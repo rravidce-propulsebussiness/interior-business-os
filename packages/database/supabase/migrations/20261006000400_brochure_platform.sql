@@ -7,14 +7,14 @@ create function public.brochure_platform(p_action text,p_id uuid default null,p_
  elsif p_action in ('suspend','release') then perform private.require_platform('platform.organizations.manage');select * into b from public.brochures where id=p_id;perform 1 from public.organizations where id=b.organization_id for update;if b.id is null or p_action='release' and b.status<>'suspended' then raise exception 'Unavailable brochure' using errcode='22023';end if;update public.brochures set status=case when p_action='suspend' then 'suspended' else 'unpublished' end,version=version+1 where id=b.id;
  else raise exception 'Unknown platform operation' using errcode='22023';end if;
  insert into public.audit_logs(actor_user_id,organization_id,action,entity_type,entity_id) values(auth.uid(),b.organization_id,'brochure.platform.'||p_action,'brochures',p_id::text);return '{}';
-end$$;
+end;$;
 create function public.brochure_grant_designer(p_organization_id uuid,p_user_id uuid) returns void language plpgsql security definer set search_path='' as $$declare rid uuid;p record;begin
  perform private.brochure_require(p_organization_id,'brochure.manage');if not private.has_permission(p_organization_id,'role.manage') then raise exception 'Role management required' using errcode='42501';end if;
  if not exists(select 1 from public.organization_memberships where organization_id=p_organization_id and user_id=p_user_id and status='active' and branch_id is null) then raise exception 'Active organization member required' using errcode='42501';end if;
  insert into public.roles(organization_id,key,name) values(p_organization_id,'brochure_designer','Brochure Designer') on conflict(organization_id,key) do nothing;select id into rid from public.roles where organization_id=p_organization_id and key='brochure_designer';
  for p in select * from public.permissions where scope='organization' and key like 'brochure.%' loop if not private.has_permission(p_organization_id,p.key) then raise exception 'Cannot delegate permission not held' using errcode='42501';end if;insert into public.role_permissions(organization_id,role_id,permission_id) values(p_organization_id,rid,p.id) on conflict do nothing;end loop;
  insert into public.membership_roles(organization_id,membership_id,role_id) select p_organization_id,id,rid from public.organization_memberships where organization_id=p_organization_id and user_id=p_user_id on conflict do nothing;perform private.brochure_event(p_organization_id,null,'brochure.designer_granted',jsonb_build_object('userId',p_user_id));
-end$$;
+end;$;
 revoke all on function public.brochure_platform(text,uuid,jsonb,integer),public.brochure_grant_designer(uuid,uuid) from public,anon;
 grant execute on function public.brochure_platform(text,uuid,jsonb,integer),public.brochure_grant_designer(uuid,uuid) to authenticated;
 commit;
