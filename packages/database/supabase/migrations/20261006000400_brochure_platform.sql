@@ -1,20 +1,213 @@
 begin;
-create function public.brochure_platform(p_action text,p_id uuid default null,p_value jsonb default '{}',p_page integer default 1) returns jsonb language plpgsql security definer set search_path='' as $$declare k text;b public.brochures;begin
- if p_action='list' then perform private.require_platform('platform.organizations.view');if p_page not between 1 and 10000 then raise exception 'Invalid page' using errcode='22023';end if;return(select coalesce(jsonb_agg(x),'[]') from(select b.id,b.name,b.status,o.name organization from public.brochures b join public.organizations o on o.id=b.organization_id order by b.created_at desc,b.id limit 25 offset(p_page-1)*25)x);
- elsif p_action='plan' then perform private.require_platform('platform.entitlements.manage');if not exists(select 1 from public.plans where id=p_id) or jsonb_typeof(p_value)<>'object' then raise exception 'Invalid plan' using errcode='22023';end if;
-  for k in select jsonb_object_keys(p_value) loop if k in ('count','pages','storage_bytes') then if jsonb_typeof(p_value->k)<>'number' or (p_value->>k)::numeric<>trunc((p_value->>k)::numeric) or (p_value->>k)::numeric<1 or (p_value->>k)::numeric>case k when 'count' then 200 when 'pages' then 100 else 1073741824 end then raise exception 'Invalid limit' using errcode='22023';end if;elsif k in ('templates','custom_design','public_share','analytics') then if jsonb_typeof(p_value->k)<>'boolean' then raise exception 'Invalid capability' using errcode='22023';end if;else raise exception 'Unknown capability' using errcode='22023';end if;end loop;
-  insert into public.brochure_plan_limits(plan_id,configuration) values(p_id,p_value) on conflict(plan_id) do update set configuration=excluded.configuration;
- elsif p_action in ('suspend','release') then perform private.require_platform('platform.organizations.manage');select * into b from public.brochures where id=p_id;perform 1 from public.organizations where id=b.organization_id for update;if b.id is null or p_action='release' and b.status<>'suspended' then raise exception 'Unavailable brochure' using errcode='22023';end if;update public.brochures set status=case when p_action='suspend' then 'suspended' else 'unpublished' end,version=version+1 where id=b.id;
- else raise exception 'Unknown platform operation' using errcode='22023';end if;
- insert into public.audit_logs(actor_user_id,organization_id,action,entity_type,entity_id) values(auth.uid(),b.organization_id,'brochure.platform.'||p_action,'brochures',p_id::text);return '{}';
-end;$$;
-create function public.brochure_grant_designer(p_organization_id uuid,p_user_id uuid) returns void language plpgsql security definer set search_path='' as $$declare rid uuid;p record;begin
- perform private.brochure_require(p_organization_id,'brochure.manage');if not private.has_permission(p_organization_id,'role.manage') then raise exception 'Role management required' using errcode='42501';end if;
- if not exists(select 1 from public.organization_memberships where organization_id=p_organization_id and user_id=p_user_id and status='active' and branch_id is null) then raise exception 'Active organization member required' using errcode='42501';end if;
- insert into public.roles(organization_id,key,name) values(p_organization_id,'brochure_designer','Brochure Designer') on conflict(organization_id,key) do nothing;select id into rid from public.roles where organization_id=p_organization_id and key='brochure_designer';
- for p in select * from public.permissions where scope='organization' and key like 'brochure.%' loop if not private.has_permission(p_organization_id,p.key) then raise exception 'Cannot delegate permission not held' using errcode='42501';end if;insert into public.role_permissions(organization_id,role_id,permission_id) values(p_organization_id,rid,p.id) on conflict do nothing;end loop;
- insert into public.membership_roles(organization_id,membership_id,role_id) select p_organization_id,id,rid from public.organization_memberships where organization_id=p_organization_id and user_id=p_user_id on conflict do nothing;perform private.brochure_event(p_organization_id,null,'brochure.designer_granted',jsonb_build_object('userId',p_user_id));
-end;$$;
-revoke all on function public.brochure_platform(text,uuid,jsonb,integer),public.brochure_grant_designer(uuid,uuid) from public,anon;
-grant execute on function public.brochure_platform(text,uuid,jsonb,integer),public.brochure_grant_designer(uuid,uuid) to authenticated;
+
+create function public.brochure_platform(
+  p_action text,
+  p_id uuid default null,
+  p_value jsonb default '{}',
+  p_page integer default 1
+) returns jsonb
+language plpgsql
+security definer
+set search_path=''
+as $$
+declare
+  k text;
+  b public.brochures;
+begin
+  if p_action = 'list' then
+    perform private.require_platform('platform.organizations.view');
+
+    if p_page not between 1 and 10000 then
+      raise exception 'Invalid page' using errcode='22023';
+    end if;
+
+    return (
+      select coalesce(jsonb_agg(x), '[]'::jsonb)
+      from (
+        select
+          br.id,
+          br.name,
+          br.status,
+          o.name as organization
+        from public.brochures br
+        join public.organizations o on o.id = br.organization_id
+        order by br.created_at desc, br.id
+        limit 25
+        offset (p_page - 1) * 25
+      ) x
+    );
+
+  elsif p_action = 'plan' then
+    perform private.require_platform('platform.entitlements.manage');
+
+    if not exists(select 1 from public.plans where id = p_id)
+       or jsonb_typeof(p_value) <> 'object' then
+      raise exception 'Invalid plan' using errcode='22023';
+    end if;
+
+    for k in select jsonb_object_keys(p_value)
+    loop
+      if k in ('count', 'pages', 'storage_bytes') then
+        if jsonb_typeof(p_value -> k) <> 'number' then
+          raise exception 'Invalid limit' using errcode='22023';
+        end if;
+
+        if (p_value ->> k)::numeric <> trunc((p_value ->> k)::numeric)
+           or (p_value ->> k)::numeric < 1 then
+          raise exception 'Invalid limit' using errcode='22023';
+        end if;
+
+        if k = 'count' and (p_value ->> k)::numeric > 200 then
+          raise exception 'Invalid limit' using errcode='22023';
+        elsif k = 'pages' and (p_value ->> k)::numeric > 100 then
+          raise exception 'Invalid limit' using errcode='22023';
+        elsif k = 'storage_bytes' and (p_value ->> k)::numeric > 1073741824 then
+          raise exception 'Invalid limit' using errcode='22023';
+        end if;
+
+      elsif k in ('templates', 'custom_design', 'public_share', 'analytics') then
+        if jsonb_typeof(p_value -> k) <> 'boolean' then
+          raise exception 'Invalid capability' using errcode='22023';
+        end if;
+
+      else
+        raise exception 'Unknown capability' using errcode='22023';
+      end if;
+    end loop;
+
+    insert into public.brochure_plan_limits(plan_id, configuration)
+    values (p_id, p_value)
+    on conflict(plan_id) do update
+      set configuration = excluded.configuration;
+
+  elsif p_action in ('suspend', 'release') then
+    perform private.require_platform('platform.organizations.manage');
+
+    select *
+    into b
+    from public.brochures
+    where id = p_id;
+
+    if b.id is null
+       or (p_action = 'release' and b.status <> 'suspended') then
+      raise exception 'Unavailable brochure' using errcode='22023';
+    end if;
+
+    perform 1
+    from public.organizations
+    where id = b.organization_id
+    for update;
+
+    update public.brochures
+    set
+      status = case
+        when p_action = 'suspend' then 'suspended'
+        else 'unpublished'
+      end,
+      version = version + 1
+    where id = b.id;
+
+  else
+    raise exception 'Unknown platform operation' using errcode='22023';
+  end if;
+
+  insert into public.audit_logs(
+    actor_user_id,
+    organization_id,
+    action,
+    entity_type,
+    entity_id
+  )
+  values (
+    auth.uid(),
+    b.organization_id,
+    'brochure.platform.' || p_action,
+    'brochures',
+    p_id::text
+  );
+
+  return '{}'::jsonb;
+end;
+$$;
+
+create function public.brochure_grant_designer(
+  p_organization_id uuid,
+  p_user_id uuid
+) returns void
+language plpgsql
+security definer
+set search_path=''
+as $$
+declare
+  rid uuid;
+  p record;
+begin
+  perform private.brochure_require(p_organization_id, 'brochure.manage');
+
+  if not private.has_permission(p_organization_id, 'role.manage') then
+    raise exception 'Role management required' using errcode='42501';
+  end if;
+
+  if not exists(
+    select 1
+    from public.organization_memberships
+    where organization_id = p_organization_id
+      and user_id = p_user_id
+      and status = 'active'
+      and branch_id is null
+  ) then
+    raise exception 'Active organization member required' using errcode='42501';
+  end if;
+
+  insert into public.roles(organization_id, key, name)
+  values (p_organization_id, 'brochure_designer', 'Brochure Designer')
+  on conflict(organization_id, key) do nothing;
+
+  select id
+  into rid
+  from public.roles
+  where organization_id = p_organization_id
+    and key = 'brochure_designer';
+
+  for p in
+    select *
+    from public.permissions
+    where scope = 'organization'
+      and key like 'brochure.%'
+  loop
+    if not private.has_permission(p_organization_id, p.key) then
+      raise exception 'Cannot delegate permission not held' using errcode='42501';
+    end if;
+
+    insert into public.role_permissions(organization_id, role_id, permission_id)
+    values (p_organization_id, rid, p.id)
+    on conflict do nothing;
+  end loop;
+
+  insert into public.membership_roles(organization_id, membership_id, role_id)
+  select p_organization_id, id, rid
+  from public.organization_memberships
+  where organization_id = p_organization_id
+    and user_id = p_user_id
+  on conflict do nothing;
+
+  perform private.brochure_event(
+    p_organization_id,
+    null,
+    'brochure.designer_granted',
+    jsonb_build_object('userId', p_user_id)
+  );
+end;
+$$;
+
+revoke all on function
+  public.brochure_platform(text,uuid,jsonb,integer),
+  public.brochure_grant_designer(uuid,uuid)
+from public, anon;
+
+grant execute on function
+  public.brochure_platform(text,uuid,jsonb,integer),
+  public.brochure_grant_designer(uuid,uuid)
+to authenticated;
+
 commit;
