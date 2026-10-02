@@ -1,0 +1,119 @@
+{
+  "version": 1,
+  "currency": "INR",
+  "categories": [
+    { "key": "carpentry", "name": "Carpentry" },
+    { "key": "false_ceiling", "name": "False Ceiling" },
+    { "key": "electrical", "name": "Electrical" },
+    { "key": "painting", "name": "Painting" },
+    { "key": "glass_aluminium", "name": "Glass & Aluminium" }
+  ],
+  "items": [
+    {
+      "key": "wardrobe",
+      "name": "Wardrobe",
+      "category": "carpentry",
+      "unit": "sq_ft",
+      "method": "width_height",
+      "rate": "1550",
+      "cost": "1050",
+      "minimum": "1350"
+    },
+    {
+      "key": "kitchen_base",
+      "name": "Kitchen Base Cabinet",
+      "category": "carpentry",
+      "unit": "running_ft",
+      "method": "length",
+      "rate": "4000"
+    },
+    {
+      "key": "tv_unit",
+      "name": "TV Unit",
+      "category": "carpentry",
+      "unit": "sq_ft",
+      "method": "width_height",
+      "rate": "1500"
+    },
+    {
+      "key": "gypsum_ceiling",
+      "name": "Gypsum False Ceiling",
+      "category": "false_ceiling",
+      "unit": "sq_ft",
+      "method": "area",
+      "rate": "120"
+    },
+    {
+      "key": "electrical_point",
+      "name": "Electrical Point",
+      "category": "electrical",
+      "unit": "point",
+      "method": "count",
+      "rate": "750"
+    },
+    {
+      "key": "interior_painting",
+      "name": "Interior Painting",
+      "category": "painting",
+      "unit": "sq_ft",
+      "method": "area",
+      "rate": "35"
+    },
+    {
+      "key": "glass_partition",
+      "name": "Glass Partition",
+      "category": "glass_aluminium",
+      "unit": "sq_ft",
+      "method": "width_height",
+      "rate": "650"
+    }
+  ],
+  "wardrobeQuestions": [
+    {
+      "key": "grade",
+      "label": "Plywood Grade",
+      "options": [
+        { "key": "mr", "label": "MR", "value": "0" },
+        { "key": "bwr", "label": "BWR", "value": "100" },
+        { "key": "bwp", "label": "BWP", "value": "180" }
+      ]
+    },
+    {
+      "key": "finish",
+      "label": "External Finish",
+      "options": [
+        { "key": "laminate", "label": "Laminate", "value": "0" },
+        { "key": "acrylic", "label": "Acrylic", "value": "350" },
+        { "key": "pu", "label": "PU", "value": "500" }
+      ]
+    },
+    {
+      "key": "hardware",
+      "label": "Hardware",
+      "options": [
+        { "key": "generic", "label": "Generic", "value": "0" },
+        { "key": "hettich", "label": "Hettich", "value": "150" },
+        { "key": "blum", "label": "Blum", "value": "350" }
+      ]
+    },
+    {
+      "key": "shutter",
+      "label": "Shutter Type",
+      "options": [
+        { "key": "hinged", "label": "Hinged", "value": "0" },
+        { "key": "sliding", "label": "Sliding", "value": "250" }
+      ]
+    },
+    {
+      "key": "pu_finish",
+      "label": "PU Finish Type",
+      "conditions": [
+        { "attribute_key": "finish", "operator": "equals", "values": ["pu"] }
+      ],
+      "options": [
+        { "key": "matte", "label": "Matte", "value": "0" },
+        { "key": "gloss", "label": "Gloss", "value": "80" }
+      ]
+    }
+  ]
+}

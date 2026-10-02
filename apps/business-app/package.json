@@ -1,0 +1,36 @@
+{
+  "name": "@business-os/business-app",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev --port 3001",
+    "build": "next build",
+    "start": "next start --hostname 127.0.0.1 --port 3001",
+    "typecheck": "next typegen && tsc --noEmit"
+  },
+  "dependencies": {
+    "@business-os/auth": "workspace:*",
+    "@business-os/core": "workspace:*",
+    "@business-os/database": "workspace:*",
+    "@business-os/shared": "workspace:*",
+    "@business-os/ui": "workspace:*",
+    "next": "16.3.6",
+    "playwright": "1.63.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "react-hook-form": "7.89.0",
+    "@business-os/quotation-engine": "workspace:*",
+    "zod": "4.6.5",
+    "@business-os/website-builder": "workspace:*",
+    "sharp": "0.35.4",
+    "@business-os/industry-interior": "workspace:*",
+    "@business-os/brochure-builder": "workspace:*",
+    "qrcode": "1.5.4"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "4.3.3",
+    "tailwindcss": "4.3.3",
+    "@types/qrcode": "1.5.6"
+  }
+}

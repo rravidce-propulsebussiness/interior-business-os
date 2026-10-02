@@ -1,0 +1,22 @@
+{
+  "name": "@business-os/website-builder",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./compiler": "./src/compiler.ts",
+    "./editor": "./src/editor.ts",
+    "./render": "./src/render.ts",
+    "./cache": "./src/cache.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "acorn": "8.18.0",
+    "parse5": "8.0.0",
+    "postcss": "8.5.28",
+    "zod": "4.6.5"
+  }
+}

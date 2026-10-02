@@ -1,0 +1,5 @@
+# Material consumption: Phase 7
+
+Issuing material moves it to site; it does not consume it. Consumption explicitly removes usable site stock. Scrap and damage are separate transaction kinds and require reasons. A reversal restores the original movement quantities while preserving both records. Site users need an assigned project, the relevant grant and Purchasing/Projects entitlements.
+
+The project stock screen supports consumption, scrap and damage. Full command forms expose area, task, work-package and estimate-line references. `/dashboard/operations/materials` compares planned purchase quantity and waste with procurement, accepted receipts and actual usage. Purchased means issued purchase-order quantity; area filtering applies to estimate and usage, while procurement and stock remain project-wide. Separate cost authorization protects consumed receipt-lot costs. Consumption PDFs are available from project documents. Variance is not automatically waste. Receiving 100, issuing 30, consuming 20, returning 5 and scrapping 2 leaves 75 at store and 3 at site.

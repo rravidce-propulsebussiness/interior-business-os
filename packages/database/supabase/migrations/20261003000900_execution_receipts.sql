@@ -1,0 +1,38 @@
+begin;
+create function public.execution_receipt_record(p_organization_id uuid,p_input jsonb) returns uuid language plpgsql security definer set search_path='' as $$
+declare po public.purchase_orders;existing public.goods_receipts;i public.purchase_order_items;entry jsonb;target uuid=gen_random_uuid();number text;received numeric;accepted numeric;rejected numeric;prior numeric;document_items jsonb='[]';begin
+ perform private.execution_require(p_organization_id,'goods_receipt.record');
+ if jsonb_typeof(p_input) is distinct from 'object' or octet_length(p_input::text)>100000 or p_input-array['po_id','idempotency_key','receipt_date','supplier_reference','notes','items']<>'{}'::jsonb or jsonb_typeof(p_input->'items') is distinct from 'array' then raise exception 'Invalid goods or service receipt' using errcode='22023';end if;
+ if jsonb_array_length(p_input->'items') not between 1 and 500 or p_input->>'idempotency_key' is null then raise exception 'Receipt requires items and retry key' using errcode='22023';end if;
+ select * into existing from public.goods_receipts where organization_id=p_organization_id and idempotency_key=(p_input->>'idempotency_key')::uuid;
+ if existing.id is not null then if existing.request_hash<>md5(p_input::text) then raise exception 'Receipt retry payload differs' using errcode='22023';end if;return existing.id;end if;
+ select * into po from public.purchase_orders where organization_id=p_organization_id and id=(p_input->>'po_id')::uuid and status in ('issued','partially_received') for update;
+ if po.id is null then raise exception 'Open issued purchase order required' using errcode='22023';end if;
+ if not exists(select 1 from public.contracts where id=po.contract_id and status not in ('closed','cancelled')) then raise exception 'Open contract required' using errcode='22023';end if;
+ if (select count(distinct x->>'po_item_id') from jsonb_array_elements(p_input->'items')x)<>jsonb_array_length(p_input->'items') then raise exception 'Duplicate receipt item' using errcode='22023';end if;
+ for entry in select jsonb_array_elements(p_input->'items') loop
+ if jsonb_typeof(entry) is distinct from 'object' or entry-array['po_item_id','received_quantity','accepted_quantity','rejected_quantity','notes']<>'{}'::jsonb then raise exception 'Invalid receipt item' using errcode='22023';end if;
+ select * into i from public.purchase_order_items where po_id=po.id and id=(entry->>'po_item_id')::uuid;
+ if i.id is null then raise exception 'Unavailable purchase order item' using errcode='42501';end if;
+ received=private.execution_decimal(entry->>'received_quantity');accepted=private.execution_decimal(entry->>'accepted_quantity');rejected=private.execution_decimal(entry->>'rejected_quantity');
+ select coalesce(sum(received_quantity::numeric),0) into prior from public.goods_receipt_items where po_item_id=i.id;
+ if received<=0 or received<>accepted+rejected or received+prior>i.quantity::numeric then raise exception 'Receipt must balance and cannot exceed ordered quantity' using errcode='22023';end if;
+ if rejected>0 and length(trim(coalesce(entry->>'notes','')))<3 then raise exception 'Rejection reason required' using errcode='22023';end if;
+ document_items=document_items||jsonb_build_array(jsonb_build_object('po_item_id',i.id,'description',i.description,'unit',i.unit,'cost_kind',i.cost_kind,'received_quantity',trim_scale(received)::text,'accepted_quantity',trim_scale(accepted)::text,'rejected_quantity',trim_scale(rejected)::text,'notes',coalesce(entry->>'notes','')));end loop;
+ number=private.finance_number(p_organization_id,'goods_receipt','GR');
+ insert into public.goods_receipts(id,organization_id,contract_id,project_id,po_id,receipt_number,receipt_date,supplier_reference,notes,idempotency_key,request_hash,document_snapshot)
+ values(target,p_organization_id,po.contract_id,po.project_id,po.id,number,coalesce((p_input->>'receipt_date')::date,current_date),coalesce(p_input->>'supplier_reference',''),coalesce(p_input->>'notes',''),(p_input->>'idempotency_key')::uuid,md5(p_input::text),jsonb_build_object('schema_version',1,'kind','goods_receipt','number',number,'po_number',po.po_number,'receipt_date',coalesce((p_input->>'receipt_date')::date,current_date),'supplier_reference',coalesce(p_input->>'supplier_reference',''),'notes',coalesce(p_input->>'notes',''),'items',document_items));
+ for entry in select jsonb_array_elements(document_items) loop
+ insert into public.goods_receipt_items(organization_id,receipt_id,po_id,po_item_id,received_quantity,accepted_quantity,rejected_quantity,notes) values(p_organization_id,target,po.id,(entry->>'po_item_id')::uuid,entry->>'received_quantity',entry->>'accepted_quantity',entry->>'rejected_quantity',entry->>'notes');end loop;
+ update public.purchase_orders set status=case when exists(select 1 from public.purchase_order_items pi where pi.po_id=po.id and pi.quantity::numeric>(select coalesce(sum(gi.received_quantity::numeric),0) from public.goods_receipt_items gi where gi.po_item_id=pi.id)) then 'partially_received' else 'received' end,version=version+1 where id=po.id;
+ perform private.crm_audit(p_organization_id,'goods_receipt.recorded','goods_receipts',target);return target;
+end$$;
+create function public.execution_cost_report(p_organization_id uuid,p_project_id uuid) returns jsonb language plpgsql stable security definer set search_path='' as $$
+declare result jsonb;begin
+ if not private.execution_access(p_organization_id,'cost_report.view') or not private.execution_access(p_organization_id,'estimate.view_cost') or not private.execution_access(p_organization_id,'purchase_order.view_cost') or not exists(select 1 from public.projects where organization_id=p_organization_id and id=p_project_id) then raise exception 'Unavailable execution cost report' using errcode='42501';end if;
+ select coalesce(jsonb_agg(jsonb_build_object('contract_id',c.id,'contract_number',c.contract_number,'currency',c.currency,'estimated_cost',(select trim_scale(sum(lc.estimated_cost::numeric))::text from public.execution_estimates e join public.execution_estimate_lines l on l.revision_id=e.current_approved_revision_id join public.execution_estimate_scope_items s on s.id=l.scope_id join public.execution_estimate_line_costs lc on lc.line_id=l.id where e.contract_id=c.id and s.coverage='estimated'),'committed_cost',(select trim_scale(coalesce(sum(pc.total::numeric),0))::text from public.purchase_orders po join public.purchase_order_costs pc on pc.po_id=po.id where po.contract_id=c.id and po.status in ('issued','partially_received','received','closed')),'accepted_received_cost',(select trim_scale(coalesce(sum(round(pc.total::numeric*(select coalesce(sum(gi.accepted_quantity::numeric),0) from public.goods_receipt_items gi where gi.po_item_id=pi.id)/pi.quantity::numeric,c.precision)),0))::text from public.purchase_orders po join public.purchase_order_items pi on pi.po_id=po.id join public.purchase_order_item_costs pc on pc.item_id=pi.id where po.contract_id=c.id and po.status in ('issued','partially_received','received','closed'))) order by c.contract_number,c.id),'[]') into result from public.contracts c where c.organization_id=p_organization_id and c.project_id=p_project_id;
+ return jsonb_build_object('project_id',p_project_id,'contracts',result,'cost_basis','Purchase commitments and accepted receipts include allocated tax and freight; estimates use planning unit costs. These are not accounting or consumed-material costs.');
+end$$;
+revoke all on function public.execution_receipt_record(uuid,jsonb),public.execution_cost_report(uuid,uuid) from public,anon;
+grant execute on function public.execution_receipt_record(uuid,jsonb),public.execution_cost_report(uuid,uuid) to authenticated;
+commit;

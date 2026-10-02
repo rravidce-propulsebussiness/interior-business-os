@@ -1,0 +1,40 @@
+{
+  "name": "business-os",
+  "private": true,
+  "type": "module",
+  "version": "0.0.0",
+  "packageManager": "pnpm@10.34.5",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "dev": "pnpm --parallel --filter \"./apps/*\" dev",
+    "build": "pnpm --workspace-concurrency=1 --filter \"./apps/*\" build",
+    "lint": "eslint . --max-warnings=0",
+    "typecheck": "pnpm -r typecheck && tsc -p tsconfig.tools.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm security:client && pnpm test:e2e",
+    "db:verify": "node packages/database/scripts/verify.mjs",
+    "db:test": "node packages/database/scripts/test.mjs",
+    "db:types": "node packages/database/scripts/generate-types.mjs",
+    "db:types:check": "node packages/database/scripts/generate-types.mjs --check",
+    "db:seed:check": "node packages/database/scripts/generate-catalog-seed.mjs --check && node packages/database/scripts/generate-crm-seed.mjs --check",
+    "security:client": "node scripts/check-client-bundles.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "@types/node": "24.19.0",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "eslint": "9.39.5",
+    "eslint-config-next": "16.3.6",
+    "eslint-config-prettier": "10.1.8",
+    "prettier": "3.9.9",
+    "typescript": "5.9.3",
+    "vitest": "5.0.2"
+  }
+}

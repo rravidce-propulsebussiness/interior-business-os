@@ -1,0 +1,272 @@
+import Link from 'next/link';
+import { pageServices, activeOrganization } from '@business-os/auth/server';
+import { signOut, switchOrganization } from '@business-os/auth/actions';
+import { canAccess, moduleNavigation } from '@business-os/auth';
+import { DomainError } from '@business-os/shared';
+import { Button } from '@business-os/ui';
+import { ActionForm } from '@business-os/ui/action-form';
+import { provisionOrganization } from './actions';
+
+export default async function Dashboard() {
+  const { authorization, repository } = await pageServices();
+  const user = await authorization.requireAuthenticatedUser();
+  const [allOrganizations, memberships, industries, modules] =
+    await Promise.all([
+      repository.organizations(),
+      repository.memberships(),
+      repository.industries(),
+      repository.modules(),
+    ]);
+  const organizations = allOrganizations.filter((org) =>
+    memberships.some(
+      (m) =>
+        m.organization_id === org.id &&
+        m.user_id === user.id &&
+        m.status === 'active',
+    ),
+  );
+  let context: Awaited<ReturnType<typeof activeOrganization>> = null;
+  let invalidSelection = false;
+  try {
+    context = await activeOrganization();
+  } catch (error) {
+    if (error instanceof DomainError && error.code === 'FORBIDDEN')
+      invalidSelection = true;
+    else throw error;
+  }
+  const organization = context
+    ? organizations.find((org) => org.id === context.organizationId)
+    : null;
+  const branches = context
+    ? await repository.branches(context.organizationId)
+    : [];
+  const canViewTeam =
+    context &&
+    canAccess(context, {
+      organizationId: context.organizationId,
+      permission: 'team.view',
+    });
+  const team =
+    context && canViewTeam ? await repository.team(context.organizationId) : [];
+  const nav = context ? moduleNavigation(context, modules) : [];
+  return (
+    <main
+      id="main-content"
+      tabIndex={-1}
+      className="mx-auto max-w-5xl px-6 py-12"
+    >
+      <h1 className="text-3xl font-semibold">Business dashboard</h1>
+      {context &&
+        context.entitlements.includes('billing') &&
+        context.grants.some(
+          (g) =>
+            [
+              'contract.view',
+              'invoice.view',
+              'payment.view',
+              'financial_report.view',
+            ].includes(g.permission) && g.scope.kind === 'organization',
+        ) && (
+          <Link
+            className="my-4 inline-block underline"
+            href="/dashboard/finance"
+          >
+            Commercial execution
+          </Link>
+        )}
+      <p className="mt-2">Signed in as {user.email ?? user.id}</p>
+      <form action={signOut} className="my-4">
+        <Button>Sign out</Button>
+      </form>
+      {invalidSelection && (
+        <p role="alert">
+          The selected organization is unavailable. Choose an active membership
+          below.
+        </p>
+      )}
+      {organizations.length > 0 && (
+        <form
+          action={switchOrganization}
+          className="my-6 flex flex-wrap items-end gap-4"
+        >
+          <label>
+            Active organization
+            <select
+              name="organizationId"
+              defaultValue={context?.organizationId}
+              className="ml-3 rounded border p-2"
+            >
+              {organizations.map((org) => (
+                <option key={org.id} value={org.id}>
+                  {org.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <Button>Switch organization</Button>
+        </form>
+      )}
+      {organization && context ? (
+        <>
+          <section className="my-8">
+            <h2 className="text-2xl font-semibold">{organization.name}</h2>
+            <p>
+              {organization.status} · {organization.default_currency} ·{' '}
+              {organization.default_timezone}
+            </p>
+          </section>
+          <section className="my-8">
+            <h2 className="text-xl font-semibold">Your roles</h2>
+            <ul>
+              {context.roles.map((role, index) => (
+                <li key={`${role.id}-${index}`}>
+                  {role.name} —{' '}
+                  {role.branchId ? `Branch ${role.branchId}` : 'Organization'}
+                </li>
+              ))}
+            </ul>
+          </section>
+          <section className="my-8">
+            <h2 className="text-xl font-semibold">Effective permissions</h2>
+            {context.grants.length ? (
+              <ul className="grid gap-1 sm:grid-cols-2">
+                {context.grants.map((grant, index) => (
+                  <li key={index} className="break-words">
+                    {grant.permission} ({grant.scope.kind})
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>No permissions assigned.</p>
+            )}
+          </section>
+          <section className="my-8">
+            <h2 className="text-xl font-semibold">Enabled modules</h2>
+            <p>{context.entitlements.join(', ') || 'No modules enabled.'}</p>
+            <nav aria-label="Enabled modules">
+              {(canAccess(context, {
+                organizationId: context.organizationId,
+                permission: 'customer.view',
+                moduleKey: 'quotation',
+              }) ||
+                canAccess(context, {
+                  organizationId: context.organizationId,
+                  permission: 'customer.view',
+                  moduleKey: 'crm',
+                })) && (
+                <Link className="underline" href="/dashboard/customers">
+                  Customers
+                </Link>
+              )}
+              <ul className="mt-4 flex flex-wrap gap-4">
+                {nav.map((item) => (
+                  <li key={item.key}>
+                    <Link className="underline" href={item.href}>
+                      {item.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          </section>
+          <section className="my-8">
+            <h2 className="text-xl font-semibold">Branches</h2>
+            {branches.length ? (
+              <ul>
+                {branches.map((branch) => (
+                  <li key={branch.id}>
+                    {branch.name} ({branch.code}) — {branch.status}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>No branches available to your account.</p>
+            )}
+          </section>
+          {canViewTeam && (
+            <section className="my-8">
+              <h2 className="text-xl font-semibold">Team memberships</h2>
+              <ul>
+                {team.map((member) => (
+                  <li className="break-all" key={member.id}>
+                    {member.user_id} — {member.status}
+                    {member.branch_id ? ` — branch ${member.branch_id}` : ''}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+        </>
+      ) : (
+        <p className="my-8">
+          No active organization selected. Create one or ask an organization
+          administrator for membership.
+        </p>
+      )}
+      <section className="my-8">
+        <h2 className="text-xl font-semibold">Create an organization</h2>
+        <ActionForm action={provisionOrganization} label="Create organization">
+          <label>
+            Business name
+            <input
+              required
+              name="name"
+              maxLength={200}
+              className="ml-3 rounded border p-2"
+            />
+          </label>
+          <label>
+            URL identifier
+            <input
+              required
+              name="slug"
+              pattern="[a-z0-9]+(-[a-z0-9]+)*"
+              maxLength={80}
+              className="ml-3 rounded border p-2"
+            />
+          </label>
+          <label>
+            Currency code
+            <input
+              required
+              name="currency"
+              placeholder="USD"
+              pattern="[A-Z]{3}"
+              className="ml-3 rounded border p-2"
+            />
+          </label>
+          <label>
+            Country code
+            <input
+              required
+              name="country"
+              placeholder="US"
+              pattern="[A-Z]{2}"
+              className="ml-3 rounded border p-2"
+            />
+          </label>
+          <label>
+            Timezone
+            <input
+              required
+              name="timezone"
+              defaultValue="UTC"
+              className="ml-3 rounded border p-2"
+            />
+          </label>
+          <label>
+            Industry
+            <select name="industryId" className="ml-3 rounded border p-2">
+              <option value="">Choose later</option>
+              {industries.map((industry) => (
+                <option key={industry.id} value={industry.id}>
+                  {industry.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        </ActionForm>
+      </section>
+    </main>
+  );
+}

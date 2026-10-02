@@ -1,0 +1,40 @@
+{
+  "name": "@business-os/database",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./server": "./src/server.ts",
+    "./browser": "./src/browser.ts",
+    "./proxy": "./src/proxy.ts",
+    "./repository": "./src/repository.ts",
+    "./catalog": "./src/catalog.ts",
+    "./quotations": "./src/quotations.ts",
+    "./crm": "./src/crm.ts",
+    "./finance": "./src/finance.ts",
+    "./execution": "./src/execution.ts",
+    "./operations": "./src/operations.ts",
+    "./website": "./src/website.ts",
+    "./brochure": "./src/brochure.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@business-os/core": "workspace:*",
+    "@business-os/shared": "workspace:*",
+    "@supabase/ssr": "0.12.7",
+    "@supabase/supabase-js": "2.117.2",
+    "server-only": "0.0.1",
+    "@business-os/quotation-engine": "workspace:*",
+    "@business-os/website-builder": "workspace:*",
+    "@business-os/brochure-builder": "workspace:*"
+  },
+  "devDependencies": {
+    "next": "16.3.6"
+  },
+  "peerDependencies": {
+    "next": "16.3.6"
+  }
+}

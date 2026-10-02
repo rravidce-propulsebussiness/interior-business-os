@@ -1,0 +1,95 @@
+{
+  "sources": [
+    "Website",
+    "Referral",
+    "Instagram",
+    "Facebook",
+    "Google Ads",
+    "Google Business Profile",
+    "Walk-in",
+    "Phone Call",
+    "Architect Referral",
+    "Builder Referral",
+    "Existing Customer",
+    "Offline Campaign",
+    "Other"
+  ],
+  "stages": [
+    "New",
+    "Contacted",
+    "Qualified",
+    "Site Visit Scheduled",
+    "Site Visit Completed",
+    "Requirement Collected",
+    "Quotation In Progress",
+    "Quotation Sent",
+    "Negotiation",
+    "Won",
+    "Lost"
+  ],
+  "lostReasons": [
+    "Price Too High",
+    "No Response",
+    "Chose Competitor",
+    "Project Postponed",
+    "Budget Mismatch",
+    "Not Qualified",
+    "Location Not Serviceable",
+    "Duplicate",
+    "Other"
+  ],
+  "requirements": [
+    {
+      "name": "Property Type",
+      "key": "property_type",
+      "type": "select",
+      "options": [
+        "Apartment",
+        "Villa",
+        "Independent House",
+        "Office",
+        "Retail",
+        "Other"
+      ]
+    },
+    {
+      "name": "Project Scope",
+      "key": "project_scope",
+      "type": "select",
+      "options": [
+        "Full Interior",
+        "Modular Kitchen",
+        "Wardrobes",
+        "Renovation",
+        "Commercial Interior",
+        "Partial Work"
+      ]
+    },
+    {
+      "name": "Property Configuration",
+      "key": "property_configuration",
+      "type": "select",
+      "options": ["1BHK", "2BHK", "3BHK", "4BHK", "Villa", "Custom"]
+    },
+    {
+      "name": "Possession Status",
+      "key": "possession_status",
+      "type": "text"
+    },
+    {
+      "name": "Built-up Area",
+      "key": "built_up_area",
+      "type": "text"
+    },
+    {
+      "name": "Style Preference",
+      "key": "style_preference",
+      "type": "text"
+    },
+    {
+      "name": "Required Rooms / Services",
+      "key": "required_services",
+      "type": "text"
+    }
+  ]
+}

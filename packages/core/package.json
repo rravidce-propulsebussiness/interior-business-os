@@ -1,0 +1,26 @@
+{
+  "name": "@business-os/core",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./commercial": "./src/commercial.ts",
+    "./quotation-document": "./src/quotation-document.ts",
+    "./crm": "./src/crm.ts",
+    "./quotation-sharing": "./src/quotation-sharing.ts",
+    "./finance": "./src/finance.ts",
+    "./finance-document": "./src/finance-document.ts",
+    "./execution": "./src/execution.ts",
+    "./execution-document": "./src/execution-document.ts",
+    "./operations": "./src/operations.ts",
+    "./operations-command": "./src/operations-command.ts",
+    "./operations-document": "./src/operations-document.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "zod": "4.6.5"
+  }
+}

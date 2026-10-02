@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "settings": {
+    "name": "Website test",
+    "locale": "en",
+    "timezone": "Asia/Kolkata",
+    "description": "",
+    "phone": "",
+    "email": "",
+    "address": "",
+    "noindex": false
+  },
+  "theme": {
+    "primary": "#343F36",
+    "secondary": "#DED8CB",
+    "accent": "#B37D53",
+    "background": "#FAF8F3",
+    "surface": "#FFFFFF",
+    "text": "#242923",
+    "muted": "#676B63",
+    "border": "#DED8CB",
+    "headingFont": "serif",
+    "bodyFont": "sans-serif",
+    "radius": 4,
+    "spacing": 8,
+    "containerWidth": 1200,
+    "shadow": "none",
+    "buttonStyle": "solid"
+  },
+  "css": "",
+  "navigation": [
+    {
+      "label": "Home",
+      "href": "/",
+      "children": []
+    }
+  ],
+  "footerNavigation": [],
+  "header": [],
+  "footer": [],
+  "pages": [
+    {
+      "id": "home",
+      "path": "/",
+      "title": "Home",
+      "visibility": "public",
+      "seo": {
+        "title": "Website test",
+        "description": "",
+        "noindex": false
+      },
+      "nodes": [
+        {
+          "id": "headline",
+          "type": "heading",
+          "props": {
+            "text": "Version one",
+            "level": 1
+          },
+          "style": {},
+          "tablet": {},
+          "mobile": {},
+          "children": []
+        }
+      ]
+    }
+  ],
+  "forms": [],
+  "content": [],
+  "sections": [],
+  "code": [],
+  "assets": []
+}

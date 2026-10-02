@@ -1,0 +1,15 @@
+# Development standards
+
+Use Node 24 and the packageManager-pinned pnpm version. Commit pnpm-lock.yaml and use frozen installs in CI. Run `pnpm check` before review. Apps use ports 3000, 3001 and 3002; production smoke tests require those ports to be free. Public-shell/anonymous smoke tests need no Supabase credentials. Database changes also require db:verify on a fresh disposable database and db:types:check; see SUPABASE.md.
+
+Use strict TypeScript, explicit public types, Zod at trust boundaries and narrow interfaces. Avoid any, unchecked assertions and duplicate logic. UI consumes application services, not database clients. Dependencies point toward domain contracts. Export supported package entry points; do not deep-import another package's src. No cross-app imports. ESLint enforces key domain/framework boundaries; architectural review covers composition and cycle risks.
+
+Default to server components. Add client boundaries only for interaction. Shared authentication forms use React Hook Form; server actions/repositories use Zod independently. UI is source-owned and shadcn-compatible, with semantic tokens and native element props. Configure the shadcn generator against packages/ui when introducing its first primitive; inspect generated changes before use. Do not add an entire component library speculatively.
+
+Use semantic landmarks, labels, keyboard access, visible focus, meaningful headings and responsive layouts. Async screens need loading, empty, error and success states. Do not disclose raw exceptions or internal cost fields to customers. Use shared safe error codes and correlation IDs; future server adapters send allowlisted structured events to a LogSink. Audit records are separate from operational logs and must commit with important mutations.
+
+Unit-test meaningful invariants and negative authorization cases with Vitest. Use Playwright for user-visible integration. Add SQL/RLS tests before data-backed routes. A passing policy unit test is not proof of tenant isolation. CI runs format, lint, typecheck, unit tests, production builds and Chromium smoke tests. Browser smoke tests cover each root page, keyboard skip-link access, narrow viewport overflow and 404 responses; they are not a full accessibility audit.
+
+Keep secrets out of source, logs, fixtures and NEXT_PUBLIC variables. Copy .env.example into an app's .env.local only when needed. Server-only secrets belong in deployment secret stores. Supabase adapters are split into explicit browser, server, proxy and repository exports. Server entry points have server-only guards. Review dependency updates through lockfile diffs and relevant checks. Never introduce privileged service credentials into ordinary tenant request code. Run security:client after builds to scan emitted browser JavaScript for privileged variable names and the test canary.
+
+Changes should be small and reviewable. Record consequential design decisions in ARCHITECTURE.md before adding features. PRs describe behavior, security impact, migrations and actual checks performed. Do not claim unrun tests passed. No production deploy or database mutation is part of Phase 0.

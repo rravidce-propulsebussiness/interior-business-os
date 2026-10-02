@@ -1,0 +1,11 @@
+# Website builder
+
+Open Business App ? Website. The module must be enabled by the existing entitlement system. Create a named website with a unique subdomain slug. Choose a blank canvas or apply the interior studio starter to an empty draft. The starter contains eight ordinary editable page trees; no template controls the resulting website. It has no invented testimonials or completed-project claims. The concept image is AI-generated and replaceable. The starter remains noindex until the business changes SEO settings.
+
+The studio has a component palette, nested layer tree, responsive preview and property inspector. Drag components into the canvas, reorder layers, use keyboard-accessible move buttons, choose a parent, duplicate or delete nodes. Click a rendered node to select it. Switch the editing area between page content, global header and global footer. Save each area's changes before changing areas. Local undo/redo retains 50 edits; it is not server history. Desktop/tablet/mobile overrides are separate style objects. Saved sections insert independent copies.
+
+Design controls edit shared tokens. Navigation supports header/footer links and dropdown children. Content entries have an explicit publication checkbox. Catalog/project imports require original source-module permission and import only title/description for review; they do not follow private live records automatically. Forms, SEO, media, domains, team, metrics and versions have separate tabs. Developer controls require additional permissions and capabilities.
+
+Save draft and Publish saved draft are separate actions. Preview does not submit forms. Concurrent changes fail with a reload message instead of overwriting another editor. Publishing validates all references, routes and custom source. Restore creates another immutable published version. Old media remains retained where needed by historical versions.
+
+The starter application saves draft sections in sequence. A failed capability/quota check can leave a partially populated draft and uploaded media; reload to review it. It never publishes partial results. Supply the industry-interior assets directory alongside the Business App deployment; it is read by the starter action.

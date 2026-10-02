@@ -1,0 +1,29 @@
+-- Optional repeatable masters only. No invented customer approvals or purchases.
+begin;
+do $$declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';actor uuid;category uuid;material uuid;variant uuid;conversion uuid;recipe uuid;component uuid;v jsonb;ordinal integer=0;begin
+ select created_by into actor from public.organizations where id=org;
+ if actor is null then raise exception 'Apply the development organization seed first';end if;
+ category=private.seed_uuid('phase6:demo:materials');
+ insert into public.material_categories(id,organization_id,name,code,created_by) values(category,org,'Interior execution materials','DEMO-EXECUTION',actor) on conflict(organization_id,code) do nothing;
+ for v in select jsonb_array_elements('[{"code":"PLY18","name":"18 mm plywood","unit":"sheet","consumption":"sqft","ratio":"32","waste":"7","cost":"3150"},{"code":"PLY6","name":"6 mm plywood","unit":"sheet","consumption":"sqft","ratio":"32","waste":"5","cost":"1400"},{"code":"LAMINATE","name":"Decorative laminate","unit":"sheet","consumption":"sqft","ratio":"32","waste":"10","cost":"1250"},{"code":"HINGE","name":"Cabinet hinge","unit":"piece","consumption":"piece","ratio":"1","waste":"0","cost":"90"},{"code":"DRAWER","name":"Drawer channel set","unit":"set","consumption":"set","ratio":"1","waste":"0","cost":"650"},{"code":"ADHESIVE","name":"Wood adhesive","unit":"kg","consumption":"kg","ratio":"1","waste":"0","cost":"240"},{"code":"EDGEBAND","name":"Edge band","unit":"roll","consumption":"m","ratio":"50","waste":"5","cost":"600"}]'::jsonb) loop
+ material=private.seed_uuid('phase6:demo:material:'||(v->>'code'));variant=private.seed_uuid('phase6:demo:variant:'||(v->>'code'));conversion=private.seed_uuid('phase6:demo:conversion:'||(v->>'code'));
+ insert into public.materials(id,organization_id,category_id,name,code,created_by) values(material,org,category,v->>'name','DEMO-'||(v->>'code'),actor) on conflict(organization_id,code) do nothing;
+ insert into public.material_variants(id,organization_id,material_id,name,code,default_waste,created_by) values(variant,org,material,v->>'name','DEMO-'||(v->>'code'),v->>'waste',actor) on conflict(organization_id,code) do nothing;
+ insert into public.material_unit_conversions(id,organization_id,variant_id,purchase_unit,consumption_unit,consumption_per_purchase,purchase_increment,reason,created_by) values(conversion,org,variant,v->>'unit',v->>'consumption',v->>'ratio','1','Demonstration packaging; confirm the actual supplier pack before use.',actor) on conflict(id) do nothing;
+ update public.material_variants set active_conversion_id=conversion where id=variant and active_conversion_id is null;
+ insert into public.material_cost_revisions(id,organization_id,variant_id,currency,unit_cost,source_reference,valid_from,created_by) values(private.seed_uuid('phase6:demo:rate:'||(v->>'code')),org,variant,'INR',v->>'cost','Illustrative planning rate — replace with a sourced rate.','2026-10-01',actor) on conflict(id) do nothing;
+ end loop;
+ for ordinal in 1..3 loop
+ insert into public.vendors(id,organization_id,name,code,payment_terms,created_by) values(private.seed_uuid('phase6:demo:vendor:'||ordinal),org,'Demo Supplier '||ordinal,'DEMO-SUP-'||ordinal,'Confirm commercial terms before ordering.',actor) on conflict(organization_id,code) do nothing;
+ insert into public.vendor_materials(id,organization_id,vendor_id,variant_id,minimum_order,pack_quantity,lead_time_days,created_by) select private.seed_uuid('phase6:demo:mapping:'||ordinal||':'||mv.code),org,private.seed_uuid('phase6:demo:vendor:'||ordinal),mv.id,'1','1',ordinal+1,actor from public.material_variants mv where mv.organization_id=org and mv.code like 'DEMO-%' and mv.id in (select variant_id from public.material_cost_revisions where source_reference='Illustrative planning rate — replace with a sourced rate.') on conflict(organization_id,vendor_id,variant_id) do nothing;
+ end loop;
+ recipe=private.seed_uuid('phase6:demo:wardrobe');
+ insert into public.estimation_recipes(id,organization_id,name,description,created_by) values(recipe,org,'Demo wardrobe requirements','Planning recipe. Enter finished area and confirm construction, hardware and site measurements.',actor) on conflict(id) do nothing;
+ ordinal=0;
+ for v in select jsonb_array_elements('[{"code":"PLY18","basis":"finished_area","factor":"2"},{"code":"PLY6","basis":"finished_area","factor":"0.6"},{"code":"LAMINATE","basis":"finished_area","factor":"2"},{"code":"HINGE","basis":"fixed","factor":"14"},{"code":"DRAWER","basis":"fixed","factor":"2"},{"code":"ADHESIVE","basis":"finished_area","factor":"0.02"},{"code":"EDGEBAND","basis":"finished_area","factor":"0.5"}]'::jsonb) loop
+ insert into public.estimation_recipe_items(id,organization_id,recipe_id,variant_id,cost_kind,description,rule,sort_order,created_by) select private.seed_uuid('phase6:demo:recipe-item:'||(v->>'code')),org,recipe,mv.id,'material',mv.name,jsonb_build_object('basis',v->>'basis','factor',v->>'factor'),ordinal,actor from public.material_variants mv where mv.id=private.seed_uuid('phase6:demo:variant:'||(v->>'code')) on conflict(id) do nothing;ordinal=ordinal+1;end loop;
+ component=private.seed_uuid('phase6:demo:pu-service');
+ insert into public.estimation_recipe_items(id,organization_id,recipe_id,cost_kind,description,unit,rule,sort_order,created_by) values(component,org,recipe,'external_service','PU finishing service','sqft','{"basis":"finished_area","factor":"1"}',7,actor) on conflict(id) do nothing;
+ insert into public.estimation_recipe_item_costs(id,organization_id,recipe_item_id,currency,unit_cost,source_reference,effective_date,created_by) values(private.seed_uuid('phase6:demo:pu-service-rate'),org,component,'INR','85','Illustrative finishing rate','2026-10-01',actor) on conflict(id) do nothing;
+end$$;
+commit;

@@ -1,0 +1,9 @@
+# Secure quotation sharing
+
+Design recorded before implementation. Business App serves /q/<opaque-token> independently of Website entitlement. Generate 32 cryptographically random bytes; show the raw token only at creation. Persist SHA-256 hash in a private table, never in audit metadata, business list payloads or traces. Link metadata is tenant-owned and RLS-protected. Rotation revokes the old link and creates a new one atomically.
+
+Public RPCs accept only an opaque token and narrowly validated action, and hash the token inside PostgreSQL. They resolve the exact revision internally and return an explicit customer document projection, never unrestricted rows or pricing snapshots. Anonymous roles have no normal tenant table access. No service-role runtime credential is introduced. Stored hashes cannot be used as bearer credentials. Direct RPC access remains confined to the same projection and token boundary; request body/SQL parameter logging must be disabled or redacted.
+
+Valid links permit historical viewing of issued/superseded revisions. A Rev 1 link never redirects its amounts to Rev 2. Revoked/expired links and cancelled quotations are unavailable. Commercial validity is separate: expired quotations remain viewable with a label but cannot receive responses. Superseded revisions cannot receive responses. PDF authorization is checked on every request and uses the existing customer renderer without permanent object URLs.
+
+Public responses are private/no-store, use no-referrer and restrictive CSP, and contain no internal IDs/cost/minimum/modifier/staff/CRM metadata. Deployment access logs and APM must redact /q/* path tokens; never enable request-body logging on public RPCs. POST checks same-origin and explicit confirmation. Database-backed per-link limits protect valid-token view/response/PDF requests across instances; ingress must also limit invalid-token traffic globally/by source. No in-memory security limiter.

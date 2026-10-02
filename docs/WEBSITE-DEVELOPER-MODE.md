@@ -1,0 +1,9 @@
+# Controlled developer mode
+
+The opt-in Website Developer organization role is created when an authorized role manager assigns it to a member and website. It has website permissions, not financial, customer, procurement or project permissions. An assignment is additionally required. Existing roles are not removed, so an existing owner retains their other access; use a dedicated developer account when website-only access is intended. Assignment revocation is immediate.
+
+Custom CSS and HTML/JavaScript components are draft document fields. Separate view, edit, publish and restore permissions apply. custom_code and developer_mode capability checks are enforced by the database on authoring/publication and on public resolution. CSS uses parsed rules and cannot import resources. HTML is parsed against a tag/attribute allowlist. JavaScript is parsed without evaluation; network, storage, global/window/parent, dynamic imports, eval, Function constructors and dangerous DOM capabilities are rejected. No npm dependencies or server-side code are supported.
+
+Each compiled component runs in an iframe with sandbox=allow-scripts and an opaque origin. Its own CSP denies network, frames, images, forms and base URLs. It does not receive Business App cookies, an authenticated database client or secrets. The SDK offers getBusinessProfile, getPublicServices, getPublicProjects, getPublicTestimonials and getPublicFAQs from approved public snapshot data. Lead submission uses the native validated form component, not arbitrary network access from custom code.
+
+The primary workflow is source editing ? preview ? validation ? publish ? immutable restore. Static validation bounds source size and AST complexity; it is not a CPU-time guarantee. Do not treat the JavaScript allowlist as the authorization boundary. The sandbox and server RPC permissions provide isolation. Git export/build adapters can be added later without making GitHub a requirement.

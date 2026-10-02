@@ -1,0 +1,17 @@
+{
+  "name": "@business-os/industry-interior",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./website": "./src/website.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@business-os/website-builder": "workspace:*",
+    "@business-os/brochure-builder": "workspace:*"
+  }
+}
