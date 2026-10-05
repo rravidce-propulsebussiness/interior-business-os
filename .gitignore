@@ -17,3 +17,5 @@ packages/database/supabase/.temp/
 packages/database/supabase/.branches/
 
 !.env.acceptance.example
+
+output/
