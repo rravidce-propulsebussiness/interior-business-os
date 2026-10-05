@@ -10,7 +10,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@business-os/ui": ["../../packages/ui/src/index.tsx"]
+      "@business-os/ui": ["../../packages/ui/src/index.tsx"],
+      "@business-os/ui/*": ["../../packages/ui/src/*"]
     }
   },
   "include": [
