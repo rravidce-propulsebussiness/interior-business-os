@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   vinext-check:
-    name: Check ${{ matrix.app }} on Cloudflare
+    name: Build ${{ matrix.app }} for Cloudflare
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -39,4 +39,12 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Check vinext compatibility
         run: pnpm dlx vinext check
+        working-directory: apps/${{ matrix.app }}
+      - name: Generate Cloudflare configuration
+        run: pnpm dlx vinext init --platform=cloudflare --skip-check
+        working-directory: apps/${{ matrix.app }}
+        env:
+          CI: "1"
+      - name: Build for Cloudflare runtime
+        run: pnpm exec vite build
         working-directory: apps/${{ matrix.app }}
