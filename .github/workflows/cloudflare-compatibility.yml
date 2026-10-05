@@ -1,0 +1,39 @@
+name: Cloudflare compatibility check
+
+on:
+  push:
+    branches:
+      - codex/cloudflare-free-compatibility
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  vinext-check:
+    name: Check ${{ matrix.app }} on Cloudflare
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        app:
+          - platform-admin
+          - business-app
+          - websites
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.34.5
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - name: Install locked workspace
+        run: pnpm install --frozen-lockfile
+      - name: Check vinext compatibility
+        run: pnpm dlx vinext check
+        working-directory: apps/${{ matrix.app }}
