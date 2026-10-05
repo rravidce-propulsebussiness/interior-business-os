@@ -50,12 +50,20 @@ test.describe('Published website renderer fixtures', () => {
   test('preview is noindex, sends selection and disables lead submission', async ({
     page,
   }) => {
-    await page.goto('/');
-    await page.setContent(
-      websiteHtml(compileWebsite(fixtureDocument()), '/contact', {
-        preview: true,
-      })!,
+    // A standalone published response has no Next shell hydration to mutate its metadata.
+    const response = await page.request.get('/');
+    const csp = response.headers()['content-security-policy'];
+    expect(csp).toBeTruthy();
+    await page.route('**/__website-preview-fixture', (route) =>
+      route.fulfill({
+        contentType: 'text/html',
+        headers: { 'Content-Security-Policy': csp! },
+        body: websiteHtml(compileWebsite(fixtureDocument()), '/contact', {
+          preview: true,
+        })!,
+      }),
     );
+    await page.goto('/__website-preview-fixture');
     await expect(page.locator('meta[name=robots]')).toHaveAttribute(
       'content',
       'noindex,nofollow',

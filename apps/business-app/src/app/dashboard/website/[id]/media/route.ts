@@ -1,5 +1,6 @@
 import sharp from 'sharp';
 import { createHash } from 'node:crypto';
+import { safeFailure } from '@business-os/shared';
 import { websiteServices, signWebsite } from '../../service';
 export async function POST(
   request: Request,
@@ -97,12 +98,10 @@ export async function POST(
       { headers: { 'Cache-Control': 'no-store' } },
     );
   } catch (e) {
-    return Response.json(
-      {
-        message:
-          e instanceof Error ? e.message.slice(0, 150) : 'Upload unavailable',
-      },
-      { status: 400, headers: { 'Cache-Control': 'no-store' } },
-    );
+    const failure = safeFailure(e);
+    return Response.json(failure, {
+      status: 400,
+      headers: { 'Cache-Control': 'no-store' },
+    });
   }
 }

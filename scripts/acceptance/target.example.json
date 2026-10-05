@@ -1,0 +1,44 @@
+{
+  "environment": "staging",
+  "inventoryReviewed": false,
+  "projectRef": "",
+  "markerId": "",
+  "releaseSha": "",
+  "releaseCandidate": "rc/2026-10-05-phase11d.3",
+  "productionProjectRefs": [],
+  "productionOrigins": [],
+  "origins": {
+    "PLATFORM_ADMIN_ORIGIN": "",
+    "BUSINESS_APP_ORIGIN": "",
+    "WEBSITES_ORIGIN": ""
+  },
+  "organizations": { "A": "", "B": "" },
+  "roles": {
+    "USER_A": "sales",
+    "USER_B": "sales",
+    "ACCOUNTS": "accountant",
+    "PROJECT_MANAGER": "project_manager",
+    "SITE_SUPERVISOR": "site_supervisor",
+    "STORE_MANAGER": "acceptance_store_manager",
+    "WEBSITE_BROCHURE": "acceptance_website_brochure"
+  },
+  "customRoles": {
+    "STORE_MANAGER": {
+      "key": "acceptance_store_manager",
+      "name": "ACCEPTANCE Store Manager",
+      "permissions": [
+        "organization.view",
+        "inventory.view",
+        "inventory.receive",
+        "inventory.issue"
+      ]
+    },
+    "WEBSITE_BROCHURE": {
+      "key": "acceptance_website_brochure",
+      "name": "ACCEPTANCE Website Brochure",
+      "permissions": ["organization.view", "website.view", "brochure.view"]
+    }
+  },
+  "providerOrigins": {},
+  "performance": []
+}

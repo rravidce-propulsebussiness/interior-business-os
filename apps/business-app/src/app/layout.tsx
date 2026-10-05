@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import './globals.css';
+// Per-request CSP nonces require dynamic HTML, including login and error shells.
+export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
   title: 'Your business workspace | Business OS',
   description:

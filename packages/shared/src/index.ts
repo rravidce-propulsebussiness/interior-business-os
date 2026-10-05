@@ -1,8 +1,11 @@
 import { z } from 'zod';
+import { isPublicKey, operationalLog } from './runtime';
 
 export const publicEnvironmentSchema = z.object({
   NEXT_PUBLIC_SUPABASE_URL: z.url(),
-  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z.string().min(1),
+  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z
+    .string()
+    .refine(isPublicKey, 'Use a publishable or anon key'),
 });
 
 /** Validate lazily in an adapter, not at module load or during static builds. */
@@ -167,13 +170,12 @@ export function safeFailure(error: unknown): {
     CONFLICT: 'This operation conflicts with an existing record.',
     INTERNAL_ERROR: 'The operation could not be completed. Please try again.',
   };
-  console.error(
-    JSON.stringify({
-      level: 'error',
-      event: 'request.failed',
-      requestId,
-      errorCode: code,
-    } satisfies LogEvent),
-  );
+  operationalLog({
+    level: code === 'INTERNAL_ERROR' ? 'error' : 'warn',
+    service: 'application',
+    event: 'request.failed',
+    requestId,
+    errorCode: code,
+  });
   return { message: messages[code], requestId };
 }

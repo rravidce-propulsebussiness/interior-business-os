@@ -19,7 +19,7 @@ sql_paths = ["./seed.sql"]
 [auth]
 enabled = true
 site_url = "http://localhost:3001"
-additional_redirect_urls = ["http://localhost:3001/auth/callback", "http://localhost:3000/auth/callback"]
+additional_redirect_urls = ["http://localhost:3001/auth/callback", "http://localhost:3000/auth/callback", "http://localhost:3001/auth/recovery", "http://localhost:3000/auth/recovery"]
 jwt_expiry = 3600
 enable_signup = true
 enable_anonymous_sign_ins = false
@@ -35,3 +35,7 @@ secure_password_change = true
 [auth.email.template.confirmation]
 subject = "Confirm your Business OS account"
 content_path = "./supabase/templates/confirmation.html"
+
+[auth.email.template.recovery]
+subject = "Reset your Business OS password"
+content_path = "./supabase/templates/recovery.html"

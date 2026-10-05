@@ -2,6 +2,7 @@ node_modules
 .pnpm-store
 .tools
 .next
+.next-recovery
 pnpm-lock.yaml
 coverage
 playwright-report

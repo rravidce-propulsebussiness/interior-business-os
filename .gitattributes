@@ -1,0 +1,14 @@
+* text=auto eol=lf
+packages/database/supabase/migrations/*.sql -text
+packages/database/src/generated/database.types.ts -text
+scripts/acceptance/schema-reference.json -text
+pnpm-lock.yaml -text
+patches/*.patch -text
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.pdf binary
