@@ -8,7 +8,9 @@
     "./server": "./src/server.ts",
     "./service": "./src/service.ts",
     "./actions": "./src/actions.ts",
-    "./callback": "./src/callback.ts"
+    "./callback": "./src/callback.ts",
+    "./recovery-actions": "./src/recovery-actions.ts",
+    "./recovery-server": "./src/recovery-server.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json"

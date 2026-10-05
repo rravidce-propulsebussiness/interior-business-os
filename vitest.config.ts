@@ -1,4 +1,7 @@
 import { defineConfig } from 'vitest/config';
+import { assertLocalTestDatabase } from './scripts/local-test-target';
+if (process.env.TEST_DATABASE_URL)
+  assertLocalTestDatabase(process.env.TEST_DATABASE_URL);
 export default defineConfig({
   test: {
     environment: 'node',

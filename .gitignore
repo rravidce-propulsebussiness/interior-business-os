@@ -1,5 +1,7 @@
 node_modules/
 .next/
+.next-recovery/
+**/next-env.d.ts
 dist/
 coverage/
 playwright-report/
@@ -13,3 +15,7 @@ test-results/
 .pnpm-store/
 packages/database/supabase/.temp/
 packages/database/supabase/.branches/
+
+!.env.acceptance.example
+
+output/

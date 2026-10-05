@@ -46,16 +46,22 @@ it('rejects invalid module names and backwards entitlement windows', () => {
   ).toBe(false);
 });
 it('never reflects raw database errors or secrets into errors or logs', () => {
-  const log = vi.spyOn(console, 'error').mockImplementation(() => {});
+  const log = vi.spyOn(console, 'log').mockImplementation(() => {});
   const result = safeFailure(
     new Error('secret token and unrelated tenant name'),
   );
   expect(JSON.stringify(result)).not.toContain('secret');
   expect(JSON.stringify(log.mock.calls)).not.toContain('secret');
+  expect(JSON.parse(log.mock.calls[0]![0])).toMatchObject({
+    severity: 'error',
+    event: 'request.failed',
+    errorCode: 'INTERNAL_ERROR',
+  });
   expect(result.requestId).toMatch(/^[a-f0-9-]+$/);
   expect(safeFailure(new DomainError('FORBIDDEN')).message).toBe(
     'You do not have access to this resource.',
   );
+  log.mockRestore();
 });
 it('registration requires a strong minimum length and omits authorization metadata', () => {
   expect(

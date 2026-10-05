@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "title": "Brochure version one",
+  "type": "Company Profile",
+  "description": "",
+  "format": "A4 Portrait",
+  "width": 210,
+  "height": 297,
+  "margin": 12,
+  "bleed": 0,
+  "safeArea": 5,
+  "theme": {
+    "primary": "#343f36",
+    "secondary": "#d8c9b5",
+    "accent": "#9b7449",
+    "background": "#faf8f2",
+    "surface": "#ffffff",
+    "text": "#243128",
+    "muted": "#687267",
+    "border": "#d8d5cd",
+    "headingFont": "Georgia",
+    "bodyFont": "Arial",
+    "radius": 0,
+    "spacing": 5,
+    "shadow": false,
+    "buttonStyle": "solid",
+    "imageTreatment": "none"
+  },
+  "pages": [
+    {
+      "id": "cover",
+      "name": "Cover",
+      "background": "#faf8f2",
+      "showHeader": false,
+      "showFooter": true,
+      "components": [
+        {
+          "id": "heading",
+          "type": "text",
+          "label": "",
+          "x": 15,
+          "y": 20,
+          "width": 80,
+          "height": 45,
+          "rotation": 0,
+          "locked": false,
+          "hidden": false,
+          "text": "Version one",
+          "subtitle": "",
+          "link": "",
+          "assets": [],
+          "alt": "",
+          "fit": "cover",
+          "focalX": 50,
+          "focalY": 50,
+          "rows": [],
+          "columns": 2,
+          "style": {
+            "font": "Arial",
+            "size": 12,
+            "weight": "normal",
+            "lineHeight": 1.4,
+            "letterSpacing": 0,
+            "align": "left",
+            "borderWidth": 0,
+            "radius": 0,
+            "padding": 0,
+            "opacity": 1,
+            "transform": "none",
+            "paragraphSpacing": 3
+          }
+        }
+      ]
+    }
+  ],
+  "header": "",
+  "footer": "",
+  "numbering": {
+    "enabled": true,
+    "start": 1,
+    "hideCover": true,
+    "position": "right"
+  },
+  "settings": {
+    "sharing": true,
+    "download": true,
+    "index": false,
+    "seoTitle": "",
+    "seoDescription": "",
+    "canonical": "",
+    "watermark": "",
+    "contactLabel": "Request consultation",
+    "contactLink": ""
+  },
+  "form": {
+    "enabled": false,
+    "label": "Request consultation",
+    "confirmation": "Thank you. Your enquiry has been received.",
+    "fields": ["email", "requirement", "message"]
+  }
+}

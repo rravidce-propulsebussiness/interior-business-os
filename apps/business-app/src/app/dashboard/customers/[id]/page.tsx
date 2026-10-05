@@ -34,6 +34,12 @@ export default async function Customer({
       <h1 className="my-6 text-3xl">{c.display_name}</h1>
       <OriginLeads customerId={id} />
       <CustomerStatementLink customerId={id} />
+      <Link
+        className="my-3 block underline"
+        href={`/dashboard/customers/${id}/activity`}
+      >
+        Customer activity timeline
+      </Link>
       <p>
         {c.phone} {c.email}
       </p>

@@ -6,9 +6,10 @@ import { DomainError } from '@business-os/shared';
 import { Button } from '@business-os/ui';
 import { ActionForm } from '@business-os/ui/action-form';
 import { provisionOrganization } from './actions';
+import { createAutomationRepository } from '@business-os/database/automation';
 
 export default async function Dashboard() {
-  const { authorization, repository } = await pageServices();
+  const { authorization, repository, client } = await pageServices();
   const user = await authorization.requireAuthenticatedUser();
   const [allOrganizations, memberships, industries, modules] =
     await Promise.all([
@@ -49,6 +50,17 @@ export default async function Dashboard() {
   const team =
     context && canViewTeam ? await repository.team(context.organizationId) : [];
   const nav = context ? moduleNavigation(context, modules) : [];
+  const notificationSummary =
+    context &&
+    canAccess(context, {
+      organizationId: context.organizationId,
+      permission: 'notification.view',
+    })
+      ? await createAutomationRepository(
+          client,
+          context.organizationId,
+        ).notifications(1, 'unread')
+      : null;
   return (
     <main
       id="main-content"
@@ -56,6 +68,37 @@ export default async function Dashboard() {
       className="mx-auto max-w-5xl px-6 py-12"
     >
       <h1 className="text-3xl font-semibold">Business dashboard</h1>
+      {context && (
+        <nav
+          className="my-4 flex flex-wrap gap-5"
+          aria-label="Daily operations"
+        >
+          <Link className="underline" href="/dashboard/reports">
+            Reports
+          </Link>
+          <Link className="underline" href="/dashboard/reports/overview">
+            Management overview
+          </Link>
+          {notificationSummary && (
+            <Link className="underline" href="/dashboard/work">
+              My work
+            </Link>
+          )}
+          {notificationSummary && (
+            <Link className="underline" href="/dashboard/notifications">
+              Notifications ({notificationSummary.unread ?? 0} unread)
+            </Link>
+          )}
+          {canAccess(context, {
+            organizationId: context.organizationId,
+            permission: 'automation.view',
+          }) && (
+            <Link className="underline" href="/dashboard/automations">
+              Automations
+            </Link>
+          )}
+        </nav>
+      )}
       {context &&
         context.entitlements.includes('billing') &&
         context.grants.some(

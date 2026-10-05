@@ -1,0 +1,11 @@
+# Brochure PDF and print pipeline
+
+The shared Chromium renderer retains the existing quotation defaults. Brochures use explicit CSS page sizes without Chromium's quotation header/footer. JavaScript is disabled, external requests are aborted and normalized images are embedded. Rendering is bounded by a 30-second watchdog and two active render jobs per process. The document schema caps 100 pages and 200 components per page; plan configuration can impose lower limits. Image payloads are capped at 50 MB per render and PDF publication at 25 MB.
+
+Before export, publication resolves the current approved marketing kit and canonical business name, validates the complete document, embeds referenced original WebP images and measures visible text/image boxes. Missing images or overflowing text fail preflight. Geometry validation rejects components outside the page, including rotated bounds. Low-resolution placement under 150 dpi produces a warning. Layout never silently shrinks text to hide an error.
+
+Supported sizes in millimetres: A4 210×297, A4 landscape 297×210, A5 148×210, A5 landscape 210×148, square 210×210 and custom 100–420 per side. Margin, safe area and optional bleed are explicit. PDF metadata includes title, business author and description. Links, embedded images and page numbering are retained. Fonts are restricted to the documented system-font allowlist; arbitrary uploaded fonts are not accepted.
+
+Draft PDF requires `brochure.export`, carries a Draft watermark and is private/no-store. Print preview requires `brochure.view` and resolves the same content as draft export. Publication generates the PDF first, signs its digest and the exact draft digest, then atomically stores the snapshot and bytes. Historical PDF retrieval returns stored bytes; brand edits cannot regenerate an old edition. Restore copies the prior snapshot and PDF into a new numbered edition, retaining the original.
+
+The seven automated fixtures cover all six size/orientation choices, a ten-page Interior profile and a fifty-page stress document. Tests check page counts, dimensions, metadata, link annotations and explicit overflow rejection. Poppler renders support visual review of every page. See PHASE9-VERIFICATION.md for measured results. This pipeline has no PDF/X or CMYK certification; commercial press acceptance requires the printer's own proof process.

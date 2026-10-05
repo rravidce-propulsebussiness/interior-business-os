@@ -22,3 +22,15 @@ Phase 6 local implementation and verification are recorded in PHASE6-VERIFICATIO
 ## Phase 8 Website module
 
 See [Website architecture](WEBSITE-ARCHITECTURE.md), [builder](WEBSITE-BUILDER.md), [security and permissions](WEBSITE-SECURITY.md) and [verification](PHASE8-VERIFICATION.md). Website is optional, uses separate immutable public snapshots and canonical CRM enquiries, and does not introduce Phase 9.
+
+## Phase 9 Brochure module
+
+The independent optional brochure implementation and local verification are tracked in [PHASE9-VERIFICATION.md](PHASE9-VERIFICATION.md). It includes fixed-layout authoring, reusable public brand content, shared media, immutable publication/PDF history, independent public viewing and canonical CRM enquiries. Hosted Auth/PostgREST acceptance remains a separate gate.
+
+## Phase 10 Automation and reporting
+
+The explicitly authorized Phase 10 introduces a transactional event outbox, one restricted central worker, structured rules, notifications/preferences, optional idempotent email, canonical work/approval queues, management reports and protected snapshot exports. See [automation](AUTOMATION.md), [reporting](REPORTING.md) and [verification](PHASE10-VERIFICATION.md). Preserve all prior domain systems and migrations. Hosted acceptance and provider delivery are separate gates.
+
+## Phase 11 production hardening
+
+Phase 11 is now authorized for hardening and verification of the existing system. See [verification](PHASE11-VERIFICATION.md), [hosted acceptance](HOSTED-ACCEPTANCE.md) and [production checklist](PRODUCTION-CHECKLIST.md). Local improvements do not close the hosted acceptance gate; the production decision remains NO-GO. Phase 12 is not started.

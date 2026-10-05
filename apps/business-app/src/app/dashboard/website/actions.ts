@@ -13,7 +13,7 @@ import {
 } from '@business-os/website-builder/compiler';
 import { websiteHtml } from '@business-os/website-builder/render';
 import { websiteServices, signWebsite } from './service';
-import { DomainError } from '@business-os/shared';
+import { safeFailure } from '@business-os/shared';
 import { interiorWebsite } from '@business-os/industry-interior/website';
 import { readFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
@@ -35,11 +35,8 @@ const permission: Record<string, string> = {
   assets: 'website.media.manage',
 };
 function message(error: unknown) {
-  return error instanceof DomainError
-    ? 'The operation was denied or the draft changed. Reload and check your access.'
-    : error instanceof Error
-      ? error.message.slice(0, 200)
-      : 'Unable to save website.';
+  const failure = safeFailure(error);
+  return `${failure.message} Reference: ${failure.requestId}`;
 }
 export async function createWebsite(name: string, slug: string) {
   try {

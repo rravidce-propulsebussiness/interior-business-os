@@ -7,7 +7,8 @@
     ".": "./src/index.tsx",
     "./styles.css": "./src/styles.css",
     "./auth-form": "./src/auth-form.tsx",
-    "./action-form": "./src/action-form.tsx"
+    "./action-form": "./src/action-form.tsx",
+    "./recovery-form": "./src/recovery-form.tsx"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json"

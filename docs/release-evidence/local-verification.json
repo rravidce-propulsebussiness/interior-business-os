@@ -1,0 +1,249 @@
+{
+  "releaseCandidate": "rc/2026-10-05-phase11d.3",
+  "sourceCommit": "71ab5cdcbd3d423f1c18cacec64574ba8d1ec881",
+  "environment": "local-clean-checkout",
+  "database": "disposable-loopback",
+  "hostedTestsExecuted": 0,
+  "productionStatus": "NO-GO",
+  "startedAt": "2026-10-05T14:57:32.087Z",
+  "steps": [
+    {
+      "command": "install",
+      "startedAt": "2026-10-05T14:57:34.082Z",
+      "durationMs": 92575,
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "result": "PASS",
+      "logReference": ".tools/phase11d3-regression/install.log",
+      "logSha256": "903f84d9120d45b68f01f9f6f5ed7bdf28fa85319dc7904fb2e13ce92aec1386"
+    },
+    {
+      "command": "create-database",
+      "startedAt": "2026-10-05T14:59:06.668Z",
+      "durationMs": 4915,
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "result": "PASS",
+      "logReference": ".tools/phase11d3-regression/create-database.log",
+      "logSha256": "c4f0e6a1d4c0f5670985351933a6e3b37f82d0e083b70cd21e88d7d6258dd588"
+    },
+    {
+      "command": "format",
+      "startedAt": "2026-10-05T14:59:11.603Z",
+      "durationMs": 102261,
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "result": "PASS",
+      "logReference": ".tools/phase11d3-regression/format.log",
+      "logSha256": "54a1583ad391d98bac2598796b1b5e2407faf13e25cd6d1bd3e597207ecd4a8c"
+    },
+    {
+      "command": "database",
+      "startedAt": "2026-10-05T14:59:11.586Z",
+      "durationMs": 210239,
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "result": "PASS",
+      "logReference": ".tools/phase11d3-regression/database.log",
+      "logSha256": "740d20bd5ad075d64e01e2bd1b4abcf676d800e0db34995a64077c188cccab48"
+    },
+    {
+      "command": "database-types",
+      "startedAt": "2026-10-05T15:02:41.831Z",
+      "durationMs": 13279,
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "result": "PASS",
+      "logReference": ".tools/phase11d3-regression/database-types.log",
+      "logSha256": "d944b6ce05edb74e770127df89e5dc5dfc4d569d5b7b9d2aeacbcf7825eb9abe"
+    },
+    {
+      "command": "seeds",
+      "startedAt": "2026-10-05T15:02:55.113Z",
+      "durationMs": 11116,
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "result": "PASS",
+      "logReference": ".tools/phase11d3-regression/seeds.log",
+      "logSha256": "f94aab294f0b601225f4d035be858ec1c62fb3588b3b7082846d0796e37983a8"
+    },
+    {
+      "command": "lint",
+      "startedAt": "2026-10-05T15:00:53.868Z",
+      "durationMs": 355542,
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "result": "PASS",
+      "logReference": ".tools/phase11d3-regression/lint.log",
+      "logSha256": "c48a2f6e4a96c37604f374df22119117264011a276720257d71c683c0a08886f"
+    },
+    {
+      "command": "core-tests",
+      "startedAt": "2026-10-05T15:09:49.664Z",
+      "durationMs": 168580,
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "result": "PASS",
+      "logReference": ".tools/phase11d3-regression/core-tests.log",
+      "logSha256": "af3c759d07b8111845c9bdcdcdd24499b5791c68de557f6f5e1e326f02492355"
+    },
+    {
+      "command": "types",
+      "startedAt": "2026-10-05T15:12:38.250Z",
+      "durationMs": 131754,
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "result": "PASS",
+      "logReference": ".tools/phase11d3-regression/types.log",
+      "logSha256": "0c3e29696589fbb343eaaf1448cd782cf9d4dd241673de4e7a9dc8a7bdf590f3"
+    },
+    {
+      "command": "node-tests",
+      "startedAt": "2026-10-05T15:14:50.007Z",
+      "durationMs": 10880,
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "result": "PASS",
+      "logReference": ".tools/phase11d3-regression/node-tests.log",
+      "logSha256": "fab968e693fdac5d41ece707e4adf24dd7a1566063506fd926daa67a57a88c97"
+    },
+    {
+      "command": "build",
+      "startedAt": "2026-10-05T15:15:00.890Z",
+      "durationMs": 274474,
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "result": "PASS",
+      "logReference": ".tools/phase11d3-regression/build.log",
+      "logSha256": "519ae1b7a93ff3db294379c17bf3cfec05c9d1e9d98eaa0ed51d668b208d824c"
+    },
+    {
+      "command": "browser-default",
+      "startedAt": "2026-10-05T15:19:35.370Z",
+      "durationMs": 226260,
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "result": "PASS",
+      "logReference": ".tools/phase11d3-regression/browser-default.log",
+      "logSha256": "abad4e7730e783a1aa1bd946a25da2c80b56e145c9eafd72a54be539a0099fd4"
+    },
+    {
+      "command": "browser-recovery",
+      "startedAt": "2026-10-05T15:23:21.636Z",
+      "durationMs": 260816,
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "result": "PASS",
+      "logReference": ".tools/phase11d3-regression/browser-recovery.log",
+      "logSha256": "d09bc0792085c4a7419397f29a1242e5a8044ef5d40c22f23bc523fcf52e2aa6"
+    },
+    {
+      "command": "client-secrets",
+      "startedAt": "2026-10-05T15:27:42.456Z",
+      "durationMs": 2645,
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "result": "PASS",
+      "logReference": ".tools/phase11d3-regression/client-secrets.log",
+      "logSha256": "7892917911f3a96f25d943d7df9cf327ae9bc0a3101bf251ee27aa851fb5084b"
+    },
+    {
+      "command": "source-artifact-secrets",
+      "startedAt": "2026-10-05T15:27:45.105Z",
+      "durationMs": 16816,
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "result": "PASS",
+      "logReference": ".tools/phase11d3-regression/source-artifact-secrets.log",
+      "logSha256": "2f36bb58fdb55a5464515dd3c0fa12ad3a254d4dbba65e54f8cbbd6b524c0f7d"
+    },
+    {
+      "command": "protected-hashes",
+      "startedAt": "2026-10-05T15:28:01.924Z",
+      "durationMs": 5212,
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "result": "PASS",
+      "logReference": ".tools/phase11d3-regression/protected-hashes.log",
+      "logSha256": "67837ab23f6cf4f7f65485fec6de680311bbb468672e8aca126651536f576eb6"
+    },
+    {
+      "command": "audit-full",
+      "startedAt": "2026-10-05T15:28:07.140Z",
+      "durationMs": 4466,
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "result": "PASS",
+      "logReference": ".tools/phase11d3-regression/audit-full.log",
+      "logSha256": "308fe86ce7fbd87c02feaf18998c3e819e4777d74cec0f01c63290b2d3005699"
+    },
+    {
+      "command": "audit-production",
+      "startedAt": "2026-10-05T15:28:11.614Z",
+      "durationMs": 3518,
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "result": "PASS",
+      "logReference": ".tools/phase11d3-regression/audit-production.log",
+      "logSha256": "bd15a346ec66c3dca0f694fb1fa43c6d5eeaf3d5bd806da8b35966e1a6968e35"
+    },
+    {
+      "command": "hosted-missing-prerequisites",
+      "startedAt": "2026-10-05T15:28:15.165Z",
+      "durationMs": 7229,
+      "exitCode": 2,
+      "expectedExitCode": 2,
+      "result": "PASS",
+      "logReference": ".tools/phase11d3-regression/hosted-missing-prerequisites.log",
+      "logSha256": "19baf02ca276f2955fd2401ac66e5fc1cd4e893ec77d15d574a157f2a0cf1ebd"
+    }
+  ],
+  "completedAt": "2026-10-05T15:29:20.940Z",
+  "verificationState": "PASS",
+  "summary": {
+    "coreTests": 243,
+    "nodeTests": 43,
+    "acceptanceGuardTests": 30,
+    "emailTests": 10,
+    "dependencyTests": 3,
+    "freshSqlAssertions": 1079,
+    "migrations": 103,
+    "protectedMigrationHashes": 89,
+    "defaultBrowserPass": 38,
+    "recoveryBrowserPass": 8,
+    "browserPass": 46,
+    "browserSkip": 79,
+    "browserFailures": 0,
+    "productionBuilds": 3,
+    "secretScans": "PASS",
+    "formatLintTypes": "PASS",
+    "cleanCheckoutPreserved": true,
+    "dependency": "MITIGATED",
+    "fullAuditFindings": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 1,
+      "critical": 0
+    },
+    "productionAudit": "PASS",
+    "hostedTestsExecuted": 0,
+    "missingConfigurationGuard": {
+      "exitCode": 2,
+      "criticalMissing": 32,
+      "PASS": 0,
+      "FAIL": 0,
+      "BLOCKED": 242,
+      "NOT APPLICABLE": 1
+    },
+    "releaseOwner": "NOT ASSIGNED",
+    "productionStatus": "NO-GO",
+    "secretCanary": {
+      "result": "PASS",
+      "logReference": ".tools/phase11d3-secret-canary.log",
+      "logSha256": "970600c7367774eedb35e0c0f91e0ec9eb48d75d821984e26db21de257b8539d",
+      "syntheticSecretLogged": false,
+      "temporaryArtifactRemoved": true
+    }
+  }
+}
