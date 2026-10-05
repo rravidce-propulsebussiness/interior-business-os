@@ -1,0 +1,86 @@
+[
+  {
+    "id": "rls.foreign-write",
+    "steps": [
+      {
+        "kind": "rpc",
+        "actor": "OWNER_A",
+        "method": "POST",
+        "path": "save_branch",
+        "status": 403,
+        "body": {
+          "p_organization_id": "${orgB}",
+          "p_input": {
+            "name": "ACCEPTANCE-DENIED",
+            "code": "acceptance-denied"
+          }
+        },
+        "assert": [{ "op": "equals", "pointer": "/code", "value": "42501" }]
+      }
+    ]
+  },
+  {
+    "id": "quotation.customer",
+    "steps": [
+      {
+        "kind": "rpc",
+        "actor": "OWNER_A",
+        "method": "POST",
+        "path": "save_commercial_entity",
+        "status": 200,
+        "body": {
+          "p_organization_id": "${orgA}",
+          "p_entity": "customers",
+          "p_input": { "display_name": "ACCEPTANCE controlled customer" }
+        },
+        "assert": [{ "op": "nonempty", "pointer": "" }],
+        "capture": { "customerId": "" }
+      }
+    ]
+  },
+  {
+    "id": "quotation.project",
+    "steps": [
+      {
+        "kind": "rpc",
+        "actor": "OWNER_A",
+        "method": "POST",
+        "path": "save_commercial_entity",
+        "status": 200,
+        "body": {
+          "p_organization_id": "${orgA}",
+          "p_entity": "projects",
+          "p_input": {
+            "customer_id": "${customerId}",
+            "name": "ACCEPTANCE controlled project",
+            "code": "acceptance-project"
+          }
+        },
+        "assert": [{ "op": "nonempty", "pointer": "" }],
+        "capture": { "projectId": "" }
+      }
+    ]
+  },
+  {
+    "id": "reports.crm",
+    "steps": [
+      {
+        "kind": "rpc",
+        "actor": "OWNER_A",
+        "method": "POST",
+        "path": "crm_search",
+        "status": 200,
+        "body": {
+          "p_organization_id": "${orgA}",
+          "p_entity": "leads",
+          "p_filter": {},
+          "p_page": 1
+        },
+        "assert": [
+          { "op": "number-at-least", "pointer": "/total", "value": 0 },
+          { "op": "equals", "pointer": "/page", "value": 1 }
+        ]
+      }
+    ]
+  }
+]

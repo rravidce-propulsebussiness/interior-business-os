@@ -15,7 +15,9 @@
     "./execution-document": "./src/execution-document.ts",
     "./operations": "./src/operations.ts",
     "./operations-command": "./src/operations-command.ts",
-    "./operations-document": "./src/operations-document.ts"
+    "./operations-document": "./src/operations-document.ts",
+    "./automation": "./src/automation.ts",
+    "./report-document": "./src/report-document.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json"

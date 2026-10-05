@@ -1,5 +1,7 @@
 # Supabase and local PostgreSQL setup
 
+The checked-in Supabase config, bootstrap and seeds are for development. Hosted Phase 11 requires separate staging/production projects, verified Auth redirect/SMTP settings and the [hosted acceptance matrix](HOSTED-ACCEPTANCE.md). Follow [production architecture](PRODUCTION-ARCHITECTURE.md) and [operations runbook](OPERATIONS-RUNBOOK.md); do not use the local verifier/bootstrap or demo seeds on a hosted project. Configured project DNS is currently unavailable; no hosted acceptance is claimed.
+
 ## Phase 5 acceptance
 
 Apply the nine additive `20261002000000`–`20261002000800` migrations after Phase 4. Optionally run `seed-finance.sql` after the existing development/catalog/commercial/CRM seeds. Regenerate database types and verify drift. Existing `QUOTATION_SIGNING_KEY` server configuration and matching private database key are also required for catalog-backed change orders; never expose that key in a public environment variable.

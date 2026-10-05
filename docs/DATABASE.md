@@ -1,5 +1,9 @@
 # Database design and migration standards
 
+Phase 11 adds only the data-free invoker `deployment_readiness()` RPC. Its anonymous execution grant exposes no tenant table or privileged mutation. The fresh verifier protects all 89 Phase 0–9 migration hashes and tests readiness execution/grants separately. See [Phase 11 verification](PHASE11-VERIFICATION.md) for local versus hosted acceptance.
+
+Phase 10 adds automation settings/rules/immutable revisions, reference-only events, executions/jobs, notifications/preferences, templates/consents/email delivery metadata and immutable report snapshots. Private registries, scheduler cursors, worker heartbeats and transient email payloads support the shared worker. All new public tenant tables force RLS and use composite tenant references. Canonical CRM, quotation, finance, procurement and execution tables remain the source of truth. Read-only work/report RPCs aggregate those sources. See [security](AUTOMATION-SECURITY.md) and [verification](PHASE10-VERIFICATION.md).
+
 ## Phase 7 local implementation
 
 Twenty-one additive operations migrations follow Phase 6. They add planning, project assignments, immutable receipt-lot stock movements, issue requests, vendor execution profiles, work orders/measurements, inspections, snags, handover and events. Runtime-tested corrections fix plan alias resolution, customer display-name lookup, purchase-cost linkage, nullable draft approval quantities and measurement aliases. All new tenant tables force RLS. `test-operations.mjs` reuses the existing execution fixture transaction and appends workflow/security checks without changing the original tests. See PHASE7-VERIFICATION.md for actual evidence and gaps.
@@ -97,3 +101,9 @@ The optional seed-execution.sql follows commercial and finance seeds and is repe
 ## Phase 8 Website module
 
 See [Website architecture](WEBSITE-ARCHITECTURE.md), [builder](WEBSITE-BUILDER.md), [security and permissions](WEBSITE-SECURITY.md) and [verification](PHASE8-VERIFICATION.md). Website is optional, uses separate immutable public snapshots and canonical CRM enquiries, and does not introduce Phase 9.
+
+## Phase 9 brochure persistence
+
+Nine additive `20261006000000`�`20261006000800` migrations introduce `brochures`, immutable `brochure_versions`, `marketing_kits`, immutable `brochure_events`, platform `brochure_plan_limits` and private PDF/metric/form-limit tables. Existing `website_assets` and `private.website_asset_data` also serve organization marketing media; Website reads remain scoped to Website-owned assets. Tenant tables force RLS, raw payload columns have no direct grants and checked RPCs enforce independent Brochure entitlement and permissions.
+
+Publication uses organization locking, optimistic draft revisions, expiring signed document/PDF digests and one transaction for historical bytes and public pointer. Historical restore preserves old rows. Existing canonical CRM leads/activities store enquiries. Database verification includes the brochure fixture after every preceding phase. See [security](BROCHURE-SECURITY.md) and [verification](PHASE9-VERIFICATION.md).

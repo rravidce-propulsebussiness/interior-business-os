@@ -1,0 +1,21 @@
+# Phase 10 automation
+
+Phase 0–9 migrations and canonical CRM, finance, procurement and execution records are preserved. Repository inspection found no existing background worker, queue, scheduler or email-delivery adapter. One shared transactional outbox and leased worker will serve all domains. No separate follow-up, project-task, invoice, inventory or activity database is introduced.
+
+Rules contain an allowlisted event, bounded conditions and actions, explicit execution identity, immutable revisions and configurable limits. Canonical database mutations emit reference-only events transactionally. Browsers cannot fabricate trusted events. Delayed/scheduled work is evaluated in the organization timezone. Worker actions revalidate the rule owner's current membership, source permissions and entitlements; recipient authorization is checked independently and again at notification read/email delivery time.
+
+Execution/action uniqueness, row locking, leases, bounded retries, cooldowns, per-entity repetition limits and daily quotas prevent duplicate work. Automation-caused mutations carry a bounded chain depth. Failed actions remain visible, and manual tests are previews without side effects. Disabling rules stops pending actions without deleting history.
+
+The worker database login is provisioned separately with execution privileges only on reviewed worker functions; it receives neither BYPASSRLS nor direct table DML. Public application roles have no worker entrypoints. Worker logs exclude credentials, contact addresses and message bodies. External email delivery requires a configured idempotent provider and explicit communication settings; unavailable delivery is recorded, never faked.
+
+Reports use existing canonical calculations and current caller authorization. Stored export snapshots preserve the selected filters, source basis, generation identity/time and safe report data. The public Website/Brochure surfaces never serve internal reports. Phase 11 remains out of scope.
+
+## Running the worker
+
+Provision a separate PostgreSQL LOGIN with INHERIT membership in `business_os_worker`, NOSUPERUSER and NOBYPASSRLS. Give it a strong password through your deployment secret manager. The role must not inherit other database roles or receive direct table grants. Set `AUTOMATION_DATABASE_URL` only in that worker's environment. Phase 11 requires `APP_ENV=development` locally or the actual `staging`/`production` value with explicit `sslmode=verify-full` remotely. Use `pnpm production:start worker` under the hosted process supervisor, or `pnpm automation:worker` locally; append `--once` for a single tick. See [production architecture](PRODUCTION-ARCHITECTURE.md) for required client/CA configuration. The worker refuses superuser/BYPASSRLS credentials. It invokes only the central tick, email claim/acknowledgement and retention functions, using bounded batches. No service-role Supabase client is involved.
+
+The scheduler scans 100 source IDs per rule per pass, with persisted cursors and at least one minute between scans of a rule. Rule executions have one to five structured actions and at most ten conditions. Daily limits, entity repetition and cooldowns are explicit rule settings. Newly created rules do not replay events that occurred before their creation. Editing a rule cancels pending actions from its old revision; the old configuration remains immutable in history.
+
+Business users manage rules at `/dashboard/automations`, including history, failed actions, retries, templates and settings. Rule tests evaluate an existing authorized event without executing actions. All nine actions use allowlisted behavior: notify, reminder, followup, task, assign_task, email, activity, escalation and start_task. Follow-ups and tasks call the existing domain operations, so their prerequisites still apply. No financial approval, project closure, snag closure or inspection approval is automated.
+
+Platform monitoring at `/dashboard/automations` in the Platform App exposes worker heartbeat and backlog/failure counts. It does not expose tenant message content. See [notifications](NOTIFICATIONS.md), [follow-ups](CRM-FOLLOWUPS.md), [reports](REPORTING.md), [security](AUTOMATION-SECURITY.md) and [verification](PHASE10-VERIFICATION.md).

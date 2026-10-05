@@ -1,0 +1,49 @@
+{
+  "releaseCandidate": "rc/2026-10-05-phase11d.3",
+  "sourceCommit": "71ab5cdcbd3d423f1c18cacec64574ba8d1ec881",
+  "generatedAt": "2026-10-05T15:29:20.209Z",
+  "artifacts": [
+    {
+      "app": "platform-admin",
+      "sourceCommit": "71ab5cdcbd3d423f1c18cacec64574ba8d1ec881",
+      "environment": "local-build-no-hosted-env",
+      "buildId": "UkyCgFTwx3zVjkHP7xz-l",
+      "files": 354,
+      "bytes": 30321408,
+      "inventorySha256": "c67333f1043aab9141de5390bbb42b456428de89e326808c582ad2819ca84e6b",
+      "excluded": [
+        "cache/",
+        "node_modules/ (runtime dependency junctions; pin/install from recorded lockfile)"
+      ],
+      "hostedDeployment": false
+    },
+    {
+      "app": "business-app",
+      "sourceCommit": "71ab5cdcbd3d423f1c18cacec64574ba8d1ec881",
+      "environment": "local-build-no-hosted-env",
+      "buildId": "OmAmFEKVGuITmZOJrp-Y7",
+      "files": 1528,
+      "bytes": 51561858,
+      "inventorySha256": "79e630b39a07aa943341acbe8d145c2d8d4295a3f99981684ac5237a50eb0b7e",
+      "excluded": [
+        "cache/",
+        "node_modules/ (runtime dependency junctions; pin/install from recorded lockfile)"
+      ],
+      "hostedDeployment": false
+    },
+    {
+      "app": "websites",
+      "sourceCommit": "71ab5cdcbd3d423f1c18cacec64574ba8d1ec881",
+      "environment": "local-build-no-hosted-env",
+      "buildId": "TSzcd-Yo_0bB0V0BTpnQi",
+      "files": 300,
+      "bytes": 24076385,
+      "inventorySha256": "aabd24650bd0631ac993ffa08afb84c53723f519acb81bed6392ae91075d547a",
+      "excluded": [
+        "cache/",
+        "node_modules/ (runtime dependency junctions; pin/install from recorded lockfile)"
+      ],
+      "hostedDeployment": false
+    }
+  ]
+}

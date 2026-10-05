@@ -16,6 +16,9 @@ export default function Login() {
         </p>
       )}
       <AuthForm action={signIn} />
+      <p className="mt-4">
+        <Link href="/forgot-password">Forgot your password?</Link>
+      </p>
       <Link className="underline" href="/register">
         Create an account
       </Link>

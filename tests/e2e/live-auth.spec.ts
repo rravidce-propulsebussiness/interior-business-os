@@ -29,10 +29,15 @@ test('live confirmed Owner can sign in and inspect tenant membership', async ({
   ).toBeVisible();
   await page
     .getByLabel('Active organization')
-    .selectOption('dddddddd-dddd-4ddd-8ddd-dddddddddddd');
+    .selectOption(
+      process.env.E2E_ORG_ID ?? 'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
+    );
   await page.getByRole('button', { name: 'Switch organization' }).click();
   await expect(
-    page.getByRole('heading', { name: 'Demo Interiors', exact: true }),
+    page.getByRole('heading', {
+      name: process.env.E2E_ORG_NAME ?? 'Demo Interiors',
+      exact: true,
+    }),
   ).toBeVisible();
   await expect(
     page

@@ -1,0 +1,56 @@
+name: Hosted Acceptance
+on:
+  workflow_dispatch:
+    inputs:
+      release_commit:
+        description: Full reviewed immutable RC commit SHA
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: hosted-acceptance-staging
+  cancel-in-progress: false
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    environment: hosted-acceptance-staging
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.release_commit }}
+      - name: Verify requested source commit before loading staging secrets
+        env:
+          REQUESTED_RELEASE_COMMIT: ${{ inputs.release_commit }}
+        run: |
+          node --input-type=module -e "import{execFileSync}from'node:child_process';const wanted=process.env.REQUESTED_RELEASE_COMMIT;if(!/^[a-f0-9]{40}$/.test(wanted??'')||execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim()!==wanted)throw new Error('RELEASE_COMMIT_MISMATCH');"
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Load protected staging configuration without output
+        env:
+          ACCEPTANCE_ENV_FILE: ${{ secrets.ACCEPTANCE_ENV_FILE }}
+          ACCEPTANCE_TARGET_JSON: ${{ vars.ACCEPTANCE_TARGET_JSON }}
+          ACCEPTANCE_SCENARIOS_JSON: ${{ vars.ACCEPTANCE_SCENARIOS_JSON }}
+        run: |
+          node --input-type=module -e "import{mkdirSync,writeFileSync}from'node:fs';mkdirSync('.tools/hosted-ci',{recursive:true});writeFileSync('.env.acceptance.local',process.env.ACCEPTANCE_ENV_FILE??'',{mode:0o600});writeFileSync('.tools/hosted-ci/target.json',process.env.ACCEPTANCE_TARGET_JSON??'{}');writeFileSync('.tools/hosted-ci/scenarios.json',process.env.ACCEPTANCE_SCENARIOS_JSON??'[]');"
+      - name: Run guarded hosted acceptance
+        run: pnpm acceptance:hosted --env-file=.env.acceptance.local
+        env:
+          ACCEPTANCE_TARGET_FILE: .tools/hosted-ci/target.json
+          ACCEPTANCE_SCENARIOS_FILE: .tools/hosted-ci/scenarios.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: hosted-acceptance-sanitized-results
+          path: |
+            .tools/acceptance/*/results.json
+            .tools/acceptance/*/report.md
+            .tools/acceptance/*/browser.json
+          retention-days: 7
+          if-no-files-found: ignore

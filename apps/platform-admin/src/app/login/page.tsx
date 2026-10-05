@@ -17,6 +17,9 @@ export default function Login() {
       )}
       <AuthForm action={signIn} />
       <p className="mt-4">
+        <Link href="/forgot-password">Forgot your password?</Link>
+      </p>
+      <p className="mt-4">
         <Link href="/">Back to home</Link>
       </p>
     </main>

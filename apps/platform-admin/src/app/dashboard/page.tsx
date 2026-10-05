@@ -30,8 +30,14 @@ export default async function PlatformDashboard() {
     >
       <h1 className="text-3xl font-semibold">Platform dashboard</h1>
       <p>Platform authorization verified.</p>
+      <Link href="/dashboard/automations" className="mr-4 underline">
+        Automation health
+      </Link>
       <Link href="/dashboard/website" className="underline">
         Website platform controls
+      </Link>
+      <Link href="/dashboard/brochures" className="ml-4 underline">
+        Brochure platform controls
       </Link>
       <form action={signOut} className="my-4">
         <Button>Sign out</Button>

@@ -66,7 +66,7 @@ it.skipIf(!process.env.TEST_DATABASE_URL)(
     try {
       const verify = spawnSync(
         process.execPath,
-        ['packages/database/scripts/verify.mjs'],
+        ['packages/database/scripts/verify.mjs', '--initialize-only'],
         {
           encoding: 'utf8',
           timeout: 180000,

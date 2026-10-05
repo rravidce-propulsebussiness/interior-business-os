@@ -1,0 +1,13 @@
+# Automation and reporting security
+
+Canonical database triggers are the only event producers; application roles cannot insert outbox events or call worker functions. Events contain entity references, not arbitrary browser payloads. An allowlisted registry controls source tables and domain permissions. Rules accept bounded structured fields and cannot contain SQL, shell commands, JavaScript or executable template expressions.
+
+Tenant tables force RLS. Cross-tenant composite foreign keys bind rule revisions, events, executions, jobs, recipients and deliveries. Rule versions and report snapshots reject updates/deletes even from privileged test sessions. Events reject payload mutation. Canonical business/audit history is retained.
+
+The restricted worker uses reviewed SECURITY DEFINER entrypoints. Each action impersonates the rule's recorded execution identity only while rechecking its current membership, entitlement and source/action permissions. Recipient authorization is separate. Caller context is restored on success and error. Transactional row locks and action uniqueness prevent duplicate effects. Chain depth is capped at five, automated retries at three and manual retries at three. Financial decisions and permission changes are not supported actions.
+
+Email uses durable provider idempotency keys, immutable attempt bodies, expiring leases and token-checked acknowledgement. Permission, consent, source state and recipient preferences are checked before each claim. Ambiguous attempts cannot retry beyond the configured 23-hour safety window. Missing configuration is recorded as failure; provider success is never simulated. Tests use a fake transport and send no external mail. Provisioning a live sender/provider remains deployment work.
+
+Read optimizations never persist authorization decisions. Notifications are scoped to the current recipient. Execution history, exports and report summaries apply source authorization before aggregation. Sensitive procurement values require extra cost permission. Platform monitoring returns operational metadata only; platform authority does not imply tenant reporting authority. Internal report URLs never pass through Website or Brochure public rendering.
+
+Mandatory concurrency tests run independent PostgreSQL sessions in a separately enabled disposable clone. They commit test history and therefore require `ALLOW_AUTOMATION_RACE_FIXTURES=yes`. Do not run that fixture on a production database. Normal domain/report suites roll back their fixtures. See [verification](PHASE10-VERIFICATION.md) for observed evidence and remaining acceptance gates.

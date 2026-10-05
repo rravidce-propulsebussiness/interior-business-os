@@ -32,6 +32,7 @@ export default async function ModuleStatus({
     throw error;
   }
   if (key === 'website') redirect('/dashboard/website');
+  if (key === 'brochure') redirect('/dashboard/brochures');
   if (key === 'crm') redirect('/dashboard/crm');
   if (key === 'catalog') redirect('/dashboard/catalog');
   if (key === 'pricing') redirect('/dashboard/pricing');

@@ -1,5 +1,9 @@
 # Architecture and decisions
 
+Phase 11 preserves these package and domain boundaries while adding deployment validation, bounded requests, health/readiness, admin CSP and operational controls. See [production architecture](PRODUCTION-ARCHITECTURE.md) and [verification](PHASE11-VERIFICATION.md). Hosted readiness remains blocked.
+
+Phase 10 adds one shared transactional outbox and restricted central worker around the existing canonical domain operations. Application routes manage structured rules, notification preferences, work queues and reports; they cannot fabricate trusted events or call worker entrypoints. PostgreSQL owns authorization, aggregate money calculations, scheduling/idempotency and immutable report data snapshots. The existing bounded offline PDF renderer serves protected report downloads. See [automation](AUTOMATION.md), [reporting](REPORTING.md) and [security](AUTOMATION-SECURITY.md).
+
 ## Phase 7 local implementation
 
 Physical execution extends existing projects, accepted contracts, approved estimates and vendor/procurement records. New checked RPCs use the organization lock; receipt-lot inventory is an immutable ledger with a database negative-stock guard. Quantity and cost records remain separate. Approved planning and inspection/handover history is protected independently of application writes. New operations reads run under caller RLS; project assignment limits Site operational access. See PHASE7-VERIFICATION.md for the implementation and acceptance limits.
@@ -102,3 +106,9 @@ Quantity and cost tables are separate. Approved estimates and issued procurement
 ## Phase 8 Website module
 
 See [Website architecture](WEBSITE-ARCHITECTURE.md), [builder](WEBSITE-BUILDER.md), [security and permissions](WEBSITE-SECURITY.md) and [verification](PHASE8-VERIFICATION.md). Website is optional, uses separate immutable public snapshots and canonical CRM enquiries, and does not introduce Phase 9.
+
+## Phase 9 independent Brochure module
+
+Business App authors strict millimetre-based brochure documents. The brochure-builder package owns schemas, editable templates, history operations and escaped fixed-page rendering. Shared Chromium infrastructure generates bounded print PDFs. Marketing kits reuse canonical organization identity and explicitly approved presentation data; shared private media preserves originals. Website entitlement and Website records are not prerequisites.
+
+Atomic publication stores immutable document and PDF snapshots. The public Websites app reads only the current authorized publication at `/brochure/{business}/{slug}`. Restore creates a new edition; revocation is checked on each request. Canonical CRM handles all enquiries. See [Brochure architecture](BROCHURE-ARCHITECTURE.md), [security](BROCHURE-SECURITY.md) and [verification](PHASE9-VERIFICATION.md).

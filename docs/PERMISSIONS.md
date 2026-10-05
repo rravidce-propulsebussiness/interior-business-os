@@ -1,5 +1,9 @@
 # Authorization model
 
+Phase 11 introduces no business permissions or RLS bypass. Health/readiness disclose only process/dependency status; the worker still requires its restricted role. See [security runbook](SECURITY-RUNBOOK.md) and [hosted role-isolation acceptance](HOSTED-ACCEPTANCE.md).
+
+Phase 10 introduces `automation.view`, `automation.manage`, `automation.execute`, `automation.retry`, `notification.view`, `notification.manage_preferences`, eight granular `report.*.view` families and `report.export`. A family permission never bypasses the original source module permission/entitlement or project assignment. Extra cost permissions still gate procurement/cost values. Notification recipients must retain source access. Worker authority is a restricted database role, not a tenant administrator or service-role key. Platform health requires `platform.audit.view` and returns operational metadata only. See [automation security](AUTOMATION-SECURITY.md).
+
 ## Phase 7 work in progress
 
 Operations adds execution, milestone, task, inventory, material-issue, subcontract/work-order, inspection, snag, handover and execution-cost grants. Runtime authorization uses permissions, never role names. Template grants are configuration. Project assignments or explicit `execution.view_all` govern new project operations; `inventory.view_all` separately governs organization stock visibility. Site receipt-lot visibility grants no cost access. New operations require Projects; stock operations also require Purchasing and subcontract operations require Vendors. See PHASE7-VERIFICATION.md for tested boundaries and remaining acceptance.
@@ -69,3 +73,7 @@ Estimate/PO PDFs require their cost grants. RFQ recipient PDFs contain requested
 ## Phase 8 Website module
 
 See [Website architecture](WEBSITE-ARCHITECTURE.md), [builder](WEBSITE-BUILDER.md), [security and permissions](WEBSITE-SECURITY.md) and [verification](PHASE8-VERIFICATION.md). Website is optional, uses separate immutable public snapshots and canonical CRM enquiries, and does not introduce Phase 9.
+
+## Phase 9 Brochure permissions
+
+Brochure checks its own entitlement, independent of Website. Granular keys are brochure.view, brochure.manage, brochure.publish, brochure.restore, brochure.export, brochure.media.manage, brochure.forms.manage, brochure.brand.manage, brochure.share and brochure.analytics.view. Owner/admin receive the initial grants. Brochure Designer is separately assignable through role-management authority and does not grant commercial/customer/Website access. Website Developer receives no implicit brochure authority. Importing project/catalog presentation fields additionally requires source module permission. Platform controls limits and suspension without acquiring tenant editing rights. See [Brochure security](BROCHURE-SECURITY.md).

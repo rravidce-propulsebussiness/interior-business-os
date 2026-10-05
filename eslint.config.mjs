@@ -10,6 +10,7 @@ export default defineConfig([
     '.pnpm-store/**',
     '.tools/**',
     '**/.next/**',
+    '**/.next-recovery/**',
     '**/next-env.d.ts',
     '**/node_modules/**',
     'coverage/**',
@@ -31,7 +32,7 @@ export default defineConfig([
   },
   {
     files: [
-      'packages/{core,quotation-engine,website-builder,industry-interior,shared}/src/**/*.ts',
+      'packages/{core,quotation-engine,website-builder,brochure-builder,industry-interior,shared}/src/**/*.ts',
     ],
     rules: {
       'no-restricted-imports': [
@@ -53,7 +54,7 @@ export default defineConfig([
   },
   {
     files: [
-      'packages/{core,quotation-engine,website-builder,shared}/src/**/*.ts',
+      'packages/{core,quotation-engine,website-builder,brochure-builder,shared}/src/**/*.ts',
     ],
     rules: {
       'no-restricted-imports': [

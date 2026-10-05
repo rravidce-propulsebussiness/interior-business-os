@@ -1,0 +1,210 @@
+.public-brochure {
+  min-height: 100vh;
+  background: #eeeee8;
+  color: #25382c;
+  font:
+    14px Arial,
+    sans-serif;
+}
+.public-brochure-header {
+  padding: 22px max(20px, 4vw);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  background: #fff;
+  border-bottom: 1px solid #d6ddd5;
+}
+.public-brochure-header h1 {
+  font:
+    26px Georgia,
+    serif;
+  margin: 5px 0;
+}
+.public-brochure-header p {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin: 0;
+}
+.public-brochure-header nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.public-brochure button,
+.public-brochure-header a,
+.public-brochure select {
+  border: 1px solid #bac8bc;
+  border-radius: 5px;
+  background: white;
+  padding: 9px 13px;
+  cursor: pointer;
+}
+.public-brochure button:disabled {
+  opacity: 0.45;
+}
+.public-brochure :focus-visible {
+  outline: 3px solid #4a93b4;
+  outline-offset: 2px;
+}
+.public-brochure .contact {
+  background: #344b3d;
+  color: white;
+}
+.public-brochure-layout {
+  display: grid;
+  grid-template-columns: 210px minmax(0, 1fr);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+.public-brochure-pages {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 25px 15px;
+}
+.public-brochure-pages button {
+  display: flex;
+  gap: 12px;
+  text-align: left;
+  align-items: center;
+  font-size: 12px;
+}
+.public-brochure-pages button[aria-current='page'] {
+  border: 2px solid #3f6550;
+  background: #f8faf7;
+}
+.public-page-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  min-width: 30px;
+  height: 40px;
+  border: 1px solid #bfcbbf;
+  background: #f1f1e9;
+  font-family: Georgia, serif;
+}
+.public-page-miniature {
+  overflow: hidden;
+  flex-shrink: 0;
+  pointer-events: none;
+  border: 1px solid #bfcbbf;
+}
+.public-brochure-reading {
+  min-width: 0;
+  padding-bottom: 25px;
+}
+.public-brochure-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 16px;
+}
+.public-brochure-scroll {
+  overflow: auto;
+  max-width: 100%;
+  padding: 0 12px;
+}
+.public-brochure-caption,
+.public-brochure-message {
+  text-align: center;
+  padding: 12px;
+  margin: 0;
+  color: #607565;
+  font-size: 12px;
+}
+.public-brochure-enquiry {
+  position: fixed;
+  z-index: 20;
+  inset: 10vh max(15px, calc((100vw - 540px) / 2));
+  background: white;
+  border: 1px solid #aabbac;
+  border-radius: 12px;
+  padding: 25px;
+  overflow: auto;
+  box-shadow: 0 20px 80px #20382955;
+}
+.public-brochure-enquiry h2 {
+  font:
+    28px Georgia,
+    serif;
+}
+.public-brochure-enquiry form {
+  display: grid;
+  gap: 12px;
+}
+.public-brochure-enquiry label {
+  display: grid;
+  gap: 6px;
+  text-transform: capitalize;
+}
+.public-brochure-enquiry input {
+  border: 1px solid #aabbac;
+  border-radius: 5px;
+  padding: 10px;
+}
+.public-brochure-enquiry .public-consent {
+  display: flex;
+  align-items: center;
+  text-transform: none;
+}
+.public-brochure-enquiry .public-honeypot {
+  position: absolute;
+  left: -10000px;
+}
+@media (max-width: 700px) {
+  .public-brochure-header {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 18px;
+  }
+  .public-brochure-header h1 {
+    font-size: 23px;
+  }
+  .public-brochure-header nav {
+    gap: 8px;
+    font-size: 12px;
+  }
+  .public-brochure-layout {
+    display: flex;
+    flex-direction: column;
+  }
+  .public-brochure-pages {
+    flex-direction: row;
+    overflow: auto;
+    padding: 12px;
+    gap: 6px;
+  }
+  .public-brochure-pages button {
+    min-width: 115px;
+    max-width: 160px;
+    padding: 6px;
+    font-size: 10px;
+  }
+  .public-brochure-controls {
+    font-size: 12px;
+    gap: 9px;
+  }
+  .public-brochure-enquiry {
+    inset: 15px;
+  }
+  .public-brochure-reading {
+    width: 100%;
+  }
+}
+@media print {
+  .public-brochure-header,
+  .public-brochure-pages,
+  .public-brochure-controls,
+  .public-brochure-caption,
+  .public-brochure-enquiry {
+    display: none;
+  }
+  .public-brochure-layout {
+    display: block;
+  }
+}

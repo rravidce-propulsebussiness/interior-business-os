@@ -57,6 +57,359 @@ export interface Database {
           },
         ];
       };
+      automation_events: {
+        Row: {
+          id: string;
+          organization_id: string;
+          event_type: string;
+          entity_kind: string;
+          entity_id: string;
+          actor_id: string | null;
+          occurred_at: string;
+          chain_depth: number;
+          dedupe_key: string;
+          dispatched_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          event_type: string;
+          entity_kind: string;
+          entity_id: string;
+          actor_id?: string | null;
+          occurred_at?: string;
+          chain_depth?: number;
+          dedupe_key: string;
+          dispatched_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          event_type?: string;
+          entity_kind?: string;
+          entity_id?: string;
+          actor_id?: string | null;
+          occurred_at?: string;
+          chain_depth?: number;
+          dedupe_key?: string;
+          dispatched_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'automation_events_actor_id_fkey';
+            columns: ['actor_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'automation_events_organization_id_fkey';
+            columns: ['organization_id'];
+            isOneToOne: false;
+            referencedRelation: 'organizations';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      automation_executions: {
+        Row: {
+          id: string;
+          organization_id: string;
+          rule_id: string;
+          rule_version_id: string;
+          event_id: string;
+          status: string;
+          created_at: string;
+          started_at: string | null;
+          completed_at: string | null;
+          reason: string;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          rule_id: string;
+          rule_version_id: string;
+          event_id: string;
+          status?: string;
+          created_at?: string;
+          started_at?: string | null;
+          completed_at?: string | null;
+          reason?: string;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          rule_id?: string;
+          rule_version_id?: string;
+          event_id?: string;
+          status?: string;
+          created_at?: string;
+          started_at?: string | null;
+          completed_at?: string | null;
+          reason?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'automation_executions_organization_id_event_id_fkey';
+            columns: ['organization_id', 'event_id'];
+            isOneToOne: false;
+            referencedRelation: 'automation_events';
+            referencedColumns: ['organization_id', 'id'];
+          },
+          {
+            foreignKeyName: 'automation_executions_organization_id_rule_id_fkey';
+            columns: ['organization_id', 'rule_id'];
+            isOneToOne: false;
+            referencedRelation: 'automation_rules';
+            referencedColumns: ['organization_id', 'id'];
+          },
+          {
+            foreignKeyName: 'automation_executions_organization_id_rule_version_id_fkey';
+            columns: ['organization_id', 'rule_version_id'];
+            isOneToOne: false;
+            referencedRelation: 'automation_rule_versions';
+            referencedColumns: ['organization_id', 'id'];
+          },
+        ];
+      };
+      automation_jobs: {
+        Row: {
+          id: string;
+          organization_id: string;
+          execution_id: string;
+          action_index: number;
+          action: Json;
+          run_at: string;
+          status: string;
+          attempts: number;
+          lease_token: string | null;
+          lease_until: string | null;
+          result_id: string | null;
+          error_code: string;
+          created_at: string;
+          completed_at: string | null;
+          manual_retries: number;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          execution_id: string;
+          action_index: number;
+          action: Json;
+          run_at: string;
+          status?: string;
+          attempts?: number;
+          lease_token?: string | null;
+          lease_until?: string | null;
+          result_id?: string | null;
+          error_code?: string;
+          created_at?: string;
+          completed_at?: string | null;
+          manual_retries?: number;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          execution_id?: string;
+          action_index?: number;
+          action?: Json;
+          run_at?: string;
+          status?: string;
+          attempts?: number;
+          lease_token?: string | null;
+          lease_until?: string | null;
+          result_id?: string | null;
+          error_code?: string;
+          created_at?: string;
+          completed_at?: string | null;
+          manual_retries?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'automation_jobs_organization_id_execution_id_fkey';
+            columns: ['organization_id', 'execution_id'];
+            isOneToOne: false;
+            referencedRelation: 'automation_executions';
+            referencedColumns: ['organization_id', 'id'];
+          },
+        ];
+      };
+      automation_rule_versions: {
+        Row: {
+          id: string;
+          organization_id: string;
+          rule_id: string;
+          version: number;
+          configuration: Json;
+          created_by: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          rule_id: string;
+          version: number;
+          configuration: Json;
+          created_by: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          rule_id?: string;
+          version?: number;
+          configuration?: Json;
+          created_by?: string;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'automation_rule_versions_created_by_fkey';
+            columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'automation_rule_versions_organization_id_rule_id_fkey';
+            columns: ['organization_id', 'rule_id'];
+            isOneToOne: false;
+            referencedRelation: 'automation_rules';
+            referencedColumns: ['organization_id', 'id'];
+          },
+        ];
+      };
+      automation_rules: {
+        Row: {
+          id: string;
+          organization_id: string;
+          name: string;
+          description: string;
+          event_type: string;
+          mode: string;
+          status: string;
+          configuration: Json;
+          version: number;
+          run_as: string;
+          created_by: string;
+          updated_by: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          name: string;
+          description?: string;
+          event_type: string;
+          mode: string;
+          status: string;
+          configuration: Json;
+          version?: number;
+          run_as: string;
+          created_by: string;
+          updated_by: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          name?: string;
+          description?: string;
+          event_type?: string;
+          mode?: string;
+          status?: string;
+          configuration?: Json;
+          version?: number;
+          run_as?: string;
+          created_by?: string;
+          updated_by?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'automation_rules_created_by_fkey';
+            columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'automation_rules_organization_id_fkey';
+            columns: ['organization_id'];
+            isOneToOne: false;
+            referencedRelation: 'organizations';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'automation_rules_organization_id_run_as_fkey';
+            columns: ['organization_id', 'run_as'];
+            isOneToOne: false;
+            referencedRelation: 'organization_memberships';
+            referencedColumns: ['organization_id', 'user_id'];
+          },
+          {
+            foreignKeyName: 'automation_rules_updated_by_fkey';
+            columns: ['updated_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      automation_settings: {
+        Row: {
+          organization_id: string;
+          version: number;
+          notification_daily_limit: number;
+          email_daily_limit: number;
+          customer_email_enabled: boolean;
+          retention_days: number;
+          updated_by: string | null;
+          updated_at: string;
+          recipient_cooldown_minutes: number;
+        };
+        Insert: {
+          organization_id: string;
+          version?: number;
+          notification_daily_limit?: number;
+          email_daily_limit?: number;
+          customer_email_enabled?: boolean;
+          retention_days?: number;
+          updated_by?: string | null;
+          updated_at?: string;
+          recipient_cooldown_minutes?: number;
+        };
+        Update: {
+          organization_id?: string;
+          version?: number;
+          notification_daily_limit?: number;
+          email_daily_limit?: number;
+          customer_email_enabled?: boolean;
+          retention_days?: number;
+          updated_by?: string | null;
+          updated_at?: string;
+          recipient_cooldown_minutes?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'automation_settings_organization_id_fkey';
+            columns: ['organization_id'];
+            isOneToOne: true;
+            referencedRelation: 'organizations';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'automation_settings_updated_by_fkey';
+            columns: ['updated_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       branches: {
         Row: {
           id: string;
@@ -95,6 +448,219 @@ export interface Database {
             isOneToOne: false;
             referencedRelation: 'organizations';
             referencedColumns: ['id'];
+          },
+        ];
+      };
+      brochure_events: {
+        Row: {
+          id: string;
+          organization_id: string;
+          brochure_id: string | null;
+          actor_id: string | null;
+          action: string;
+          metadata: Json;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          brochure_id?: string | null;
+          actor_id?: string | null;
+          action: string;
+          metadata?: Json;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          brochure_id?: string | null;
+          actor_id?: string | null;
+          action?: string;
+          metadata?: Json;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'brochure_events_actor_id_fkey';
+            columns: ['actor_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'brochure_events_organization_id_brochure_id_fkey';
+            columns: ['organization_id', 'brochure_id'];
+            isOneToOne: false;
+            referencedRelation: 'brochures';
+            referencedColumns: ['organization_id', 'id'];
+          },
+          {
+            foreignKeyName: 'brochure_events_organization_id_fkey';
+            columns: ['organization_id'];
+            isOneToOne: false;
+            referencedRelation: 'organizations';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      brochure_plan_limits: {
+        Row: {
+          plan_id: string;
+          configuration: Json;
+        };
+        Insert: {
+          plan_id: string;
+          configuration?: Json;
+        };
+        Update: {
+          plan_id?: string;
+          configuration?: Json;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'brochure_plan_limits_plan_id_fkey';
+            columns: ['plan_id'];
+            isOneToOne: true;
+            referencedRelation: 'plans';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      brochure_versions: {
+        Row: {
+          id: string;
+          organization_id: string;
+          brochure_id: string;
+          sequence: number;
+          snapshot: Json;
+          business_name: string;
+          summary: string;
+          pdf_digest: string;
+          restored_from: string | null;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          brochure_id: string;
+          sequence: number;
+          snapshot: Json;
+          business_name: string;
+          summary?: string;
+          pdf_digest: string;
+          restored_from?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          brochure_id?: string;
+          sequence?: number;
+          snapshot?: Json;
+          business_name?: string;
+          summary?: string;
+          pdf_digest?: string;
+          restored_from?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'brochure_versions_created_by_fkey';
+            columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'brochure_versions_organization_id_brochure_id_fkey';
+            columns: ['organization_id', 'brochure_id'];
+            isOneToOne: false;
+            referencedRelation: 'brochures';
+            referencedColumns: ['organization_id', 'id'];
+          },
+          {
+            foreignKeyName: 'brochure_versions_organization_id_brochure_id_restored_fro_fkey';
+            columns: ['organization_id', 'brochure_id', 'restored_from'];
+            isOneToOne: false;
+            referencedRelation: 'brochure_versions';
+            referencedColumns: ['organization_id', 'brochure_id', 'id'];
+          },
+          {
+            foreignKeyName: 'brochure_versions_organization_id_fkey';
+            columns: ['organization_id'];
+            isOneToOne: false;
+            referencedRelation: 'organizations';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      brochures: {
+        Row: {
+          id: string;
+          organization_id: string;
+          name: string;
+          slug: string;
+          type: string;
+          status: string;
+          version: number;
+          document: Json;
+          published_version_id: string | null;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          name: string;
+          slug: string;
+          type: string;
+          status?: string;
+          version?: number;
+          document: Json;
+          published_version_id?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          name?: string;
+          slug?: string;
+          type?: string;
+          status?: string;
+          version?: number;
+          document?: Json;
+          published_version_id?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'brochures_created_by_fkey';
+            columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'brochures_organization_id_fkey';
+            columns: ['organization_id'];
+            isOneToOne: false;
+            referencedRelation: 'organizations';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'brochures_organization_id_id_published_version_id_fkey';
+            columns: ['organization_id', 'id', 'published_version_id'];
+            isOneToOne: false;
+            referencedRelation: 'brochure_versions';
+            referencedColumns: ['organization_id', 'brochure_id', 'id'];
           },
         ];
       };
@@ -559,6 +1125,61 @@ export interface Database {
           },
         ];
       };
+      communication_consents: {
+        Row: {
+          id: string;
+          organization_id: string;
+          customer_id: string;
+          email_enabled: boolean;
+          evidence: string;
+          version: number;
+          updated_by: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          customer_id: string;
+          email_enabled?: boolean;
+          evidence: string;
+          version?: number;
+          updated_by: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          customer_id?: string;
+          email_enabled?: boolean;
+          evidence?: string;
+          version?: number;
+          updated_by?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'communication_consents_organization_id_customer_id_fkey';
+            columns: ['organization_id', 'customer_id'];
+            isOneToOne: true;
+            referencedRelation: 'customers';
+            referencedColumns: ['organization_id', 'id'];
+          },
+          {
+            foreignKeyName: 'communication_consents_organization_id_fkey';
+            columns: ['organization_id'];
+            isOneToOne: false;
+            referencedRelation: 'organizations';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'communication_consents_updated_by_fkey';
+            columns: ['updated_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       contracts: {
         Row: {
           id: string;
@@ -1012,6 +1633,140 @@ export interface Database {
             columns: ['organization_id'];
             isOneToOne: false;
             referencedRelation: 'organizations';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      email_deliveries: {
+        Row: {
+          id: string;
+          organization_id: string;
+          job_id: string;
+          event_id: string;
+          recipient_id: string | null;
+          customer_id: string | null;
+          template_key: string;
+          status: string;
+          attempts: number;
+          lease_token: string | null;
+          lease_until: string | null;
+          next_attempt_at: string;
+          provider_message_id: string | null;
+          error_code: string;
+          created_at: string;
+          sent_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          job_id: string;
+          event_id: string;
+          recipient_id?: string | null;
+          customer_id?: string | null;
+          template_key: string;
+          status?: string;
+          attempts?: number;
+          lease_token?: string | null;
+          lease_until?: string | null;
+          next_attempt_at?: string;
+          provider_message_id?: string | null;
+          error_code?: string;
+          created_at?: string;
+          sent_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          job_id?: string;
+          event_id?: string;
+          recipient_id?: string | null;
+          customer_id?: string | null;
+          template_key?: string;
+          status?: string;
+          attempts?: number;
+          lease_token?: string | null;
+          lease_until?: string | null;
+          next_attempt_at?: string;
+          provider_message_id?: string | null;
+          error_code?: string;
+          created_at?: string;
+          sent_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'email_deliveries_organization_id_customer_id_fkey';
+            columns: ['organization_id', 'customer_id'];
+            isOneToOne: false;
+            referencedRelation: 'customers';
+            referencedColumns: ['organization_id', 'id'];
+          },
+          {
+            foreignKeyName: 'email_deliveries_organization_id_event_id_fkey';
+            columns: ['organization_id', 'event_id'];
+            isOneToOne: false;
+            referencedRelation: 'automation_events';
+            referencedColumns: ['organization_id', 'id'];
+          },
+          {
+            foreignKeyName: 'email_deliveries_organization_id_job_id_fkey';
+            columns: ['organization_id', 'job_id'];
+            isOneToOne: false;
+            referencedRelation: 'automation_jobs';
+            referencedColumns: ['organization_id', 'id'];
+          },
+          {
+            foreignKeyName: 'email_deliveries_organization_id_recipient_id_fkey';
+            columns: ['organization_id', 'recipient_id'];
+            isOneToOne: false;
+            referencedRelation: 'organization_memberships';
+            referencedColumns: ['organization_id', 'user_id'];
+          },
+        ];
+      };
+      email_templates: {
+        Row: {
+          id: string;
+          organization_id: string;
+          key: string;
+          subject: string;
+          body: string;
+          version: number;
+          updated_by: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          key: string;
+          subject: string;
+          body: string;
+          version?: number;
+          updated_by: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          key?: string;
+          subject?: string;
+          body?: string;
+          version?: number;
+          updated_by?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'email_templates_organization_id_fkey';
+            columns: ['organization_id'];
+            isOneToOne: false;
+            referencedRelation: 'organizations';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'email_templates_updated_by_fkey';
+            columns: ['updated_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
             referencedColumns: ['id'];
           },
         ];
@@ -3584,6 +4339,35 @@ export interface Database {
           },
         ];
       };
+      marketing_kits: {
+        Row: {
+          organization_id: string;
+          version: number;
+          content: Json;
+          updated_at: string;
+        };
+        Insert: {
+          organization_id: string;
+          version?: number;
+          content?: Json;
+          updated_at?: string;
+        };
+        Update: {
+          organization_id?: string;
+          version?: number;
+          content?: Json;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'marketing_kits_organization_id_fkey';
+            columns: ['organization_id'];
+            isOneToOne: true;
+            referencedRelation: 'organizations';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       material_categories: {
         Row: {
           id: string;
@@ -4236,6 +5020,119 @@ export interface Database {
             isOneToOne: false;
             referencedRelation: 'permissions';
             referencedColumns: ['key'];
+          },
+        ];
+      };
+      notification_preferences: {
+        Row: {
+          organization_id: string;
+          user_id: string;
+          configuration: Json;
+          version: number;
+          updated_at: string;
+        };
+        Insert: {
+          organization_id: string;
+          user_id: string;
+          configuration: Json;
+          version?: number;
+          updated_at?: string;
+        };
+        Update: {
+          organization_id?: string;
+          user_id?: string;
+          configuration?: Json;
+          version?: number;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'notification_preferences_organization_id_fkey';
+            columns: ['organization_id'];
+            isOneToOne: false;
+            referencedRelation: 'organizations';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'notification_preferences_organization_id_user_id_fkey';
+            columns: ['organization_id', 'user_id'];
+            isOneToOne: true;
+            referencedRelation: 'organization_memberships';
+            referencedColumns: ['organization_id', 'user_id'];
+          },
+        ];
+      };
+      notifications: {
+        Row: {
+          id: string;
+          organization_id: string;
+          recipient_id: string;
+          event_id: string;
+          job_id: string;
+          category: string;
+          priority: string;
+          title: string;
+          status: string;
+          version: number;
+          created_at: string;
+          read_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          recipient_id: string;
+          event_id: string;
+          job_id: string;
+          category: string;
+          priority: string;
+          title: string;
+          status?: string;
+          version?: number;
+          created_at?: string;
+          read_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          recipient_id?: string;
+          event_id?: string;
+          job_id?: string;
+          category?: string;
+          priority?: string;
+          title?: string;
+          status?: string;
+          version?: number;
+          created_at?: string;
+          read_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'notifications_organization_id_event_id_fkey';
+            columns: ['organization_id', 'event_id'];
+            isOneToOne: false;
+            referencedRelation: 'automation_events';
+            referencedColumns: ['organization_id', 'id'];
+          },
+          {
+            foreignKeyName: 'notifications_organization_id_fkey';
+            columns: ['organization_id'];
+            isOneToOne: false;
+            referencedRelation: 'organizations';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'notifications_organization_id_job_id_fkey';
+            columns: ['organization_id', 'job_id'];
+            isOneToOne: false;
+            referencedRelation: 'automation_jobs';
+            referencedColumns: ['organization_id', 'id'];
+          },
+          {
+            foreignKeyName: 'notifications_organization_id_recipient_id_fkey';
+            columns: ['organization_id', 'recipient_id'];
+            isOneToOne: false;
+            referencedRelation: 'organization_memberships';
+            referencedColumns: ['organization_id', 'user_id'];
           },
         ];
       };
@@ -7520,6 +8417,54 @@ export interface Database {
           },
         ];
       };
+      report_snapshots: {
+        Row: {
+          id: string;
+          organization_id: string;
+          kind: string;
+          filters: Json;
+          data: Json;
+          renderer_version: number;
+          created_by: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          kind: string;
+          filters: Json;
+          data: Json;
+          renderer_version?: number;
+          created_by: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          kind?: string;
+          filters?: Json;
+          data?: Json;
+          renderer_version?: number;
+          created_by?: string;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'report_snapshots_created_by_fkey';
+            columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'report_snapshots_organization_id_fkey';
+            columns: ['organization_id'];
+            isOneToOne: false;
+            referencedRelation: 'organizations';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       rfq_items: {
         Row: {
           id: string;
@@ -8785,7 +9730,7 @@ export interface Database {
           created_by: string | null;
           created_at: string;
           updated_at: string;
-          website_id: string;
+          website_id: string | null;
           name: string;
           mime: string;
           bytes: number;
@@ -8802,7 +9747,7 @@ export interface Database {
           created_by?: string | null;
           created_at?: string;
           updated_at?: string;
-          website_id: string;
+          website_id?: string | null;
           name: string;
           mime: string;
           bytes: number;
@@ -8819,7 +9764,7 @@ export interface Database {
           created_by?: string | null;
           created_at?: string;
           updated_at?: string;
-          website_id?: string;
+          website_id?: string | null;
           name?: string;
           mime?: string;
           bytes?: number;
@@ -9518,6 +10463,178 @@ export interface Database {
         Args: { p_membership_id: string };
         Returns: undefined;
       };
+      automation_configure: {
+        Args: {
+          p_organization_id: string;
+          p_section: string;
+          p_version: number;
+          p_input: Json;
+        };
+        Returns: number;
+      };
+      automation_platform_health: {
+        Args: Record<string, never>;
+        Returns: Json;
+      };
+      automation_read: {
+        Args: {
+          p_organization_id: string;
+          p_section?: string;
+          p_page?: number;
+          p_id?: string;
+        };
+        Returns: Json;
+      };
+      automation_retry: {
+        Args: { p_organization_id: string; p_job_id: string };
+        Returns: undefined;
+      };
+      automation_rule_save: {
+        Args: {
+          p_organization_id: string;
+          p_id: string;
+          p_version: number;
+          p_configuration: Json;
+        };
+        Returns: Json;
+      };
+      automation_test: {
+        Args: {
+          p_organization_id: string;
+          p_rule_id: string;
+          p_event_id: string;
+        };
+        Returns: Json;
+      };
+      brochure_asset_read: {
+        Args: {
+          p_organization_id: string;
+          p_brochure_id: string;
+          p_asset_id: string;
+          p_version_id?: string;
+        };
+        Returns: Json;
+      };
+      brochure_document_digest: {
+        Args: { p_organization_id: string; p_brochure_id: string };
+        Returns: string;
+      };
+      brochure_grant_designer: {
+        Args: { p_organization_id: string; p_user_id: string };
+        Returns: undefined;
+      };
+      brochure_kit_save: {
+        Args: {
+          p_organization_id: string;
+          p_version: number;
+          p_proof: string;
+          p_signature: string;
+        };
+        Returns: number;
+      };
+      brochure_media: {
+        Args: {
+          p_organization_id: string;
+          p_action: string;
+          p_asset_id?: string;
+          p_proof?: string;
+          p_signature?: string;
+          p_data?: string;
+          p_page?: number;
+        };
+        Returns: Json;
+      };
+      brochure_metrics_read: {
+        Args: { p_organization_id: string; p_brochure_id: string };
+        Returns: Json;
+      };
+      brochure_pdf_read: {
+        Args: {
+          p_organization_id: string;
+          p_brochure_id: string;
+          p_version_id: string;
+        };
+        Returns: Json;
+      };
+      brochure_platform: {
+        Args: {
+          p_action: string;
+          p_id?: string;
+          p_value?: Json;
+          p_page?: number;
+        };
+        Returns: Json;
+      };
+      brochure_public: {
+        Args: {
+          p_business: string;
+          p_slug: string;
+          p_action?: string;
+          p_asset_id?: string;
+        };
+        Returns: Json;
+      };
+      brochure_publish: {
+        Args: {
+          p_organization_id: string;
+          p_brochure_id: string;
+          p_version: number;
+          p_proof: string;
+          p_signature: string;
+          p_pdf: string;
+          p_summary: string;
+          p_restore_id?: string;
+        };
+        Returns: string;
+      };
+      brochure_read: {
+        Args: {
+          p_organization_id: string;
+          p_brochure_id?: string;
+          p_version_id?: string;
+          p_page?: number;
+        };
+        Returns: Json;
+      };
+      brochure_sitemap: { Args: { p_business: string }; Returns: Json };
+      brochure_sources: {
+        Args: {
+          p_organization_id: string;
+          p_kind: string;
+          p_query?: string;
+          p_page?: number;
+        };
+        Returns: Json;
+      };
+      brochure_status: {
+        Args: {
+          p_organization_id: string;
+          p_brochure_id: string;
+          p_version: number;
+          p_status: string;
+        };
+        Returns: undefined;
+      };
+      brochure_submit_lead: {
+        Args: {
+          p_business: string;
+          p_slug: string;
+          p_page: string;
+          p_values: Json;
+          p_honeypot?: string;
+        };
+        Returns: Json;
+      };
+      brochure_write: {
+        Args: {
+          p_organization_id: string;
+          p_brochure_id: string;
+          p_version: number;
+          p_proof: string;
+          p_signature: string;
+        };
+        Returns: Json;
+      };
       catalog_snapshot: {
         Args: { p_organization_id: string; p_pricing?: boolean };
         Returns: Json;
@@ -9597,6 +10714,7 @@ export interface Database {
         };
         Returns: Json;
       };
+      deployment_readiness: { Args: Record<string, never>; Returns: boolean };
       execution_configure: {
         Args: { p_organization_id: string; p_entity: string; p_input: Json };
         Returns: string;
@@ -9826,6 +10944,35 @@ export interface Database {
         Args: { p_organization_id: string; p_id: string; p_reason: string };
         Returns: string;
       };
+      management_dashboard: {
+        Args: { p_organization_id: string; p_filters: Json };
+        Returns: Json;
+      };
+      notification_preferences_save: {
+        Args: {
+          p_organization_id: string;
+          p_version: number;
+          p_configuration: Json;
+        };
+        Returns: number;
+      };
+      notification_state: {
+        Args: {
+          p_organization_id: string;
+          p_id: string;
+          p_version: number;
+          p_status: string;
+        };
+        Returns: number;
+      };
+      notification_target: {
+        Args: { p_organization_id: string; p_id: string };
+        Returns: Json;
+      };
+      notifications_read: {
+        Args: { p_organization_id: string; p_page?: number; p_status?: string };
+        Returns: Json;
+      };
       operations_balances: {
         Args: {
           p_organization_id: string;
@@ -10032,6 +11179,22 @@ export interface Database {
       };
       quotation_share_manage: {
         Args: { p_organization_id: string; p_action: string; p_input: Json };
+        Returns: Json;
+      };
+      report_read: {
+        Args: { p_organization_id: string; p_kind: string; p_filters: Json };
+        Returns: Json;
+      };
+      report_snapshot_create: {
+        Args: { p_organization_id: string; p_kind: string; p_filters: Json };
+        Returns: string;
+      };
+      report_snapshot_history: {
+        Args: { p_organization_id: string; p_kind: string; p_page?: number };
+        Returns: Json;
+      };
+      report_snapshot_read: {
+        Args: { p_organization_id: string; p_id: string };
         Returns: Json;
       };
       save_branch: {
@@ -10247,6 +11410,10 @@ export interface Database {
       };
       website_team_choices: {
         Args: { p_organization_id: string; p_website_id: string };
+        Returns: Json;
+      };
+      work_queue: {
+        Args: { p_organization_id: string; p_group?: string; p_page?: number };
         Returns: Json;
       };
     };

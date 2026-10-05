@@ -8,3 +8,7 @@ console.log(psql(['-f', file('tests/execution.sql')]));
 await import('./test-operations.mjs');
 
 await import('./test-website.mjs');
+await import('./test-brochure.mjs');
+await import('./test-automation.mjs');
+await import('./test-reporting.mjs');
+console.log(psql(['-f', file('tests/deployment.sql')]));

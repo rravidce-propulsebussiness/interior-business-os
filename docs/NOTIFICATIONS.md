@@ -1,0 +1,11 @@
+# Notifications and daily work
+
+The Business dashboard includes a global notification bell with an authorized unread count and a dropdown showing five unread items, plus links to the notification center, My Work, reports and automation settings. Notifications have eleven domain categories, four priorities and unread/read/archived states. Recipient identity, live source access and tenant permission are required on every read and source drill-down. A revoked source permission removes the historical notification from the visible list without deleting its history.
+
+Notification state uses optimistic versions. Repeating the same requested state is idempotent; conflicting stale changes require reloading. Archive preserves the row. The central worker enforces organization daily limits, rule cooldowns and repetition caps. Priorities are explicitly configured and are not automatically urgent.
+
+Preferences support in-app/email opt-in, categories, timezone and quiet-hour boundaries. Quiet hours defer delivery until the next permitted hour, including overnight ranges. Email is off by default. Paused/disabled rules and changed rule revisions stop pending actions. Only read notifications older than the configured retention period are automatically archived; unread notifications and domain history are not deleted. Transient private email bodies expire after one day, separately from durable delivery metadata.
+
+My Work aggregates canonical follow-ups, tasks, milestones, inspections, snags, handover drafts, quotation drafts, material issue requests and purchase requisitions. Views include assigned, today, overdue, upcoming, approval candidates, escalated and all authorized work. Escalated items require an actual escalation notification for the recipient. Dates use the organization timezone. Approval candidates only appear for callers with the relevant approval permission. Opening an item returns to its original workflow and does not bypass readiness, version or approval checks. Lists return 25 items per page.
+
+Large notification/history reads group source authorization checks by distinct source within a single query. This does not persist an authorization cache. Direct table reads retain RLS. See the measured workload and limits in [verification](PHASE10-VERIFICATION.md).

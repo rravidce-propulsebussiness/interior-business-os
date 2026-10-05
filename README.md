@@ -1,6 +1,8 @@
 # Business OS
 
-Phase 8 adds an optional structured website builder, published website renderer, media, SEO, CRM enquiries, version restore, domain verification and isolated frontend developer components. See [the Phase 8 verification report](docs/PHASE8-VERIFICATION.md) for local evidence and outstanding hosted acceptance. Website remains independent of the core business workflows and the future Brochure module.
+Phase 11 hardens the existing Phase 0–10 system. Production release is **NO-GO** while real hosted acceptance is blocked. See [Phase 11 verification](docs/PHASE11-VERIFICATION.md), [production architecture](docs/PRODUCTION-ARCHITECTURE.md), [hosted acceptance](docs/HOSTED-ACCEPTANCE.md) and [production checklist](docs/PRODUCTION-CHECKLIST.md).
+
+Phase 9 adds an independent optional [Brochure Builder](docs/BROCHURE-ARCHITECTURE.md): fixed-layout pages, reusable brand content, print PDFs, immutable editions, public sharing and canonical CRM enquiries. See [Phase 9 verification](docs/PHASE9-VERIFICATION.md) for local evidence and hosted acceptance boundaries. The [Phase 8 Website module](docs/PHASE8-VERIFICATION.md) and core workflows remain independent.
 
 Phase 7 physical execution workflows are implemented locally. The planning, inventory, subcontract, quality and handover workflows are described in [the Phase 7 verification report](docs/PHASE7-VERIFICATION.md). Hosted acceptance and full authenticated browser verification remain pending.
 
@@ -21,7 +23,7 @@ pnpm dev
 | apps/business-app   | http://localhost:3001 | Tenant workspace shell        |
 | apps/websites       | http://localhost:3002 | Public website delivery shell |
 
-Public landing pages run without credentials. For authentication, copy .env.example into both administration apps as .env.local and set the Supabase URL and publishable key. Neither app uses a service-role key. Follow [Supabase setup](docs/SUPABASE.md) before signing in. To run one app: `pnpm --filter @business-os/business-app dev`.
+Public landing pages run without credentials. For authentication, copy .env.example into both administration apps as .env.local and set the Supabase URL and publishable key. Neither app uses a service-role key. Follow [Supabase setup](docs/SUPABASE.md) before signing in. Configure the origin, private recovery key, Supabase recovery template and Auth SMTP as described in [password recovery](docs/AUTH-RECOVERY.md). To run one app: `pnpm --filter @business-os/business-app dev`.
 
 ## Verify
 
@@ -42,6 +44,8 @@ Database verification is separate and requires PostgreSQL plus a **new disposabl
 Default Playwright coverage needs no Supabase credentials. Hosted login/membership tests are opt-in with `E2E_LIVE_SUPABASE=true`, `E2E_OWNER_EMAIL` and `E2E_OWNER_PASSWORD`; otherwise they are explicitly skipped. See [Phase 1 verification](docs/PHASE1-VERIFICATION.md) for executed results and limitations.
 
 ## Workspace
+
+Phase 10 adds [automation](docs/AUTOMATION.md), [notifications and My Work](docs/NOTIFICATIONS.md), and [management reports](docs/REPORTING.md). Run the restricted central worker separately using `pnpm automation:worker` with `APP_ENV=development` locally; application processes do not need its credentials. Review [Phase 10 verification](docs/PHASE10-VERIFICATION.md) for local evidence and outstanding acceptance. Hosted deployments use the validated launcher described in [production architecture](docs/PRODUCTION-ARCHITECTURE.md).
 
 After Supabase setup, use the Business dashboard's Catalog and Pricing links. Configure categories/items, questions/options/dependencies, price books, effective rates and modifiers. The item preview calls the same engine intended for future quotations and can download a calculation snapshot. See [catalog configuration](docs/CATALOG.md), [pricing semantics](docs/PRICING-ENGINE.md) and [Phase 2 verification](docs/PHASE2-VERIFICATION.md). Apply the optional `seed-catalog.sql` after `seed-users.sql` for the Interior demo. Never apply development seeds to production.
 

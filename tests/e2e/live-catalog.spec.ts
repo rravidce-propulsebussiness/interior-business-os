@@ -19,7 +19,9 @@ async function signIn(page: Page, email: string, password: string) {
   ).toBeVisible();
   await page
     .getByLabel('Active organization')
-    .selectOption('dddddddd-dddd-4ddd-8ddd-dddddddddddd');
+    .selectOption(
+      process.env.E2E_ORG_ID ?? 'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
+    );
   await page.getByRole('button', { name: 'Switch organization' }).click();
 }
 test('live Owner configures catalog, dependencies, modifiers, price book and preview', async ({
