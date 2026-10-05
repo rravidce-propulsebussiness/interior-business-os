@@ -85,11 +85,16 @@ export async function POST(
     if (action === 'metrics') {
       if (!('kind' in body) || !['view', 'cta'].includes(String(body.kind)))
         throw new Error('Invalid metric');
-      await client.rpc('brochure_public', {
+      const metric = await client.rpc('brochure_public', {
         p_business: business,
         p_slug: slug,
         p_action: String(body.kind),
       });
+      if (metric.error)
+        return Response.json(
+          { message: 'Analytics unavailable' },
+          { status: 503, headers },
+        );
       return Response.json({ accepted: true }, { headers });
     }
     if (
