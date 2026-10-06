@@ -20,6 +20,14 @@ export async function GET(
       },
     });
   } catch (error) {
+    if (
+      error instanceof Error &&
+      error.message.startsWith('PDF_RENDERER_UNAVAILABLE:')
+    )
+      return new Response(
+        'PDF generation is not enabled on this Cloudflare staging runtime. Use the quotation preview instead.',
+        { status: 503, headers: { 'Cache-Control': 'no-store' } },
+      );
     const failure = safeFailure(error);
     return new Response(failure.message, {
       status: 403,
