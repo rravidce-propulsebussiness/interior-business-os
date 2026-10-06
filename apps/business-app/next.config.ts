@@ -18,7 +18,6 @@ const config: NextConfig = {
   outputFileTracingIncludes: {
     '/*': ['../../packages/industry-interior/assets/*.webp'],
   },
-  serverExternalPackages: ['playwright'],
   async headers() {
     return [
       {
