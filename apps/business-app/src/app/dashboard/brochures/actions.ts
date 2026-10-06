@@ -27,7 +27,10 @@ function failure(e: unknown) {
     message:
       e instanceof Error && e.message.startsWith('Print preflight:')
         ? e.message
-        : 'Unable to complete this operation. Check access, limits and content, then reload if the draft changed.',
+        : e instanceof Error &&
+            e.message.startsWith('PDF_RENDERER_UNAVAILABLE:')
+          ? 'PDF generation is not enabled on this Cloudflare staging runtime. Preview and editing remain available.'
+          : 'Unable to complete this operation. Check access, limits and content, then reload if the draft changed.',
   };
 }
 export async function createBrochure(
