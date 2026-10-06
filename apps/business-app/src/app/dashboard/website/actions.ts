@@ -18,7 +18,7 @@ import { interiorWebsite } from '@business-os/industry-interior/website';
 import { readFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { resolve } from 'node:path';
-import sharp from 'sharp';
+import { prepareMarketingImage } from '@business-os/shared/media';
 const permission: Record<string, string> = {
   pages: 'website.page.edit',
   theme: 'website.theme.manage',
@@ -226,7 +226,9 @@ export async function applyInteriorStarter(id: string, version: number) {
         '../../packages/industry-interior/assets/living-room-concept.webp',
       ),
     );
-    const { width, height } = await sharp(bytes).metadata();
+    const starterImage = await prepareMarketingImage(bytes, true);
+    const width = starterImage.width ?? 1536;
+    const height = starterImage.height ?? 1024;
     const proof = signWebsite({
       purpose: 'website.asset',
       organizationId: s.context.organizationId,
