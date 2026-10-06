@@ -18,7 +18,7 @@ import { interiorWebsite } from '@business-os/industry-interior/website';
 import { readFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { resolve } from 'node:path';
-import sharp from 'sharp';
+import { prepareMarketingImage } from '@business-os/shared/media';
 const permission: Record<string, string> = {
   pages: 'website.page.edit',
   theme: 'website.theme.manage',
@@ -226,28 +226,28 @@ export async function applyInteriorStarter(id: string, version: number) {
         '../../packages/industry-interior/assets/living-room-concept.webp',
       ),
     );
-    const { width, height } = await sharp(bytes).metadata();
+    const image = await prepareMarketingImage(bytes, true);
     const proof = signWebsite({
       purpose: 'website.asset',
       organizationId: s.context.organizationId,
       websiteId: id,
       name: 'living-room-concept.webp',
-      mime: 'image/webp',
-      width,
-      height,
+      mime: image.mime,
+      width: image.width,
+      height: image.height,
       alt: 'AI-generated interior concept',
-      digest: createHash('sha256').update(bytes).digest('hex'),
+      digest: createHash('sha256').update(image.data).digest('hex'),
     });
     const asset = await s.client.rpc('website_asset_save', {
       p_organization_id: s.context.organizationId,
       p_website_id: id,
       p_proof: proof.body,
       p_signature: proof.signature,
-      p_data: bytes.toString('base64'),
+      p_data: image.data.toString('base64'),
     });
     if (asset.error || !asset.data)
       throw new Error('Unable to add starter media. Check storage limits.');
-    const doc = interiorWebsite(asset.data, width, height);
+    const doc = interiorWebsite(asset.data, image.width, image.height);
     const crm = await s.client.rpc('website_prepare_crm', {
       p_organization_id: s.context.organizationId,
       p_website_id: id,
