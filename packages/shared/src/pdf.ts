@@ -1,75 +1,128 @@
-import { chromium } from 'playwright';
-import { PDFDocument } from 'pdf-lib';
+import { PDFDocument, StandardFonts, rgb, type PDFFont } from 'pdf-lib';
+
 let active = 0;
+
 export interface PdfOptions {
   brochure?: boolean;
   title?: string;
   author?: string;
   subject?: string;
 }
-/** One bounded, offline Chromium renderer for commercial documents and brochures. */
+
+function plainText(html: string) {
+  return html
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<br\s*\/?\s*>/gi, '\n')
+    .replace(/<\/(p|div|section|article|li|h[1-6]|tr)>/gi, '\n')
+    .replace(/<li[^>]*>/gi, '- ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/[–—]/g, '-')
+    .replace(/[‘’]/g, "'")
+    .replace(/[“”]/g, '"')
+    .replace(/[^\x09\x0a\x0d\x20-\x7e]/g, '?')
+    .replace(/[ \t]+/g, ' ')
+    .replace(/\n[ \t]+/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
+function wrap(text: string, maxWidth: number, font: PDFFont, size: number) {
+  const output: string[] = [];
+  for (const paragraph of text.split('\n')) {
+    if (!paragraph.trim()) {
+      output.push('');
+      continue;
+    }
+    let line = '';
+    for (const word of paragraph.trim().split(/\s+/)) {
+      const candidate = line ? `${line} ${word}` : word;
+      if (font.widthOfTextAtSize(candidate, size) <= maxWidth) {
+        line = candidate;
+      } else {
+        if (line) output.push(line);
+        line = word;
+      }
+    }
+    if (line) output.push(line);
+  }
+  return output;
+}
+
+/**
+ * Cloudflare-safe PDF renderer.
+ *
+ * Workers cannot launch Playwright/Chromium. Keep document downloads
+ * functional with a clean text-first PDF. A browser-rendered implementation
+ * can later be backed by Cloudflare Browser Rendering without blocking the app.
+ */
 export async function renderPdf(html: string, options: PdfOptions = {}) {
   if (active >= 2) throw new Error('PDF renderer is busy');
   if (Buffer.byteLength(html) > 80000000)
     throw new Error('Document exceeds rendering limit');
   active++;
   try {
-    const browser = await chromium.launch({ headless: true });
-    const deadline = setTimeout(() => {
-      void browser.close().catch(() => undefined);
-    }, 30000);
-    try {
-      const context = await browser.newContext({ javaScriptEnabled: false });
-      await context.route('**/*', (route) => route.abort());
-      const page = await context.newPage();
-      page.setDefaultTimeout(15000);
-      await page.setContent(html, { waitUntil: 'load', timeout: 15000 });
-      if (options.brochure) {
-        await page.emulateMedia({ media: 'print' });
-        const problems = await page.evaluate(() => {
-          const issues: string[] = [];
-          for (const item of document.querySelectorAll<HTMLElement>(
-            '[data-component]',
-          )) {
-            if (
-              item.scrollHeight > item.clientHeight + 2 ||
-              item.scrollWidth > item.clientWidth + 2
-            )
-              issues.push(
-                `${item.closest('section')?.getAttribute('aria-label') ?? 'Page'}: ${item.dataset.label ?? 'Component'}`,
-              );
-            for (const img of item.querySelectorAll('img'))
-              if (!img.complete || img.naturalWidth === 0)
-                issues.push('Missing image');
-          }
-          return issues.slice(0, 15);
-        });
-        if (problems.length)
-          throw new Error(
-            `Print preflight: resize or shorten overflowing content: ${problems.join(', ')}`,
-          );
-      }
-      const bytes = await page.pdf({
-        format: 'A4',
-        printBackground: true,
-        preferCSSPageSize: true,
-        displayHeaderFooter: !options.brochure,
-        headerTemplate: '<span></span>',
-        footerTemplate:
-          '<div style="width:100%;text-align:center;font-size:9px;color:#666"><span class="pageNumber"></span> / <span class="totalPages"></span></div>',
+    const document = await PDFDocument.create();
+    const font = await document.embedFont(StandardFonts.Helvetica);
+    const bold = await document.embedFont(StandardFonts.HelveticaBold);
+    const pageWidth = 595.28;
+    const pageHeight = 841.89;
+    const margin = 48;
+    const fontSize = 10;
+    const lineHeight = 14;
+    const title = plainText(
+      options.title ?? (options.brochure ? 'Brochure' : 'Business OS document'),
+    );
+    const lines = wrap(
+      plainText(html),
+      pageWidth - margin * 2,
+      font,
+      fontSize,
+    );
+
+    let page = document.addPage([pageWidth, pageHeight]);
+    let y = pageHeight - margin;
+    if (title) {
+      page.drawText(title.slice(0, 120), {
+        x: margin,
+        y,
+        size: 16,
+        font: bold,
+        color: rgb(0.08, 0.12, 0.18),
       });
-      if (!options.brochure) return bytes;
-      const pdf = await PDFDocument.load(bytes);
-      pdf.setTitle(options.title ?? 'Brochure');
-      pdf.setAuthor(options.author ?? '');
-      pdf.setSubject(options.subject ?? 'Business brochure');
-      pdf.setCreator('Business OS');
-      pdf.setProducer('Business OS document renderer');
-      return Buffer.from(await pdf.save());
-    } finally {
-      clearTimeout(deadline);
-      await browser.close();
+      y -= 28;
     }
+
+    for (const line of lines) {
+      if (y < margin + lineHeight) {
+        page = document.addPage([pageWidth, pageHeight]);
+        y = pageHeight - margin;
+      }
+      if (line)
+        page.drawText(line, {
+          x: margin,
+          y,
+          size: fontSize,
+          font,
+          color: rgb(0.12, 0.16, 0.22),
+        });
+      y -= lineHeight;
+    }
+
+    document.setTitle(
+      options.title ?? (options.brochure ? 'Brochure' : 'Business OS document'),
+    );
+    document.setAuthor(options.author ?? '');
+    document.setSubject(options.subject ?? '');
+    document.setCreator('Business OS');
+    document.setProducer('Business OS Cloudflare PDF renderer');
+    return Buffer.from(await document.save());
   } finally {
     active--;
   }
