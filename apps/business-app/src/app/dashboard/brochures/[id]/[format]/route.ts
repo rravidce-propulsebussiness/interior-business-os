@@ -60,13 +60,20 @@ export async function GET(
         'Content-Disposition': `attachment; filename="brochure${versionId ? '-published' : '-draft'}.pdf"`,
       },
     });
-  } catch {
+  } catch (error) {
+    const pdfUnavailable =
+      error instanceof Error &&
+      error.message.startsWith('PDF_RENDERER_UNAVAILABLE:');
     return Response.json(
       {
-        message:
-          'Brochure document unavailable. Check access and print layout.',
+        message: pdfUnavailable
+          ? 'PDF generation is not enabled on this Cloudflare staging runtime. Use the brochure preview instead.'
+          : 'Brochure document unavailable. Check access and print layout.',
       },
-      { status: 403, headers: { 'Cache-Control': 'no-store' } },
+      {
+        status: pdfUnavailable ? 503 : 403,
+        headers: { 'Cache-Control': 'no-store' },
+      },
     );
   }
 }
