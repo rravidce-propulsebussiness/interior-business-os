@@ -1,6 +1,6 @@
-import sharp from 'sharp';
 import { createHash } from 'node:crypto';
 import { safeFailure } from '@business-os/shared';
+import { prepareMarketingImage } from '@business-os/shared/media';
 import { websiteServices, signWebsite } from '../../service';
 export async function POST(
   request: Request,
@@ -56,23 +56,11 @@ export async function POST(
       )
         throw new Error('Unsupported video container');
     } else {
-      const image = sharp(data, { limitInputPixels: 40000000 });
-      const metadata = await image.metadata();
-      if (!['jpeg', 'png', 'webp', 'avif'].includes(metadata.format ?? ''))
-        throw new Error('Use a JPEG, PNG, WebP or AVIF image');
-      const result = await image
-        .rotate()
-        .resize({
-          width: 1920,
-          height: 1920,
-          fit: 'inside',
-          withoutEnlargement: true,
-        })
-        .webp({ quality: 84 })
-        .toBuffer({ resolveWithObject: true });
+      const result = await prepareMarketingImage(data);
       data = result.data;
-      width = result.info.width;
-      height = result.info.height;
+      mime = result.mime;
+      width = result.width;
+      height = result.height;
     }
     const proof = signWebsite({
       purpose: 'website.asset',
