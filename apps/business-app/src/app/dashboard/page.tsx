@@ -65,12 +65,18 @@ export default async function Dashboard() {
     <main
       id="main-content"
       tabIndex={-1}
-      className="mx-auto max-w-5xl px-6 py-12"
+      className="dashboard-shell"
     >
-      <h1 className="text-3xl font-semibold">Business dashboard</h1>
+      <header className="dashboard-header">
+        <div>
+          <p className="eyebrow">Operations workspace</p>
+          <h1>Business dashboard</h1>
+          <p>Manage the organization, modules, permissions, and daily work from one secure view.</p>
+        </div>
+      </header>
       {context && (
         <nav
-          className="my-4 flex flex-wrap gap-5"
+          className="dashboard-nav"
           aria-label="Daily operations"
         >
           <Link className="underline" href="/dashboard/reports">
@@ -111,13 +117,13 @@ export default async function Dashboard() {
             ].includes(g.permission) && g.scope.kind === 'organization',
         ) && (
           <Link
-            className="my-4 inline-block underline"
+            className="premium-link-secondary"
             href="/dashboard/finance"
           >
             Commercial execution
           </Link>
         )}
-      <p className="mt-2">Signed in as {user.email ?? user.id}</p>
+      <p className="muted">Signed in as {user.email ?? user.id}</p>
       <form action={signOut} className="my-4">
         <Button>Sign out</Button>
       </form>
@@ -130,14 +136,14 @@ export default async function Dashboard() {
       {organizations.length > 0 && (
         <form
           action={switchOrganization}
-          className="my-6 flex flex-wrap items-end gap-4"
+          className="dashboard-controlbar"
         >
           <label>
             Active organization
             <select
               name="organizationId"
               defaultValue={context?.organizationId}
-              className="ml-3 rounded border p-2"
+              className="mt-2"
             >
               {organizations.map((org) => (
                 <option key={org.id} value={org.id}>
@@ -151,14 +157,14 @@ export default async function Dashboard() {
       )}
       {organization && context ? (
         <>
-          <section className="my-8">
+          <section className="section-card">
             <h2 className="text-2xl font-semibold">{organization.name}</h2>
             <p>
               {organization.status} · {organization.default_currency} ·{' '}
               {organization.default_timezone}
             </p>
           </section>
-          <section className="my-8">
+          <section className="section-card">
             <h2 className="text-xl font-semibold">Your roles</h2>
             <ul>
               {context.roles.map((role, index) => (
@@ -169,10 +175,10 @@ export default async function Dashboard() {
               ))}
             </ul>
           </section>
-          <section className="my-8">
+          <section className="section-card">
             <h2 className="text-xl font-semibold">Effective permissions</h2>
             {context.grants.length ? (
-              <ul className="grid gap-1 sm:grid-cols-2">
+              <ul className="permission-grid">
                 {context.grants.map((grant, index) => (
                   <li key={index} className="break-words">
                     {grant.permission} ({grant.scope.kind})
@@ -183,10 +189,10 @@ export default async function Dashboard() {
               <p>No permissions assigned.</p>
             )}
           </section>
-          <section className="my-8">
+          <section className="section-card">
             <h2 className="text-xl font-semibold">Enabled modules</h2>
             <p>{context.entitlements.join(', ') || 'No modules enabled.'}</p>
-            <nav aria-label="Enabled modules">
+            <nav className="dashboard-nav" aria-label="Enabled modules">
               {(canAccess(context, {
                 organizationId: context.organizationId,
                 permission: 'customer.view',
@@ -201,7 +207,7 @@ export default async function Dashboard() {
                   Customers
                 </Link>
               )}
-              <ul className="mt-4 flex flex-wrap gap-4">
+              <ul className="dashboard-nav">
                 {nav.map((item) => (
                   <li key={item.key}>
                     <Link className="underline" href={item.href}>
@@ -212,7 +218,7 @@ export default async function Dashboard() {
               </ul>
             </nav>
           </section>
-          <section className="my-8">
+          <section className="section-card">
             <h2 className="text-xl font-semibold">Branches</h2>
             {branches.length ? (
               <ul>
@@ -227,7 +233,7 @@ export default async function Dashboard() {
             )}
           </section>
           {canViewTeam && (
-            <section className="my-8">
+            <section className="section-card">
               <h2 className="text-xl font-semibold">Team memberships</h2>
               <ul>
                 {team.map((member) => (
@@ -241,12 +247,12 @@ export default async function Dashboard() {
           )}
         </>
       ) : (
-        <p className="my-8">
+        <p className="section-card">
           No active organization selected. Create one or ask an organization
           administrator for membership.
         </p>
       )}
-      <section className="my-8">
+      <section className="section-card">
         <h2 className="text-xl font-semibold">Create an organization</h2>
         <ActionForm action={provisionOrganization} label="Create organization">
           <label>
@@ -255,7 +261,7 @@ export default async function Dashboard() {
               required
               name="name"
               maxLength={200}
-              className="ml-3 rounded border p-2"
+              className="mt-2"
             />
           </label>
           <label>
@@ -265,7 +271,7 @@ export default async function Dashboard() {
               name="slug"
               pattern="[a-z0-9]+(-[a-z0-9]+)*"
               maxLength={80}
-              className="ml-3 rounded border p-2"
+              className="mt-2"
             />
           </label>
           <label>
@@ -275,7 +281,7 @@ export default async function Dashboard() {
               name="currency"
               placeholder="USD"
               pattern="[A-Z]{3}"
-              className="ml-3 rounded border p-2"
+              className="mt-2"
             />
           </label>
           <label>
@@ -285,7 +291,7 @@ export default async function Dashboard() {
               name="country"
               placeholder="US"
               pattern="[A-Z]{2}"
-              className="ml-3 rounded border p-2"
+              className="mt-2"
             />
           </label>
           <label>
@@ -294,12 +300,12 @@ export default async function Dashboard() {
               required
               name="timezone"
               defaultValue="UTC"
-              className="ml-3 rounded border p-2"
+              className="mt-2"
             />
           </label>
           <label>
             Industry
-            <select name="industryId" className="ml-3 rounded border p-2">
+            <select name="industryId" className="mt-2">
               <option value="">Choose later</option>
               {industries.map((industry) => (
                 <option key={industry.id} value={industry.id}>
