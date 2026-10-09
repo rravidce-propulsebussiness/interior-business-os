@@ -1,14 +1,13 @@
-import { createServer } from 'node:http';
 import { createRequire } from 'node:module';
 import { existsSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { validateDeploymentEnvironment } from './packages/shared/src/runtime.ts';
 
-// Hostinger supervises this entrypoint. Listen from this same Node process
-// rather than spawning "next start" in a child process, which can leave
-// managed-hosting gateways waiting for the entrypoint to bind its HTTP port.
-// This follows Next.js' documented custom-server API.
+// Hostinger's lsnode.js loads this entry file with require(esm).
+// Do not use top-level await. Let Next.js run its own native HTTP router
+// rather than the custom next({ dir }).getRequestHandler() wrapper, which
+// emitted status 200 with no body or Content-Type for all Next-rendered routes.
 const root = dirname(fileURLToPath(import.meta.url));
 const service = process.env.BUSINESS_OS_SERVICE?.trim() || 'business-app';
 if (!['business-app', 'platform-admin', 'websites'].includes(service)) {
@@ -21,138 +20,35 @@ if (!/^[0-9]+$/.test(portText) || Number(portText) < 1 || Number(portText) > 655
 }
 const port = Number(portText);
 const hostname = '0.0.0.0';
-console.log(`[Business OS] Starting ${service} on port ${port} (Node ${process.version}).`);
+console.log(`[Business OS] Starting native Next.js server for ${service} on ${hostname}:${port} (Node ${process.version}).`);
 validateDeploymentEnvironment(process.env, service);
 
 const appDir = resolve(root, 'apps', service);
 if (!existsSync(resolve(appDir, '.next', 'BUILD_ID'))) {
-  throw new Error(
-    `[Business OS] Next.js build missing for ${service}: .next/BUILD_ID not present in published runtime.`,
-  );
+  throw new Error(`[Business OS] Missing Next.js build artifact for ${service}. Inspect Hostinger published files.`);
 }
 
-// Resolve the workspace package from the selected app; the repository root
-// itself does not declare Next.js as a dependency in pnpm.
 const appRequire = createRequire(resolve(appDir, 'package.json'));
-let next;
+let startServer;
 try {
-  next = appRequire('next');
+  // Next.js' own production 'next start' executable uses this module.
+  ({ startServer } = appRequire('next/dist/server/lib/start-server'));
 } catch (error) {
-  console.error('[Business OS] Next.js dependency not available at runtime.');
+  console.error('[Business OS] Native Next.js server module unavailable.');
   throw error;
 }
 
-const app = next({ dev: false, dir: appDir, hostname, port });
-const handler = app.getRequestHandler();
-const server = createServer((req, res) => {
-  // Diagnostic boundary: this data-free endpoint is identical to the Next.js
-  // health response, but bypasses Next routing, middleware and Supabase.
-  // If Hostinger still returns 504, the request never reached this listener.
-  const pathname = req.url?.split('?', 1)[0];
-  // Compare Hostinger response paths without invoking Next.js or accessing
-  // credentials. Plain mode ends in one write; stream mode sends two chunks.
-  if (req.method === 'GET' && pathname === '/__hostinger_diag/plain') {
-    const body = '<!doctype html><html><body>Node direct HTML: OK</body></html>';
-    res.writeHead(200, {
-      'Content-Type': 'text/html; charset=utf-8',
-      'Content-Length': String(Buffer.byteLength(body)),
-      'Cache-Control': 'no-store',
-    });
-    res.end(body);
-    console.log('[Business OS] Direct single-write HTML probe delivered.');
-    return;
-  }
-  if (req.method === 'GET' && pathname === '/__hostinger_diag/stream') {
-    res.writeHead(200, {
-      'Content-Type': 'text/html; charset=utf-8',
-      'Cache-Control': 'no-store',
-    });
-    res.write('<!doctype html><html><body>Node streamed HTML: ');
-    res.end('OK</body></html>');
-    console.log('[Business OS] Direct streamed HTML probe delivered.');
-    return;
-  }
-  // Only log public diagnostic paths, never URLs with query strings, request
-  // bodies, cookies, authorization headers, or private document/token routes.
-  const tracked = req.method === 'GET' &&
-    (pathname === '/' || pathname === '/login' || pathname === '/register' ||
-      pathname === '/api/ready');
-  if (tracked) {
-    const started = Date.now();
-    let payloadBytes = 0;
-    const measure = (chunk, encoding) => {
-      if (typeof chunk === 'string') return Buffer.byteLength(chunk, typeof encoding === 'string' ? encoding : 'utf8');
-      if (chunk instanceof Uint8Array) return chunk.byteLength;
-      return 0;
-    };
-    const originalWrite = res.write;
-    const originalEnd = res.end;
-    res.write = function (chunk, ...args) {
-      payloadBytes += measure(chunk, args[0]);
-      return originalWrite.call(this, chunk, ...args);
-    };
-    res.end = function (...args) {
-      payloadBytes += measure(args[0], args[1]);
-      return originalEnd.apply(this, args);
-    };
-    console.log(`[Business OS] Incoming GET ${pathname}.`);
-    const warning = setTimeout(() => {
-      if (!res.writableEnded)
-        console.error(`[Business OS] GET ${pathname} still pending after 5s.`);
-    }, 5000);
-    warning.unref();
-    res.once('finish', () => {
-      const contentType = res.getHeader('Content-Type');
-      console.log(`[Business OS] GET ${pathname} completed: HTTP ${res.statusCode} in ${Date.now() - started}ms; bodyBytes=${payloadBytes}; contentType=${typeof contentType === 'string' ? contentType : 'unset'}.`);
-    });
-    res.once('close', () => {
-      clearTimeout(warning);
-      if (!res.writableFinished)
-        console.error(`[Business OS] GET ${pathname} connection closed before completion after ${Date.now() - started}ms.`);
-    });
-  }
-  if (pathname === '/api/health' && req.method === 'GET') {
-    console.log('[Business OS] Direct HTTP health request received.');
-    res.writeHead(200, {
-      'Content-Type': 'application/json; charset=utf-8',
-      'Cache-Control': 'no-store',
-      'X-Content-Type-Options': 'nosniff',
-    });
-    res.end('{"status":"alive"}');
-    return;
-  }
-  if (pathname === '/api/ready') {
-    console.log('[Business OS] Database readiness request reached Node.js.');
-  }
-  Promise.resolve(handler(req, res)).catch((error) => {
-    console.error('[Business OS] Request handling failed:', error);
-    if (!res.headersSent) {
-      res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' });
-    }
-    if (!res.writableEnded) res.end('Internal Server Error');
-  });
-});
-server.on('error', (error) => {
-  console.error('[Business OS] HTTP server startup error:', error);
+// A native server sets up routing, request/response handling and the HTTP
+// listener in the same Node process supervised by Hostinger. Do not spawn.
+startServer({
+  dir: appDir,
+  isDev: false,
+  port,
+  hostname,
+  allowRetry: false,
+}).then(() => {
+  console.log(`[Business OS] Native Next.js server ready for ${service} on port ${port}.`);
+}).catch((error) => {
+  console.error('[Business OS] Native Next.js startup failed:', error);
   process.exitCode = 1;
 });
-const shutdown = (signal) => {
-  console.log(`[Business OS] Received ${signal}; stopping HTTP server after ${Math.round(process.uptime())}s uptime.`);
-  server.close(() => process.exit(0));
-};
-for (const signal of ['SIGINT', 'SIGTERM']) process.once(signal, () => shutdown(signal));
-
-// Hostinger's lsnode.js uses require() to load this ESM entrypoint.
-// Avoid top-level await: require(esm) in Node 24 only supports synchronous
-// ESM graphs. Prepare Next asynchronously after the module evaluates.
-console.log('[Business OS] Preparing Next.js application.');
-app.prepare()
-  .then(() => {
-    server.listen(port, hostname, () => {
-      console.log(`[Business OS] HTTP server listening on ${hostname}:${port} for ${service}.`);
-    });
-  })
-  .catch((error) => {
-    console.error('[Business OS] Next.js preparation failed:', error);
-    process.exitCode = 1;
-  });
