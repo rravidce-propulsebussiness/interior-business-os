@@ -9,8 +9,12 @@
     "incremental": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"],
-      "@business-os/ui": ["../../packages/ui/src/index.tsx"]
+      "@/*": [
+        "./src/*"
+      ],
+      "@business-os/ui": [
+        "../../packages/ui/src/index.tsx"
+      ]
     }
   },
   "include": [
@@ -20,5 +24,8 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    "open-next.config.ts"
+  ]
 }
