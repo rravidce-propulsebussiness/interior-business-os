@@ -45,6 +45,23 @@ try {
 const app = next({ dev: false, dir: appDir, hostname, port });
 const handler = app.getRequestHandler();
 const server = createServer((req, res) => {
+  // Diagnostic boundary: this data-free endpoint is identical to the Next.js
+  // health response, but bypasses Next routing, middleware and Supabase.
+  // If Hostinger still returns 504, the request never reached this listener.
+  const pathname = req.url?.split('?', 1)[0];
+  if (pathname === '/api/health' && req.method === 'GET') {
+    console.log('[Business OS] Direct HTTP health request received.');
+    res.writeHead(200, {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Cache-Control': 'no-store',
+      'X-Content-Type-Options': 'nosniff',
+    });
+    res.end('{"status":"alive"}');
+    return;
+  }
+  if (pathname === '/api/ready') {
+    console.log('[Business OS] Database readiness request reached Node.js.');
+  }
   Promise.resolve(handler(req, res)).catch((error) => {
     console.error('[Business OS] Request handling failed:', error);
     if (!res.headersSent) {
@@ -58,7 +75,7 @@ server.on('error', (error) => {
   process.exitCode = 1;
 });
 const shutdown = (signal) => {
-  console.log(`[Business OS] Received ${signal}; stopping HTTP server.`);
+  console.log(`[Business OS] Received ${signal}; stopping HTTP server after ${Math.round(process.uptime())}s uptime.`);
   server.close(() => process.exit(0));
 };
 for (const signal of ['SIGINT', 'SIGTERM']) process.once(signal, () => shutdown(signal));
