@@ -49,6 +49,29 @@ const server = createServer((req, res) => {
   // health response, but bypasses Next routing, middleware and Supabase.
   // If Hostinger still returns 504, the request never reached this listener.
   const pathname = req.url?.split('?', 1)[0];
+  // Compare Hostinger response paths without invoking Next.js or accessing
+  // credentials. Plain mode ends in one write; stream mode sends two chunks.
+  if (req.method === 'GET' && pathname === '/__hostinger_diag/plain') {
+    const body = '<!doctype html><html><body>Node direct HTML: OK</body></html>';
+    res.writeHead(200, {
+      'Content-Type': 'text/html; charset=utf-8',
+      'Content-Length': String(Buffer.byteLength(body)),
+      'Cache-Control': 'no-store',
+    });
+    res.end(body);
+    console.log('[Business OS] Direct single-write HTML probe delivered.');
+    return;
+  }
+  if (req.method === 'GET' && pathname === '/__hostinger_diag/stream') {
+    res.writeHead(200, {
+      'Content-Type': 'text/html; charset=utf-8',
+      'Cache-Control': 'no-store',
+    });
+    res.write('<!doctype html><html><body>Node streamed HTML: ');
+    res.end('OK</body></html>');
+    console.log('[Business OS] Direct streamed HTML probe delivered.');
+    return;
+  }
   // Only log public diagnostic paths, never URLs with query strings, request
   // bodies, cookies, authorization headers, or private document/token routes.
   const tracked = req.method === 'GET' &&
@@ -56,6 +79,22 @@ const server = createServer((req, res) => {
       pathname === '/api/ready');
   if (tracked) {
     const started = Date.now();
+    let payloadBytes = 0;
+    const measure = (chunk, encoding) => {
+      if (typeof chunk === 'string') return Buffer.byteLength(chunk, typeof encoding === 'string' ? encoding : 'utf8');
+      if (chunk instanceof Uint8Array) return chunk.byteLength;
+      return 0;
+    };
+    const originalWrite = res.write;
+    const originalEnd = res.end;
+    res.write = function (chunk, ...args) {
+      payloadBytes += measure(chunk, args[0]);
+      return originalWrite.call(this, chunk, ...args);
+    };
+    res.end = function (...args) {
+      payloadBytes += measure(args[0], args[1]);
+      return originalEnd.apply(this, args);
+    };
     console.log(`[Business OS] Incoming GET ${pathname}.`);
     const warning = setTimeout(() => {
       if (!res.writableEnded)
@@ -63,7 +102,8 @@ const server = createServer((req, res) => {
     }, 5000);
     warning.unref();
     res.once('finish', () => {
-      console.log(`[Business OS] GET ${pathname} completed: HTTP ${res.statusCode} in ${Date.now() - started}ms.`);
+      const contentType = res.getHeader('Content-Type');
+      console.log(`[Business OS] GET ${pathname} completed: HTTP ${res.statusCode} in ${Date.now() - started}ms; bodyBytes=${payloadBytes}; contentType=${typeof contentType === 'string' ? contentType : 'unset'}.`);
     });
     res.once('close', () => {
       clearTimeout(warning);
