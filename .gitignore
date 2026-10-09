@@ -18,4 +18,12 @@ packages/database/supabase/.branches/
 
 !.env.acceptance.example
 
+# Imported Hostinger/private app environment files must never be committed.
+*.hostinger.env
+*.hostinger.env.*
+*.env
+*.env.local
+*.env.staging
+*.env.production
+
 output/
