@@ -63,13 +63,17 @@ const shutdown = (signal) => {
 };
 for (const signal of ['SIGINT', 'SIGTERM']) process.once(signal, () => shutdown(signal));
 
-try {
-  console.log('[Business OS] Preparing Next.js application.');
-  await app.prepare();
-  server.listen(port, hostname, () => {
-    console.log(`[Business OS] HTTP server listening on ${hostname}:${port} for ${service}.`);
+// Hostinger's lsnode.js uses require() to load this ESM entrypoint.
+// Avoid top-level await: require(esm) in Node 24 only supports synchronous
+// ESM graphs. Prepare Next asynchronously after the module evaluates.
+console.log('[Business OS] Preparing Next.js application.');
+app.prepare()
+  .then(() => {
+    server.listen(port, hostname, () => {
+      console.log(`[Business OS] HTTP server listening on ${hostname}:${port} for ${service}.`);
+    });
+  })
+  .catch((error) => {
+    console.error('[Business OS] Next.js preparation failed:', error);
+    process.exitCode = 1;
   });
-} catch (error) {
-  console.error('[Business OS] Next.js preparation failed:', error);
-  process.exitCode = 1;
-}
