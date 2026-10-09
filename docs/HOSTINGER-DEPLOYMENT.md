@@ -45,3 +45,23 @@ Platform Admin also needs `AUTH_RECOVERY_SIGNING_KEY` but not the Business App's
 Validate configuration with `node scripts/start-service.mjs business-app --check` after installing workspace dependencies. Then run a read-only hosted smoke test and acceptance checks.
 
 **Release status:** the repository's production checklist currently records **NO-GO**, including unverified hosted Auth, migrations, email, signing, public sites, PDF/Chromium and restricted automation worker. Passing a Hostinger build does not authorize a production cutover. Business App PDF generation needs Playwright Chromium and Linux libraries, which the hosting runtime must support. See `docs/PRODUCTION-ARCHITECTURE.md`, `docs/PRODUCTION-CHECKLIST.md`, and `docs/RELEASE-CHECKLIST.md`.
+
+
+## Tbot Supabase project: Interior Business OS (2026-10-09)
+
+This repository includes **public, secret-free Hostinger templates** for the dedicated Tbot-connected Supabase project `interior-business-os` (`wqkjzuqiarjyoimrzalk`, Mumbai `ap-south-1`):
+
+| Hostinger service | Safe template | Proposed production origin |
+| --- | --- | --- |
+| Business App | [`deploy/hostinger/business-app.env.template`](../deploy/hostinger/business-app.env.template) | `https://sghomesinterior.in` |
+| Platform Admin | [`deploy/hostinger/platform-admin.env.template`](../deploy/hostinger/platform-admin.env.template) | `https://admin.sghomesinterior.in` |
+| Public Websites | [`deploy/hostinger/websites.env.template`](../deploy/hostinger/websites.env.template) | `https://sites.sghomesinterior.in` |
+| Automation Worker | [`deploy/hostinger/worker.env.template`](../deploy/hostinger/worker.env.template) | No public origin; **not** a managed website |
+
+**Repository templates cannot inject environment variables into Hostinger on their own.** In hPanel, create a separate Node.js website for each Next.js service. Import the corresponding privately maintained `.env` file into the website's Environment Variables section **before** running `npm run hostinger:build`. Choose Node 24, repository root, and `server.js` entry. The publishable Supabase key and project URL are safe to include in the templates; all signing keys, database passwords, provider tokens and service-role keys must remain private in Hostinger/provider secret stores. Never replace real secrets with `REPLACE_...` template values.
+
+**Private bundle:** If the operator has the previously generated `interior-business-os-tbot-hostinger-env.zip`, use its **Business App private environment file** rather than the public template for the actual Hostinger import. The 2026-10-09 database configuration already has matching private quotation and website/brochure signing keys. Rotating or regenerating those values requires updating the private database records and every consuming app together. Keep this bundle offline and out of Git.
+
+**Schema status checked 2026-10-09:** The dedicated database has 103/103 application migrations with original version numbers, 167 application tables, all 143 public tables protected by RLS, and private signing-key rows. Do **not** apply development demo seeds, disposable-database verification, or reset commands to that project. Its **subscription plans and provisioning defaults are not configured**; hosted Auth, SMTP, role provisioning and tenant acceptance also remain unverified. This is infrastructure preparation, **not a production GO decision**.
+
+**Safest deployment order:** (1) set up an isolated test/staging origin; (2) configure exact Supabase Auth site URL, confirmation/recovery allowlist and SMTP/templates; (3) install private environment values; (4) deploy Business App and verify `/health/live`, `/health/ready`, login, asset responses, RLS, and PDFs; (5) deploy separate Admin and Websites services; (6) complete tenant provisioning, worker supervision and hosted acceptance. Only then point the public production domain at the new application. Do not replace an existing ProPulse deployment during setup.
