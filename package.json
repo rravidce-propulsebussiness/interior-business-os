@@ -36,7 +36,9 @@
     "db:types": "node packages/database/scripts/generate-types.mjs",
     "db:types:check": "node packages/database/scripts/generate-types.mjs --check",
     "db:seed:check": "node packages/database/scripts/generate-catalog-seed.mjs --check && node packages/database/scripts/generate-crm-seed.mjs --check",
-    "security:client": "node scripts/check-client-bundles.mjs"
+    "security:client": "node scripts/check-client-bundles.mjs",
+    "hostinger:build": "node scripts/hostinger-build.mjs",
+    "hostinger:start": "node server.js"
   },
   "devDependencies": {
     "@playwright/test": "1.63.0",
