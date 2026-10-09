@@ -45,7 +45,8 @@ if ($LASTEXITCODE -ne 0) {
 
 function Invoke-Supabase {
     param([string[]]$Arguments)
-    & npx --yes supabase @Arguments
+    $npxCommand = if ($env:OS -eq 'Windows_NT') { 'npx.cmd' } else { 'npx' }
+    & $npxCommand --yes supabase @Arguments
     if ($LASTEXITCODE -ne 0) {
         throw "Supabase CLI command failed: $($Arguments -join ' ')"
     }
@@ -55,12 +56,12 @@ Push-Location $DatabaseRoot
 try {
     Write-Host "Linking ONLY to Interior Business OS staging project $ProjectRef" -ForegroundColor Cyan
     Write-Host 'CLI login and database password might be requested. Do not enter credentials in Git or chat.'
-    Invoke-Supabase @('link', '--project-ref', $ProjectRef)
+    Invoke-Supabase -Arguments @('link', '--project-ref', $ProjectRef)
 
     Write-Host 'Existing remote migration history:' -ForegroundColor Cyan
-    Invoke-Supabase @('migration', 'list', '--linked')
+    Invoke-Supabase -Arguments @('migration', 'list', '--linked')
     Write-Host 'Previewing the 103 migration files; no changes applied:' -ForegroundColor Cyan
-    Invoke-Supabase @('db', 'push', '--dry-run')
+    Invoke-Supabase -Arguments @('db', 'push', '--dry-run')
 
     if (-not $Apply) {
         Write-Host 'Preview complete. After reviewing, use -Apply to deploy.' -ForegroundColor Green
@@ -72,9 +73,9 @@ try {
         throw 'Project identity confirmation failed. No migrations applied.'
     }
     Write-Host 'Applying tracked migrations using their original versions...' -ForegroundColor Yellow
-    Invoke-Supabase @('db', 'push')
+    Invoke-Supabase -Arguments @('db', 'push')
     Write-Host 'Verifying remote migration history...' -ForegroundColor Cyan
-    Invoke-Supabase @('migration', 'list', '--linked')
+    Invoke-Supabase -Arguments @('migration', 'list', '--linked')
     Write-Host 'Migration push completed. Run hosted security and tenant-isolation acceptance before production.' -ForegroundColor Green
 }
 finally {
