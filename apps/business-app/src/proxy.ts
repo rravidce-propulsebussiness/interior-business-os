@@ -1,5 +1,7 @@
 import { refreshSession } from '@business-os/database/proxy';
 export const proxy = refreshSession;
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
+  // Keep the temporary renderer diagnostic out of Auth session handling.
+  // All existing application routes keep their original Proxy coverage.
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|__hostinger_diag/).*)'],
 };
