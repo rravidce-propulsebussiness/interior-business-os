@@ -49,6 +49,28 @@ const server = createServer((req, res) => {
   // health response, but bypasses Next routing, middleware and Supabase.
   // If Hostinger still returns 504, the request never reached this listener.
   const pathname = req.url?.split('?', 1)[0];
+  // Only log public diagnostic paths, never URLs with query strings, request
+  // bodies, cookies, authorization headers, or private document/token routes.
+  const tracked = req.method === 'GET' &&
+    (pathname === '/' || pathname === '/login' || pathname === '/register' ||
+      pathname === '/api/ready');
+  if (tracked) {
+    const started = Date.now();
+    console.log(`[Business OS] Incoming GET ${pathname}.`);
+    const warning = setTimeout(() => {
+      if (!res.writableEnded)
+        console.error(`[Business OS] GET ${pathname} still pending after 5s.`);
+    }, 5000);
+    warning.unref();
+    res.once('finish', () => {
+      console.log(`[Business OS] GET ${pathname} completed: HTTP ${res.statusCode} in ${Date.now() - started}ms.`);
+    });
+    res.once('close', () => {
+      clearTimeout(warning);
+      if (!res.writableFinished)
+        console.error(`[Business OS] GET ${pathname} connection closed before completion after ${Date.now() - started}ms.`);
+    });
+  }
   if (pathname === '/api/health' && req.method === 'GET') {
     console.log('[Business OS] Direct HTTP health request received.');
     res.writeHead(200, {
