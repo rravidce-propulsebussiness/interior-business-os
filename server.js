@@ -15,7 +15,7 @@ if (!['business-app', 'platform-admin', 'websites'].includes(service)) {
 }
 
 const port = process.env.PORT || '3000';
-if (!/^\\d+$/.test(port) || Number(port) < 1 || Number(port) > 65535) {
+if (!/^[0-9]+$/.test(port) || Number(port) < 1 || Number(port) > 65535) {
   throw new Error('PORT must be a valid TCP port');
 }
 
