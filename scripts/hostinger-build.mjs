@@ -21,4 +21,9 @@ const runPnpm = (args) => {
 };
 
 runPnpm(['install', '--frozen-lockfile', '--prod=false']);
-runPnpm(['--filter', `@business-os/${service}`, 'build']);
+// Next.js 16 defaults to Turbopack. On Hostinger its PostCSS child worker
+// exits before establishing IPC while processing globals.css. The officially
+// supported --webpack path avoids that Turbopack-specific process failure.
+// Keep each application's usual build script unchanged for local development.
+console.log(`[Business OS] Building ${service} with Next.js Webpack for Hostinger.`);
+runPnpm(['--filter', `@business-os/${service}`, 'exec', 'next', 'build', '--webpack']);
