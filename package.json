@@ -38,7 +38,8 @@
     "db:seed:check": "node packages/database/scripts/generate-catalog-seed.mjs --check && node packages/database/scripts/generate-crm-seed.mjs --check",
     "security:client": "node scripts/check-client-bundles.mjs",
     "hostinger:build": "node scripts/hostinger-build.mjs",
-    "hostinger:start": "node server.js"
+    "hostinger:start": "node server.js",
+    "postinstall": "node scripts/hostinger-postinstall.mjs"
   },
   "devDependencies": {
     "@playwright/test": "1.63.0",
