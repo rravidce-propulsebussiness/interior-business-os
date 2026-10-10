@@ -11146,6 +11146,7 @@ export interface Database {
         Returns: string;
       };
       platform_context: { Args: Record<string, never>; Returns: Json };
+      platform_plan_create: { Args: { p_input: Json }; Returns: string };
       platform_set_entitlement: {
         Args: { p_organization_id: string; p_input: Json };
         Returns: string;
