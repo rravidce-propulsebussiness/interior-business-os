@@ -87,7 +87,7 @@ export function configuredPdfProvider(
 
 export function cloudflarePdfRequest(
   html: string,
-  options: PdfOptions,
+  _options: PdfOptions,
   env: Record<string, string | undefined> = process.env,
 ) {
   const accountId = env.CF_BROWSER_ACCOUNT_ID;
