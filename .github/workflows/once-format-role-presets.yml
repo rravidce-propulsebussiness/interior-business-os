@@ -1,0 +1,29 @@
+name: One-time role preset formatter
+on:
+  push:
+    branches:
+      - feature/phase2-universal-role-presets-20261010
+permissions:
+  contents: write
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/phase2-universal-role-presets-20261010
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec prettier --write apps/business-app/src/app/dashboard/company/team/presets.ts apps/business-app/src/app/dashboard/company/team/presets.test.ts apps/business-app/src/app/dashboard/company/team/actions.ts apps/business-app/src/app/dashboard/company/team/page.tsx
+      - run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/business-app/src/app/dashboard/company/team/presets.ts apps/business-app/src/app/dashboard/company/team/presets.test.ts apps/business-app/src/app/dashboard/company/team/actions.ts apps/business-app/src/app/dashboard/company/team/page.tsx
+          if ! git diff --cached --quiet; then
+            git commit -m "style(roles): format preset catalog and team integration"
+            git push origin HEAD:feature/phase2-universal-role-presets-20261010
+          fi
