@@ -64,9 +64,13 @@ begin
      or p.full_name ilike '%'||replace(replace(trim(p_query),'%',''),'_','')||'%'
      or o.name ilike '%'||replace(replace(trim(p_query),'%',''),'_','')||'%')
  )
- select coalesce(jsonb_agg(private.platform_user_card(z.id) order by z.sort_time desc,z.id desc),'[]'::jsonb)
+ select coalesce(jsonb_agg(private.platform_user_card(z.id) order by z.rank),'[]'::jsonb)
  into v_rows from (
-  select id,created_at as sort_time from owners
+  select id, row_number() over(order by
+    case when p_sort='name' then lower(display_name) end asc nulls last,
+    case when p_sort='oldest' then created_at end asc nulls last,
+    case when p_sort='newest' then created_at end desc nulls last,
+    id desc) rank from owners
   where (p_status='' or owner_status=p_status)
    and (p_kind='all' or owner_kind=p_kind)
   order by
