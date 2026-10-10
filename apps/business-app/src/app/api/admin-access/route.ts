@@ -15,9 +15,8 @@ const headers = { 'Cache-Control': 'private, no-store' };
 
 function configuredProject() {
   try {
-    const hostname = new URL(
-      process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
-    ).hostname;
+    const hostname = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL ?? '')
+      .hostname;
     return hostname.endsWith('.supabase.co')
       ? hostname.slice(0, -'.supabase.co'.length)
       : null;
@@ -62,9 +61,6 @@ export async function GET() {
       );
 
     // Don't disclose database/RPC or environment exception details.
-    return Response.json(
-      { status: 'unavailable' },
-      { status: 503, headers },
-    );
+    return Response.json({ status: 'unavailable' }, { status: 503, headers });
   }
 }
