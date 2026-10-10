@@ -95,7 +95,7 @@ select public.platform_company_create(
  '{"name":"Regular Buyer","slug":"regular-buyer","ownerEmail":"owner@example.test","country":"IN","currency":"INR","timezone":"Asia/Kolkata","industries":["interior"],"seller":false}'
 ) as buyer_company \gset
 select private.company_control_assert(
- (public.platform_company_profile((:'buyer_company'::jsonb->>'organizationId')::uuid)->'seller') is null,
+ jsonb_typeof(public.platform_company_profile((:'buyer_company'::jsonb->>'organizationId')::uuid)->'seller')='null',
  'new business starts without seller account');
 select public.platform_company_seller_enable((:'buyer_company'::jsonb->>'organizationId')::uuid,'Buyer Wholesale');
 select private.company_control_assert(
