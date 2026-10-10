@@ -1,33 +1,16 @@
 'use server';
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
-import { serverServices } from '@business-os/auth/server';
-import { safeFailure } from '@business-os/shared';
+
+/**
+ * Retain the existing server-action export for compatibility with already
+ * rendered forms, but never provision a tenant from an unreviewed POST.
+ * The replacement application form is /dashboard/company/apply.
+ */
 export async function provisionOrganization(
   _state: { message: string },
-  form: FormData,
+  _form: FormData,
 ) {
-  let id: string;
-  try {
-    const { authorization, repository } = await serverServices();
-    await authorization.requireAuthenticatedUser();
-    id = await repository.createOrganization({
-      name: form.get('name'),
-      slug: form.get('slug'),
-      currency: form.get('currency'),
-      country: form.get('country'),
-      timezone: form.get('timezone'),
-      ...(form.get('industryId') ? { industryId: form.get('industryId') } : {}),
-    });
-  } catch (error) {
-    return { message: safeFailure(error).message };
-  }
-  (await cookies()).set('business-os-organization', id, {
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
-    path: '/',
-    maxAge: 60 * 60 * 24 * 30,
-  });
-  redirect('/dashboard');
+  return {
+    message:
+      'Direct company creation is no longer available here. Submit your business for administrator review at /dashboard/company/apply.',
+  };
 }
