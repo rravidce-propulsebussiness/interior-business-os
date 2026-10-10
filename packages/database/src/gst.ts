@@ -87,32 +87,54 @@ export function createGstRepository(client: SupabaseClient<Database>) {
     name: string,
     args?: Record<string, unknown>,
   ) => Promise<{ data: unknown; error: { code?: string } | null }>;
-  async function invoke<T>(name: string, args: Record<string, unknown>): Promise<T> {
+  async function invoke<T>(
+    name: string,
+    args: Record<string, unknown>,
+  ): Promise<T> {
     const result = await rpc(name, args);
     if (result.error) {
       const code = result.error.code;
       throw new DomainError(
-        code === '42501' ? 'FORBIDDEN'
-        : code === '23505' || code === '40001' ? 'CONFLICT'
-        : ['22023','22P02','23514','23503'].includes(code ?? '')
-          ? 'VALIDATION_FAILED' : 'INTERNAL_ERROR',
+        code === '42501'
+          ? 'FORBIDDEN'
+          : code === '23505' || code === '40001'
+            ? 'CONFLICT'
+            : ['22023', '22P02', '23514', '23503'].includes(code ?? '')
+              ? 'VALIDATION_FAILED'
+              : 'INTERNAL_ERROR',
       );
     }
     return result.data as T;
   }
   return {
     profile: (organizationId: string) =>
-      invoke<GstBusinessProfile | null>('gst_profile_read', { p_org: organizationId }),
+      invoke<GstBusinessProfile | null>('gst_profile_read', {
+        p_org: organizationId,
+      }),
     saveProfile: (organizationId: string, input: GstBusinessProfile) =>
-      invoke<void>('gst_profile_save', { p_org: organizationId, p_input: input }),
+      invoke<void>('gst_profile_save', {
+        p_org: organizationId,
+        p_input: input,
+      }),
     saveDocument: (organizationId: string, input: GstDocumentInput) =>
-      invoke<string>('gst_document_save', { p_org: organizationId, p_input: input }),
+      invoke<string>('gst_document_save', {
+        p_org: organizationId,
+        p_input: input,
+      }),
     finalize: (organizationId: string, id: string, version: number) =>
       invoke<string>('gst_document_finalize', {
-        p_org: organizationId, p_id: id, p_version: version,
+        p_org: organizationId,
+        p_id: id,
+        p_version: version,
       }),
-    list: (organizationId: string, kind: 'all' | 'sales_invoice' | 'purchase_bill' | 'incoming') =>
-      invoke<GstDocumentRow[]>('gst_documents', { p_org: organizationId, p_kind: kind }),
+    list: (
+      organizationId: string,
+      kind: 'all' | 'sales_invoice' | 'purchase_bill' | 'incoming',
+    ) =>
+      invoke<GstDocumentRow[]>('gst_documents', {
+        p_org: organizationId,
+        p_kind: kind,
+      }),
     document: (organizationId: string, id: string) =>
       invoke<GstDocument>('gst_document', { p_org: organizationId, p_id: id }),
     platformSummary: () => invoke<GstSummary>('platform_gst_summary', {}),

@@ -41,9 +41,19 @@ export default async function Finance() {
     <main id="main-content" tabIndex={-1} className="mx-auto max-w-6xl p-6">
       <h1 className="text-3xl">Finance &amp; billing</h1>
       <section className="my-5 rounded-2xl border border-teal-200 bg-teal-50 p-6 text-slate-900">
-        <h2 className="text-xl font-semibold">Everyday GST-ready invoices &amp; supplier bills</h2>
-        <p className="mt-2 text-sm leading-6">Create standalone sales invoices, record supplier bills and access incoming marketplace invoices without requiring a project contract.</p>
-        <Link href="/dashboard/billing" className="mt-4 inline-block rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white">Open invoices &amp; bills →</Link>
+        <h2 className="text-xl font-semibold">
+          Everyday GST-ready invoices &amp; supplier bills
+        </h2>
+        <p className="mt-2 text-sm leading-6">
+          Create standalone sales invoices, record supplier bills and access
+          incoming marketplace invoices without requiring a project contract.
+        </p>
+        <Link
+          href="/dashboard/billing"
+          className="mt-4 inline-block rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white"
+        >
+          Open invoices &amp; bills →
+        </Link>
       </section>
       <p className="my-3">
         Accepted scope, billing milestones, offline collections and approved
