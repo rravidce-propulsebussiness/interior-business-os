@@ -10680,6 +10680,11 @@ export interface Database {
         Args: { p_status?: string; p_page?: number };
         Returns: Json;
       };
+      company_onboarding_policy: { Args: Record<string, never>; Returns: Json };
+      company_onboarding_set_policy: {
+        Args: { p_approval_required: boolean };
+        Returns: Json;
+      };
       contract_create: {
         Args: { p_organization_id: string; p_revision_id: string };
         Returns: string;
