@@ -60,7 +60,7 @@ function Action({
 }: {
   project:string;operation:string;label:string;fields:SiteField[];hidden?:Record<string,string>;
 }) {
-  return <ProjectSiteForm project={project} operation={operation} label={label} fields={fields} hidden={hidden} secondary />;
+  return <ProjectSiteForm project={project} operation={operation} label={label} fields={fields} hidden={hidden ?? {}} secondary />;
 }
 function Heading({eyebrow,title,detail}:{eyebrow:string;title:string;detail:string}) {
   return <div className="mb-5">
