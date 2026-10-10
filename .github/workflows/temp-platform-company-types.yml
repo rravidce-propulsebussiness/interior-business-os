@@ -1,0 +1,47 @@
+name: Validate company controls and generate types
+on:
+  push:
+    branches:
+      - feat/platform-company-seller-management
+permissions:
+  contents: write
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: company_controls_test
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/platform-company-seller-management
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm db:verify && pnpm db:types
+        env:
+          TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:5432/company_controls_test
+          ALLOW_TEST_DATABASE_RESET: 'yes'
+      - run: pnpm exec prettier --write packages/database/src/generated/database.types.ts packages/database/src/platform-companies.ts packages/database/tests/platform-companies.sql packages/database/supabase/migrations/20261010000500_platform_company_control.sql apps/business-app/src/app/admin/organizations
+      - run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add packages/database/src/generated/database.types.ts packages/database/src/platform-companies.ts packages/database/tests/platform-companies.sql packages/database/supabase/migrations/20261010000500_platform_company_control.sql apps/business-app/src/app/admin/organizations
+          if ! git diff --cached --quiet; then
+            git commit -m 'chore(admin): refresh company schema types and format controls'
+            git push origin HEAD:feat/platform-company-seller-management
+          fi
