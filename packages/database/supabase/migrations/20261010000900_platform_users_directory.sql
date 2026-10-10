@@ -231,7 +231,7 @@ end $fn$;
 revoke all on function public.platform_user_directory(text,text,text,uuid,integer,text),
  public.platform_user_profile(uuid), public.platform_user_status_set(uuid,text),
  public.platform_user_company_assign(uuid,uuid,uuid),public.platform_user_company_choices() from public,anon;
-grant execute on function public.platform_user_directory(text,text,text,uuid,integer),
+grant execute on function public.platform_user_directory(text,text,text,uuid,integer,text),
  public.platform_user_profile(uuid), public.platform_user_status_set(uuid,text),
  public.platform_user_company_assign(uuid,uuid,uuid),public.platform_user_company_choices() to authenticated;
 commit;
