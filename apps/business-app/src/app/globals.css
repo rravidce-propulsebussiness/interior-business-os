@@ -733,7 +733,11 @@ label {
   border: 1px solid rgba(88, 230, 195, 0.2);
   border-radius: 1.5rem;
   background:
-    radial-gradient(circle at 90% 10%, rgba(125, 211, 252, 0.18), transparent 38%),
+    radial-gradient(
+      circle at 90% 10%,
+      rgba(125, 211, 252, 0.18),
+      transparent 38%
+    ),
     linear-gradient(115deg, #143d4a, #10253e 65%, #101d35);
 }
 

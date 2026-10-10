@@ -97,7 +97,9 @@ export default async function Dashboard() {
           <h1>Business overview</h1>
           <p className="tenant-v2-lead">
             {organization
-              ? 'Welcome to ' + organization.name + '. Your work, tools and team in one place.'
+              ? 'Welcome to ' +
+                organization.name +
+                '. Your work, tools and team in one place.'
               : 'Select your company to access your business tools and daily operations.'}
           </p>
           <div className="tenant-v2-hero-actions">
@@ -164,14 +166,14 @@ export default async function Dashboard() {
             <div className="tenant-v2-metric">
               <span>Team memberships</span>
               <strong>{canViewTeam ? team.length : '—'}</strong>
-              <small>{canViewTeam ? 'Your company team' : 'Access restricted'}</small>
+              <small>
+                {canViewTeam ? 'Your company team' : 'Access restricted'}
+              </small>
             </div>
             <div className="tenant-v2-metric">
               <span>Unread notifications</span>
               <strong>
-                {notificationSummary
-                  ? (notificationSummary.unread ?? 0)
-                  : '—'}
+                {notificationSummary ? (notificationSummary.unread ?? 0) : '—'}
               </strong>
               <small>
                 {notificationSummary ? 'Pending updates' : 'Access restricted'}
@@ -345,7 +347,10 @@ export default async function Dashboard() {
           <h2>Need another business workspace?</h2>
           <p>Apply to register a construction or interiors company.</p>
         </div>
-        <Link href="/dashboard/company/apply" className="premium-link-secondary">
+        <Link
+          href="/dashboard/company/apply"
+          className="premium-link-secondary"
+        >
           Register a company →
         </Link>
       </footer>
