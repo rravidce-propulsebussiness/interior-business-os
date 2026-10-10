@@ -45,7 +45,7 @@ const primary: { title: string; icon: IconName; href: string }[] = [
   { title: 'Dashboard', icon: 'dashboard', href: '/dashboard' },
   { title: 'Marketplace', icon: 'marketplace', href: '/dashboard/control/marketplace' },
   { title: 'Users & Tenants', icon: 'users', href: '/dashboard/organizations' },
-  { title: 'Membership Plans', icon: 'crown', href: '/dashboard/control/memberships' },
+  { title: 'Membership Plans', icon: 'crown', href: '/dashboard/plans' },
   { title: 'Billing & Payments', icon: 'billing', href: '/dashboard/control/billing' },
   { title: 'Quotations', icon: 'quotation', href: '/dashboard/control/quotations' },
   { title: 'CRM & Leads', icon: 'crm', href: '/dashboard/control/crm' },
