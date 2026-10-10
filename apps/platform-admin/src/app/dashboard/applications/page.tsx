@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { pageServices } from '@business-os/auth/server';
 import { DomainError } from '@business-os/shared';
 import { ActionForm } from '@business-os/ui/action-form';
-import { decideCompanyApplication } from './actions';
+import { decideCompanyApplication, setCompanyOnboardingPolicy } from './actions';
 
 type Application = {
   id: string;
@@ -59,7 +59,15 @@ export default async function CompanyApplications({
     Number.isSafeInteger(suppliedPage) && suppliedPage > 0
       ? Math.min(suppliedPage, 10_000)
       : 1;
-  const data = await repository.reviewCompanyApplications(status, page);
+  const [data, approvalPolicy] = await Promise.all([
+    repository.reviewCompanyApplications(status, page),
+    repository.companyOnboardingPolicy(),
+  ]);
+  const approvalRequired =
+    approvalPolicy !== null &&
+    typeof approvalPolicy === 'object' &&
+    !Array.isArray(approvalPolicy) &&
+    approvalPolicy.approvalRequired === true;
   const response =
     data && typeof data === 'object' && !Array.isArray(data)
       ? (data as { rows?: unknown; total?: unknown })
@@ -96,6 +104,36 @@ export default async function CompanyApplications({
             transaction.
           </p>
         </header>
+        <section
+          aria-label="Company creation policy"
+          className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+        >
+          <h2 className="text-xl font-semibold">New company approvals</h2>
+          <p className="mt-2 text-sm leading-6 text-slate-600">
+            {approvalRequired
+              ? 'Required: legacy direct creation is blocked. New companies must pass platform review.'
+              : 'Compatibility mode: existing direct-creation integrations remain available. Administrator review is not yet mandatory.'}
+          </p>
+          <p className="mt-2 text-xs text-slate-500">
+            Switch only after verifying legacy integrations and hosted Auth.
+            This changes new organization creation, not existing company data.
+            The change is permission-gated and recorded in the audit log.
+          </p>
+          <ActionForm
+            action={setCompanyOnboardingPolicy}
+            label={
+              approvalRequired
+                ? 'Restore compatibility mode'
+                : 'Require approval for all new companies'
+            }
+          >
+            <input
+              type="hidden"
+              name="approvalRequired"
+              value={approvalRequired ? 'false' : 'true'}
+            />
+          </ActionForm>
+        </section>
         <nav aria-label="Application status" className="flex flex-wrap gap-3">
           {filters.map((filter) => (
             <Link
