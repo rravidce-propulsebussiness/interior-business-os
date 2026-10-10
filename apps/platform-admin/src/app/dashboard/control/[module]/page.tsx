@@ -3,8 +3,6 @@ import { notFound } from 'next/navigation';
 import { pageServices } from '@business-os/auth/server';
 import { DomainError } from '@business-os/shared';
 import { OsIcon } from '../../dashboard-shell';
-import { ActionForm } from '@business-os/ui/action-form';
-import { createPlatformPlan } from './actions';
 
 const directory = {
   marketplace: {
@@ -95,31 +93,6 @@ export default async function PlatformControlModule({ params }: { params: Promis
         <div><h1 className="os-secondary-heading">{config.title}</h1><p className="os-secondary-subtitle">{config.intro}</p></div>
         <Link href="/dashboard/organizations" className="os-action">Manage tenants <OsIcon name="arrow" size={16} /></Link>
       </div>
-
-      {slug === 'memberships' && (
-        <section className="os-resource-panel">
-          <div className="os-panel-heading"><h2>Create membership plan</h2><span className="text-xs text-slate-500">Saved through authorized platform plan RPC</span></div>
-          <p className="os-secondary-subtitle">Choose an independent feature bundle. Plan assignments and manual tenant overrides continue to use the existing entitlement engine.</p>
-          <ActionForm action={createPlatformPlan} label="Create membership plan">
-            <label className="grid gap-2 text-sm font-semibold">Plan display name
-              <input required name="name" minLength={2} maxLength={100} placeholder="e.g. Growth" className="rounded-lg border border-slate-300 bg-white p-3 font-normal" />
-            </label>
-            <label className="grid gap-2 text-sm font-semibold">Plan key
-              <input required name="key" minLength={2} maxLength={48} pattern="[a-z][a-z0-9_-]{1,47}" placeholder="growth" className="rounded-lg border border-slate-300 bg-white p-3 font-normal" />
-            </label>
-            <fieldset className="grid gap-3">
-              <legend className="mb-2 text-sm font-semibold">Included modules</legend>
-              <div className="grid grid-cols-2 gap-3">
-                {modules.filter((mod) => mod.status === 'active').map((mod) => (
-                  <label key={mod.id} className="flex items-center gap-2 text-sm">
-                    <input type="checkbox" name="module" value={mod.key} /> {mod.name}
-                  </label>
-                ))}
-              </div>
-            </fieldset>
-          </ActionForm>
-        </section>
-      )}
 
       <div className="os-content-grid mt-6">
         <section className="os-panel">
