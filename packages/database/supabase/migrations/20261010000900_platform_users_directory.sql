@@ -98,6 +98,8 @@ begin
      and (p_status='' or i.status=p_status)
      and (nullif(trim(p_query),'') is null or
        i.email ilike '%' || replace(replace(replace(trim(p_query),E'\\',''),'%',''),'_','') || '%' or
+       exists (select 1 from auth.users phone where phone.id=i.id
+         and coalesce(phone.raw_user_meta_data->>'phone','') ilike '%' || replace(replace(trim(p_query),'%',''),'_','') || '%') or
        exists (select 1 from public.profiles p where p.id=i.id
          and p.full_name ilike '%' || replace(replace(trim(p_query),'%',''),'_','') || '%') or
        exists (select 1 from public.organization_memberships m
@@ -119,6 +121,7 @@ begin
      and (nullif(trim(p_query),'') is null or
        u.email ilike '%' || replace(replace(replace(trim(p_query),E'\\',''),'%',''),'_','') || '%' or
        p.full_name ilike '%' || replace(replace(trim(p_query),'%',''),'_','') || '%' or
+       coalesce(u.raw_user_meta_data->>'phone','') ilike '%' || replace(replace(trim(p_query),'%',''),'_','') || '%' or
        exists(select 1 from public.organization_memberships m
         join public.organizations o on o.id=m.organization_id
         where m.user_id=u.id and o.name ilike '%' || replace(replace(trim(p_query),'%',''),'_','') || '%'))
