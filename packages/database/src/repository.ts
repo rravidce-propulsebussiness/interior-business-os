@@ -153,6 +153,15 @@ export function createRepository(client: SupabaseClient<Database>) {
           .eq('organization_id', idSchema.parse(id)),
       );
     },
+    async createSubscriptionPlan(input: {
+      key: string;
+      name: string;
+      modules: string[];
+    }) {
+      return unwrap(
+        await client.rpc('platform_plan_create', { p_input: input }),
+      );
+    },
     async submitCompanyApplication(input: {
       name: string;
       slug: string;
