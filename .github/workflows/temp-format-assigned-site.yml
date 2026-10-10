@@ -1,0 +1,32 @@
+name: Temporary assigned-site formatter
+on:
+  push:
+    branches: [feature/project-manager-updates-manual-quantities-20261010]
+permissions:
+  contents: write
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.34.5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Prettier for site project directory
+        run: pnpm exec prettier --write apps/business-app/src/app/dashboard/site-projects/page.tsx apps/business-app/src/app/dashboard/page.tsx
+      - name: Commit formatted files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/business-app/src/app/dashboard/site-projects/page.tsx apps/business-app/src/app/dashboard/page.tsx
+          if ! git diff --cached --quiet; then
+            git commit -m "style: format assigned site directory"
+            git push
+          fi
