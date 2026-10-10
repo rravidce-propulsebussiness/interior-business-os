@@ -36,6 +36,11 @@ create trigger company_applications_touch before update
   on private.company_applications for each row
   execute function private.touch_updated_at();
 
+-- Construction was intentionally inactive in the original Interior-only seed.
+-- Make both canonical industries selectable; a combined company has two memberships,
+-- NOT a duplicated 'construction+interior' application/database.
+update public.industries set status = 'active' where key = 'construction';
+
 -- Not an exposed Data API table. RPCs below are the only supported access path.
 alter table private.company_applications enable row level security;
 revoke all on private.company_applications from public, anon, authenticated;
