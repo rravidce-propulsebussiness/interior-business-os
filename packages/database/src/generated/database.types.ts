@@ -11306,10 +11306,6 @@ export interface Database {
         Args: { p_user_id: string; p_role_id: string; p_remove?: boolean };
         Returns: undefined;
       };
-      platform_user_company_choices: {
-        Args: Record<string, never>;
-        Returns: Json;
-      };
       platform_user_company_assign: {
         Args: {
           p_user_id: string;
@@ -11317,6 +11313,10 @@ export interface Database {
           p_role_id: string;
         };
         Returns: string;
+      };
+      platform_user_company_choices: {
+        Args: Record<string, never>;
+        Returns: Json;
       };
       platform_user_directory: {
         Args: {
