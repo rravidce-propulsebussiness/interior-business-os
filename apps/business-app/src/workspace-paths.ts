@@ -83,6 +83,17 @@ export function workspaceIngress(input: {
         ? redirect : null,
     };
   }
+  if (central && dashboard && !validWorkspaceSlug(input.selectedSlug ?? '') &&
+      path !== '/dashboard') {
+    // New sessions must select/resolve the company on the dashboard landing
+    // page instead of silently serving a module for the first membership.
+    return {
+      ...none,
+      redirect: input.method === 'GET' || input.method === 'HEAD'
+        ? '/dashboard' : null,
+      denyPlatform: input.method !== 'GET' && input.method !== 'HEAD',
+    };
+  }
   if (!central) {
     if (path === '/admin' || path.startsWith('/admin/')) {
       return { ...none, denyPlatform: true };
