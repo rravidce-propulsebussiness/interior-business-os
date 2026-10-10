@@ -101,19 +101,29 @@ export async function saveProjectManagerUpdate(
       p_action: operation,
       p_input: fromForm(form),
     });
-    if (error) throw new Error(error.code === '42501'
-      ? 'Project manager access required'
-      : error.message.slice(0, 220));
+    if (error)
+      throw new Error(
+        error.code === '42501'
+          ? 'Project manager access required'
+          : error.message.slice(0, 220),
+      );
     revalidatePath(pathFor(project));
-    return { saved: true, message: operation === 'material_quantity_correct'
-      ? 'Material quantity revised. Previous value kept in history.'
-      : operation === 'report_review'
-        ? 'Engineer report review recorded.'
-        : 'Project manager update published.' };
+    return {
+      saved: true,
+      message:
+        operation === 'material_quantity_correct'
+          ? 'Material quantity revised. Previous value kept in history.'
+          : operation === 'report_review'
+            ? 'Engineer report review recorded.'
+            : 'Project manager update published.',
+    };
   } catch (error) {
     return {
       saved: false,
-      message: error instanceof Error ? error.message : 'Unable to save manager update',
+      message:
+        error instanceof Error
+          ? error.message
+          : 'Unable to save manager update',
     };
   }
 }

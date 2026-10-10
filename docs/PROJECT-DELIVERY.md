@@ -73,7 +73,6 @@ has been claimed as verified. Test with at least one manager, architect,
 structural designer, engineer and watchman on staging and validate that
 cross-organization and cross-project requests are rejected.
 
-
 ## Project manager updates (manual now, AI later)
 
 Migration `20261010000800_project_manager_updates.sql` introduces append-only
