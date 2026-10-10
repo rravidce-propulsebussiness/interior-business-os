@@ -87,7 +87,11 @@ const primary: { title: string; icon: IconName; href: string }[] = [
     icon: 'marketplace',
     href: '/admin/control/marketplace',
   },
-  { title: 'Organizations & Users', icon: 'users', href: '/admin/organizations' },
+  {
+    title: 'Organizations & Users',
+    icon: 'users',
+    href: '/admin/organizations',
+  },
   { title: 'Membership Plans', icon: 'crown', href: '/admin/plans' },
   {
     title: 'Billing & Payments',

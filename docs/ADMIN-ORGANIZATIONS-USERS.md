@@ -13,9 +13,9 @@ CSS files or duplicate company provisioning routes are introduced.
 - Supabase Auth identity: one user email/account (never create a duplicate).
 - `public.profiles` holds name, optional avatar and active/suspended status.
 - `public.organization_memberships` and `public.membership_roles` hold
-  each user's *separate* company access.
+  each user's _separate_ company access.
 - Company owners are automatically assigned the canonical owner role by
-  existing `platform_company_create`. This has full *company* permissions
+  existing `platform_company_create`. This has full _company_ permissions
   subject to plan/module entitlements, **not** Super Admin access.
 - A company may also be an approved marketplace seller (no duplicate account).
   Cards derive role kind from active memberships and marketplace seller status.
@@ -29,7 +29,7 @@ CSS files or duplicate company provisioning routes are introduced.
   email (email configuration and Supabase rate limits apply). No plaintext
   password, impersonation, tenant assignment, or owner role is created.
   The user must verify email before joining a company.
-- **Create Organization** moves the *existing* create company form to
+- **Create Organization** moves the _existing_ create company form to
   `/admin/organizations/create`. The existing provisioner still creates
   owner membership/owner permissions, industries, subscription and optional
   marketplace seller, with the same validation rules.

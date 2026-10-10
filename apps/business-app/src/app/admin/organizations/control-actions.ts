@@ -183,19 +183,26 @@ export async function updateCompanyRole(_state: State, form: FormData) {
 export async function invitePlatformUser(_state: State, form: FormData) {
   try {
     const { authorization } = await serverServices();
-    await authorization.requirePlatformPermission('platform.organizations.manage');
-    const user = z.object({
-      email: z.email().trim().toLowerCase().max(254),
-      fullName: z.string().trim().min(2).max(200),
-    }).parse({
-      email: form.get('email'),
-      fullName: form.get('fullName'),
-    });
+    await authorization.requirePlatformPermission(
+      'platform.organizations.manage',
+    );
+    const user = z
+      .object({
+        email: z.email().trim().toLowerCase().max(254),
+        fullName: z.string().trim().min(2).max(200),
+      })
+      .parse({
+        email: form.get('email'),
+        fullName: form.get('fullName'),
+      });
     const origin = process.env.APP_ORIGIN;
     let emailRedirectTo: string | undefined;
     if (origin) {
       const url = new URL(origin);
-      if (url.protocol === 'https:' || (process.env.NODE_ENV !== 'production' && url.hostname === 'localhost'))
+      if (
+        url.protocol === 'https:' ||
+        (process.env.NODE_ENV !== 'production' && url.hostname === 'localhost')
+      )
         emailRedirectTo = new URL('/auth/callback', url).toString();
     }
     const client = createPublicDatabase();
@@ -208,10 +215,14 @@ export async function invitePlatformUser(_state: State, form: FormData) {
       },
     });
     if (error)
-      return { message: 'Unable to send verification email. Check Supabase Auth email configuration and try again.' };
+      return {
+        message:
+          'Unable to send verification email. Check Supabase Auth email configuration and try again.',
+      };
     revalidatePath('/admin/organizations');
     return {
-      message: 'Verification email requested. The person must verify their address before receiving a company role. If they already have an account, their existing account is reused.',
+      message:
+        'Verification email requested. The person must verify their address before receiving a company role. If they already have an account, their existing account is reused.',
     };
   } catch (error) {
     return { message: safeFailure(error).message };
@@ -221,32 +232,51 @@ export async function invitePlatformUser(_state: State, form: FormData) {
 export async function updatePlatformUserStatus(_state: State, form: FormData) {
   try {
     const { authorization, client } = await serverServices();
-    await authorization.requirePlatformPermission('platform.organizations.manage');
+    await authorization.requirePlatformPermission(
+      'platform.organizations.manage',
+    );
     const id = idSchema.parse(form.get('userId'));
-    const status = z.enum(['active','suspended']).parse(form.get('status'));
-    await createPlatformCompaniesRepository(client).setUserStatus(id,status);
+    const status = z.enum(['active', 'suspended']).parse(form.get('status'));
+    await createPlatformCompaniesRepository(client).setUserStatus(id, status);
     revalidatePath('/admin/users/' + id);
     revalidatePath('/admin/organizations');
-    return { message: status === 'active' ? 'User reactivated.' : 'User suspended.' };
+    return {
+      message: status === 'active' ? 'User reactivated.' : 'User suspended.',
+    };
   } catch (error) {
     return { message: safeFailure(error).message };
   }
 }
 
-export async function assignPlatformUserToCompany(_state: State, form: FormData) {
+export async function assignPlatformUserToCompany(
+  _state: State,
+  form: FormData,
+) {
   try {
     const { authorization, client } = await serverServices();
-    await authorization.requirePlatformPermission('platform.organizations.manage');
+    await authorization.requirePlatformPermission(
+      'platform.organizations.manage',
+    );
     await authorization.requirePlatformPermission('platform.roles.manage');
     const userId = idSchema.parse(form.get('userId'));
-    const [organizationId,roleId] = z.string().max(80).parse(form.get('assignment')).split(':');
-    if (!organizationId || !roleId) return { message: 'Choose a company and an employee role.' };
+    const [organizationId, roleId] = z
+      .string()
+      .max(80)
+      .parse(form.get('assignment'))
+      .split(':');
+    if (!organizationId || !roleId)
+      return { message: 'Choose a company and an employee role.' };
     await createPlatformCompaniesRepository(client).assignUserToCompany(
-      userId,idSchema.parse(organizationId),idSchema.parse(roleId),
+      userId,
+      idSchema.parse(organizationId),
+      idSchema.parse(roleId),
     );
     revalidatePath('/admin/users/' + userId);
     revalidatePath('/admin/organizations');
-    return { message: 'Verified user assigned to company. Owner permissions are managed separately.' };
+    return {
+      message:
+        'Verified user assigned to company. Owner permissions are managed separately.',
+    };
   } catch (error) {
     return { message: safeFailure(error).message };
   }
