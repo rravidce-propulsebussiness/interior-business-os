@@ -371,18 +371,20 @@ export default async function Dashboard() {
           </p>
         </section>
       )}
-      {scope?.kind !== 'hostname' && <footer className="tenant-v2-footer">
-        <div>
-          <h2>Need another business workspace?</h2>
-          <p>Apply to register a construction or interiors company.</p>
-        </div>
-        <Link
-          href="/dashboard/company/apply"
-          className="premium-link-secondary"
-        >
-          Register a company →
-        </Link>
-      </footer>}
+      {scope?.kind !== 'hostname' && (
+        <footer className="tenant-v2-footer">
+          <div>
+            <h2>Need another business workspace?</h2>
+            <p>Apply to register a construction or interiors company.</p>
+          </div>
+          <Link
+            href="/dashboard/company/apply"
+            className="premium-link-secondary"
+          >
+            Register a company →
+          </Link>
+        </footer>
+      )}
     </main>
   );
 }

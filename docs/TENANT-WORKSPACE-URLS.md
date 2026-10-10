@@ -5,13 +5,13 @@
 A business has one organization UUID and a stable unique `organizations.slug`.
 The platform **domain is configuration**, not a company identifier.
 
-| Incoming URL | Tenant selection | Service |
-| --- | --- | --- |
-| `https://sghomesinterior.in/neelima-construction/dashboard` | Authenticated membership in slug `neelima-construction` | Business App |
-| `https://sghomesinterior.in/neelima-construction/dashboard/crm` | Same slug, same company | Business App |
-| `https://neelimaconstruction.com/dashboard` | Verified active custom hostname mapped to company | Business App |
-| `https://neelimaconstruction.com/dashboard/finance` | Same hostname, same company | Business App |
-| `https://neelimaconstruction.com/` | Public published website for hostname | Websites App |
+| Incoming URL                                                    | Tenant selection                                        | Service      |
+| --------------------------------------------------------------- | ------------------------------------------------------- | ------------ |
+| `https://sghomesinterior.in/neelima-construction/dashboard`     | Authenticated membership in slug `neelima-construction` | Business App |
+| `https://sghomesinterior.in/neelima-construction/dashboard/crm` | Same slug, same company                                 | Business App |
+| `https://neelimaconstruction.com/dashboard`                     | Verified active custom hostname mapped to company       | Business App |
+| `https://neelimaconstruction.com/dashboard/finance`             | Same hostname, same company                             | Business App |
+| `https://neelimaconstruction.com/`                              | Public published website for hostname                   | Websites App |
 
 These URLs are illustrative; there is **no live connected tenant** named in this file.
 
@@ -39,6 +39,7 @@ The route flag defaults to **off**, preserving the existing unprefixed
 Development includes localhost as a central hostname automatically.
 
 When enabled, the Business App Next.js proxy:
+
 1. Removes caller-provided internal workspace headers.
 2. Rewrites `/<slug>/dashboard/*` to the existing `/dashboard/*` route,
    setting the selected slug in a same-site, host-only HTTP-only cookie

@@ -8,8 +8,19 @@ export const WORKSPACE_HOST_HEADER = 'x-business-os-workspace-host';
 export const WORKSPACE_COOKIE = 'business-os-workspace-route';
 
 const RESERVED = new Set([
-  'admin', 'api', 'auth', 'dashboard', 'login', 'register', 'forgot-password',
-  'reset-password', 'q', 'assets', 'brochure', 'favicon.ico', '_next',
+  'admin',
+  'api',
+  'auth',
+  'dashboard',
+  'login',
+  'register',
+  'forgot-password',
+  'reset-password',
+  'q',
+  'assets',
+  'brochure',
+  'favicon.ico',
+  '_next',
 ]);
 
 export function validWorkspaceSlug(value: string) {
@@ -22,9 +33,11 @@ export function validWorkspaceSlug(value: string) {
 }
 
 export function normalizedWorkspaceHost(host: string) {
-  const value = host.trim().toLowerCase().replace(/:\d{1,5}$/, '');
-  return value.length <= 253 &&
-    /^[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$/.test(value)
+  const value = host
+    .trim()
+    .toLowerCase()
+    .replace(/:\d{1,5}$/, '');
+  return value.length <= 253 && /^[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$/.test(value)
     ? value
     : null;
 }
@@ -71,26 +84,34 @@ export function workspaceIngress(input: {
       setSlugCookie: slugMatch[1]!,
     };
   }
-  if (central && dashboard && input.selectedSlug &&
-      validWorkspaceSlug(input.selectedSlug)) {
+  if (
+    central &&
+    dashboard &&
+    input.selectedSlug &&
+    validWorkspaceSlug(input.selectedSlug)
+  ) {
     const redirect = '/' + input.selectedSlug + path;
     return {
       ...none,
       scope: { type: 'slug', value: input.selectedSlug },
       // Non-GET requests include Server Action submissions: do not redirect
       // these because redirects would forward the action body to a new path.
-      redirect: input.method === 'GET' || input.method === 'HEAD'
-        ? redirect : null,
+      redirect:
+        input.method === 'GET' || input.method === 'HEAD' ? redirect : null,
     };
   }
-  if (central && dashboard && !validWorkspaceSlug(input.selectedSlug ?? '') &&
-      path !== '/dashboard') {
+  if (
+    central &&
+    dashboard &&
+    !validWorkspaceSlug(input.selectedSlug ?? '') &&
+    path !== '/dashboard'
+  ) {
     // New sessions must select/resolve the company on the dashboard landing
     // page instead of silently serving a module for the first membership.
     return {
       ...none,
-      redirect: input.method === 'GET' || input.method === 'HEAD'
-        ? '/dashboard' : null,
+      redirect:
+        input.method === 'GET' || input.method === 'HEAD' ? '/dashboard' : null,
       denyPlatform: input.method !== 'GET' && input.method !== 'HEAD',
     };
   }

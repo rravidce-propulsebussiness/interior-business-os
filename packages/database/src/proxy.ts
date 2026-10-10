@@ -6,7 +6,10 @@ import { parsePublicEnvironment } from '@business-os/shared';
 import { boundedFetch } from '@business-os/shared/runtime';
 import { adminContentSecurityPolicy } from '@business-os/shared/security';
 import type { Database } from './generated/database.types';
-export async function refreshSession(request: NextRequest, rewriteTarget?: URL) {
+export async function refreshSession(
+  request: NextRequest,
+  rewriteTarget?: URL,
+) {
   const debugPublicPage =
     request.method === 'GET' &&
     (request.nextUrl.pathname === '/' || request.nextUrl.pathname === '/login');
