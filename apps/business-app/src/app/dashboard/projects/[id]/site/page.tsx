@@ -292,7 +292,7 @@ export default async function ProjectDeliveryPage({
             </div>
             <details className={formDetails}>
               <summary className="cursor-pointer font-semibold">
-                Assign or change an employee's project role
+                Assign or change an employee&apos;s project role
               </summary>
               <div className="mt-4">
                 <Action
