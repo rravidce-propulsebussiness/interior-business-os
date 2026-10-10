@@ -112,14 +112,14 @@ export default async function DomainManagement() {
 
       <section className="os-resource-panel">
         <div className="os-panel-heading">
-          <h2>Connect a customer's existing domain</h2>
+          <h2>Connect a customer&apos;s existing domain</h2>
           <Link href="/dashboard/website">Configure domain settings ↗</Link>
         </div>
         <p className="os-secondary-subtitle">
           The existing tenant Website → Domains workflow creates a unique domain
           claim and a one-time DNS ownership challenge. The Super Admin controls
           the platform base hostname, entitlements and website suspensions;
-          modifying a tenant's domain currently requires the tenant's own
+          modifying a tenant&apos;s domain currently requires the tenant&apos;s own
           authorized website session.
         </p>
         <div className="os-domain-steps">
@@ -130,7 +130,7 @@ export default async function DomainManagement() {
             <strong>1. Add the website domain</strong>
             In the business workspace, open Website Studio → Domains and add{' '}
             <code>www.customer.com</code>. This creates a unique claim and TXT
-            challenge. Enable the customer's custom-domain entitlement when
+            challenge. Enable the customer&apos;s custom-domain entitlement when
             required.
           </div>
           <div className="os-domain-step">
@@ -140,7 +140,7 @@ export default async function DomainManagement() {
             <strong>2. Update external DNS</strong>
             At the existing registrar, create{' '}
             <code>_business-os.www.customer.com</code> as a TXT record with the
-            generated verification value. Point the hostname's CNAME to{' '}
+            generated verification value. Point the hostname&apos;s CNAME to{' '}
             <code>
               {settings.data.base_domain || 'your configured platform hostname'}
             </code>
@@ -152,7 +152,7 @@ export default async function DomainManagement() {
             </div>
             <strong>3. Provision TLS and verify</strong>
             Configure routing and a valid certificate for the hostname on the
-            hosting provider. Use the tenant's Verify DNS and HTTPS action to
+            hosting provider. Use the tenant&apos;s Verify DNS and HTTPS action to
             validate ownership and secure delivery before activation.
           </div>
         </div>
