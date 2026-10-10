@@ -225,7 +225,7 @@ declare v_stage text;v_role text;v_id uuid;v_kind text;v_revision integer;v_stat
   returning id into v_id;
   perform private.site_log(p_organization_id,p_project_id,'team.assigned',v_id);
  elsif p_action='design_submit' then
-  if v_stage<>'design' or not private.site_allowed(p_organization_id,p_project_id,array['architect','structural_designer','manager']) then raise exception 'Design phase required' using errcode='42501';end if;
+  if v_stage is distinct from 'design' or not private.site_allowed(p_organization_id,p_project_id,array['architect','structural_designer','manager']) then raise exception 'Design phase required' using errcode='42501';end if;
   if p_input-array['kind','reference','notes']<>'{}'::jsonb then raise exception 'Invalid design input' using errcode='22023';end if;
   v_kind=p_input->>'kind';
   if v_kind not in ('architectural_plan','3d_design','structural_design') or (v_role='structural_designer' and v_kind<>'structural_design' and not private.has_permission(p_organization_id,'project.manage')) or (v_role='architect' and v_kind='structural_design' and not private.has_permission(p_organization_id,'project.manage')) then raise exception 'Design role mismatch' using errcode='42501';end if;
@@ -236,7 +236,7 @@ declare v_stage text;v_role text;v_id uuid;v_kind text;v_revision integer;v_stat
   values(p_organization_id,p_project_id,v_kind,v_revision,trim(p_input->>'reference'),coalesce(p_input->>'notes',''),auth.uid()) returning id into v_id;
   perform private.site_log(p_organization_id,p_project_id,'design.submitted',v_id);
  elsif p_action='design_decide' then
-  if v_stage<>'design' or not private.site_allowed(p_organization_id,p_project_id,array['manager']) then raise exception 'Manager review required' using errcode='42501';end if;
+  if v_stage is distinct from 'design' or not private.site_allowed(p_organization_id,p_project_id,array['manager']) then raise exception 'Manager review required' using errcode='42501';end if;
   if p_input-array['id','decision','note']<>'{}'::jsonb then raise exception 'Invalid design review' using errcode='22023';end if;
   v_status=p_input->>'decision';
   if v_status not in ('approved','changes_requested') then raise exception 'Invalid review decision' using errcode='22023';end if;
@@ -246,7 +246,7 @@ declare v_stage text;v_role text;v_id uuid;v_kind text;v_revision integer;v_stat
   update private.site_designs set status=v_status,reviewed_by=auth.uid(),reviewed_at=now(),review_note=coalesce(p_input->>'note','') where id=v_row.id;
   v_id=v_row.id; perform private.site_log(p_organization_id,p_project_id,'design.'||v_status,v_id);
  elsif p_action='client_approve' then
-  if v_stage<>'design' or not private.site_allowed(p_organization_id,p_project_id,array['manager']) then raise exception 'Manager approval required' using errcode='42501';end if;
+  if v_stage is distinct from 'design' or not private.site_allowed(p_organization_id,p_project_id,array['manager']) then raise exception 'Manager approval required' using errcode='42501';end if;
   if p_input-array['evidence']<>'{}'::jsonb then raise exception 'Invalid approval' using errcode='22023';end if;
   v_evidence=trim(coalesce(p_input->>'evidence',''));
   if length(v_evidence) not between 10 and 3000 then raise exception 'Record client approval evidence (minimum ten characters)' using errcode='22023';end if;
@@ -254,11 +254,11 @@ declare v_stage text;v_role text;v_id uuid;v_kind text;v_revision integer;v_stat
   update private.site_state set stage='client_approved',approval_evidence=v_evidence,client_approval_recorded_by=auth.uid(),client_approval_recorded_at=now(),updated_at=now() where project_id=p_project_id;
   perform private.site_log(p_organization_id,p_project_id,'client.approval_recorded');
  elsif p_action='execution_start' then
-  if v_stage<>'client_approved' or not private.site_allowed(p_organization_id,p_project_id,array['manager']) then raise exception 'Client approval required before site execution' using errcode='42501';end if;
+  if v_stage is distinct from 'client_approved' or not private.site_allowed(p_organization_id,p_project_id,array['manager']) then raise exception 'Client approval required before site execution' using errcode='42501';end if;
   update private.site_state set stage='execution',execution_started_at=now(),updated_at=now() where project_id=p_project_id;
   perform private.site_log(p_organization_id,p_project_id,'execution.started');
  elsif p_action='report_add' then
-  if v_stage<>'execution' or not private.site_allowed(p_organization_id,p_project_id,array['manager','site_engineer']) then raise exception 'Site engineer required' using errcode='42501';end if;
+  if v_stage is distinct from 'execution' or not private.site_allowed(p_organization_id,p_project_id,array['manager','site_engineer']) then raise exception 'Site engineer required' using errcode='42501';end if;
   if p_input-array['report_date','completed_work','tomorrow_plan','blockers','checks_done','checks_required','worker_count']<>'{}'::jsonb then raise exception 'Invalid daily report' using errcode='22023';end if;
   if length(trim(coalesce(p_input->>'completed_work',''))) not between 5 and 5000 or length(trim(coalesce(p_input->>'tomorrow_plan',''))) not between 5 and 3000 or length(coalesce(p_input->>'blockers',''))>2000 or length(coalesce(p_input->>'checks_done',''))>3000 or length(coalesce(p_input->>'checks_required',''))>3000 or (p_input->>'worker_count')::integer not between 0 and 10000 then raise exception 'Invalid daily report values' using errcode='22023';end if;
   if (p_input->>'report_date')::date not between current_date-7 and current_date+1 then raise exception 'Report date outside permitted window' using errcode='22023';end if;
@@ -266,14 +266,14 @@ declare v_stage text;v_role text;v_id uuid;v_kind text;v_revision integer;v_stat
   values(p_organization_id,p_project_id,(p_input->>'report_date')::date,trim(p_input->>'completed_work'),trim(p_input->>'tomorrow_plan'),coalesce(p_input->>'blockers',''),coalesce(p_input->>'checks_done',''),coalesce(p_input->>'checks_required',''),(p_input->>'worker_count')::integer,auth.uid()) returning id into v_id;
   perform private.site_log(p_organization_id,p_project_id,'daily.reported',v_id);
  elsif p_action='material_add' then
-  if v_stage<>'execution' or not private.site_allowed(p_organization_id,p_project_id,array['manager','site_engineer','procurement']) then raise exception 'Material access denied' using errcode='42501';end if;
+  if v_stage is distinct from 'execution' or not private.site_allowed(p_organization_id,p_project_id,array['manager','site_engineer','procurement']) then raise exception 'Material access denied' using errcode='42501';end if;
   if p_input-array['item','quantity','unit','notes']<>'{}'::jsonb then raise exception 'Invalid material request' using errcode='22023';end if;
   if length(trim(coalesce(p_input->>'item',''))) not between 2 and 200 or length(coalesce(p_input->>'notes',''))>3000 then raise exception 'Invalid material name or notes' using errcode='22023';end if;
   insert into private.site_material_needs(organization_id,project_id,item,quantity,unit,notes,requested_by)
   values(p_organization_id,p_project_id,trim(p_input->>'item'),(p_input->>'quantity')::numeric,p_input->>'unit',coalesce(p_input->>'notes',''),auth.uid()) returning id into v_id;
   perform private.site_log(p_organization_id,p_project_id,'material.requested',v_id);
  elsif p_action='material_update' then
-  if v_stage<>'execution' or not private.site_allowed(p_organization_id,p_project_id,array['manager','procurement']) then raise exception 'Procurement review required' using errcode='42501';end if;
+  if v_stage is distinct from 'execution' or not private.site_allowed(p_organization_id,p_project_id,array['manager','procurement']) then raise exception 'Procurement review required' using errcode='42501';end if;
   if p_input-array['id','status','source','vendor_reference']<>'{}'::jsonb then raise exception 'Invalid procurement action' using errcode='22023';end if;
   v_status=p_input->>'status';v_source=p_input->>'source';
   if v_status not in ('approved','ordered','received','rejected') or v_source not in ('undecided','marketplace','outside') or length(coalesce(p_input->>'vendor_reference',''))>500 then raise exception 'Invalid procurement status or source' using errcode='22023';end if;
@@ -287,13 +287,13 @@ declare v_stage text;v_role text;v_id uuid;v_kind text;v_revision integer;v_stat
   if v_id is null then raise exception 'Invalid or stale material status transition' using errcode='40001';end if;
   perform private.site_log(p_organization_id,p_project_id,'material.'||v_status,v_id);
  elsif p_action='check_add' then
-  if v_stage<>'execution' or not private.site_allowed(p_organization_id,p_project_id,array['manager','site_engineer','quality_inspector']) then raise exception 'Site checking access denied' using errcode='42501';end if;
+  if v_stage is distinct from 'execution' or not private.site_allowed(p_organization_id,p_project_id,array['manager','site_engineer','quality_inspector']) then raise exception 'Site checking access denied' using errcode='42501';end if;
   if p_input-array['title','due_date','notes']<>'{}'::jsonb or length(trim(coalesce(p_input->>'title',''))) not between 3 and 200 or length(coalesce(p_input->>'notes',''))>3000 then raise exception 'Invalid site check' using errcode='22023';end if;
   insert into private.site_checks(organization_id,project_id,title,due_date,notes,created_by)
   values(p_organization_id,p_project_id,trim(p_input->>'title'),nullif(p_input->>'due_date','')::date,coalesce(p_input->>'notes',''),auth.uid()) returning id into v_id;
   perform private.site_log(p_organization_id,p_project_id,'check.created',v_id);
  elsif p_action='check_update' then
-  if v_stage<>'execution' or not private.site_allowed(p_organization_id,p_project_id,array['manager','site_engineer','quality_inspector']) then raise exception 'Checking access denied' using errcode='42501';end if;
+  if v_stage is distinct from 'execution' or not private.site_allowed(p_organization_id,p_project_id,array['manager','site_engineer','quality_inspector']) then raise exception 'Checking access denied' using errcode='42501';end if;
   if p_input-array['id','status','notes']<>'{}'::jsonb then raise exception 'Invalid check action' using errcode='22023';end if;
   v_status=p_input->>'status';
   if v_status not in ('passed','failed','recheck') or length(coalesce(p_input->>'notes',''))>3000 then raise exception 'Invalid check result' using errcode='22023';end if;
@@ -303,13 +303,13 @@ declare v_stage text;v_role text;v_id uuid;v_kind text;v_revision integer;v_stat
   if v_id is null then raise exception 'Check already closed or unavailable' using errcode='40001';end if;
   perform private.site_log(p_organization_id,p_project_id,'check.'||v_status,v_id);
  elsif p_action='gate_add' then
-  if v_stage<>'execution' or not private.site_allowed(p_organization_id,p_project_id,array['manager','watchman']) then raise exception 'Gate access denied' using errcode='42501';end if;
+  if v_stage is distinct from 'execution' or not private.site_allowed(p_organization_id,p_project_id,array['manager','watchman']) then raise exception 'Gate access denied' using errcode='42501';end if;
   if p_input-array['kind','description','notes']<>'{}'::jsonb or p_input->>'kind' not in ('material_delivery','visitor','labour','security_round','curing') or length(trim(coalesce(p_input->>'description',''))) not between 3 and 1500 or length(coalesce(p_input->>'notes',''))>3000 then raise exception 'Invalid gate entry' using errcode='22023';end if;
   insert into private.site_gate(organization_id,project_id,kind,description,notes,created_by)
   values(p_organization_id,p_project_id,p_input->>'kind',trim(p_input->>'description'),coalesce(p_input->>'notes',''),auth.uid()) returning id into v_id;
   perform private.site_log(p_organization_id,p_project_id,'gate.'||(p_input->>'kind'),v_id);
  elsif p_action='handover' then
-  if v_stage<>'execution' or not private.site_allowed(p_organization_id,p_project_id,array['manager']) then raise exception 'Manager required' using errcode='42501';end if;
+  if v_stage is distinct from 'execution' or not private.site_allowed(p_organization_id,p_project_id,array['manager']) then raise exception 'Manager required' using errcode='42501';end if;
   if exists(select 1 from private.site_checks where organization_id=p_organization_id and project_id=p_project_id and status<>'passed') or
      exists(select 1 from private.site_material_needs where organization_id=p_organization_id and project_id=p_project_id and status in ('requested','approved','ordered')) or
      coalesce((private.ops_readiness(p_organization_id,p_project_id)->>'ready')::boolean,false)=false
@@ -327,9 +327,9 @@ returns uuid language plpgsql security definer set search_path='' as $$
 declare v_id uuid;v_bytes bytea;v_stage text;begin
  if not private.site_allowed(p_organization_id,p_project_id,array['manager','architect','structural_designer','site_engineer','quality_inspector']) then raise exception 'Media access denied' using errcode='42501';end if;
  if p_category not in ('design','daily','site','inspection') or p_mime not in ('image/jpeg','image/png','image/webp','video/mp4','application/pdf')
- or length(p_filename) not between 1 and 180 or p_filename ~ '[/\\[:cntrl:]]' or length(coalesce(p_caption,''))>500 or length(p_base64)>11500000 then raise exception 'Invalid media' using errcode='22023';end if;
+ or length(p_filename) not between 1 and 180 or (position('/' in p_filename)>0 or position(chr(92) in p_filename)>0 or p_filename ~ '[[:cntrl:]]') or length(coalesce(p_caption,''))>500 or length(p_base64)>11500000 then raise exception 'Invalid media' using errcode='22023';end if;
  select stage into v_stage from private.site_state where project_id=p_project_id and organization_id=p_organization_id;
- if (v_stage='design' and p_category<>'design') or (v_stage='execution' and p_category='design') or v_stage not in ('design','execution') then raise exception 'Media not permitted in this phase' using errcode='42501';end if;
+ if v_stage is null or (v_stage='design' and p_category<>'design') or (v_stage='execution' and p_category='design') or v_stage not in ('design','execution') then raise exception 'Media not permitted in this phase' using errcode='42501';end if;
  if p_category='design' and not private.site_allowed(p_organization_id,p_project_id,array['manager','architect','structural_designer']) then raise exception 'Design role required' using errcode='42501';end if;
  if p_category<>'design' and not private.site_allowed(p_organization_id,p_project_id,array['manager','site_engineer','quality_inspector']) then raise exception 'Site role required' using errcode='42501';end if;
  if (select count(*) from private.site_media where organization_id=p_organization_id and project_id=p_project_id)>=150 then raise exception 'Project media count limit reached' using errcode='23514';end if;
