@@ -59,7 +59,7 @@ test('Cloudflare REST adapter accepts only PDF bytes from an explicit provider',
   const sample = await doc.save();
   const fetchMock = vi.fn(
     async () =>
-      new Response(sample, {
+      new Response(Uint8Array.from(sample).buffer, {
         status: 200,
         headers: { 'content-type': 'application/pdf' },
       }),
