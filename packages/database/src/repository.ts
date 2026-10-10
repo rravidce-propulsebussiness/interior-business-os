@@ -153,6 +153,63 @@ export function createRepository(client: SupabaseClient<Database>) {
           .eq('organization_id', idSchema.parse(id)),
       );
     },
+    async createSubscriptionPlan(input: {
+      key: string;
+      name: string;
+      modules: string[];
+    }) {
+      return unwrap(
+        await client.rpc('platform_plan_create', { p_input: input }),
+      );
+    },
+    async submitCompanyApplication(input: {
+      name: string;
+      slug: string;
+      legalName: string;
+      country: string;
+      currency: string;
+      timezone: string;
+      industries: string[];
+      planId?: string;
+    }) {
+      return unwrap(
+        await client.rpc('company_application_submit', { p_input: input }),
+      );
+    },
+    async myCompanyApplications() {
+      return unwrap(await client.rpc('company_applications_mine'));
+    },
+    async companyOnboardingPolicy() {
+      return unwrap(await client.rpc('company_onboarding_policy'));
+    },
+    async setCompanyOnboardingPolicy(approvalRequired: boolean) {
+      return unwrap(
+        await client.rpc('company_onboarding_set_policy', {
+          p_approval_required: approvalRequired,
+        }),
+      );
+    },
+    async reviewCompanyApplications(status: string, page: number) {
+      return unwrap(
+        await client.rpc('company_applications_review', {
+          p_status: status,
+          p_page: page,
+        }),
+      );
+    },
+    async decideCompanyApplication(
+      applicationId: string,
+      action: 'approve' | 'reject',
+      note: string,
+    ) {
+      return unwrap(
+        await client.rpc('company_application_decide', {
+          p_application_id: idSchema.parse(applicationId),
+          p_action: action,
+          p_note: note,
+        }),
+      );
+    },
     async createOrganization(input: unknown) {
       return unwrap(
         await client.rpc('create_organization', {
