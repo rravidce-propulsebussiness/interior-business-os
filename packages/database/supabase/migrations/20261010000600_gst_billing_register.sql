@@ -324,9 +324,14 @@ begin
    raise exception 'Invalid document kind' using errcode='22023';end if;
  return coalesce((select jsonb_agg(to_jsonb(t)) from (
    select d.id,d.organization_id as "organizationId",d.kind,d.status,d.number,
-     d.document_date as "date",d.party_name as "partyName",d.total,d.version,
-     d.cgst,d.sgst,d.igst,d.created_at as "createdAt"
-   from private.gst_business_documents d where
+     d.document_date as "date",
+     case when p_kind='incoming' then coalesce(s.legal_name,o.name)
+          else d.party_name end as "partyName",
+     d.total,d.version,d.cgst,d.sgst,d.igst,d.created_at as "createdAt"
+   from private.gst_business_documents d
+   join public.organizations o on o.id=d.organization_id
+   left join private.gst_business_profiles s on s.organization_id=o.id
+   where
     (p_kind<>'incoming' and d.organization_id=p_org and (p_kind='all' or d.kind=p_kind))
     or (p_kind='incoming' and d.counterparty_organization_id=p_org and d.status='issued')
    order by d.document_date desc,d.id desc limit 100
