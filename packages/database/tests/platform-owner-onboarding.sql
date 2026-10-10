@@ -29,7 +29,7 @@ begin
    where c->>'memberStatus'='active' and (c->>'isOwner')::boolean
   ) then raise exception 'FAIL: nonowner % surfaced in owner-only cards', row->>'id';end if;
  end loop;
- select email into actual_email from auth.users where id='11111111-1111-4111-8111-111111111111';
+ actual_email=result->'rows'->0->>'email';
  status=public.platform_owner_email_status(actual_email);
  if status not in ('verified','unverified','suspended') then
   raise exception 'FAIL: owner lookup did not find existing user: %',status;end if;
