@@ -24,8 +24,9 @@ export function DomainPanel({
   }[];
   canManage: boolean;
 }) {
-  const [message, setMessage] = useState(''),
-    [pending, start] = useTransition();
+  const [message, setMessage] = useState('');
+  const [records, setRecords] = useState<{ type: 'TXT'; name: string; value: string }[]>([]);
+  const [pending, start] = useTransition();
   return (
     <div className="space-y-5">
       {canManage && (
@@ -56,6 +57,11 @@ export function DomainPanel({
           </button>
         </form>
       )}
+      <p className="text-sm text-muted-foreground">
+        Use a subdomain such as www.yourbusiness.com. A root domain without www
+        requires an additional apex-domain routing setup at your DNS provider.
+        Your domain stays registered with your chosen registrar.
+      </p>
       {domains.map((d) => (
         <section key={d.id} className="rounded border p-5">
           <div className="flex justify-between">
@@ -84,11 +90,11 @@ export function DomainPanel({
                   <button
                     disabled={pending}
                     onClick={() =>
-                      start(async () =>
-                        setMessage(
-                          (await checkWebsiteDomain(site, d.id)).message,
-                        ),
-                      )
+                      start(async () => {
+                        const result = await checkWebsiteDomain(site, d.id);
+                        setMessage(result.message);
+                        setRecords(result.records);
+                      })
                     }
                     className="rounded border px-3 py-2 text-sm"
                   >
@@ -114,6 +120,23 @@ export function DomainPanel({
           )}
         </section>
       ))}
+      {records.length > 0 && (
+        <section className="rounded border p-4">
+          <h2 className="mb-2 font-semibold">Additional Cloudflare validation records</h2>
+          <p className="mb-3 text-sm text-muted-foreground">
+            If HTTPS is pending, add the records below in your DNS provider. These
+            tokens come from Cloudflare and are separate from the Business OS TXT record.
+          </p>
+          <dl className="space-y-2 break-all text-sm">
+            {records.map((record) => (
+              <div key={record.name + record.value}>
+                <dt className="font-semibold">{record.type} · {record.name}</dt>
+                <dd className="font-mono">{record.value}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+      )}
       <p role="status" className="text-sm">
         {message}
       </p>
