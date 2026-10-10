@@ -203,7 +203,7 @@ export async function invitePlatformUser(_state: State, form: FormData) {
         url.protocol === 'https:' ||
         (process.env.NODE_ENV !== 'production' && url.hostname === 'localhost')
       )
-        emailRedirectTo = new URL('/auth/callback', url).toString();
+        emailRedirectTo = new URL('/forgot-password?invited=1', url).toString();
     }
     const client = createPublicDatabase();
     const { error } = await client.auth.signInWithOtp({
@@ -222,7 +222,7 @@ export async function invitePlatformUser(_state: State, form: FormData) {
     revalidatePath('/admin/organizations');
     return {
       message:
-        'Verification email requested. The person must verify their address before receiving a company role. If they already have an account, their existing account is reused.',
+        'Account invitation email requested. After using the email link, the user can set a password using Forgot password. Company access is assigned separately after email verification; existing email accounts are not duplicated.',
     };
   } catch (error) {
     return { message: safeFailure(error).message };
