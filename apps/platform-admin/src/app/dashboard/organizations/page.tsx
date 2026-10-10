@@ -61,7 +61,7 @@ export default async function OrganizationsDirectory({
       : 1;
   const result = await repository.organizationDirectory({
     query: q,
-    status,
+    ...(status ? { status } : {}),
     page,
     pageSize: PAGE_SIZE,
   });
@@ -130,7 +130,7 @@ export default async function OrganizationsDirectory({
                 <option value="">All statuses</option>
                 {statuses.map((value) => (
                   <option value={value} key={value}>
-                    {value[0].toUpperCase() + value.slice(1)}
+                    {value.charAt(0).toUpperCase() + value.slice(1)}
                   </option>
                 ))}
               </select>
