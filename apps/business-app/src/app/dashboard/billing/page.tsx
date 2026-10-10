@@ -1,8 +1,6 @@
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
 import { pageServices, activeOrganization } from '@business-os/auth/server';
 import { createGstRepository } from '@business-os/database/gst';
-import { DomainError } from '@business-os/shared';
 import { ActionForm } from '@business-os/ui/action-form';
 import { saveGstProfile } from './actions';
 
