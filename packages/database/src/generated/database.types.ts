@@ -11302,6 +11302,21 @@ export interface Database {
         };
         Returns: undefined;
       };
+      platform_owner_directory: {
+        Args: {
+          p_query?: string;
+          p_status?: string;
+          p_industry_id?: string | null;
+          p_page?: number;
+          p_sort?: string;
+          p_kind?: string;
+        };
+        Returns: Json;
+      };
+      platform_owner_email_status: {
+        Args: { p_email: string };
+        Returns: string;
+      };
       platform_set_role: {
         Args: { p_user_id: string; p_role_id: string; p_remove?: boolean };
         Returns: undefined;
