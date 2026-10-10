@@ -105,9 +105,9 @@ export default async function CompanyTeamPage() {
   const canInvite = has('team.invite') && has('role.manage');
   const invitationResult = canInvite
     ? await repository.employeeInvitations(organizationId)
-    : [];
-  const invitations = Array.isArray(invitationResult)
-    ? invitationResult.filter(isInvitationRow)
+    : { available: true, rows: [] };
+  const invitations = Array.isArray(invitationResult.rows)
+    ? invitationResult.rows.filter(isInvitationRow)
     : [];
   const canChangeStatus = has('team.manage') || has('team.remove');
 
@@ -301,7 +301,17 @@ export default async function CompanyTeamPage() {
             )}
           </section>
         )}
-        {canInvite && (
+        {canInvite && !invitationResult.available && (
+          <section
+            role="status"
+            className="rounded-2xl border border-amber-200 bg-amber-50 p-6 text-sm text-amber-900"
+          >
+            Employee email invitations are not enabled in this environment yet.
+            An administrator must verify the deployment database and apply the
+            reviewed migration before using this feature.
+          </section>
+        )}
+        {canInvite && invitationResult.available && (
           <section className="space-y-5 rounded-2xl border border-slate-200 bg-white p-6 sm:p-8">
             <h2 className="text-xl font-semibold">Invite employees by email</h2>
             <p className="text-sm text-slate-600">
