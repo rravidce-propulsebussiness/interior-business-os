@@ -77,6 +77,14 @@ export const rolePresets: readonly RolePreset[] = [
       'Prepare quotation drafts; internal costs and approvals are separate.',
   },
   {
+    key: 'project_manager_limited',
+    name: 'Project Manager (assigned projects)',
+    industries: ['construction', 'interior'],
+    permissions: ['organization.view', 'branch.view'],
+    description:
+      'Manage assigned project delivery through the project-specific manager role; no company-wide finance or project access.',
+  },
+  {
     key: 'site_engineer',
     name: 'Site Engineer',
     industries: ['construction', 'interior'],

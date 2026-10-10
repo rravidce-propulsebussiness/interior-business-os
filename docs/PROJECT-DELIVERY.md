@@ -72,3 +72,29 @@ No live customer approval, marketplace purchase, field video or site action
 has been claimed as verified. Test with at least one manager, architect,
 structural designer, engineer and watchman on staging and validate that
 cross-organization and cross-project requests are rejected.
+
+## Project manager updates (manual now, AI later)
+
+Migration `20261010000800_project_manager_updates.sql` introduces append-only
+manager updates with site health, completed progress narrative, next-day work
+priorities, decisions, measured material instructions and assigned staff
+instructions. The project engineer, quality inspector and procurement staff
+can read the manager's directions, but only project managers (and the
+organization owner) can publish or change manager decisions.
+
+Engineers continue submitting separate dated site reports. The manager can
+review another team member's report as **Approved** or **Changes requested**,
+with a required explanation for rework. Reviews are append-only, never
+silently rewrite the engineer's report, and cannot self-approve a manager's
+own daily submission. A revised engineer report is a new dated entry.
+
+Project managers can **manually correct material quantities** while requests
+are `requested` or `approved`; once `ordered` they are locked.
+Each correction records previous quantity, new quantity, reason and editor.
+Purchases, receipts and marketplace ordering remain separate. There is **no
+AI structural drawing interpretation, auto-BOQ generation, or prediction** in
+this phase.
+
+The new project manager workflow requires both the earlier delivery migration
+and `20261010000800_project_manager_updates.sql`. Run the DB regression
+`packages/database/tests/project-manager.sql` before production activation.

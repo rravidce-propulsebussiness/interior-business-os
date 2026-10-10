@@ -11315,6 +11315,19 @@ export interface Database {
         };
         Returns: Json;
       };
+      project_site_manager_command: {
+        Args: {
+          p_organization_id: string;
+          p_project_id: string;
+          p_action: string;
+          p_input?: Json;
+        };
+        Returns: Json;
+      };
+      project_site_manager_read: {
+        Args: { p_organization_id: string; p_project_id: string };
+        Returns: Json;
+      };
       project_site_media_get: {
         Args: { p_organization_id: string; p_project_id: string; p_id: string };
         Returns: Json;
@@ -11330,6 +11343,10 @@ export interface Database {
           p_caption?: string;
         };
         Returns: string;
+      };
+      project_site_my_projects: {
+        Args: { p_organization_id: string };
+        Returns: Json;
       };
       project_site_read: {
         Args: { p_organization_id: string; p_project_id: string };

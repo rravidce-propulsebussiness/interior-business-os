@@ -48,6 +48,7 @@ psql(['-f', file('supabase/seed-commercial.sql')]);
 psql(['-f', file('supabase/seed-commercial.sql')]);
 console.log('Commercial demo seed is repeatable.');
 assertionFile('project-delivery');
+assertionFile('project-manager');
 assertionFile('quotations');
 psql(['-f', file('supabase/seed-crm.sql')]);
 psql(['-f', file('supabase/seed-crm.sql')]);

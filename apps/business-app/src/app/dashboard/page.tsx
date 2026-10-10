@@ -228,6 +228,15 @@ export default async function Dashboard() {
                       <b aria-hidden="true">↗</b>
                     </Link>
                   )}
+                  {context.entitlements.includes('projects') && (
+                    <Link href="/dashboard/site-projects">
+                      <span>My assigned sites</span>
+                      <small>
+                        Manager updates, engineers and site delivery
+                      </small>
+                      <b aria-hidden="true">↗</b>
+                    </Link>
+                  )}
                   {canAccess(context, {
                     organizationId: context.organizationId,
                     permission: 'purchase.view',

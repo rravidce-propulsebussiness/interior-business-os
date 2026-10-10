@@ -31,6 +31,13 @@ const siteSchema = z.object({
   events: z.array(z.record(z.string(), z.unknown())),
 });
 type Site = z.infer<typeof siteSchema>;
+const managerDataSchema = z.object({
+  updates: z.array(row),
+  reviews: z.array(row),
+  quantity_revisions: z.array(row),
+});
+type ManagerData = z.infer<typeof managerDataSchema>;
+
 const stages = [
   {
     key: 'design',
@@ -118,6 +125,31 @@ function Action({
     />
   );
 }
+function ManagerAction({
+  project,
+  operation,
+  label,
+  fields,
+  hidden,
+}: {
+  project: string;
+  operation: string;
+  label: string;
+  fields: SiteField[];
+  hidden?: Record<string, string>;
+}) {
+  return (
+    <ProjectSiteForm
+      project={project}
+      operation={operation}
+      label={label}
+      fields={fields}
+      hidden={hidden ?? {}}
+      manager
+    />
+  );
+}
+
 function Heading({
   eyebrow,
   title,
@@ -158,6 +190,31 @@ export default async function ProjectDeliveryPage({
   const parsed = siteSchema.safeParse(result.data);
   if (!parsed.success) notFound();
   const site: Site = parsed.data;
+  const canSeeManagerUpdates =
+    site.can_manage ||
+    ['site_engineer', 'quality_inspector', 'procurement'].includes(
+      site.role ?? '',
+    );
+  let managerData: ManagerData = {
+    updates: [],
+    reviews: [],
+    quantity_revisions: [],
+  };
+  if (canSeeManagerUpdates && ['execution', 'handover'].includes(site.stage)) {
+    const response = await s.client.rpc('project_site_manager_read', {
+      p_organization_id: context.organizationId,
+      p_project_id: id,
+    });
+    if (response.error) notFound();
+    const selected = managerDataSchema.safeParse(response.data);
+    if (!selected.success) notFound();
+    managerData = selected.data;
+  }
+  const latestReviews = new Map<string, Record<string, unknown>>();
+  for (const review of managerData.reviews) {
+    const reportId = value(review, 'report_id');
+    if (!latestReviews.has(reportId)) latestReviews.set(reportId, review);
+  }
   const role = site.role;
   const manager = site.can_manage;
   const isDesign =
@@ -551,6 +608,131 @@ export default async function ProjectDeliveryPage({
             </section>
           )}
 
+        {canSeeManagerUpdates && (open || site.stage === 'handover') && (
+          <section className={card}>
+            <Heading
+              eyebrow="Manager control"
+              title="Project manager's updates & tomorrow priorities"
+              detail="Human-entered instructions, project health, tomorrow's priorities, site risks and pending decisions. Engineers can read the updates; only the project manager can publish them."
+            />
+            {manager && open && (
+              <details
+                className={formDetails}
+                open={managerData.updates.length === 0}
+              >
+                <summary className="cursor-pointer font-semibold">
+                  Publish a project manager update
+                </summary>
+                <div className="mt-4">
+                  <ManagerAction
+                    project={id}
+                    operation="manager_update"
+                    label="Save manager's daily update"
+                    fields={[
+                      {
+                        name: 'report_date',
+                        label: 'Update date',
+                        input: 'date',
+                        required: true,
+                      },
+                      {
+                        name: 'health',
+                        label: 'Overall site status',
+                        input: 'select',
+                        required: true,
+                        options: [
+                          { value: 'on_track', label: 'On track' },
+                          { value: 'at_risk', label: 'At risk' },
+                          {
+                            value: 'blocked',
+                            label: 'Blocked / cannot proceed',
+                          },
+                        ],
+                      },
+                      {
+                        name: 'summary',
+                        label: 'Progress / decisions today',
+                        input: 'textarea',
+                        required: true,
+                      },
+                      {
+                        name: 'tomorrow_priorities',
+                        label: 'Tomorrow work priorities',
+                        input: 'textarea',
+                        required: true,
+                      },
+                      {
+                        name: 'decisions_needed',
+                        label: 'Pending approvals and decisions',
+                        input: 'textarea',
+                      },
+                      {
+                        name: 'materials_notes',
+                        label: 'Manual material / procurement instructions',
+                        input: 'textarea',
+                      },
+                      {
+                        name: 'site_instructions',
+                        label: 'Instructions to site engineer / security',
+                        input: 'textarea',
+                      },
+                    ]}
+                  />
+                </div>
+              </details>
+            )}
+            <div className="mt-4 space-y-3">
+              {managerData.updates.map((update) => (
+                <article
+                  className="rounded-xl border border-slate-200 p-4 text-sm"
+                  key={update.id}
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <strong>{value(update, 'report_date')}</strong>
+                    <span
+                      className={
+                        value(update, 'health') === 'on_track' ? green : gray
+                      }
+                    >
+                      {display(value(update, 'health'))}
+                    </span>
+                  </div>
+                  <p className="mt-2">
+                    <strong>Progress:</strong> {value(update, 'summary')}
+                  </p>
+                  <p className="mt-2">
+                    <strong>Tomorrow:</strong>{' '}
+                    {value(update, 'tomorrow_priorities')}
+                  </p>
+                  {value(update, 'decisions_needed') && (
+                    <p className="mt-2">
+                      <strong>Pending approvals:</strong>{' '}
+                      {value(update, 'decisions_needed')}
+                    </p>
+                  )}
+                  {value(update, 'materials_notes') && (
+                    <p className="mt-2">
+                      <strong>Material instructions:</strong>{' '}
+                      {value(update, 'materials_notes')}
+                    </p>
+                  )}
+                  {value(update, 'site_instructions') && (
+                    <p className="mt-2">
+                      <strong>Staff instructions:</strong>{' '}
+                      {value(update, 'site_instructions')}
+                    </p>
+                  )}
+                </article>
+              ))}
+              {!managerData.updates.length && (
+                <p className="text-sm text-slate-500">
+                  No project manager updates yet.
+                </p>
+              )}
+            </div>
+          </section>
+        )}
+
         {(isEngineer || isQuality) && (open || site.stage === 'handover') && (
           <section className={card}>
             <Heading
@@ -651,6 +833,64 @@ export default async function ProjectDeliveryPage({
                       <strong>Checks required:</strong>{' '}
                       {value(report, 'checks_required')}
                     </p>
+                  )}
+                  {latestReviews.has(String(report.id)) && (
+                    <p className="mt-3 rounded-lg bg-slate-50 p-2 text-xs">
+                      <strong>Manager review:</strong>{' '}
+                      {display(
+                        value(
+                          latestReviews.get(String(report.id)) ?? {},
+                          'decision',
+                        ),
+                      )}
+                      {value(
+                        latestReviews.get(String(report.id)) ?? {},
+                        'note',
+                      ) &&
+                        ' · ' +
+                          value(
+                            latestReviews.get(String(report.id)) ?? {},
+                            'note',
+                          )}
+                    </p>
+                  )}
+                  {manager && open && (
+                    <details className={formDetails}>
+                      <summary className="cursor-pointer font-semibold">
+                        Review engineer report
+                      </summary>
+                      <p className="my-2 text-xs text-slate-600">
+                        Manager reviews of reports submitted by another team
+                        member are recorded permanently. A manager cannot
+                        approve their own report.
+                      </p>
+                      <ManagerAction
+                        project={id}
+                        operation="report_review"
+                        label="Record review"
+                        hidden={{ report_id: String(report.id) }}
+                        fields={[
+                          {
+                            name: 'decision',
+                            label: 'Review decision',
+                            input: 'select',
+                            required: true,
+                            options: [
+                              { value: 'approved', label: 'Approved' },
+                              {
+                                value: 'changes_requested',
+                                label: 'Changes needed',
+                              },
+                            ],
+                          },
+                          {
+                            name: 'note',
+                            label: 'Review notes / work requiring correction',
+                            input: 'textarea',
+                          },
+                        ]}
+                      />
+                    </details>
                   )}
                 </article>
               ))}
@@ -753,6 +993,48 @@ export default async function ProjectDeliveryPage({
                         Supplier/PO reference: {value(m, 'vendor_reference')}
                       </p>
                     )}
+                    {manager &&
+                      open &&
+                      ['requested', 'approved'].includes(
+                        value(m, 'status'),
+                      ) && (
+                        <details className={formDetails}>
+                          <summary className="cursor-pointer text-sm font-semibold">
+                            Correct manually measured quantity
+                          </summary>
+                          <p className="mt-2 text-xs text-slate-600">
+                            AI measurement is not enabled. The original quantity
+                            and reason are preserved, and already ordered
+                            materials cannot be changed here.
+                          </p>
+                          <div className="mt-3">
+                            <ManagerAction
+                              project={id}
+                              operation="material_quantity_correct"
+                              label="Save corrected quantity"
+                              hidden={{ id: String(m.id) }}
+                              fields={[
+                                {
+                                  name: 'quantity',
+                                  label:
+                                    'New required quantity (' +
+                                    value(m, 'unit') +
+                                    ')',
+                                  input: 'number',
+                                  required: true,
+                                  initial: value(m, 'quantity'),
+                                },
+                                {
+                                  name: 'reason',
+                                  label: 'Why did the quantity change?',
+                                  input: 'textarea',
+                                  required: true,
+                                },
+                              ]}
+                            />
+                          </div>
+                        </details>
+                      )}
                     {open &&
                       isProcurement &&
                       ['requested', 'approved', 'ordered'].includes(
@@ -806,6 +1088,23 @@ export default async function ProjectDeliveryPage({
                       )}
                   </article>
                 ))}
+                {manager && managerData.quantity_revisions.length > 0 && (
+                  <details className={formDetails}>
+                    <summary className="cursor-pointer text-sm font-semibold">
+                      Manual quantity revision history
+                    </summary>
+                    <div className="mt-3 space-y-2">
+                      {managerData.quantity_revisions.map((revision) => (
+                        <p className="text-xs text-slate-700" key={revision.id}>
+                          {value(revision, 'old_quantity')} →{' '}
+                          {value(revision, 'new_quantity')}
+                          {' · '}
+                          {value(revision, 'reason')}
+                        </p>
+                      ))}
+                    </div>
+                  </details>
+                )}
                 {!site.materials.length && (
                   <p className="text-sm text-slate-500">
                     No materials requested yet.
