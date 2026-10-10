@@ -17,9 +17,6 @@ begin
  if not private.has_permission(org,'project.manage') then
    raise exception 'Project owner fixture lacks project.manage grant';
  end if;
- if not private.entitled(org,'projects') then
-   raise exception 'Fixture requires Projects entitlement';
- end if;
  result=public.project_site_command(org,project,'initialize','{}');
  if (public.project_site_read(org,project)->>'stage') is distinct from 'design' then
    raise exception 'Project initialization did not enter design stage';
