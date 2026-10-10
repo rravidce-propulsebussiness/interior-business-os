@@ -257,11 +257,18 @@ export default async function Dashboard() {
                         ].includes(grant.permission) &&
                         grant.scope.kind === 'organization',
                     ) && (
+                      <>
+                        <Link href="/dashboard/billing">
+                          <span>Invoices &amp; GST Bills</span>
+                          <small>Sales, purchases &amp; payments</small>
+                          <b aria-hidden="true">↗</b>
+                        </Link>
                       <Link href="/dashboard/finance">
                         <span>Finance</span>
                         <small>Commercial execution</small>
                         <b aria-hidden="true">↗</b>
                       </Link>
+                      </>
                     )}
                   {notificationSummary && (
                     <Link href="/dashboard/work">
