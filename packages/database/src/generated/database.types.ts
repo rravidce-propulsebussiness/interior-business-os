@@ -11547,13 +11547,13 @@ export interface Database {
         Args: { p_organization_id: string; p_website_id: string };
         Returns: Json;
       };
-      workspace_organization_for_hostname: {
-        Args: { p_hostname: string };
-        Returns: string;
-      };
       work_queue: {
         Args: { p_organization_id: string; p_group?: string; p_page?: number };
         Returns: Json;
+      };
+      workspace_organization_for_hostname: {
+        Args: { p_hostname: string };
+        Returns: string;
       };
     };
     Enums: Record<string, never>;
