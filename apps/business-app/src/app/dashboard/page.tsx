@@ -71,6 +71,15 @@ export default async function Dashboard() {
       </header>
       {context && (
         <nav className="dashboard-nav" aria-label="Daily operations">
+          {(canViewTeam ||
+            canAccess(context, {
+              organizationId: context.organizationId,
+              permission: 'role.view',
+            })) && (
+            <Link className="underline" href="/dashboard/company/team">
+              Employees &amp; roles
+            </Link>
+          )}
           <Link className="underline" href="/dashboard/reports">
             Reports
           </Link>
