@@ -1,6 +1,10 @@
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
-import { pageServices, activeOrganization } from '@business-os/auth/server';
+import { notFound, redirect } from 'next/navigation';
+import {
+  pageServices,
+  activeOrganization,
+  workspaceScope,
+} from '@business-os/auth/server';
 import { signOut, switchOrganization } from '@business-os/auth/actions';
 import { canAccess, moduleNavigation } from '@business-os/auth';
 import { DomainError } from '@business-os/shared';
@@ -10,6 +14,7 @@ import { createAutomationRepository } from '@business-os/database/automation';
 export default async function Dashboard() {
   const { authorization, repository, client } = await pageServices();
   const user = await authorization.requireAuthenticatedUser();
+  const scope = await workspaceScope();
   // Platform administrators have one canonical dashboard: /admin.
   // An organization Owner is not a platform administrator. Redirect only when
   // every permission required by /admin's dashboard is verified server-side.
@@ -25,7 +30,7 @@ export default async function Dashboard() {
     if (!(error instanceof DomainError && error.code === 'FORBIDDEN'))
       throw error;
   }
-  if (canOpenPlatformDashboard) redirect('/admin');
+  if (canOpenPlatformDashboard && !scope) redirect('/admin');
   const [allOrganizations, memberships, modules] = await Promise.all([
     repository.organizations(),
     repository.memberships(),
@@ -48,9 +53,16 @@ export default async function Dashboard() {
       invalidSelection = true;
     else throw error;
   }
+  if (scope && (!context || invalidSelection)) notFound();
   const organization = context
     ? organizations.find((org) => org.id === context.organizationId)
     : null;
+  if (
+    !scope &&
+    organization &&
+    process.env.BUSINESS_OS_TENANT_ROUTES_ENABLED === 'true'
+  )
+    redirect('/' + organization.slug + '/dashboard');
   const branches = context
     ? await repository.branches(context.organizationId)
     : [];
@@ -132,7 +144,7 @@ export default async function Dashboard() {
         </p>
       )}
 
-      {organizations.length > 0 && (
+      {organizations.length > 0 && scope?.kind !== 'hostname' && (
         <form action={switchOrganization} className="dashboard-controlbar">
           <label>
             Active company
@@ -359,7 +371,7 @@ export default async function Dashboard() {
           </p>
         </section>
       )}
-      <footer className="tenant-v2-footer">
+      {scope?.kind !== 'hostname' && <footer className="tenant-v2-footer">
         <div>
           <h2>Need another business workspace?</h2>
           <p>Apply to register a construction or interiors company.</p>
@@ -370,7 +382,7 @@ export default async function Dashboard() {
         >
           Register a company →
         </Link>
-      </footer>
+      </footer>}
     </main>
   );
 }
