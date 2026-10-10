@@ -8,10 +8,12 @@ import {
   changeMembershipRole,
   changeMembershipStatus,
   createCustomRole,
+  createRoleFromPreset,
   inviteEmployeeByEmail,
   resendEmployeeEmail,
   revokeEmployeeEmail,
 } from './actions';
+import { rolePresets } from './presets';
 
 type InvitationRow = {
   id: string;
@@ -466,6 +468,72 @@ export default async function CompanyTeamPage() {
                 </article>
               ))}
             </div>
+          </section>
+        )}
+        {canCreateRoles && (
+          <section className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8">
+            <h2 className="text-xl font-semibold">Suggested role presets</h2>
+            <p className="mt-2 text-sm text-slate-600">
+              These are editable starting points, not industry restrictions.
+              Construction and Interior companies can use the same roles.
+              Project and site access is not created by a role label.
+            </p>
+            {rolePresets.some(
+              (preset) => !roles.some((role) => role.key === preset.key),
+            ) ? (
+              <ActionForm action={createRoleFromPreset} label="Add role preset">
+                <input
+                  type="hidden"
+                  name="organizationId"
+                  value={organizationId}
+                />
+                <label className="grid gap-2 text-sm font-medium">
+                  Choose a role
+                  <select
+                    name="presetKey"
+                    required
+                    className="w-full rounded-lg border border-slate-300 p-3"
+                  >
+                    {rolePresets
+                      .filter(
+                        (preset) =>
+                          !roles.some((role) => role.key === preset.key),
+                      )
+                      .map((preset) => (
+                        <option key={preset.key} value={preset.key}>
+                          {preset.name} — {preset.industries.join(' / ')}
+                        </option>
+                      ))}
+                  </select>
+                </label>
+              </ActionForm>
+            ) : (
+              <p className="mt-3 text-sm text-slate-500">
+                All suggested roles are already installed.
+              </p>
+            )}
+            <ul className="mt-5 grid gap-3 sm:grid-cols-2">
+              {rolePresets.map((preset) => (
+                <li
+                  key={preset.key}
+                  className="rounded-xl border border-slate-200 p-4"
+                >
+                  <h3 className="font-semibold">{preset.name}</h3>
+                  <p className="mt-1 text-xs text-slate-500">
+                    {preset.industries.join(' · ')} ·{' '}
+                    {preset.permissions.length} starting permissions
+                  </p>
+                  <p className="mt-2 text-sm text-slate-600">
+                    {preset.description}
+                  </p>
+                  {roles.some((role) => role.key === preset.key) && (
+                    <p className="mt-2 text-xs font-semibold text-emerald-800">
+                      Installed
+                    </p>
+                  )}
+                </li>
+              ))}
+            </ul>
           </section>
         )}
         {canCreateRoles && (
