@@ -31,3 +31,29 @@ export async function decideCompanyApplication(
     return { message: safeFailure(error).message };
   }
 }
+
+export async function setCompanyOnboardingPolicy(
+  _state: { message: string },
+  form: FormData,
+) {
+  try {
+    const { authorization, repository } = await serverServices();
+    await authorization.requirePlatformPermission(
+      'platform.organizations.manage',
+    );
+    const requested = form.get('approvalRequired');
+    if (requested !== 'true' && requested !== 'false') {
+      return { message: 'Choose an explicit company approval setting.' };
+    }
+    await repository.setCompanyOnboardingPolicy(requested === 'true');
+    revalidatePath('/dashboard/applications');
+    return {
+      message:
+        requested === 'true'
+          ? 'New companies now require platform review. Existing companies are unaffected.'
+          : 'Legacy organization creation re-enabled for controlled rollback.',
+    };
+  } catch (error) {
+    return { message: safeFailure(error).message };
+  }
+}
