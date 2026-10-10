@@ -122,16 +122,21 @@ export function cloudflarePdfRequest(
 
 async function cloudflarePdf(html: string, options: PdfOptions) {
   const request = cloudflarePdfRequest(html, options);
-  const response = await fetch(request.url, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${request.token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(request.body),
-    signal: AbortSignal.timeout(RENDER_TIMEOUT_MS),
-    redirect: 'error',
-  });
+  let response: Response;
+  try {
+    response = await fetch(request.url, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${request.token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(request.body),
+      signal: AbortSignal.timeout(RENDER_TIMEOUT_MS),
+      redirect: 'error',
+    });
+  } catch {
+    throw new PdfServiceError('PDF_RENDER_FAILED');
+  }
   // Do not return a provider error body; it could contain private input.
   if (
     !response.ok ||
@@ -179,6 +184,11 @@ export async function renderPdf(
     if (bytes.byteLength > MAX_PDF_BYTES)
       throw new PdfServiceError('PDF_RENDER_LIMIT');
     return await applyMetadata(bytes, options);
+  } catch (error) {
+    if (error instanceof PdfServiceError) throw error;
+    if (error instanceof Error && error.message.startsWith('Print preflight'))
+      throw error;
+    throw new PdfServiceError('PDF_RENDER_FAILED');
   } finally {
     active--;
   }
