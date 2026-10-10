@@ -1,0 +1,31 @@
+name: One-time Phase 2 formatter
+on:
+  push:
+    branches:
+      - feature/phase2-team-role-management-20261010
+permissions:
+  contents: write
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/phase2-team-role-management-20261010
+          persist-credentials: true
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Format only new employee management files
+        run: |
+          pnpm exec prettier --write apps/business-app/src/app/dashboard/company/team/actions.ts apps/business-app/src/app/dashboard/company/team/page.tsx apps/business-app/src/app/dashboard/page.tsx
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/business-app/src/app/dashboard/company/team/actions.ts apps/business-app/src/app/dashboard/company/team/page.tsx apps/business-app/src/app/dashboard/page.tsx
+          if ! git diff --cached --quiet; then
+            git commit -m "style(team): format employee management screens"
+            git push origin HEAD:feature/phase2-team-role-management-20261010
+          fi
