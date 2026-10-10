@@ -80,6 +80,44 @@ export async function saveProjectSite(
   }
 }
 
+const managerActions = new Set([
+  'manager_update',
+  'report_review',
+  'material_quantity_correct',
+]);
+
+export async function saveProjectManagerUpdate(
+  project: string,
+  operation: string,
+  form: FormData,
+): Promise<Result> {
+  try {
+    if (!managerActions.has(operation))
+      throw new Error('Unknown project manager action');
+    const { client, org } = await context(project);
+    const { error } = await client.rpc('project_site_manager_command', {
+      p_organization_id: org,
+      p_project_id: project,
+      p_action: operation,
+      p_input: fromForm(form),
+    });
+    if (error) throw new Error(error.code === '42501'
+      ? 'Project manager access required'
+      : error.message.slice(0, 220));
+    revalidatePath(pathFor(project));
+    return { saved: true, message: operation === 'material_quantity_correct'
+      ? 'Material quantity revised. Previous value kept in history.'
+      : operation === 'report_review'
+        ? 'Engineer report review recorded.'
+        : 'Project manager update published.' };
+  } catch (error) {
+    return {
+      saved: false,
+      message: error instanceof Error ? error.message : 'Unable to save manager update',
+    };
+  }
+}
+
 export async function uploadProjectSiteMedia(
   project: string,
   form: FormData,
