@@ -159,32 +159,32 @@ language sql stable security definer set search_path='' as $$
 $$;
 
 create function private.site_owner(org uuid) returns boolean
-language sql stable security definer set search_path='' as $
+language sql stable security definer set search_path='' as $$
  select private.is_member(org) and exists (
   select 1 from public.organization_memberships m
   join public.membership_roles mr on mr.organization_id=m.organization_id and mr.membership_id=m.id
   join public.roles r on r.organization_id=mr.organization_id and r.id=mr.role_id
   where m.organization_id=org and m.user_id=(select auth.uid()) and m.status='active' and r.is_owner
  )
-$;
+$$;
 
 create function private.site_is_manager(org uuid,project uuid) returns boolean
-language sql stable security definer set search_path='' as $
+language sql stable security definer set search_path='' as $$
  select private.site_access(org,project) and (
   private.site_owner(org) or
   private.site_role(org,project)='manager' or
   (private.site_role(org,project) is null and private.has_permission(org,'project.manage'))
  )
-$;
+$$;
 
 create function private.site_allowed(org uuid,project uuid,roles text[]) returns boolean
-language sql stable security definer set search_path='' as $
+language sql stable security definer set search_path='' as $$
  select private.site_access(org,project) and (
   private.site_owner(org) or
   (private.site_role(org,project) is null and private.has_permission(org,'project.manage')) or
   private.site_role(org,project)=any(roles)
  )
-$;
+$$;
 
 create function private.site_log(org uuid,project uuid,action text,record_id uuid default null) returns void
 language plpgsql security definer set search_path='' as $$
