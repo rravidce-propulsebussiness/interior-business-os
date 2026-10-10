@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 const titles: Record<string, string> = {
   'platform-admin': 'Platform administration',
-  'business-app': 'Your business workspace',
+  'business-app': 'Run the whole business from one calm workspace.',
   websites: 'Business websites',
 };
 test('application shell is accessible and responsive', async ({
