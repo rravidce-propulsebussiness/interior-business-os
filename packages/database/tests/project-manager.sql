@@ -69,6 +69,8 @@ begin
  perform set_config('test.manager_report',record->>'id',true);
  if jsonb_array_length(public.project_site_manager_read(org,project)->'updates')<>2 then
   raise exception 'Site engineer cannot read manager next-day instructions';end if;
+ if jsonb_array_length(public.project_site_my_projects(org))<1 then
+   raise exception 'Assigned engineer cannot discover the project';end if;
  begin
    perform public.project_site_manager_command(org,project,'manager_update',
     jsonb_build_object('report_date',current_date,'health','on_track',
