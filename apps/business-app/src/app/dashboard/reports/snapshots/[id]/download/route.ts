@@ -1,3 +1,4 @@
+import { PdfServiceError } from '@business-os/shared/pdf';
 import { reportCsv } from '@business-os/core/automation';
 import { reportHtml } from '@business-os/core/report-document';
 import { renderPdf } from '@business-os/shared/pdf';
@@ -50,6 +51,10 @@ export async function GET(
       },
     });
   } catch (error) {
+    if (error instanceof PdfServiceError)
+      return new Response('PDF rendering service is unavailable', {
+        status: error.status, headers,
+      });
     return new Response(safeFailure(error).message, { status: 403, headers });
   }
 }
