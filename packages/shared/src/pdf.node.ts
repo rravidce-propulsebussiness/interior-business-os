@@ -65,7 +65,6 @@ export async function renderNodePdf(
         preferCSSPageSize: true,
         printBackground: true,
         displayHeaderFooter: false,
-        timeout: 30_000,
       });
       return Buffer.from(bytes);
     } finally {
