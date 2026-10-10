@@ -23,8 +23,8 @@ const productSchema = z
   })
   .refine(
     (value) =>
-      Math.round(value.price * 100) === value.price * 100 &&
-      Math.round(value.minQuantity * 1000) === value.minQuantity * 1000,
+      Math.abs(Math.round(value.price * 100) - value.price * 100) < 0.000001 &&
+      Math.abs(Math.round(value.minQuantity * 1000) - value.minQuantity * 1000) < 0.000001,
   );
 const orderSchema = z
   .object({
@@ -33,7 +33,7 @@ const orderSchema = z
     requestKey: z.uuid(),
   })
   .refine(
-    (value) => Math.round(value.quantity * 1000) === value.quantity * 1000,
+    (value) => Math.abs(Math.round(value.quantity * 1000) - value.quantity * 1000) < 0.000001,
   );
 
 async function currentOrg() {
