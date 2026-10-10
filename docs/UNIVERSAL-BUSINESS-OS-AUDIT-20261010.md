@@ -16,19 +16,19 @@ These entities are **existing foundations**, not proof that every intended workf
 
 ## 2. Feature gap matrix
 
-| Requested capability | Present now | Missing before acceptance |
-| --- | --- | --- |
-| Unified core CRM, customers, quotations and catalog/pricing | Canonical migrations, repositories, domain services and UI | Hosted tenant tests and workflow refinements |
-| Billing, contracts, payments, projects, procurement and inventory | Canonical tables, checked RPCs and dashboard modules | End-to-end acceptance and additional business workflows |
-| Platform Super Admin | Platform roles, permission checks, organization status/plan and entitlement actions | Searchable organization console, approvals, SaaS plan editor, safe support, audit UX |
-| Company onboarding | Supabase sign-up, `create_organization` RPC, owner role and optional single industry | Verified-email company application, idempotent approval process, multi-industry selection, guided onboarding |
-| Employee/team management | Memberships, roles, branch-scoped grants and team RPCs | Email-based invitations, visual role editor, project/task scopes and mobile worker views |
-| Industry Packs | `industries` and `organization_industries`; interior starter package | Versioned pack definitions, configurable roles/forms/workflows/catalog/dashboard registry and multiple enabled packs |
-| Template website builder | Page-tree editor, responsive preview, published versions, lead forms | Further premium templates and hosted operational verification |
-| Fully custom frontend websites | Restricted HTML/CSS/JS iframe components | ZIP/React/TypeScript build pipeline, isolated asset hosting and complete website imports |
-| Hosted URLs and custom domains | Website/domain tables and resolver infrastructure | Verified customer-facing DNS/TLS provisioning, automated lifecycle and hosted tests |
-| Shared materials marketplace | Vendors, materials and purchasing within company domain | Cross-tenant seller catalog, merchant onboarding, cart/order/dispute and settlement domain |
-| Analytics and automations | Reporting and notification/outbox implementation | New industry-specific widgets and hosted job acceptance |
+| Requested capability                                              | Present now                                                                          | Missing before acceptance                                                                                            |
+| ----------------------------------------------------------------- | ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| Unified core CRM, customers, quotations and catalog/pricing       | Canonical migrations, repositories, domain services and UI                           | Hosted tenant tests and workflow refinements                                                                         |
+| Billing, contracts, payments, projects, procurement and inventory | Canonical tables, checked RPCs and dashboard modules                                 | End-to-end acceptance and additional business workflows                                                              |
+| Platform Super Admin                                              | Platform roles, permission checks, organization status/plan and entitlement actions  | Searchable organization console, approvals, SaaS plan editor, safe support, audit UX                                 |
+| Company onboarding                                                | Supabase sign-up, `create_organization` RPC, owner role and optional single industry | Verified-email company application, idempotent approval process, multi-industry selection, guided onboarding         |
+| Employee/team management                                          | Memberships, roles, branch-scoped grants and team RPCs                               | Email-based invitations, visual role editor, project/task scopes and mobile worker views                             |
+| Industry Packs                                                    | `industries` and `organization_industries`; interior starter package                 | Versioned pack definitions, configurable roles/forms/workflows/catalog/dashboard registry and multiple enabled packs |
+| Template website builder                                          | Page-tree editor, responsive preview, published versions, lead forms                 | Further premium templates and hosted operational verification                                                        |
+| Fully custom frontend websites                                    | Restricted HTML/CSS/JS iframe components                                             | ZIP/React/TypeScript build pipeline, isolated asset hosting and complete website imports                             |
+| Hosted URLs and custom domains                                    | Website/domain tables and resolver infrastructure                                    | Verified customer-facing DNS/TLS provisioning, automated lifecycle and hosted tests                                  |
+| Shared materials marketplace                                      | Vendors, materials and purchasing within company domain                              | Cross-tenant seller catalog, merchant onboarding, cart/order/dispute and settlement domain                           |
+| Analytics and automations                                         | Reporting and notification/outbox implementation                                     | New industry-specific widgets and hosted job acceptance                                                              |
 
 **Do not rename the canonical business application or redirect `sghomesinterior.in` as part of these changes.** A website-builder capability does not imply that arbitrary user code can run on the authenticated dashboard origin.
 
@@ -63,7 +63,7 @@ Implemented without changing tenancy data or SQL migrations:
 5. **Phase 4**: preserve current website builder; add isolated, resource-limited custom frontend project validation/build/publish service. Never execute arbitrary tenant code with Business App cookies or service keys.
 6. **Phase 5**: hosted slug/subdomain/custom-domain registration, TXT/CNAME verification, TLS provisioning, tenant-safe routing and stable migration between URL types. No changes to SG Homes live routing without verified cutover.
 7. **Phase 6**: refine canonical lead → customer → quotation → contract → project → tasks → procurement → invoice → payment → handover processes with versioned optional stages and approvals.
-8. **Phase 7**: build a distinct *marketplace bounded context* that **reuses** catalog classification and procurement contracts but correctly separates merchants, external buyers, orders, disputes and financial settlements.
+8. **Phase 7**: build a distinct _marketplace bounded context_ that **reuses** catalog classification and procurement contracts but correctly separates merchants, external buyers, orders, disputes and financial settlements.
 9. **Phase 8**: run real staging Auth/RLS/Worker tests, cross-company probes, permission denial matrix, browser/mobile tests, migration dry runs, rollback, monitoring and hosted DNS/TLS/PDF acceptance.
 
 Do not create demo customers, claims of completed projects, employees or marketplace sellers on production from unverified sample data. Seed example workers/companies only in explicitly isolated staging fixtures.

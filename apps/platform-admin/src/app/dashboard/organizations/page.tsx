@@ -16,7 +16,11 @@ function single(value: string | string[] | undefined) {
   return typeof value === 'string' ? value : (value?.[0] ?? '');
 }
 
-function directoryHref(query: string, status: Status | undefined, page: number) {
+function directoryHref(
+  query: string,
+  status: Status | undefined,
+  page: number,
+) {
   const params = new URLSearchParams();
   if (query) params.set('q', query);
   if (status) params.set('status', status);
@@ -39,7 +43,9 @@ export default async function OrganizationsDirectory({
 }) {
   const { authorization, repository } = await pageServices();
   try {
-    await authorization.requirePlatformPermission('platform.organizations.view');
+    await authorization.requirePlatformPermission(
+      'platform.organizations.view',
+    );
   } catch (error) {
     if (error instanceof DomainError && error.code === 'FORBIDDEN') notFound();
     throw error;
@@ -96,7 +102,10 @@ export default async function OrganizationsDirectory({
             database row-level security.
           </p>
           <p className="mt-6 text-2xl font-semibold" aria-live="polite">
-            {total.toLocaleString()} <span className="text-sm font-normal text-slate-300">matching organizations</span>
+            {total.toLocaleString()}{' '}
+            <span className="text-sm font-normal text-slate-300">
+              matching organizations
+            </span>
           </p>
         </header>
 
@@ -152,7 +161,8 @@ export default async function OrganizationsDirectory({
 
         <section aria-label="Organization results" className="space-y-4">
           <p className="text-sm text-slate-600">
-            Showing {first}–{last} of {total.toLocaleString()} matching organizations
+            Showing {first}–{last} of {total.toLocaleString()} matching
+            organizations
           </p>
           {organizations.length ? (
             <ul className="grid gap-4 sm:grid-cols-2">
@@ -175,13 +185,18 @@ export default async function OrganizationsDirectory({
                         {organization.slug} · {organization.country_code}
                       </p>
                       <p className="mt-3 text-xs text-slate-500">
-                        {organization.plan_id ? 'Plan assigned' : 'No plan assigned'}
+                        {organization.plan_id
+                          ? 'Plan assigned'
+                          : 'No plan assigned'}
                       </p>
                       <Link
                         href={`/dashboard/organizations/${organization.id}`}
                         className="mt-5 inline-flex rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold hover:bg-slate-50"
                       >
-                        View organization <span aria-hidden="true" className="ml-2">→</span>
+                        View organization{' '}
+                        <span aria-hidden="true" className="ml-2">
+                          →
+                        </span>
                       </Link>
                     </article>
                   </li>
@@ -198,7 +213,10 @@ export default async function OrganizationsDirectory({
           )}
         </section>
 
-        <nav aria-label="Organization pagination" className="flex items-center justify-between gap-4 pb-8">
+        <nav
+          aria-label="Organization pagination"
+          className="flex items-center justify-between gap-4 pb-8"
+        >
           {page > 1 ? (
             <Link
               href={directoryHref(q, status, page - 1)}
