@@ -80,10 +80,6 @@ select set_config('request.jwt.claim.sub','22222222-2222-4222-8222-222222222222'
 do $$
 declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd'; project uuid=current_setting('test.project_site_id')::uuid;
 begin
- raise notice 'Site watchman diagnostic uid %, role %, manager %, permission %',
-   auth.uid(),public.project_site_read(org,project)->>'role',
-   public.project_site_read(org,project)->>'can_manage',
-   private.has_permission(org,'project.manage');
  perform public.project_site_command(org,project,'gate_add',
   '{"kind":"material_delivery","description":"Cement truck arrived","notes":"Check delivery against PO"}');
  begin
