@@ -16,12 +16,13 @@ export type SiteField = {
 const control =
   'mt-1.5 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-blue-600 focus:outline-blue-600';
 export function ProjectSiteForm({
-  project, operation, label, fields, secondary = false,
+  project, operation, label, fields, hidden = {}, secondary = false,
 }: {
   project: string;
   operation: string;
   label: string;
   fields: readonly SiteField[];
+  hidden?: Readonly<Record<string, string>>;
   secondary?: boolean;
 }) {
   const [message, setMessage] = useState('');
@@ -40,6 +41,7 @@ export function ProjectSiteForm({
         });
       }}
     >
+      {Object.entries(hidden).map(([key, value]) => <input type="hidden" name={key} value={value} key={key} />)}
       <div className="grid gap-3 sm:grid-cols-2">
         {fields.map((field) => (
           <label key={field.name} className={field.input === 'textarea' ? 'sm:col-span-2 text-sm font-medium' : 'text-sm font-medium'}>
