@@ -76,9 +76,10 @@ export default async function PlatformControlModule({ params }: { params: Promis
     repository.plans(),
     repository.planModules(),
   ]);
-  const related = config.keywords.length
+  const keywords: readonly string[] = config.keywords;
+  const related = keywords.length
     ? modules.filter((mod) =>
-        config.keywords.some((key) =>
+        keywords.some((key) =>
           mod.key.toLowerCase().includes(key) || mod.name.toLowerCase().includes(key),
         ),
       )
