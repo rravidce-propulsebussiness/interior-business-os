@@ -10997,6 +10997,10 @@ export interface Database {
         };
         Returns: Json;
       };
+      marketplace_industry_create: {
+        Args: { p_key: string; p_name: string };
+        Returns: string;
+      };
       marketplace_order_decide: {
         Args: {
           p_organization_id: string;
@@ -11028,6 +11032,10 @@ export interface Database {
       };
       marketplace_seller_decide: {
         Args: { p_seller_id: string; p_action: string };
+        Returns: undefined;
+      };
+      marketplace_seller_industry_assign: {
+        Args: { p_organization_id: string; p_industry_id: string };
         Returns: undefined;
       };
       marketplace_seller_profile: {

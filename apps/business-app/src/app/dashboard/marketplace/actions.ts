@@ -24,7 +24,9 @@ const productSchema = z
   .refine(
     (value) =>
       Math.abs(Math.round(value.price * 100) - value.price * 100) < 0.000001 &&
-      Math.abs(Math.round(value.minQuantity * 1000) - value.minQuantity * 1000) < 0.000001,
+      Math.abs(
+        Math.round(value.minQuantity * 1000) - value.minQuantity * 1000,
+      ) < 0.000001,
   );
 const orderSchema = z
   .object({
@@ -33,7 +35,9 @@ const orderSchema = z
     requestKey: z.uuid(),
   })
   .refine(
-    (value) => Math.abs(Math.round(value.quantity * 1000) - value.quantity * 1000) < 0.000001,
+    (value) =>
+      Math.abs(Math.round(value.quantity * 1000) - value.quantity * 1000) <
+      0.000001,
   );
 
 async function currentOrg() {
@@ -139,29 +143,45 @@ export async function decideMarketplaceSeller(form: FormData) {
 }
 
 export async function createMarketplaceIndustry(form: FormData) {
-  const path='/admin/control/marketplace';
+  const path = '/admin/control/marketplace';
   try {
-    const {authorization,client}=await pageServices();
-    await authorization.requirePlatformPermission('platform.entitlements.manage');
-    const key=z.string().trim().toLowerCase().regex(/^[a-z][a-z0-9_]*$/).min(2).max(64).parse(form.get('key'));
-    const title=z.string().trim().min(2).max(100).parse(form.get('name'));
-    await createMarketplaceRepository(client).industryCreate(key,title);
+    const { authorization, client } = await pageServices();
+    await authorization.requirePlatformPermission(
+      'platform.entitlements.manage',
+    );
+    const key = z
+      .string()
+      .trim()
+      .toLowerCase()
+      .regex(/^[a-z][a-z0-9_]*$/)
+      .min(2)
+      .max(64)
+      .parse(form.get('key'));
+    const title = z.string().trim().min(2).max(100).parse(form.get('name'));
+    await createMarketplaceRepository(client).industryCreate(key, title);
     revalidatePath(path);
     revalidatePath('/dashboard/marketplace');
-  }catch(error){handleFailure(error,path);}
-  redirect(path+'?updated=industry');
+  } catch (error) {
+    handleFailure(error, path);
+  }
+  redirect(path + '?updated=industry');
 }
 
 export async function assignSellerIndustry(form: FormData) {
-  const path='/admin/control/marketplace';
+  const path = '/admin/control/marketplace';
   try {
-    const {authorization,client}=await pageServices();
-    await authorization.requirePlatformPermission('platform.organizations.manage');
+    const { authorization, client } = await pageServices();
+    await authorization.requirePlatformPermission(
+      'platform.organizations.manage',
+    );
     await createMarketplaceRepository(client).sellerIndustryAssign(
       id.parse(form.get('organizationId')),
-      id.parse(form.get('industryId')));
+      id.parse(form.get('industryId')),
+    );
     revalidatePath(path);
     revalidatePath('/dashboard/marketplace/seller');
-  }catch(error){handleFailure(error,path);}
-  redirect(path+'?updated=industry-assignment');
+  } catch (error) {
+    handleFailure(error, path);
+  }
+  redirect(path + '?updated=industry-assignment');
 }
