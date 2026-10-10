@@ -91,8 +91,8 @@ export default async function CreateUser() {
             </p>
             <p>
               <strong>Seller:</strong> create or enable a seller storefront on
-              the person&apos;s company. Buyers and sellers can belong to the same
-              organization.
+              the person&apos;s company. Buyers and sellers can belong to the
+              same organization.
             </p>
           </div>
         </section>
