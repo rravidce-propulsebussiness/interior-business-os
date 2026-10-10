@@ -99,7 +99,7 @@ select private.marketplace_assert(
 -- New industries are data-driven, not hard-coded to construction.
 select set_config('request.jwt.claim.sub','66666666-6666-4666-8666-666666666666',true);
 select private.marketplace_denied(
- $select public.marketplace_industry_create('manufacturing','Manufacturing')$,
+ $$select public.marketplace_industry_create('manufacturing','Manufacturing')$$,
  'ordinary buyer cannot add industries');
 select set_config('request.jwt.claim.sub','55555555-5555-4555-8555-555555555555',true);
 select public.marketplace_industry_create('manufacturing','Manufacturing') as new_industry_id \gset
