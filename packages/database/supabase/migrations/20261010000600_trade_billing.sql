@@ -122,7 +122,7 @@ declare v_id uuid;v_doc private.trade_documents;v_kind text;v_date date;v_due da
  v_qty numeric;v_rate numeric;v_gst numeric;v_taxable numeric;v_tax numeric;
  v_cgst numeric=0;v_sgst numeric=0;v_igst numeric=0;v_subtotal numeric=0;
  v_pos text;v_total numeric;v_notes text;v_reference text;v_delivery text;v_rcm boolean;
- v_interstate boolean;v_counter integer=0;
+ v_interstate boolean;v_counter integer=0;v_fy integer;
 begin
  perform private.finance_require(p_org,'invoice.create');
  if jsonb_typeof(p_input) is distinct from 'object'
@@ -136,6 +136,8 @@ begin
  if not found then raise exception 'Complete company billing settings first' using errcode='22023';end if;
  v_date=(p_input->>'issueDate')::date;
  v_due=nullif(p_input->>'dueDate','')::date;
+ v_fy=extract(year from v_date)::integer;
+ if extract(month from v_date)<4 then v_fy=v_fy-1;end if;
  v_pos=p_input->>'placeOfSupply';
  v_rcm=coalesce((p_input->>'reverseCharge')::boolean,false);
  v_notes=coalesce(p_input->>'notes','');
@@ -206,14 +208,15 @@ begin
     set issue_date=v_date,due_date=v_due,reference=v_reference,issuer=v_issuer,
     receiver=v_receiver,place_of_supply=v_pos,delivery_address=v_delivery,
     reverse_charge=v_rcm,lines=v_lines,subtotal=v_subtotal,cgst=v_cgst,
-    sgst=v_sgst,igst=v_igst,total=v_total,notes=v_notes
+    sgst=v_sgst,igst=v_igst,total=v_total,notes=v_notes,
+    financial_year=v_fy
     where id=v_id;
  else
    insert into private.trade_documents(organization_id,kind,issue_date,due_date,reference,
     issuer,receiver,place_of_supply,delivery_address,reverse_charge,lines,
-    subtotal,cgst,sgst,igst,total,notes,created_by)
+    subtotal,cgst,sgst,igst,total,notes,financial_year,created_by)
    values(p_org,v_kind,v_date,v_due,v_reference,v_issuer,v_receiver,v_pos,v_delivery,
-    v_rcm,v_lines,v_subtotal,v_cgst,v_sgst,v_igst,v_total,v_notes,auth.uid())
+    v_rcm,v_lines,v_subtotal,v_cgst,v_sgst,v_igst,v_total,v_notes,v_fy,auth.uid())
    returning id into v_id;
  end if;
  insert into public.audit_logs(actor_user_id,organization_id,action,entity_type,entity_id)
