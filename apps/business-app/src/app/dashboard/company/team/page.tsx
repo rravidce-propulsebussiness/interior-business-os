@@ -8,8 +8,38 @@ import {
   changeMembershipRole,
   changeMembershipStatus,
   createCustomRole,
-  inviteRegisteredMember,
+  inviteEmployeeByEmail,
+  resendEmployeeEmail,
+  revokeEmployeeEmail,
 } from './actions';
+
+type InvitationRow = {
+  id: string;
+  email: string;
+  status: string;
+  mailStatus: string;
+  expiresAt: string;
+  roleIds: string[];
+};
+
+function isInvitationRow(item: unknown): item is InvitationRow {
+  return (
+    typeof item === 'object' &&
+    item !== null &&
+    'id' in item &&
+    typeof item.id === 'string' &&
+    'email' in item &&
+    typeof item.email === 'string' &&
+    'status' in item &&
+    typeof item.status === 'string' &&
+    'mailStatus' in item &&
+    typeof item.mailStatus === 'string' &&
+    'expiresAt' in item &&
+    typeof item.expiresAt === 'string' &&
+    'roleIds' in item &&
+    Array.isArray(item.roleIds)
+  );
+}
 
 export default async function CompanyTeamPage() {
   const { client, repository } = await pageServices();
@@ -70,7 +100,13 @@ export default async function CompanyTeamPage() {
   const assignments = assignmentResult.data ?? [];
   const canAssign = has('team.manage') && has('role.manage');
   const canCreateRoles = has('role.manage');
-  const canInvite = has('team.invite');
+  const canInvite = has('team.invite') && has('role.manage');
+  const invitationResult = canInvite
+    ? await repository.employeeInvitations(organizationId)
+    : [];
+  const invitations = Array.isArray(invitationResult)
+    ? invitationResult.filter(isInvitationRow)
+    : [];
   const canChangeStatus = has('team.manage') || has('team.remove');
 
   return (
@@ -264,36 +300,37 @@ export default async function CompanyTeamPage() {
           </section>
         )}
         {canInvite && (
-          <section className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8">
-            <h2 className="text-xl font-semibold">
-              Invite a registered colleague
-            </h2>
-            <p className="mt-2 text-sm text-slate-600">
-              This existing access operation accepts an Auth user ID, not an
-              email address. Email invitations are not enabled yet. The
-              colleague must accept the invitation before access is active.
+          <section className="space-y-5 rounded-2xl border border-slate-200 bg-white p-6 sm:p-8">
+            <h2 className="text-xl font-semibold">Invite employees by email</h2>
+            <p className="text-sm text-slate-600">
+              Invite a colleague without their Supabase user ID. Select the
+              roles they will receive after signing in with the matching,
+              verified email address. Only role permissions you may delegate are
+              accepted.
             </p>
             <ActionForm
-              action={inviteRegisteredMember}
-              label="Create membership invitation"
+              action={inviteEmployeeByEmail}
+              label="Send employee invitation"
             >
               <input
                 type="hidden"
                 name="organizationId"
                 value={organizationId}
               />
-              <label className="grid gap-2 text-sm">
-                Registered user ID
+              <label className="grid gap-2 text-sm font-medium">
+                Employee email address
                 <input
-                  name="userId"
-                  type="text"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
                   required
-                  placeholder="User UUID"
-                  className="rounded-lg border border-slate-300 p-3"
+                  maxLength={254}
+                  placeholder="colleague@example.com"
+                  className="w-full rounded-lg border border-slate-300 p-3"
                 />
               </label>
-              <label className="grid gap-2 text-sm">
-                Branch (optional)
+              <label className="grid gap-2 text-sm font-medium">
+                Assigned branch (optional)
                 <select
                   name="branchId"
                   defaultValue=""
@@ -307,7 +344,88 @@ export default async function CompanyTeamPage() {
                   ))}
                 </select>
               </label>
+              <fieldset className="rounded-xl border border-slate-200 p-4">
+                <legend className="px-2 text-sm font-semibold">
+                  Assign one or more roles
+                </legend>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {roles
+                    .filter((role) => !role.is_owner)
+                    .map((role) => (
+                      <label
+                        key={role.id}
+                        className="flex items-center gap-2 text-sm"
+                      >
+                        <input
+                          type="checkbox"
+                          name="roleIds"
+                          value={role.id}
+                          className="h-4 w-4"
+                        />
+                        {role.name}
+                      </label>
+                    ))}
+                </div>
+              </fieldset>
             </ActionForm>
+            <h3 className="text-lg font-semibold">Invitation history</h3>
+            {invitations.length ? (
+              <div className="space-y-3">
+                {invitations.map((invite) => (
+                  <article
+                    key={invite.id}
+                    className="rounded-xl border border-slate-200 p-4"
+                  >
+                    <p className="break-all text-sm font-semibold">
+                      {invite.email}
+                    </p>
+                    <p className="mt-1 text-xs text-slate-600">
+                      {invite.status} · email {invite.mailStatus} ·{' '}
+                      {invite.roleIds.length} roles · expires{' '}
+                      {new Date(invite.expiresAt).toLocaleDateString('en-IN')}
+                    </p>
+                    {['pending', 'expired'].includes(invite.status) && (
+                      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                        <ActionForm
+                          action={resendEmployeeEmail}
+                          label="Resend invitation"
+                        >
+                          <input
+                            type="hidden"
+                            name="organizationId"
+                            value={organizationId}
+                          />
+                          <input
+                            type="hidden"
+                            name="inviteId"
+                            value={invite.id}
+                          />
+                        </ActionForm>
+                        <ActionForm
+                          action={revokeEmployeeEmail}
+                          label="Revoke invitation"
+                        >
+                          <input
+                            type="hidden"
+                            name="organizationId"
+                            value={organizationId}
+                          />
+                          <input
+                            type="hidden"
+                            name="inviteId"
+                            value={invite.id}
+                          />
+                        </ActionForm>
+                      </div>
+                    )}
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-slate-500">
+                No email invitations yet.
+              </p>
+            )}
           </section>
         )}
         {canViewRoles && (

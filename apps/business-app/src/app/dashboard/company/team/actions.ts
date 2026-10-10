@@ -104,3 +104,59 @@ export async function createCustomRole(_state: FormState, form: FormData) {
     return { message: safeFailure(error).message };
   }
 }
+
+export async function inviteEmployeeByEmail(_state: FormState, form: FormData) {
+  void _state;
+  try {
+    const organizationId = String(form.get('organizationId') ?? '');
+    const repository = await authorizedWorkspace(organizationId, 'team.invite');
+    await authorizedWorkspace(organizationId, 'role.manage');
+    const branchId = String(form.get('branchId') ?? '').trim();
+    await repository.createEmployeeEmailInvitation(organizationId, {
+      email: String(form.get('email') ?? '').trim(),
+      roleIds: form
+        .getAll('roleIds')
+        .filter((value): value is string => typeof value === 'string'),
+      ...(branchId ? { branchId } : {}),
+    });
+    refreshTeam();
+    return {
+      message:
+        'Invitation queued. Delivery status is shown below; email delivery requires the configured worker.',
+    };
+  } catch (error) {
+    return { message: safeFailure(error).message };
+  }
+}
+
+export async function resendEmployeeEmail(_state: FormState, form: FormData) {
+  void _state;
+  try {
+    const organizationId = String(form.get('organizationId') ?? '');
+    const repository = await authorizedWorkspace(organizationId, 'team.invite');
+    await repository.resendEmployeeInvitation(
+      organizationId,
+      String(form.get('inviteId') ?? ''),
+    );
+    refreshTeam();
+    return { message: 'Invitation email queued again.' };
+  } catch (error) {
+    return { message: safeFailure(error).message };
+  }
+}
+
+export async function revokeEmployeeEmail(_state: FormState, form: FormData) {
+  void _state;
+  try {
+    const organizationId = String(form.get('organizationId') ?? '');
+    const repository = await authorizedWorkspace(organizationId, 'team.invite');
+    await repository.revokeEmployeeInvitation(
+      organizationId,
+      String(form.get('inviteId') ?? ''),
+    );
+    refreshTeam();
+    return { message: 'Invitation revoked.' };
+  } catch (error) {
+    return { message: safeFailure(error).message };
+  }
+}
