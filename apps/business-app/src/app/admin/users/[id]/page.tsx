@@ -76,7 +76,7 @@ export default async function OwnerDetails({
           <h2 className="text-xl font-bold">Owned organizations</h2>
           <p className="mt-2 text-sm text-slate-600">
             Owners automatically have full tenant permissions, within their
-            subscribed modules. Super Admin manages the organization&apos;s plan,
+            subscribed modules. Super Admin manages company plans,
             industry and seller approval. The owner manages employees,
             invitations and roles within their company dashboard.
           </p>
