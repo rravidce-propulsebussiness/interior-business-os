@@ -104,6 +104,27 @@ begin
  ) into v_stats;
  return jsonb_build_object('rows',v_rows,'total',v_total,'page',p_page,'stats',v_stats);
 end $fn$;
+create function public.platform_owner_email_status(p_email text)
+returns text language plpgsql stable security definer set search_path='' as $fn$
+declare v_email text;v_state text;
+begin
+ perform private.require_platform('platform.organizations.manage');
+ v_email=lower(trim(coalesce(p_email,'')));
+ if length(v_email)<5 or length(v_email)>254 then
+   raise exception 'Invalid owner email' using errcode='22023';
+ end if;
+ select case
+  when p.status='suspended' then 'suspended'
+  when u.email_confirmed_at is null then 'unverified'
+  else 'verified'
+ end into v_state
+ from auth.users u left join public.profiles p on p.id=u.id
+ where lower(u.email)=v_email limit 1;
+ return coalesce(v_state,'missing');
+end $fn$;
+
 revoke all on function public.platform_owner_directory(text,text,uuid,integer,text,text) from public,anon;
+revoke all on function public.platform_owner_email_status(text) from public,anon;
 grant execute on function public.platform_owner_directory(text,text,uuid,integer,text,text) to authenticated;
+grant execute on function public.platform_owner_email_status(text) to authenticated;
 commit;
