@@ -88,7 +88,7 @@ begin
   or p_page not between 1 and 10000 or p_sort not in ('newest','oldest','name')
  then raise exception 'Invalid user filter' using errcode='22023'; end if;
  with identities as (
-   select u.id,u.email,coalesce(p.created_at,u.email_confirmed_at),private.platform_user_kind(u.id) kind,
+   select u.id,u.email,coalesce(p.created_at,u.email_confirmed_at) as created_at,private.platform_user_kind(u.id) kind,
      case when u.email_confirmed_at is null then 'pending'
        when p.status='suspended' then 'suspended' else 'active' end status
    from auth.users u left join public.profiles p on p.id=u.id
@@ -110,7 +110,7 @@ begin
  )
  select count(*) into v_count from matches;
  with matches as (
-   select u.id,coalesce(p.created_at,u.email_confirmed_at) from auth.users u
+   select u.id,coalesce(p.created_at,u.email_confirmed_at) as created_at from auth.users u
    left join public.profiles p on p.id=u.id
    where (p_kind='all' or private.platform_user_kind(u.id)=p_kind)
      and (p_status='' or
