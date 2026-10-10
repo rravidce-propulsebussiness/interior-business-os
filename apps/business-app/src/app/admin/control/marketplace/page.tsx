@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { pageServices } from '@business-os/auth/server';
 import { createMarketplaceRepository } from '@business-os/database/marketplace';
 import { DomainError } from '@business-os/shared';
-import { decideMarketplaceSeller } from '../../../dashboard/marketplace/actions';
+import { decideMarketplaceSeller, createMarketplaceIndustry, assignSellerIndustry } from '../../../dashboard/marketplace/actions';
 
 export const dynamic = 'force-dynamic';
 
@@ -56,7 +56,7 @@ export default async function PlatformMarketplace({
       )}
       {params.updated && (
         <p role="status" className="os-warning mb-4">
-          Seller decision saved successfully.
+          Marketplace update saved successfully.
         </p>
       )}
       <section className="os-stats-grid">
@@ -142,6 +142,15 @@ export default async function PlatformMarketplace({
                           </button>
                         )}
                       </form>
+                      <form action={assignSellerIndustry} className="flex flex-wrap gap-2 mt-3">
+                        <input type="hidden" name="organizationId" value={seller.organizationId}/>
+                        <select name="industryId" required aria-label={'Assign industry to ' + seller.name} className="rounded-lg border p-2">
+                          {industries.map((industry) => (
+                            <option key={industry.id} value={industry.id}>{industry.name}</option>
+                          ))}
+                        </select>
+                        <button type="submit" className="os-action secondary">Assign industry</button>
+                      </form>
                     </td>
                   </tr>
                 ))}
@@ -175,6 +184,18 @@ export default async function PlatformMarketplace({
           {industries.length === 0 && (
             <p className="os-empty">No active industry registered.</p>
           )}
+          <form action={createMarketplaceIndustry} className="grid gap-3 mt-5">
+            <h3 className="font-bold">Add a new industry</h3>
+            <label className="grid gap-1 text-sm">Industry key
+              <input required name="key" minLength={2} maxLength={64} pattern="[a-z][a-z0-9_]*"
+                placeholder="manufacturing" className="rounded-lg border p-3 text-slate-900 bg-white"/>
+            </label>
+            <label className="grid gap-1 text-sm">Industry name
+              <input required name="name" minLength={2} maxLength={100}
+                placeholder="Manufacturing" className="rounded-lg border p-3 text-slate-900 bg-white"/>
+            </label>
+            <button type="submit" className="os-action">Add industry</button>
+          </form>
           <div className="os-warning mt-5">
             Purchase requests are not online payments. Tax, shipping, verified
             stock, seller payouts, dispute handling and gateway processing
