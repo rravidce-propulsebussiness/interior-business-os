@@ -92,4 +92,23 @@ select private.company_assert(
 select private.company_assert(
   (public.company_applications_mine()->0->>'status')='approved',
   'applicant sees decision outcome');
+-- Subscription bundles reuse the existing module registry and preserve current plans.
+select private.company_denied(
+  $select public.platform_plan_create('{"key":"forbidden_employee_plan","name":"Forbidden Employee Plan","modules":["crm"]}')$,
+  'company owner cannot create platform subscription plans');
+
+select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000073',true);
+select public.platform_plan_create(
+ '{"key":"sample_construction_bundle","name":"Sample Construction Bundle","modules":["crm","quotation","projects"]}'
+) as new_plan_id \gset
+select private.company_assert(
+ (select count(*)=3 from public.plan_modules where plan_id=:'new_plan_id'),
+ 'new plan receives exactly requested shared business modules');
+select private.company_assert(
+ exists(select 1 from public.plans where id=:'new_plan_id' and status='active'),
+ 'new subscription plan is available');
+select private.company_assert(
+ not exists(select 1 from public.organizations where plan_id=:'new_plan_id'),
+ 'creating a plan does not change existing company subscriptions');
+
 rollback;
