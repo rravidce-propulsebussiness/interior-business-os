@@ -39,7 +39,7 @@ export default async function DomainManagement() {
         <Link className="os-action" href="/dashboard/website">Platform website configuration →</Link>
       </div>
 
-      <div className="os-stats-grid mt-6">
+      <div className="os-stats-grid os-domain-summary mt-6">
         <dl className="os-stat" style={{ gridColumn: 'span 2' }}>
           <div className="os-stat-icon os-icon-blue"><OsIcon name="domain" size={24} /></div>
           <div><dt>Managed base hostname</dt><dd className="text-base!" style={{ overflowWrap: 'anywhere' }}>{settings.data.base_domain || 'Not configured'}</dd><p className="os-stat-note">CNAME destination for verified external domains</p></div>
