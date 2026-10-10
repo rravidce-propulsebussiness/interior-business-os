@@ -11306,6 +11306,34 @@ export interface Database {
         Args: { p_user_id: string; p_role_id: string; p_remove?: boolean };
         Returns: undefined;
       };
+      platform_user_company_assign: {
+        Args: {
+          p_user_id: string;
+          p_organization_id: string;
+          p_role_id: string;
+        };
+        Returns: string;
+      };
+      platform_user_company_choices: {
+        Args: Record<string, never>;
+        Returns: Json;
+      };
+      platform_user_directory: {
+        Args: {
+          p_query?: string;
+          p_kind?: string;
+          p_status?: string;
+          p_industry_id?: string;
+          p_page?: number;
+          p_sort?: string;
+        };
+        Returns: Json;
+      };
+      platform_user_profile: { Args: { p_user_id: string }; Returns: Json };
+      platform_user_status_set: {
+        Args: { p_user_id: string; p_status: string };
+        Returns: undefined;
+      };
       project_site_command: {
         Args: {
           p_organization_id: string;

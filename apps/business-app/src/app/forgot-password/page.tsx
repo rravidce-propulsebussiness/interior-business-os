@@ -2,7 +2,12 @@ import Link from 'next/link';
 import { RecoveryForm } from '@business-os/ui/recovery-form';
 import { requestPasswordReset } from '@business-os/auth/recovery-actions';
 
-export default function ForgotPassword() {
+export default async function ForgotPassword({
+  searchParams,
+}: {
+  searchParams: Promise<{ invited?: string }>;
+}) {
+  const { invited } = await searchParams;
   return (
     <main id="main-content" tabIndex={-1} className="auth-shell">
       <section className="auth-story" aria-labelledby="recovery-story-title">
@@ -23,6 +28,14 @@ export default function ForgotPassword() {
           Enter your email address. For security, the response is the same
           whether or not an account exists.
         </p>
+        {invited === '1' && (
+          <p className="notice notice-success" role="status">
+            Your Business OS invitation brought you here. If your email is now
+            verified, request a password reset link below to choose your own
+            password. You can sign in afterward; company access is assigned
+            separately.
+          </p>
+        )}
         <RecoveryForm action={requestPasswordReset} />
         <div className="auth-links">
           <Link href="/login">← Back to sign in</Link>

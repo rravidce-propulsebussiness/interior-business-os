@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { serverServices } from '@business-os/auth/server';
+import { createPublicDatabase } from '@business-os/database/server';
 import { createPlatformCompaniesRepository } from '@business-os/database/platform-companies';
 import { createMarketplaceRepository } from '@business-os/database/marketplace';
 import { idSchema, safeFailure } from '@business-os/shared';
@@ -172,6 +173,109 @@ export async function updateCompanyRole(_state: State, form: FormData) {
     revalidatePath('/admin/organizations/' + organizationId);
     return {
       message: remove ? 'Member role removed.' : 'Member role assigned.',
+    };
+  } catch (error) {
+    return { message: safeFailure(error).message };
+  }
+}
+
+/** Sends a Supabase verification/magic link, never grants tenant privileges. */
+export async function invitePlatformUser(_state: State, form: FormData) {
+  try {
+    const { authorization } = await serverServices();
+    await authorization.requirePlatformPermission(
+      'platform.organizations.manage',
+    );
+    const user = z
+      .object({
+        email: z.email().trim().toLowerCase().max(254),
+        fullName: z.string().trim().min(2).max(200),
+      })
+      .parse({
+        email: form.get('email'),
+        fullName: form.get('fullName'),
+      });
+    const origin = process.env.APP_ORIGIN;
+    let emailRedirectTo: string | undefined;
+    if (origin) {
+      const url = new URL(origin);
+      if (
+        url.protocol === 'https:' ||
+        (process.env.NODE_ENV !== 'production' && url.hostname === 'localhost')
+      )
+        emailRedirectTo = new URL('/forgot-password?invited=1', url).toString();
+    }
+    const client = createPublicDatabase();
+    const { error } = await client.auth.signInWithOtp({
+      email: user.email,
+      options: {
+        shouldCreateUser: true,
+        data: { full_name: user.fullName },
+        ...(emailRedirectTo ? { emailRedirectTo } : {}),
+      },
+    });
+    if (error)
+      return {
+        message:
+          'Unable to send verification email. Check Supabase Auth email configuration and try again.',
+      };
+    revalidatePath('/admin/organizations');
+    return {
+      message:
+        'Account invitation email requested. After using the email link, the user can set a password using Forgot password. Company access is assigned separately after email verification; existing email accounts are not duplicated.',
+    };
+  } catch (error) {
+    return { message: safeFailure(error).message };
+  }
+}
+
+export async function updatePlatformUserStatus(_state: State, form: FormData) {
+  try {
+    const { authorization, client } = await serverServices();
+    await authorization.requirePlatformPermission(
+      'platform.organizations.manage',
+    );
+    const id = idSchema.parse(form.get('userId'));
+    const status = z.enum(['active', 'suspended']).parse(form.get('status'));
+    await createPlatformCompaniesRepository(client).setUserStatus(id, status);
+    revalidatePath('/admin/users/' + id);
+    revalidatePath('/admin/organizations');
+    return {
+      message: status === 'active' ? 'User reactivated.' : 'User suspended.',
+    };
+  } catch (error) {
+    return { message: safeFailure(error).message };
+  }
+}
+
+export async function assignPlatformUserToCompany(
+  _state: State,
+  form: FormData,
+) {
+  try {
+    const { authorization, client } = await serverServices();
+    await authorization.requirePlatformPermission(
+      'platform.organizations.manage',
+    );
+    await authorization.requirePlatformPermission('platform.roles.manage');
+    const userId = idSchema.parse(form.get('userId'));
+    const [organizationId, roleId] = z
+      .string()
+      .max(80)
+      .parse(form.get('assignment'))
+      .split(':');
+    if (!organizationId || !roleId)
+      return { message: 'Choose a company and an employee role.' };
+    await createPlatformCompaniesRepository(client).assignUserToCompany(
+      userId,
+      idSchema.parse(organizationId),
+      idSchema.parse(roleId),
+    );
+    revalidatePath('/admin/users/' + userId);
+    revalidatePath('/admin/organizations');
+    return {
+      message:
+        'Verified user assigned to company. Owner permissions are managed separately.',
     };
   } catch (error) {
     return { message: safeFailure(error).message };
