@@ -42,6 +42,7 @@ psql(['-f', file('supabase/seed-catalog.sql')]);
 assertionFile('marketplace');
 assertionFile('platform-companies');
 assertionFile('platform-users');
+assertionFile('platform-owner-onboarding');
 assertionFile('gst-billing');
 console.log('Interior catalog seed is repeatable.');
 assertionFile('catalog');
