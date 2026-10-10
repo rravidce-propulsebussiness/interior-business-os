@@ -348,6 +348,14 @@ export default async function SellerCenter({
                       </td>
                       <td className="p-3">{order.status}</td>
                       <td className="p-3">
+                        {order.status === 'accepted' && (
+                          <Link
+                            href={'/dashboard/billing/new?order=' + order.id}
+                            className="premium-link-secondary"
+                          >
+                            Prepare GST invoice ↗
+                          </Link>
+                        )}
                         {order.status === 'requested' && (
                           <form
                             action={decideMarketplaceOrder}

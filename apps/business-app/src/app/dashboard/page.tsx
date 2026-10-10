@@ -248,6 +248,17 @@ export default async function Dashboard() {
                       <b aria-hidden="true">↗</b>
                     </Link>
                   )}
+                  {canAccess(context, {
+                    organizationId: context.organizationId,
+                    permission: 'invoice.view',
+                    moduleKey: 'billing',
+                  }) && (
+                    <Link href="/dashboard/billing">
+                      <span>Invoices &amp; GST bills</span>
+                      <small>Sales, supplier bills and GST</small>
+                      <b aria-hidden="true">↗</b>
+                    </Link>
+                  )}
                   <Link href="/dashboard/reports">
                     <span>Reports</span>
                     <small>Company performance</small>

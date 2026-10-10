@@ -10957,6 +10957,24 @@ export interface Database {
         };
         Returns: Json;
       };
+      gst_document: { Args: { p_org: string; p_id: string }; Returns: Json };
+      gst_document_finalize: {
+        Args: { p_org: string; p_id: string; p_version: number };
+        Returns: string;
+      };
+      gst_document_save: {
+        Args: { p_org: string; p_input: Json };
+        Returns: string;
+      };
+      gst_documents: {
+        Args: { p_org: string; p_kind?: string };
+        Returns: Json;
+      };
+      gst_profile_read: { Args: { p_org: string }; Returns: Json };
+      gst_profile_save: {
+        Args: { p_org: string; p_input: Json };
+        Returns: undefined;
+      };
       has_entitlement: {
         Args: { p_organization_id: string; p_module_key: string };
         Returns: boolean;
@@ -11270,6 +11288,7 @@ export interface Database {
         Returns: string;
       };
       platform_context: { Args: Record<string, never>; Returns: Json };
+      platform_gst_summary: { Args: Record<string, never>; Returns: Json };
       platform_plan_create: { Args: { p_input: Json }; Returns: string };
       platform_set_entitlement: {
         Args: { p_organization_id: string; p_input: Json };
