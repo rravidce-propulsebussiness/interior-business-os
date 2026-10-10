@@ -11,6 +11,7 @@ export default defineConfig({
     include: [
       'packages/*/src/**/*.test.ts',
       'apps/business-app/src/app/dashboard/website/cloudflare-domains.test.ts',
+      'apps/business-app/src/workspace-paths.test.ts',
     ],
     clearMocks: true,
     restoreMocks: true,
