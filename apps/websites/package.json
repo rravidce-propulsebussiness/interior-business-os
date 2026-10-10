@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@business-os/ui": "workspace:*",
-    "next": "16.3.6",
+    "next": "16.3.8",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "@business-os/website-builder": "workspace:*",
@@ -19,7 +19,7 @@
     "@business-os/shared": "workspace:*",
     "@business-os/brochure-builder": "workspace:*",
     "qrcode": "1.5.4",
-    "sharp": "0.35.4"
+    "sharp": "0.35.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "4.3.3",
