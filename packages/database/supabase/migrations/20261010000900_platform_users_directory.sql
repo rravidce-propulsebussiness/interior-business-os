@@ -76,7 +76,8 @@ create function public.platform_user_directory(
  p_kind text default 'all',
  p_status text default '',
  p_industry_id uuid default null,
- p_page integer default 1
+ p_page integer default 1,
+ p_sort text default 'newest'
 ) returns jsonb language plpgsql stable security definer set search_path='' as $fn$
 declare v_rows jsonb;v_count bigint;v_totals jsonb;
 begin
@@ -84,7 +85,7 @@ begin
  if length(coalesce(p_query,''))>80
   or p_kind not in ('all','business_owner','seller','general_user')
   or p_status not in ('','active','pending','suspended')
-  or p_page not between 1 and 10000
+  or p_page not between 1 and 10000 or p_sort not in ('newest','oldest','name')
  then raise exception 'Invalid user filter' using errcode='22023'; end if;
  with identities as (
    select u.id,u.email,u.created_at,private.platform_user_kind(u.id) kind,
@@ -128,7 +129,11 @@ begin
  )
  select coalesce(jsonb_agg(private.platform_user_card(x.id)),'[]'::jsonb)
  into v_rows from (
-   select id from matches order by created_at desc,id desc
+   select id from matches order by
+     case when p_sort='name' then lower((select coalesce(nullif(trim(p.full_name),''),u.email) from auth.users u left join public.profiles p on p.id=u.id where u.id=matches.id)) end asc nulls last,
+     case when p_sort='oldest' then created_at end asc nulls last,
+     case when p_sort='newest' then created_at end desc nulls last,
+     id desc
    limit 20 offset (p_page-1)*20
  ) x;
 
@@ -205,10 +210,28 @@ begin
  return v_member;
 end $fn$;
 
-revoke all on function public.platform_user_directory(text,text,text,uuid,integer),
+create function public.platform_user_company_choices()
+returns jsonb language plpgsql stable security definer set search_path='' as $fn$
+begin
+ perform private.require_platform('platform.organizations.manage');
+ perform private.require_platform('platform.roles.manage');
+ return coalesce((
+    select jsonb_agg(jsonb_build_object(
+      'organizationId',o.id,'organizationName',o.name,
+      'roles',coalesce((
+        select jsonb_agg(jsonb_build_object('id',r.id,'name',r.name) order by r.name)
+        from public.roles r where r.organization_id=o.id and not r.is_owner
+      ),'[]'::jsonb)
+    ) order by o.name)
+    from (select id,name from public.organizations where status in ('active','trial')
+      order by name,id limit 100) o
+  ),'[]'::jsonb);
+end $fn$;
+
+revoke all on function public.platform_user_directory(text,text,text,uuid,integer,text),
  public.platform_user_profile(uuid), public.platform_user_status_set(uuid,text),
- public.platform_user_company_assign(uuid,uuid,uuid) from public,anon;
+ public.platform_user_company_assign(uuid,uuid,uuid),public.platform_user_company_choices() from public,anon;
 grant execute on function public.platform_user_directory(text,text,text,uuid,integer),
  public.platform_user_profile(uuid), public.platform_user_status_set(uuid,text),
- public.platform_user_company_assign(uuid,uuid,uuid) to authenticated;
+ public.platform_user_company_assign(uuid,uuid,uuid),public.platform_user_company_choices() to authenticated;
 commit;
