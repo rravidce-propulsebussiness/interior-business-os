@@ -13,6 +13,14 @@ begin
  raise exception 'FAILED: %',label;
 end $fn$;
 
+create function private.marketplace_invalid(command text,label text) returns void language plpgsql as $fn$
+begin
+ begin execute command;
+ exception when sqlstate '22023' then raise notice 'PASS: %',label;return;
+ end;
+ raise exception 'FAILED: %',label;
+end $fn$;
+
 -- Isolated buyer company. The existing demo-interiors company is the seller.
 insert into auth.users(id,email) values('66666666-6666-4666-8666-666666666666','market.buyer@example.test');
 insert into public.organizations(id,name,slug,status,default_currency,country_code,default_timezone,created_by)
@@ -44,8 +52,7 @@ select public.marketplace_seller_decide(:'seller_id','approve');
 select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',true);
 select public.marketplace_product_save(
  'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
- '{"industryId":"' || (select id::text from public.industries where key='interior') || '","sku":"PLY-100","name":"Premium plywood","category":"Panels","unit":"sheet","price":1500.00,"minQuantity":2,"currency":"INR","status":"published"}'
- ::jsonb
+ ('{"industryId":"' || (select id::text from public.industries where key='interior') || '","sku":"PLY-100","name":"Premium plywood","category":"Panels","unit":"sheet","price":1500.00,"minQuantity":2,"currency":"INR","status":"published"}')::jsonb
 ) as product_id \gset
 select private.marketplace_assert(
  jsonb_array_length(public.marketplace_seller_profile('dddddddd-dddd-4ddd-8ddd-dddddddddddd')->'products')=1,
@@ -81,8 +88,8 @@ select private.marketplace_assert(
  'buyer cannot read seller inbox for another organization');
 
 select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',true);
-select private.marketplace_denied(
- format('select public.marketplace_order_place(%L,%L,1,%L)','dddddddd-dddd-4ddd-8ddd-dddddddddddd',:'product_id','bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'),
+select private.marketplace_invalid(
+ format('select public.marketplace_order_place(%L,%L,2,%L)','dddddddd-dddd-4ddd-8ddd-dddddddddddd',:'product_id','bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'),
  'seller cannot purchase own product');
 select public.marketplace_order_decide('dddddddd-dddd-4ddd-8ddd-dddddddddddd',:'order_id','accept');
 select private.marketplace_assert(
