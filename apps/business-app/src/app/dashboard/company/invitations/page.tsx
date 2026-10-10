@@ -63,10 +63,13 @@ export default async function MyEmployeeInvitations() {
           </p>
         </header>
         {!result.available ? (
-          <section role="status" className="rounded-2xl border border-amber-200 bg-amber-50 p-6 text-sm text-amber-900">
-            Employee invitations are not enabled in this environment yet.
-            The deployment administrator must verify the database and install
-            the reviewed migration before acceptance is available.
+          <section
+            role="status"
+            className="rounded-2xl border border-amber-200 bg-amber-50 p-6 text-sm text-amber-900"
+          >
+            Employee invitations are not enabled in this environment yet. The
+            deployment administrator must verify the database and install the
+            reviewed migration before acceptance is available.
           </section>
         ) : invitations.length > 0 ? (
           <section className="space-y-4" aria-label="Available invitations">

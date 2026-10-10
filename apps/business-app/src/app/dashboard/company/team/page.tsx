@@ -302,7 +302,10 @@ export default async function CompanyTeamPage() {
           </section>
         )}
         {canInvite && !invitationResult.available && (
-          <section role="status" className="rounded-2xl border border-amber-200 bg-amber-50 p-6 text-sm text-amber-900">
+          <section
+            role="status"
+            className="rounded-2xl border border-amber-200 bg-amber-50 p-6 text-sm text-amber-900"
+          >
             Employee email invitations are not enabled in this environment yet.
             An administrator must verify the deployment database and apply the
             reviewed migration before using this feature.
