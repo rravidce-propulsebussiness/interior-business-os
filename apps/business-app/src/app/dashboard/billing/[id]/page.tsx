@@ -234,7 +234,7 @@ export default async function TradeDocumentDetail({
           )}
           {!isSales && (
             <p className="mt-7 text-xs text-slate-500">
-              Purchase-bill register copy. The supplier's original tax invoice
+              Purchase-bill register copy. The supplier&apos;s original tax invoice
               should be retained as the legal source document; this record is
               not issued on their behalf.
             </p>
