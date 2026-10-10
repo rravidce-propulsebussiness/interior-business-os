@@ -33,6 +33,9 @@ export default async function PlatformDashboard() {
       <Link href="/dashboard/automations" className="mr-4 underline">
         Automation health
       </Link>
+      <Link href="/dashboard/plans" className="mr-4 underline">
+        Subscription plans
+      </Link>
       <Link href="/dashboard/applications" className="mr-4 underline">
         Review company applications
       </Link>
