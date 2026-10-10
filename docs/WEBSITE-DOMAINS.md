@@ -8,7 +8,6 @@ The verification action resolves TXT and IPv4 A records on the server, compares 
 
 Certificate issuance is the deployment platform's responsibility. This code verifies an already provisioned certificate; it does not impersonate an ACME issuer or claim automatic provisioning. IPv6-only and proxy configurations with nonmatching address sets require an additional deployment adapter. Until DNS and TLS pass, the custom domain does not serve a website. Live DNS, certificates and hosted wildcard routing have not been tested locally.
 
-
 ## Optional automatic HTTPS with Cloudflare for SaaS
 
 The existing manual DNS/TLS verification continues to work without Cloudflare

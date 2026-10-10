@@ -47,7 +47,7 @@ function credentials() {
 export function cloudflareSaasEnabled() {
   return Boolean(
     process.env.CLOUDFLARE_SAAS_ZONE_ID?.trim() &&
-      process.env.CLOUDFLARE_SAAS_API_TOKEN?.trim(),
+    process.env.CLOUDFLARE_SAAS_API_TOKEN?.trim(),
   );
 }
 
@@ -59,7 +59,10 @@ async function cloudflareRequest<T>(
   const config = credentials();
   if (!config) throw new Error('Cloudflare for SaaS is not configured');
   const response = await fetch(
-    'https://api.cloudflare.com/client/v4/zones/' + config.zone + '/custom_hostnames' + path,
+    'https://api.cloudflare.com/client/v4/zones/' +
+      config.zone +
+      '/custom_hostnames' +
+      path,
     {
       method,
       cache: 'no-store',
@@ -71,7 +74,8 @@ async function cloudflareRequest<T>(
       ...(body ? { body: JSON.stringify(body) } : {}),
     },
   );
-  if (!response.ok) throw new Error('Cloudflare custom hostname API unavailable');
+  if (!response.ok)
+    throw new Error('Cloudflare custom hostname API unavailable');
   const data = (await response.json()) as {
     success?: boolean;
     result?: T;
@@ -85,7 +89,8 @@ async function findHostname(hostname: string) {
   const rows = await cloudflareRequest<CloudflareHostname[]>(
     '?hostname.exact=' + encodeURIComponent(hostname) + '&per_page=10',
   );
-  if (!Array.isArray(rows)) throw new Error('Invalid Cloudflare hostname response');
+  if (!Array.isArray(rows))
+    throw new Error('Invalid Cloudflare hostname response');
   return rows.find((row) => row.hostname === hostname) ?? null;
 }
 

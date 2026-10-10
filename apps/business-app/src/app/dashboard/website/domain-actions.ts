@@ -38,7 +38,8 @@ export async function addWebsiteDomain(site: string, hostname: string) {
       p_hostname: host,
     });
     if (r.error) throw new Error('Domain unavailable or capability disabled');
-    let message = 'Domain added. Configure the TXT and CNAME records, then verify.';
+    let message =
+      'Domain added. Configure the TXT and CNAME records, then verify.';
     if (cloudflareSaasEnabled()) {
       try {
         await ensureCloudflareHostname(host);
@@ -55,7 +56,10 @@ export async function addWebsiteDomain(site: string, hostname: string) {
     return { message: 'Domain unavailable or capability disabled.' };
   }
 }
-export async function checkWebsiteDomain(site: string, id: string): Promise<{
+export async function checkWebsiteDomain(
+  site: string,
+  id: string,
+): Promise<{
   message: string;
   records: DomainDnsInstruction[];
 }> {
@@ -68,7 +72,12 @@ export async function checkWebsiteDomain(site: string, id: string): Promise<{
       .eq('website_id', site)
       .eq('organization_id', s.context.organizationId)
       .single();
-    if (r.error || !r.data || r.data.kind !== 'custom' || r.data.status === 'removed')
+    if (
+      r.error ||
+      !r.data ||
+      r.data.kind !== 'custom' ||
+      r.data.status === 'removed'
+    )
       throw new Error('Unavailable domain');
     const domain = r.data;
     const config = await s.client.rpc('website_configuration', {
@@ -121,16 +130,16 @@ export async function checkWebsiteDomain(site: string, id: string): Promise<{
         resolver.resolve4(domain.hostname),
         resolver.resolve4(base),
       ]);
-      if (ownership &&
-          answers[0].status === 'fulfilled' &&
-          answers[1].status === 'fulfilled') {
+      if (
+        ownership &&
+        answers[0].status === 'fulfilled' &&
+        answers[1].status === 'fulfilled'
+      ) {
         const addresses = answers[0].value;
         const targetAddresses = answers[1].value;
         dns =
           addresses.length > 0 &&
-          addresses.every(
-            (ip) => publicIp(ip) && targetAddresses.includes(ip),
-          );
+          addresses.every((ip) => publicIp(ip) && targetAddresses.includes(ip));
         if (dns)
           tls = await new Promise<boolean>((resolve) => {
             const socket = connect(

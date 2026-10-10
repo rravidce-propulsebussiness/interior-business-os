@@ -25,7 +25,9 @@ export function DomainPanel({
   canManage: boolean;
 }) {
   const [message, setMessage] = useState('');
-  const [records, setRecords] = useState<{ type: 'TXT'; name: string; value: string }[]>([]);
+  const [records, setRecords] = useState<
+    { type: 'TXT'; name: string; value: string }[]
+  >([]);
   const [pending, start] = useTransition();
   return (
     <div className="space-y-5">
@@ -122,15 +124,20 @@ export function DomainPanel({
       ))}
       {records.length > 0 && (
         <section className="rounded border p-4">
-          <h2 className="mb-2 font-semibold">Additional Cloudflare validation records</h2>
+          <h2 className="mb-2 font-semibold">
+            Additional Cloudflare validation records
+          </h2>
           <p className="mb-3 text-sm text-muted-foreground">
-            If HTTPS is pending, add the records below in your DNS provider. These
-            tokens come from Cloudflare and are separate from the Business OS TXT record.
+            If HTTPS is pending, add the records below in your DNS provider.
+            These tokens come from Cloudflare and are separate from the Business
+            OS TXT record.
           </p>
           <dl className="space-y-2 break-all text-sm">
             {records.map((record) => (
               <div key={record.name + record.value}>
-                <dt className="font-semibold">{record.type} · {record.name}</dt>
+                <dt className="font-semibold">
+                  {record.type} · {record.name}
+                </dt>
                 <dd className="font-mono">{record.value}</dd>
               </div>
             ))}

@@ -31,10 +31,16 @@ describe('Cloudflare for SaaS custom domains', () => {
   it('creates a hostname with HTTPS validation and never sends the token to the browser', async () => {
     vi.stubEnv('CLOUDFLARE_SAAS_ZONE_ID', zoneId);
     vi.stubEnv('CLOUDFLARE_SAAS_API_TOKEN', 'secret-test-token');
-    const fetchMock = vi.fn()
+    const fetchMock = vi
+      .fn()
       .mockResolvedValueOnce(json([]))
       .mockResolvedValueOnce(
-        json({ id: 'test-id', hostname, status: 'pending', ssl: { status: 'pending_validation' } }),
+        json({
+          id: 'test-id',
+          hostname,
+          status: 'pending',
+          ssl: { status: 'pending_validation' },
+        }),
       );
     vi.stubGlobal('fetch', fetchMock);
 
@@ -42,7 +48,9 @@ describe('Cloudflare for SaaS custom domains', () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
     const [url, options] = fetchMock.mock.calls[1]!;
     expect(url).toBe(
-      'https://api.cloudflare.com/client/v4/zones/' + zoneId + '/custom_hostnames',
+      'https://api.cloudflare.com/client/v4/zones/' +
+        zoneId +
+        '/custom_hostnames',
     );
     expect(options.method).toBe('POST');
     expect(options.headers.Authorization).toBe('Bearer secret-test-token');
@@ -65,7 +73,9 @@ describe('Cloudflare for SaaS custom domains', () => {
     vi.stubGlobal('fetch', fetchMock);
     expect(await getCloudflareHostname(hostname)).toEqual(existing);
     expect(fetchMock).toHaveBeenCalledTimes(2);
-    expect(fetchMock.mock.calls.every((args) => args[1].method === 'GET')).toBe(true);
+    expect(fetchMock.mock.calls.every((args) => args[1].method === 'GET')).toBe(
+      true,
+    );
   });
 
   it('shows provider ownership and SSL TXT records without duplication', () => {
@@ -82,14 +92,24 @@ describe('Cloudflare for SaaS custom domains', () => {
         ssl: {
           status: 'pending_validation',
           validation_records: [
-            { txt_name: '_acme-challenge.' + hostname, txt_value: 'certificate' },
-            { txt_name: '_acme-challenge.' + hostname, txt_value: 'certificate' },
+            {
+              txt_name: '_acme-challenge.' + hostname,
+              txt_value: 'certificate',
+            },
+            {
+              txt_name: '_acme-challenge.' + hostname,
+              txt_value: 'certificate',
+            },
           ],
         },
       }),
     ).toEqual([
       { type: 'TXT', name: '_cf-custom-hostname.' + hostname, value: 'claim' },
-      { type: 'TXT', name: '_acme-challenge.' + hostname, value: 'certificate' },
+      {
+        type: 'TXT',
+        name: '_acme-challenge.' + hostname,
+        value: 'certificate',
+      },
     ]);
   });
 });

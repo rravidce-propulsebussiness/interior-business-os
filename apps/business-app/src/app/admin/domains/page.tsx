@@ -158,10 +158,10 @@ export default async function DomainManagement() {
         </div>
         <p className="os-warning mt-5">
           Domain connection and domain registration transfer are different
-          operations. The Business App can automatically request Cloudflare-managed
-          certificates when its SaaS integration is configured. Otherwise
-          Business OS verifies existing DNS and HTTPS; it does not purchase
-          or transfer domain registrations. Do not mark a
+          operations. The Business App can automatically request
+          Cloudflare-managed certificates when its SaaS integration is
+          configured. Otherwise Business OS verifies existing DNS and HTTPS; it
+          does not purchase or transfer domain registrations. Do not mark a
           domain live until both DNS and HTTPS verification succeed.
         </p>
         <div className="mt-5 flex flex-wrap gap-3">
