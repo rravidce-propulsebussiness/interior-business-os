@@ -243,30 +243,3 @@ export async function updateCompanyIndustry(_state: State, form: FormData) {
     return { message: safeFailure(error).message };
   }
 }
-
-export async function updateCompanyRole(_state: State, form: FormData) {
-  try {
-    const { authorization, client } = await serverServices();
-    await authorization.requirePlatformPermission(
-      'platform.organizations.manage',
-    );
-    await authorization.requirePlatformPermission('platform.roles.manage');
-    const organizationId = idSchema.parse(form.get('organizationId'));
-    const membershipId = idSchema.parse(form.get('membershipId'));
-    const roleId = idSchema.parse(form.get('roleId'));
-    const remove =
-      z.enum(['true', 'false']).parse(form.get('remove')) === 'true';
-    await createPlatformCompaniesRepository(client).setRole(
-      organizationId,
-      membershipId,
-      roleId,
-      remove,
-    );
-    revalidatePath('/admin/organizations/' + organizationId);
-    return {
-      message: remove ? 'Member role removed.' : 'Member role assigned.',
-    };
-  } catch (error) {
-    return { message: safeFailure(error).message };
-  }
-}
