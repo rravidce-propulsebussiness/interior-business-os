@@ -4,6 +4,8 @@ import { revalidatePath } from 'next/cache';
 import { activeOrganization, serverServices } from '@business-os/auth/server';
 import { DomainError, safeFailure } from '@business-os/shared';
 
+import { getRolePreset } from './presets';
+
 type FormState = { message: string };
 
 async function authorizedWorkspace(organizationId: string, permission: string) {
@@ -156,6 +158,27 @@ export async function revokeEmployeeEmail(_state: FormState, form: FormData) {
     );
     refreshTeam();
     return { message: 'Invitation revoked.' };
+  } catch (error) {
+    return { message: safeFailure(error).message };
+  }
+}
+
+export async function createRoleFromPreset(_state: FormState, form: FormData) {
+  void _state;
+  try {
+    const organizationId = String(form.get('organizationId') ?? '');
+    const repository = await authorizedWorkspace(organizationId, 'role.manage');
+    const preset = getRolePreset(String(form.get('presetKey') ?? ''));
+    if (!preset) throw new DomainError('VALIDATION_FAILED');
+    // Permission keys are server-defined and cannot be forged by the client.
+    // save_role rechecks the actor's authority on every permission.
+    await repository.saveRole(organizationId, {
+      key: preset.key,
+      name: preset.name,
+      permissions: [...preset.permissions],
+    });
+    refreshTeam();
+    return { message: 'Role preset installed. It remains editable using the existing permission controls.' };
   } catch (error) {
     return { message: safeFailure(error).message };
   }
