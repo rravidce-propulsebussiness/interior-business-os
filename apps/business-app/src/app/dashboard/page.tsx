@@ -2,7 +2,8 @@ import Link from 'next/link';
 import { pageServices, activeOrganization } from '@business-os/auth/server';
 import { signOut, switchOrganization } from '@business-os/auth/actions';
 import { canAccess, moduleNavigation } from '@business-os/auth';
-import { DomainError, isHostedOrigin } from '@business-os/shared';
+import { DomainError } from '@business-os/shared';
+import { isHostedOrigin } from '@business-os/shared/runtime';
 import { Button } from '@business-os/ui';
 import { createAutomationRepository } from '@business-os/database/automation';
 
