@@ -1,4 +1,4 @@
-import { refreshSession } from '@business-os/database/proxy';
+import { refreshSessionWithRewrite } from '@business-os/database/proxy';
 import { NextResponse, type NextRequest } from 'next/server';
 import {
   WORKSPACE_COOKIE,
@@ -59,7 +59,7 @@ export async function proxy(request: NextRequest) {
   const rewrite = routing.rewrite
     ? new URL(routing.rewrite + request.nextUrl.search, request.nextUrl.origin)
     : undefined;
-  const response = await refreshSession(request, rewrite);
+  const response = await refreshSessionWithRewrite(request, rewrite);
   if (routing.setSlugCookie) {
     response.cookies.set(WORKSPACE_COOKIE, routing.setSlugCookie, {
       path: '/',
