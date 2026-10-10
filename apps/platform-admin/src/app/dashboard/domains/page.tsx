@@ -151,16 +151,17 @@ export default async function DomainManagement() {
               <OsIcon name="check" size={22} />
             </div>
             <strong>3. Provision TLS and verify</strong>
-            Configure routing and a valid certificate for the hostname on the
-            hosting provider. Use the tenant’s Verify DNS and HTTPS action to
-            validate ownership and secure delivery before activation.
+            With Cloudflare for SaaS configured on the Business App, HTTPS
+            certificates are requested automatically. Otherwise, configure a
+            certificate at the host. Use Verify DNS and HTTPS before activation.
           </div>
         </div>
         <p className="os-warning mt-5">
           Domain connection and domain registration transfer are different
-          operations. The current Business OS verifies DNS and an already
-          provisioned TLS certificate; it does not purchase or transfer domain
-          registrations or automatically issue certificates. Do not mark a
+          operations. The Business App can automatically request Cloudflare-managed
+          certificates when its SaaS integration is configured. Otherwise
+          Business OS verifies existing DNS and HTTPS; it does not purchase
+          or transfer domain registrations. Do not mark a
           domain live until both DNS and HTTPS verification succeed.
         </p>
         <div className="mt-5 flex flex-wrap gap-3">
