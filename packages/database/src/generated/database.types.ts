@@ -10670,6 +10670,26 @@ export interface Database {
         Args: { p_message: string; p_signature: string };
         Returns: string;
       };
+      company_application_decide: {
+        Args: {
+          p_application_id: string;
+          p_action: string;
+          p_note?: string;
+        };
+        Returns: Json;
+      };
+      company_application_submit: {
+        Args: { p_input: Json };
+        Returns: string;
+      };
+      company_applications_mine: {
+        Args: Record<string, never>;
+        Returns: Json;
+      };
+      company_applications_review: {
+        Args: { p_status?: string; p_page?: number };
+        Returns: Json;
+      };
       contract_create: {
         Args: { p_organization_id: string; p_revision_id: string };
         Returns: string;
