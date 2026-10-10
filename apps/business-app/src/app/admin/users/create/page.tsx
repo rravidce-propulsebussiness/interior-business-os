@@ -86,12 +86,12 @@ export default async function CreateUser() {
             </p>
             <p>
               <strong>Business Owner:</strong> create a company with this
-              verified owner's email; the company owner role receives the
+              verified owner&apos;s email; the company owner role receives the
               default full company permissions.
             </p>
             <p>
               <strong>Seller:</strong> create or enable a seller storefront on
-              the person's company. Buyers and sellers can belong to the same
+              the person&apos;s company. Buyers and sellers can belong to the same
               organization.
             </p>
           </div>
