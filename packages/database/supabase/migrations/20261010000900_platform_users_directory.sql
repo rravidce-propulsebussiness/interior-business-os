@@ -31,14 +31,14 @@ $fn$;
 create function private.platform_user_card(p_id uuid)
 returns jsonb language sql stable security definer set search_path='' as $fn$
  select jsonb_build_object(
-  'id',u.id,'email',u.email,'phone',coalesce(u.phone,''),
+  'id',u.id,'email',u.email,'phone',coalesce(u.raw_user_meta_data->>'phone',''),
   'name',coalesce(nullif(trim(p.full_name),''),split_part(u.email,'@',1)),
   'avatar',coalesce(p.avatar_url,''),
   'status',case when u.email_confirmed_at is null then 'pending'
     when p.status='suspended' then 'suspended' else 'active' end,
   'kind',private.platform_user_kind(u.id),
   'verified',u.email_confirmed_at is not null,
-  'createdAt',u.created_at,
+  'createdAt',coalesce(p.created_at,u.email_confirmed_at),
   'companies',coalesce((
     select jsonb_agg(jsonb_build_object(
       'id',o.id,'name',o.name,'slug',o.slug,'status',o.status,
@@ -88,7 +88,7 @@ begin
   or p_page not between 1 and 10000 or p_sort not in ('newest','oldest','name')
  then raise exception 'Invalid user filter' using errcode='22023'; end if;
  with identities as (
-   select u.id,u.email,u.created_at,private.platform_user_kind(u.id) kind,
+   select u.id,u.email,coalesce(p.created_at,u.email_confirmed_at),private.platform_user_kind(u.id) kind,
      case when u.email_confirmed_at is null then 'pending'
        when p.status='suspended' then 'suspended' else 'active' end status
    from auth.users u left join public.profiles p on p.id=u.id
@@ -110,7 +110,7 @@ begin
  )
  select count(*) into v_count from matches;
  with matches as (
-   select u.id,u.created_at from auth.users u
+   select u.id,coalesce(p.created_at,u.email_confirmed_at) from auth.users u
    left join public.profiles p on p.id=u.id
    where (p_kind='all' or private.platform_user_kind(u.id)=p_kind)
      and (p_status='' or
