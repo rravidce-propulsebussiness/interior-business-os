@@ -147,6 +147,25 @@ export function createPlatformCompaniesRepository(
       invoke<CompanyProfile>('platform_company_profile', {
         p_organization_id: organizationId,
       }),
+    ownerDirectory: (filters: {
+      query?: string;
+      kind?: string;
+      status?: string;
+      industryId?: string;
+      sort?: string;
+      page: number;
+    }) =>
+      invoke<PlatformUserDirectory>('platform_owner_directory', {
+        p_query: filters.query ?? '',
+        p_kind: filters.kind ?? 'all',
+        p_status: filters.status ?? '',
+        p_industry_id: filters.industryId ?? null,
+        p_page: filters.page,
+        p_sort: filters.sort ?? 'newest',
+      }),
+    ownerEmailStatus: (email: string) =>
+      invoke<'verified'|'unverified'|'suspended'|'missing'>(
+        'platform_owner_email_status', { p_email: email }),
     userDirectory: (filters: {
       query?: string;
       kind?: string;
