@@ -170,7 +170,7 @@ export function createRepository(client: SupabaseClient<Database>) {
     async myCompanyApplications() {
       return unwrap(await client.rpc('company_applications_mine'));
     },
-    async reviewCompanyApplications(status: string | null, page: number) {
+    async reviewCompanyApplications(status: string, page: number) {
       return unwrap(
         await client.rpc('company_applications_review', {
           p_status: status,
