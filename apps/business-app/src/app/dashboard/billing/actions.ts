@@ -73,7 +73,11 @@ export async function saveTradeDocument(
     const s = await financeServices('invoice.create');
     const raw = JSON.parse(String(form.get('payload') ?? '')) as unknown;
     const input = draft.parse(raw);
-    id = await createTradeBillingRepository(s.client, s.org).save(input);
+    const { id: existingId, ...draftData } = input;
+    id = await createTradeBillingRepository(s.client, s.org).save({
+      ...draftData,
+      ...(existingId ? { id: existingId } : {}),
+    });
     revalidatePath('/dashboard/billing');
   } catch (error) {
     return { message: safeFailure(error).message };
