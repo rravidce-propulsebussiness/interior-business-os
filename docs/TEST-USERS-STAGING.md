@@ -1,93 +1,66 @@
-# Disposable Business OS Auth test accounts
+# Hosted Business OS test accounts — no local setup
 
-This procedure is **only** for a confirmed disposable development or staging Supabase project.
-It must not run on production or use a production secret key.
+Updated 2026-10-10. This project is deployed to **https://sghomesinterior.in** as
+the Business App. Use the connected Supabase project for Auth and roles:
+[`interior-business-os` Auth Users](https://supabase.com/dashboard/project/wqkjzuqiarjyoimrzalk/auth/users).
 
-## Current test project (10 October 2026)
+## Already provisioned in the hosted database
 
-- Supabase ref: `wqkjzuqiarjyoimrzalk` (`interior-business-os`).
-- Database migrations exist.
-- The three development plans and default Starter provisioning record have been initialized.
-- Auth contains an unrelated pre-existing unconfirmed account; leave it untouched.
-- Tenant and platform role assignments do **not** exist yet.
+The active database contains 103 migrations, three development plans,
+and a test-only tenant:
 
-## Create the five real Supabase Auth identities
+- Organization: **Business OS Test Workspace**
+- Slug: `business-os-test-20261010`
+- ID: `7872fdab-f513-4bd7-97f4-5c671f97bcbb`
+- Plan: **Business** (all 12 predefined plan modules)
+- Ten predefined tenant roles, with 637 role-permission assignments
+- One Main Branch
+- Existing registered account `rvrmvth@gmail.com`: active **Owner** membership.
+  The Auth record's email is **not confirmed**; complete email verification
+  before expecting a password login to work.
 
-The script uses the official server-only `supabase.auth.admin.createUser()`
-operation, generates independent random passwords, confirms the disposable
-`example.test` addresses and **never** gives them roles in Auth metadata.
+The hosted test organization contains no customer/commercial project records.
+Do not delete or overwrite other organizations to test this one.
 
-From PowerShell on your trusted development computer, inside the repository:
+## Create additional hosted sign-in identities
 
-```powershell
-git pull origin main
-corepack pnpm install --frozen-lockfile
+Open [Supabase Dashboard → Authentication → Users](https://supabase.com/dashboard/project/wqkjzuqiarjyoimrzalk/auth/users).
+Use **Add user** to create test identities you own and can access, with distinct
+strong passwords. Prefer real controlled mailbox aliases over
+`example.test` email addresses, which cannot receive confirmation emails.
+Use your Supabase account's documented verification/admin creation flow.
+Suggested accounts: Sales, Interior Designer, Accountant, and a separate
+Platform Admin. You can add Project Manager/Site Supervisor later.
 
-$env:APP_ENV = "staging"
-$env:SUPABASE_ENVIRONMENT = "staging"
-$env:ALLOW_TEST_AUTH_PROVISIONING = "yes"
-$env:BUSINESS_OS_TEST_PROJECT_REF = "wqkjzuqiarjyoimrzalk"
-$env:SUPABASE_URL = "https://wqkjzuqiarjyoimrzalk.supabase.co"
+**Never share their passwords or a service-role/secret key in GitHub or chat.**
 
-# Obtain the SERVER secret key from Supabase Dashboard > Project Settings > API Keys.
-# Never copy it into GitHub, ChatGPT, a public NEXT_PUBLIC_* variable, or this document.
-$secret = Read-Host "Supabase server secret key" -AsSecureString
-$env:SUPABASE_SECRET_KEY = [System.Net.NetworkCredential]::new("", $secret).Password
+Creating Auth identities does *not* grant tenant access. After identities
+exist, use the authorized SQL role assignment process or ask the connected
+Supabase administrator to attach the Sales, Designer, Accountant memberships
+to `business-os-test-20261010`. Platform Admin must receive
+`platform_super_admin` via a separately reviewed bootstrap assignment;
+do not add it through public registration. Keep it separate from tenant roles.
 
-node packages/database/scripts/provision-test-auth-users.mjs
-Remove-Item Env:SUPABASE_SECRET_KEY
-```
+## Test from the live domain
 
-Generated passwords and user IDs are stored in
-`.tools/business-os-test-users.json` (locally ignored by Git).
-Keep that file private, securely move credentials to your password manager,
-and remove it after testing. If an account already exists, the script
-leaves it alone rather than resetting an existing password.
+- Business App login: https://sghomesinterior.in/login
+- Hosted registration: https://sghomesinterior.in/register
+- Business dashboard: https://sghomesinterior.in/dashboard
+- Supabase Auth users: https://supabase.com/dashboard/project/wqkjzuqiarjyoimrzalk/auth/users
 
-Users created:
+First validate that the live Next.js app returns HTML and its configured
+Supabase project matches `wqkjzuqiarjyoimrzalk`. Then test Owner,
+Sales, Designer, and Accountant sessions separately, role-specific navigation,
+module entitlements, and cross-tenant denial. The Platform Admin UI is a
+*separate Next.js service* (`BUSINESS_OS_SERVICE=platform-admin`) and cannot be
+assumed to exist at the Business App's domain without an independent deployment.
 
-| Email | Intended role |
-| --- | --- |
-| `platform.admin@example.test` | Platform Super Admin |
-| `owner@example.test` | Demo Interiors Owner |
-| `sales@example.test` | Sales |
-| `designer@example.test` | Interior Designer |
-| `accountant@example.test` | Accountant |
+The database provisioning above has been verified. Real password login,
+email confirmation, rendered pages and production browser acceptance have
+**not** been verified as of this update. Do not treat a correct SQL membership
+as a passed login test.
 
-## Assign organization and roles
-
-Creating Auth accounts alone never grants application access.
-
-In the **same disposable test project**, open Supabase SQL Editor and run the
-existing `packages/database/supabase/seed-users.sql` file, in its entirety.
-It requires all five Auth accounts to exist, and `seed.sql` to have populated
-the plans (already done in the named project above). The seed will create
-Demo Interiors, Main Branch, the Interior industry association, the
-Professional plan, its ten role templates/permissions, four active tenant
-memberships and one Platform Super Admin. Re-runs do not create duplicate
-memberships or roles.
-
-Do not paste generated Auth passwords into the SQL editor. Never apply
-`seed-users.sql` to a production or customer-data database.
-
-## Validate
-
-1. Check Supabase Auth has the five disposable users, each with a confirmed email and profile.
-2. Check `public.organizations` has `demo-interiors`, and there are four active tenant memberships.
-3. Check `public.platform_user_roles` has the single disposable platform admin.
-4. Sign in as Owner to **Business App**, and verify Demo Interiors/dashboard, modules and sign-out.
-5. Sign in as Designer and Accountant separately and verify their permissions differ from Owner. Sales should have different access from Designer.
-6. Sign in as Platform Admin to the independently hosted **Platform Admin** app and confirm no Business App tenant membership.
-7. Validate foreign tenant ID access is denied, password reset, login/logout and role revocation before calling hosted acceptance passed.
-
-If the Business App remains blank, troubleshoot Hostinger build and environment
-configuration separately: working database records are not proof that hosted
-Next.js is serving pages correctly.
-
-## Cleanup
-
-This procedure is intended for a disposable staging project. Prefer discarding
-the test project at the end of acceptance rather than deleting arbitrary users
-from a database containing real customers. If keeping it, first remove
-memberships and other dependent data through controlled admin procedures;
-never delete `auth.users` by raw SQL.
+An optional guarded **developer** script exists at
+`packages/database/scripts/provision-test-auth-users.mjs`, but is **not
+required for this hosted workflow**. It must never be run as a public endpoint
+or on a production customer project.
