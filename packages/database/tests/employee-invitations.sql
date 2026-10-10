@@ -86,6 +86,8 @@ select private.emp_assert(
 select private.employee_invitation_email_ack(
  (:'claimed'::jsonb->>'id')::uuid,
  (:'claimed'::jsonb->>'lease')::uuid,'sent',null);
+select private.emp_assert(private.employee_invitation_email_claim()='null'::jsonb,
+ 'idle worker receives JSON null, never a parser-breaking empty SQL value');
 reset role;
 set local role authenticated;
 select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000082',true);
