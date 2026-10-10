@@ -61,3 +61,26 @@ export async function createServerDatabase() {
     },
   );
 }
+
+/**
+ * Elevated Auth provisioning. Server Action only, after a separate platform
+ * authorization check. Never export its key or use this client in a browser.
+ */
+export function createOwnerProvisioningDatabase() {
+  const env = parsePublicEnvironment(process.env);
+  const secret =
+    process.env.SUPABASE_SECRET_KEY?.trim() ||
+    process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
+  if (!secret)
+    throw new Error(
+      'Owner onboarding is not configured: set SUPABASE_SECRET_KEY on the Business App server.',
+    );
+  return createClient<Database>(env.NEXT_PUBLIC_SUPABASE_URL, secret, {
+    global: { fetch: boundedFetch },
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false,
+    },
+  });
+}

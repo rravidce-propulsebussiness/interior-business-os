@@ -11289,6 +11289,21 @@ export interface Database {
       };
       platform_context: { Args: Record<string, never>; Returns: Json };
       platform_gst_summary: { Args: Record<string, never>; Returns: Json };
+      platform_owner_directory: {
+        Args: {
+          p_query?: string;
+          p_status?: string;
+          p_industry_id?: string;
+          p_page?: number;
+          p_sort?: string;
+          p_kind?: string;
+        };
+        Returns: Json;
+      };
+      platform_owner_email_status: {
+        Args: { p_email: string };
+        Returns: string;
+      };
       platform_plan_create: { Args: { p_input: Json }; Returns: string };
       platform_set_entitlement: {
         Args: { p_organization_id: string; p_input: Json };

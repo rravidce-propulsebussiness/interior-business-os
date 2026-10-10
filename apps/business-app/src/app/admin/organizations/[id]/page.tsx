@@ -9,7 +9,6 @@ import {
   enablePlatformSeller,
   updateCompanySeller,
   updateCompanyIndustry,
-  updateCompanyRole,
 } from '../control-actions';
 
 export const dynamic = 'force-dynamic';
@@ -39,8 +38,6 @@ export default async function OrganizationDetail({
     throw error;
   }
   const canManage = permissions.includes('platform.organizations.manage');
-  const canManageRoles =
-    canManage && permissions.includes('platform.roles.manage');
   const canSeeEntitlements = permissions.includes('platform.entitlements.view');
   const canManageEntitlements = permissions.includes(
     'platform.entitlements.manage',
@@ -142,8 +139,8 @@ export default async function OrganizationDetail({
             role="status"
             className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900"
           >
-            Company workspace created with verified owner, roles, industries and
-            seller status, if requested.
+            Company workspace created with its owner, full owner permissions,
+            industries and seller status, if requested.
           </p>
         )}
 
@@ -335,9 +332,9 @@ export default async function OrganizationDetail({
               </span>
             </div>
             <p className="mt-3 text-sm leading-6 text-slate-600">
-              Roles belong to this company, not to another tenant. Platform
-              changes are audited and removing the final Owner role is blocked.
-              Industry membership is managed independently above.
+              The business owner manages employee accounts and permissions from
+              the company workspace. Super Admin can inspect memberships here,
+              but cannot assign individual employee roles.
             </p>
             <div className="mt-5 grid gap-4 md:grid-cols-2">
               {company.members.map((member) => {
@@ -371,44 +368,6 @@ export default async function OrganizationDetail({
                         </span>
                       )}
                     </div>
-                    {canManageRoles && member.status === 'active' && (
-                      <div className="mt-4">
-                        <ActionForm
-                          action={updateCompanyRole}
-                          label="Save member role"
-                        >
-                          <input
-                            type="hidden"
-                            name="organizationId"
-                            value={id}
-                          />
-                          <input
-                            type="hidden"
-                            name="membershipId"
-                            value={member.id}
-                          />
-                          <div className="grid gap-3 sm:grid-cols-2">
-                            <label className="grid gap-1.5 text-xs font-medium">
-                              Role
-                              <select className={field} name="roleId">
-                                {company.roles.map((role) => (
-                                  <option key={role.id} value={role.id}>
-                                    {role.name}
-                                  </option>
-                                ))}
-                              </select>
-                            </label>
-                            <label className="grid gap-1.5 text-xs font-medium">
-                              Action
-                              <select name="remove" className={field}>
-                                <option value="false">Assign role</option>
-                                <option value="true">Remove role</option>
-                              </select>
-                            </label>
-                          </div>
-                        </ActionForm>
-                      </div>
-                    )}
                   </article>
                 );
               })}
