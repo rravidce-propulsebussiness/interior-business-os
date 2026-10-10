@@ -2,16 +2,23 @@
 
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import {
-  activeOrganization,
-  serverServices,
-} from '@business-os/auth/server';
+import { activeOrganization, serverServices } from '@business-os/auth/server';
 
 const uuid = z.uuid();
 const allowedActions = new Set([
-  'initialize','assign','design_submit','design_decide','client_approve',
-  'execution_start','report_add','material_add','material_update',
-  'check_add','check_update','gate_add','handover',
+  'initialize',
+  'assign',
+  'design_submit',
+  'design_decide',
+  'client_approve',
+  'execution_start',
+  'report_add',
+  'material_add',
+  'material_update',
+  'check_add',
+  'check_update',
+  'gate_add',
+  'handover',
 ]);
 type Result = { saved: boolean; message: string };
 const pathFor = (project: string) => '/dashboard/projects/' + project + '/site';
@@ -45,7 +52,8 @@ export async function saveProjectSite(
   form: FormData,
 ): Promise<Result> {
   try {
-    if (!allowedActions.has(operation)) throw new Error('Unknown project action');
+    if (!allowedActions.has(operation))
+      throw new Error('Unknown project action');
     const { client, org } = await context(project);
     const { error } = await client.rpc('project_site_command', {
       p_organization_id: org,
@@ -53,15 +61,21 @@ export async function saveProjectSite(
       p_action: operation,
       p_input: fromForm(form),
     });
-    if (error) throw new Error(error.code === '42501'
-      ? 'This project role does not allow that action'
-      : error.message.slice(0, 220));
+    if (error)
+      throw new Error(
+        error.code === '42501'
+          ? 'This project role does not allow that action'
+          : error.message.slice(0, 220),
+      );
     revalidatePath(pathFor(project));
     return { saved: true, message: 'Project record saved.' };
   } catch (error) {
     return {
       saved: false,
-      message: error instanceof Error ? error.message : 'Unable to save project record',
+      message:
+        error instanceof Error
+          ? error.message
+          : 'Unable to save project record',
     };
   }
 }
@@ -75,11 +89,21 @@ export async function uploadProjectSiteMedia(
     const file = form.get('file');
     if (!(file instanceof File) || file.size < 1 || file.size > 8 * 1024 * 1024)
       throw new Error('Choose a photo, PDF or short MP4 up to 8 MB');
-    if (!['image/jpeg','image/png','image/webp','video/mp4','application/pdf'].includes(file.type))
+    if (
+      ![
+        'image/jpeg',
+        'image/png',
+        'image/webp',
+        'video/mp4',
+        'application/pdf',
+      ].includes(file.type)
+    )
       throw new Error('Unsupported file type');
     const category = String(form.get('category') ?? '');
     const caption = String(form.get('caption') ?? '');
-    const filename = file.name.replace(/[\\/\x00-\x1f\x7f]/g, '_').slice(0,180);
+    const filename = file.name
+      .replace(/[\\/\x00-\x1f\x7f]/g, '_')
+      .slice(0, 180);
     if (caption.length > 500) throw new Error('Caption too long');
     const bytes = Buffer.from(await file.arrayBuffer());
     if (bytes.length > 8 * 1024 * 1024) throw new Error('File too large');
@@ -92,11 +116,18 @@ export async function uploadProjectSiteMedia(
       p_base64: bytes.toString('base64'),
       p_caption: caption,
     });
-    if (error) throw new Error(error.code === '42501' ? 'Project media access denied'
-      : error.message.slice(0, 220));
+    if (error)
+      throw new Error(
+        error.code === '42501'
+          ? 'Project media access denied'
+          : error.message.slice(0, 220),
+      );
     revalidatePath(pathFor(project));
     return { saved: true, message: 'Media saved privately to this project.' };
   } catch (error) {
-    return { saved: false, message: error instanceof Error ? error.message : 'Upload failed' };
+    return {
+      saved: false,
+      message: error instanceof Error ? error.message : 'Upload failed',
+    };
   }
 }

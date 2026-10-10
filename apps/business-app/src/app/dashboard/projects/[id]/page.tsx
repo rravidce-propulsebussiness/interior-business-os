@@ -34,12 +34,16 @@ export default async function Project({
       <Link href="/dashboard/projects">Projects</Link>
       <h1 className="my-6 text-3xl">{p.name}</h1>
       <section className="my-5 rounded-2xl border border-blue-200 bg-blue-50 p-5">
-        <p className="text-xs font-bold uppercase tracking-wider text-blue-800">Project delivery</p>
-        <h2 className="mt-2 text-xl font-semibold">From drawings to handover</h2>
+        <p className="text-xs font-bold uppercase tracking-wider text-blue-800">
+          Project delivery
+        </p>
+        <h2 className="mt-2 text-xl font-semibold">
+          From drawings to handover
+        </h2>
         <p className="mt-2 text-sm text-slate-700">
-          Assign architects, structural designers, engineers and watchmen; review
-          designs, record client approval, plan site works, track materials,
-          upload progress evidence and complete quality checks.
+          Assign architects, structural designers, engineers and watchmen;
+          review designs, record client approval, plan site works, track
+          materials, upload progress evidence and complete quality checks.
         </p>
         <Link
           className="mt-4 inline-block rounded-xl bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-800"

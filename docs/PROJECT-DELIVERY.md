@@ -5,6 +5,7 @@ Tenant URL: `/dashboard/projects/<project-id>/site`. Platform controls:
 platform admins do **not** get access to customer project data).
 
 ## Flow
+
 After a customer project has been created from the existing CRM/quote/contract
 flow, an authorized project manager initializes the delivery workspace.
 
@@ -37,6 +38,7 @@ flow, an authorized project manager initializes the delivery workspace.
    (tasks, formal inspections, and snags).
 
 ## Access controls
+
 - Requires authenticated active organization membership and Projects module
   entitlement, plus either the company's `project.manage` permission or a
   project-specific role assigned by a manager.
@@ -60,6 +62,7 @@ flow, an authorized project manager initializes the delivery workspace.
   permissions and from the original Operations plan assignment table.
 
 ## Deployment
+
 New migration: `20261010000700_project_delivery.sql`. Apply only to the
 verified correct database. Generated RPC types committed with the migration.
 The corresponding Business App must be deployed after migration. **The
