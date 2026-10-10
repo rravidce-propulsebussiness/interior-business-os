@@ -3,7 +3,10 @@ import { notFound } from 'next/navigation';
 import { pageServices } from '@business-os/auth/server';
 import { DomainError } from '@business-os/shared';
 import { ActionForm } from '@business-os/ui/action-form';
-import { decideCompanyApplication, setCompanyOnboardingPolicy } from './actions';
+import {
+  decideCompanyApplication,
+  setCompanyOnboardingPolicy,
+} from './actions';
 
 type Application = {
   id: string;
