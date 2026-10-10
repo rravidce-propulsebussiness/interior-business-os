@@ -178,7 +178,10 @@ export async function createRoleFromPreset(_state: FormState, form: FormData) {
       permissions: [...preset.permissions],
     });
     refreshTeam();
-    return { message: 'Role preset installed. It remains editable using the existing permission controls.' };
+    return {
+      message:
+        'Role preset installed. It remains editable using the existing permission controls.',
+    };
   } catch (error) {
     return { message: safeFailure(error).message };
   }
