@@ -55,6 +55,7 @@ psql(['-f', file('supabase/seed-finance.sql')]);
 psql(['-f', file('supabase/seed-finance.sql')]);
 console.log('Finance demo configuration seed is repeatable.');
 assertionFile('finance');
+assertionFile('trade-billing');
 psql(['-f', file('supabase/seed-execution.sql')]);
 psql(['-f', file('supabase/seed-execution.sql')]);
 console.log('Execution demo masters are repeatable.');
