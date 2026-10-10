@@ -4,10 +4,10 @@ The previous text-only `pdf-lib` fallback was incompatible with the quotation, f
 
 ## Providers and configuration
 
-| Host | `PDF_RENDERER` | Runtime backend | Required configuration |
-| --- | --- | --- | --- |
-| Standard Node 24 (Hostinger/VPS/staging) | `node` (default outside Workers) | `packages/shared/src/pdf.node.ts`: restricted Playwright Chromium | Install matching Chromium with `pnpm exec playwright install --with-deps chromium`; Node must be allowed to spawn browser processes |
-| Cloudflare Workers/OpenNext | `cloudflare-rest` (explicit in `apps/business-app/wrangler.jsonc`) | Cloudflare Browser Rendering REST `POST /accounts/{id}/browser-rendering/pdf` with server-supplied HTML | Secret `CF_BROWSER_API_TOKEN` with Browser Rendering Write and non-secret `CF_BROWSER_ACCOUNT_ID` (32 hex chars), provisioned per environment |
+| Host                                     | `PDF_RENDERER`                                                     | Runtime backend                                                                                         | Required configuration                                                                                                                        |
+| ---------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Standard Node 24 (Hostinger/VPS/staging) | `node` (default outside Workers)                                   | `packages/shared/src/pdf.node.ts`: restricted Playwright Chromium                                       | Install matching Chromium with `pnpm exec playwright install --with-deps chromium`; Node must be allowed to spawn browser processes           |
+| Cloudflare Workers/OpenNext              | `cloudflare-rest` (explicit in `apps/business-app/wrangler.jsonc`) | Cloudflare Browser Rendering REST `POST /accounts/{id}/browser-rendering/pdf` with server-supplied HTML | Secret `CF_BROWSER_API_TOKEN` with Browser Rendering Write and non-secret `CF_BROWSER_ACCOUNT_ID` (32 hex chars), provisioned per environment |
 
 **Neither `nodejs_compat` nor OpenNext provides a local Chromium process in Workers.** A missing/invalid provider is a `PDF_RENDERER_UNAVAILABLE` 503, not a degraded text document. Node launch failures and remote rendering failures also fail closed (no silent fallback). Never put Browser Rendering tokens into `NEXT_PUBLIC_*`, HTML, checked-in Wrangler vars or code. The Worker must have outbound access to the official Cloudflare API. The REST API supports supplied HTML, PDF options, `setJavaScriptEnabled`, request-blocking patterns and preferred CSS page sizes: https://developers.cloudflare.com/api/resources/browser_rendering/subresources/pdf/methods/create/.
 

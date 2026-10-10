@@ -9,7 +9,11 @@ export async function renderNodePdf(
   const browser = await chromium.launch({
     headless: true,
     timeout: 15_000,
-    args: ['--disable-background-networking', '--no-first-run', '--disable-extensions'],
+    args: [
+      '--disable-background-networking',
+      '--no-first-run',
+      '--disable-extensions',
+    ],
   });
   // Hard stop if the renderer hangs. Closing the browser fails the job closed.
   const watchdog = setTimeout(() => {
@@ -34,8 +38,9 @@ export async function renderNodePdf(
       // Deliberately reject overflowing brochure components, never auto-shrink
       // important copy or silently cut off pricing/legal terms.
       if (options.brochure) {
-        const overflow = await page.locator('.brochure-component').evaluateAll(
-          (components) =>
+        const overflow = await page
+          .locator('.brochure-component')
+          .evaluateAll((components) =>
             components.some((component) => {
               if (
                 !component.querySelector(
@@ -48,8 +53,11 @@ export async function renderNodePdf(
                 component.scrollWidth > component.clientWidth + 2
               );
             }),
-        );
-        if (overflow) throw new Error('Print preflight: brochure content overflows a component');
+          );
+        if (overflow)
+          throw new Error(
+            'Print preflight: brochure content overflows a component',
+          );
       }
 
       const bytes = await page.pdf({

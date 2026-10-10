@@ -30,16 +30,26 @@ let active = 0;
 export function validatePrintHtml(html: string): string {
   if (!html || Buffer.byteLength(html, 'utf8') > MAX_HTML_BYTES)
     throw new Error('PDF input exceeds rendering limit');
-  if (/<\s*(?:script|iframe|object|embed|base|link|svg|video|audio)\b/i.test(html))
+  if (
+    /<\s*(?:script|iframe|object|embed|base|link|svg|video|audio)\b/i.test(html)
+  )
     throw new Error('PDF contains forbidden active or remote content');
-  if (/@import\b|url\(\s*['"]?(?!data:image\/(?:png|jpeg|webp);base64,)/i.test(html))
+  if (
+    /@import\b|url\(\s*['"]?(?!data:image\/(?:png|jpeg|webp);base64,)/i.test(
+      html,
+    )
+  )
     throw new Error('PDF styles cannot load external resources');
   if (/\b(?:srcset|poster)\s*=/i.test(html))
     throw new Error('PDF cannot load external resources');
   const sources = [...html.matchAll(/\bsrc\s*=\s*["']([^"']*)["']/gi)];
   let embeddedSize = 0;
   for (const [, source] of sources) {
-    if (!/^data:image\/(?:png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/i.test(source ?? ''))
+    if (
+      !/^data:image\/(?:png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/i.test(
+        source ?? '',
+      )
+    )
       throw new Error('PDF image must be a bounded embedded raster image');
     embeddedSize += Math.floor(((source ?? '').length * 3) / 4);
     if (embeddedSize > MAX_EMBEDDED_BYTES)
@@ -53,13 +63,22 @@ export function validatePrintHtml(html: string): string {
     "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; img-src data:; style-src 'unsafe-inline'; font-src data:; script-src 'none'; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'\">";
   if (/<head\b[^>]*>/i.test(html))
     return html.replace(/<head\b[^>]*>/i, (match) => match + csp);
-  return '<!doctype html><html><head>' + csp + '</head><body>' + html + '</body></html>';
+  return (
+    '<!doctype html><html><head>' +
+    csp +
+    '</head><body>' +
+    html +
+    '</body></html>'
+  );
 }
 
-export function configuredPdfProvider(env: Record<string, string | undefined> = process.env): PdfProvider {
+export function configuredPdfProvider(
+  env: Record<string, string | undefined> = process.env,
+): PdfProvider {
   const value = env.PDF_RENDERER;
   const isWorker =
-    typeof navigator !== 'undefined' && navigator.userAgent === 'Cloudflare-Workers';
+    typeof navigator !== 'undefined' &&
+    navigator.userAgent === 'Cloudflare-Workers';
   if (value === 'cloudflare-rest') return 'cloudflare-rest';
   if (value === 'node' && !isWorker) return 'node';
   if (!value && !isWorker) return 'node';
@@ -82,7 +101,13 @@ export function cloudflarePdfRequest(
       html,
       setJavaScriptEnabled: false,
       rejectRequestPattern: ['^https?://', '^file://', '^ftp://', '^wss?://'],
-      rejectResourceTypes: ['script', 'xhr', 'fetch', 'websocket', 'eventsource'],
+      rejectResourceTypes: [
+        'script',
+        'xhr',
+        'fetch',
+        'websocket',
+        'eventsource',
+      ],
       pdfOptions: {
         format: 'a4',
         preferCSSPageSize: true,
@@ -108,13 +133,17 @@ async function cloudflarePdf(html: string, options: PdfOptions) {
     redirect: 'error',
   });
   // Do not return a provider error body; it could contain private input.
-  if (!response.ok || !response.headers.get('content-type')?.includes('application/pdf'))
+  if (
+    !response.ok ||
+    !response.headers.get('content-type')?.includes('application/pdf')
+  )
     throw new PdfServiceError('PDF_RENDER_FAILED');
   return Buffer.from(await response.arrayBuffer());
 }
 
 async function applyMetadata(bytes: Uint8Array, options: PdfOptions) {
-  if (!options.title && !options.author && !options.subject) return Buffer.from(bytes);
+  if (!options.title && !options.author && !options.subject)
+    return Buffer.from(bytes);
   const document = await PDFDocument.load(bytes);
   if (options.title) document.setTitle(options.title);
   if (options.author) document.setAuthor(options.author);
@@ -129,7 +158,10 @@ async function applyMetadata(bytes: Uint8Array, options: PdfOptions) {
  * Authentication, allowed data projections and snapshot integrity remain
  * the responsibility of the existing protected route and repository.
  */
-export async function renderPdf(html: string, options: PdfOptions = {}): Promise<Buffer> {
+export async function renderPdf(
+  html: string,
+  options: PdfOptions = {},
+): Promise<Buffer> {
   const provider = configuredPdfProvider();
   if (active >= 2) throw new PdfServiceError('PDF_RENDERER_BUSY');
   const safeHtml = validatePrintHtml(html);
@@ -139,7 +171,10 @@ export async function renderPdf(html: string, options: PdfOptions = {}): Promise
       provider === 'node'
         ? await (await import('./pdf.node')).renderNodePdf(safeHtml, options)
         : await cloudflarePdf(safeHtml, options);
-    if (bytes.byteLength < 5 || Buffer.from(bytes).toString('ascii', 0, 5) !== '%PDF-')
+    if (
+      bytes.byteLength < 5 ||
+      Buffer.from(bytes).toString('ascii', 0, 5) !== '%PDF-'
+    )
       throw new PdfServiceError('PDF_RENDER_FAILED');
     if (bytes.byteLength > MAX_PDF_BYTES)
       throw new PdfServiceError('PDF_RENDER_LIMIT');
