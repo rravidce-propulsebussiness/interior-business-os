@@ -18,7 +18,8 @@
     "./automation": "./src/automation.ts",
     "./reporting": "./src/reporting.ts",
     "./website": "./src/website.ts",
-    "./brochure": "./src/brochure.ts"
+    "./brochure": "./src/brochure.ts",
+    "./marketplace": "./src/marketplace.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json"

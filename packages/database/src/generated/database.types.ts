@@ -10989,6 +10989,63 @@ export interface Database {
         Args: { p_organization_id: string; p_filters: Json };
         Returns: Json;
       };
+      marketplace_catalog: {
+        Args: {
+          p_organization_id: string;
+          p_industry_id?: string;
+          p_query?: string;
+        };
+        Returns: Json;
+      };
+      marketplace_industry_create: {
+        Args: { p_key: string; p_name: string };
+        Returns: string;
+      };
+      marketplace_order_decide: {
+        Args: {
+          p_organization_id: string;
+          p_order_id: string;
+          p_action: string;
+        };
+        Returns: undefined;
+      };
+      marketplace_order_place: {
+        Args: {
+          p_organization_id: string;
+          p_product_id: string;
+          p_quantity: number;
+          p_idempotency_key: string;
+        };
+        Returns: string;
+      };
+      marketplace_orders: {
+        Args: { p_organization_id: string; p_role?: string };
+        Returns: Json;
+      };
+      marketplace_product_save: {
+        Args: { p_organization_id: string; p_input: Json };
+        Returns: string;
+      };
+      marketplace_seller_apply: {
+        Args: { p_organization_id: string; p_name: string };
+        Returns: string;
+      };
+      marketplace_seller_decide: {
+        Args: { p_seller_id: string; p_action: string };
+        Returns: undefined;
+      };
+      marketplace_seller_industry_assign: {
+        Args: { p_organization_id: string; p_industry_id: string };
+        Returns: undefined;
+      };
+      marketplace_seller_profile: {
+        Args: { p_organization_id: string };
+        Returns: Json;
+      };
+      marketplace_sellers_review: {
+        Args: { p_status?: string };
+        Returns: Json;
+      };
       notification_preferences_save: {
         Args: {
           p_organization_id: string;
