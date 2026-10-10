@@ -111,4 +111,50 @@ select private.company_assert(
  not exists(select 1 from public.organizations where plan_id=:'new_plan_id'),
  'creating a plan does not change existing company subscriptions');
 
+
+-- Retain the established provisioning workflow until a platform operator
+-- explicitly turns on mandatory approval after hosted validation.
+select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000071',true);
+select private.company_denied(
+  $select public.company_onboarding_policy()$,
+  'ordinary owner cannot inspect protected platform onboarding policy');
+select private.company_denied(
+  $select public.company_onboarding_set_policy(true)$,
+  'ordinary owner cannot change legacy onboarding policy');
+
+select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000073',true);
+select private.company_assert(
+  (public.company_onboarding_policy()->>'approvalRequired')::boolean = false,
+  'legacy gate defaults off to preserve existing tenants');
+select public.company_onboarding_set_policy(true);
+select private.company_assert(
+  (public.company_onboarding_policy()->>'approvalRequired')::boolean = true,
+  'authorized reviewer can enforce reviewed onboarding');
+
+select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000071',true);
+select private.company_denied(
+  $select public.create_organization('{"name":"Unreviewed Business","slug":"unreviewed-bypass-attempt","currency":"INR","country":"IN","timezone":"Asia/Kolkata"}')$,
+  'legacy direct organization RPC cannot bypass enforced review');
+select private.company_assert(
+  not exists(select 1 from public.organizations where slug='unreviewed-bypass-attempt'),
+  'blocked legacy RPC cannot create organization or owner');
+select private.company_denied(
+  $select public.company_onboarding_set_policy(false)$,
+  'ordinary tenant owner cannot disable enforced review');
+
+-- Approved application workflow continues to work under the enforced gate.
+select public.company_application_submit(
+ '{"name":"Approved While Enforced","slug":"reviewed-while-enforced","country":"IN","currency":"INR","timezone":"Asia/Kolkata","industries":["construction"]}'
+) as enforced_application_id \gset
+select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000073',true);
+select public.company_application_decide(:'enforced_application_id','approve','Reviewed');
+select private.company_assert(
+  (select count(*)=1 from public.organizations where slug='reviewed-while-enforced'),
+  'platform approval still provisions when legacy creation is denied');
+-- Reversible only through the existing platform manage permission.
+select public.company_onboarding_set_policy(false);
+select private.company_assert(
+  (public.company_onboarding_policy()->>'approvalRequired')::boolean = false,
+  'platform can roll back gating without touching existing companies');
+
 rollback;
