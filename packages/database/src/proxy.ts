@@ -6,7 +6,13 @@ import { parsePublicEnvironment } from '@business-os/shared';
 import { boundedFetch } from '@business-os/shared/runtime';
 import { adminContentSecurityPolicy } from '@business-os/shared/security';
 import type { Database } from './generated/database.types';
-export async function refreshSession(
+// Next.js calls proxy(request, event): do not mistake the NextFetchEvent
+// for a URL. Only the explicit helper accepts a rewrite target.
+export async function refreshSession(request: NextRequest) {
+  return refreshSessionWithRewrite(request);
+}
+
+export async function refreshSessionWithRewrite(
   request: NextRequest,
   rewriteTarget?: URL,
 ) {
