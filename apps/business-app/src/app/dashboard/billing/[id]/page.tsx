@@ -17,10 +17,8 @@ function text(obj: Record<string, unknown>, key: string) {
 }
 export default async function GstDocumentDetail({
   params,
-  searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ saved?: string }>;
 }) {
   const { id } = await params;
   if (!idSchema.safeParse(id).success) notFound();
