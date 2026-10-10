@@ -7,6 +7,7 @@ create table private.employee_invitations (
   organization_id uuid not null references public.organizations(id),
   email text not null check (email = lower(btrim(email)) and length(email) between 3 and 254),
   invited_by uuid not null references public.profiles(id),
+  company_name_snapshot text not null,
   role_ids uuid[] not null check (cardinality(role_ids) between 1 and 8),
   branch_id uuid,
   status text not null default 'pending' check (status in ('pending','accepted','revoked')),
@@ -19,6 +20,7 @@ create table private.employee_invitations (
   mail_version integer not null default 1,
   mail_status text not null default 'queued' check (mail_status in ('queued','sending','retry','sent','failed')),
   mail_attempts integer not null default 0,
+  mail_first_attempt_at timestamptz,
   next_attempt_at timestamptz not null default now(),
   mail_lease uuid,
   mail_lease_until timestamptz,
@@ -74,7 +76,7 @@ $fn$;
 create function public.employee_invitation_create(
  p_organization_id uuid,p_email text,p_role_ids uuid[],p_branch_id uuid default null
 ) returns uuid language plpgsql security definer set search_path='' as $fn$
-declare v_email text=lower(btrim(p_email)); result uuid;
+declare v_email text=lower(btrim(p_email)); result uuid; v_company text;
 begin
  perform private.require_permission(p_organization_id,'team.invite');
  perform private.require_permission(p_organization_id,'role.manage');
@@ -95,8 +97,10 @@ begin
  if (select count(*) from private.employee_invitations
      where organization_id=p_organization_id and created_at>now()-interval '24 hours')>=20
  then raise exception 'Daily invitation limit' using errcode='42501'; end if;
- insert into private.employee_invitations(organization_id,email,invited_by,role_ids,branch_id)
- values(p_organization_id,v_email,auth.uid(),p_role_ids,p_branch_id)
+ select name into v_company from public.organizations where id=p_organization_id and status in ('active','trial');
+ if v_company is null then raise exception 'Inactive company' using errcode='42501'; end if;
+ insert into private.employee_invitations(organization_id,email,invited_by,company_name_snapshot,role_ids,branch_id)
+ values(p_organization_id,v_email,auth.uid(),v_company,p_role_ids,p_branch_id)
  returning id into result;
  insert into public.audit_logs(actor_user_id,organization_id,action,entity_type,entity_id,metadata)
  values(auth.uid(),p_organization_id,'employee.invitation.created','employee_invitation',result::text,
@@ -194,7 +198,7 @@ begin
  then raise exception 'Invitation not eligible for resend' using errcode='42501'; end if;
  update private.employee_invitations
  set expires_at=now()+interval '7 days',mail_version=mail_version+1,
-     mail_status='queued',mail_attempts=0,next_attempt_at=now(),
+     mail_status='queued',mail_attempts=0,mail_first_attempt_at=null,next_attempt_at=now(),
      mail_lease=null,mail_lease_until=null,resent_at=now(),updated_at=now()
  where id=p_invitation_id;
  insert into public.audit_logs(actor_user_id,organization_id,action,entity_type,entity_id)
@@ -205,8 +209,11 @@ end $fn$;
 -- or provider secret is placed in the Business App.
 create function private.employee_invitation_email_claim()
 returns jsonb language plpgsql security definer set search_path='' as $fn$
-declare i private.employee_invitations; v_name text; v_lease uuid;
+declare i private.employee_invitations; v_lease uuid;
 begin
+ update private.employee_invitations set mail_status='failed',updated_at=now()
+ where status='pending' and mail_status in ('retry','sending')
+   and mail_first_attempt_at<=now()-interval '23 hours';
  for i in select * from private.employee_invitations
    where status='pending' and expires_at>now()
      and (mail_status in ('queued','retry') or (mail_status='sending' and mail_lease_until<now()))
@@ -217,16 +224,15 @@ begin
     update private.employee_invitations set mail_status='failed',updated_at=now() where id=i.id;
     continue;
   end if;
-  select name into v_name from public.organizations where id=i.organization_id and status in ('active','trial');
-  if v_name is null then continue; end if;
+  if not exists(select 1 from public.organizations where id=i.organization_id and status in ('active','trial')) then continue; end if;
   v_lease=gen_random_uuid();
   update private.employee_invitations
     set mail_status='sending',mail_lease=v_lease,mail_lease_until=now()+interval '2 minutes',
-        mail_attempts=mail_attempts+1,updated_at=now()
+        mail_attempts=mail_attempts+1,mail_first_attempt_at=coalesce(mail_first_attempt_at,now()),updated_at=now()
     where id=i.id;
   return jsonb_build_object(
     'id',i.id,'lease',v_lease,'recipient',i.email,
-    'organizationName',regexp_replace(v_name,'[\r\n]+',' ','g'),
+    'organizationName',regexp_replace(i.company_name_snapshot,'[\r\n]+',' ','g'),
     'idempotencyKey','employee-invite-'||i.id::text||'-'||i.mail_version::text
   );
  end loop;
