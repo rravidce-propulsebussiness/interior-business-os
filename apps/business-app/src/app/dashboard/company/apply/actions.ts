@@ -19,8 +19,12 @@ export async function submitCompanyApplication(
       name: String(form.get('name') ?? '').trim(),
       slug: String(form.get('slug') ?? '').trim(),
       legalName: String(form.get('legalName') ?? '').trim(),
-      country: String(form.get('country') ?? '').trim().toUpperCase(),
-      currency: String(form.get('currency') ?? '').trim().toUpperCase(),
+      country: String(form.get('country') ?? '')
+        .trim()
+        .toUpperCase(),
+      currency: String(form.get('currency') ?? '')
+        .trim()
+        .toUpperCase(),
       timezone: String(form.get('timezone') ?? '').trim(),
       industries,
       ...(planId ? { planId } : {}),

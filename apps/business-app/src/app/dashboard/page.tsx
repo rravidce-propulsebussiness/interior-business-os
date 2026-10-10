@@ -9,12 +9,11 @@ import { createAutomationRepository } from '@business-os/database/automation';
 export default async function Dashboard() {
   const { authorization, repository, client } = await pageServices();
   const user = await authorization.requireAuthenticatedUser();
-  const [allOrganizations, memberships, modules] =
-    await Promise.all([
-      repository.organizations(),
-      repository.memberships(),
-      repository.modules(),
-    ]);
+  const [allOrganizations, memberships, modules] = await Promise.all([
+    repository.organizations(),
+    repository.memberships(),
+    repository.modules(),
+  ]);
   const organizations = allOrganizations.filter((org) =>
     memberships.some(
       (m) =>
@@ -242,10 +241,13 @@ export default async function Dashboard() {
       <section className="section-card">
         <h2 className="text-xl font-semibold">Add a business</h2>
         <p>
-          New companies are reviewed by the platform before a workspace
-          is activated. Choose Construction, Interior Design or both.
+          New companies are reviewed by the platform before a workspace is
+          activated. Choose Construction, Interior Design or both.
         </p>
-        <Link className="premium-link-secondary" href="/dashboard/company/apply">
+        <Link
+          className="premium-link-secondary"
+          href="/dashboard/company/apply"
+        >
           Apply to register a company
         </Link>
       </section>
