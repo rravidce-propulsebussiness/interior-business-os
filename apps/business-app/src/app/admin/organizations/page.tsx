@@ -198,18 +198,7 @@ function UserCard({
             Manage company
           </Link>
         )}
-        <Link
-          href={
-            company
-              ? '/admin/organizations/' + company.id
-              : '/admin/users/' + user.id
-          }
-          title={company ? 'Manage company' : 'View user'}
-          aria-label="More account options"
-          className="inline-flex items-center justify-center rounded-xl border border-slate-200 px-3 text-slate-700 hover:bg-slate-50"
-        >
-          ···
-        </Link>
+
       </div>
     </article>
   );
