@@ -57,7 +57,6 @@ Validate configuration with `node scripts/start-service.mjs business-app --check
 - `https://sghomesinterior.in/admin/plans`: platform subscription plans
 - `https://sghomesinterior.in/admin/domains`: platform domain control center
 
-
 **Navigation rule:** do not offer a second business-dashboard link in the Super Admin sidebar. A successful login still passes through `/dashboard`, where the server immediately routes fully authorized platform-dashboard users to `/admin` before rendering a tenant overview. This preserves all existing tenant module routes and prevents organization Owners from being mistaken for platform administrators. If a platform administrator also needs tenant operations, visit an explicitly authorized tenant module; do not expose tenant-only data in platform aggregates.
 
 Keep `BUSINESS_OS_SERVICE=business-app` in the single Hostinger website. Set `APP_ORIGIN=https://sghomesinterior.in`, `APP_ENV=production`, `SUPABASE_ENVIRONMENT=production`, and use **real, validated** production Supabase credentials and all the existing required Business App signing keys and public delivery origin. Restore the original keys if a platform-admin .env template with placeholder values was imported: an invalid public URL, publishable key or recovery key causes a startup 503. The `PLATFORM_ADMIN_ORIGIN` variable is no longer used by the in-app Super Admin entry point and can be omitted.
