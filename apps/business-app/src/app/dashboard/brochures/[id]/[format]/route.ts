@@ -63,10 +63,13 @@ export async function GET(
     });
   } catch (error) {
     if (error instanceof PdfServiceError)
-      return Response.json({ message: 'PDF rendering service is unavailable' }, {
-        status: error.status,
-        headers: { 'Cache-Control': 'private, no-store' },
-      });
+      return Response.json(
+        { message: 'PDF rendering service is unavailable' },
+        {
+          status: error.status,
+          headers: { 'Cache-Control': 'private, no-store' },
+        },
+      );
     return Response.json(
       {
         message:

@@ -54,7 +54,8 @@ export async function GET(
   } catch (error) {
     if (error instanceof PdfServiceError)
       return new Response('PDF rendering service is unavailable', {
-        status: error.status, headers,
+        status: error.status,
+        headers,
       });
     return new Response(safeFailure(error).message, { status: 403, headers });
   }
