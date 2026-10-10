@@ -81,7 +81,10 @@ export function createRepository(client: SupabaseClient<Database>) {
         .order('created_at', { ascending: false })
         .order('id', { ascending: false });
       if (filters.status) request = request.eq('status', filters.status);
-      const search = filters.query?.trim().replace(/[\\%_]/g, '').slice(0, 80);
+      const search = filters.query
+        ?.trim()
+        .replace(/[\\%_]/g, '')
+        .slice(0, 80);
       if (search) request = request.ilike('name', `%${search}%`);
       const response = await request.range(
         (page - 1) * pageSize,
