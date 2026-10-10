@@ -11549,7 +11549,7 @@ export interface Database {
       };
       workspace_organization_for_hostname: {
         Args: { p_hostname: string };
-        Returns: string | null;
+        Returns: string;
       };
       work_queue: {
         Args: { p_organization_id: string; p_group?: string; p_page?: number };
