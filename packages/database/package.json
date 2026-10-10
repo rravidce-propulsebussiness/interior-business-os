@@ -19,7 +19,8 @@
     "./reporting": "./src/reporting.ts",
     "./website": "./src/website.ts",
     "./brochure": "./src/brochure.ts",
-    "./marketplace": "./src/marketplace.ts"
+    "./marketplace": "./src/marketplace.ts",
+    "./platform-companies": "./src/platform-companies.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json"
