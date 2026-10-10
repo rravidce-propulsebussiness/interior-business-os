@@ -88,7 +88,7 @@ const primary: { title: string; icon: IconName; href: string }[] = [
     href: '/admin/control/marketplace',
   },
   {
-    title: 'Organizations & Users',
+    title: 'Organizations & Owners',
     icon: 'users',
     href: '/admin/organizations',
   },
