@@ -125,10 +125,11 @@ export async function checkWebsiteDomain(site: string, id: string): Promise<{
           answers[0].status === 'fulfilled' &&
           answers[1].status === 'fulfilled') {
         const addresses = answers[0].value;
+        const targetAddresses = answers[1].value;
         dns =
           addresses.length > 0 &&
           addresses.every(
-            (ip) => publicIp(ip) && answers[1].value.includes(ip),
+            (ip) => publicIp(ip) && targetAddresses.includes(ip),
           );
         if (dns)
           tls = await new Promise<boolean>((resolve) => {
