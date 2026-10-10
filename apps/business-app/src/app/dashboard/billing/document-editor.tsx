@@ -109,8 +109,8 @@ export function DocumentEditor({ existing, profile, order }: Props) {
           })),
         )}
       />
-      {order && (
-        <input type="hidden" name="marketplaceOrderId" value={order.id} />
+      {(order || existing?.marketplaceOrderId) && (
+        <input type="hidden" name="marketplaceOrderId" value={order?.id ?? existing?.marketplaceOrderId ?? ''} />
       )}
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
         <h2 className="mb-5 text-xl font-semibold">Document information</h2>
