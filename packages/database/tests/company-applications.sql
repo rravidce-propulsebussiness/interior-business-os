@@ -68,6 +68,14 @@ select private.company_assert(
   (select count(*)=1 from public.organizations where slug='combined-company-app-test'),
   'approved application atomically provisions exactly one organization');
 select private.company_assert(
+  (public.company_application_decide(:'application_id','approve','retry')->>'status')='approved',
+  'retry after approval is idempotent');
+select private.company_assert(
+  (select count(*)=1 from public.organizations where slug='combined-company-app-test'),
+  'repeated approval cannot duplicate tenant');
+
+select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000071',true);
+select private.company_assert(
   (select count(*)=2 from public.organization_industries oi
    join public.organizations o on o.id=oi.organization_id
    where o.slug='combined-company-app-test'),
@@ -81,14 +89,6 @@ select private.company_assert(
    where o.slug='combined-company-app-test'
    and m.user_id='00000000-0000-4000-8000-000000000071' and m.status='active'
   ), 'approved verified applicant becomes owner');
-select private.company_assert(
-  (public.company_application_decide(:'application_id','approve','retry')->>'status')='approved',
-  'retry after approval is idempotent');
-select private.company_assert(
-  (select count(*)=1 from public.organizations where slug='combined-company-app-test'),
-  'repeated approval cannot duplicate tenant');
-
-select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000071',true);
 select private.company_assert(
   (public.company_applications_mine()->0->>'status')='approved',
   'applicant sees decision outcome');
