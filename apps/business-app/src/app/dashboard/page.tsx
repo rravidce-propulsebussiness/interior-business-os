@@ -4,18 +4,15 @@ import { signOut, switchOrganization } from '@business-os/auth/actions';
 import { canAccess, moduleNavigation } from '@business-os/auth';
 import { DomainError } from '@business-os/shared';
 import { Button } from '@business-os/ui';
-import { ActionForm } from '@business-os/ui/action-form';
-import { provisionOrganization } from './actions';
 import { createAutomationRepository } from '@business-os/database/automation';
 
 export default async function Dashboard() {
   const { authorization, repository, client } = await pageServices();
   const user = await authorization.requireAuthenticatedUser();
-  const [allOrganizations, memberships, industries, modules] =
+  const [allOrganizations, memberships, modules] =
     await Promise.all([
       repository.organizations(),
       repository.memberships(),
-      repository.industries(),
       repository.modules(),
     ]);
   const organizations = allOrganizations.filter((org) =>
@@ -243,63 +240,14 @@ export default async function Dashboard() {
         </p>
       )}
       <section className="section-card">
-        <h2 className="text-xl font-semibold">Create an organization</h2>
-        <ActionForm action={provisionOrganization} label="Create organization">
-          <label>
-            Business name
-            <input required name="name" maxLength={200} className="mt-2" />
-          </label>
-          <label>
-            URL identifier
-            <input
-              required
-              name="slug"
-              pattern="[a-z0-9]+(-[a-z0-9]+)*"
-              maxLength={80}
-              className="mt-2"
-            />
-          </label>
-          <label>
-            Currency code
-            <input
-              required
-              name="currency"
-              placeholder="USD"
-              pattern="[A-Z]{3}"
-              className="mt-2"
-            />
-          </label>
-          <label>
-            Country code
-            <input
-              required
-              name="country"
-              placeholder="US"
-              pattern="[A-Z]{2}"
-              className="mt-2"
-            />
-          </label>
-          <label>
-            Timezone
-            <input
-              required
-              name="timezone"
-              defaultValue="UTC"
-              className="mt-2"
-            />
-          </label>
-          <label>
-            Industry
-            <select name="industryId" className="mt-2">
-              <option value="">Choose later</option>
-              {industries.map((industry) => (
-                <option key={industry.id} value={industry.id}>
-                  {industry.name}
-                </option>
-              ))}
-            </select>
-          </label>
-        </ActionForm>
+        <h2 className="text-xl font-semibold">Add a business</h2>
+        <p>
+          New companies are reviewed by the platform before a workspace
+          is activated. Choose Construction, Interior Design or both.
+        </p>
+        <Link className="premium-link-secondary" href="/dashboard/company/apply">
+          Apply to register a company
+        </Link>
       </section>
     </main>
   );
