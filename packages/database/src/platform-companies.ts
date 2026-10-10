@@ -3,6 +3,44 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { DomainError } from '@business-os/shared';
 import type { Database } from './generated/database.types';
 
+export type PlatformUserCompany = {
+  id: string;
+  name: string;
+  slug: string;
+  status: string;
+  membershipId: string;
+  memberStatus: string;
+  isOwner: boolean;
+  roles: string[];
+  sellerStatus: CompanySeller['status'] | null;
+  industries: string[];
+};
+export type PlatformUser = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  avatar: string;
+  status: 'active' | 'pending' | 'suspended';
+  kind: 'business_owner' | 'seller' | 'general_user';
+  verified: boolean;
+  createdAt: string;
+  companies: PlatformUserCompany[];
+};
+export type PlatformUserDirectory = {
+  rows: PlatformUser[];
+  total: number;
+  page: number;
+  stats: {
+    organizations: number;
+    businessOwners: number;
+    sellers: number;
+    generalUsers: number;
+    activeUsers: number;
+    totalUsers: number;
+  };
+};
+
 export type CompanyIndustry = { id: string; key: string; name: string };
 export type CompanySeller = {
   id: string;
@@ -109,6 +147,33 @@ export function createPlatformCompaniesRepository(
       invoke<CompanyProfile>('platform_company_profile', {
         p_organization_id: organizationId,
       }),
+    userDirectory: (filters: {
+      query?: string;
+      kind?: string;
+      status?: string;
+      industryId?: string;
+      page: number;
+    }) => invoke<PlatformUserDirectory>('platform_user_directory', {
+      p_query: filters.query ?? '',
+      p_kind: filters.kind ?? 'all',
+      p_status: filters.status ?? '',
+      p_industry_id: filters.industryId ?? null,
+      p_page: filters.page,
+    }),
+    userProfile: (id: string) =>
+      invoke<PlatformUser>('platform_user_profile', { p_user_id: id }),
+    setUserStatus: (id: string, status: 'active' | 'suspended') =>
+      invoke<void>('platform_user_status_set', {
+        p_user_id: id,
+        p_status: status,
+      }),
+    assignUserToCompany: (userId: string, organizationId: string, roleId: string) =>
+      invoke<string>('platform_user_company_assign', {
+        p_user_id: userId,
+        p_organization_id: organizationId,
+        p_role_id: roleId,
+      }),
+
     create: (input: CreateCompanyInput) =>
       invoke<{ organizationId: string; sellerId: string | null }>(
         'platform_company_create',
