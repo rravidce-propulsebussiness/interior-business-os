@@ -86,14 +86,20 @@ export default async function Dashboard() {
         </div>
       </header>
       {hasPlatformAccess && (
-        <section className="section-card section-card-wide" aria-label="Platform administration">
+        <section
+          className="section-card section-card-wide"
+          aria-label="Platform administration"
+        >
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <p className="eyebrow">Platform Super Admin</p>
-              <h2 className="text-xl font-semibold">Open the platform control center</h2>
+              <h2 className="text-xl font-semibold">
+                Open the platform control center
+              </h2>
               <p className="muted">
                 This is your company workspace. The marketplace, tenant plans,
-                websites and domain control center run in a separate, secure app.
+                websites and domain control center run in a separate, secure
+                app.
               </p>
             </div>
             {platformOrigin ? (
