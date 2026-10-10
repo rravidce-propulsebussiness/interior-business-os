@@ -11306,6 +11306,15 @@ export interface Database {
         Args: { p_user_id: string; p_role_id: string; p_remove?: boolean };
         Returns: undefined;
       };
+      project_site_command: {
+        Args: {
+          p_organization_id: string;
+          p_project_id: string;
+          p_action: string;
+          p_input?: Json;
+        };
+        Returns: Json;
+      };
       project_site_manager_command: {
         Args: {
           p_organization_id: string;
@@ -11317,15 +11326,6 @@ export interface Database {
       };
       project_site_manager_read: {
         Args: { p_organization_id: string; p_project_id: string };
-        Returns: Json;
-      };
-      project_site_command: {
-        Args: {
-          p_organization_id: string;
-          p_project_id: string;
-          p_action: string;
-          p_input?: Json;
-        };
         Returns: Json;
       };
       project_site_media_get: {
