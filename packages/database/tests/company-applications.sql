@@ -116,10 +116,10 @@ select private.company_assert(
 -- explicitly turns on mandatory approval after hosted validation.
 select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000071',true);
 select private.company_denied(
-  $select public.company_onboarding_policy()$,
+  'select public.company_onboarding_policy()',
   'ordinary owner cannot inspect protected platform onboarding policy');
 select private.company_denied(
-  $select public.company_onboarding_set_policy(true)$,
+  'select public.company_onboarding_set_policy(true)',
   'ordinary owner cannot change legacy onboarding policy');
 
 select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000073',true);
@@ -133,13 +133,13 @@ select private.company_assert(
 
 select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000071',true);
 select private.company_denied(
-  $select public.create_organization('{"name":"Unreviewed Business","slug":"unreviewed-bypass-attempt","currency":"INR","country":"IN","timezone":"Asia/Kolkata"}')$,
+  'select public.create_organization(''{"name":"Unreviewed Business","slug":"unreviewed-bypass-attempt","currency":"INR","country":"IN","timezone":"Asia/Kolkata"}'')',
   'legacy direct organization RPC cannot bypass enforced review');
 select private.company_assert(
   not exists(select 1 from public.organizations where slug='unreviewed-bypass-attempt'),
   'blocked legacy RPC cannot create organization or owner');
 select private.company_denied(
-  $select public.company_onboarding_set_policy(false)$,
+  'select public.company_onboarding_set_policy(false)',
   'ordinary tenant owner cannot disable enforced review');
 
 -- Approved application workflow continues to work under the enforced gate.
