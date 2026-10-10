@@ -1,0 +1,45 @@
+name: Temporary project delivery formatter
+on:
+  push:
+    branches:
+      - feature/project-delivery-workflow-20261010
+permissions:
+  contents: write
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.34.5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Format delivery feature files
+        run: |
+          pnpm exec prettier --write \
+            apps/business-app/src/app/admin/control/projects/page.tsx \
+            apps/business-app/src/app/dashboard/projects/[id]/site/actions.ts \
+            apps/business-app/src/app/dashboard/projects/[id]/site/forms.tsx \
+            apps/business-app/src/app/dashboard/projects/[id]/site/page.tsx \
+            apps/business-app/src/app/dashboard/projects/[id]/site/media/[mediaId]/route.ts \
+            apps/business-app/src/app/dashboard/projects/[id]/page.tsx \
+            docs/PROJECT-DELIVERY.md \
+            packages/database/src/generated/database.types.ts
+      - name: Push formatted files if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/business-app/src/app/admin/control/projects/page.tsx \
+            apps/business-app/src/app/dashboard/projects \
+            docs/PROJECT-DELIVERY.md \
+            packages/database/src/generated/database.types.ts
+          if ! git diff --cached --quiet; then
+            git commit -m "style: format project delivery feature"
+            git push
+          fi
