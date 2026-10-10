@@ -79,7 +79,7 @@ set search_path='' as $fn$
   and coalesce(p->>'state','') ~ '^[0-9]{2}$'
   and (coalesce(p->>'gstin','')='' or coalesce(p->>'gstin','') ~ '^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][A-Z0-9]Z[A-Z0-9]$')
   and (coalesce(p->>'gstin','')='' or left(p->>'gstin',2)=p->>'state')
-  and p-jsonb_build_object('name',p->'name','address',p->'address','state',p->'state','gstin',p->'gstin')='{}'::jsonb;
+  and (p-array['name','address','state','gstin'])='{}'::jsonb;
 $fn$;
 
 create function public.trade_billing_profile(p_org uuid)
