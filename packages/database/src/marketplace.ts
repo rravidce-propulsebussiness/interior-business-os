@@ -79,6 +79,10 @@ export function createMarketplaceRepository(client: SupabaseClient<Database>) {
     return result.data as T;
   }
   return {
+    industryCreate: (key: string, name: string) =>
+      invoke<string>('marketplace_industry_create', { p_key: key, p_name: name }),
+    sellerIndustryAssign: (organizationId: string, industryId: string) =>
+      invoke<void>('marketplace_seller_industry_assign', { p_organization_id: organizationId, p_industry_id: industryId }),
     sellerApply: (organizationId: string, name: string) =>
       invoke<string>('marketplace_seller_apply', {
         p_organization_id: organizationId,
