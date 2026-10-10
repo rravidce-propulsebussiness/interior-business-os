@@ -8,6 +8,7 @@ import {
   organizationUpdateSchema,
   branchInputSchema,
   membershipInputSchema,
+  employeeEmailInvitationSchema,
   membershipStatusSchema,
   roleAssignmentSchema,
   roleInputSchema,
@@ -234,6 +235,48 @@ export function createRepository(client: SupabaseClient<Database>) {
           ...(value.branchId ? { p_branch_id: value.branchId } : {}),
         }),
       );
+    },
+    async createEmployeeEmailInvitation(orgId: string, input: unknown) {
+      const value = employeeEmailInvitationSchema.parse(input);
+      return unwrap(
+        await client.rpc('employee_invitation_create', {
+          p_organization_id: idSchema.parse(orgId),
+          p_email: value.email,
+          p_role_ids: value.roleIds,
+          ...(value.branchId ? { p_branch_id: value.branchId } : {}),
+        }),
+      );
+    },
+    async employeeInvitations(orgId: string) {
+      return unwrap(
+        await client.rpc('employee_invitations_list', {
+          p_organization_id: idSchema.parse(orgId),
+        }),
+      );
+    },
+    async myEmployeeInvitations() {
+      return unwrap(await client.rpc('employee_invitations_mine'));
+    },
+    async acceptEmployeeInvitation(id: string) {
+      return unwrap(
+        await client.rpc('employee_invitation_accept', {
+          p_invitation_id: idSchema.parse(id),
+        }),
+      );
+    },
+    async revokeEmployeeInvitation(orgId: string, inviteId: string) {
+      const result = await client.rpc('employee_invitation_revoke', {
+        p_organization_id: idSchema.parse(orgId),
+        p_invitation_id: idSchema.parse(inviteId),
+      });
+      unwrap({ ...result, data: true });
+    },
+    async resendEmployeeInvitation(orgId: string, inviteId: string) {
+      const result = await client.rpc('employee_invitation_resend', {
+        p_organization_id: idSchema.parse(orgId),
+        p_invitation_id: idSchema.parse(inviteId),
+      });
+      unwrap({ ...result, data: true });
     },
     async acceptMembership(id: string) {
       const result = await client.rpc('accept_membership', {
