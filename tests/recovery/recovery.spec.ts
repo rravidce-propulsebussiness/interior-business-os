@@ -39,7 +39,7 @@ test('expired session, scanner-safe landing, reset, revocation and old/new login
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.name));
   await login(page, 'Initial-local-password-123');
-  await expect(page).toHaveURL(/dashboard/);
+  await expect(page).toHaveURL(/\/(?:admin|dashboard)$/);
   await expect(
     page.getByRole('heading', {
       name: /^(?:(?:Platform|Business) dashboard|Super Admin Dashboard|Business overview)$/,
@@ -87,7 +87,7 @@ test('expired session, scanner-safe landing, reset, revocation and old/new login
   await login(page, 'Initial-local-password-123');
   await expect(page.getByRole('status')).toContainText('Sign-in failed');
   await login(page, 'Changed-local-password-456');
-  await expect(page).toHaveURL(/dashboard/);
+  await expect(page).toHaveURL(/\/(?:admin|dashboard)$/);
   await expect(
     page.getByRole('heading', {
       name: /^(?:(?:Platform|Business) dashboard|Super Admin Dashboard|Business overview)$/,

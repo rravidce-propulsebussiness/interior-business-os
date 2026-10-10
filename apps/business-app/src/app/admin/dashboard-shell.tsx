@@ -184,7 +184,8 @@ export function DashboardShell({ children }: { children: ReactNode }) {
         <div className="os-sidebar-foot">
           <span className="os-online-dot" /> Platform controls
           <small>Tenant-scoped access is enforced</small>
-          <Link href="/dashboard">← Business workspace</Link>
+          {/* The platform dashboard lives here. Do not expose a competing
+              dashboard navigation link from this workspace. */}
           <Link href="/admin/automations">
             Automation health <span aria-hidden="true">↗</span>
           </Link>

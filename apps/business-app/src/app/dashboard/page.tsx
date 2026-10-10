@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { pageServices, activeOrganization } from '@business-os/auth/server';
 import { signOut, switchOrganization } from '@business-os/auth/actions';
 import { canAccess, moduleNavigation } from '@business-os/auth';
@@ -9,16 +10,22 @@ import { createAutomationRepository } from '@business-os/database/automation';
 export default async function Dashboard() {
   const { authorization, repository, client } = await pageServices();
   const user = await authorization.requireAuthenticatedUser();
-  // Being an organization Owner does NOT make a user a Platform Super Admin.
-  // Only a server-verified platform permission can reveal the admin entry.
-  let hasPlatformAccess = false;
+  // Platform administrators have one canonical dashboard: /admin.
+  // An organization Owner is not a platform administrator. Redirect only when
+  // every permission required by /admin's dashboard is verified server-side.
+  let canOpenPlatformDashboard = false;
   try {
     await authorization.requirePlatformPermission('platform.access');
-    hasPlatformAccess = true;
+    await authorization.requirePlatformPermission(
+      'platform.organizations.view',
+    );
+    await authorization.requirePlatformPermission('platform.catalog.view');
+    canOpenPlatformDashboard = true;
   } catch (error) {
     if (!(error instanceof DomainError && error.code === 'FORBIDDEN'))
       throw error;
   }
+  if (canOpenPlatformDashboard) redirect('/admin');
   const [allOrganizations, memberships, modules] = await Promise.all([
     repository.organizations(),
     repository.memberships(),
@@ -103,11 +110,6 @@ export default async function Dashboard() {
               : 'Select your company to access your business tools and daily operations.'}
           </p>
           <div className="tenant-v2-hero-actions">
-            {hasPlatformAccess && (
-              <Link className="premium-link" href="/admin">
-                Open Super Admin →
-              </Link>
-            )}
             {context && (
               <Link
                 className="premium-link-secondary"
@@ -322,11 +324,6 @@ export default async function Dashboard() {
                     className="premium-link-secondary"
                   >
                     Manage access →
-                  </Link>
-                )}
-                {hasPlatformAccess && (
-                  <Link href="/admin" className="tenant-v2-admin-entry">
-                    Platform Super Admin ↗
                   </Link>
                 )}
               </section>
