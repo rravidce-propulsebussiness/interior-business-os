@@ -177,8 +177,25 @@ begin
  return jsonb_build_object('id',v_id,'action',p_action);
 end$$;
 
+-- Team members with assigned project roles need a safe entry point independent
+-- of organization-wide project.view (which could expose other customer jobs).
+create function public.project_site_my_projects(p_organization_id uuid)
+returns jsonb language sql stable security definer set search_path='' as $
+ select coalesce(jsonb_agg(to_jsonb(z) order by z.created_at desc,z.id desc),'[]'::jsonb)
+ from (
+   select p.id,p.name,p.code,p.created_at,coalesce(s.stage,'not_started') stage,
+     coalesce(private.site_role(p_organization_id,p.id),
+       case when private.site_is_manager(p_organization_id,p.id) then 'manager' else 'assigned' end) role
+   from public.projects p
+   left join private.site_state s on s.organization_id=p.organization_id and s.project_id=p.id
+   where p.organization_id=p_organization_id and p.status='active'
+     and private.site_access(p_organization_id,p.id)
+   order by p.created_at desc,p.id desc limit 50
+ ) z
+$;
+
 revoke all on function public.project_site_manager_read(uuid,uuid),
- public.project_site_manager_command(uuid,uuid,text,jsonb) from public,anon;
+ public.project_site_manager_command(uuid,uuid,text,jsonb),public.project_site_my_projects(uuid) from public,anon;
 grant execute on function public.project_site_manager_read(uuid,uuid),
- public.project_site_manager_command(uuid,uuid,text,jsonb) to authenticated;
+ public.project_site_manager_command(uuid,uuid,text,jsonb),public.project_site_my_projects(uuid) to authenticated;
 commit;
