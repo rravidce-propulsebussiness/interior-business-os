@@ -1,3 +1,4 @@
+import { PdfServiceError } from '@business-os/shared/pdf';
 import { brochureServices, prepareBrochure, publishedPdf } from '../../service';
 import { brochureHtml } from '@business-os/brochure-builder/render';
 import { resolveSnapshot } from '@business-os/brochure-builder';
@@ -60,7 +61,12 @@ export async function GET(
         'Content-Disposition': `attachment; filename="brochure${versionId ? '-published' : '-draft'}.pdf"`,
       },
     });
-  } catch {
+  } catch (error) {
+    if (error instanceof PdfServiceError)
+      return Response.json({ message: 'PDF rendering service is unavailable' }, {
+        status: error.status,
+        headers: { 'Cache-Control': 'private, no-store' },
+      });
     return Response.json(
       {
         message:
