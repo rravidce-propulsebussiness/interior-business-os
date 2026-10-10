@@ -29,7 +29,7 @@ begin
    join public.membership_roles mr on mr.membership_id=m.id and mr.organization_id=m.organization_id and mr.branch_id is null
    join public.roles r on r.id=mr.role_id and r.organization_id=mr.organization_id and r.is_owner
    where m.user_id=(row->>'id')::uuid and m.status='active'
-  ) then raise exception 'FAIL: nonowner surfaced in owner-only cards';end if;
+  ) then raise exception 'FAIL: nonowner % surfaced in owner-only cards', row->>'id';end if;
  end loop;
  select email into actual_email from auth.users where id='11111111-1111-4111-8111-111111111111';
  status=public.platform_owner_email_status(actual_email);
