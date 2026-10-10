@@ -6,7 +6,6 @@ import {
   type GstDocument,
 } from '@business-os/database/gst';
 import { createMarketplaceRepository } from '@business-os/database/marketplace';
-import { DomainError } from '@business-os/shared';
 import { DocumentEditor } from '../document-editor';
 
 export const dynamic = 'force-dynamic';
