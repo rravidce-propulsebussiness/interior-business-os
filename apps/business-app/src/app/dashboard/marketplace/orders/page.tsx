@@ -103,7 +103,7 @@ export default async function MarketplaceOrders({
           </table>
         </div>
         {orders.length === 0 && (
-          <p className="muted py-4">You haven't requested any products yet.</p>
+          <p className="muted py-4">You have not requested any products yet.</p>
         )}
         <p className="muted mt-4 text-sm">
           An accepted request does not represent a completed payment or
