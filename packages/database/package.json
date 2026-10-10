@@ -20,7 +20,8 @@
     "./website": "./src/website.ts",
     "./brochure": "./src/brochure.ts",
     "./marketplace": "./src/marketplace.ts",
-    "./platform-companies": "./src/platform-companies.ts"
+    "./platform-companies": "./src/platform-companies.ts",
+    "./gst": "./src/gst.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json"
