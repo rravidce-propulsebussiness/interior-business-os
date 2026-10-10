@@ -11233,6 +11233,42 @@ export interface Database {
         Args: { p_organization_id: string; p_id: string; p_reason: string };
         Returns: string;
       };
+      platform_company_create: { Args: { p_input: Json }; Returns: Json };
+      platform_company_directory: {
+        Args: {
+          p_query?: string;
+          p_status?: string;
+          p_industry_id?: string;
+          p_kind?: string;
+          p_page?: number;
+        };
+        Returns: Json;
+      };
+      platform_company_industry_set: {
+        Args: {
+          p_organization_id: string;
+          p_industry_id: string;
+          p_enabled: boolean;
+        };
+        Returns: undefined;
+      };
+      platform_company_profile: {
+        Args: { p_organization_id: string };
+        Returns: Json;
+      };
+      platform_company_role_set: {
+        Args: {
+          p_organization_id: string;
+          p_membership_id: string;
+          p_role_id: string;
+          p_remove: boolean;
+        };
+        Returns: undefined;
+      };
+      platform_company_seller_enable: {
+        Args: { p_organization_id: string; p_store_name: string };
+        Returns: string;
+      };
       platform_context: { Args: Record<string, never>; Returns: Json };
       platform_plan_create: { Args: { p_input: Json }; Returns: string };
       platform_set_entitlement: {

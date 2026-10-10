@@ -11,7 +11,11 @@ import { idSchema, safeFailure } from '@business-os/shared';
 type State = { message: string };
 const companyInput = z.object({
   name: z.string().trim().min(2).max(200),
-  slug: z.string().trim().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/).max(80),
+  slug: z
+    .string()
+    .trim()
+    .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/)
+    .max(80),
   legalName: z.string().trim().max(200),
   ownerEmail: z.email().trim().toLowerCase().max(254),
   country: z.string().regex(/^[A-Z]{2}$/),
@@ -27,7 +31,9 @@ export async function createPlatformCompany(_state: State, form: FormData) {
   let organizationId: string;
   try {
     const { authorization, client } = await serverServices();
-    await authorization.requirePlatformPermission('platform.organizations.manage');
+    await authorization.requirePlatformPermission(
+      'platform.organizations.manage',
+    );
     const input = companyInput.parse({
       name: form.get('name'),
       slug: form.get('slug'),
@@ -69,10 +75,20 @@ export async function createPlatformCompany(_state: State, form: FormData) {
 export async function enablePlatformSeller(_state: State, form: FormData) {
   try {
     const { authorization, client } = await serverServices();
-    await authorization.requirePlatformPermission('platform.organizations.manage');
+    await authorization.requirePlatformPermission(
+      'platform.organizations.manage',
+    );
     const organizationId = idSchema.parse(form.get('organizationId'));
-    const storeName = z.string().trim().min(2).max(150).parse(form.get('storeName'));
-    await createPlatformCompaniesRepository(client).enableSeller(organizationId, storeName);
+    const storeName = z
+      .string()
+      .trim()
+      .min(2)
+      .max(150)
+      .parse(form.get('storeName'));
+    await createPlatformCompaniesRepository(client).enableSeller(
+      organizationId,
+      storeName,
+    );
     revalidatePath('/admin/organizations/' + organizationId);
     revalidatePath('/admin/organizations');
     revalidatePath('/admin/control/marketplace');
@@ -85,12 +101,18 @@ export async function enablePlatformSeller(_state: State, form: FormData) {
 export async function updateCompanySeller(_state: State, form: FormData) {
   try {
     const { authorization, client } = await serverServices();
-    await authorization.requirePlatformPermission('platform.organizations.manage');
+    await authorization.requirePlatformPermission(
+      'platform.organizations.manage',
+    );
     const organizationId = idSchema.parse(form.get('organizationId'));
     const sellerId = idSchema.parse(form.get('sellerId'));
-    const action = z.enum(['approve', 'reject', 'suspend']).parse(form.get('action'));
-    const company = await createPlatformCompaniesRepository(client).profile(organizationId);
-    if (company.seller?.id !== sellerId) return { message: 'Seller does not belong to this company.' };
+    const action = z
+      .enum(['approve', 'reject', 'suspend'])
+      .parse(form.get('action'));
+    const company =
+      await createPlatformCompaniesRepository(client).profile(organizationId);
+    if (company.seller?.id !== sellerId)
+      return { message: 'Seller does not belong to this company.' };
     await createMarketplaceRepository(client).sellerDecide(sellerId, action);
     revalidatePath('/admin/organizations/' + organizationId);
     revalidatePath('/admin/organizations');
@@ -104,15 +126,26 @@ export async function updateCompanySeller(_state: State, form: FormData) {
 export async function updateCompanyIndustry(_state: State, form: FormData) {
   try {
     const { authorization, client } = await serverServices();
-    await authorization.requirePlatformPermission('platform.organizations.manage');
+    await authorization.requirePlatformPermission(
+      'platform.organizations.manage',
+    );
     const organizationId = idSchema.parse(form.get('organizationId'));
     const industryId = idSchema.parse(form.get('industryId'));
-    const enabled = z.enum(['true','false']).parse(form.get('enabled')) === 'true';
-    await createPlatformCompaniesRepository(client).setIndustry(organizationId, industryId, enabled);
+    const enabled =
+      z.enum(['true', 'false']).parse(form.get('enabled')) === 'true';
+    await createPlatformCompaniesRepository(client).setIndustry(
+      organizationId,
+      industryId,
+      enabled,
+    );
     revalidatePath('/admin/organizations/' + organizationId);
     revalidatePath('/admin/organizations');
     revalidatePath('/admin/control/marketplace');
-    return { message: enabled ? 'Industry enabled for company.' : 'Industry removed from company.' };
+    return {
+      message: enabled
+        ? 'Industry enabled for company.'
+        : 'Industry removed from company.',
+    };
   } catch (error) {
     return { message: safeFailure(error).message };
   }
@@ -121,15 +154,25 @@ export async function updateCompanyIndustry(_state: State, form: FormData) {
 export async function updateCompanyRole(_state: State, form: FormData) {
   try {
     const { authorization, client } = await serverServices();
-    await authorization.requirePlatformPermission('platform.organizations.manage');
+    await authorization.requirePlatformPermission(
+      'platform.organizations.manage',
+    );
     await authorization.requirePlatformPermission('platform.roles.manage');
     const organizationId = idSchema.parse(form.get('organizationId'));
     const membershipId = idSchema.parse(form.get('membershipId'));
     const roleId = idSchema.parse(form.get('roleId'));
-    const remove = z.enum(['true','false']).parse(form.get('remove')) === 'true';
-    await createPlatformCompaniesRepository(client).setRole(organizationId, membershipId, roleId, remove);
+    const remove =
+      z.enum(['true', 'false']).parse(form.get('remove')) === 'true';
+    await createPlatformCompaniesRepository(client).setRole(
+      organizationId,
+      membershipId,
+      roleId,
+      remove,
+    );
     revalidatePath('/admin/organizations/' + organizationId);
-    return { message: remove ? 'Member role removed.' : 'Member role assigned.' };
+    return {
+      message: remove ? 'Member role removed.' : 'Member role assigned.',
+    };
   } catch (error) {
     return { message: safeFailure(error).message };
   }

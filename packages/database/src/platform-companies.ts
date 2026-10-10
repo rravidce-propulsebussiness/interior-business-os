@@ -4,9 +4,23 @@ import { DomainError } from '@business-os/shared';
 import type { Database } from './generated/database.types';
 
 export type CompanyIndustry = { id: string; key: string; name: string };
-export type CompanySeller = { id: string; name: string; status: 'pending' | 'approved' | 'rejected' | 'suspended' };
-export type CompanyRole = { id: string; key: string; name: string; isOwner: boolean };
-export type CompanyMember = { id: string; email: string; status: string; roleIds: string[] };
+export type CompanySeller = {
+  id: string;
+  name: string;
+  status: 'pending' | 'approved' | 'rejected' | 'suspended';
+};
+export type CompanyRole = {
+  id: string;
+  key: string;
+  name: string;
+  isOwner: boolean;
+};
+export type CompanyMember = {
+  id: string;
+  email: string;
+  status: string;
+  roleIds: string[];
+};
 export type PlatformCompany = {
   id: string;
   name: string;
@@ -21,7 +35,11 @@ export type PlatformCompany = {
   industries: CompanyIndustry[];
   memberCount: number;
 };
-export type CompanyDirectory = { rows: PlatformCompany[]; total: number; page: number };
+export type CompanyDirectory = {
+  rows: PlatformCompany[];
+  total: number;
+  page: number;
+};
 export type CompanyProfile = {
   ownerEmail: string;
   industries: CompanyIndustry[];
@@ -43,21 +61,29 @@ export type CreateCompanyInput = {
   storeName?: string;
 };
 
-export function createPlatformCompaniesRepository(client: SupabaseClient<Database>) {
+export function createPlatformCompaniesRepository(
+  client: SupabaseClient<Database>,
+) {
   const rpc = client.rpc.bind(client) as unknown as (
     name: string,
     args?: Record<string, unknown>,
   ) => Promise<{ data: unknown; error: { code?: string } | null }>;
 
-  async function invoke<T>(name: string, args: Record<string, unknown>): Promise<T> {
+  async function invoke<T>(
+    name: string,
+    args: Record<string, unknown>,
+  ): Promise<T> {
     const { data, error } = await rpc(name, args);
     if (error) {
       const code = error.code;
       throw new DomainError(
-        code === '42501' ? 'FORBIDDEN'
-          : code === '23505' ? 'CONFLICT'
-          : ['22023', '22P02', '23514', '23503'].includes(code ?? '')
-            ? 'VALIDATION_FAILED' : 'INTERNAL_ERROR',
+        code === '42501'
+          ? 'FORBIDDEN'
+          : code === '23505'
+            ? 'CONFLICT'
+            : ['22023', '22P02', '23514', '23503'].includes(code ?? '')
+              ? 'VALIDATION_FAILED'
+              : 'INTERNAL_ERROR',
       );
     }
     if (data === null || data === undefined) throw new DomainError('NOT_FOUND');
@@ -71,26 +97,49 @@ export function createPlatformCompaniesRepository(client: SupabaseClient<Databas
       industryId?: string;
       kind?: string;
       page: number;
-    }) => invoke<CompanyDirectory>('platform_company_directory', {
-      p_query: filters.query ?? null,
-      p_status: filters.status ?? null,
-      p_industry_id: filters.industryId ?? null,
-      p_kind: filters.kind ?? 'all',
-      p_page: filters.page,
-    }),
-    profile: (organizationId: string) =>
-      invoke<CompanyProfile>('platform_company_profile', { p_organization_id: organizationId }),
-    create: (input: CreateCompanyInput) =>
-      invoke<{ organizationId: string; sellerId: string | null }>('platform_company_create', { p_input: input }),
-    enableSeller: (organizationId: string, storeName: string) =>
-      invoke<string>('platform_company_seller_enable', { p_organization_id: organizationId, p_store_name: storeName }),
-    setIndustry: (organizationId: string, industryId: string, enabled: boolean) =>
-      invoke<void>('platform_company_industry_set', {
-        p_organization_id: organizationId, p_industry_id: industryId, p_enabled: enabled,
+    }) =>
+      invoke<CompanyDirectory>('platform_company_directory', {
+        p_query: filters.query ?? null,
+        p_status: filters.status ?? null,
+        p_industry_id: filters.industryId ?? null,
+        p_kind: filters.kind ?? 'all',
+        p_page: filters.page,
       }),
-    setRole: (organizationId: string, membershipId: string, roleId: string, remove: boolean) =>
+    profile: (organizationId: string) =>
+      invoke<CompanyProfile>('platform_company_profile', {
+        p_organization_id: organizationId,
+      }),
+    create: (input: CreateCompanyInput) =>
+      invoke<{ organizationId: string; sellerId: string | null }>(
+        'platform_company_create',
+        { p_input: input },
+      ),
+    enableSeller: (organizationId: string, storeName: string) =>
+      invoke<string>('platform_company_seller_enable', {
+        p_organization_id: organizationId,
+        p_store_name: storeName,
+      }),
+    setIndustry: (
+      organizationId: string,
+      industryId: string,
+      enabled: boolean,
+    ) =>
+      invoke<void>('platform_company_industry_set', {
+        p_organization_id: organizationId,
+        p_industry_id: industryId,
+        p_enabled: enabled,
+      }),
+    setRole: (
+      organizationId: string,
+      membershipId: string,
+      roleId: string,
+      remove: boolean,
+    ) =>
       invoke<void>('platform_company_role_set', {
-        p_organization_id: organizationId, p_membership_id: membershipId, p_role_id: roleId, p_remove: remove,
+        p_organization_id: organizationId,
+        p_membership_id: membershipId,
+        p_role_id: roleId,
+        p_remove: remove,
       }),
   };
 }
