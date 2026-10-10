@@ -64,3 +64,14 @@ Use Node **24**, project root `./`, entry `server.js` and `npm run hostinger:bui
 The `/admin` layout calls `requirePlatformPermission('platform.access')` server-side and its screens/actions have their own platform permission requirements. Being a tenant Owner does NOT grant platform Super Admin. The tenant's CRM, finance, quotation and project data remain tenant-isolated and are not made platform-readable by this change. Do not bypass RLS or create blanket support impersonation.
 
 Before releasing, validate staging, schema compatibility, two-tenant RBAC/RLS and denied admin access, recovery/login, static assets, all feature route navigation, then live Auth and DNS/TLS acceptance. The repository production checklist may still be **NO-GO** for a full hosted release; a successful CI run does not supersede those gates.
+
+### Diagnose an `/admin` 404 or favicon 503
+
+On the same deployed origin, check these URLs **in order**:
+
+1. `/api/health` — 200 `alive` proves the Next.js process is receiving requests; upstream 503 means check Hostinger **runtime**, environment validation and service restart logs first.
+2. `/api/ready` — 200 `ready` indicates the configured public Supabase project responds to the database readiness RPC; 503 requires Supabase/project/migration/network investigation.
+3. `/api/admin-access` — authenticated, no-store and read-only access check. 200 with `dashboardAccess: true` means the current session has the three required platform permissions; 401 means sign in again, 403 means the *current signed-in user* has insufficient rights, and 503 means a backend/auth dependency failed. The `configuredProject` value is the public project identifier, useful for verifying that Hostinger and the actual role assignments refer to the **same** Supabase project. This endpoint never emits emails, signing keys, JWTs or secret credentials.
+4. `/admin` — the existing restricted UI intentionally renders 404 for forbidden sessions; the built route's existence alone does not grant access.
+
+A missing browser `/favicon.ico` request is not evidence that `/admin` is missing. The Business App provides a brand SVG icon and same-origin legacy favicon redirect; if favicon still responds 503 **along with /api/health**, repair the upstream server first. If `/api/health` is 200 but the browser shows stale 404, use a private window or clear that site's cache. Do **not** seed platform roles in production or reassign permissions as a troubleshooting shortcut.
