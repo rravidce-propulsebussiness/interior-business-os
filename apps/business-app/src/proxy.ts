@@ -4,7 +4,6 @@ import {
   WORKSPACE_COOKIE,
   WORKSPACE_HOST_HEADER,
   WORKSPACE_SLUG_HEADER,
-  normalizedWorkspaceHost,
   workspaceIngress,
 } from './workspace-paths';
 
