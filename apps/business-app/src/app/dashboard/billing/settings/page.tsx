@@ -99,7 +99,7 @@ export default async function GstSettings() {
               </div>
               <p className="text-xs text-slate-500">
                 Example invoice: INV-26-000001. Invoice numbers are assigned
-                when issued and remain unique within the organization's
+                when issued and remain unique within the organization&apos;s
                 financial year.
               </p>
             </ActionForm>
@@ -112,7 +112,7 @@ export default async function GstSettings() {
         </section>
         <p className="text-sm text-amber-800">
           The GSTIN pattern is checked, but registration status is not verified
-          against the GST portal. An authorized representative's signature,
+          against the GST portal. An authorized representative&apos;s signature,
           applicable legal declarations and IRN/QR code (where required) remain
           your responsibility.
         </p>
