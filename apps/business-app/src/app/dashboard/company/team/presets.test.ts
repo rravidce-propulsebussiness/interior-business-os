@@ -11,6 +11,7 @@ describe('editable employee role presets', () => {
       'customer_support',
       'quotation_preparer',
       'site_engineer',
+      'project_manager_limited',
       'site_supervisor_limited',
       'watchman',
       'carpenter',
