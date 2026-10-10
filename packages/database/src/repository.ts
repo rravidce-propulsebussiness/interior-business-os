@@ -65,6 +65,35 @@ export function createRepository(client: SupabaseClient<Database>) {
         await client.from('organizations').select('*').order('name'),
       );
     },
+    async organizationDirectory(filters: {
+      query?: string;
+      status?: 'active' | 'trial' | 'suspended' | 'archived';
+      page: number;
+      pageSize: number;
+    }) {
+      const page = Math.max(1, Math.min(10_000, Math.trunc(filters.page)));
+      const pageSize = Math.max(1, Math.min(50, Math.trunc(filters.pageSize)));
+      let request = client
+        .from('organizations')
+        .select('id,name,slug,status,plan_id,country_code,created_at', {
+          count: 'exact',
+        })
+        .order('created_at', { ascending: false })
+        .order('id', { ascending: false });
+      if (filters.status) request = request.eq('status', filters.status);
+      const search = filters.query?.trim().replace(/[\\%_]/g, '').slice(0, 80);
+      if (search) request = request.ilike('name', `%${search}%`);
+      const response = await request.range(
+        (page - 1) * pageSize,
+        page * pageSize - 1,
+      );
+      return {
+        organizations: unwrap(response),
+        total: response.count ?? 0,
+        page,
+        pageSize,
+      };
+    },
     async organization(id: string) {
       return unwrap(
         await client

@@ -43,7 +43,11 @@ export default async function PlatformDashboard() {
         <Button>Sign out</Button>
       </form>
       <section className="my-8">
-        <h2 className="text-xl font-semibold">Organizations</h2>
+        <h2 className="text-xl font-semibold">
+          <Link href="/dashboard/organizations" className="underline">
+            Organizations — search and manage
+          </Link>
+        </h2>
         {organizations.length ? (
           <ul>
             {organizations.map((org) => (
