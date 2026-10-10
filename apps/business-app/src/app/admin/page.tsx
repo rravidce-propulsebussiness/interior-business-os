@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { pageServices } from '@business-os/auth/server';
 import { DomainError } from '@business-os/shared';
-import { OsIcon } from './admin-shell';
+import { OsIcon } from './dashboard-shell';
 
 const cards = [
   {
