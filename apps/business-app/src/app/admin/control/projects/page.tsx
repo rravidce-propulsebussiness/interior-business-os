@@ -175,7 +175,7 @@ export default async function ProjectControl() {
           How a construction project progresses
         </h2>
         <p className="mt-2 text-sm text-slate-600">
-          The tenant's daily delivery workspace sits alongside the existing
+          The tenant&apos;s daily delivery workspace sits alongside the existing
           planning, estimate, purchasing, inventory, quality and handover
           modules.
         </p>
@@ -204,7 +204,7 @@ export default async function ProjectControl() {
         <h2 className="text-xl font-bold">Company roles and access</h2>
         <p className="mt-2 text-sm text-slate-600">
           Workers must belong to the company and be explicitly assigned to a
-          project. Site roles cannot open another company's project or
+          project. Site roles cannot open another company&apos;s project or
           unrestricted company finances.
         </p>
         <div className="mt-4 overflow-x-auto">
