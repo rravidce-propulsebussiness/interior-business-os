@@ -130,7 +130,7 @@ export function TradeDocumentEditor({
           </label>
           {doc.kind === 'purchase_bill' && (
             <label className="grid gap-1.5 text-sm font-medium">
-              Supplier's original bill/invoice number
+              Supplier&apos;s original bill/invoice number
               <input
                 required
                 maxLength={40}
