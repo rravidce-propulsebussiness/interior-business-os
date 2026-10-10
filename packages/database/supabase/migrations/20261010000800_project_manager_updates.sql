@@ -180,7 +180,7 @@ end$$;
 -- Team members with assigned project roles need a safe entry point independent
 -- of organization-wide project.view (which could expose other customer jobs).
 create function public.project_site_my_projects(p_organization_id uuid)
-returns jsonb language sql stable security definer set search_path='' as $
+returns jsonb language sql stable security definer set search_path='' as $$
  select coalesce(jsonb_agg(to_jsonb(z) order by z.created_at desc,z.id desc),'[]'::jsonb)
  from (
    select p.id,p.name,p.code,p.created_at,coalesce(s.stage,'not_started') stage,
@@ -192,7 +192,7 @@ returns jsonb language sql stable security definer set search_path='' as $
      and private.site_access(p_organization_id,p.id)
    order by p.created_at desc,p.id desc limit 50
  ) z
-$;
+$$;
 
 revoke all on function public.project_site_manager_read(uuid,uuid),
  public.project_site_manager_command(uuid,uuid,text,jsonb),public.project_site_my_projects(uuid) from public,anon;
