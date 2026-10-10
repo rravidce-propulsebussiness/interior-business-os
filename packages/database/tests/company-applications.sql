@@ -94,7 +94,7 @@ select private.company_assert(
   'applicant sees decision outcome');
 -- Subscription bundles reuse the existing module registry and preserve current plans.
 select private.company_denied(
-  $select public.platform_plan_create('{"key":"forbidden_employee_plan","name":"Forbidden Employee Plan","modules":["crm"]}')$,
+  'select public.platform_plan_create(''{"key":"forbidden_employee_plan","name":"Forbidden Employee Plan","modules":["crm"]}'')',
   'company owner cannot create platform subscription plans');
 
 select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000073',true);
