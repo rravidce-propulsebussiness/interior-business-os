@@ -70,9 +70,10 @@ export async function saveMarketplaceProduct(form: FormData) {
     await authorization.requirePermission(org, 'catalog.manage');
     const raw = Object.fromEntries(form.entries());
     const parsed = productSchema.parse(raw);
+    const { id: productId, ...product } = parsed;
     await createMarketplaceRepository(client).saveProduct(org, {
-      ...parsed,
-      ...(parsed.id ? { id: parsed.id } : {}),
+      ...product,
+      ...(productId ? { id: productId } : {}),
     });
     revalidatePath(path);
   } catch (error) {
