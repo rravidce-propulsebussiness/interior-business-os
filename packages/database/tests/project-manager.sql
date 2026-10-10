@@ -41,8 +41,8 @@ begin
  material=(record->>'id')::uuid;
  perform public.project_site_manager_command(org,project,'material_quantity_correct',
   jsonb_build_object('id',material,'quantity',115.5,'reason','Updated manual site measure for footing'));
- if (select quantity from private.site_material_needs where id=material)<>115.5
-   or (select old_quantity from private.site_material_quantity_revisions where material_id=material)<>100
+ if (public.project_site_read(org,project)->'materials'->0->>'quantity')::numeric<>115.5
+   or (public.project_site_manager_read(org,project)->'quantity_revisions'->0->>'old_quantity')::numeric<>100
  then raise exception 'Manual material correction history lost';end if;
  perform public.project_site_command(org,project,'material_update',
   jsonb_build_object('id',material,'status','approved','source','undecided','vendor_reference',''));
@@ -89,8 +89,8 @@ begin
  perform public.project_site_manager_command(org,project,'report_review',
   jsonb_build_object('report_id',report,'decision','approved',
   'note','Reviewed revised evidence independently'));
- if (select count(*) from private.site_report_reviews where report_id=report)<>2
-  or (select count(*) from private.site_reports where id=report)<>1
+ if jsonb_array_length(public.project_site_manager_read(org,project)->'reviews')<>2
+  or jsonb_array_length(public.project_site_read(org,project)->'reports')<>1
  then raise exception 'Manager approval history or original report missing';end if;
  raise notice 'PASS: manager approval/rework decisions append and preserve engineer report';
 end $$;
