@@ -6,7 +6,16 @@ import { parsePublicEnvironment } from '@business-os/shared';
 import { boundedFetch } from '@business-os/shared/runtime';
 import { adminContentSecurityPolicy } from '@business-os/shared/security';
 import type { Database } from './generated/database.types';
+// Next.js calls proxy(request, event): do not mistake the NextFetchEvent
+// for a URL. Only the explicit helper accepts a rewrite target.
 export async function refreshSession(request: NextRequest) {
+  return refreshSessionWithRewrite(request);
+}
+
+export async function refreshSessionWithRewrite(
+  request: NextRequest,
+  rewriteTarget?: URL,
+) {
   const debugPublicPage =
     request.method === 'GET' &&
     (request.nextUrl.pathname === '/' || request.nextUrl.pathname === '/login');
@@ -24,6 +33,10 @@ export async function refreshSession(request: NextRequest) {
   request.headers.set('x-request-id', requestId);
   request.headers.set('x-nonce', nonce);
   request.headers.set('Content-Security-Policy', policy);
+  const responseForRequest = () =>
+    rewriteTarget
+      ? NextResponse.rewrite(rewriteTarget, { request })
+      : NextResponse.next({ request });
   const protect = (response: NextResponse) => {
     response.headers.set('x-request-id', requestId);
     response.headers.set('Content-Security-Policy', policy);
@@ -31,14 +44,14 @@ export async function refreshSession(request: NextRequest) {
     return response;
   };
   if (['/api/health', '/api/ready'].includes(request.nextUrl.pathname))
-    return protect(NextResponse.next({ request }));
+    return protect(responseForRequest());
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
     !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
   )
-    return protect(NextResponse.next({ request }));
+    return protect(responseForRequest());
   const env = parsePublicEnvironment(process.env);
-  let response = NextResponse.next({ request });
+  let response = responseForRequest();
   const client = createServerClient<Database>(
     env.NEXT_PUBLIC_SUPABASE_URL,
     env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
@@ -49,7 +62,7 @@ export async function refreshSession(request: NextRequest) {
         setAll(values) {
           for (const { name, value } of values)
             request.cookies.set(name, value);
-          response = NextResponse.next({ request });
+          response = responseForRequest();
           for (const { name, value, options } of values)
             response.cookies.set(name, value, {
               ...options,
