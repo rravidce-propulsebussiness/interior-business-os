@@ -3,7 +3,6 @@ import { pageServices, activeOrganization } from '@business-os/auth/server';
 import { signOut, switchOrganization } from '@business-os/auth/actions';
 import { canAccess, moduleNavigation } from '@business-os/auth';
 import { DomainError } from '@business-os/shared';
-import { isHostedOrigin } from '@business-os/shared/runtime';
 import { Button } from '@business-os/ui';
 import { createAutomationRepository } from '@business-os/database/automation';
 
@@ -20,11 +19,6 @@ export default async function Dashboard() {
     if (!(error instanceof DomainError && error.code === 'FORBIDDEN'))
       throw error;
   }
-  const platformOrigin =
-    process.env.PLATFORM_ADMIN_ORIGIN &&
-    isHostedOrigin(process.env.PLATFORM_ADMIN_ORIGIN)
-      ? process.env.PLATFORM_ADMIN_ORIGIN.replace(/\/$/, '')
-      : null;
   const [allOrganizations, memberships, modules] = await Promise.all([
     repository.organizations(),
     repository.memberships(),
@@ -97,25 +91,14 @@ export default async function Dashboard() {
                 Open the platform control center
               </h2>
               <p className="muted">
-                This is your company workspace. The marketplace, tenant plans,
-                websites and domain control center run in a separate, secure
-                app.
+                This is your company workspace. Manage the marketplace,
+                tenants, plans, websites and domains securely on this same
+                website.
               </p>
             </div>
-            {platformOrigin ? (
-              <a
-                className="premium-link"
-                href={`${platformOrigin}/dashboard`}
-                rel="noopener noreferrer"
-              >
-                Open Super Admin ↗
-              </a>
-            ) : (
-              <p className="notice notice-warning">
-                Admin hosting not connected. Deploy the separate platform-admin
-                service and configure PLATFORM_ADMIN_ORIGIN on the Business App.
-              </p>
-            )}
+            <Link className="premium-link" href="/admin">
+              Open Super Admin →
+            </Link>
           </div>
         </section>
       )}
