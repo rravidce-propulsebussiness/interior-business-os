@@ -7,7 +7,11 @@ import './dashboard.css';
 
 export const dynamic = 'force-dynamic';
 
-export default async function AdminLayout({ children }: { children: ReactNode }) {
+export default async function AdminLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
   const { authorization } = await pageServices();
   try {
     await authorization.requirePlatformPermission('platform.access');

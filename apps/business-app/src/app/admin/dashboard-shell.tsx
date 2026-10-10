@@ -167,11 +167,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
         className={`os-sidebar ${open ? 'os-sidebar-open' : ''}`}
         aria-label="Super Admin navigation"
       >
-        <Link
-          className="os-brand"
-          href="/admin"
-          onClick={() => setOpen(false)}
-        >
+        <Link className="os-brand" href="/admin" onClick={() => setOpen(false)}>
           <span className="os-brand-mark">
             <OsIcon name="dashboard" size={23} />
           </span>
@@ -188,9 +184,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
         <div className="os-sidebar-foot">
           <span className="os-online-dot" /> Platform controls
           <small>Tenant-scoped access is enforced</small>
-          <Link href="/dashboard">
-            ← Business workspace
-          </Link>
+          <Link href="/dashboard">← Business workspace</Link>
           <Link href="/admin/automations">
             Automation health <span aria-hidden="true">↗</span>
           </Link>

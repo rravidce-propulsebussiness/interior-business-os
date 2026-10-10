@@ -91,9 +91,8 @@ export default async function Dashboard() {
                 Open the platform control center
               </h2>
               <p className="muted">
-                This is your company workspace. Manage the marketplace,
-                tenants, plans, websites and domains securely on this same
-                website.
+                This is your company workspace. Manage the marketplace, tenants,
+                plans, websites and domains securely on this same website.
               </p>
             </div>
             <Link className="premium-link" href="/admin">
