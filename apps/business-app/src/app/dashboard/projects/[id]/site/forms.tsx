@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { saveProjectSite, uploadProjectSiteMedia } from './actions';
+import { saveProjectSite, saveProjectManagerUpdate, uploadProjectSiteMedia } from './actions';
 
 export type SiteField = {
   name: string;
@@ -22,6 +22,7 @@ export function ProjectSiteForm({
   fields,
   hidden = {},
   secondary = false,
+  manager = false,
 }: {
   project: string;
   operation: string;
@@ -29,6 +30,7 @@ export function ProjectSiteForm({
   fields: readonly SiteField[];
   hidden?: Readonly<Record<string, string>>;
   secondary?: boolean;
+  manager?: boolean;
 }) {
   const [message, setMessage] = useState('');
   const [pending, start] = useTransition();
@@ -40,7 +42,9 @@ export function ProjectSiteForm({
         const target = event.currentTarget;
         const values = new FormData(target);
         start(async () => {
-          const result = await saveProjectSite(project, operation, values);
+          const result = manager
+            ? await saveProjectManagerUpdate(project, operation, values)
+            : await saveProjectSite(project, operation, values);
           setMessage(result.message);
           if (result.saved) target.reset();
         });
