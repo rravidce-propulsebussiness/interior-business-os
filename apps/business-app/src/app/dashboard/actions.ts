@@ -9,6 +9,8 @@ export async function provisionOrganization(
   _state: { message: string },
   _form: FormData,
 ) {
+  void _state;
+  void _form;
   return {
     message:
       'Direct company creation is no longer available here. Submit your business for administrator review at /dashboard/company/apply.',
