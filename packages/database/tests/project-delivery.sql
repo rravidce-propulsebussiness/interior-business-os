@@ -6,11 +6,14 @@ select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111'
 do $$
 declare
  org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
- project uuid=private.seed_uuid('business-os:demo:3bhk');
+ project uuid;
  design_id uuid;need_id uuid;check_id uuid;
  kind text;
  result jsonb;
 begin
+ select id into project from public.projects where organization_id=org and code='demo-3bhk';
+ if project is null then raise exception 'Missing seeded project';end if;
+ perform set_config('test.project_site_id',project::text,true);
  if not private.has_permission(org,'project.manage') then
    raise exception 'Project owner fixture lacks project.manage grant';
  end if;
@@ -63,7 +66,7 @@ begin
  perform public.project_site_command(org,project,'check_update',
    jsonb_build_object('id',check_id,'status','passed','notes','Verified'));
  perform public.project_site_command(org,project,'report_add',
-   '{"report_date":"2026-10-10","completed_work":"Site clearing and marking","tomorrow_plan":"Footing gridline inspection","worker_count":8}');
+   jsonb_build_object('report_date',current_date::text,'completed_work','Site clearing and marking','tomorrow_plan','Footing gridline inspection','worker_count',8));
  begin
    perform public.project_site_command(org,project,'handover','{}');
    raise exception 'FAIL: handover without formal inspections allowed';
@@ -78,7 +81,7 @@ end $$;
 -- Watchman can record gate events only, not change design/client approval.
 select set_config('request.jwt.claim.sub','22222222-2222-4222-8222-222222222222',true);
 do $$
-declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd'; project uuid=private.seed_uuid('business-os:demo:3bhk');
+declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd'; project uuid=current_setting('test.project_site_id')::uuid;
 begin
  perform public.project_site_command(org,project,'gate_add',
   '{"kind":"material_delivery","description":"Cement truck arrived","notes":"Check delivery against PO"}');
