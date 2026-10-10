@@ -36,11 +36,11 @@ jobs:
         env:
           TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:5432/company_controls_test
           ALLOW_TEST_DATABASE_RESET: 'yes'
-      - run: pnpm exec prettier --write packages/database/src/generated/database.types.ts packages/database/src/platform-companies.ts packages/database/tests/platform-companies.sql packages/database/supabase/migrations/20261010000500_platform_company_control.sql apps/business-app/src/app/admin/organizations
+      - run: pnpm exec prettier --write packages/database/src/generated/database.types.ts packages/database/src/platform-companies.ts apps/business-app/src/app/admin/organizations
       - run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add packages/database/src/generated/database.types.ts packages/database/src/platform-companies.ts packages/database/tests/platform-companies.sql packages/database/supabase/migrations/20261010000500_platform_company_control.sql apps/business-app/src/app/admin/organizations
+          git add packages/database/src/generated/database.types.ts packages/database/src/platform-companies.ts apps/business-app/src/app/admin/organizations
           if ! git diff --cached --quiet; then
             git commit -m 'chore(admin): refresh company schema types and format controls'
             git push origin HEAD:feat/platform-company-seller-management
