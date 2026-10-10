@@ -20,7 +20,9 @@ const isHostedNpmInstall =
   process.env.BUSINESS_OS_SKIP_AUTOBUILD !== '1';
 
 if (!isHostedNpmInstall) {
-  console.log('[Business OS] Skipping hosted build during this package lifecycle.');
+  console.log(
+    '[Business OS] Skipping hosted build during this package lifecycle.',
+  );
 } else {
   console.log(
     '[Business OS] Hosted npm install detected; running frozen pnpm workspace install and selected Next.js build.',
@@ -35,7 +37,10 @@ if (!isHostedNpmInstall) {
     },
   );
   if (result.error) {
-    console.error('[Business OS] Hosted postinstall build failed:', result.error.message);
+    console.error(
+      '[Business OS] Hosted postinstall build failed:',
+      result.error.message,
+    );
     process.exitCode = 1;
   } else if (result.status !== 0) {
     process.exitCode = result.status || 1;

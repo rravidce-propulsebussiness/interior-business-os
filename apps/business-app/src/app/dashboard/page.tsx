@@ -62,23 +62,19 @@ export default async function Dashboard() {
         ).notifications(1, 'unread')
       : null;
   return (
-    <main
-      id="main-content"
-      tabIndex={-1}
-      className="dashboard-shell"
-    >
+    <main id="main-content" tabIndex={-1} className="dashboard-shell">
       <header className="dashboard-header">
         <div>
           <p className="eyebrow">Operations workspace</p>
           <h1>Business dashboard</h1>
-          <p>Manage the organization, modules, permissions, and daily work from one secure view.</p>
+          <p>
+            Manage the organization, modules, permissions, and daily work from
+            one secure view.
+          </p>
         </div>
       </header>
       {context && (
-        <nav
-          className="dashboard-nav"
-          aria-label="Daily operations"
-        >
+        <nav className="dashboard-nav" aria-label="Daily operations">
           <Link className="underline" href="/dashboard/reports">
             Reports
           </Link>
@@ -116,10 +112,7 @@ export default async function Dashboard() {
               'financial_report.view',
             ].includes(g.permission) && g.scope.kind === 'organization',
         ) && (
-          <Link
-            className="premium-link-secondary"
-            href="/dashboard/finance"
-          >
+          <Link className="premium-link-secondary" href="/dashboard/finance">
             Commercial execution
           </Link>
         )}
@@ -134,10 +127,7 @@ export default async function Dashboard() {
         </p>
       )}
       {organizations.length > 0 && (
-        <form
-          action={switchOrganization}
-          className="dashboard-controlbar"
-        >
+        <form action={switchOrganization} className="dashboard-controlbar">
           <label>
             Active organization
             <select
@@ -257,12 +247,7 @@ export default async function Dashboard() {
         <ActionForm action={provisionOrganization} label="Create organization">
           <label>
             Business name
-            <input
-              required
-              name="name"
-              maxLength={200}
-              className="mt-2"
-            />
+            <input required name="name" maxLength={200} className="mt-2" />
           </label>
           <label>
             URL identifier

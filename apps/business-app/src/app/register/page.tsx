@@ -9,8 +9,8 @@ export default function Register() {
         <p className="eyebrow">Business OS · account onboarding</p>
         <h2 id="register-story-title">Create your secure account.</h2>
         <p>
-          Start with an identity, then join an organization through an invitation
-          or approved workspace membership.
+          Start with an identity, then join an organization through an
+          invitation or approved workspace membership.
         </p>
         <ul className="feature-list">
           <li>
@@ -19,7 +19,9 @@ export default function Register() {
           </li>
           <li>
             <span className="feature-dot" aria-hidden="true" />
-            <span>Organization permissions remain isolated and role-based.</span>
+            <span>
+              Organization permissions remain isolated and role-based.
+            </span>
           </li>
         </ul>
       </section>

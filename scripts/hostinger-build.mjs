@@ -7,7 +7,9 @@ import { fileURLToPath } from 'node:url';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const service = process.env.BUSINESS_OS_SERVICE?.trim() || 'business-app';
 if (!['business-app', 'platform-admin', 'websites'].includes(service)) {
-  throw new Error('BUSINESS_OS_SERVICE must be business-app, platform-admin or websites');
+  throw new Error(
+    'BUSINESS_OS_SERVICE must be business-app, platform-admin or websites',
+  );
 }
 const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 const runPnpm = (args) => {
@@ -25,5 +27,14 @@ runPnpm(['install', '--frozen-lockfile', '--prod=false']);
 // exits before establishing IPC while processing globals.css. The officially
 // supported --webpack path avoids that Turbopack-specific process failure.
 // Keep each application's usual build script unchanged for local development.
-console.log(`[Business OS] Building ${service} with Next.js Webpack for Hostinger.`);
-runPnpm(['--filter', `@business-os/${service}`, 'exec', 'next', 'build', '--webpack']);
+console.log(
+  `[Business OS] Building ${service} with Next.js Webpack for Hostinger.`,
+);
+runPnpm([
+  '--filter',
+  `@business-os/${service}`,
+  'exec',
+  'next',
+  'build',
+  '--webpack',
+]);

@@ -1,8 +1,5 @@
 type SupportedImageMime =
-  | 'image/jpeg'
-  | 'image/png'
-  | 'image/webp'
-  | 'image/avif';
+  'image/jpeg' | 'image/png' | 'image/webp' | 'image/avif';
 
 function detectImage(input: Buffer): SupportedImageMime | null {
   if (

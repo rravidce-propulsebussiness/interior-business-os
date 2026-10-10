@@ -7,11 +7,14 @@ import { boundedFetch } from '@business-os/shared/runtime';
 import { adminContentSecurityPolicy } from '@business-os/shared/security';
 import type { Database } from './generated/database.types';
 export async function refreshSession(request: NextRequest) {
-  const debugPublicPage = request.method === 'GET' &&
+  const debugPublicPage =
+    request.method === 'GET' &&
     (request.nextUrl.pathname === '/' || request.nextUrl.pathname === '/login');
   const diagnosticStart = Date.now();
   if (debugPublicPage)
-    console.log(`[Business OS] Next proxy entered ${request.nextUrl.pathname}.`);
+    console.log(
+      `[Business OS] Next proxy entered ${request.nextUrl.pathname}.`,
+    );
   const requestId = crypto.randomUUID();
   const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
   const policy = adminContentSecurityPolicy(
@@ -60,12 +63,16 @@ export async function refreshSession(request: NextRequest) {
     },
   );
   if (debugPublicPage)
-    console.log(`[Business OS] Next proxy requesting authenticated session for ${request.nextUrl.pathname}.`);
+    console.log(
+      `[Business OS] Next proxy requesting authenticated session for ${request.nextUrl.pathname}.`,
+    );
   try {
     await client.auth.getUser();
   } finally {
     if (debugPublicPage)
-      console.log(`[Business OS] Next proxy session check finished for ${request.nextUrl.pathname} after ${Date.now() - diagnosticStart}ms.`);
+      console.log(
+        `[Business OS] Next proxy session check finished for ${request.nextUrl.pathname} after ${Date.now() - diagnosticStart}ms.`,
+      );
   }
   response.headers.set('Cache-Control', 'private, no-store');
   return protect(response);

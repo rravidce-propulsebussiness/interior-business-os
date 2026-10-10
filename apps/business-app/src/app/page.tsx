@@ -23,8 +23,8 @@ export default function Page() {
           </h1>
           <p className="hero-copy">
             Business OS brings customers, quotations, finance, execution,
-            automation, reports, and team access into one secure operating
-            layer built for growing interior businesses.
+            automation, reports, and team access into one secure operating layer
+            built for growing interior businesses.
           </p>
           <div className="hero-actions">
             <Link className="premium-link" href="/dashboard">
@@ -50,8 +50,7 @@ export default function Page() {
               <span className="feature-dot" aria-hidden="true" />
               <span>
                 <strong>One operational view.</strong> Move from lead to
-                quotation, delivery, finance, and reporting without tool
-                sprawl.
+                quotation, delivery, finance, and reporting without tool sprawl.
               </span>
             </li>
             <li>

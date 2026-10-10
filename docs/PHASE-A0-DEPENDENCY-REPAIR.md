@@ -17,19 +17,19 @@ The 2026-10-09 `Foundation checks` run [37983731824](https://github.com/rravidce
 
 ## Files intended in the final PR
 
-`package.json`, `apps/business-app/package.json`, `apps/platform-admin/package.json`, `apps/websites/package.json`, `packages/auth/package.json`, `packages/database/package.json`, `packages/shared/package.json`, `pnpm-workspace.yaml`, `pnpm-lock.yaml` and this documentation. `docs/PHASE-B-COMPANY-ACCESS-SPEC.md` documents *future scope only*. The one-time dependency lockfile regeneration workflow ran on the branch and was then deleted, so it is not part of the final feature diff.
+`package.json`, `apps/business-app/package.json`, `apps/platform-admin/package.json`, `apps/websites/package.json`, `packages/auth/package.json`, `packages/database/package.json`, `packages/shared/package.json`, `pnpm-workspace.yaml`, `pnpm-lock.yaml` and this documentation. `docs/PHASE-B-COMPANY-ACCESS-SPEC.md` documents _future scope only_. The one-time dependency lockfile regeneration workflow ran on the branch and was then deleted, so it is not part of the final feature diff.
 
 ## Verification evidence (executed versus pending)
 
 A one-time GitHub Actions job [38024541193](https://github.com/rravidce-propulsebussiness/interior-business-os/actions/runs/38024541193) completed **SUCCESS** on 2026-10-10 with these actual steps:
 
-| Actual command | Result | Evidence |
-| --- | --- | --- |
-| `pnpm install --lockfile-only --ignore-scripts` | PASS | Generated new lockfile |
-| `pnpm install --frozen-lockfile` | PASS | Resolved and installed dependencies |
-| `pnpm audit --prod --audit-level=high` | PASS | Runner output: `No known vulnerabilities found` |
-| `pnpm security:dependency` | PASS | Patched braces regression tests |
-| Lockfile-only commit | PASS | Commit `ef690a93224639024351b3eae52a660f4819f22a` |
+| Actual command                                  | Result | Evidence                                          |
+| ----------------------------------------------- | ------ | ------------------------------------------------- |
+| `pnpm install --lockfile-only --ignore-scripts` | PASS   | Generated new lockfile                            |
+| `pnpm install --frozen-lockfile`                | PASS   | Resolved and installed dependencies               |
+| `pnpm audit --prod --audit-level=high`          | PASS   | Runner output: `No known vulnerabilities found`   |
+| `pnpm security:dependency`                      | PASS   | Patched braces regression tests                   |
+| Lockfile-only commit                            | PASS   | Commit `ef690a93224639024351b3eae52a660f4819f22a` |
 
 The project's independent CI workflow `.github/workflows/ci.yml` executes: email adapter and acceptance tests, dependency mitigation regression, unsuppressed production audit, fresh disposable PostgreSQL migrations with RLS assertions and generated type/seed checks, Playwright Chromium install, recovery regression, formatting, linting, TypeScript, full Vitest, three Next.js application builds, client and secrets scanning, and browser E2E. **The final PR/head run is authoritative; historical successes do not count as current pass.**
 

@@ -79,12 +79,7 @@ export async function renderPdf(html: string, options: PdfOptions = {}) {
     const title = plainText(
       options.title ?? (options.brochure ? 'Brochure' : 'Business OS document'),
     );
-    const lines = wrap(
-      plainText(html),
-      pageWidth - margin * 2,
-      font,
-      fontSize,
-    );
+    const lines = wrap(plainText(html), pageWidth - margin * 2, font, fontSize);
 
     let page = document.addPage([pageWidth, pageHeight]);
     let y = pageHeight - margin;

@@ -15,7 +15,9 @@ export default async function Login({
     <main id="main-content" tabIndex={-1} className="auth-shell">
       <section className="auth-story" aria-labelledby="auth-story-title">
         <p className="eyebrow">Business OS · secure workspace</p>
-        <h2 id="auth-story-title">Everything your team needs. Nothing they do not.</h2>
+        <h2 id="auth-story-title">
+          Everything your team needs. Nothing they do not.
+        </h2>
         <p>
           Sign in to your organization workspace to access the modules,
           permissions, reporting, and operational tools assigned to your role.
@@ -27,7 +29,9 @@ export default async function Login({
           </li>
           <li>
             <span className="feature-dot" aria-hidden="true" />
-            <span>Fast handoff between customers, finance, delivery, and reporting.</span>
+            <span>
+              Fast handoff between customers, finance, delivery, and reporting.
+            </span>
           </li>
           <li>
             <span className="feature-dot" aria-hidden="true" />
@@ -43,7 +47,8 @@ export default async function Login({
 
         {recoveryComplete && (
           <p className="notice notice-success" role="status">
-            Your password was updated successfully. Sign in with the new password.
+            Your password was updated successfully. Sign in with the new
+            password.
           </p>
         )}
 
