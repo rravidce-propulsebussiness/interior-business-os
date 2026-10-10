@@ -158,12 +158,23 @@ language sql stable security definer set search_path='' as $$
  ) and (private.has_permission(org,'project.manage') or private.site_role(org,project) is not null)
 $$;
 
-create function private.site_allowed(org uuid,project uuid,roles text[]) returns boolean
-language sql stable security definer set search_path='' as $$
+create function private.site_is_manager(org uuid,project uuid) returns boolean
+language sql stable security definer set search_path='' as $
  select private.site_access(org,project) and (
-  private.has_permission(org,'project.manage') or private.site_role(org,project)=any(roles)
+  private.has_permission(org,'organization.manage') or
+  private.site_role(org,project)='manager' or
+  (private.site_role(org,project) is null and private.has_permission(org,'project.manage'))
  )
-$$;
+$;
+
+create function private.site_allowed(org uuid,project uuid,roles text[]) returns boolean
+language sql stable security definer set search_path='' as $
+ select private.site_access(org,project) and (
+  private.has_permission(org,'organization.manage') or
+  (private.site_role(org,project) is null and private.has_permission(org,'project.manage')) or
+  private.site_role(org,project)=any(roles)
+ )
+$;
 
 create function private.site_log(org uuid,project uuid,action text,record_id uuid default null) returns void
 language plpgsql security definer set search_path='' as $$
@@ -179,7 +190,7 @@ declare v_role text;manager boolean;result jsonb;begin
   raise exception 'Project workspace unavailable' using errcode='42501';
  end if;
  v_role=private.site_role(p_organization_id,p_project_id);
- manager=private.has_permission(p_organization_id,'project.manage') or v_role='manager';
+ manager=private.site_is_manager(p_organization_id,p_project_id);
  select jsonb_build_object(
   'project',jsonb_build_object('id',p.id,'name',p.name,'code',p.code,'status',p.status),
   'stage',coalesce(s.stage,'not_started'),
@@ -228,7 +239,7 @@ declare v_stage text;v_role text;v_id uuid;v_kind text;v_revision integer;v_stat
   if v_stage is distinct from 'design' or not private.site_allowed(p_organization_id,p_project_id,array['architect','structural_designer','manager']) then raise exception 'Design phase required' using errcode='42501';end if;
   if p_input-array['kind','reference','notes']<>'{}'::jsonb then raise exception 'Invalid design input' using errcode='22023';end if;
   v_kind=p_input->>'kind';
-  if v_kind not in ('architectural_plan','3d_design','structural_design') or (v_role='structural_designer' and v_kind<>'structural_design' and not private.has_permission(p_organization_id,'project.manage')) or (v_role='architect' and v_kind='structural_design' and not private.has_permission(p_organization_id,'project.manage')) then raise exception 'Design role mismatch' using errcode='42501';end if;
+  if v_kind not in ('architectural_plan','3d_design','structural_design') or (v_role='structural_designer' and v_kind<>'structural_design' and not private.site_is_manager(p_organization_id,p_project_id)) or (v_role='architect' and v_kind='structural_design' and not private.has_permission(p_organization_id,'project.manage')) then raise exception 'Design role mismatch' using errcode='42501';end if;
   if length(trim(coalesce(p_input->>'reference',''))) not between 6 and 1500 or length(coalesce(p_input->>'notes',''))>3000 then raise exception 'Invalid design reference' using errcode='22023';end if;
   if exists(select 1 from private.site_designs where organization_id=p_organization_id and project_id=p_project_id and kind=v_kind and status='submitted') then raise exception 'Review current design before revising' using errcode='23514';end if;
   select coalesce(max(revision),0)+1 into v_revision from private.site_designs where organization_id=p_organization_id and project_id=p_project_id and kind=v_kind;
@@ -352,11 +363,11 @@ returns jsonb language plpgsql stable security definer set search_path='' as $$
 declare m private.site_media;role text;begin
  if not private.site_access(p_organization_id,p_project_id) then raise exception 'Media not available' using errcode='42501';end if;
  role=private.site_role(p_organization_id,p_project_id);
- if not private.has_permission(p_organization_id,'project.manage') and role not in ('manager','architect','structural_designer','site_engineer','quality_inspector') then raise exception 'Media not available' using errcode='42501';end if;
+ if not private.site_is_manager(p_organization_id,p_project_id) and role not in ('manager','architect','structural_designer','site_engineer','quality_inspector') then raise exception 'Media not available' using errcode='42501';end if;
  select * into m from private.site_media where organization_id=p_organization_id and project_id=p_project_id and id=p_id;
  if m.id is null then raise exception 'Media not found' using errcode='42501';end if;
- if m.category='design' and role in ('watchman','procurement') and not private.has_permission(p_organization_id,'project.manage') then raise exception 'Media not permitted' using errcode='42501';end if;
- if m.category<>'design' and role in ('architect','structural_designer') and not private.has_permission(p_organization_id,'project.manage') then raise exception 'Media not permitted' using errcode='42501';end if;
+ if m.category='design' and role in ('watchman','procurement') and not private.site_is_manager(p_organization_id,p_project_id) then raise exception 'Media not permitted' using errcode='42501';end if;
+ if m.category<>'design' and role in ('architect','structural_designer') and not private.site_is_manager(p_organization_id,p_project_id) then raise exception 'Media not permitted' using errcode='42501';end if;
  return jsonb_build_object('filename',m.filename,'mime',m.mime,'base64',encode(m.bytes,'base64'));
 end$$;
 
