@@ -15,7 +15,6 @@ const kinds = [
   { key: 'all', label: 'All' },
   { key: 'business_owner', label: 'Business Owners' },
   { key: 'seller', label: 'Sellers' },
-  { key: 'general_user', label: 'General Users' },
 ] as const;
 
 type DirectoryParams = {
@@ -66,12 +65,10 @@ const countCard =
 const roleLabel = {
   business_owner: 'Business Owner',
   seller: 'Seller',
-  general_user: 'General User',
 } as const;
 const kindColor = {
   business_owner: 'bg-blue-100 text-blue-700',
   seller: 'bg-violet-100 text-violet-700',
-  general_user: 'bg-orange-100 text-orange-700',
 } as const;
 function UserCard({
   user,
@@ -170,18 +167,10 @@ function UserCard({
           <OsIcon name={owner ? 'crown' : 'users'} size={19} />
           <div className="min-w-0">
             <p className="font-bold">
-              {owner
-                ? 'Default full company access'
-                : user.kind === 'seller'
-                  ? 'Seller & assigned permissions'
-                  : 'Limited permissions'}
+              {owner ? 'Full owner access' : 'Linked company access'}
             </p>
             <p className="mt-0.5 line-clamp-2 opacity-80">
-              {owner
-                ? 'Owner role · company modules and subscription limits apply'
-                : roles.length
-                  ? roles.join(', ')
-                  : 'No company role assigned yet'}
+              {owner ? 'Owner controls company permissions, subject to subscribed modules' : roles.join(', ')}
             </p>
           </div>
         </div>
@@ -195,10 +184,10 @@ function UserCard({
         </Link>
         {canManage && (
           <Link
-            href={'/admin/users/' + user.id + '#manage'}
+            href={company ? '/admin/organizations/' + company.id : '/admin/users/' + user.id}
             className="inline-flex min-w-0 flex-1 items-center justify-center rounded-xl border border-slate-200 bg-white px-2 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
           >
-            Manage
+            Manage company
           </Link>
         )}
         <Link
@@ -260,7 +249,7 @@ export default async function OrganizationsDirectory({
   const page =
     Number.isSafeInteger(rawPage) && rawPage > 0 ? Math.min(rawPage, 10000) : 1;
   const companyRepository = createPlatformCompaniesRepository(client);
-  const result = await companyRepository.userDirectory({
+  const result = await companyRepository.ownerDirectory({
     query: q,
     kind,
     status,
@@ -277,7 +266,6 @@ export default async function OrganizationsDirectory({
     all: stats.totalUsers,
     business_owner: stats.businessOwners,
     seller: stats.sellers,
-    general_user: stats.generalUsers,
   };
   const metrics = [
     {
@@ -299,13 +287,7 @@ export default async function OrganizationsDirectory({
       icon: '◇',
     },
     {
-      label: 'General Users',
-      value: stats.generalUsers,
-      theme: 'border-orange-100 bg-orange-50 text-orange-700',
-      icon: '♙',
-    },
-    {
-      label: 'Active Users',
+      label: 'Active Owners',
       value: stats.activeUsers,
       theme: 'border-emerald-100 bg-emerald-50 text-emerald-700',
       icon: '✓',
@@ -328,15 +310,15 @@ export default async function OrganizationsDirectory({
           <div>
             <div className="flex flex-wrap items-center gap-3">
               <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
-                Organizations &amp; Users
+                Organizations &amp; Owners
               </h1>
               <span className="inline-flex items-center gap-1.5 rounded-full bg-teal-100 px-3 py-1.5 text-xs font-semibold text-teal-800">
                 <OsIcon name="crown" size={15} /> Super Admin
               </span>
             </div>
             <p className="mt-2 max-w-2xl text-sm text-slate-500">
-              Manage companies, business owners, sellers and users from a single
-              control centre.
+              Manage company owners, subscriptions and approved sellers in one place.
+              Employees are managed by each business owner.
             </p>
           </div>
           {canManage && (
@@ -346,12 +328,6 @@ export default async function OrganizationsDirectory({
                 className="inline-flex h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-blue-700 shadow-sm hover:bg-slate-50"
               >
                 <span className="text-lg">▦</span> Create Organization
-              </Link>
-              <Link
-                href="/admin/users/create"
-                className="inline-flex h-11 items-center gap-2 rounded-xl bg-blue-600 px-5 text-sm font-bold text-white shadow-md shadow-blue-100 hover:bg-blue-700"
-              >
-                <OsIcon name="users" size={19} /> Create User
               </Link>
             </div>
           )}
@@ -401,7 +377,7 @@ export default async function OrganizationsDirectory({
                 type="search"
                 maxLength={80}
                 defaultValue={q}
-                placeholder="Search users, companies, email or phone..."
+                placeholder="Search owners, companies, email or phone..."
                 className={inputClass + ' pl-11'}
               />
             </div>
@@ -485,7 +461,7 @@ export default async function OrganizationsDirectory({
           </div>
         </section>
         <section
-          aria-label="Users directory"
+          aria-label="Company owners directory"
           className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4"
         >
           {result.rows.map((user) => (
@@ -494,9 +470,9 @@ export default async function OrganizationsDirectory({
         </section>
         {result.rows.length === 0 && (
           <section className="rounded-2xl border border-dashed border-slate-300 bg-white px-8 py-14 text-center">
-            <h2 className="text-lg font-bold">No users match these filters</h2>
+            <h2 className="text-lg font-bold">No company owners match these filters</h2>
             <p className="mt-2 text-sm text-slate-500">
-              Try a different search or invite a new account.
+              Try a different search or create a new organization with an owner.
             </p>
             <Link
               href="/admin/organizations"
