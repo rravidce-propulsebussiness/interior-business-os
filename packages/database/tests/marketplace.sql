@@ -104,10 +104,14 @@ select private.marketplace_denied(
 select set_config('request.jwt.claim.sub','55555555-5555-4555-8555-555555555555',true);
 select public.marketplace_industry_create('manufacturing','Manufacturing') as new_industry_id \gset
 select public.marketplace_seller_industry_assign('dddddddd-dddd-4ddd-8ddd-dddddddddddd',:'new_industry_id');
+-- The platform user has no direct cross-tenant RLS SELECT privilege.
+-- Assert fixture state as the disposable test owner, not by weakening RLS.
+reset role;
 select private.marketplace_assert(
  exists (select 1 from public.organization_industries where
  organization_id='dddddddd-dddd-4ddd-8ddd-dddddddddddd' and industry_id=:'new_industry_id'),
  'platform can assign an added industry to seller');
+set local role authenticated;
 select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',true);
 select public.marketplace_product_save(
  'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
