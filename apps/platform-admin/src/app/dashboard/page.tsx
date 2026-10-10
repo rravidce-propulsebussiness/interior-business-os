@@ -47,7 +47,7 @@ export default async function PlatformDashboard() {
     count: statusResults[index]?.total ?? 0,
     hue: hues[index],
   }));
-  const active = rows[0].count;
+  const active = rows[0]?.count ?? 0;
   const assignedPlans = new Map(plans.map((plan) => [plan.id, plan.name]));
   const stats = [
     { label: 'Total Tenants', value: number(directory.total), detail: 'Across all statuses', icon: 'marketplace', hue: 'blue' },
