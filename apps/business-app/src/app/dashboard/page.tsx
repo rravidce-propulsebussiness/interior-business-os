@@ -216,6 +216,26 @@ export default async function Dashboard() {
                       <b aria-hidden="true">↗</b>
                     </Link>
                   )}
+                  {canAccess(context, {
+                    organizationId: context.organizationId,
+                    permission: 'purchase.view',
+                  }) && (
+                    <Link href="/dashboard/marketplace">
+                      <span>B2B Marketplace</span>
+                      <small>Compare supplier rates</small>
+                      <b aria-hidden="true">↗</b>
+                    </Link>
+                  )}
+                  {canAccess(context, {
+                    organizationId: context.organizationId,
+                    permission: 'organization.manage',
+                  }) && (
+                    <Link href="/dashboard/marketplace/seller">
+                      <span>Seller account</span>
+                      <small>Storefront and supplier orders</small>
+                      <b aria-hidden="true">↗</b>
+                    </Link>
+                  )}
                   <Link href="/dashboard/reports">
                     <span>Reports</span>
                     <small>Company performance</small>
