@@ -152,6 +152,7 @@ export function createPlatformCompaniesRepository(
       kind?: string;
       status?: string;
       industryId?: string;
+      sort?: string;
       page: number;
     }) => invoke<PlatformUserDirectory>('platform_user_directory', {
       p_query: filters.query ?? '',
@@ -159,9 +160,16 @@ export function createPlatformCompaniesRepository(
       p_status: filters.status ?? '',
       p_industry_id: filters.industryId ?? null,
       p_page: filters.page,
+      p_sort: filters.sort ?? 'newest',
     }),
     userProfile: (id: string) =>
       invoke<PlatformUser>('platform_user_profile', { p_user_id: id }),
+    userCompanyChoices: () =>
+      invoke<Array<{
+        organizationId: string;
+        organizationName: string;
+        roles: Array<{ id: string; name: string }>;
+      }>>('platform_user_company_choices', {}),
     setUserStatus: (id: string, status: 'active' | 'suspended') =>
       invoke<void>('platform_user_status_set', {
         p_user_id: id,
