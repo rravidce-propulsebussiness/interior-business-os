@@ -80,6 +80,9 @@ export default async function Dashboard() {
               Employees &amp; roles
             </Link>
           )}
+          <Link className="underline" href="/dashboard/company/invitations">
+            My company invitations
+          </Link>
           <Link className="underline" href="/dashboard/reports">
             Reports
           </Link>
