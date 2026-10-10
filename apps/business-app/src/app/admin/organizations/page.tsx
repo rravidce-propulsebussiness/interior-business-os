@@ -198,7 +198,6 @@ function UserCard({
             Manage company
           </Link>
         )}
-
       </div>
     </article>
   );

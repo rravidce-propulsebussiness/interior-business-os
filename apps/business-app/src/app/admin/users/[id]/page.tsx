@@ -76,9 +76,9 @@ export default async function OwnerDetails({
           <h2 className="text-xl font-bold">Owned organizations</h2>
           <p className="mt-2 text-sm text-slate-600">
             Owners automatically have full tenant permissions, within their
-            subscribed modules. Super Admin manages company plans,
-            industry and seller approval. The owner manages employees,
-            invitations and roles within their company dashboard.
+            subscribed modules. Super Admin manages company plans, industry and
+            seller approval. The owner manages employees, invitations and roles
+            within their company dashboard.
           </p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             {ownedCompanies.map((company) => (
