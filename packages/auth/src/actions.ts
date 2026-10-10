@@ -62,6 +62,7 @@ export async function signOut() {
   const { error } = await client.auth.signOut();
   if (error) throw new DomainError('INTERNAL_ERROR');
   (await cookies()).delete('business-os-organization');
+  (await cookies()).delete('business-os-workspace-route');
   redirect('/login');
 }
 export async function switchOrganization(form: FormData) {
