@@ -41,7 +41,9 @@ test('expired session, scanner-safe landing, reset, revocation and old/new login
   await login(page, 'Initial-local-password-123');
   await expect(page).toHaveURL(/dashboard/);
   await expect(
-    page.getByRole('heading', { name: /^(?:(?:Platform|Business) dashboard|Super Admin Dashboard)$/ }),
+    page.getByRole('heading', {
+      name: /^(?:(?:Platform|Business) dashboard|Super Admin Dashboard)$/,
+    }),
   ).toBeVisible();
   await control(request, 'expire');
   await page.goto('/dashboard');
@@ -87,7 +89,9 @@ test('expired session, scanner-safe landing, reset, revocation and old/new login
   await login(page, 'Changed-local-password-456');
   await expect(page).toHaveURL(/dashboard/);
   await expect(
-    page.getByRole('heading', { name: /^(?:(?:Platform|Business) dashboard|Super Admin Dashboard)$/ }),
+    page.getByRole('heading', {
+      name: /^(?:(?:Platform|Business) dashboard|Super Admin Dashboard)$/,
+    }),
   ).toBeVisible();
   expect(errors).toEqual([]);
 });
