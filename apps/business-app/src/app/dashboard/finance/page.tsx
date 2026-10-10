@@ -40,8 +40,16 @@ export default async function Finance() {
   return (
     <main id="main-content" tabIndex={-1} className="mx-auto max-w-6xl p-6">
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-        <Link href="/dashboard" className="text-sm font-semibold text-slate-600">← Business dashboard</Link>
-        <Link href="/dashboard/billing" className="rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white">
+        <Link
+          href="/dashboard"
+          className="text-sm font-semibold text-slate-600"
+        >
+          ← Business dashboard
+        </Link>
+        <Link
+          href="/dashboard/billing"
+          className="rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white"
+        >
           Sales invoices &amp; purchase bills →
         </Link>
       </div>

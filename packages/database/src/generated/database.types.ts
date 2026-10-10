@@ -11381,6 +11381,42 @@ export interface Database {
         };
         Returns: undefined;
       };
+      trade_billing_profile: { Args: { p_org: string }; Returns: Json };
+      trade_billing_profile_save: {
+        Args: { p_org: string; p_input: Json };
+        Returns: undefined;
+      };
+      trade_document_get: {
+        Args: { p_org: string; p_id: string };
+        Returns: Json;
+      };
+      trade_document_issue: {
+        Args: { p_org: string; p_id: string };
+        Returns: string;
+      };
+      trade_document_save: {
+        Args: { p_org: string; p_input: Json };
+        Returns: string;
+      };
+      trade_document_void: {
+        Args: { p_org: string; p_id: string; p_reason: string };
+        Returns: undefined;
+      };
+      trade_documents_list: {
+        Args: { p_org: string; p_kind?: string };
+        Returns: Json;
+      };
+      trade_payment_record: {
+        Args: {
+          p_org: string;
+          p_id: string;
+          p_amount: number;
+          p_date: string;
+          p_mode: string;
+          p_reference?: string;
+        };
+        Returns: string;
+      };
       website_asset_manage: {
         Args: {
           p_organization_id: string;
