@@ -22,6 +22,20 @@ export const rolePresets: readonly RolePreset[] = [
     description: 'Campaign and customer enquiry collaboration; no private rates or finance.',
   },
   {
+    key: 'sales_limited',
+    name: 'Sales (limited)',
+    industries: ['universal'],
+    permissions: ['organization.view', 'crm.view', 'crm.create', 'quotation.view', 'quotation.create'],
+    description: 'Create leads and quotations without overriding rates, viewing costs or approving payments.',
+  },
+  {
+    key: 'estimator_limited',
+    name: 'Estimator (limited)',
+    industries: ['construction', 'interior'],
+    permissions: ['organization.view', 'catalog.view', 'quotation.view', 'quotation.create'],
+    description: 'Build estimates without revealing private internal costs or changing approved rate books.',
+  },
+  {
     key: 'customer_support',
     name: 'Customer Support',
     industries: ['universal'],
