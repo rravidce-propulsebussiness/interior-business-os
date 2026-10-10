@@ -11306,6 +11306,35 @@ export interface Database {
         Args: { p_user_id: string; p_role_id: string; p_remove?: boolean };
         Returns: undefined;
       };
+      project_site_command: {
+        Args: {
+          p_organization_id: string;
+          p_project_id: string;
+          p_action: string;
+          p_input?: Json;
+        };
+        Returns: Json;
+      };
+      project_site_media_get: {
+        Args: { p_organization_id: string; p_project_id: string; p_id: string };
+        Returns: Json;
+      };
+      project_site_media_put: {
+        Args: {
+          p_organization_id: string;
+          p_project_id: string;
+          p_category: string;
+          p_filename: string;
+          p_mime: string;
+          p_base64: string;
+          p_caption?: string;
+        };
+        Returns: string;
+      };
+      project_site_read: {
+        Args: { p_organization_id: string; p_project_id: string };
+        Returns: Json;
+      };
       public_quotation: {
         Args: { p_token: string; p_operation?: string; p_input?: Json };
         Returns: Json;
