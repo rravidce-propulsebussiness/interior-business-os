@@ -15,6 +15,11 @@ const config: NextConfig = {
     '@business-os/industry-interior',
   ],
   poweredByHeader: false,
+  // Project photo/PDF/short MP4 evidence is capped separately at 8 MiB,
+  // but multipart Server Action posts need some additional framing room.
+  experimental: {
+    serverActions: { bodySizeLimit: '10mb' },
+  },
   outputFileTracingIncludes: {
     '/*': ['../../packages/industry-interior/assets/*.webp'],
   },
