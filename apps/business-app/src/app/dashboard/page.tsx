@@ -231,7 +231,9 @@ export default async function Dashboard() {
                   {context.entitlements.includes('projects') && (
                     <Link href="/dashboard/site-projects">
                       <span>My assigned sites</span>
-                      <small>Manager updates, engineers and site delivery</small>
+                      <small>
+                        Manager updates, engineers and site delivery
+                      </small>
                       <b aria-hidden="true">↗</b>
                     </Link>
                   )}
