@@ -179,6 +179,16 @@ export function createRepository(client: SupabaseClient<Database>) {
     async myCompanyApplications() {
       return unwrap(await client.rpc('company_applications_mine'));
     },
+    async companyOnboardingPolicy() {
+      return unwrap(await client.rpc('company_onboarding_policy'));
+    },
+    async setCompanyOnboardingPolicy(approvalRequired: boolean) {
+      return unwrap(
+        await client.rpc('company_onboarding_set_policy', {
+          p_approval_required: approvalRequired,
+        }),
+      );
+    },
     async reviewCompanyApplications(status: string, page: number) {
       return unwrap(
         await client.rpc('company_applications_review', {
