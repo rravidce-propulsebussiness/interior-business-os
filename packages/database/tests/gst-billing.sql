@@ -48,7 +48,7 @@ select private.gst_denied(
 select private.gst_denied(
  format('select public.gst_document_save(%L,%L::jsonb)',
  'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
- '{"id":"' || :'first_invoice' || '","version":2,"kind":"sales_invoice","documentType":"tax_invoice","date":"2026-10-10","partyName":"Changed","partyState":"36","placeOfSupply":"36","reverseCharge":false,"lines":[]}'),
+ '{"id":"' || :'first_invoice' || '","version":2,"kind":"sales_invoice","documentType":"tax_invoice","date":"2026-10-10","partyName":"Changed","partyState":"36","placeOfSupply":"36","reverseCharge":false,"lines":[{"description":"Engineered panel","hsnSac":"4412","unit":"sheet","quantity":2,"unitPrice":1000,"discount":100,"gstRate":18}]}'),
  'issued document cannot be overwritten');
 
 select public.gst_document_save('dddddddd-dddd-4ddd-8ddd-dddddddddddd',
