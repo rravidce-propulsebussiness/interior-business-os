@@ -23,9 +23,9 @@
     "zod": "4.6.5"
   },
   "devDependencies": {
-    "next": "16.3.6"
+    "next": "16.3.8"
   },
   "peerDependencies": {
-    "next": "16.3.6"
+    "next": "16.3.8"
   }
 }

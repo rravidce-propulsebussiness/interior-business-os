@@ -11,21 +11,31 @@ import { validateDeploymentEnvironment } from './packages/shared/src/runtime.ts'
 const root = dirname(fileURLToPath(import.meta.url));
 const service = process.env.BUSINESS_OS_SERVICE?.trim() || 'business-app';
 if (!['business-app', 'platform-admin', 'websites'].includes(service)) {
-  throw new Error('BUSINESS_OS_SERVICE must be business-app, platform-admin or websites');
+  throw new Error(
+    'BUSINESS_OS_SERVICE must be business-app, platform-admin or websites',
+  );
 }
 
 const portText = process.env.PORT || '3000';
-if (!/^[0-9]+$/.test(portText) || Number(portText) < 1 || Number(portText) > 65535) {
+if (
+  !/^[0-9]+$/.test(portText) ||
+  Number(portText) < 1 ||
+  Number(portText) > 65535
+) {
   throw new Error('PORT must be a valid TCP port');
 }
 const port = Number(portText);
 const hostname = '0.0.0.0';
-console.log(`[Business OS] Starting native Next.js server for ${service} on ${hostname}:${port} (Node ${process.version}).`);
+console.log(
+  `[Business OS] Starting native Next.js server for ${service} on ${hostname}:${port} (Node ${process.version}).`,
+);
 validateDeploymentEnvironment(process.env, service);
 
 const appDir = resolve(root, 'apps', service);
 if (!existsSync(resolve(appDir, '.next', 'BUILD_ID'))) {
-  throw new Error(`[Business OS] Missing Next.js build artifact for ${service}. Inspect Hostinger published files.`);
+  throw new Error(
+    `[Business OS] Missing Next.js build artifact for ${service}. Inspect Hostinger published files.`,
+  );
 }
 
 const appRequire = createRequire(resolve(appDir, 'package.json'));
@@ -46,9 +56,13 @@ startServer({
   port,
   hostname,
   allowRetry: false,
-}).then(() => {
-  console.log(`[Business OS] Native Next.js server ready for ${service} on port ${port}.`);
-}).catch((error) => {
-  console.error('[Business OS] Native Next.js startup failed:', error);
-  process.exitCode = 1;
-});
+})
+  .then(() => {
+    console.log(
+      `[Business OS] Native Next.js server ready for ${service} on port ${port}.`,
+    );
+  })
+  .catch((error) => {
+    console.error('[Business OS] Native Next.js startup failed:', error);
+    process.exitCode = 1;
+  });

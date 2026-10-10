@@ -1,6 +1,7 @@
 import { quotationDocument } from '../../document';
 import { renderQuotationPdf } from '../../pdf';
 import { safeFailure } from '@business-os/shared';
+import { PdfServiceError } from '@business-os/shared/pdf';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export async function GET(
@@ -20,6 +21,12 @@ export async function GET(
       },
     });
   } catch (error) {
+    if (error instanceof PdfServiceError) {
+      return new Response('PDF rendering service is unavailable', {
+        status: error.status,
+        headers: { 'Cache-Control': 'private, no-store' },
+      });
+    }
     const failure = safeFailure(error);
     return new Response(failure.message, {
       status: 403,

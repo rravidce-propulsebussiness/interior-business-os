@@ -7,10 +7,12 @@ export default function ForgotPassword() {
     <main id="main-content" tabIndex={-1} className="auth-shell">
       <section className="auth-story" aria-labelledby="recovery-story-title">
         <p className="eyebrow">Account recovery</p>
-        <h2 id="recovery-story-title">Get back into your workspace securely.</h2>
+        <h2 id="recovery-story-title">
+          Get back into your workspace securely.
+        </h2>
         <p>
-          Request a time-limited recovery link for the email address attached
-          to your Business OS account.
+          Request a time-limited recovery link for the email address attached to
+          your Business OS account.
         </p>
       </section>
 

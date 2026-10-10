@@ -22,8 +22,8 @@ export default async function ResetPassword() {
         <h1 id="reset-title">Set a new password</h1>
         {pending ? (
           <p>
-            The recovery link will be verified when you submit. You will need
-            to sign in again after the password changes.
+            The recovery link will be verified when you submit. You will need to
+            sign in again after the password changes.
           </p>
         ) : (
           <p className="notice notice-warning">

@@ -1,4 +1,5 @@
 import { renderQuotationDocument } from '@business-os/core/quotation-document';
+import { PdfServiceError } from '@business-os/shared/pdf';
 import { publicHeaders, publicQuotation, unavailable } from '../../service';
 import { renderQuotationPdf } from '../../../dashboard/quotations/pdf';
 export const runtime = 'nodejs';
@@ -18,7 +19,12 @@ export async function GET(
         'Content-Disposition': 'attachment; filename="quotation.pdf"',
       },
     });
-  } catch {
+  } catch (error) {
+    if (error instanceof PdfServiceError)
+      return new Response('PDF rendering service is unavailable', {
+        status: error.status,
+        headers: { ...publicHeaders, 'Cache-Control': 'no-store' },
+      });
     return unavailable();
   }
 }

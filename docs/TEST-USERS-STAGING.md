@@ -34,7 +34,7 @@ Platform Admin. You can add Project Manager/Site Supervisor later.
 
 **Never share their passwords or a service-role/secret key in GitHub or chat.**
 
-Creating Auth identities does *not* grant tenant access. After identities
+Creating Auth identities does _not_ grant tenant access. After identities
 exist, use the authorized SQL role assignment process or ask the connected
 Supabase administrator to attach the Sales, Designer, Accountant memberships
 to `business-os-test-20261010`. Platform Admin must receive
@@ -52,7 +52,7 @@ First validate that the live Next.js app returns HTML and its configured
 Supabase project matches `wqkjzuqiarjyoimrzalk`. Then test Owner,
 Sales, Designer, and Accountant sessions separately, role-specific navigation,
 module entitlements, and cross-tenant denial. The Platform Admin UI is a
-*separate Next.js service* (`BUSINESS_OS_SERVICE=platform-admin`) and cannot be
+_separate Next.js service_ (`BUSINESS_OS_SERVICE=platform-admin`) and cannot be
 assumed to exist at the Business App's domain without an independent deployment.
 
 The database provisioning above has been verified. Real password login,
