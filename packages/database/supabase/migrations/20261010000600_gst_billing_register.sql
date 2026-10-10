@@ -126,6 +126,7 @@ declare d private.gst_business_documents;
  v_cgst_total numeric=0;v_sgst_total numeric=0;v_igst_total numeric=0;v_total numeric=0;
  v_supplier_state text;v_order private.marketplace_orders;v_seller private.marketplace_sellers;
  v_order_id uuid;v_buyer_org uuid;v_number text;
+ v_verified_name text;v_verified_gstin text;v_verified_state text;
 begin
  perform private.finance_require(p_org,'invoice.create');
  if jsonb_typeof(p_input) is distinct from 'object' or octet_length(p_input::text)>65000
@@ -216,6 +217,15 @@ begin
    -- Sales invoice is shared read-only with its verified marketplace buyer.
    if not exists(select 1 from public.organizations where id=v_buyer_org and status in ('active','trial')) then
      raise exception 'Marketplace buyer unavailable' using errcode='22023';end if;
+   select coalesce(p.legal_name,o.name),p.gstin,p.state_code
+   into v_verified_name,v_verified_gstin,v_verified_state
+   from public.organizations o left join private.gst_business_profiles p on p.organization_id=o.id
+   where o.id=v_buyer_org;
+   if lower(v_party)<>lower(v_verified_name)
+      or (v_verified_gstin is not null and v_gstin is distinct from v_verified_gstin)
+      or (v_verified_state is not null and v_state<>v_verified_state)
+   then raise exception 'Marketplace invoice buyer details do not match registered company billing identity'
+     using errcode='22023';end if;
  end if;
  if nullif(p_input->>'id','') is not null then
    perform private.finance_require(p_org,'invoice.manage');
@@ -262,6 +272,13 @@ begin
  if d.document_type='tax_invoice' and d.kind='sales_invoice'
   and (p.gstin is null or length(p.authorized_signatory)<2 or length(p.address)<5)
  then raise exception 'GSTIN, address and signatory required for issuing a tax invoice' using errcode='22023';end if;
+ if d.kind='sales_invoice' and d.party_gstin is null and d.taxable>=50000
+  and length(btrim(d.party_address))<5 then
+  raise exception 'Recipient address required for large unregistered supply' using errcode='22023';end if;
+ if d.kind='purchase_bill' and d.document_type='tax_invoice'
+    and d.party_gstin is null and not d.reverse_charge then
+  raise exception 'Supplier GSTIN required when recording an ordinary tax invoice'
+  using errcode='22023';end if;
  if d.kind='sales_invoice' then
    v_fy=extract(year from d.document_date)::integer-
      case when extract(month from d.document_date)<4 then 1 else 0 end;
