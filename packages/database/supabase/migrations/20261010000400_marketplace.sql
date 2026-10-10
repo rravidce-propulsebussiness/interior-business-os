@@ -302,4 +302,35 @@ do $$ declare sig text; begin
   execute format('grant execute on function public.%s to authenticated',sig);
  end loop;
 end $$;
+-- Platform operators can expand the marketplace to ANY industry and
+-- assign additional industries to a supplier without changing source code.
+create function public.marketplace_industry_create(p_key text,p_name text)
+returns uuid language plpgsql security definer set search_path='' as $fn$
+declare v_id uuid;v_key text=lower(btrim(coalesce(p_key,'')));v_name text=btrim(coalesce(p_name,''));
+begin
+ perform private.require_platform('platform.entitlements.manage');
+ if length(v_key) not between 2 and 64 or v_key !~ '^[a-z][a-z0-9_]*
+   or length(v_name) not between 2 and 100
+ then raise exception 'Invalid industry name or key' using errcode='22023';end if;
+ insert into public.industries(key,name,status)
+ values(v_key,v_name,'active') returning id into v_id;
+ insert into public.audit_logs(actor_user_id,action,entity_type,entity_id,metadata)
+ values(auth.uid(),'marketplace.industry.created','industry',v_id::text,jsonb_build_object('key',v_key));
+ return v_id;
+end $fn$;
+create function public.marketplace_seller_industry_assign(p_organization_id uuid,p_industry_id uuid)
+returns void language plpgsql security definer set search_path='' as $fn$
+begin
+ perform private.require_platform('platform.organizations.manage');
+ if not exists(select 1 from public.organizations where id=p_organization_id and status in ('active','trial'))
+   or not exists(select 1 from private.marketplace_sellers where organization_id=p_organization_id)
+   or not exists(select 1 from public.industries where id=p_industry_id and status='active')
+ then raise exception 'Seller company and active industry required' using errcode='22023';end if;
+ insert into public.organization_industries(organization_id,industry_id)
+ values(p_organization_id,p_industry_id) on conflict do nothing;
+end $fn$;
+revoke all on function public.marketplace_industry_create(text,text),
+ public.marketplace_seller_industry_assign(uuid,uuid) from public,anon;
+grant execute on function public.marketplace_industry_create(text,text),
+ public.marketplace_seller_industry_assign(uuid,uuid) to authenticated;
 commit;
