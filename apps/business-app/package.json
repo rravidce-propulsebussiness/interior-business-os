@@ -15,7 +15,7 @@
     "@business-os/database": "workspace:*",
     "@business-os/shared": "workspace:*",
     "@business-os/ui": "workspace:*",
-    "next": "16.3.6",
+    "next": "16.3.8",
     "playwright": "1.63.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",
@@ -23,7 +23,7 @@
     "@business-os/quotation-engine": "workspace:*",
     "zod": "4.6.5",
     "@business-os/website-builder": "workspace:*",
-    "sharp": "0.35.4",
+    "sharp": "0.35.5",
     "@business-os/industry-interior": "workspace:*",
     "@business-os/brochure-builder": "workspace:*",
     "qrcode": "1.5.4"
