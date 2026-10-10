@@ -40,6 +40,7 @@ console.log(psql(['-f', file('tests/development-seed.sql')]));
 psql(['-f', file('supabase/seed-catalog.sql')]);
 psql(['-f', file('supabase/seed-catalog.sql')]);
 assertionFile('marketplace');
+assertionFile('platform-companies');
 console.log('Interior catalog seed is repeatable.');
 assertionFile('catalog');
 psql(['-f', file('supabase/seed-commercial.sql')]);
