@@ -10730,6 +10730,32 @@ export interface Database {
         Returns: Json;
       };
       deployment_readiness: { Args: Record<string, never>; Returns: boolean };
+      employee_invitation_accept: {
+        Args: { p_invitation_id: string };
+        Returns: string;
+      };
+      employee_invitation_create: {
+        Args: {
+          p_organization_id: string;
+          p_email: string;
+          p_role_ids: string[];
+          p_branch_id?: string;
+        };
+        Returns: string;
+      };
+      employee_invitation_resend: {
+        Args: { p_organization_id: string; p_invitation_id: string };
+        Returns: undefined;
+      };
+      employee_invitation_revoke: {
+        Args: { p_organization_id: string; p_invitation_id: string };
+        Returns: undefined;
+      };
+      employee_invitations_list: {
+        Args: { p_organization_id: string };
+        Returns: Json;
+      };
+      employee_invitations_mine: { Args: Record<string, never>; Returns: Json };
       execution_configure: {
         Args: { p_organization_id: string; p_entity: string; p_input: Json };
         Returns: string;

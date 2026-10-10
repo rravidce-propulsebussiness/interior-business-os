@@ -120,7 +120,10 @@ export const membershipInputSchema = z
   .strict();
 export const employeeEmailInvitationSchema = z
   .object({
-    email: z.email().max(254).transform((value) => value.trim().toLowerCase()),
+    email: z
+      .email()
+      .max(254)
+      .transform((value) => value.trim().toLowerCase()),
     roleIds: z.array(z.uuid()).min(1).max(8),
     branchId: z.uuid().optional(),
   })

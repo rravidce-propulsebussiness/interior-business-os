@@ -12,10 +12,15 @@ export async function acceptEmployeeEmailInvitation(
   try {
     const { authorization, repository } = await serverServices();
     await authorization.requireAuthenticatedUser();
-    await repository.acceptEmployeeInvitation(String(form.get('inviteId') ?? ''));
+    await repository.acceptEmployeeInvitation(
+      String(form.get('inviteId') ?? ''),
+    );
     revalidatePath('/dashboard');
     revalidatePath('/dashboard/company/invitations');
-    return { message: 'Invitation accepted. Open your Business dashboard to select the company.' };
+    return {
+      message:
+        'Invitation accepted. Open your Business dashboard to select the company.',
+    };
   } catch (error) {
     return { message: safeFailure(error).message };
   }

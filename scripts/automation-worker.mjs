@@ -133,7 +133,9 @@ do {
     // Employee invites are not automation rules: use a separate, permission-
     // checked lease and the same restricted worker mail transport.
     for (let attempt = 0; attempt < 5 && !stopping; attempt++) {
-      const invite = await query('select private.employee_invitation_email_claim();');
+      const invite = await query(
+        'select private.employee_invitation_email_claim();',
+      );
       if (!invite) break;
       if (
         !/^[a-f0-9-]{36}$/.test(invite.id) ||
@@ -146,9 +148,18 @@ do {
       if (configuredOrigin) {
         try {
           const parsed = new URL(configuredOrigin);
-          if (parsed.protocol === 'https:' && parsed.pathname === '/' &&
-              !parsed.search && !parsed.hash && !parsed.username && !parsed.password) {
-            appUrl = new URL('/dashboard/company/invitations', parsed).toString();
+          if (
+            parsed.protocol === 'https:' &&
+            parsed.pathname === '/' &&
+            !parsed.search &&
+            !parsed.hash &&
+            !parsed.username &&
+            !parsed.password
+          ) {
+            appUrl = new URL(
+              '/dashboard/company/invitations',
+              parsed,
+            ).toString();
           }
         } catch {
           // Fail closed when no approved HTTPS business origin is configured.
@@ -159,11 +170,15 @@ do {
         idempotencyKey: invite.idempotencyKey,
         subject: 'Invitation to join your business workspace',
         text: [
-          'You have been invited to join ' + invite.organizationName + ' on Business OS.',
+          'You have been invited to join ' +
+            invite.organizationName +
+            ' on Business OS.',
           'Sign up or sign in with this email address, verify it, and accept your invitation.',
           appUrl ?? '',
           'Invitations expire after seven days. If you were not expecting this, ignore this email.',
-        ].filter(Boolean).join('\n\n'),
+        ]
+          .filter(Boolean)
+          .join('\n\n'),
       };
       const result = appUrl
         ? await deliverEmail(delivery, {
@@ -172,7 +187,7 @@ do {
           })
         : { result: 'unconfigured' };
       await query(
-        `select private.employee_invitation_email_ack(${quote(invite.id)},${quote(invite.lease)},${quote(result.result)},${result.providerId ? quote(result.providerId) : 'null'});`
+        `select private.employee_invitation_email_ack(${quote(invite.id)},${quote(invite.lease)},${quote(result.result)},${result.providerId ? quote(result.providerId) : 'null'});`,
       );
     }
     await query('select to_jsonb(private.automation_retention());');
