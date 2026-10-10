@@ -42,7 +42,7 @@ test('expired session, scanner-safe landing, reset, revocation and old/new login
   await expect(page).toHaveURL(/dashboard/);
   await expect(
     page.getByRole('heading', {
-      name: /^(?:(?:Platform|Business) dashboard|Super Admin Dashboard)$/,
+      name: /^(?:(?:Platform|Business) dashboard|Super Admin Dashboard|Business overview)$/,
     }),
   ).toBeVisible();
   await control(request, 'expire');
@@ -90,7 +90,7 @@ test('expired session, scanner-safe landing, reset, revocation and old/new login
   await expect(page).toHaveURL(/dashboard/);
   await expect(
     page.getByRole('heading', {
-      name: /^(?:(?:Platform|Business) dashboard|Super Admin Dashboard)$/,
+      name: /^(?:(?:Platform|Business) dashboard|Super Admin Dashboard|Business overview)$/,
     }),
   ).toBeVisible();
   expect(errors).toEqual([]);
