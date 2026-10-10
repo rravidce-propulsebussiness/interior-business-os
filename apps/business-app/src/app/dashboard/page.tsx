@@ -2,13 +2,28 @@ import Link from 'next/link';
 import { pageServices, activeOrganization } from '@business-os/auth/server';
 import { signOut, switchOrganization } from '@business-os/auth/actions';
 import { canAccess, moduleNavigation } from '@business-os/auth';
-import { DomainError } from '@business-os/shared';
+import { DomainError, isHostedOrigin } from '@business-os/shared';
 import { Button } from '@business-os/ui';
 import { createAutomationRepository } from '@business-os/database/automation';
 
 export default async function Dashboard() {
   const { authorization, repository, client } = await pageServices();
   const user = await authorization.requireAuthenticatedUser();
+  // Being an organization Owner does NOT make a user a Platform Super Admin.
+  // Only a server-verified platform permission can reveal the admin entry.
+  let hasPlatformAccess = false;
+  try {
+    await authorization.requirePlatformPermission('platform.access');
+    hasPlatformAccess = true;
+  } catch (error) {
+    if (!(error instanceof DomainError && error.code === 'FORBIDDEN'))
+      throw error;
+  }
+  const platformOrigin =
+    process.env.PLATFORM_ADMIN_ORIGIN &&
+    isHostedOrigin(process.env.PLATFORM_ADMIN_ORIGIN)
+      ? process.env.PLATFORM_ADMIN_ORIGIN.replace(/\/$/, '')
+      : null;
   const [allOrganizations, memberships, modules] = await Promise.all([
     repository.organizations(),
     repository.memberships(),
@@ -69,6 +84,34 @@ export default async function Dashboard() {
           </p>
         </div>
       </header>
+      {hasPlatformAccess && (
+        <section className="section-card section-card-wide" aria-label="Platform administration">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <p className="eyebrow">Platform Super Admin</p>
+              <h2 className="text-xl font-semibold">Open the platform control center</h2>
+              <p className="muted">
+                This is your company workspace. The marketplace, tenant plans,
+                websites and domain control center run in a separate, secure app.
+              </p>
+            </div>
+            {platformOrigin ? (
+              <a
+                className="premium-link"
+                href={`${platformOrigin}/dashboard`}
+                rel="noopener noreferrer"
+              >
+                Open Super Admin ↗
+              </a>
+            ) : (
+              <p className="notice notice-warning">
+                Admin hosting not connected. Deploy the separate platform-admin
+                service and configure PLATFORM_ADMIN_ORIGIN on the Business App.
+              </p>
+            )}
+          </div>
+        </section>
+      )}
       {context && (
         <nav className="dashboard-nav" aria-label="Daily operations">
           {(canViewTeam ||
