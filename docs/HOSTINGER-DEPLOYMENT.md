@@ -46,25 +46,21 @@ Validate configuration with `node scripts/start-service.mjs business-app --check
 
 **Release status:** the repository's production checklist currently records **NO-GO**, including unverified hosted Auth, migrations, email, signing, public sites, PDF/Chromium and restricted automation worker. Passing a Hostinger build does not authorize a production cutover. Business App PDF generation needs Playwright Chromium and Linux libraries, which the hosting runtime must support. See `docs/PRODUCTION-ARCHITECTURE.md`, `docs/PRODUCTION-CHECKLIST.md`, and `docs/RELEASE-CHECKLIST.md`.
 
-## Where the new Super Admin dashboard appears
+## Single-website Business App and Super Admin deployment
 
-A merged platform-admin UI does **not** change `https://sghomesinterior.in/dashboard` while that Hostinger app uses `BUSINESS_OS_SERVICE=business-app`. That route is the **tenant workspace**, even if the account is also a platform administrator. Do not change the production Business App to `platform-admin`; doing so removes the tenant routes from that deployment.
+**The production website uses ONE Hostinger Node.js deployment** at `https://sghomesinterior.in`. Do not deploy `BUSINESS_OS_SERVICE=platform-admin` to the existing domain. The Super Admin routes are integrated into the Business App and share the same origin, deployment, Supabase project, and existing login session:
 
-To serve both safely, provision **a separate Hostinger Node.js website** (same GitHub repository/branch `main`) using `admin.sghomesinterior.in` or another approved admin hostname. Set:
+- `https://sghomesinterior.in/`: Business OS public landing page
+- `https://sghomesinterior.in/dashboard`: tenant/company workspace (owner and team access)
+- `https://sghomesinterior.in/admin`: platform dashboard for authorized platform administrators
+- `https://sghomesinterior.in/admin/organizations`: all tenant companies, plans and entitlements
+- `https://sghomesinterior.in/admin/plans`: platform subscription plans
+- `https://sghomesinterior.in/admin/domains`: platform domain control center
 
-```dotenv
-BUSINESS_OS_SERVICE=platform-admin
-APP_ENV=production
-SUPABASE_ENVIRONMENT=production
-APP_ORIGIN=https://admin.sghomesinterior.in
-LOG_LEVEL=info
-NEXT_PUBLIC_SUPABASE_URL=https://YOUR_VERIFIED_PRODUCTION_PROJECT.supabase.co
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=YOUR_PRODUCTION_PUBLISHABLE_KEY
-AUTH_RECOVERY_SIGNING_KEY=YOUR_SEPARATE_64_CHARACTER_HEX_SECRET
-```
+Keep `BUSINESS_OS_SERVICE=business-app` in the single Hostinger website. Set `APP_ORIGIN=https://sghomesinterior.in`, `APP_ENV=production`, `SUPABASE_ENVIRONMENT=production`, and use **real, validated** production Supabase credentials and all the existing required Business App signing keys and public delivery origin. Restore the original keys if a platform-admin .env template with placeholder values was imported: an invalid public URL, publishable key or recovery key causes a startup 503. The `PLATFORM_ADMIN_ORIGIN` variable is no longer used by the in-app Super Admin entry point and can be omitted.
 
-Use the same verified production Supabase _project_ as the Business App so platform roles and organizations come from one database, but do not reuse or publish signing keys. Ensure the selected environment and project are the real production pairing; do not point staging credentials at production. In Hostinger select project directory **repository root**, build command `npm run hostinger:build`, entry file `server.js`, and Node **24**. Connect the subdomain's DNS/HTTPS to **this new Hostinger website**. Add its `https://admin.sghomesinterior.in/auth/callback` and applicable authentication/recovery redirect URLs to the verified Supabase Auth allowlist. Redeploy the separate app after credentials and Auth allowlists are configured.
+Use Node **24**, project root `./`, entry `server.js` and `npm run hostinger:build` (or the repository's validated hosted postinstall build path). Hostinger may label the custom Node runtime Express; the server actually launches native Next.js. The build must show **Business App** routes including `/admin`, and runtime logs must identify `business-app`. Do not treat a successful publish as proof of a successful app start.
 
-On the **existing Business App** Hostinger website leave `BUSINESS_OS_SERVICE=business-app` unchanged, and optionally set the runtime variable `PLATFORM_ADMIN_ORIGIN=https://admin.sghomesinterior.in`. Once the Business App is redeployed, a user with verified `platform.access` permission gets an **Open Super Admin** link on their tenant dashboard. Users who only have an organization Owner role never see this link. Both apps require sign-in and enforce their own server/database permissions. The admin app must also be protected by its platform role assignments; tenant Owner does not imply Super Admin.
+The `/admin` layout calls `requirePlatformPermission('platform.access')` server-side and its screens/actions have their own platform permission requirements. Being a tenant Owner does NOT grant platform Super Admin. The tenant's CRM, finance, quotation and project data remain tenant-isolated and are not made platform-readable by this change. Do not bypass RLS or create blanket support impersonation.
 
-**Required validation before live rollout:** independently verify the target project, schema/migrations, platform-role bootstrap, Hostinger build and Node startup, TLS and redirect allowlist, platform login, unauthorized tenant-owner denial, database RLS, then test both URLs. This document is deployment guidance, not proof that a new Hostinger site exists or is live. Do not run disposable database test scripts, development seeds or unreviewed migrations against production.
+Before releasing, validate staging, schema compatibility, two-tenant RBAC/RLS and denied admin access, recovery/login, static assets, all feature route navigation, then live Auth and DNS/TLS acceptance. The repository production checklist may still be **NO-GO** for a full hosted release; a successful CI run does not supersede those gates.
