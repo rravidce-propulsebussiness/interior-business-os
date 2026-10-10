@@ -4,6 +4,13 @@ import { connect } from 'node:tls';
 import { isIP } from 'node:net';
 import { websiteServices, signWebsite } from './service';
 import { revalidatePath } from 'next/cache';
+import {
+  cloudflareSaasEnabled,
+  cloudflareDnsInstructions,
+  ensureCloudflareHostname,
+  getCloudflareHostname,
+  type DomainDnsInstruction,
+} from './cloudflare-domains';
 function publicIp(ip: string) {
   if (isIP(ip) === 4) {
     const a = ip.split('.').map(Number);
@@ -31,16 +38,27 @@ export async function addWebsiteDomain(site: string, hostname: string) {
       p_hostname: host,
     });
     if (r.error) throw new Error('Domain unavailable or capability disabled');
+    let message = 'Domain added. Configure the TXT and CNAME records, then verify.';
+    if (cloudflareSaasEnabled()) {
+      try {
+        await ensureCloudflareHostname(host);
+        message =
+          'Domain registered for automatic HTTPS. Add the TXT and CNAME records, then select Verify.';
+      } catch {
+        message =
+          'Domain saved, but automatic HTTPS provisioning needs a retry. Configure DNS and select Verify.';
+      }
+    }
     revalidatePath(`/dashboard/website/${site}/domains`);
-    return {
-      message:
-        'Domain added. Configure the TXT and CNAME records, then verify.',
-    };
+    return { message };
   } catch {
     return { message: 'Domain unavailable or capability disabled.' };
   }
 }
-export async function checkWebsiteDomain(site: string, id: string) {
+export async function checkWebsiteDomain(site: string, id: string): Promise<{
+  message: string;
+  records: DomainDnsInstruction[];
+}> {
   try {
     const s = await websiteServices('website.domain.manage');
     const r = await s.client
@@ -50,7 +68,8 @@ export async function checkWebsiteDomain(site: string, id: string) {
       .eq('website_id', site)
       .eq('organization_id', s.context.organizationId)
       .single();
-    if (r.error) throw r.error;
+    if (r.error || !r.data || r.data.kind !== 'custom' || r.data.status === 'removed')
+      throw new Error('Unavailable domain');
     const domain = r.data;
     const config = await s.client.rpc('website_configuration', {
       p_organization_id: s.context.organizationId,
@@ -58,56 +77,85 @@ export async function checkWebsiteDomain(site: string, id: string) {
     const cfg = config.data as { platform?: { baseDomain?: string } } | null;
     const base = cfg?.platform?.baseDomain;
     if (!base) throw new Error('Platform domain not configured');
+
+    // DNS ownership is always checked with the unique Business OS challenge,
+    // even when Cloudflare reports an issued certificate for the hostname.
     const resolver = new Resolver({ timeout: 3000, tries: 1 });
-    let dns = false,
-      tls = false;
-    const answers = await Promise.allSettled([
-      resolver.resolveTxt(`_business-os.${domain.hostname}`),
-      resolver.resolve4(domain.hostname),
-      resolver.resolve4(base),
+    const txtResult = await Promise.allSettled([
+      resolver.resolveTxt('_business-os.' + domain.hostname),
     ]);
-    if (
-      answers[0].status === 'fulfilled' &&
-      answers[1].status === 'fulfilled' &&
-      answers[2].status === 'fulfilled'
-    ) {
-      const addresses = answers[1].value;
+    const ownership =
+      txtResult[0].status === 'fulfilled' &&
+      txtResult[0].value.some(
+        (parts) =>
+          parts.join('') === 'business-os-verification=' + domain.challenge,
+      );
+    let dns = false;
+    let tls = false;
+    let records: DomainDnsInstruction[] = [];
+
+    if (cloudflareSaasEnabled()) {
+      // In managed mode the public SaaS target must be an actual CNAME.
+      // Direct apex/A records need a separate explicitly supported adapter.
+      const cname = await Promise.allSettled([
+        resolver.resolveCname(domain.hostname),
+      ]);
+      const canonical = (value: string) =>
+        value.toLowerCase().replace(/\.$/, '');
       dns =
-        answers[0].value.some(
-          (parts) =>
-            parts.join('') === `business-os-verification=${domain.challenge}`,
-        ) &&
-        addresses.length > 0 &&
-        addresses.every(
-          (ip) =>
-            publicIp(ip) &&
-            answers[2].status === 'fulfilled' &&
-            answers[2].value.includes(ip),
-        );
-      if (dns)
-        tls = await new Promise<boolean>((resolve) => {
-          const socket = connect(
-            {
-              host: addresses[0]!,
-              port: 443,
-              servername: domain.hostname,
-              rejectUnauthorized: true,
-            },
-            () => {
-              resolve(socket.authorized);
-              socket.destroy();
-            },
+        ownership &&
+        cname[0].status === 'fulfilled' &&
+        cname[0].value.some((target) => canonical(target) === canonical(base));
+
+      const cloudflare = await getCloudflareHostname(domain.hostname);
+      records = cloudflareDnsInstructions(cloudflare);
+      // Both activation and edge SSL must be active, not just the certificate
+      // handshake or the status of the customer's DNS record.
+      tls =
+        dns &&
+        cloudflare.status === 'active' &&
+        cloudflare.ssl?.status === 'active';
+    } else {
+      // Preserve the existing manually provisioned origin/TLS flow.
+      const answers = await Promise.allSettled([
+        resolver.resolve4(domain.hostname),
+        resolver.resolve4(base),
+      ]);
+      if (ownership &&
+          answers[0].status === 'fulfilled' &&
+          answers[1].status === 'fulfilled') {
+        const addresses = answers[0].value;
+        dns =
+          addresses.length > 0 &&
+          addresses.every(
+            (ip) => publicIp(ip) && answers[1].value.includes(ip),
           );
-          socket.setTimeout(5000, () => {
-            resolve(false);
-            socket.destroy();
+        if (dns)
+          tls = await new Promise<boolean>((resolve) => {
+            const socket = connect(
+              {
+                host: addresses[0]!,
+                port: 443,
+                servername: domain.hostname,
+                rejectUnauthorized: true,
+              },
+              () => {
+                resolve(socket.authorized);
+                socket.destroy();
+              },
+            );
+            socket.setTimeout(5000, () => {
+              resolve(false);
+              socket.destroy();
+            });
+            socket.on('error', () => {
+              resolve(false);
+              socket.destroy();
+            });
           });
-          socket.on('error', () => {
-            resolve(false);
-            socket.destroy();
-          });
-        });
+      }
     }
+
     const proof = signWebsite({
       purpose: 'website.domain',
       organizationId: s.context.organizationId,
@@ -130,13 +178,17 @@ export async function checkWebsiteDomain(site: string, id: string) {
         result.data === 'active'
           ? 'Domain active: DNS and HTTPS verified.'
           : result.data === 'verified'
-            ? 'DNS verified. Configure a valid HTTPS certificate with your hosting provider, then check again.'
-            : 'DNS ownership or routing could not be verified.',
+            ? cloudflareSaasEnabled()
+              ? 'DNS verified. Cloudflare is still issuing or activating HTTPS. Verify again after provisioning finishes.'
+              : 'DNS verified. Configure a valid HTTPS certificate with your hosting provider, then check again.'
+            : 'DNS ownership or CNAME routing could not be verified.',
+      records,
     };
   } catch {
     return {
       message:
-        'Verification unavailable. Check DNS and platform signing configuration.',
+        'Verification unavailable. Check DNS, platform signing configuration and HTTPS provisioning.',
+      records: [],
     };
   }
 }
