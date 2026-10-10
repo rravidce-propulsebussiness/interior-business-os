@@ -230,7 +230,9 @@ begin
     'idempotencyKey','employee-invite-'||i.id::text||'-'||i.mail_version::text
   );
  end loop;
- return null;
+ -- JSON null is emitted as literal 'null' by psql; SQL NULL would be an
+ -- empty line and break the existing worker's JSON parser on idle ticks.
+ return 'null'::jsonb;
 end $fn$;
 
 create function private.employee_invitation_email_ack(
