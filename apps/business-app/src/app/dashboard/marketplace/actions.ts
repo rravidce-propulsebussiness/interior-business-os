@@ -136,3 +136,31 @@ export async function decideMarketplaceSeller(form: FormData) {
   }
   redirect(path + '?updated=seller');
 }
+
+export async function createMarketplaceIndustry(form: FormData) {
+  const path='/admin/control/marketplace';
+  try {
+    const {authorization,client}=await pageServices();
+    await authorization.requirePlatformPermission('platform.entitlements.manage');
+    const key=z.string().trim().toLowerCase().regex(/^[a-z][a-z0-9_]*$/).min(2).max(64).parse(form.get('key'));
+    const title=z.string().trim().min(2).max(100).parse(form.get('name'));
+    await createMarketplaceRepository(client).industryCreate(key,title);
+    revalidatePath(path);
+    revalidatePath('/dashboard/marketplace');
+  }catch(error){handleFailure(error,path);}
+  redirect(path+'?updated=industry');
+}
+
+export async function assignSellerIndustry(form: FormData) {
+  const path='/admin/control/marketplace';
+  try {
+    const {authorization,client}=await pageServices();
+    await authorization.requirePlatformPermission('platform.organizations.manage');
+    await createMarketplaceRepository(client).sellerIndustryAssign(
+      id.parse(form.get('organizationId')),
+      id.parse(form.get('industryId')));
+    revalidatePath(path);
+    revalidatePath('/dashboard/marketplace/seller');
+  }catch(error){handleFailure(error,path);}
+  redirect(path+'?updated=industry-assignment');
+}
