@@ -7,7 +7,7 @@ import { OsIcon } from './dashboard-shell';
 const cards = [
   { label: 'Marketplace', detail: 'Platform services, industry packs and organization access.', icon: 'marketplace', hue: 'blue', link: '/dashboard/control/marketplace', action: 'View marketplace' },
   { label: 'Users & Tenants', detail: 'Search companies, manage status, permissions and subscriptions.', icon: 'users', hue: 'purple', link: '/dashboard/organizations', action: 'Manage tenants' },
-  { label: 'Membership Plans', detail: 'Configure plan assignment and enabled business modules.', icon: 'crown', hue: 'amber', link: '/dashboard/control/memberships', action: 'Manage plans' },
+  { label: 'Membership Plans', detail: 'Configure plan assignment and enabled business modules.', icon: 'crown', hue: 'amber', link: '/dashboard/plans', action: 'Manage plans' },
   { label: 'Billing & Payments', detail: 'Review finance capabilities and business-level configuration.', icon: 'billing', hue: 'green', link: '/dashboard/control/billing', action: 'View billing controls' },
   { label: 'Quotations', detail: 'Manage entitlements for configurable quotation workflows.', icon: 'quotation', hue: 'rose', link: '/dashboard/control/quotations', action: 'View quotation controls' },
   { label: 'CRM & Leads', detail: 'Customer pipelines and leads remain isolated per company.', icon: 'crm', hue: 'cyan', link: '/dashboard/control/crm', action: 'View CRM controls' },
@@ -106,7 +106,7 @@ export default async function PlatformDashboard() {
           </div>
         </section>
         <section className="os-panel" aria-label="Module availability">
-          <div className="os-panel-heading"><h2>Platform Modules</h2><Link href="/dashboard/control/memberships">Manage plans ↗</Link></div>
+          <div className="os-panel-heading"><h2>Platform Modules</h2><Link href="/dashboard/plans">Manage plans ↗</Link></div>
           <div className="os-activity-list">
             {modules.slice(0, 6).map((module) => (
               <div className="os-activity-item" key={module.id}>
@@ -136,6 +136,7 @@ export default async function PlatformDashboard() {
           <div className="os-panel-heading"><h2>Quick Actions</h2></div>
           <div className="os-activity-list">
             {[
+              { title: 'Review company applications', note: 'Approve new tenant workspaces', href: '/dashboard/applications', icon: 'users' },
               { title: 'Find and configure a tenant', note: 'Plan, status and module overrides', href: '/dashboard/organizations', icon: 'users' },
               { title: 'Set website capabilities', note: 'Domain entitlements and page limits', href: '/dashboard/website', icon: 'website' },
               { title: 'Connect a custom domain', note: 'DNS and HTTPS setup', href: '/dashboard/domains', icon: 'domain' },
