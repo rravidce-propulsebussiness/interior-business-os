@@ -65,10 +65,12 @@ const countCard =
 const roleLabel = {
   business_owner: 'Business Owner',
   seller: 'Seller',
+  general_user: 'Legacy account',
 } as const;
 const kindColor = {
   business_owner: 'bg-blue-100 text-blue-700',
   seller: 'bg-violet-100 text-violet-700',
+  general_user: 'bg-slate-100 text-slate-700',
 } as const;
 function UserCard({
   user,
