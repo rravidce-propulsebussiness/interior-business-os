@@ -18,7 +18,10 @@ export type MarketplaceProduct = {
   seller: string;
   sellerOrganizationId: string;
 };
-export type SellerProduct = Omit<MarketplaceProduct, 'industry' | 'seller' | 'sellerOrganizationId'> & {
+export type SellerProduct = Omit<
+  MarketplaceProduct,
+  'industry' | 'seller' | 'sellerOrganizationId'
+> & {
   status: 'draft' | 'published' | 'archived';
 };
 export type MarketplaceSeller = {
@@ -56,58 +59,98 @@ export function createMarketplaceRepository(client: SupabaseClient<Database>) {
     name: string,
     args?: Record<string, unknown>,
   ) => Promise<{ data: unknown; error: { code?: string } | null }>;
-  async function invoke<T>(name: string, args?: Record<string, unknown>): Promise<T> {
+  async function invoke<T>(
+    name: string,
+    args?: Record<string, unknown>,
+  ): Promise<T> {
     const result = await rpc(name, args);
     if (result.error) {
       const code = result.error.code;
       throw new DomainError(
-        code === '42501' ? 'FORBIDDEN'
-          : code === '23505' ? 'CONFLICT'
-          : ['22023', '22P02', '23514', '23503'].includes(code ?? '')
-            ? 'VALIDATION_FAILED' : 'INTERNAL_ERROR',
+        code === '42501'
+          ? 'FORBIDDEN'
+          : code === '23505'
+            ? 'CONFLICT'
+            : ['22023', '22P02', '23514', '23503'].includes(code ?? '')
+              ? 'VALIDATION_FAILED'
+              : 'INTERNAL_ERROR',
       );
     }
     return result.data as T;
   }
   return {
     sellerApply: (organizationId: string, name: string) =>
-      invoke<string>('marketplace_seller_apply', { p_organization_id: organizationId, p_name: name }),
+      invoke<string>('marketplace_seller_apply', {
+        p_organization_id: organizationId,
+        p_name: name,
+      }),
     sellerProfile: (organizationId: string) =>
-      invoke<MarketplaceSeller | null>('marketplace_seller_profile', { p_organization_id: organizationId }),
+      invoke<MarketplaceSeller | null>('marketplace_seller_profile', {
+        p_organization_id: organizationId,
+      }),
     sellerReview: (status: string = 'pending') =>
-      invoke<MarketplaceReviewSeller[]>('marketplace_sellers_review', { p_status: status }),
-    sellerDecide: (sellerId: string, action: 'approve' | 'reject' | 'suspend') =>
-      invoke<void>('marketplace_seller_decide', { p_seller_id: sellerId, p_action: action }),
-    saveProduct: (organizationId: string, product: {
-      id?: string;
-      industryId: string;
-      sku: string;
-      name: string;
-      category: string;
-      unit: string;
-      price: number;
-      minQuantity: number;
-      currency: string;
-      status: 'draft' | 'published' | 'archived';
-    }) => invoke<string>('marketplace_product_save', {
-      p_organization_id: organizationId, p_input: product,
-    }),
+      invoke<MarketplaceReviewSeller[]>('marketplace_sellers_review', {
+        p_status: status,
+      }),
+    sellerDecide: (
+      sellerId: string,
+      action: 'approve' | 'reject' | 'suspend',
+    ) =>
+      invoke<void>('marketplace_seller_decide', {
+        p_seller_id: sellerId,
+        p_action: action,
+      }),
+    saveProduct: (
+      organizationId: string,
+      product: {
+        id?: string;
+        industryId: string;
+        sku: string;
+        name: string;
+        category: string;
+        unit: string;
+        price: number;
+        minQuantity: number;
+        currency: string;
+        status: 'draft' | 'published' | 'archived';
+      },
+    ) =>
+      invoke<string>('marketplace_product_save', {
+        p_organization_id: organizationId,
+        p_input: product,
+      }),
     catalog: (organizationId: string, industryId?: string, query?: string) =>
       invoke<MarketplaceProduct[]>('marketplace_catalog', {
-        p_organization_id: organizationId, p_industry_id: industryId ?? null, p_query: query ?? null,
+        p_organization_id: organizationId,
+        p_industry_id: industryId ?? null,
+        p_query: query ?? null,
       }),
-    placeOrder: (organizationId: string, productId: string, quantity: number, idempotencyKey: string) =>
+    placeOrder: (
+      organizationId: string,
+      productId: string,
+      quantity: number,
+      idempotencyKey: string,
+    ) =>
       invoke<string>('marketplace_order_place', {
-        p_organization_id: organizationId, p_product_id: productId,
-        p_quantity: quantity, p_idempotency_key: idempotencyKey,
+        p_organization_id: organizationId,
+        p_product_id: productId,
+        p_quantity: quantity,
+        p_idempotency_key: idempotencyKey,
       }),
     orders: (organizationId: string, role: 'buyer' | 'seller') =>
       invoke<MarketplaceOrder[]>('marketplace_orders', {
-        p_organization_id: organizationId, p_role: role,
+        p_organization_id: organizationId,
+        p_role: role,
       }),
-    orderDecide: (organizationId: string, orderId: string, action: 'accept' | 'reject') =>
+    orderDecide: (
+      organizationId: string,
+      orderId: string,
+      action: 'accept' | 'reject',
+    ) =>
       invoke<void>('marketplace_order_decide', {
-        p_organization_id: organizationId, p_order_id: orderId, p_action: action,
+        p_organization_id: organizationId,
+        p_order_id: orderId,
+        p_action: action,
       }),
   };
 }
