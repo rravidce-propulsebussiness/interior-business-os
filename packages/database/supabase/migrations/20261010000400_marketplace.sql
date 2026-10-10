@@ -309,7 +309,7 @@ returns uuid language plpgsql security definer set search_path='' as $fn$
 declare v_id uuid;v_key text=lower(btrim(coalesce(p_key,'')));v_name text=btrim(coalesce(p_name,''));
 begin
  perform private.require_platform('platform.entitlements.manage');
- if length(v_key) not between 2 and 64 or v_key !~ '^[a-z][a-z0-9_]*
+ if length(v_key) not between 2 and 64 or v_key !~ '^[a-z][a-z0-9_]*$'
    or length(v_name) not between 2 and 100
  then raise exception 'Invalid industry name or key' using errcode='22023';end if;
  insert into public.industries(key,name,status)
