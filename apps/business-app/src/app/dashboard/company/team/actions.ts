@@ -20,7 +20,10 @@ function refreshTeam() {
   revalidatePath('/dashboard');
 }
 
-export async function inviteRegisteredMember(_state: FormState, form: FormData) {
+export async function inviteRegisteredMember(
+  _state: FormState,
+  form: FormData,
+) {
   void _state;
   try {
     const organizationId = String(form.get('organizationId') ?? '');
@@ -31,13 +34,19 @@ export async function inviteRegisteredMember(_state: FormState, form: FormData) 
       ...(branchId ? { branchId } : {}),
     });
     refreshTeam();
-    return { message: 'Membership invitation created for the registered account. The member must accept it.' };
+    return {
+      message:
+        'Membership invitation created for the registered account. The member must accept it.',
+    };
   } catch (error) {
     return { message: safeFailure(error).message };
   }
 }
 
-export async function changeMembershipStatus(_state: FormState, form: FormData) {
+export async function changeMembershipStatus(
+  _state: FormState,
+  form: FormData,
+) {
   void _state;
   try {
     const organizationId = String(form.get('organizationId') ?? '');
