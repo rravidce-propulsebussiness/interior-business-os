@@ -13,7 +13,7 @@ as $$
   where p_hostname is not null
     and length(p_hostname) between 4 and 253
     and p_hostname = lower(p_hostname)
-    and p_hostname ~ '^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z]{2,63}$'
+    and p_hostname ~ '^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$'
     and w.id = private.website_resolve(p_hostname)
     and private.is_member(w.organization_id)
   limit 1
