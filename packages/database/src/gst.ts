@@ -58,7 +58,10 @@ export type GstDocumentRow = {
   igst: number;
   createdAt: string;
 };
-export type GstDocument = Omit<GstDocumentInput, 'partyGstin' | 'marketplaceOrderId'> & {
+export type GstDocument = Omit<
+  GstDocumentInput,
+  'partyGstin' | 'marketplaceOrderId'
+> & {
   id: string;
   status: GstDocumentRow['status'];
   partyGstin: string | null;
