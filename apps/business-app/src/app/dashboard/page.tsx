@@ -95,6 +95,11 @@ export default async function Dashboard() {
             </Link>
           )}
           {notificationSummary && (
+            <Link className="underline" href="/dashboard/field">
+              Field workspace
+            </Link>
+          )
+          {notificationSummary && (
             <Link className="underline" href="/dashboard/notifications">
               Notifications ({notificationSummary.unread ?? 0} unread)
             </Link>
