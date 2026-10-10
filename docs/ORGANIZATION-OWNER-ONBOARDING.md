@@ -13,7 +13,7 @@ employees remain in their company workspace and are not removed from storage.
 ## Credentials
 
 Configure **SUPABASE_SECRET_KEY** or **SUPABASE_SERVICE_ROLE_KEY** as a
-*Business App server-only* Hostinger environment secret. Never set
+_Business App server-only_ Hostinger environment secret. Never set
 `NEXT_PUBLIC_*`, ship it into a build artifact, include it in logs, or place
 it on public Websites app hosting.
 
@@ -29,12 +29,12 @@ server checks whether the owner email is already registered via the
   seller status. The password is never stored by the Business App,
   included in RPC arguments, logged, or included in server action responses.
   The Super Admin can copy the password while still on the result screen.
-- **Existing verified email:** reuse the account with its *current password*.
+- **Existing verified email:** reuse the account with its _current password_.
   Never override its password automatically.
 - **Existing unverified/suspended email:** fail with an explanatory message;
   do not create a duplicate account.
 - If a new owner account is created but company creation fails, the server
-  makes a best-effort cleanup of *only that new account*, first ensuring it
+  makes a best-effort cleanup of _only that new account_, first ensuring it
   has no company membership. If cleanup cannot complete, admin should check
   user and company records before retrying.
 

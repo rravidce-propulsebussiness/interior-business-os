@@ -72,17 +72,15 @@ export function createOwnerProvisioningDatabase() {
     process.env.SUPABASE_SECRET_KEY?.trim() ||
     process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
   if (!secret)
-    throw new Error('Owner onboarding is not configured: set SUPABASE_SECRET_KEY on the Business App server.');
-  return createClient<Database>(
-    env.NEXT_PUBLIC_SUPABASE_URL,
-    secret,
-    {
-      global: { fetch: boundedFetch },
-      auth: {
-        persistSession: false,
-        autoRefreshToken: false,
-        detectSessionInUrl: false,
-      },
+    throw new Error(
+      'Owner onboarding is not configured: set SUPABASE_SECRET_KEY on the Business App server.',
+    );
+  return createClient<Database>(env.NEXT_PUBLIC_SUPABASE_URL, secret, {
+    global: { fetch: boundedFetch },
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false,
     },
-  );
+  });
 }

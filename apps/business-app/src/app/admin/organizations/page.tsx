@@ -172,7 +172,9 @@ function UserCard({
               {owner ? 'Full owner access' : 'Linked company access'}
             </p>
             <p className="mt-0.5 line-clamp-2 opacity-80">
-              {owner ? 'Owner controls company permissions, subject to subscribed modules' : roles.join(', ')}
+              {owner
+                ? 'Owner controls company permissions, subject to subscribed modules'
+                : roles.join(', ')}
             </p>
           </div>
         </div>
@@ -186,7 +188,11 @@ function UserCard({
         </Link>
         {canManage && (
           <Link
-            href={company ? '/admin/organizations/' + company.id : '/admin/users/' + user.id}
+            href={
+              company
+                ? '/admin/organizations/' + company.id
+                : '/admin/users/' + user.id
+            }
             className="inline-flex min-w-0 flex-1 items-center justify-center rounded-xl border border-slate-200 bg-white px-2 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
           >
             Manage company
@@ -319,8 +325,8 @@ export default async function OrganizationsDirectory({
               </span>
             </div>
             <p className="mt-2 max-w-2xl text-sm text-slate-500">
-              Manage company owners, subscriptions and approved sellers in one place.
-              Employees are managed by each business owner.
+              Manage company owners, subscriptions and approved sellers in one
+              place. Employees are managed by each business owner.
             </p>
           </div>
           {canManage && (
@@ -472,7 +478,9 @@ export default async function OrganizationsDirectory({
         </section>
         {result.rows.length === 0 && (
           <section className="rounded-2xl border border-dashed border-slate-300 bg-white px-8 py-14 text-center">
-            <h2 className="text-lg font-bold">No company owners match these filters</h2>
+            <h2 className="text-lg font-bold">
+              No company owners match these filters
+            </h2>
             <p className="mt-2 text-sm text-slate-500">
               Try a different search or create a new organization with an owner.
             </p>

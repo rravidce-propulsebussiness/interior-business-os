@@ -164,8 +164,10 @@ export function createPlatformCompaniesRepository(
         p_sort: filters.sort ?? 'newest',
       }),
     ownerEmailStatus: (email: string) =>
-      invoke<'verified'|'unverified'|'suspended'|'missing'>(
-        'platform_owner_email_status', { p_email: email }),
+      invoke<'verified' | 'unverified' | 'suspended' | 'missing'>(
+        'platform_owner_email_status',
+        { p_email: email },
+      ),
     userDirectory: (filters: {
       query?: string;
       kind?: string;

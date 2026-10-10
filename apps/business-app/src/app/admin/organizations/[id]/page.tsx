@@ -139,8 +139,8 @@ export default async function OrganizationDetail({
             role="status"
             className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900"
           >
-            Company workspace created with its owner, full owner permissions, industries
-            and seller status, if requested.
+            Company workspace created with its owner, full owner permissions,
+            industries and seller status, if requested.
           </p>
         )}
 
@@ -332,8 +332,8 @@ export default async function OrganizationDetail({
               </span>
             </div>
             <p className="mt-3 text-sm leading-6 text-slate-600">
-              The business owner manages employee accounts and permissions from the
-              company workspace. Super Admin can inspect memberships here,
+              The business owner manages employee accounts and permissions from
+              the company workspace. Super Admin can inspect memberships here,
               but cannot assign individual employee roles.
             </p>
             <div className="mt-5 grid gap-4 md:grid-cols-2">
@@ -368,7 +368,6 @@ export default async function OrganizationDetail({
                         </span>
                       )}
                     </div>
-
                   </article>
                 );
               })}

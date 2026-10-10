@@ -19,9 +19,18 @@ const companyInput = z.object({
   legalName: z.string().trim().max(200),
   ownerEmail: z.email().trim().toLowerCase().max(254),
   ownerName: z.string().trim().min(2).max(200),
-  temporaryPassword: z.string().min(16).max(128)
-    .refine(x => /[a-z]/.test(x) && /[A-Z]/.test(x) && /[0-9]/.test(x) && /[^a-zA-Z0-9]/.test(x),
-      'Temporary password must be strong and at least 16 characters.'),
+  temporaryPassword: z
+    .string()
+    .min(16)
+    .max(128)
+    .refine(
+      (x) =>
+        /[a-z]/.test(x) &&
+        /[A-Z]/.test(x) &&
+        /[0-9]/.test(x) &&
+        /[^a-zA-Z0-9]/.test(x),
+      'Temporary password must be strong and at least 16 characters.',
+    ),
   country: z.string().regex(/^[A-Z]{2}$/),
   currency: z.string().regex(/^[A-Z]{3}$/),
   timezone: z.string().min(1).max(100),
@@ -46,7 +55,9 @@ export async function createPlatformCompany(
   let admin: ReturnType<typeof createOwnerProvisioningDatabase> | null = null;
   try {
     const { authorization, client } = await serverServices();
-    await authorization.requirePlatformPermission('platform.organizations.manage');
+    await authorization.requirePlatformPermission(
+      'platform.organizations.manage',
+    );
     const input = companyInput.parse({
       name: form.get('name'),
       slug: form.get('slug'),
@@ -68,9 +79,15 @@ export async function createPlatformCompany(
     const companies = createPlatformCompaniesRepository(client);
     const accountStatus = await companies.ownerEmailStatus(input.ownerEmail);
     if (accountStatus === 'unverified')
-      return { message: 'This owner email already exists but is not verified. Verify the existing account before creating a company.' };
+      return {
+        message:
+          'This owner email already exists but is not verified. Verify the existing account before creating a company.',
+      };
     if (accountStatus === 'suspended')
-      return { message: 'This owner account is suspended. Contact the platform administrator before creating another company.' };
+      return {
+        message:
+          'This owner account is suspended. Contact the platform administrator before creating another company.',
+      };
     if (accountStatus === 'missing') {
       // The elevated key is never read until platform permission checks pass.
       // Auth stores only the password hash; no temporary password is saved
@@ -78,7 +95,10 @@ export async function createPlatformCompany(
       try {
         admin = createOwnerProvisioningDatabase();
       } catch {
-        return { message: 'Owner account provisioning is not configured. Set the Business App server-only SUPABASE_SECRET_KEY and try again.' };
+        return {
+          message:
+            'Owner account provisioning is not configured. Set the Business App server-only SUPABASE_SECRET_KEY and try again.',
+        };
       }
       const { data, error } = await admin.auth.admin.createUser({
         email: input.ownerEmail,
@@ -87,7 +107,10 @@ export async function createPlatformCompany(
         user_metadata: { full_name: input.ownerName },
       });
       if (error || !data.user)
-        return { message: 'Unable to create this owner account. It may already exist, or the Auth service may be unavailable. Check the owner email and retry.' };
+        return {
+          message:
+            'Unable to create this owner account. It may already exist, or the Auth service may be unavailable. Check the owner email and retry.',
+        };
       newUserId = data.user.id;
     }
 
@@ -111,10 +134,16 @@ export async function createPlatformCompany(
       // Never delete an existing account, or a newly created account if
       // another request has already attached it to any company.
       if (admin && newUserId) {
-        const membership = await admin.from('organization_memberships')
-          .select('id').eq('user_id', newUserId).limit(1);
+        const membership = await admin
+          .from('organization_memberships')
+          .select('id')
+          .eq('user_id', newUserId)
+          .limit(1);
         if (!membership.error && membership.data?.length === 0) {
-          const profile = await admin.from('profiles').delete().eq('id', newUserId);
+          const profile = await admin
+            .from('profiles')
+            .delete()
+            .eq('id', newUserId);
           if (!profile.error) await admin.auth.admin.deleteUser(newUserId);
         }
       }
