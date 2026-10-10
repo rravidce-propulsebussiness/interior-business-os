@@ -68,108 +68,72 @@ export default async function Dashboard() {
         ).notifications(1, 'unread')
       : null;
   return (
-    <main id="main-content" tabIndex={-1} className="dashboard-shell">
-      <header className="dashboard-header">
-        <div>
-          <p className="eyebrow">Operations workspace</p>
-          <h1>Business dashboard</h1>
-          <p>
-            Manage the organization, modules, permissions, and daily work from
-            one secure view.
-          </p>
+    <main
+      id="main-content"
+      tabIndex={-1}
+      className="dashboard-shell tenant-dashboard-v2"
+    >
+      <header className="tenant-v2-topbar">
+        <Link className="tenant-v2-brand" href="/dashboard">
+          <span className="tenant-v2-monogram" aria-hidden="true">
+            P
+          </span>
+          <span>
+            <strong>ProPulse Business OS</strong>
+            <small>Company workspace</small>
+          </span>
+        </Link>
+        <div className="tenant-v2-account">
+          <span>{user.email ?? 'Signed in'}</span>
+          <form action={signOut}>
+            <Button>Sign out</Button>
+          </form>
         </div>
       </header>
-      {hasPlatformAccess && (
-        <section
-          className="section-card section-card-wide"
-          aria-label="Platform administration"
-        >
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <p className="eyebrow">Platform Super Admin</p>
-              <h2 className="text-xl font-semibold">
-                Open the platform control center
-              </h2>
-              <p className="muted">
-                This is your company workspace. Manage the marketplace, tenants,
-                plans, websites and domains securely on this same website.
-              </p>
-            </div>
-            <Link className="premium-link" href="/admin">
-              Open Super Admin →
-            </Link>
+
+      <section className="tenant-v2-hero">
+        <div>
+          <p className="eyebrow">Your business, one workspace</p>
+          <h1>Business overview</h1>
+          <p className="tenant-v2-lead">
+            {organization
+              ? 'Welcome to ' +
+                organization.name +
+                '. Your work, tools and team in one place.'
+              : 'Select your company to access your business tools and daily operations.'}
+          </p>
+          <div className="tenant-v2-hero-actions">
+            {hasPlatformAccess && (
+              <Link className="premium-link" href="/admin">
+                Open Super Admin →
+              </Link>
+            )}
+            {context && (
+              <Link
+                className="premium-link-secondary"
+                href="/dashboard/reports/overview"
+              >
+                Management overview →
+              </Link>
+            )}
           </div>
-        </section>
-      )}
-      {context && (
-        <nav className="dashboard-nav" aria-label="Daily operations">
-          {(canViewTeam ||
-            canAccess(context, {
-              organizationId: context.organizationId,
-              permission: 'role.view',
-            })) && (
-            <Link className="underline" href="/dashboard/company/team">
-              Employees &amp; roles
-            </Link>
-          )}
-          <Link className="underline" href="/dashboard/company/invitations">
-            My company invitations
-          </Link>
-          <Link className="underline" href="/dashboard/reports">
-            Reports
-          </Link>
-          <Link className="underline" href="/dashboard/reports/overview">
-            Management overview
-          </Link>
-          {notificationSummary && (
-            <Link className="underline" href="/dashboard/work">
-              My work
-            </Link>
-          )}
-          {notificationSummary && (
-            <Link className="underline" href="/dashboard/notifications">
-              Notifications ({notificationSummary.unread ?? 0} unread)
-            </Link>
-          )}
-          {canAccess(context, {
-            organizationId: context.organizationId,
-            permission: 'automation.view',
-          }) && (
-            <Link className="underline" href="/dashboard/automations">
-              Automations
-            </Link>
-          )}
-        </nav>
-      )}
-      {context &&
-        context.entitlements.includes('billing') &&
-        context.grants.some(
-          (g) =>
-            [
-              'contract.view',
-              'invoice.view',
-              'payment.view',
-              'financial_report.view',
-            ].includes(g.permission) && g.scope.kind === 'organization',
-        ) && (
-          <Link className="premium-link-secondary" href="/dashboard/finance">
-            Commercial execution
-          </Link>
-        )}
-      <p className="muted">Signed in as {user.email ?? user.id}</p>
-      <form action={signOut} className="my-4">
-        <Button>Sign out</Button>
-      </form>
+        </div>
+        <div className="tenant-v2-art" aria-hidden="true">
+          <span>OS</span>
+        </div>
+      </section>
+
       {invalidSelection && (
-        <p role="alert">
-          The selected organization is unavailable. Choose an active membership
-          below.
+        <p className="tenant-v2-alert" role="alert">
+          Your previously selected company is unavailable. Select an active
+          company below.
         </p>
       )}
+
       {organizations.length > 0 && (
         <form action={switchOrganization} className="dashboard-controlbar">
           <label>
-            Active organization
+            Active company
             <select
               name="organizationId"
               defaultValue={context?.organizationId}
@@ -182,119 +146,214 @@ export default async function Dashboard() {
               ))}
             </select>
           </label>
-          <Button>Switch organization</Button>
+          <Button>Switch company</Button>
         </form>
       )}
+
       {organization && context ? (
         <>
-          <section className="section-card">
-            <h2 className="text-2xl font-semibold">{organization.name}</h2>
-            <p>
-              {organization.status} · {organization.default_currency} ·{' '}
-              {organization.default_timezone}
-            </p>
+          <section className="tenant-v2-metrics" aria-label="Company snapshot">
+            <div className="tenant-v2-metric">
+              <span>Accessible modules</span>
+              <strong>{nav.length}</strong>
+              <small>Available to your account</small>
+            </div>
+            <div className="tenant-v2-metric">
+              <span>Company branches</span>
+              <strong>{branches.length}</strong>
+              <small>Visible branches</small>
+            </div>
+            <div className="tenant-v2-metric">
+              <span>Team memberships</span>
+              <strong>{canViewTeam ? team.length : '—'}</strong>
+              <small>
+                {canViewTeam ? 'Your company team' : 'Access restricted'}
+              </small>
+            </div>
+            <div className="tenant-v2-metric">
+              <span>Unread notifications</span>
+              <strong>
+                {notificationSummary ? (notificationSummary.unread ?? 0) : '—'}
+              </strong>
+              <small>
+                {notificationSummary ? 'Pending updates' : 'Access restricted'}
+              </small>
+            </div>
           </section>
-          <section className="section-card">
-            <h2 className="text-xl font-semibold">Your roles</h2>
-            <ul>
-              {context.roles.map((role, index) => (
-                <li key={`${role.id}-${index}`}>
-                  {role.name} —{' '}
-                  {role.branchId ? `Branch ${role.branchId}` : 'Organization'}
-                </li>
-              ))}
-            </ul>
-          </section>
-          <section className="section-card">
-            <h2 className="text-xl font-semibold">Effective permissions</h2>
-            {context.grants.length ? (
-              <ul className="permission-grid">
-                {context.grants.map((grant, index) => (
-                  <li key={index} className="break-words">
-                    {grant.permission} ({grant.scope.kind})
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p>No permissions assigned.</p>
-            )}
-          </section>
-          <section className="section-card">
-            <h2 className="text-xl font-semibold">Enabled modules</h2>
-            <p>{context.entitlements.join(', ') || 'No modules enabled.'}</p>
-            <nav className="dashboard-nav" aria-label="Enabled modules">
-              {(canAccess(context, {
-                organizationId: context.organizationId,
-                permission: 'customer.view',
-                moduleKey: 'quotation',
-              }) ||
-                canAccess(context, {
-                  organizationId: context.organizationId,
-                  permission: 'customer.view',
-                  moduleKey: 'crm',
-                })) && (
-                <Link className="underline" href="/dashboard/customers">
-                  Customers
-                </Link>
-              )}
-              <ul className="dashboard-nav">
-                {nav.map((item) => (
-                  <li key={item.key}>
-                    <Link className="underline" href={item.href}>
-                      {item.label}
+
+          <div className="tenant-v2-columns">
+            <div className="tenant-v2-stack">
+              <section className="tenant-v2-panel">
+                <p className="eyebrow">Daily operations</p>
+                <h2>Quick access</h2>
+                <div className="tenant-v2-actions">
+                  {(canAccess(context, {
+                    organizationId: context.organizationId,
+                    permission: 'customer.view',
+                    moduleKey: 'quotation',
+                  }) ||
+                    canAccess(context, {
+                      organizationId: context.organizationId,
+                      permission: 'customer.view',
+                      moduleKey: 'crm',
+                    })) && (
+                    <Link href="/dashboard/customers">
+                      <span>Customers</span>
+                      <small>Contacts and enquiries</small>
+                      <b aria-hidden="true">↗</b>
                     </Link>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-          </section>
-          <section className="section-card">
-            <h2 className="text-xl font-semibold">Branches</h2>
-            {branches.length ? (
-              <ul>
-                {branches.map((branch) => (
-                  <li key={branch.id}>
-                    {branch.name} ({branch.code}) — {branch.status}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p>No branches available to your account.</p>
-            )}
-          </section>
-          {canViewTeam && (
-            <section className="section-card">
-              <h2 className="text-xl font-semibold">Team memberships</h2>
-              <ul>
-                {team.map((member) => (
-                  <li className="break-all" key={member.id}>
-                    {member.user_id} — {member.status}
-                    {member.branch_id ? ` — branch ${member.branch_id}` : ''}
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
+                  )}
+                  {(canViewTeam ||
+                    canAccess(context, {
+                      organizationId: context.organizationId,
+                      permission: 'role.view',
+                    })) && (
+                    <Link href="/dashboard/company/team">
+                      <span>People &amp; roles</span>
+                      <small>Employees and access</small>
+                      <b aria-hidden="true">↗</b>
+                    </Link>
+                  )}
+                  <Link href="/dashboard/reports">
+                    <span>Reports</span>
+                    <small>Company performance</small>
+                    <b aria-hidden="true">↗</b>
+                  </Link>
+                  <Link href="/dashboard/company/invitations">
+                    <span>Invitations</span>
+                    <small>Company invitations</small>
+                    <b aria-hidden="true">↗</b>
+                  </Link>
+                  {context.entitlements.includes('billing') &&
+                    context.grants.some(
+                      (grant) =>
+                        [
+                          'contract.view',
+                          'invoice.view',
+                          'payment.view',
+                          'financial_report.view',
+                        ].includes(grant.permission) &&
+                        grant.scope.kind === 'organization',
+                    ) && (
+                      <Link href="/dashboard/finance">
+                        <span>Finance</span>
+                        <small>Commercial execution</small>
+                        <b aria-hidden="true">↗</b>
+                      </Link>
+                    )}
+                  {notificationSummary && (
+                    <Link href="/dashboard/work">
+                      <span>My work</span>
+                      <small>Tasks and notifications</small>
+                      <b aria-hidden="true">↗</b>
+                    </Link>
+                  )}
+                  {canAccess(context, {
+                    organizationId: context.organizationId,
+                    permission: 'automation.view',
+                  }) && (
+                    <Link href="/dashboard/automations">
+                      <span>Automations</span>
+                      <small>Workflow management</small>
+                      <b aria-hidden="true">↗</b>
+                    </Link>
+                  )}
+                </div>
+              </section>
+
+              <section className="tenant-v2-panel">
+                <p className="eyebrow">Company tools</p>
+                <h2>Enabled modules</h2>
+                {nav.length ? (
+                  <div className="tenant-v2-modules">
+                    {nav.map((item) => (
+                      <Link key={item.key} href={item.href}>
+                        <span className="tenant-v2-dot" aria-hidden="true" />
+                        {item.label}
+                        <span aria-hidden="true">→</span>
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="muted">
+                    No modules are available to your account yet.
+                  </p>
+                )}
+              </section>
+            </div>
+            <aside className="tenant-v2-stack" aria-label="Company information">
+              <section className="tenant-v2-panel">
+                <p className="eyebrow">Active company</p>
+                <h2>{organization.name}</h2>
+                <dl className="tenant-v2-details">
+                  <div>
+                    <dt>Status</dt>
+                    <dd>{organization.status}</dd>
+                  </div>
+                  <div>
+                    <dt>Currency</dt>
+                    <dd>{organization.default_currency}</dd>
+                  </div>
+                  <div>
+                    <dt>Time zone</dt>
+                    <dd>{organization.default_timezone}</dd>
+                  </div>
+                  <div>
+                    <dt>Branches</dt>
+                    <dd>{branches.length}</dd>
+                  </div>
+                </dl>
+              </section>
+              <section className="tenant-v2-panel">
+                <p className="eyebrow">Secure workspace</p>
+                <h2>Only what you need</h2>
+                <p className="muted">
+                  Your workspace shows the modules and tools assigned to your
+                  company membership. Detailed permissions are managed in the
+                  employee access area rather than on this dashboard.
+                </p>
+                {(canViewTeam ||
+                  canAccess(context, {
+                    organizationId: context.organizationId,
+                    permission: 'role.view',
+                  })) && (
+                  <Link
+                    href="/dashboard/company/team"
+                    className="premium-link-secondary"
+                  >
+                    Manage access →
+                  </Link>
+                )}
+                {hasPlatformAccess && (
+                  <Link href="/admin" className="tenant-v2-admin-entry">
+                    Platform Super Admin ↗
+                  </Link>
+                )}
+              </section>
+            </aside>
+          </div>
         </>
       ) : (
-        <p className="section-card">
-          No active organization selected. Create one or ask an organization
-          administrator for membership.
-        </p>
+        <section className="tenant-v2-panel">
+          <h2>No active company selected</h2>
+          <p>
+            Select an active membership above or ask an organization
+            administrator to invite you.
+          </p>
+        </section>
       )}
-      <section className="section-card">
-        <h2 className="text-xl font-semibold">Add a business</h2>
-        <p>
-          New companies are reviewed by the platform before a workspace is
-          activated. Choose Construction, Interior Design or both.
-        </p>
+      <footer className="tenant-v2-footer">
+        <div>
+          <h2>Need another business workspace?</h2>
+          <p>Apply to register a construction or interiors company.</p>
+        </div>
         <Link
-          className="premium-link-secondary"
           href="/dashboard/company/apply"
+          className="premium-link-secondary"
         >
-          Apply to register a company
+          Register a company →
         </Link>
-      </section>
+      </footer>
     </main>
   );
 }
