@@ -46,7 +46,10 @@ select private.trade_assert(
 select private.trade_denied(
  format('select public.trade_document_save(%L::uuid,%L::jsonb)','dddddddd-dddd-4ddd-8ddd-dddddddddddd',
  jsonb_build_object('id',:'sale_id','kind','sales_invoice','issueDate',current_date::text,
-  'counterparty',jsonb_build_object('name','Any Buyer'))::text),
+  'counterparty',jsonb_build_object('name','Any Buyer','address','Bengaluru Karnataka',
+    'gstin','29ABCDE1234F1Z5','state','29'),'placeOfSupply','29',
+  'lines',jsonb_build_array(jsonb_build_object('description','Steel plates','hsn','7208',
+   'unit','piece','quantity',1,'rate',1000,'gstRate',18)))::text),
  'issued document cannot be edited');
 
 select public.trade_payment_record('dddddddd-dddd-4ddd-8ddd-dddddddddddd',:'sale_id',800,current_date,'bank','UTR123') as pay_id \gset
