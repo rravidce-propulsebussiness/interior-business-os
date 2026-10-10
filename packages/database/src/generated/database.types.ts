@@ -11344,6 +11344,10 @@ export interface Database {
         };
         Returns: string;
       };
+      project_site_my_projects: {
+        Args: { p_organization_id: string };
+        Returns: Json;
+      };
       project_site_read: {
         Args: { p_organization_id: string; p_project_id: string };
         Returns: Json;
