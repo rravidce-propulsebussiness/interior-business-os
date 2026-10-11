@@ -108,6 +108,7 @@ export default async function Quotation({
       s.allowed('quotation.edit', 'quotation'),
     canDiscount = s.allowed('quotation.discount', 'quotation'),
     canOverride = s.allowed('quotation.override_rate', 'quotation');
+  const existingSftEstimate = lines?.map(line=>parseSftEstimate(line.description)).find(Boolean) ?? null;
   const selected = lines?.find((l) => l.id === filter.line),
     selectedSnapshot = selected
       ? lineSnapshotSchema.parse(selected.snapshot)
@@ -503,6 +504,7 @@ export default async function Quotation({
             <ConstructionSelector
               rates={constructionOptions}
               packages={constructionPackages}
+              initialSchedule={existingSftEstimate}
               revisionId={r.id}
               version={r.version}
             />
