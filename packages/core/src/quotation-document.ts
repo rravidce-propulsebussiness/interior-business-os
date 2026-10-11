@@ -87,7 +87,7 @@ export function renderQuotationDocument(input: unknown): string {
   });
   const renderSftSchedule = sftSchedules
     .map(
-      ({ line, details }) =>
+      ({ details }) =>
         '<section class="terms"><h2>Work-wise SFT estimate</h2><table><thead><tr>' +
         '<th>Work description</th><th>L (ft)</th><th>W (ft)</th><th>SFT</th>' +
         (h.display.unit_rate ? '<th class="amount">Rate / SFT</th>' : '') +
