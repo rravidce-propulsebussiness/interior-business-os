@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { createConstructionRatesRepository } from '@business-os/database/construction-rates';
+import { createConstructionPackagesRepository } from '@business-os/database/construction-packages';
 import { DomainError, idSchema, safeFailure } from '@business-os/shared';
 import { commercialServices } from '../commercial/service';
 
@@ -126,4 +127,90 @@ export async function saveConstructionPackage(
   } catch (error) {
     return { message: safeFailure(error).message };
   }
+}
+
+const packageSelectionSchema = selectionSchema.extend({
+  packageId: idSchema,
+});
+
+export async function previewFixedPackage(
+  revisionId: string,
+  input: unknown,
+): Promise<{message:string;total?:string;ratePerSqft?:string;packageName?:string}>{
+  try{
+    const id=idSchema.parse(revisionId);
+    const value=packageSelectionSchema.parse(input);
+    const {s}=await editable(id,false);
+    const packageQuote=await createConstructionPackagesRepository(s.client).preview(
+      s.org,value.packageId,value.ids,value.areaSqft,
+    );
+    return {message:'The package price is fixed; selected brand specifications do not add extra charges.',
+      total:packageQuote.total,ratePerSqft:packageQuote.ratePerSqft,packageName:packageQuote.packageName};
+  }catch(error){return {message:safeFailure(error).message};}
+}
+
+export async function saveFixedPackage(
+  revisionId: string,version:number,input:unknown,
+):Promise<{message:string;id?:string}>{
+  try{
+    const rid=idSchema.parse(revisionId),value=packageSelectionSchema.parse(input);
+    if(!Number.isInteger(version)||version<1)throw new DomainError('VALIDATION_FAILED');
+    const {s,revision}=await editable(rid,true);
+    if(revision.version!==version)throw new DomainError('CONFLICT');
+    const p=await createConstructionPackagesRepository(s.client).preview(
+      s.org,value.packageId,value.ids,value.areaSqft,
+    );
+    const specs=p.options.map(o=>o.category+': '+o.name+
+      (o.specification?' — '+o.specification:''));
+    const breakdown=[
+      'Package: '+p.packageName+' ('+p.packageCode+')',
+      ...(p.description?['Scope: '+p.description]:[]),
+      'Materials / brands:',
+      ...specs,
+    ].join('\n');
+    if(breakdown.length>3000)throw new DomainError('VALIDATION_FAILED');
+    const id=await s.commercial.saveManualLine(s.org,rid,version,{
+      area_id:null,sort_order:0,optional:false,
+      name:p.packageName+' — Construction package',
+      description:breakdown,
+      quantity:p.areaSqft,unit:'built-up sq ft',rate:p.ratePerSqft,
+      reason:'Fixed construction package '+p.packageCode+'; material choices are specifications, not extra charges.',
+      discount:{kind:'none',value:'0'},estimated_cost_rate:null,
+    });
+    revalidatePath('/dashboard/quotations','layout');
+    return {id,message:'Fixed-price construction package added. Selected brands are specifications, not additional costs.'};
+  }catch(error){return {message:safeFailure(error).message};}
+}
+
+const oneMaterialSchema=z.object({
+  materialId:idSchema,
+  areaSqft:selectionSchema.shape.areaSqft,
+}).strict();
+
+export async function saveCustomizedMaterial(
+  revisionId:string,version:number,input:unknown,
+):Promise<{message:string;id?:string}>{
+  try{
+    const rid=idSchema.parse(revisionId),value=oneMaterialSchema.parse(input);
+    if(!Number.isInteger(version)||version<1)throw new DomainError('VALIDATION_FAILED');
+    const {s,revision}=await editable(rid,true);
+    if(revision.version!==version)throw new DomainError('CONFLICT');
+    // Re-read current prices from PostgreSQL. Never trust a browser-submitted rate.
+    const p=await createConstructionRatesRepository(s.client).preview(
+      s.org,[value.materialId],value.areaSqft,
+    );
+    const item=p.options[0];
+    if(!item||Number(p.ratePerSqft)<=0)throw new DomainError('VALIDATION_FAILED');
+    const id=await s.commercial.saveManualLine(s.org,rid,version,{
+      area_id:null,sort_order:0,optional:false,
+      name:item.category+' — '+item.name,
+      description:'Materials / brands:\n'+item.category+': '+item.name+
+        (item.specification?' — '+item.specification:''),
+      quantity:p.areaSqft,unit:'built-up sq ft',rate:p.ratePerSqft,
+      reason:'Company-authorized custom material rate for '+item.category+' ('+item.name+').',
+      discount:{kind:'none',value:'0'},estimated_cost_rate:null,
+    });
+    revalidatePath('/dashboard/quotations','layout');
+    return {id,message:item.name+' added as an individually priced quotation line. Add further items to customize the quote.'};
+  }catch(error){return {message:safeFailure(error).message};}
 }
