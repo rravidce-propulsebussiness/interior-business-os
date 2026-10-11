@@ -133,6 +133,31 @@ export default async function PlatformControlModule({
         </Link>
       </div>
 
+      {slug === 'quotations' && (
+        <section className="mt-6 rounded-3xl border border-blue-200 bg-gradient-to-r from-blue-50 to-white p-6 shadow-sm">
+          <p className="text-xs font-bold uppercase tracking-widest text-blue-700">
+            Construction pricing workflow
+          </p>
+          <h2 className="mt-2 text-xl font-extrabold text-slate-950">
+            Steel, bricks, cement, painting &amp; material-grade choices
+          </h2>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+            Each subscribed company manages its own brand-wise rates per built-up sq ft.
+            In a draft quotation, users choose one brand or material grade per category,
+            enter construction area, and save the server-calculated amount.
+            Issued quotations stay frozen. Platform admins manage company permissions here,
+            not private customer prices or quotations.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <Link href="/admin/organizations" className="os-action">
+              Configure business access ↗
+            </Link>
+            <Link href="/dashboard/pricing/construction" className="os-action secondary">
+              Open active company pricing ↗
+            </Link>
+          </div>
+        </section>
+      )}
       <div className="os-content-grid mt-6">
         <section className="os-panel">
           <div className="os-panel-heading">
