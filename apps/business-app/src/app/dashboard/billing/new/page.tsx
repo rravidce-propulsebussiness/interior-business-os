@@ -130,7 +130,9 @@ export default async function PrepareDocument({
           profile={profile}
           standard={standard}
           existingLayout={currentLayout}
-          requestedKind={params.kind === 'purchase_bill' ? 'purchase_bill' : 'sales_invoice'}
+          requestedKind={
+            params.kind === 'purchase_bill' ? 'purchase_bill' : 'sales_invoice'
+          }
         />
       )}
     </main>

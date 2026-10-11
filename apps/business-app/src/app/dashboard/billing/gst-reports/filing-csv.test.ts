@@ -20,26 +20,28 @@ const sample: GstFilingDocument = {
   igst: 0,
   discount: 0,
   total: 1180,
-  lines: [{
-    description: 'Service, "finishing"',
-    hsnSac: '9954',
-    unit: 'sqft',
-    quantity: 2,
-    unitPrice: 500,
-    discount: 0,
-    gstRate: 18,
-    taxable: 1000,
-    cgst: 90,
-    sgst: 90,
-    igst: 0,
-    total: 1180,
-  }],
+  lines: [
+    {
+      description: 'Service, "finishing"',
+      hsnSac: '9954',
+      unit: 'sqft',
+      quantity: 2,
+      unitPrice: 500,
+      discount: 0,
+      gstRate: 18,
+      taxable: 1000,
+      cgst: 90,
+      sgst: 90,
+      igst: 0,
+      total: 1180,
+    },
+  ],
 };
 
 describe('GST export working papers', () => {
   it('protects party inputs against Excel formula execution', () => {
     const csv = filingCsv([sample], 'summary');
-    expect(csv).toContain("\"'=HYPERLINK");
+    expect(csv).toContain('"\'=HYPERLINK');
     expect(csv).toContain('"1180"');
     expect(csv).toContain('Invoice Total');
   });

@@ -212,21 +212,34 @@ function StandardAction({
   isStandard: boolean;
 }) {
   const router = useRouter();
-  const [state, action, pending] = useActionState(setStandardInvoiceFormat, { message: '' });
+  const [state, action, pending] = useActionState(setStandardInvoiceFormat, {
+    message: '',
+  });
   useEffect(() => {
     if (state.saved) router.refresh();
   }, [state.saved, router]);
   if (isStandard) {
-    return <span className="rounded-xl bg-blue-600 px-3 py-2 text-xs font-bold text-white">✓ Standard</span>;
+    return (
+      <span className="rounded-xl bg-blue-600 px-3 py-2 text-xs font-bold text-white">
+        ✓ Standard
+      </span>
+    );
   }
   return (
     <form action={action}>
       <input type="hidden" name="id" value={template.id} />
-      <button type="submit" disabled={pending || template.status !== 'active'}
-        className="rounded-lg border border-blue-200 bg-white px-3 py-2 text-xs font-bold text-blue-700 disabled:opacity-50">
+      <button
+        type="submit"
+        disabled={pending || template.status !== 'active'}
+        className="rounded-lg border border-blue-200 bg-white px-3 py-2 text-xs font-bold text-blue-700 disabled:opacity-50"
+      >
         {pending ? 'Applying…' : 'Use as standard'}
       </button>
-      {state.message && !state.saved && <p role="alert" className="mt-1 text-xs text-red-600">{state.message}</p>}
+      {state.message && !state.saved && (
+        <p role="alert" className="mt-1 text-xs text-red-600">
+          {state.message}
+        </p>
+      )}
     </form>
   );
 }
@@ -644,12 +657,18 @@ export function GstTemplateStudio({
         )}
       </header>
       <section className="mt-5 flex flex-wrap items-start gap-4 rounded-2xl border border-blue-200 bg-blue-50 p-5">
-        <span className="grid size-11 place-items-center rounded-xl bg-blue-600 text-xl text-white">✓</span>
+        <span className="grid size-11 place-items-center rounded-xl bg-blue-600 text-xl text-white">
+          ✓
+        </span>
         <div>
-          <h3 className="text-base font-extrabold text-slate-950">Current standard: {standard.name}</h3>
+          <h3 className="text-base font-extrabold text-slate-950">
+            Current standard: {standard.name}
+          </h3>
           <p className="mt-1 text-sm leading-6 text-slate-600">
-            All new sales invoices and supplier bills share this design. Editing the selected preset changes future documents automatically.
-            Previously issued invoices retain their original layouts and amounts.
+            All new sales invoices and supplier bills share this design. Editing
+            the selected preset changes future documents automatically.
+            Previously issued invoices retain their original layouts and
+            amounts.
           </p>
         </div>
       </section>
@@ -808,7 +827,10 @@ export function GstTemplateStudio({
                   </button>
                 )}
                 {canEdit && (
-                  <StandardAction template={template} isStandard={standard.templateId === template.id} />
+                  <StandardAction
+                    template={template}
+                    isStandard={standard.templateId === template.id}
+                  />
                 )}
                 {canEdit && <StatusAction template={template} />}
               </div>

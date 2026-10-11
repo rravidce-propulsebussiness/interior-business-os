@@ -42,10 +42,16 @@ export function DocumentEditor({
   existingLayout,
   requestedKind,
 }: Props) {
-  const initialKind = existing?.kind ?? (order ? 'sales_invoice' : requestedKind ?? 'sales_invoice');
-  const [kind, setKind] = useState<'sales_invoice' | 'purchase_bill'>(initialKind);
+  const initialKind =
+    existing?.kind ??
+    (order ? 'sales_invoice' : (requestedKind ?? 'sales_invoice'));
+  const [kind, setKind] = useState<'sales_invoice' | 'purchase_bill'>(
+    initialKind,
+  );
   // The platform standard is enforced again by the server when saving.
-  const appearance = existing ? (existingLayout?.config ?? standard.config) : standard.config;
+  const appearance = existing
+    ? (existingLayout?.config ?? standard.config)
+    : standard.config;
 
   const [type, setType] = useState<GstDocument['documentType']>(
     existing?.documentType ?? 'tax_invoice',
@@ -73,10 +79,7 @@ export function DocumentEditor({
           ]
         : Array.from(
             {
-              length: Math.min(
-                10,
-                Math.max(1, appearance.blankRows ?? 1),
-              ),
+              length: Math.min(10, Math.max(1, appearance.blankRows ?? 1)),
             },
             () => ({ ...empty }),
           ),
@@ -144,12 +147,14 @@ export function DocumentEditor({
               GST billing · Uniform format
             </p>
             <h2 className="mt-1 text-lg font-extrabold text-slate-950">
-              {existing ? (existingLayout?.name ?? 'Original invoice layout') : standard.name}
+              {existing
+                ? (existingLayout?.name ?? 'Original invoice layout')
+                : standard.name}
             </h2>
             <p className="mt-1 text-xs leading-5 text-slate-600">
               Every new invoice follows the platform administrator's standard.
-              Each business supplies its own legal GST identity and customer or supplier details.
-              The format cannot change tax calculations.
+              Each business supplies its own legal GST identity and customer or
+              supplier details. The format cannot change tax calculations.
             </p>
           </div>
           <span className="rounded-xl bg-blue-100 px-3 py-2 text-xs font-bold text-blue-700">

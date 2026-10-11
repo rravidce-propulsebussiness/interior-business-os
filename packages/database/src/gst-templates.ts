@@ -93,12 +93,24 @@ export function createGstTemplatesRepository(client: SupabaseClient<Database>) {
         p_org: organizationId,
       }),
     standard: (organizationId: string | null = null) =>
-      invoke<GstInvoiceAppearance>('gst_standard_invoice_format', { p_org: organizationId }),
+      invoke<GstInvoiceAppearance>('gst_standard_invoice_format', {
+        p_org: organizationId,
+      }),
     setStandard: (templateId: string) =>
-      invoke<void>('gst_standard_invoice_select', { p_template_id: templateId }),
-    filingRows: (organizationId: string, from: string, to: string, kind: GstTemplateKind) =>
+      invoke<void>('gst_standard_invoice_select', {
+        p_template_id: templateId,
+      }),
+    filingRows: (
+      organizationId: string,
+      from: string,
+      to: string,
+      kind: GstTemplateKind,
+    ) =>
       invoke<GstFilingDocument[]>('gst_filing_workpaper', {
-        p_org: organizationId, p_from: from, p_to: to, p_kind: kind,
+        p_org: organizationId,
+        p_from: from,
+        p_to: to,
+        p_kind: kind,
       }),
     save: (input: {
       id?: string;

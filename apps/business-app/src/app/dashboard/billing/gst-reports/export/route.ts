@@ -32,22 +32,44 @@ export async function GET(request: Request) {
       (kind !== 'sales_invoice' && kind !== 'purchase_bill') ||
       (format !== 'summary' && format !== 'items')
     ) {
-      return new Response('Choose a valid date range, document type and export.', {
-        status: 400, headers,
-      });
+      return new Response(
+        'Choose a valid date range, document type and export.',
+        {
+          status: 400,
+          headers,
+        },
+      );
     }
     const context = await activeOrganization();
-    if (!context) return new Response('Company selection required.', { status: 403, headers });
+    if (!context)
+      return new Response('Company selection required.', {
+        status: 403,
+        headers,
+      });
     const { authorization, client } = await pageServices();
-    await authorization.requirePermission(context.organizationId, 'invoice.view');
+    await authorization.requirePermission(
+      context.organizationId,
+      'invoice.view',
+    );
 
     const documents = await createGstTemplatesRepository(client).filingRows(
-      context.organizationId, from, to, kind,
+      context.organizationId,
+      from,
+      to,
+      kind,
     );
     const body = filingCsv(documents, format as WorkpaperFormat);
     // The content represents draft filing workpapers, not government upload JSON.
-    const filename = 'gst-' + (kind === 'sales_invoice' ? 'sales' : 'purchases') +
-      '-' + format + '-' + from + '-to-' + to + '.csv';
+    const filename =
+      'gst-' +
+      (kind === 'sales_invoice' ? 'sales' : 'purchases') +
+      '-' +
+      format +
+      '-' +
+      from +
+      '-to-' +
+      to +
+      '.csv';
     return new Response(body, {
       headers: {
         ...headers,

@@ -10978,9 +10978,18 @@ export interface Database {
         Args: { p_org: string; p_kind?: string };
         Returns: Json;
       };
+      gst_filing_workpaper: {
+        Args: { p_org: string; p_from: string; p_to: string; p_kind?: string };
+        Returns: Json;
+      };
       gst_profile_read: { Args: { p_org: string }; Returns: Json };
       gst_profile_save: {
         Args: { p_org: string; p_input: Json };
+        Returns: undefined;
+      };
+      gst_standard_invoice_format: { Args: { p_org?: string }; Returns: Json };
+      gst_standard_invoice_select: {
+        Args: { p_template_id: string };
         Returns: undefined;
       };
       gst_template_list: { Args: { p_org?: string }; Returns: Json };

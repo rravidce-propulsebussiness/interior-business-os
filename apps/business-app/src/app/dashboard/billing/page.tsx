@@ -104,12 +104,17 @@ export default async function BusinessBilling({
       <section className="rounded-3xl border border-blue-200 bg-gradient-to-br from-white to-blue-50/50 p-5 shadow-sm sm:p-7">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-bold uppercase tracking-wider text-blue-700">Unified invoice design</p>
-            <h2 className="mt-2 text-xl font-extrabold text-slate-950">{standard.name}</h2>
+            <p className="text-xs font-bold uppercase tracking-wider text-blue-700">
+              Unified invoice design
+            </p>
+            <h2 className="mt-2 text-xl font-extrabold text-slate-950">
+              {standard.name}
+            </h2>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-              One professional GST-ready format for every new sales invoice and supplier purchase bill.
-              The platform admin controls presentation. You enter your own actual business, supplier,
-              goods/services and GST details. Quotations are handled separately.
+              One professional GST-ready format for every new sales invoice and
+              supplier purchase bill. The platform admin controls presentation.
+              You enter your own actual business, supplier, goods/services and
+              GST details. Quotations are handled separately.
             </p>
           </div>
           <span className="rounded-xl border border-blue-200 bg-white px-3 py-2 text-xs font-bold text-blue-700">
@@ -119,18 +124,24 @@ export default async function BusinessBilling({
         <div className="mt-5 flex flex-wrap gap-3">
           {canCreate && (
             <>
-              <Link href="/dashboard/billing/new?kind=sales_invoice"
-                className="rounded-xl bg-blue-600 px-5 py-3 text-xs font-extrabold text-white hover:bg-blue-700">
+              <Link
+                href="/dashboard/billing/new?kind=sales_invoice"
+                className="rounded-xl bg-blue-600 px-5 py-3 text-xs font-extrabold text-white hover:bg-blue-700"
+              >
                 + New sales invoice
               </Link>
-              <Link href="/dashboard/billing/new?kind=purchase_bill"
-                className="rounded-xl border border-blue-200 bg-white px-5 py-3 text-xs font-extrabold text-blue-700 hover:bg-blue-50">
+              <Link
+                href="/dashboard/billing/new?kind=purchase_bill"
+                className="rounded-xl border border-blue-200 bg-white px-5 py-3 text-xs font-extrabold text-blue-700 hover:bg-blue-50"
+              >
                 + Record purchase bill
               </Link>
             </>
           )}
-          <Link href="/dashboard/billing/gst-reports"
-            className="rounded-xl border border-slate-200 bg-white px-5 py-3 text-xs font-extrabold text-slate-700 hover:bg-slate-50">
+          <Link
+            href="/dashboard/billing/gst-reports"
+            className="rounded-xl border border-slate-200 bg-white px-5 py-3 text-xs font-extrabold text-slate-700 hover:bg-slate-50"
+          >
             GST filing workpapers →
           </Link>
         </div>
