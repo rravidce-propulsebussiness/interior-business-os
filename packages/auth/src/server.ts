@@ -1,4 +1,5 @@
 import 'server-only';
+import { cache } from 'react';
 import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import {
@@ -9,11 +10,16 @@ import { createRepository } from '@business-os/database/repository';
 import { DomainError } from '@business-os/shared';
 import { createAuthorization } from './service';
 
-export async function serverServices() {
+const getServerServices = cache(async () => {
   if (!isSupabaseConfigured()) throw new DomainError('UNAUTHENTICATED');
   const client = await createServerDatabase();
   const repository = createRepository(client);
   return { client, repository, authorization: createAuthorization(repository) };
+});
+
+/** One Supabase auth context per server render; never reused across requests. */
+export async function serverServices() {
+  return getServerServices();
 }
 export async function pageServices() {
   if (!isSupabaseConfigured()) redirect('/login');
@@ -44,7 +50,7 @@ export async function workspaceScope() {
   return null;
 }
 
-export async function activeOrganization() {
+const getActiveOrganization = cache(async () => {
   const { authorization, repository, client } = await serverServices();
   const scope = await workspaceScope();
   if (scope?.kind === 'slug') {
@@ -77,4 +83,8 @@ export async function activeOrganization() {
   return first
     ? authorization.requireOrganizationMembership(first.organization_id)
     : null;
+});
+
+export async function activeOrganization() {
+  return getActiveOrganization();
 }
