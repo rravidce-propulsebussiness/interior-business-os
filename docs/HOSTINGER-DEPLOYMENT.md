@@ -55,6 +55,7 @@ For reliable deployments:
    key complements deployment IDs but **does not make old action IDs
    valid forever**. The build warns if the key is absent and refuses malformed
    keys.
+
 4. Leave `NEXT_DEPLOYMENT_ID` **unset** in Hostinger unless the release
    automation supplies a **new non-secret value for each deploy**. Reusing
    a fixed ID would disable change detection.
@@ -72,7 +73,7 @@ For reliable deployments:
 
 Owner provisioning is a **separate configuration concern**. Only the
 Business App backend needs `SUPABASE_SECRET_KEY` (or the legacy
-`SUPABASE_SERVICE_ROLE_KEY`) for creating a *new* owner identity. It must
+`SUPABASE_SERVICE_ROLE_KEY`) for creating a _new_ owner identity. It must
 be a server-only credential matching the same Supabase project used by the
 Business App's public URL and publishable key.
 

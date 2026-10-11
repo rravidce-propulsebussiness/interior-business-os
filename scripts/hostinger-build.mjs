@@ -31,7 +31,11 @@ const runPnpm = (args, overrides = {}) => {
   const result = spawnSync(
     npm,
     ['exec', '--yes', '--package=pnpm@10.34.5', '--', 'pnpm', ...args],
-    { cwd: root, stdio: 'inherit', env: { ...process.env, CI: 'true', ...overrides } },
+    {
+      cwd: root,
+      stdio: 'inherit',
+      env: { ...process.env, CI: 'true', ...overrides },
+    },
   );
   if (result.error) throw result.error;
   if (result.status !== 0) process.exit(result.status || 1);
@@ -45,11 +49,7 @@ runPnpm(['install', '--frozen-lockfile', '--prod=false']);
 console.log(
   `[Business OS] Building ${service} with Next.js Webpack for Hostinger.`,
 );
-runPnpm([
-  '--filter',
-  `@business-os/${service}`,
-  'exec',
-  'next',
-  'build',
-  '--webpack',
-], { NEXT_DEPLOYMENT_ID: nextDeploymentId });
+runPnpm(
+  ['--filter', `@business-os/${service}`, 'exec', 'next', 'build', '--webpack'],
+  { NEXT_DEPLOYMENT_ID: nextDeploymentId },
+);

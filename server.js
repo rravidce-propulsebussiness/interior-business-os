@@ -46,8 +46,10 @@ if (existsSync(releaseManifest)) {
   const manifest = JSON.parse(readFileSync(releaseManifest, 'utf8'));
   const builtId = manifest?.config?.deploymentId;
   if (typeof builtId === 'string' && builtId.length > 0) {
-    if (process.env.NEXT_DEPLOYMENT_ID &&
-        process.env.NEXT_DEPLOYMENT_ID !== builtId) {
+    if (
+      process.env.NEXT_DEPLOYMENT_ID &&
+      process.env.NEXT_DEPLOYMENT_ID !== builtId
+    ) {
       throw new Error(
         '[Business OS] Runtime NEXT_DEPLOYMENT_ID does not match the deployed Next.js build.',
       );

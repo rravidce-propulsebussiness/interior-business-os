@@ -28,7 +28,8 @@ test('explicit release ID is accepted but malformed IDs are rejected', () => {
     'release-123.ab',
   );
   assert.throws(
-    () => resolveDeploymentId({ env: { NEXT_DEPLOYMENT_ID: 'a header\\r\\n' } }),
+    () =>
+      resolveDeploymentId({ env: { NEXT_DEPLOYMENT_ID: 'a header\\r\\n' } }),
     /NEXT_DEPLOYMENT_ID/,
   );
 });
@@ -43,13 +44,17 @@ test('build still receives a unique version without git metadata', () => {
 test('Server Action key validation is optional and never exposes key contents', () => {
   assert.equal(validateServerActionsEncryptionKey({}), false);
   const secret = randomBytes(32).toString('base64');
-  assert.equal(validateServerActionsEncryptionKey({
-    NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: secret,
-  }), true);
-  assert.throws(
-    () => validateServerActionsEncryptionKey({
-      NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: 'not-a-valid-key',
+  assert.equal(
+    validateServerActionsEncryptionKey({
+      NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: secret,
     }),
+    true,
+  );
+  assert.throws(
+    () =>
+      validateServerActionsEncryptionKey({
+        NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: 'not-a-valid-key',
+      }),
     (error) =>
       error instanceof Error &&
       /NEXT_SERVER_ACTIONS_ENCRYPTION_KEY/.test(error.message) &&
