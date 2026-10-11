@@ -1,4 +1,21 @@
 import { expect, test } from '@playwright/test';
+test('public Business App home shows guest navigation only to anonymous visitors', async ({
+  page,
+}, info) => {
+  test.skip(
+    info.project.name !== 'business-app',
+    'Session-aware public home belongs to the Business App.',
+  );
+  await page.goto('/');
+  await expect(
+    page.getByRole('link', { name: 'Sign in', exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('link', { name: 'Sign in to your workspace' }),
+  ).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Sign out' })).toHaveCount(0);
+});
+
 test('protected dashboards require authentication', async ({ page }, info) => {
   test.skip(
     info.project.name === 'websites',

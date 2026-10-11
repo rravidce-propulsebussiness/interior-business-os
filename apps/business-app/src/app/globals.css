@@ -170,6 +170,52 @@ label {
   backdrop-filter: blur(18px);
 }
 
+.premium-account-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  min-width: 0;
+}
+
+.premium-account-status {
+  max-width: min(27vw, 260px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #9ed8d1;
+  font-size: 0.78rem;
+  font-weight: 650;
+}
+
+.premium-account-nav form {
+  margin: 0;
+}
+
+.premium-account-nav button.premium-link-secondary {
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+@media (max-width: 600px) {
+  .premium-account-status {
+    display: none;
+  }
+
+  .premium-account-nav {
+    gap: 0.4rem;
+  }
+
+  .premium-account-nav .premium-link-secondary {
+    min-height: 2.5rem;
+    padding: 0.55rem 0.7rem;
+    font-size: 0.8rem;
+  }
+}
+
 .brand-lockup {
   display: inline-flex;
   align-items: center;
@@ -632,6 +678,7 @@ label {
 
   .premium-topbar {
     padding: 0.7rem;
+    flex-wrap: wrap;
   }
 
   .premium-topbar .premium-link-secondary {

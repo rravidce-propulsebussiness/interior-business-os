@@ -1,7 +1,11 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { AuthForm } from '@business-os/ui/auth-form';
 import { signIn } from '@business-os/auth/actions';
-import { isSupabaseConfigured } from '@business-os/database/server';
+import {
+  createServerDatabase,
+  isSupabaseConfigured,
+} from '@business-os/database/server';
 
 export default async function Login({
   searchParams,
@@ -10,6 +14,10 @@ export default async function Login({
 }) {
   const params = await searchParams;
   const recoveryComplete = params.recovery === 'complete';
+  if (!recoveryComplete && isSupabaseConfigured()) {
+    const { data } = await (await createServerDatabase()).auth.getUser();
+    if (data.user) redirect('/dashboard');
+  }
 
   return (
     <main id="main-content" tabIndex={-1} className="auth-shell">
