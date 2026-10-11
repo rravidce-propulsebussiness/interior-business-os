@@ -12,6 +12,18 @@ export default async function PricingPage() {
     >
       <Link href="/dashboard/catalog">Catalog</Link>
       <h1 className="my-6 text-3xl font-semibold">Pricing</h1>
+      <section className="mb-8 rounded-3xl border border-blue-200 bg-gradient-to-r from-blue-50 to-white p-6 shadow-sm">
+        <p className="text-xs font-bold uppercase tracking-widest text-blue-600">Construction estimates</p>
+        <h2 className="mt-2 text-xl font-extrabold text-slate-950">Material &amp; brand pricing by sq ft</h2>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+          Configure choices for steel, bricks, cement mix ratios, painting and other materials.
+          Set your company's rate per sq ft of built-up area; authorized quotation users can
+          select the materials and generate a rate-verified construction line.
+        </p>
+        <Link href="/dashboard/pricing/construction" className="mt-4 inline-flex rounded-xl bg-blue-600 px-5 py-3 text-xs font-bold text-white">
+          Configure construction rates →
+        </Link>
+      </section>
       <section>
         <h2 className="text-2xl">Price books</h2>
         <p className="my-3">
