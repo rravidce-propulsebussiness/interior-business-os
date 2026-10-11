@@ -7,8 +7,12 @@ test('public Business App home shows guest navigation only to anonymous visitors
     'Session-aware public home belongs to the Business App.',
   );
   await page.goto('/');
-  await expect(page.getByRole('link', { name: 'Sign in', exact: true })).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Sign in to your workspace' })).toBeVisible();
+  await expect(
+    page.getByRole('link', { name: 'Sign in', exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('link', { name: 'Sign in to your workspace' }),
+  ).toBeVisible();
   await expect(page.getByRole('button', { name: 'Sign out' })).toHaveCount(0);
 });
 

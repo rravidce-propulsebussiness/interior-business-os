@@ -10,7 +10,9 @@ export const dynamic = 'force-dynamic';
 export default async function Page() {
   // Always resolve the current verified session on the server. The landing
   // page must not display guest-only links to signed-in owners/admins.
-  const { data: { user } } = isSupabaseConfigured()
+  const {
+    data: { user },
+  } = isSupabaseConfigured()
     ? await (await createServerDatabase()).auth.getUser()
     : { data: { user: null } };
   const signedIn = Boolean(user);
@@ -26,7 +28,10 @@ export default async function Page() {
         </div>
         {signedIn ? (
           <nav className="premium-account-nav" aria-label="Your account">
-            <span className="premium-account-status" title={user?.email ?? undefined}>
+            <span
+              className="premium-account-status"
+              title={user?.email ?? undefined}
+            >
               Signed in{user?.email ? ` · ${user.email}` : ''}
             </span>
             <Link className="premium-link-secondary" href="/dashboard">
