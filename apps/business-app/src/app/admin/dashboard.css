@@ -811,3 +811,37 @@
     grid-column: span 1 !important;
   }
 }
+
+
+/* Light organization onboarding controls inside the legacy dark global theme.
+   Keep these scoped to the admin creation form; do not duplicate base styles. */
+.org-owner-setup {
+  color-scheme: light;
+}
+
+.org-owner-setup label {
+  color: #334155;
+}
+
+.org-owner-setup input.org-owner-input,
+.org-owner-setup select.org-owner-input {
+  background: #fff;
+  color: #0f172a;
+  border-color: #dbe3ef !important;
+  box-shadow: none;
+}
+
+.org-owner-setup input.org-owner-input::placeholder {
+  color: #94a3b8;
+}
+
+.org-owner-setup input.org-owner-input:focus,
+.org-owner-setup select.org-owner-input:focus {
+  background: #fff;
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 4px #dbeafe;
+}
+
+.org-owner-setup input[type='hidden'] {
+  display: none;
+}
