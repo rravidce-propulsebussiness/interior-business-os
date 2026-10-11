@@ -21,7 +21,7 @@ export default async function PricingPage() {
         </h2>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
           Configure choices for steel, bricks, cement mix ratios, painting and
-          other materials. Set your company's rate per sq ft of built-up area;
+          other materials. Set your company&apos;s rate per sq ft of built-up area;
           authorized quotation users can select the materials and generate a
           rate-verified construction line.
         </p>
