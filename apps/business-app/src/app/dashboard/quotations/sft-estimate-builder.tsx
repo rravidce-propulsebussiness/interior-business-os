@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, useTransition } from 'react';
+import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -36,10 +36,10 @@ export function SftEstimateBuilder({
  const materialOptions=active.filter(x=>materialIds.includes(x.id)).map(x=>({
   category:x.category,name:x.name,specification:x.specification,
  }));
- const quote=useMemo<SftEstimateDetails|null>(()=>{
+ const quote:SftEstimateDetails|null=(()=>{
   try{return calculateSftEstimate({rows,materialIds},materialOptions);}
   catch{return null;}
- },[rows,materialIds.join(','),materialOptions.map(x=>x.name+x.specification).join('|')]);
+ })();
  const change=(index:number,key:keyof WorkRow,value:string)=>{
   setRows(prev=>prev.map((r,i)=>i===index?{...r,[key]:value}:r));
   setMessage('');setSaved(false);
