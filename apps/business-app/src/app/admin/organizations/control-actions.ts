@@ -37,7 +37,6 @@ const companyInput = z.object({
   planId: z.union([z.uuid(), z.literal('')]),
   industries: z.array(z.string().min(1).max(64)).min(1).max(12),
   seller: z.boolean(),
-  storeName: z.string().trim().max(150),
 });
 
 export type CreateCompanyState = {
@@ -71,7 +70,6 @@ export async function createPlatformCompany(
       planId: form.get('planId') ?? '',
       industries: form.getAll('industries'),
       seller: form.get('seller') === 'true',
-      storeName: form.get('storeName') ?? '',
     });
     if (new Set(input.industries).size !== input.industries.length)
       return { message: 'Select each industry only once.' };
@@ -127,7 +125,8 @@ export async function createPlatformCompany(
         ...(input.planId ? { planId: input.planId } : {}),
         industries: input.industries,
         seller: input.seller,
-        ...(input.storeName ? { storeName: input.storeName } : {}),
+        // Seller display name defaults to this company name in the
+        // canonical RPC; never accept a conflicting storefront field.
       });
     } catch (error) {
       // Best-effort cleanup of an identity created in this request only.
@@ -167,20 +166,16 @@ export async function createPlatformCompany(
 
 export async function enablePlatformSeller(_state: State, form: FormData) {
   try {
-    const { authorization, client } = await serverServices();
+    const { authorization, client, repository } = await serverServices();
     await authorization.requirePlatformPermission(
       'platform.organizations.manage',
     );
     const organizationId = idSchema.parse(form.get('organizationId'));
-    const storeName = z
-      .string()
-      .trim()
-      .min(2)
-      .max(150)
-      .parse(form.get('storeName'));
+    const organization = await repository.organization(organizationId);
+    // A seller storefront is the company identity, not a separate name.
     await createPlatformCompaniesRepository(client).enableSeller(
       organizationId,
-      storeName,
+      organization.name,
     );
     revalidatePath('/admin/organizations/' + organizationId);
     revalidatePath('/admin/organizations');
