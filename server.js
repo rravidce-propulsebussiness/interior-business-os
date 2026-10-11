@@ -1,5 +1,5 @@
 import { createRequire } from 'node:module';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { validateDeploymentEnvironment } from './packages/shared/src/runtime.ts';
@@ -36,6 +36,27 @@ if (!existsSync(resolve(appDir, '.next', 'BUILD_ID'))) {
   throw new Error(
     `[Business OS] Missing Next.js build artifact for ${service}. Inspect Hostinger published files.`,
   );
+}
+
+// The release ID is compiled into the Next.js build. Recover it from the
+// published artifact at process startup so build/runtime stay on the same
+// deployment even when Hostinger does not persist build-only environment.
+const releaseManifest = resolve(appDir, '.next', 'required-server-files.json');
+if (existsSync(releaseManifest)) {
+  const manifest = JSON.parse(readFileSync(releaseManifest, 'utf8'));
+  const builtId = manifest?.config?.deploymentId;
+  if (typeof builtId === 'string' && builtId.length > 0) {
+    if (
+      process.env.NEXT_DEPLOYMENT_ID &&
+      process.env.NEXT_DEPLOYMENT_ID !== builtId
+    ) {
+      throw new Error(
+        '[Business OS] Runtime NEXT_DEPLOYMENT_ID does not match the deployed Next.js build.',
+      );
+    }
+    process.env.NEXT_DEPLOYMENT_ID = builtId;
+    console.log(`[Business OS] Running deployment ${builtId}.`);
+  }
 }
 
 const appRequire = createRequire(resolve(appDir, 'package.json'));

@@ -17,6 +17,66 @@ Create a separate **staging subdomain** rather than overwriting an existing prod
 
 For other independent Node.js deployments, set `BUSINESS_OS_SERVICE=platform-admin` or `BUSINESS_OS_SERVICE=websites`, use their own subdomains and build them separately from this same repository.
 
+## Avoid Server Action 404 after redeployment
+
+Next.js Server Actions use build-specific identifiers. When Hostinger serves
+an old form/bundle against a different Next.js build, it can return
+`UnrecognizedActionError: Server Action ... was not found` (HTTP 404).
+This is **not** fixed by giving the browser an elevated Supabase key.
+
+The `hostinger:build` command now creates a unique, non-secret
+`NEXT_DEPLOYMENT_ID` **for each build** and embeds it into the Business App.
+Next.js uses it to identify deployment skew and force a full navigation
+rather than using incompatible cached Server Actions. The native launcher
+reads the ID from the published Next.js build and restores it at runtime.
+
+For reliable deployments:
+
+1. **One build, one published artifact, one restart.** Use branch `main`,
+   repository root, Node 24, build command `npm run hostinger:build`,
+   entry `server.js`, and `BUSINESS_OS_SERVICE=business-app`.
+   Never build over the directory of a running Node service.
+2. Hostinger's npm `postinstall` fallback may build the app automatically.
+   **If your Hostinger project reliably runs the explicit build command,**
+   set `BUSINESS_OS_SKIP_AUTOBUILD=1` to prevent building twice. Do not
+   set it if the explicit build command is missing or ignored.
+3. Recommended for self-hosting: create an independent random **32-byte
+   base64** encryption key with a trusted local terminal:
+
+   ```sh
+   node -e "console.log(require('node:crypto').randomBytes(32).toString('base64'))"
+   ```
+
+   Put the result **only in Hostinger's private environment settings** as
+   `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY`. It must be identical at
+   **build and runtime**, and across all instances of this Business App.
+   Never use `NEXT_PUBLIC_`, log it, or commit it. Generate it once;
+   do not rotate casually during a rolling release. A consistent encryption
+   key complements deployment IDs but **does not make old action IDs
+   valid forever**. The build warns if the key is absent and refuses malformed
+   keys.
+
+4. Leave `NEXT_DEPLOYMENT_ID` **unset** in Hostinger unless the release
+   automation supplies a **new non-secret value for each deploy**. Reusing
+   a fixed ID would disable change detection.
+5. Publish the completed artifact, restart Node, open a fresh/private browser
+   session and revisit `/admin/organizations/create`. The page is
+   dynamically rendered, but old tabs still keep old JavaScript and forms.
+6. If a brand-new private window still receives an Action 404, compare
+   Hostinger build logs (`Next deployment ID`), server startup logs
+   (`Running deployment`), deployed `.next/BUILD_ID`, and any CDN/edge
+   caching for HTML or RSC requests. Static `/_next/static` assets can
+   be cached by version; authenticated HTML, RSC responses and POST Server
+   Actions must not be cached across releases. Roll back/redeploy the entire
+   matching build if those versions disagree. Do not keep retrying a form
+   whose previous request might have completed.
+
+Owner provisioning is a **separate configuration concern**. Only the
+Business App backend needs `SUPABASE_SECRET_KEY` (or the legacy
+`SUPABASE_SERVICE_ROLE_KEY`) for creating a _new_ owner identity. It must
+be a server-only credential matching the same Supabase project used by the
+Business App's public URL and publishable key.
+
 ## Required environment variables
 
 Set environment variables in the **Hostinger secret/settings UI** rather than committing an `.env` file. Set public Supabase values **before building** because Next.js embeds them in browser bundles. Use different staging/production projects and keys. For a staging Business App:
@@ -40,7 +100,7 @@ BROCHURE_PUBLIC_ORIGIN=https://YOUR-STAGING-WEBSITES-DOMAIN
 
 Use `APP_ENV=production` and `SUPABASE_ENVIRONMENT=production` together only after production sign-off. Generate **independent** 64-character hex signing keys securely (e.g. `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`), and provision the matching private database keys as described in the existing quotation/website documentation. Do not reuse the Supabase publishable key as a signing key.
 
-Platform Admin also needs `AUTH_RECOVERY_SIGNING_KEY` but not the Business App's quotation/website signing keys. Websites needs the public Supabase configuration, `APP_ORIGIN`, `BROCHURE_PUBLIC_ORIGIN`, and matching environment fields; it must not receive private Business App signing keys. Neither app needs Supabase service-role credentials. Worker credentials belong **only** to the independently hosted worker.
+Platform Admin also needs `AUTH_RECOVERY_SIGNING_KEY` but not the Business App's quotation/website signing keys. Websites needs the public Supabase configuration, `APP_ORIGIN`, `BROCHURE_PUBLIC_ORIGIN`, and matching environment fields; it must not receive private Business App signing keys. The Business App is the exception when provisioning new owner identities: it needs a narrowly hosted, **server-only** `SUPABASE_SECRET_KEY` (or legacy `SUPABASE_SERVICE_ROLE_KEY`). Platform Admin and Websites do not need that credential. Worker credentials belong **only** to the independently hosted worker.
 
 Validate configuration with `node scripts/start-service.mjs business-app --check` after installing workspace dependencies. Then run a read-only hosted smoke test and acceptance checks.
 
