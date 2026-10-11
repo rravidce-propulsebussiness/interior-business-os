@@ -1,4 +1,4 @@
-import Link from 'next/link';
+/* eslint-disable @next/next/no-html-link-for-pages -- Intentional full-document navigation avoids incomplete RSC Flight streams on Hostinger. */
 import type { ReactNode } from 'react';
 import { notFound, redirect } from 'next/navigation';
 import {
@@ -100,9 +100,9 @@ function DashboardStat({
     </>
   );
   return href ? (
-    <Link href={href} className="owner-stat">
+    <a href={href} className="owner-stat">
       {content}
-    </Link>
+    </a>
   ) : (
     <div className="owner-stat">{content}</div>
   );
@@ -120,13 +120,13 @@ function QuickLink({
   primary?: boolean;
 }) {
   return (
-    <Link
+    <a
       href={href}
       className={'owner-quick-button' + (primary ? ' owner-quick-primary' : '')}
     >
       <OwnerIcon name={icon} size={19} />
       <span>{children}</span>
-    </Link>
+    </a>
   );
 }
 
@@ -142,10 +142,10 @@ function AccessTile({
   tone: string;
 }) {
   return (
-    <Link className={'owner-access-tile owner-tile-' + tone} href={href}>
+    <a className={'owner-access-tile owner-tile-' + tone} href={href}>
       <OwnerIcon name={icon} size={27} />
       <span>{label}</span>
-    </Link>
+    </a>
   );
 }
 
@@ -191,9 +191,7 @@ export default async function Dashboard({
           Your account needs an active company membership to access business
           tools.
         </p>
-        <Link href="/dashboard/company/invitations">
-          Review your invitations →
-        </Link>
+        <a href="/dashboard/company/invitations">Review your invitations →</a>
       </main>
     );
   }
@@ -537,9 +535,9 @@ export default async function Dashboard({
               </small>
             </span>
             {canWebsite && (
-              <Link className="owner-company-action" href="/dashboard/website">
+              <a className="owner-company-action" href="/dashboard/website">
                 <OwnerIcon name="globe" size={16} /> Website
-              </Link>
+              </a>
             )}
           </div>
         </section>
@@ -553,7 +551,7 @@ export default async function Dashboard({
                 access.
               </p>
             </div>
-            <Link href="/dashboard">Clear search</Link>
+            <a href="/dashboard">Clear search</a>
             {!hasRows && (
               <p className="owner-search-empty">
                 No matching leads, active projects, or quotations were found.
@@ -653,12 +651,9 @@ export default async function Dashboard({
               ))}
             </div>
             {canInvite && (
-              <Link
-                className="owner-quick-invite"
-                href="/dashboard/company/team"
-              >
+              <a className="owner-quick-invite" href="/dashboard/company/team">
                 <OwnerIcon name="team" size={19} /> Invite Team Member
-              </Link>
+              </a>
             )}
           </section>
         )}
@@ -668,9 +663,9 @@ export default async function Dashboard({
             <div className="owner-panel-heading">
               <h2>Recent Leads</h2>
               {canLeads && (
-                <Link href="/dashboard/crm/leads">
+                <a href="/dashboard/crm/leads">
                   View All <OwnerIcon name="arrow" size={15} />
-                </Link>
+                </a>
               )}
             </div>
             {!canLeads ? (
@@ -697,9 +692,7 @@ export default async function Dashboard({
                     : 'Capture enquiries and follow-ups in one place.'}
                 </p>
                 {has('lead.create', 'crm') && (
-                  <Link href="/dashboard/crm/leads/new">
-                    Add your first lead →
-                  </Link>
+                  <a href="/dashboard/crm/leads/new">Add your first lead →</a>
                 )}
               </div>
             ) : (
@@ -721,9 +714,9 @@ export default async function Dashboard({
                         <tr key={leadId || String(i)}>
                           <td>
                             {leadId ? (
-                              <Link href={'/dashboard/crm/leads/' + leadId}>
+                              <a href={'/dashboard/crm/leads/' + leadId}>
                                 {asText(lead.name) || 'Lead'}
-                              </Link>
+                              </a>
                             ) : (
                               asText(lead.name) || 'Lead'
                             )}
@@ -766,9 +759,9 @@ export default async function Dashboard({
             <div className="owner-panel-heading">
               <h2>Ongoing Projects</h2>
               {canProjects && (
-                <Link href="/dashboard/projects">
+                <a href="/dashboard/projects">
                   View All <OwnerIcon name="arrow" size={15} />
-                </Link>
+                </a>
               )}
             </div>
             {!canProjects ? (
@@ -778,9 +771,7 @@ export default async function Dashboard({
                 </span>
                 <p>Company project access is not enabled for this account.</p>
                 {canSites && (
-                  <Link href="/dashboard/site-projects">
-                    My assigned sites →
-                  </Link>
+                  <a href="/dashboard/site-projects">My assigned sites →</a>
                 )}
               </div>
             ) : !projects ? (
@@ -799,9 +790,7 @@ export default async function Dashboard({
                 </strong>
                 <p>Manage project delivery, site updates and handover.</p>
                 {has('project.create', 'projects') && (
-                  <Link href="/dashboard/customers">
-                    Create from a client →
-                  </Link>
+                  <a href="/dashboard/customers">Create from a client →</a>
                 )}
               </div>
             ) : (
@@ -809,7 +798,7 @@ export default async function Dashboard({
                 {projects.rows.slice(0, 4).map((project) => {
                   const site = siteById.get(project.id);
                   return (
-                    <Link
+                    <a
                       className="owner-project-row"
                       href={'/dashboard/projects/' + project.id}
                       key={project.id}
@@ -837,7 +826,7 @@ export default async function Dashboard({
                           ? titleCase(site.stage)
                           : titleCase(project.status)}
                       </span>
-                    </Link>
+                    </a>
                   );
                 })}
               </div>
@@ -861,9 +850,9 @@ export default async function Dashboard({
             <section className="owner-panel owner-team-panel">
               <div className="owner-panel-heading">
                 <h2>Team Members</h2>
-                <Link href="/dashboard/company/team">
+                <a href="/dashboard/company/team">
                   Manage Team <OwnerIcon name="arrow" size={15} />
-                </Link>
+                </a>
               </div>
               <div className="owner-team-content">
                 <span className="owner-team-illustration">
@@ -886,19 +875,19 @@ export default async function Dashboard({
                   </p>
                   <div className="owner-team-buttons">
                     {canInvite && (
-                      <Link
+                      <a
                         href="/dashboard/company/team"
                         className="owner-team-primary"
                       >
                         <OwnerIcon name="team" size={16} /> Invite Team Member
-                      </Link>
+                      </a>
                     )}
-                    <Link
+                    <a
                       href="/dashboard/company/team"
                       className="owner-team-secondary"
                     >
                       Manage Access
-                    </Link>
+                    </a>
                   </div>
                 </div>
               </div>

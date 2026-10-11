@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-html-link-for-pages -- Intentional full-document navigation avoids incomplete RSC Flight streams on Hostinger. */
 import Link from 'next/link';
 import { signOut } from '@business-os/auth/actions';
 import {
@@ -34,9 +35,9 @@ export default async function Page() {
             >
               Signed in{user?.email ? ` · ${user.email}` : ''}
             </span>
-            <Link className="premium-link-secondary" href="/dashboard">
+            <a className="premium-link-secondary" href="/dashboard">
               Dashboard
-            </Link>
+            </a>
             <form action={signOut}>
               <button type="submit" className="premium-link-secondary">
                 Sign out
@@ -63,9 +64,9 @@ export default async function Page() {
           </p>
           <div className="hero-actions">
             {signedIn ? (
-              <Link className="premium-link" href="/dashboard">
+              <a className="premium-link" href="/dashboard">
                 Continue to your dashboard →
-              </Link>
+              </a>
             ) : (
               <>
                 <Link className="premium-link" href="/login">

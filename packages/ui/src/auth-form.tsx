@@ -1,5 +1,5 @@
 'use client';
-import { startTransition, useActionState } from 'react';
+import { startTransition, useActionState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Button } from './index';
 export function AuthForm({
@@ -9,7 +9,7 @@ export function AuthForm({
   action: (
     state: { message: string },
     form: FormData,
-  ) => Promise<{ message: string }>;
+  ) => Promise<{ message: string; authenticated?: boolean }>;
   registerAccount?: boolean;
 }) {
   const [state, dispatch, pending] = useActionState(action, { message: '' });
@@ -18,6 +18,16 @@ export function AuthForm({
     handleSubmit,
     formState: { errors },
   } = useForm<{ email: string; password: string; fullName: string }>();
+
+  useEffect(() => {
+    // A fresh document avoids an incomplete RSC Flight transition immediately
+    // after Supabase authentication updates the session cookies.
+    if (state.authenticated)
+      window.location.replace(
+        new URL('/dashboard', window.location.origin).href,
+      );
+  }, [state.authenticated]);
+
   return (
     <form
       className="mt-6 grid max-w-md gap-4"
@@ -66,7 +76,7 @@ export function AuthForm({
           Complete all fields. New passwords need at least 12 characters.
         </p>
       )}
-      <Button disabled={pending} type="submit">
+      <Button disabled={pending || state.authenticated === true} type="submit">
         {pending
           ? 'Please wait…'
           : registerAccount
