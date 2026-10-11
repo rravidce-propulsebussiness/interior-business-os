@@ -104,11 +104,12 @@ function safePhone(value: string) {
 function whatsapp(value: string) {
   return value.replace(/\D/g, '');
 }
-function date(value: string | null, includeTime = false) {
+function date(value: string | null, includeTime = false, timeZone = 'Asia/Kolkata') {
   if (!value) return 'Not scheduled';
   const parsed = new Date(value);
   if (Number.isNaN(parsed.valueOf())) return 'Not scheduled';
   return new Intl.DateTimeFormat('en-IN', {
+    timeZone,
     day: '2-digit',
     month: 'short',
     year: 'numeric',
@@ -142,13 +143,15 @@ function statusTone(lead: LeadView) {
   if (/follow|contact/i.test(lead.stageName)) return 'amber';
   return 'blue';
 }
-function due(lead: LeadView) {
+function due(lead: LeadView, asOf: string, timeZone: string) {
   if (!lead.nextFollowUpAt) return 'none';
   const d = new Date(lead.nextFollowUpAt).getTime();
   if (!Number.isFinite(d)) return 'none';
-  if (d < Date.now()) return 'late';
-  return new Date(lead.nextFollowUpAt).toDateString() ===
-    new Date().toDateString()
+  if (d < new Date(asOf).getTime()) return 'late';
+  const day = new Intl.DateTimeFormat('sv-SE', {
+    timeZone, year: 'numeric', month: '2-digit', day: '2-digit',
+  });
+  return day.format(new Date(lead.nextFollowUpAt)) === day.format(new Date(asOf))
     ? 'today'
     : 'future';
 }
@@ -230,6 +233,8 @@ export function LeadsWorkspace({
   canConvert,
   canQuote,
   organizationName,
+  timeZone,
+  asOf,
 }: {
   rows: LeadView[];
   stats: {
@@ -258,6 +263,8 @@ export function LeadsWorkspace({
   canConvert: boolean;
   canQuote: boolean;
   organizationName: string;
+  timeZone: string;
+  asOf: string;
 }) {
   const [selectedId, setSelectedId] = useState<string | null>(
     rows[0]?.id ?? null,
@@ -650,10 +657,10 @@ export function LeadsWorkspace({
                           </span>
                         </td>
                         <td>
-                          <span className={'crm-due crm-due-' + due(lead)}>
+                          <span className={'crm-due crm-due-' + due(lead, asOf, timeZone)}>
                             <Icon name="clock" size={15} />
                             {lead.nextFollowUpAt
-                              ? date(lead.nextFollowUpAt, true)
+                              ? date(lead.nextFollowUpAt, true, timeZone)
                               : 'Not set'}
                           </span>
                         </td>
@@ -739,7 +746,7 @@ export function LeadsWorkspace({
                     </div>
                     <small className="crm-mobile-sub">
                       {lead.location || 'Location not provided'} · Follow-up{' '}
-                      {date(lead.nextFollowUpAt)}
+                      {date(lead.nextFollowUpAt, false, timeZone)}
                     </small>
                   </article>
                 ))}
@@ -816,7 +823,7 @@ export function LeadsWorkspace({
                     </span>
                   </div>
                   <p>{selected.number || 'Lead'}</p>
-                  <small>Created {date(selected.createdAt, true)}</small>
+                  <small>Created {date(selected.createdAt, true, timeZone)}</small>
                 </div>
               </div>
               <button
@@ -936,7 +943,7 @@ export function LeadsWorkspace({
                     </Field>
                     <Field label="Location">{text(selected.location)}</Field>
                     <Field label="Next follow-up">
-                      {date(selected.nextFollowUpAt, true)}
+                      {date(selected.nextFollowUpAt, true, timeZone)}
                     </Field>
                     <Field label="Requirement">
                       {text(selected.requirement)}
