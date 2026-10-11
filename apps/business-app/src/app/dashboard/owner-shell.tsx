@@ -136,7 +136,9 @@ export function OwnerShell({
         </div>
         <nav className="owner-nav" aria-label="Your company's modules">
           {navigation.map((item) => {
-            const selected = currentHref ? (item.href === currentHref) : item.href === '/dashboard';
+            const selected = currentHref
+              ? item.href === currentHref
+              : item.href === '/dashboard';
             return (
               <a
                 key={item.href}

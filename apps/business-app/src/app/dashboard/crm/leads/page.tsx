@@ -1,10 +1,7 @@
 import { canAccess } from '@business-os/auth';
 import { crmServices, resultSchema } from '../service';
 import { lookups, pageNumber, type Params } from '../lookups';
-import {
-  OwnerShell,
-  type OwnerNavItem,
-} from '../../owner-shell';
+import { OwnerShell, type OwnerNavItem } from '../../owner-shell';
 import {
   LeadsWorkspace,
   type LeadView,
@@ -20,8 +17,19 @@ export const dynamic = 'force-dynamic';
 const base = '/dashboard/crm/leads';
 const number = new Intl.NumberFormat('en-IN');
 const allowedFilters = [
-  'q', 'stage_id', 'assigned_to', 'source_id', 'branch_id', 'priority',
-  'due', 'from', 'until', 'converted', 'lifecycle', 'sort', 'unassigned',
+  'q',
+  'stage_id',
+  'assigned_to',
+  'source_id',
+  'branch_id',
+  'priority',
+  'due',
+  'from',
+  'until',
+  'converted',
+  'lifecycle',
+  'sort',
+  'unassigned',
 ] as const;
 
 function label(value: unknown): string {
@@ -38,7 +46,10 @@ function finiteNumber(value: unknown): string | null {
   return String(value);
 }
 
-function searchLink(params: Params, changes: Record<string, string | null>): string {
+function searchLink(
+  params: Params,
+  changes: Record<string, string | null>,
+): string {
   const next = new URLSearchParams();
   for (const key of allowedFilters) {
     if (params[key]) next.set(key, params[key]!);
@@ -51,9 +62,7 @@ function searchLink(params: Params, changes: Record<string, string | null>): str
   return query ? base + '?' + query : base;
 }
 
-async function metric(
-  run: Promise<unknown>,
-): Promise<number | null> {
+async function metric(run: Promise<unknown>): Promise<number | null> {
   try {
     const parsed = resultSchema.parse(await run);
     return parsed.total;
@@ -72,12 +81,12 @@ export default async function Leads({
   const page = pageNumber(p.page);
   const choices = await lookups(s, p);
   const filter = Object.fromEntries(
-    allowedFilters
-      .filter((key) => p[key])
-      .map((key) => [key, p[key]!]),
+    allowedFilters.filter((key) => p[key]).map((key) => [key, p[key]!]),
   );
   const [result, organization, user, plans] = await Promise.all([
-    s.crm.search('leads', filter, page).then((value) => resultSchema.parse(value)),
+    s.crm
+      .search('leads', filter, page)
+      .then((value) => resultSchema.parse(value)),
     s.repository.organization(s.org),
     s.authorization.requireAuthenticatedUser(),
     s.repository.plans().catch(() => null),
@@ -93,14 +102,19 @@ export default async function Leads({
     day: '2-digit',
   }).format(new Date());
 
-  const [total, newToday, dueToday, overdue, converted, lost] = await Promise.all([
-    metric(s.crm.search('leads', {})),
-    metric(s.crm.search('leads', { from: today, until: today })),
-    metric(s.crm.search('lead_followups', { queue: 'today', status: 'pending' })),
-    metric(s.crm.search('lead_followups', { queue: 'overdue', status: 'pending' })),
-    metric(s.crm.search('leads', { converted: true })),
-    metric(s.crm.search('leads', { lifecycle: 'lost' })),
-  ]);
+  const [total, newToday, dueToday, overdue, converted, lost] =
+    await Promise.all([
+      metric(s.crm.search('leads', {})),
+      metric(s.crm.search('leads', { from: today, until: today })),
+      metric(
+        s.crm.search('lead_followups', { queue: 'today', status: 'pending' }),
+      ),
+      metric(
+        s.crm.search('lead_followups', { queue: 'overdue', status: 'pending' }),
+      ),
+      metric(s.crm.search('leads', { converted: true })),
+      metric(s.crm.search('leads', { lifecycle: 'lost' })),
+    ]);
 
   const stages: LeadStage[] = choices.stages.rows
     .filter((r) => typeof r.id === 'string' && typeof r.name === 'string')
@@ -126,8 +140,12 @@ export default async function Leads({
     label: String(reason.name),
   }));
   const stagesById = new Map(stages.map((stage) => [stage.id, stage]));
-  const sourcesById = new Map(sources.map((source) => [source.value, source.label]));
-  const teamById = new Map(assignees.map((member) => [member.value, member.label]));
+  const sourcesById = new Map(
+    sources.map((source) => [source.value, source.label]),
+  );
+  const teamById = new Map(
+    assignees.map((member) => [member.value, member.label]),
+  );
   const rows: LeadView[] = result.rows.map((r) => {
     const stageId = label(r.stage_id);
     const assigneeId = label(r.assigned_to);
@@ -140,11 +158,13 @@ export default async function Leads({
       phone: label(r.phone),
       phoneNormalized: label(r.phone_normalized),
       email: label(r.email),
-      source: sourcesById.get(label(r.source_id)) ?? label(r.source_detail) ?? '',
+      source:
+        sourcesById.get(label(r.source_id)) ?? label(r.source_detail) ?? '',
       priority: label(r.priority) || 'normal',
       lifecycle: label(r.lifecycle) || 'open',
       stageId,
-      stageName: stagesById.get(stageId)?.name ?? (label(r.lifecycle) || 'Open'),
+      stageName:
+        stagesById.get(stageId)?.name ?? (label(r.lifecycle) || 'Open'),
       assignedTo: assigneeId,
       assignedName: teamById.get(assigneeId) ?? '',
       location: label(r.location),
@@ -163,52 +183,156 @@ export default async function Leads({
   });
 
   const tabs: LeadTab[] = [
-    { label: 'All Leads', href: searchLink(p, { lifecycle: null, stage_id: null, converted: null, due: null }), count: total, active: !p.lifecycle && !p.stage_id && !p.converted && !p.due },
-    ...stages.filter((stage) => stage.outcome === 'open').slice(0, 4).map((stage) => ({
-      label: stage.name,
-      href: searchLink(p, { stage_id: stage.id, lifecycle: null, converted: null, due: null }),
-      count: p.stage_id === stage.id ? result.total : null,
-      active: p.stage_id === stage.id,
-    })),
-    { label: 'Converted', href: searchLink(p, { converted: 'true', lifecycle: null, stage_id: null, due: null }), count: converted, active: p.converted === 'true' },
-    { label: 'Lost', href: searchLink(p, { lifecycle: 'lost', converted: null, stage_id: null, due: null }), count: lost, active: p.lifecycle === 'lost' },
+    {
+      label: 'All Leads',
+      href: searchLink(p, {
+        lifecycle: null,
+        stage_id: null,
+        converted: null,
+        due: null,
+      }),
+      count: total,
+      active: !p.lifecycle && !p.stage_id && !p.converted && !p.due,
+    },
+    ...stages
+      .filter((stage) => stage.outcome === 'open')
+      .slice(0, 4)
+      .map((stage) => ({
+        label: stage.name,
+        href: searchLink(p, {
+          stage_id: stage.id,
+          lifecycle: null,
+          converted: null,
+          due: null,
+        }),
+        count: p.stage_id === stage.id ? result.total : null,
+        active: p.stage_id === stage.id,
+      })),
+    {
+      label: 'Converted',
+      href: searchLink(p, {
+        converted: 'true',
+        lifecycle: null,
+        stage_id: null,
+        due: null,
+      }),
+      count: converted,
+      active: p.converted === 'true',
+    },
+    {
+      label: 'Lost',
+      href: searchLink(p, {
+        lifecycle: 'lost',
+        converted: null,
+        stage_id: null,
+        due: null,
+      }),
+      count: lost,
+      active: p.lifecycle === 'lost',
+    },
   ];
 
-  const may = (permission: string, moduleKey?: string) => canAccess(s.context, {
-    organizationId: s.org,
-    permission,
-    ...(moduleKey ? { moduleKey } : {}),
-  });
+  const may = (permission: string, moduleKey?: string) =>
+    canAccess(s.context, {
+      organizationId: s.org,
+      permission,
+      ...(moduleKey ? { moduleKey } : {}),
+    });
 
-  const nav: OwnerNavItem[] = [{ label: 'Dashboard', href: '/dashboard', icon: 'dashboard' }];
+  const nav: OwnerNavItem[] = [
+    { label: 'Dashboard', href: '/dashboard', icon: 'dashboard' },
+  ];
   nav.push({ label: 'Leads', href: base, icon: 'leads' });
   if (may('quotation.view', 'quotation'))
-    nav.push({ label: 'Quotations', href: '/dashboard/quotations', icon: 'quotations' });
+    nav.push({
+      label: 'Quotations',
+      href: '/dashboard/quotations',
+      icon: 'quotations',
+    });
   if (may('project.view', 'projects'))
-    nav.push({ label: 'Projects', href: '/dashboard/projects', icon: 'projects' });
+    nav.push({
+      label: 'Projects',
+      href: '/dashboard/projects',
+      icon: 'projects',
+    });
   if (may('customer.view', 'crm') || may('customer.view', 'quotation'))
-    nav.push({ label: 'Clients', href: '/dashboard/customers', icon: 'clients' });
+    nav.push({
+      label: 'Clients',
+      href: '/dashboard/customers',
+      icon: 'clients',
+    });
   if (may('purchase.view'))
-    nav.push({ label: 'Marketplace', href: '/dashboard/marketplace', icon: 'marketplace' });
+    nav.push({
+      label: 'Marketplace',
+      href: '/dashboard/marketplace',
+      icon: 'marketplace',
+    });
   if (may('invoice.view', 'billing'))
-    nav.push({ label: 'Billing & Invoices', href: '/dashboard/billing', icon: 'billing' });
+    nav.push({
+      label: 'Billing & Invoices',
+      href: '/dashboard/billing',
+      icon: 'billing',
+    });
   if (may('report.view'))
     nav.push({ label: 'Reports', href: '/dashboard/reports', icon: 'reports' });
   if (may('team.view'))
     nav.push({ label: 'Team', href: '/dashboard/company/team', icon: 'team' });
   if (may('organization.view'))
-    nav.push({ label: 'Company Settings', href: '/dashboard/company/settings', icon: 'settings' });
+    nav.push({
+      label: 'Company Settings',
+      href: '/dashboard/company/settings',
+      icon: 'settings',
+    });
 
-  const displayName = (user.email ?? '').split('@')[0]?.split(/[._-]/).filter(Boolean).map((word) =>
-    word.charAt(0).toUpperCase() + word.slice(1),
-  ).slice(0, 2).join(' ') || 'Owner';
+  const displayName =
+    (user.email ?? '')
+      .split('@')[0]
+      ?.split(/[._-]/)
+      .filter(Boolean)
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .slice(0, 2)
+      .join(' ') || 'Owner';
   const plan = plans?.find((item) => item.id === organization.plan_id);
   const stats = [
-    { label: 'Total Leads', value: total === null ? '—' : number.format(total), note: 'All company leads', icon: 'leads' as const, tone: 'blue' },
-    { label: 'New Today', value: newToday === null ? '—' : number.format(newToday), note: 'Created today', icon: 'plus' as const, tone: 'purple' },
-    { label: 'Follow-ups Due', value: dueToday === null || overdue === null ? '—' : number.format(dueToday + overdue), note: overdue === null ? 'Unavailable' : 'Overdue: ' + number.format(overdue), icon: 'calendar' as const, tone: 'rose' },
-    { label: 'Converted', value: converted === null ? '—' : number.format(converted), note: 'Converted to projects', icon: 'check' as const, tone: 'green' },
-    { label: 'Lost', value: lost === null ? '—' : number.format(lost), note: 'Closed lost', icon: 'close' as const, tone: 'orange' },
+    {
+      label: 'Total Leads',
+      value: total === null ? '—' : number.format(total),
+      note: 'All company leads',
+      icon: 'leads' as const,
+      tone: 'blue',
+    },
+    {
+      label: 'New Today',
+      value: newToday === null ? '—' : number.format(newToday),
+      note: 'Created today',
+      icon: 'plus' as const,
+      tone: 'purple',
+    },
+    {
+      label: 'Follow-ups Due',
+      value:
+        dueToday === null || overdue === null
+          ? '—'
+          : number.format(dueToday + overdue),
+      note:
+        overdue === null ? 'Unavailable' : 'Overdue: ' + number.format(overdue),
+      icon: 'calendar' as const,
+      tone: 'rose',
+    },
+    {
+      label: 'Converted',
+      value: converted === null ? '—' : number.format(converted),
+      note: 'Converted to projects',
+      icon: 'check' as const,
+      tone: 'green',
+    },
+    {
+      label: 'Lost',
+      value: lost === null ? '—' : number.format(lost),
+      note: 'Closed lost',
+      icon: 'close' as const,
+      tone: 'orange',
+    },
   ];
 
   return (
@@ -235,7 +359,11 @@ export default async function Leads({
         count={result.total}
         page={page}
         prevHref={page > 1 ? searchLink(p, { page: String(page - 1) }) : null}
-        nextHref={page * 25 < result.total ? searchLink(p, { page: String(page + 1) }) : null}
+        nextHref={
+          page * 25 < result.total
+            ? searchLink(p, { page: String(page + 1) })
+            : null
+        }
         canCreate={s.allowed('lead.create')}
         canManage={s.allowed('lead.manage')}
         canAssign={s.allowed('lead.assign')}
