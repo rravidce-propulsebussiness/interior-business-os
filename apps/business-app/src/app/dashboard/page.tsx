@@ -25,11 +25,6 @@ export const dynamic = 'force-dynamic';
 
 type SearchParams = { q?: string };
 type Lead = Record<string, unknown>;
-type Project = {
-  id: string;
-  name?: string;
-  status: string;
-};
 type SiteProject = { id: string; stage: string; role: string };
 
 const number = new Intl.NumberFormat('en-IN');
@@ -60,7 +55,7 @@ function emailDisplayName(email: string): string {
   return identifier.map((word) => titleCase(word)).join(' ') || 'there';
 }
 
-async function optional<T>(value: Promise<T>): Promise<T | null> {
+async function optional<T>(value: PromiseLike<T>): Promise<T | null> {
   try {
     return await value;
   } catch {
@@ -384,7 +379,7 @@ export default async function Dashboard({
           <section className="owner-quick-actions" aria-label="Quick actions">
             <div className="owner-quick-scroll">
               {quickActions.map((item) => (
-                <QuickLink key={item.label} href={item.href} icon={item.icon} primary={item.primary}>{item.label}</QuickLink>
+                <QuickLink key={item.label} href={item.href} icon={item.icon} primary={item.primary === true}>{item.label}</QuickLink>
               ))}
             </div>
             {canInvite && (
@@ -461,7 +456,7 @@ export default async function Dashboard({
               </div>
             ) : (
               <div className="owner-project-list">
-                {projects.rows.slice(0, 4).map((project: Project) => {
+                {projects.rows.slice(0, 4).map((project) => {
                   const site = siteById.get(project.id);
                   return (
                     <Link className="owner-project-row" href={'/dashboard/projects/' + project.id} key={project.id}>
