@@ -15,7 +15,10 @@ export default async function Settings() {
       <Link href="/dashboard/quotations">Quotations</Link>
       <h1 className="my-6 text-3xl">Company quotation design &amp; code</h1>
       <p>
-        Company owners control the quotation number prefix, logo, colors, columns, default terms and client-facing layout. The platform Super Admin does not create quotations. Changes apply to new quotations only; issued document snapshots remain unchanged.
+        Company owners control the quotation number prefix, logo, colors,
+        columns, default terms and client-facing layout. The platform Super
+        Admin does not create quotations. Changes apply to new quotations only;
+        issued document snapshots remain unchanged.
       </p>
       <MasterForm
         entity="organization_quotation_settings"

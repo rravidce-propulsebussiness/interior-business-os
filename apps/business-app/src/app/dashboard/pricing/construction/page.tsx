@@ -33,7 +33,10 @@ export default async function ConstructionPricing() {
           Open quotations →
         </Link>
       </nav>
-      <ConstructionPackagesManager packages={packages} canManage={canManagePrice} />
+      <ConstructionPackagesManager
+        packages={packages}
+        canManage={canManagePrice}
+      />
       <ConstructionRatesManager rates={rates} canManage={canManagePrice} />
     </main>
   );
