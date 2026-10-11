@@ -23,7 +23,8 @@ export default async function CompanySettings() {
   const options = [
     {
       label: 'Team and access',
-      description: 'Invite employees, give them roles, and control their permissions.',
+      description:
+        'Invite employees, give them roles, and control their permissions.',
       href: '/dashboard/company/team',
       enabled: canView('team.view') || canView('role.view'),
     },
@@ -48,15 +49,26 @@ export default async function CompanySettings() {
   ].filter((item) => item.enabled);
 
   return (
-    <main id="main-content" tabIndex={-1} className="min-h-screen bg-slate-50 px-5 py-10 text-slate-950 sm:px-8">
+    <main
+      id="main-content"
+      tabIndex={-1}
+      className="min-h-screen bg-slate-50 px-5 py-10 text-slate-950 sm:px-8"
+    >
       <div className="mx-auto max-w-5xl space-y-7">
-        <Link href="/dashboard" className="text-sm font-semibold text-blue-700 hover:underline">
+        <Link
+          href="/dashboard"
+          className="text-sm font-semibold text-blue-700 hover:underline"
+        >
           ← Back to your dashboard
         </Link>
         <header className="rounded-3xl bg-slate-950 p-8 text-white">
-          <p className="text-xs font-bold uppercase tracking-[.15em] text-blue-300">Your company only</p>
+          <p className="text-xs font-bold uppercase tracking-[.15em] text-blue-300">
+            Your company only
+          </p>
           <h1 className="mt-3 text-3xl font-bold">Company Settings</h1>
-          <p className="mt-2 text-sm text-slate-300">Manage the workspace for {company.name}.</p>
+          <p className="mt-2 text-sm text-slate-300">
+            Manage the workspace for {company.name}.
+          </p>
         </header>
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="text-lg font-bold">Business details</h2>
@@ -67,7 +79,9 @@ export default async function CompanySettings() {
             </div>
             <div>
               <dt className="text-xs text-slate-500">Workspace status</dt>
-              <dd className="mt-1 font-semibold capitalize">{company.status}</dd>
+              <dd className="mt-1 font-semibold capitalize">
+                {company.status}
+              </dd>
             </div>
             <div>
               <dt className="text-xs text-slate-500">Currency</dt>
@@ -79,15 +93,24 @@ export default async function CompanySettings() {
             </div>
           </dl>
           <p className="mt-6 text-xs leading-6 text-slate-500">
-            Core company identity and subscriptions are administered by the platform.
-            Your business tools and employee access can be managed below.
+            Core company identity and subscriptions are administered by the
+            platform. Your business tools and employee access can be managed
+            below.
           </p>
         </section>
         <section className="grid gap-4 sm:grid-cols-2">
           {options.map((item) => (
-            <Link key={item.href} href={item.href} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-blue-300">
-              <h2 className="font-bold">{item.label} <span aria-hidden="true">↗</span></h2>
-              <p className="mt-2 text-sm leading-6 text-slate-600">{item.description}</p>
+            <Link
+              key={item.href}
+              href={item.href}
+              className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-blue-300"
+            >
+              <h2 className="font-bold">
+                {item.label} <span aria-hidden="true">↗</span>
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                {item.description}
+              </p>
             </Link>
           ))}
         </section>
