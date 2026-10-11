@@ -52,7 +52,7 @@ export default async function NewQuotation({
           <h1 className="mt-3 text-3xl font-bold">Create Quotation</h1>
           <p className="mt-2 text-sm text-slate-300">
             Choose an active project in your company. The quotation will be
-            created in this project's workspace.
+            created in this project&apos;s workspace.
           </p>
         </header>
         <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
