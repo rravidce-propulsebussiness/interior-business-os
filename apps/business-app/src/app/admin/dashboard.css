@@ -844,3 +844,47 @@
 .org-owner-setup input[type='hidden'] {
   display: none;
 }
+
+/* Membership plan workspace: opt into light controls without changing the
+   site's existing dark global form defaults or duplicating admin styles. */
+.os-plans {
+  color-scheme: light;
+}
+
+.os-plans label {
+  color: #334155;
+}
+
+.os-plans input.os-plans-input {
+  border: 1px solid #dbe3ef !important;
+  background: #fff;
+  color: #0f172a;
+  box-shadow: none;
+}
+
+.os-plans input.os-plans-input::placeholder {
+  color: #94a3b8;
+}
+
+.os-plans input.os-plans-input:focus {
+  border-color: #2563eb !important;
+  background: #fff;
+  box-shadow: 0 0 0 4px #dbeafe;
+}
+
+.os-plans input.os-plans-checkbox {
+  width: 1rem;
+  height: 1rem;
+  min-width: 1rem;
+  margin: 0;
+  accent-color: #2563eb;
+}
+
+.os-plans button {
+  box-shadow: none;
+}
+
+.os-plans-dialog {
+  max-height: calc(100dvh - 2rem);
+  color-scheme: light;
+}

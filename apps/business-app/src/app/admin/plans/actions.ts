@@ -4,7 +4,7 @@ import { serverServices } from '@business-os/auth/server';
 import { safeFailure } from '@business-os/shared';
 
 export async function createSubscriptionPlan(
-  _state: { message: string },
+  _state: { message: string; created?: boolean },
   form: FormData,
 ) {
   try {
@@ -22,6 +22,7 @@ export async function createSubscriptionPlan(
     });
     revalidatePath('/admin/plans');
     return {
+      created: true,
       message:
         'New subscription plan saved. It is available for new approved organizations.',
     };
