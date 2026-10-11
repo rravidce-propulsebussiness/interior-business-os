@@ -888,3 +888,52 @@
   max-height: calc(100dvh - 2rem);
   color-scheme: light;
 }
+
+
+/* GST invoice template gallery: isolated from the global dark-themed inputs. */
+.gst-template-studio {
+  color-scheme: light;
+}
+
+.gst-template-studio label {
+  color: #334155;
+}
+
+.gst-template-studio input.gst-studio-input,
+.gst-template-studio select.gst-studio-input,
+.gst-template-studio textarea.gst-studio-input {
+  background: #fff;
+  border: 1px solid #dce5f2 !important;
+  color: #0f172a;
+  box-shadow: none;
+}
+
+.gst-template-studio input.gst-studio-input:focus,
+.gst-template-studio select.gst-studio-input:focus,
+.gst-template-studio textarea.gst-studio-input:focus {
+  background: #fff;
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 4px #dbeafe;
+}
+
+.gst-template-studio input.gst-studio-input::placeholder,
+.gst-template-studio textarea.gst-studio-input::placeholder {
+  color: #94a3b8;
+}
+
+.gst-template-studio input[type='checkbox'] {
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+  accent-color: #2563eb;
+}
+
+.gst-template-dialog {
+  color-scheme: light;
+}
+
+@media (max-width: 640px) {
+  .gst-template-dialog {
+    max-height: calc(100dvh - 1rem);
+  }
+}
