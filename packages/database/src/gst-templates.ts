@@ -27,6 +27,42 @@ export type GstInvoiceAppearance = {
   config: GstTemplateConfig;
 };
 
+export type GstFilingLine = {
+  description: string;
+  hsnSac: string;
+  unit: string;
+  quantity: number;
+  unitPrice: number;
+  discount: number;
+  gstRate: number;
+  taxable: number;
+  cgst: number;
+  sgst: number;
+  igst: number;
+  total: number;
+};
+
+export type GstFilingDocument = {
+  number: string;
+  kind: GstTemplateKind;
+  documentType: 'tax_invoice' | 'bill_of_supply' | 'commercial_invoice';
+  date: string;
+  placeOfSupply: string;
+  partyName: string;
+  partyGstin: string | null;
+  partyState: string;
+  supplierName: string;
+  supplierGstin: string | null;
+  reverseCharge: boolean;
+  taxable: number;
+  cgst: number;
+  sgst: number;
+  igst: number;
+  discount: number;
+  total: number;
+  lines: GstFilingLine[];
+};
+
 export function createGstTemplatesRepository(client: SupabaseClient<Database>) {
   const rpc = client.rpc.bind(client) as unknown as (
     name: string,
@@ -55,6 +91,14 @@ export function createGstTemplatesRepository(client: SupabaseClient<Database>) {
     tenantList: (organizationId: string) =>
       invoke<GstInvoiceTemplate[]>('gst_template_list', {
         p_org: organizationId,
+      }),
+    standard: (organizationId: string | null = null) =>
+      invoke<GstInvoiceAppearance>('gst_standard_invoice_format', { p_org: organizationId }),
+    setStandard: (templateId: string) =>
+      invoke<void>('gst_standard_invoice_select', { p_template_id: templateId }),
+    filingRows: (organizationId: string, from: string, to: string, kind: GstTemplateKind) =>
+      invoke<GstFilingDocument[]>('gst_filing_workpaper', {
+        p_org: organizationId, p_from: from, p_to: to, p_kind: kind,
       }),
     save: (input: {
       id?: string;
