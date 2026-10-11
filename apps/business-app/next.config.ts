@@ -1,6 +1,11 @@
 import type { NextConfig } from 'next';
 const isProduction = process.env.NODE_ENV === 'production';
 const config: NextConfig = {
+  // Ensures the browser reloads instead of submitting a stale Server Action
+  // across Hostinger deployments. Build script assigns a fresh ID per build.
+  ...(process.env.NEXT_DEPLOYMENT_ID
+    ? { deploymentId: process.env.NEXT_DEPLOYMENT_ID }
+    : {}),
   distDir:
     process.env.E2E_RECOVERY_BUILD === 'true' ? '.next-recovery' : '.next',
   transpilePackages: [
