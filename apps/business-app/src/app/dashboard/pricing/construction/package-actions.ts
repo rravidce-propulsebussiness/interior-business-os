@@ -11,7 +11,7 @@ const schema=z.object({
  name:z.string().trim().min(2).max(120),
  code:z.string().trim().toUpperCase().regex(/^[A-Z][A-Z0-9-]{1,19}$/),
  description:z.string().trim().max(600),
- ratePerSqft:z.string().regex(/^(0|[1-9]\\d{0,5})(\\.\\d{1,2})?$/).refine(v=>Number(v)>0),
+ ratePerSqft:z.string().regex(/^(0|[1-9]\d{0,5})(\.\d{1,2})?$/).refine(v=>Number(v)>0),
  status:z.enum(['active','inactive'])
 }).strict();
 
