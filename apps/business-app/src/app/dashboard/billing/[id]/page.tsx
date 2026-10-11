@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { activeOrganization, pageServices } from '@business-os/auth/server';
 import { createGstRepository, type GstLine } from '@business-os/database/gst';
+import { createGstTemplatesRepository } from '@business-os/database/gst-templates';
 import { idSchema } from '@business-os/shared';
 import { ActionForm } from '@business-os/ui/action-form';
 import { finalizeGstDocument } from '../actions';
@@ -29,6 +30,12 @@ export default async function GstDocumentDetail({
   const gst = createGstRepository(client);
   const doc = await gst.document(context.organizationId, id);
   const profile = await gst.profile(context.organizationId);
+  const appearance = await createGstTemplatesRepository(client).documentLayout(
+    context.organizationId,
+    id,
+  );
+  const layout = appearance?.config;
+  const accent = layout?.accent ?? '#0f766e';
   const canIssue =
     doc.isOwner &&
     context.grants.some(
@@ -105,10 +112,16 @@ export default async function GstDocumentDetail({
           </ActionForm>
         </section>
       )}
-      <article className="rounded-2xl border border-slate-200 bg-white p-7 shadow-sm sm:p-10 print:border-0 print:p-0 print:shadow-none">
+      <article
+        className="rounded-2xl border border-slate-200 bg-white p-7 shadow-sm sm:p-10 print:border-0 print:p-0 print:shadow-none"
+        style={{ borderTop: '6px solid ' + accent }}
+      >
         <header className="flex flex-wrap items-start justify-between gap-6 border-b border-slate-300 pb-6">
           <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-teal-700">
+            <p
+              className="text-xs font-bold uppercase tracking-widest"
+              style={{ color: accent }}
+            >
               {doc.status === 'draft'
                 ? 'DRAFT — Not a tax document'
                 : doc.kind === 'purchase_bill'
@@ -125,6 +138,9 @@ export default async function GstDocumentDetail({
             <p className="mt-2 text-sm text-slate-600">
               Number: {doc.number ?? 'Assigned when issued'}
             </p>
+            {layout?.subtitle && (
+              <p className="mt-2 text-sm text-slate-500">{layout.subtitle}</p>
+            )}
           </div>
           <div className="text-sm">
             <p>
@@ -203,7 +219,11 @@ export default async function GstDocumentDetail({
                 <th className="px-2 py-3">Goods / Services</th>
                 <th className="px-2 py-3">HSN/SAC</th>
                 <th className="px-2 py-3">Qty</th>
+                {layout?.showUnit && <th className="px-2 py-3">Unit</th>}
                 <th className="px-2 py-3">Rate</th>
+                {layout?.showDiscount && (
+                  <th className="px-2 py-3">Discount</th>
+                )}
                 <th className="px-2 py-3">GST %</th>
                 <th className="px-2 py-3">Taxable</th>
                 <th className="px-2 py-3">Amount</th>
@@ -214,11 +234,17 @@ export default async function GstDocumentDetail({
                 <tr key={i} className="border-b border-slate-200">
                   <td className="px-2 py-3">
                     {l.description}
-                    <span className="block text-slate-500">{l.unit}</span>
+                    {!layout?.showUnit && (
+                      <span className="block text-slate-500">{l.unit}</span>
+                    )}
                   </td>
                   <td className="px-2 py-3">{l.hsnSac}</td>
                   <td className="px-2 py-3">{l.quantity}</td>
+                  {layout?.showUnit && <td className="px-2 py-3">{l.unit}</td>}
                   <td className="px-2 py-3">{money(l.unitPrice)}</td>
+                  {layout?.showDiscount && (
+                    <td className="px-2 py-3">{money(l.discount)}</td>
+                  )}
                   <td className="px-2 py-3">{l.gstRate}%</td>
                   <td className="px-2 py-3">{money(Number(l.taxable ?? 0))}</td>
                   <td className="px-2 py-3">{money(Number(l.total ?? 0))}</td>
@@ -253,6 +279,20 @@ export default async function GstDocumentDetail({
             <strong>Notes</strong>
             <p className="mt-2 whitespace-pre-line">{doc.notes}</p>
           </div>
+        )}
+        {(layout?.footer || (layout?.customFields.length ?? 0) > 0) && (
+          <section className="mt-8 border-t border-slate-200 pt-5 text-sm">
+            {layout?.customFields.map((field, index) => (
+              <p className="mt-1" key={index}>
+                <strong>{field.label}:</strong> {field.value}
+              </p>
+            ))}
+            {layout?.footer && (
+              <p className="mt-3 whitespace-pre-line text-slate-600">
+                {layout.footer}
+              </p>
+            )}
+          </section>
         )}
         <footer className="mt-12 flex flex-wrap justify-between gap-6 border-t border-slate-200 pt-7 text-xs text-slate-500">
           <p>Business OS · GST-ready register · Values in INR</p>

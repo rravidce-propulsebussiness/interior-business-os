@@ -10962,8 +10962,16 @@ export interface Database {
         Args: { p_org: string; p_id: string; p_version: number };
         Returns: string;
       };
+      gst_document_layout: {
+        Args: { p_org: string; p_id: string };
+        Returns: Json;
+      };
       gst_document_save: {
         Args: { p_org: string; p_input: Json };
+        Returns: string;
+      };
+      gst_document_with_template_save: {
+        Args: { p_org: string; p_input: Json; p_template_id?: string };
         Returns: string;
       };
       gst_documents: {
@@ -10973,6 +10981,12 @@ export interface Database {
       gst_profile_read: { Args: { p_org: string }; Returns: Json };
       gst_profile_save: {
         Args: { p_org: string; p_input: Json };
+        Returns: undefined;
+      };
+      gst_template_list: { Args: { p_org?: string }; Returns: Json };
+      gst_template_save: { Args: { p_input: Json }; Returns: string };
+      gst_template_set_status: {
+        Args: { p_id: string; p_active: boolean };
         Returns: undefined;
       };
       has_entitlement: {

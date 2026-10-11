@@ -7,12 +7,18 @@ import {
 } from '@business-os/database/gst';
 import { createMarketplaceRepository } from '@business-os/database/marketplace';
 import { DocumentEditor } from '../document-editor';
+import { createGstTemplatesRepository } from '@business-os/database/gst-templates';
 
 export const dynamic = 'force-dynamic';
 export default async function PrepareDocument({
   searchParams,
 }: {
-  searchParams: Promise<{ edit?: string; order?: string; error?: string }>;
+  searchParams: Promise<{
+    edit?: string;
+    order?: string;
+    error?: string;
+    template?: string;
+  }>;
 }) {
   const params = await searchParams;
   const context = await activeOrganization();
@@ -24,6 +30,8 @@ export default async function PrepareDocument({
   );
   const gst = createGstRepository(client);
   const profile = await gst.profile(context.organizationId);
+  const templatesRepo = createGstTemplatesRepository(client);
+  const templates = await templatesRepo.tenantList(context.organizationId);
   let existing: GstDocument | null = null;
   if (params.edit) {
     existing = await gst.document(context.organizationId, params.edit);
@@ -33,6 +41,9 @@ export default async function PrepareDocument({
       'invoice.manage',
     );
   }
+  const currentLayout = existing
+    ? await templatesRepo.documentLayout(context.organizationId, existing.id)
+    : null;
   let order: null | {
     id: string;
     productName: string;
@@ -113,7 +124,14 @@ export default async function PrepareDocument({
           </Link>
         </section>
       ) : (
-        <DocumentEditor existing={existing} order={order} profile={profile} />
+        <DocumentEditor
+          existing={existing}
+          order={order}
+          profile={profile}
+          templates={templates}
+          existingLayout={currentLayout}
+          suggestedTemplateId={params.template}
+        />
       )}
     </main>
   );

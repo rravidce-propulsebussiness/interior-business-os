@@ -2,6 +2,10 @@
 import { useState } from 'react';
 import { saveGstDocument } from './actions';
 import type {
+  GstInvoiceAppearance,
+  GstInvoiceTemplate,
+} from '@business-os/database/gst-templates';
+import type {
   GstDocument,
   GstBusinessProfile,
   GstLine,
@@ -10,6 +14,9 @@ import type {
 type Props = {
   existing?: GstDocument | null;
   profile: GstBusinessProfile | null;
+  templates: GstInvoiceTemplate[];
+  existingLayout?: GstInvoiceAppearance | null;
+  suggestedTemplateId?: string | undefined;
   order?: {
     id: string;
     productName: string;
@@ -30,10 +37,39 @@ const empty: GstLine = {
   gstRate: 18,
 };
 const n = (x: number) => (Number.isFinite(x) ? x : 0);
-export function DocumentEditor({ existing, profile, order }: Props) {
-  const [kind, setKind] = useState<'sales_invoice' | 'purchase_bill'>(
-    existing?.kind ?? 'sales_invoice',
+export function DocumentEditor({
+  existing,
+  profile,
+  order,
+  templates,
+  existingLayout,
+  suggestedTemplateId,
+}: Props) {
+  const suggested = templates.find(
+    (template) => template.id === suggestedTemplateId,
   );
+  const initialKind =
+    existing?.kind ??
+    (order ? 'sales_invoice' : (suggested?.kind ?? 'sales_invoice'));
+  const [kind, setKind] = useState<'sales_invoice' | 'purchase_bill'>(
+    initialKind,
+  );
+  const [templateId, setTemplateId] = useState(
+    existing
+      ? existingLayout?.templateId &&
+        templates.some((template) => template.id === existingLayout.templateId)
+        ? existingLayout.templateId
+        : ''
+      : (suggested?.id ??
+          templates.find((template) => template.kind === initialKind)?.id ??
+          ''),
+  );
+  const template = templates.find(
+    (candidate) => candidate.id === templateId && candidate.kind === kind,
+  );
+  const appearance =
+    template?.config ?? (existing ? existingLayout?.config : null);
+
   const [type, setType] = useState<GstDocument['documentType']>(
     existing?.documentType ?? 'tax_invoice',
   );
@@ -58,7 +94,15 @@ export function DocumentEditor({ existing, profile, order }: Props) {
               gstRate: 18,
             },
           ]
-        : [{ ...empty }],
+        : Array.from(
+            {
+              length: Math.min(
+                10,
+                Math.max(1, template?.config.blankRows ?? 1),
+              ),
+            },
+            () => ({ ...empty }),
+          ),
   );
   const update = (i: number, key: keyof GstLine, value: string) => {
     setLines((prev) =>
@@ -88,6 +132,7 @@ export function DocumentEditor({ existing, profile, order }: Props) {
   });
   return (
     <form action={saveGstDocument} className="space-y-6">
+      <input type="hidden" name="templateId" value={templateId} />
       {existing && (
         <>
           <input type="hidden" name="id" value={existing.id} />
@@ -116,6 +161,56 @@ export function DocumentEditor({ existing, profile, order }: Props) {
           value={order?.id ?? existing?.marketplaceOrderId ?? ''}
         />
       )}
+      <section className="rounded-2xl border border-blue-200 bg-gradient-to-br from-blue-50 via-white to-white p-5 shadow-sm sm:p-7">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-[.14em] text-blue-700">
+              Invoice layout
+            </p>
+            <h2 className="mt-1 text-lg font-extrabold text-slate-950">
+              Choose your document design
+            </h2>
+            <p className="mt-1 text-xs leading-5 text-slate-600">
+              Your company branding comes from your billing profile. Switching
+              layouts changes styling, not the values on an existing draft.
+            </p>
+          </div>
+          {appearance && (
+            <span className="rounded-full bg-white px-3 py-2 text-xs font-bold text-blue-700">
+              {appearance.layout} · {appearance.blankRows} starting rows
+            </span>
+          )}
+        </div>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <label className="grid gap-2 text-xs font-bold text-slate-700">
+            Template
+            <select
+              className={input}
+              value={templateId}
+              onChange={(event) => setTemplateId(event.target.value)}
+            >
+              <option value="">Standard invoice layout</option>
+              {templates
+                .filter((item) => item.kind === kind)
+                .map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.name}
+                  </option>
+                ))}
+            </select>
+          </label>
+          <div className="rounded-xl border border-slate-200 bg-white p-3 text-xs leading-5 text-slate-600">
+            <span className="mb-1 block font-bold text-slate-900">
+              Layout details
+            </span>
+            {appearance?.subtitle || 'Standard document layout'}
+            <span className="mt-1 block text-slate-500">
+              GST calculations, original supplier references and invoice numbers
+              remain server-controlled.
+            </span>
+          </div>
+        </div>
+      </section>
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
         <h2 className="mb-5 text-xl font-semibold">Document information</h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -125,7 +220,13 @@ export function DocumentEditor({ existing, profile, order }: Props) {
               className={input}
               name="kind"
               value={kind}
-              onChange={(e) => setKind(e.target.value as typeof kind)}
+              onChange={(e) => {
+                const next = e.target.value as typeof kind;
+                setKind(next);
+                setTemplateId(
+                  templates.find((item) => item.kind === next)?.id ?? '',
+                );
+              }}
               disabled={!!existing || !!order}
             >
               <option value="sales_invoice">Sales invoice (outgoing)</option>
@@ -279,7 +380,7 @@ export function DocumentEditor({ existing, profile, order }: Props) {
               )
             }
           >
-            + Add item
+            + Add row
           </button>
         </div>
         <div className="space-y-4">
@@ -290,17 +391,37 @@ export function DocumentEditor({ existing, profile, order }: Props) {
             >
               <div className="mb-3 flex justify-between">
                 <strong className="text-sm">Item {i + 1}</strong>
-                {lines.length > 1 && (
+                <div className="flex items-center gap-3">
                   <button
                     type="button"
-                    className="text-sm text-rose-700"
+                    disabled={lines.length >= 50}
+                    className="text-sm font-semibold text-blue-700 disabled:opacity-40"
                     onClick={() =>
-                      setLines((prev) => prev.filter((_, j) => j !== i))
+                      setLines((prev) =>
+                        prev.length >= 50
+                          ? prev
+                          : [
+                              ...prev.slice(0, i + 1),
+                              { ...line },
+                              ...prev.slice(i + 1),
+                            ],
+                      )
                     }
                   >
-                    Remove
+                    Duplicate row
                   </button>
-                )}
+                  {lines.length > 1 && (
+                    <button
+                      type="button"
+                      className="text-sm text-rose-700"
+                      onClick={() =>
+                        setLines((prev) => prev.filter((_, j) => j !== i))
+                      }
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
               </div>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 <label className="grid gap-1 text-xs font-semibold sm:col-span-2">
@@ -386,6 +507,10 @@ export function DocumentEditor({ existing, profile, order }: Props) {
             </div>
           ))}
         </div>
+        <p className="mt-3 text-xs text-slate-500">
+          Up to 50 goods or services rows. Duplicated rows remain editable;
+          discounts and GST are recalculated when saved.
+        </p>
         <p className="mt-4 text-right text-lg font-bold">
           Estimated total: {currency.format(total)}
         </p>
