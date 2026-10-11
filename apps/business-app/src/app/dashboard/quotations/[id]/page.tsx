@@ -295,32 +295,51 @@ export default async function Quotation({
               <div className="my-3 overflow-x-auto rounded-xl border border-slate-200">
                 <table className="min-w-[600px] w-full text-left text-xs text-slate-800">
                   <thead className="bg-slate-50 font-extrabold">
-                    <tr><th className="px-3 py-2">Work</th><th className="px-3 py-2">L</th>
-                      <th className="px-3 py-2">W</th><th className="px-3 py-2">SFT</th>
-                      <th className="px-3 py-2">Rate</th><th className="px-3 py-2">Amount</th></tr>
+                    <tr>
+                      <th className="px-3 py-2">Work</th>
+                      <th className="px-3 py-2">L</th>
+                      <th className="px-3 py-2">W</th>
+                      <th className="px-3 py-2">SFT</th>
+                      <th className="px-3 py-2">Rate</th>
+                      <th className="px-3 py-2">Amount</th>
+                    </tr>
                   </thead>
                   <tbody>
                     {sft.rows.map((row, index) => (
                       <tr className="border-t border-slate-100" key={index}>
-                        <td className="px-3 py-2">{row.name}</td><td className="px-3 py-2">{row.lengthFeet}</td>
-                        <td className="px-3 py-2">{row.widthFeet}</td><td className="px-3 py-2">{row.areaSqft}</td>
-                        <td className="px-3 py-2">{row.ratePerSqft}</td><td className="px-3 py-2">{row.amount}</td>
+                        <td className="px-3 py-2">{row.name}</td>
+                        <td className="px-3 py-2">{row.lengthFeet}</td>
+                        <td className="px-3 py-2">{row.widthFeet}</td>
+                        <td className="px-3 py-2">{row.areaSqft}</td>
+                        <td className="px-3 py-2">{row.ratePerSqft}</td>
+                        <td className="px-3 py-2">{row.amount}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
                 <div className="flex flex-wrap justify-between gap-2 bg-blue-50 px-3 py-3 text-xs font-bold">
                   <span>Total area: {sft.totalAreaSqft} sq ft</span>
-                  <span>Floorwise estimate: {sft.total} {r.currency}</span>
+                  <span>
+                    Floorwise estimate: {sft.total} {r.currency}
+                  </span>
                 </div>
-                {sft.materials.length > 0 && <div className="p-3 text-xs text-slate-600">
-                  <strong className="block pb-1 text-slate-900">Included material and brand specifications</strong>
-                  {sft.materials.map(material=>(
-                    <p key={material.category}>{material.category}: {material.name} {material.specification}</p>
-                  ))}
-                </div>}
+                {sft.materials.length > 0 && (
+                  <div className="p-3 text-xs text-slate-600">
+                    <strong className="block pb-1 text-slate-900">
+                      Included material and brand specifications
+                    </strong>
+                    {sft.materials.map((material) => (
+                      <p key={material.category}>
+                        {material.category}: {material.name}{' '}
+                        {material.specification}
+                      </p>
+                    ))}
+                  </div>
+                )}
               </div>
-            ) : <p className="whitespace-pre-wrap">{line.description}</p>}
+            ) : (
+              <p className="whitespace-pre-wrap">{line.description}</p>
+            )}
             {snap.customer_specifications.map((spec) => (
               <p key={spec.label}>
                 {spec.label}: {spec.value}

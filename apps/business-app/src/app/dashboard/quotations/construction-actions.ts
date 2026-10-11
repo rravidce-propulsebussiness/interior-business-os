@@ -1,7 +1,11 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { calculateSftEstimate, encodeSftEstimate, sftEstimateInputSchema } from '@business-os/core/sft-quotation';
+import {
+  calculateSftEstimate,
+  encodeSftEstimate,
+  sftEstimateInputSchema,
+} from '@business-os/core/sft-quotation';
 import { z } from 'zod';
 import { createConstructionRatesRepository } from '@business-os/database/construction-rates';
 import { createConstructionPackagesRepository } from '@business-os/database/construction-packages';
@@ -288,39 +292,68 @@ export async function saveCustomizedMaterial(
  * one versioned quotation line. Brands below are inclusions, not surcharge
  * lines. On re-save we replace that line rather than bill the floors twice. */
 export async function saveFloorwiseSftEstimate(
-  revisionId:string,version:number,input:unknown,
-):Promise<{message:string;id?:string;total?:string}>{
-  try{
-    const rid=idSchema.parse(revisionId);
-    const parsed=sftEstimateInputSchema.parse(input);
-    if(!Number.isInteger(version)||version<1)throw new DomainError('VALIDATION_FAILED');
-    const {s,revision}=await editable(rid,true);
-    if(revision.version!==version)throw new DomainError('CONFLICT');
-    const saved=await createConstructionRatesRepository(s.client).list(s.org);
-    const options=saved.filter(r=>parsed.materialIds.includes(r.id)&&r.status==='active');
-    if(options.length!==parsed.materialIds.length||
-      new Set(options.map(r=>r.category)).size!==options.length)
+  revisionId: string,
+  version: number,
+  input: unknown,
+): Promise<{ message: string; id?: string; total?: string }> {
+  try {
+    const rid = idSchema.parse(revisionId);
+    const parsed = sftEstimateInputSchema.parse(input);
+    if (!Number.isInteger(version) || version < 1)
       throw new DomainError('VALIDATION_FAILED');
-    const calculated=calculateSftEstimate(parsed,options.map(o=>({
-      category:o.category,name:o.name,specification:o.specification,
-    })));
-    const description=encodeSftEstimate(calculated);
-    const {data:existing,error}=await s.client.from('quotation_items')
-      .select('id').eq('organization_id',s.org).eq('revision_id',rid)
-      .like('description','SFT_ESTIMATE_V1:%').limit(2);
-    if(error||!existing||existing.length>1)throw new DomainError('VALIDATION_FAILED');
-    const id=await s.commercial.saveManualLine(s.org,rid,version,{
-      ...(existing[0]?{id:existing[0].id}:{}),
-      area_id:null,sort_order:0,optional:false,
-      name:'Construction — floor-wise SFT estimate',
-      description,quantity:'1',unit:'complete estimate',
-      rate:calculated.total,
-      reason:'Approved floor/work-wise built-up square footage and per-SFT rates. Material choices are inclusions, not surcharges.',
-      discount:{kind:'none',value:'0'},estimated_cost_rate:null,
+    const { s, revision } = await editable(rid, true);
+    if (revision.version !== version) throw new DomainError('CONFLICT');
+    const saved = await createConstructionRatesRepository(s.client).list(s.org);
+    const options = saved.filter(
+      (r) => parsed.materialIds.includes(r.id) && r.status === 'active',
+    );
+    if (
+      options.length !== parsed.materialIds.length ||
+      new Set(options.map((r) => r.category)).size !== options.length
+    )
+      throw new DomainError('VALIDATION_FAILED');
+    const calculated = calculateSftEstimate(
+      parsed,
+      options.map((o) => ({
+        category: o.category,
+        name: o.name,
+        specification: o.specification,
+      })),
+    );
+    const description = encodeSftEstimate(calculated);
+    const { data: existing, error } = await s.client
+      .from('quotation_items')
+      .select('id')
+      .eq('organization_id', s.org)
+      .eq('revision_id', rid)
+      .like('description', 'SFT_ESTIMATE_V1:%')
+      .limit(2);
+    if (error || !existing || existing.length > 1)
+      throw new DomainError('VALIDATION_FAILED');
+    const id = await s.commercial.saveManualLine(s.org, rid, version, {
+      ...(existing[0] ? { id: existing[0].id } : {}),
+      area_id: null,
+      sort_order: 0,
+      optional: false,
+      name: 'Construction — floor-wise SFT estimate',
+      description,
+      quantity: '1',
+      unit: 'complete estimate',
+      rate: calculated.total,
+      reason:
+        'Approved floor/work-wise built-up square footage and per-SFT rates. Material choices are inclusions, not surcharges.',
+      discount: { kind: 'none', value: '0' },
+      estimated_cost_rate: null,
     });
-    revalidatePath('/dashboard/quotations','layout');
-    return {id,total:calculated.total,
-      message:existing.length?'Floor-wise estimate updated. Review your revision before issuing.':
-      'Floor-wise estimate saved with the itemized area/rate schedule. Review your PDF before issuing.'};
-  }catch(error){return {message:safeFailure(error).message};}
+    revalidatePath('/dashboard/quotations', 'layout');
+    return {
+      id,
+      total: calculated.total,
+      message: existing.length
+        ? 'Floor-wise estimate updated. Review your revision before issuing.'
+        : 'Floor-wise estimate saved with the itemized area/rate schedule. Review your PDF before issuing.',
+    };
+  } catch (error) {
+    return { message: safeFailure(error).message };
+  }
 }
