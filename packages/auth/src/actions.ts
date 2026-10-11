@@ -29,7 +29,9 @@ export async function signIn(_state: { message: string }, form: FormData) {
   } catch (error) {
     return { message: safeFailure(error).message };
   }
-  redirect('/dashboard');
+  // The browser performs a fresh navigation after the session cookie has
+  // been committed; a server-action redirect would navigate via RSC Flight.
+  return { message: '', authenticated: true };
 }
 export async function signUp(_state: { message: string }, form: FormData) {
   try {
