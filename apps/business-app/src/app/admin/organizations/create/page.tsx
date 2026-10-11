@@ -48,9 +48,9 @@ export default async function CreateOrganization() {
               Create organization &amp; owner
             </h1>
             <p className="mt-3 text-sm leading-6 text-slate-500">
-              One company, one owner login and a ready-to-use workspace.
-              Seller storefronts match the company name automatically.
-              Employees are managed later by their owner.
+              One company, one owner login and a ready-to-use workspace. Seller
+              storefronts match the company name automatically. Employees are
+              managed later by their owner.
             </p>
           </div>
           <div

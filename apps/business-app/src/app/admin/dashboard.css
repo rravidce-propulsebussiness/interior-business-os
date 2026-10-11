@@ -812,7 +812,6 @@
   }
 }
 
-
 /* Light organization onboarding controls inside the legacy dark global theme.
    Keep these scoped to the admin creation form; do not duplicate base styles. */
 .org-owner-setup {

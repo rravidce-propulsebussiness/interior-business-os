@@ -259,8 +259,8 @@ export function OwnerOrganizationForm({
               <p className="mt-3 rounded-xl border border-blue-100 bg-blue-50 p-3 text-xs leading-5 text-blue-800">
                 <strong>Storefront: {name.trim() || 'Company name'}</strong>
                 <span className="mt-1 block">
-                  Automatically matches the company name. No separate store
-                  name to enter.
+                  Automatically matches the company name. No separate store name
+                  to enter.
                 </span>
               </p>
             )}
@@ -458,7 +458,9 @@ export function OwnerOrganizationForm({
                 <button
                   type="button"
                   aria-pressed={passwordVisible}
-                  aria-label={passwordVisible ? 'Hide password' : 'Show password'}
+                  aria-label={
+                    passwordVisible ? 'Hide password' : 'Show password'
+                  }
                   onClick={() => setPasswordVisible((value) => !value)}
                   className="rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700"
                 >
@@ -512,7 +514,8 @@ export function OwnerOrganizationForm({
                 Owner access preview
               </h2>
               <p className="mt-1 text-xs text-slate-500">
-                All owner actions are included automatically; module availability follows the selected plan.
+                All owner actions are included automatically; module
+                availability follows the selected plan.
               </p>
             </div>
           </div>
@@ -524,11 +527,18 @@ export function OwnerOrganizationForm({
           <table className="w-full min-w-[570px] border-separate border-spacing-0 text-xs">
             <thead>
               <tr className="bg-slate-50 text-slate-600">
-                <th scope="col" className="rounded-l-xl px-4 py-3 text-left font-bold">
+                <th
+                  scope="col"
+                  className="rounded-l-xl px-4 py-3 text-left font-bold"
+                >
                   Module
                 </th>
                 {['View', 'Create', 'Edit', 'Manage'].map((ability) => (
-                  <th scope="col" key={ability} className="px-4 py-3 text-center font-bold">
+                  <th
+                    scope="col"
+                    key={ability}
+                    className="px-4 py-3 text-center font-bold"
+                  >
                     {ability}
                   </th>
                 ))}
@@ -539,11 +549,17 @@ export function OwnerOrganizationForm({
                 .filter((module) => module.status === 'active')
                 .map((module) => (
                   <tr key={module.id} className="border-b border-slate-100">
-                    <th scope="row" className="border-b border-slate-100 px-4 py-3 text-left font-semibold text-slate-800">
+                    <th
+                      scope="row"
+                      className="border-b border-slate-100 px-4 py-3 text-left font-semibold text-slate-800"
+                    >
                       {module.name}
                     </th>
                     {['View', 'Create', 'Edit', 'Manage'].map((ability) => (
-                      <td key={ability} className="border-b border-slate-100 px-4 py-3 text-center">
+                      <td
+                        key={ability}
+                        className="border-b border-slate-100 px-4 py-3 text-center"
+                      >
                         <Tick />
                       </td>
                     ))}
@@ -552,7 +568,10 @@ export function OwnerOrganizationForm({
               {modules.filter((module) => module.status === 'active').length ===
                 0 && (
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-slate-500">
+                  <td
+                    colSpan={5}
+                    className="px-4 py-8 text-center text-slate-500"
+                  >
                     Module list is unavailable; the owner role is still granted
                     using the existing company defaults.
                   </td>
@@ -562,13 +581,17 @@ export function OwnerOrganizationForm({
           </table>
         </div>
         <p className="border-t border-slate-100 bg-slate-50 px-5 py-3 text-[11px] leading-5 text-slate-600 sm:px-7">
-          Checkmarks are a role preview, not separate switches. Actual operations
-          also require the module entitlement and the permission required by that
-          operation. Plan and module access can be managed on the company page.
+          Checkmarks are a role preview, not separate switches. Actual
+          operations also require the module entitlement and the permission
+          required by that operation. Plan and module access can be managed on
+          the company page.
         </p>
       </section>
       {state.message && (
-        <p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-900">
+        <p
+          role="alert"
+          className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-900"
+        >
           {state.message}
         </p>
       )}
@@ -578,7 +601,8 @@ export function OwnerOrganizationForm({
             Ready to create this workspace?
           </p>
           <p className="mt-1 text-xs text-slate-500">
-            One submission creates the organization, owner and optional seller storefront.
+            One submission creates the organization, owner and optional seller
+            storefront.
           </p>
         </div>
         <div className="flex w-full flex-wrap gap-2 sm:w-auto">
@@ -593,7 +617,9 @@ export function OwnerOrganizationForm({
             disabled={pending || !ready || industries.length === 0}
             className="flex-1 rounded-xl bg-blue-600 px-6 py-3 text-xs font-bold text-white shadow-lg shadow-blue-200 hover:bg-blue-700 disabled:cursor-not-allowed sm:flex-none"
           >
-            {pending ? 'Creating organization…' : 'Create organization & owner →'}
+            {pending
+              ? 'Creating organization…'
+              : 'Create organization & owner →'}
           </button>
         </div>
       </div>
