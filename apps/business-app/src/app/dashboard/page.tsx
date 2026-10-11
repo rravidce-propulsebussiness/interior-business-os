@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-html-link-for-pages -- Intentional full-document navigation avoids incomplete RSC Flight streams on Hostinger. */
 import type { ReactNode } from 'react';
 import { notFound, redirect } from 'next/navigation';
 import {
