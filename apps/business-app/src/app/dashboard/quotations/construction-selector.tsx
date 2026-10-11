@@ -6,6 +6,7 @@ import Link from 'next/link';
 import type { ConstructionRate } from '@business-os/database/construction-rates';
 import type { ConstructionPackage } from '@business-os/database/construction-packages';
 import { SftEstimateBuilder } from './sft-estimate-builder';
+import type { SftEstimateDetails } from '@business-os/core/sft-quotation';
 import {
   previewConstructionPackage,
   saveCustomizedMaterial,
@@ -194,11 +195,13 @@ function CustomizedQuote({
 export function ConstructionSelector({
   rates,
   packages,
+  initialSchedule,
   revisionId,
   version,
 }: {
   rates: ConstructionRate[];
   packages: ConstructionPackage[];
+  initialSchedule: SftEstimateDetails | null;
   revisionId: string;
   version: number;
 }) {
@@ -267,6 +270,7 @@ export function ConstructionSelector({
           <SftEstimateBuilder
             rates={rates}
             packages={packages}
+            initialSchedule={initialSchedule}
             revisionId={revisionId}
             version={version}
           />
