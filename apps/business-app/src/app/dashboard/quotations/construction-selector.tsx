@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import type { ConstructionRate } from '@business-os/database/construction-rates';
 import {
   previewConstructionPackage,
@@ -214,7 +215,7 @@ export function ConstructionSelector({
               href="/dashboard/pricing/construction"
             >
               Construction Pricing
-            </a>
+            </Link>
             .
           </p>
         )}
