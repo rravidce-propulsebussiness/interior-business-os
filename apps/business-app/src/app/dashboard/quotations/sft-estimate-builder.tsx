@@ -65,6 +65,7 @@ export function SftEstimateBuilder({
   const archivedBrands=(initialSchedule?.materials??[]).filter(material=>
     !rates.some(r=>r.status==='active'&&r.category===material.category
       &&r.name===material.name&&r.specification===material.specification));
+  const unresolvedArchivedBrands = archivedBrands.filter(material=>!brands[material.category]);
   const [saved, setSaved] = useState(false);
   const active = rates.filter((x) => x.status === 'active');
   const categories = [...new Set(active.map((x) => x.category))].sort();
@@ -327,7 +328,7 @@ export function SftEstimateBuilder({
             </label>
           ))}
         </div>
-        {archivedBrands.length>0 && (
+        {unresolvedArchivedBrands.length>0 && (
           <p role="alert" className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
             Some brands from the saved quotation are no longer active. Select a current brand before
             resaving, or retain the original issued revision without changes.
@@ -361,7 +362,7 @@ export function SftEstimateBuilder({
         </div>
         <button
           type="button"
-          disabled={!quote || pending}
+          disabled={!quote || pending || unresolvedArchivedBrands.length>0}
           onClick={save}
           className="rounded-xl bg-blue-600 px-6 py-3 text-sm font-extrabold text-white disabled:opacity-40"
         >
