@@ -17,7 +17,7 @@ export default async function PrepareDocument({
     edit?: string;
     order?: string;
     error?: string;
-    template?: string;
+    kind?: string;
   }>;
 }) {
   const params = await searchParams;
@@ -31,7 +31,7 @@ export default async function PrepareDocument({
   const gst = createGstRepository(client);
   const profile = await gst.profile(context.organizationId);
   const templatesRepo = createGstTemplatesRepository(client);
-  const templates = await templatesRepo.tenantList(context.organizationId);
+  const standard = await templatesRepo.standard(context.organizationId);
   let existing: GstDocument | null = null;
   if (params.edit) {
     existing = await gst.document(context.organizationId, params.edit);
@@ -128,9 +128,9 @@ export default async function PrepareDocument({
           existing={existing}
           order={order}
           profile={profile}
-          templates={templates}
+          standard={standard}
           existingLayout={currentLayout}
-          suggestedTemplateId={params.template}
+          requestedKind={params.kind === 'purchase_bill' ? 'purchase_bill' : 'sales_invoice'}
         />
       )}
     </main>
