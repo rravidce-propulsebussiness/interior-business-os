@@ -810,7 +810,7 @@ export function GstTemplateStudio({
                 {canEdit && (
                   <StandardAction template={template} isStandard={standard.templateId === template.id} />
                 )}
-                {canEdit && <StatusAction template={template} />
+                {canEdit && <StatusAction template={template} />}
               </div>
             </div>
           </article>
