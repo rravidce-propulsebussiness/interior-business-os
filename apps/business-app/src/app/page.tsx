@@ -1,6 +1,20 @@
 import Link from 'next/link';
+import { signOut } from '@business-os/auth/actions';
+import {
+  createServerDatabase,
+  isSupabaseConfigured,
+} from '@business-os/database/server';
 
-export default function Page() {
+export const dynamic = 'force-dynamic';
+
+export default async function Page() {
+  // Always resolve the current verified session on the server. The landing
+  // page must not display guest-only links to signed-in owners/admins.
+  const { data: { user } } = isSupabaseConfigured()
+    ? await (await createServerDatabase()).auth.getUser()
+    : { data: { user: null } };
+  const signedIn = Boolean(user);
+
   return (
     <main id="main-content" tabIndex={-1} className="premium-shell">
       <header className="premium-topbar">
@@ -10,9 +24,25 @@ export default function Page() {
           </span>
           <span>Business OS</span>
         </div>
-        <Link className="premium-link-secondary" href="/login">
-          Sign in
-        </Link>
+        {signedIn ? (
+          <nav className="premium-account-nav" aria-label="Your account">
+            <span className="premium-account-status" title={user?.email ?? undefined}>
+              Signed in{user?.email ? ` · ${user.email}` : ''}
+            </span>
+            <Link className="premium-link-secondary" href="/dashboard">
+              Dashboard
+            </Link>
+            <form action={signOut}>
+              <button type="submit" className="premium-link-secondary">
+                Sign out
+              </button>
+            </form>
+          </nav>
+        ) : (
+          <Link className="premium-link-secondary" href="/login">
+            Sign in
+          </Link>
+        )}
       </header>
 
       <section className="home-hero" aria-labelledby="home-title">
@@ -27,12 +57,20 @@ export default function Page() {
             built for growing interior businesses.
           </p>
           <div className="hero-actions">
-            <Link className="premium-link" href="/dashboard">
-              Open dashboard →
-            </Link>
-            <Link className="premium-link-secondary" href="/login">
-              Sign in securely
-            </Link>
+            {signedIn ? (
+              <Link className="premium-link" href="/dashboard">
+                Continue to your dashboard →
+              </Link>
+            ) : (
+              <>
+                <Link className="premium-link" href="/login">
+                  Sign in to your workspace →
+                </Link>
+                <Link className="premium-link-secondary" href="/register">
+                  Create an account
+                </Link>
+              </>
+            )}
           </div>
         </div>
 
