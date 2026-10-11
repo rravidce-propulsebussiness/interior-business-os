@@ -1,10 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { saveGstDocument } from './actions';
-import type {
-  GstInvoiceAppearance,
-  GstInvoiceTemplate,
-} from '@business-os/database/gst-templates';
+import type { GstInvoiceAppearance } from '@business-os/database/gst-templates';
 import type {
   GstDocument,
   GstBusinessProfile,
@@ -14,9 +11,9 @@ import type {
 type Props = {
   existing?: GstDocument | null;
   profile: GstBusinessProfile | null;
-  templates: GstInvoiceTemplate[];
+  standard: GstInvoiceAppearance;
   existingLayout?: GstInvoiceAppearance | null;
-  suggestedTemplateId?: string | undefined;
+  requestedKind?: 'sales_invoice' | 'purchase_bill';
   order?: {
     id: string;
     productName: string;
@@ -41,34 +38,20 @@ export function DocumentEditor({
   existing,
   profile,
   order,
-  templates,
+  standard,
   existingLayout,
-  suggestedTemplateId,
+  requestedKind,
 }: Props) {
-  const suggested = templates.find(
-    (template) => template.id === suggestedTemplateId,
-  );
   const initialKind =
     existing?.kind ??
-    (order ? 'sales_invoice' : (suggested?.kind ?? 'sales_invoice'));
+    (order ? 'sales_invoice' : (requestedKind ?? 'sales_invoice'));
   const [kind, setKind] = useState<'sales_invoice' | 'purchase_bill'>(
     initialKind,
   );
-  const [templateId, setTemplateId] = useState(
-    existing
-      ? existingLayout?.templateId &&
-        templates.some((template) => template.id === existingLayout.templateId)
-        ? existingLayout.templateId
-        : ''
-      : (suggested?.id ??
-          templates.find((template) => template.kind === initialKind)?.id ??
-          ''),
-  );
-  const template = templates.find(
-    (candidate) => candidate.id === templateId && candidate.kind === kind,
-  );
-  const appearance =
-    template?.config ?? (existing ? existingLayout?.config : null);
+  // The platform standard is enforced again by the server when saving.
+  const appearance = existing
+    ? (existingLayout?.config ?? standard.config)
+    : standard.config;
 
   const [type, setType] = useState<GstDocument['documentType']>(
     existing?.documentType ?? 'tax_invoice',
@@ -96,10 +79,7 @@ export function DocumentEditor({
           ]
         : Array.from(
             {
-              length: Math.min(
-                10,
-                Math.max(1, template?.config.blankRows ?? 1),
-              ),
+              length: Math.min(10, Math.max(1, appearance.blankRows ?? 1)),
             },
             () => ({ ...empty }),
           ),
@@ -132,7 +112,6 @@ export function DocumentEditor({
   });
   return (
     <form action={saveGstDocument} className="space-y-6">
-      <input type="hidden" name="templateId" value={templateId} />
       {existing && (
         <>
           <input type="hidden" name="id" value={existing.id} />
@@ -161,54 +140,27 @@ export function DocumentEditor({
           value={order?.id ?? existing?.marketplaceOrderId ?? ''}
         />
       )}
-      <section className="rounded-2xl border border-blue-200 bg-gradient-to-br from-blue-50 via-white to-white p-5 shadow-sm sm:p-7">
+      <section className="rounded-2xl border border-blue-200 bg-gradient-to-br from-blue-50 to-white p-5 sm:p-7">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[.14em] text-blue-700">
-              Invoice layout
+            <p className="text-xs font-extrabold uppercase tracking-wider text-blue-700">
+              GST billing · Uniform format
             </p>
             <h2 className="mt-1 text-lg font-extrabold text-slate-950">
-              Choose your document design
+              {existing
+                ? (existingLayout?.name ?? 'Original invoice layout')
+                : standard.name}
             </h2>
             <p className="mt-1 text-xs leading-5 text-slate-600">
-              Your company branding comes from your billing profile. Switching
-              layouts changes styling, not the values on an existing draft.
+              Every new invoice follows the platform administrator&apos;s
+              standard. Each business supplies its own legal GST identity and
+              customer or supplier details. The format cannot change tax
+              calculations.
             </p>
           </div>
-          {appearance && (
-            <span className="rounded-full bg-white px-3 py-2 text-xs font-bold text-blue-700">
-              {appearance.layout} · {appearance.blankRows} starting rows
-            </span>
-          )}
-        </div>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          <label className="grid gap-2 text-xs font-bold text-slate-700">
-            Template
-            <select
-              className={input}
-              value={templateId}
-              onChange={(event) => setTemplateId(event.target.value)}
-            >
-              <option value="">Standard invoice layout</option>
-              {templates
-                .filter((item) => item.kind === kind)
-                .map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.name}
-                  </option>
-                ))}
-            </select>
-          </label>
-          <div className="rounded-xl border border-slate-200 bg-white p-3 text-xs leading-5 text-slate-600">
-            <span className="mb-1 block font-bold text-slate-900">
-              Layout details
-            </span>
-            {appearance?.subtitle || 'Standard document layout'}
-            <span className="mt-1 block text-slate-500">
-              GST calculations, original supplier references and invoice numbers
-              remain server-controlled.
-            </span>
-          </div>
+          <span className="rounded-xl bg-blue-100 px-3 py-2 text-xs font-bold text-blue-700">
+            {appearance.layout} · GST-ready register
+          </span>
         </div>
       </section>
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
@@ -220,13 +172,7 @@ export function DocumentEditor({
               className={input}
               name="kind"
               value={kind}
-              onChange={(e) => {
-                const next = e.target.value as typeof kind;
-                setKind(next);
-                setTemplateId(
-                  templates.find((item) => item.kind === next)?.id ?? '',
-                );
-              }}
+              onChange={(e) => setKind(e.target.value as typeof kind)}
               disabled={!!existing || !!order}
             >
               <option value="sales_invoice">Sales invoice (outgoing)</option>

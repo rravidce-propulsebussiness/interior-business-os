@@ -6,10 +6,12 @@ import type {
   GstInvoiceTemplate,
   GstTemplateConfig,
   GstTemplateKind,
+  GstInvoiceAppearance,
 } from '@business-os/database/gst-templates';
 import {
   saveInvoiceTemplate,
   setInvoiceTemplateStatus,
+  setStandardInvoiceFormat,
 } from './template-actions';
 
 const defaultConfig: GstTemplateConfig = {
@@ -195,6 +197,46 @@ function StatusAction({ template }: { template: GstInvoiceTemplate }) {
       </button>
       {state.message && !state.saved && (
         <p className="mt-1 text-[11px] text-red-600" role="alert">
+          {state.message}
+        </p>
+      )}
+    </form>
+  );
+}
+
+function StandardAction({
+  template,
+  isStandard,
+}: {
+  template: GstInvoiceTemplate;
+  isStandard: boolean;
+}) {
+  const router = useRouter();
+  const [state, action, pending] = useActionState(setStandardInvoiceFormat, {
+    message: '',
+  });
+  useEffect(() => {
+    if (state.saved) router.refresh();
+  }, [state.saved, router]);
+  if (isStandard) {
+    return (
+      <span className="rounded-xl bg-blue-600 px-3 py-2 text-xs font-bold text-white">
+        ✓ Standard
+      </span>
+    );
+  }
+  return (
+    <form action={action}>
+      <input type="hidden" name="id" value={template.id} />
+      <button
+        type="submit"
+        disabled={pending || template.status !== 'active'}
+        className="rounded-lg border border-blue-200 bg-white px-3 py-2 text-xs font-bold text-blue-700 disabled:opacity-50"
+      >
+        {pending ? 'Applying…' : 'Use as standard'}
+      </button>
+      {state.message && !state.saved && (
+        <p role="alert" className="mt-1 text-xs text-red-600">
           {state.message}
         </p>
       )}
@@ -566,9 +608,11 @@ function TemplateEditor({
 export function GstTemplateStudio({
   templates,
   canEdit,
+  standard,
 }: {
   templates: GstInvoiceTemplate[];
   canEdit: boolean;
+  standard: GstInvoiceAppearance;
 }) {
   const [kind, setKind] = useState<'all' | GstTemplateKind>('all');
   const [search, setSearch] = useState('');
@@ -598,9 +642,8 @@ export function GstTemplateStudio({
             Invoice template studio
           </h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-            Design layouts for business and seller invoices. Templates are
-            shared, but customer and supplier bills remain private to their
-            companies.
+            One platform-approved format is applied to every new sales invoice
+            and supplier bill. Edit a preset, then make it the shared standard.
           </p>
         </div>
         {canEdit && (
@@ -613,6 +656,22 @@ export function GstTemplateStudio({
           </button>
         )}
       </header>
+      <section className="mt-5 flex flex-wrap items-start gap-4 rounded-2xl border border-blue-200 bg-blue-50 p-5">
+        <span className="grid size-11 place-items-center rounded-xl bg-blue-600 text-xl text-white">
+          ✓
+        </span>
+        <div>
+          <h3 className="text-base font-extrabold text-slate-950">
+            Current standard: {standard.name}
+          </h3>
+          <p className="mt-1 text-sm leading-6 text-slate-600">
+            All new sales invoices and supplier bills share this design. Editing
+            the selected preset changes future documents automatically.
+            Previously issued invoices retain their original layouts and
+            amounts.
+          </p>
+        </div>
+      </section>
       <div className="mt-6 grid gap-3 sm:grid-cols-3">
         {[
           {
@@ -708,6 +767,11 @@ export function GstTemplateStudio({
               />
             </div>
             <div className="flex flex-1 flex-col p-5">
+              {standard.templateId === template.id && (
+                <p className="mb-3 w-fit rounded-full bg-blue-100 px-3 py-1 text-[10px] font-extrabold text-blue-700">
+                  Active platform standard · both invoice types
+                </p>
+              )}
               <div className="flex flex-wrap items-center gap-2">
                 <span
                   className={
@@ -762,7 +826,15 @@ export function GstTemplateStudio({
                     Duplicate
                   </button>
                 )}
-                {canEdit && <StatusAction template={template} />}
+                {canEdit && (
+                  <StandardAction
+                    template={template}
+                    isStandard={standard.templateId === template.id}
+                  />
+                )}
+                {canEdit && standard.templateId !== template.id && (
+                  <StatusAction template={template} />
+                )}
               </div>
             </div>
           </article>

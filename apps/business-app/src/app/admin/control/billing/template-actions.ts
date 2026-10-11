@@ -95,3 +95,26 @@ export async function setInvoiceTemplateStatus(
     return { message: safeFailure(error).message };
   }
 }
+
+export async function setStandardInvoiceFormat(
+  _previous: TemplateActionState,
+  form: FormData,
+): Promise<TemplateActionState> {
+  try {
+    const { authorization, client } = await serverServices();
+    await authorization.requirePlatformPermission(
+      'platform.entitlements.manage',
+    );
+    const id = idSchema.parse(form.get('id'));
+    await createGstTemplatesRepository(client).setStandard(id);
+    revalidatePath('/admin/control/billing');
+    revalidatePath('/dashboard/billing');
+    return {
+      saved: true,
+      message:
+        'Shared GST invoice design updated for all NEW sales and purchase documents. Existing documents are unchanged.',
+    };
+  } catch (error) {
+    return { message: safeFailure(error).message };
+  }
+}

@@ -22,13 +22,15 @@ export default async function PlatformBilling() {
     if (error instanceof DomainError && error.code === 'FORBIDDEN') notFound();
     throw error;
   }
-  const [summary, tenants, modules, plans, templates] = await Promise.all([
-    createGstRepository(client).platformSummary(),
-    repository.organizationDirectory({ page: 1, pageSize: 12 }),
-    repository.modules(),
-    repository.plans(),
-    createGstTemplatesRepository(client).platformList(),
-  ]);
+  const [summary, tenants, modules, plans, templates, standard] =
+    await Promise.all([
+      createGstRepository(client).platformSummary(),
+      repository.organizationDirectory({ page: 1, pageSize: 12 }),
+      repository.modules(),
+      repository.plans(),
+      createGstTemplatesRepository(client).platformList(),
+      createGstTemplatesRepository(client).standard(),
+    ]);
   const billing = modules.find((m) => m.key === 'billing');
   const planNames = new Map(plans.map((p) => [p.id, p.name]));
   const cards = [
@@ -67,6 +69,7 @@ export default async function PlatformBilling() {
       <div className="mt-8">
         <GstTemplateStudio
           templates={templates}
+          standard={standard}
           canEdit={permissions.includes('platform.entitlements.manage')}
         />
       </div>

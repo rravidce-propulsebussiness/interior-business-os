@@ -131,11 +131,12 @@ export async function saveGstDocument(form: FormData) {
       ...(marketplaceOrderId ? { marketplaceOrderId } : {}),
     });
     const input = parsed as GstDocumentInput;
-    const templateId = String(form.get('templateId') ?? '').trim();
+    // Every tenant uses the same platform-admin-approved appearance.
+    // The database ignores client-selected template IDs as a second check.
     id = await createGstTemplatesRepository(client).saveDocument(
       org,
       input,
-      templateId ? idSchema.parse(templateId) : null,
+      null,
     );
     revalidatePath('/dashboard/billing');
   } catch (error) {
