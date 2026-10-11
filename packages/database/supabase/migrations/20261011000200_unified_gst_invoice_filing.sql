@@ -80,25 +80,34 @@ end $fn$;
 create trigger gst_standard_block_archive before update of status
  on private.gst_invoice_templates for each row execute function private.gst_standard_block_archive();
 
+-- A trigger covers ALL invoice creation paths, including the existing
+-- authorized gst_document_save RPC. Tenant users cannot bypass appearance
+-- controls by using an older client or calling the legacy function.
+create function private.gst_assign_standard_on_invoice_insert()
+returns trigger language plpgsql security definer set search_path='' as $fn$
+begin
+ insert into private.gst_invoice_document_layouts(document_id,template_id,template_name,config)
+ select new.id,template_id,name,config
+ from private.gst_invoice_standard where id=true;
+ if not found then
+   raise exception 'Standard invoice format unavailable' using errcode='22023';
+ end if;
+ return new;
+end $fn$;
+create trigger gst_assign_standard_on_invoice_insert
+ after insert on private.gst_business_documents for each row
+ execute function private.gst_assign_standard_on_invoice_insert();
+
 -- Retain signature for compatibility but ignore tenant-supplied template IDs:
 -- the server enforces a single platform-approved design for all new invoices.
 create or replace function public.gst_document_with_template_save(
  p_org uuid,p_input jsonb,p_template_id uuid default null)
 returns uuid language plpgsql security definer set search_path='' as $fn$
-declare v_id uuid; v_standard private.gst_invoice_standard; v_edit_id uuid;
 begin
- -- This enforces document permissions and server GST calculations.
- v_id=public.gst_document_save(p_org,p_input);
- v_edit_id=nullif(p_input->>'id','')::uuid;
- if v_edit_id is null then
-   select * into v_standard from private.gst_invoice_standard where id=true;
-   if not found then raise exception 'Standard invoice format unavailable' using errcode='22023';end if;
-   insert into private.gst_invoice_document_layouts(document_id,template_id,template_name,config)
-   values(v_id,v_standard.template_id,v_standard.name,v_standard.config);
- end if;
- -- Existing drafts retain their initial design; issued documents are
- -- immutable in the original gst_document_save function.
- return v_id;
+ -- The AFTER INSERT trigger assigns the standard on every code path.
+ -- Edits to existing drafts and issued historical snapshots keep the
+ -- layout initially captured for that document.
+ return public.gst_document_save(p_org,p_input);
 end $fn$;
 
 -- Scoped readout of finalized tax records. Drafts are excluded. Buyers can
