@@ -372,6 +372,8 @@ export default async function Leads({
         canConvert={s.allowed('lead.convert')}
         canQuote={s.allowed('quotation.create', 'quotation')}
         organizationName={organization.name}
+        timeZone={organization.default_timezone || 'Asia/Kolkata'}
+        asOf={new Date().toISOString()}
       />
     </OwnerShell>
   );
