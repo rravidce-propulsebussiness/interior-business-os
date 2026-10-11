@@ -76,6 +76,7 @@ export function OwnerShell({
   navigation,
   search,
   notificationsEnabled,
+  currentHref,
 }: {
   children: ReactNode;
   companyName: string;
@@ -85,6 +86,7 @@ export function OwnerShell({
   navigation: OwnerNavItem[];
   search: string;
   notificationsEnabled: boolean;
+  currentHref?: string;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const initials =
@@ -134,7 +136,7 @@ export function OwnerShell({
         </div>
         <nav className="owner-nav" aria-label="Your company's modules">
           {navigation.map((item) => {
-            const selected = item.href === '/dashboard';
+            const selected = currentHref ? (item.href === currentHref) : item.href === '/dashboard';
             return (
               <a
                 key={item.href}
