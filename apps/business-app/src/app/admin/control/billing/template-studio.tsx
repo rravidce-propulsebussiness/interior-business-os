@@ -206,7 +206,7 @@ function TemplateEditor({
   initial,
   onClose,
 }: {
-  initial?: GstInvoiceTemplate;
+  initial?: GstInvoiceTemplate | undefined;
   onClose: () => void;
 }) {
   const router = useRouter();
