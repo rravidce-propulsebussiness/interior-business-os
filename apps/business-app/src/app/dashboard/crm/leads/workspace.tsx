@@ -104,7 +104,11 @@ function safePhone(value: string) {
 function whatsapp(value: string) {
   return value.replace(/\D/g, '');
 }
-function date(value: string | null, includeTime = false, timeZone = 'Asia/Kolkata') {
+function date(
+  value: string | null,
+  includeTime = false,
+  timeZone = 'Asia/Kolkata',
+) {
   if (!value) return 'Not scheduled';
   const parsed = new Date(value);
   if (Number.isNaN(parsed.valueOf())) return 'Not scheduled';
@@ -149,9 +153,13 @@ function due(lead: LeadView, asOf: string, timeZone: string) {
   if (!Number.isFinite(d)) return 'none';
   if (d < new Date(asOf).getTime()) return 'late';
   const day = new Intl.DateTimeFormat('sv-SE', {
-    timeZone, year: 'numeric', month: '2-digit', day: '2-digit',
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
   });
-  return day.format(new Date(lead.nextFollowUpAt)) === day.format(new Date(asOf))
+  return day.format(new Date(lead.nextFollowUpAt)) ===
+    day.format(new Date(asOf))
     ? 'today'
     : 'future';
 }
@@ -657,7 +665,11 @@ export function LeadsWorkspace({
                           </span>
                         </td>
                         <td>
-                          <span className={'crm-due crm-due-' + due(lead, asOf, timeZone)}>
+                          <span
+                            className={
+                              'crm-due crm-due-' + due(lead, asOf, timeZone)
+                            }
+                          >
                             <Icon name="clock" size={15} />
                             {lead.nextFollowUpAt
                               ? date(lead.nextFollowUpAt, true, timeZone)
@@ -823,7 +835,9 @@ export function LeadsWorkspace({
                     </span>
                   </div>
                   <p>{selected.number || 'Lead'}</p>
-                  <small>Created {date(selected.createdAt, true, timeZone)}</small>
+                  <small>
+                    Created {date(selected.createdAt, true, timeZone)}
+                  </small>
                 </div>
               </div>
               <button

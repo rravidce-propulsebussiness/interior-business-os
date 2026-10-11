@@ -198,14 +198,26 @@ test('live Leads page uses the scoped premium dashboard and working filters', as
   page.on('pageerror', (error) => clientErrors.push(error.message));
   await login(page);
   await page.goto('/dashboard/crm/leads');
-  await expect(page.getByRole('heading', { level: 1, name: 'Leads' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { level: 1, name: 'Leads' }),
+  ).toBeVisible();
   await expect(page.locator('.crm-kpi-card')).toHaveCount(5);
-  await expect(page.getByRole('searchbox', { name: 'Search leads' })).toBeVisible();
-  await expect(page.getByRole('navigation', { name: "Your company's modules" })).toBeVisible();
-  await expect(page.locator('.crm-detail-pane, .crm-detail-placeholder')).toHaveCount(1);
-  await page.getByRole('searchbox', { name: 'Search leads' }).fill('an-unknown-lead-for-ui-smoke');
+  await expect(
+    page.getByRole('searchbox', { name: 'Search leads' }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('navigation', { name: "Your company's modules" }),
+  ).toBeVisible();
+  await expect(
+    page.locator('.crm-detail-pane, .crm-detail-placeholder'),
+  ).toHaveCount(1);
+  await page
+    .getByRole('searchbox', { name: 'Search leads' })
+    .fill('an-unknown-lead-for-ui-smoke');
   await page.getByRole('button', { name: 'Apply' }).click();
   await expect(page).toHaveURL(/q=an-unknown-lead-for-ui-smoke/);
   await expect(page.getByText('No leads found')).toBeVisible();
-  expect(clientErrors.filter((error) => /Connection closed|error #412/.test(error))).toEqual([]);
+  expect(
+    clientErrors.filter((error) => /Connection closed|error #412/.test(error)),
+  ).toEqual([]);
 });
