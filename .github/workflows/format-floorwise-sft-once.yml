@@ -1,0 +1,40 @@
+name: Format floorwise SFT quotation (temporary)
+on:
+  pull_request:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  format:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Format modified quotation files
+        run: |
+          pnpm exec prettier --write \
+            'packages/core/src/sft-quotation.ts' \
+            'packages/core/src/sft-quotation.test.ts' \
+            'packages/core/src/quotation-document.ts' \
+            'packages/core/src/quotation-document.test.ts' \
+            'apps/business-app/src/app/dashboard/quotations/sft-estimate-builder.tsx' \
+            'apps/business-app/src/app/dashboard/quotations/construction-selector.tsx' \
+            'apps/business-app/src/app/dashboard/quotations/construction-actions.ts' \
+            'apps/business-app/src/app/dashboard/quotations/[id]/page.tsx'
+      - name: Commit formatting
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add packages/core/src apps/business-app/src/app/dashboard/quotations
+          if ! git diff --cached --quiet; then
+            git commit -m 'style(quotation): format floorwise SFT quotation source'
+            git push origin HEAD:${{ github.head_ref }}
+          fi
