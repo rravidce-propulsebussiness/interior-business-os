@@ -1,7 +1,5 @@
 'use client';
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import { useState, type ReactNode } from 'react';
 import { signOut } from '@business-os/auth/actions';
 
@@ -87,7 +85,6 @@ export function OwnerShell({
   search: string;
   notificationsEnabled: boolean;
 }) {
-  const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const initials =
     accountLabel
@@ -111,7 +108,7 @@ export function OwnerShell({
         className={'owner-sidebar' + (menuOpen ? ' owner-sidebar-open' : '')}
         aria-label="Company navigation"
       >
-        <Link
+        <a
           href="/dashboard"
           className="owner-brand"
           onClick={() => setMenuOpen(false)}
@@ -123,7 +120,7 @@ export function OwnerShell({
             <strong>ProPulse</strong>
             <small>Business OS</small>
           </span>
-        </Link>
+        </a>
         <div className="owner-mobile-heading">
           <span>Workspace menu</span>
           <button
@@ -136,13 +133,9 @@ export function OwnerShell({
         </div>
         <nav className="owner-nav" aria-label="Your company's modules">
           {navigation.map((item) => {
-            const selected =
-              item.href === '/dashboard'
-                ? pathname === '/dashboard'
-                : pathname === item.href ||
-                  pathname.startsWith(item.href + '/');
+            const selected = item.href === '/dashboard';
             return (
-              <Link
+              <a
                 key={item.href}
                 href={item.href}
                 className={
@@ -153,7 +146,7 @@ export function OwnerShell({
               >
                 <OwnerIcon name={item.icon} size={20} />
                 <span>{item.label}</span>
-              </Link>
+              </a>
             );
           })}
         </nav>
@@ -199,13 +192,13 @@ export function OwnerShell({
           </form>
           <div className="owner-account-actions">
             {notificationsEnabled && (
-              <Link
+              <a
                 href="/dashboard/notifications"
                 className="owner-topbar-icon"
                 aria-label="Notifications"
               >
                 <OwnerIcon name="bell" size={21} />
-              </Link>
+              </a>
             )}
             <details className="owner-profile">
               <summary aria-label="Account menu">
@@ -219,7 +212,7 @@ export function OwnerShell({
               <div className="owner-profile-menu">
                 <strong>{companyName}</strong>
                 <small>{accountEmail}</small>
-                <Link href="/">View home page</Link>
+                <a href="/">View home page</a>
                 <form action={signOut}>
                   <button type="submit">
                     <OwnerIcon name="logout" size={17} /> Sign out
