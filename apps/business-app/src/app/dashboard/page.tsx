@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import type { ReactNode } from 'react';
 import { notFound, redirect } from 'next/navigation';
 import {
   pageServices,
@@ -109,7 +110,7 @@ function QuickLink({
 }: {
   href: string;
   icon: OwnerIconName;
-  children: React.ReactNode;
+  children: ReactNode;
   primary?: boolean;
 }) {
   return (
@@ -277,7 +278,7 @@ export default async function Dashboard({
   if (canSettings) navigation.push({ label: 'Company Settings', href: '/dashboard/company/settings', icon: 'settings' });
 
   const quickActions: { label: string; href: string; icon: OwnerIconName; primary?: boolean }[] = [];
-  if (has('quotation.create', 'quotation')) quickActions.push({ label: 'Create Quotation', href: '/dashboard/projects', icon: 'plus', primary: true });
+  if (has('quotation.create', 'quotation')) quickActions.push({ label: 'Create Quotation', href: '/dashboard/quotations/new', icon: 'plus', primary: true });
   if (has('lead.create', 'crm')) quickActions.push({ label: 'Add New Lead', href: '/dashboard/crm/leads/new', icon: 'leads' });
   if (has('invoice.create', 'billing')) quickActions.push({ label: 'Create Invoice', href: '/dashboard/billing/new?kind=sales_invoice', icon: 'billing' });
   if (has('project.create', 'projects')) quickActions.push({ label: 'Add Project', href: '/dashboard/customers', icon: 'projects' });
