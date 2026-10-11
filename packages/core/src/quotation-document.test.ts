@@ -45,3 +45,20 @@ it('honours visibility settings and is deterministic from saved snapshots', () =
   expect(html).not.toContain('Hettich');
   expect(renderQuotationDocument(structuredClone(d))).toBe(html);
 });
+
+it('renders client, pricing, then selected construction specifications without double billing', () => {
+  const d = quotationDocumentFixture();
+  d.lines[0]!.name = 'Premium — Construction package';
+  d.lines[0]!.description =
+    'Package: Premium (PREMIUM)\\nScope: Complete structure\\nMaterials / brands:\\nSteel: Tata\\nBricks: Karimnagar';
+  const html = renderQuotationDocument(d);
+  const client = html.indexOf('Prepared for');
+  const pricing = html.indexOf('2 · Pricing');
+  const specs = html.indexOf('3 · Materials &amp; brand specifications');
+  expect(client).toBeGreaterThan(0);
+  expect(pricing).toBeGreaterThan(client);
+  expect(specs).toBeGreaterThan(pricing);
+  expect(html).toContain('Steel: Tata');
+  expect(html).toContain('Bricks: Karimnagar');
+  expect(html).toContain('133280');
+});

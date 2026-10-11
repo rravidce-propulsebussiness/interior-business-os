@@ -38,6 +38,21 @@ select private.catalog_assert(
 select private.catalog_assert(
  jsonb_array_length(public.construction_rate_list(:'org'))=2,
  'company can read its own construction rate choices');
+select public.construction_package_save(:'org',
+ '{"name":"Sample Premium","code":"PREMIUM","description":"Full scope with selected material brands","ratePerSqft":"1750","status":"active"}'::jsonb) as construction_package \gset
+select private.catalog_assert(
+ (public.construction_package_quote_preview(:'org',:'construction_package',
+ array[:'construction_steel'::uuid,:'construction_bricks'::uuid],1000)->>'total')::numeric=1750000,
+ 'fixed package rate is independent of component brand rates');
+select private.catalog_assert(
+ jsonb_array_length(public.construction_package_list(:'org'))=1,
+ 'owner can view own construction packages');
+select private.catalog_denied(format('select public.construction_package_list(%L)',:'other_org'),
+ array['42501'],'cross-company package pricing forbidden');
+select private.catalog_denied(format(
+ 'select public.construction_package_quote_preview(%L,%L,array[]::uuid[],1000)',
+ :'other_org',:'construction_package'),array['42501'],
+ 'foreign company cannot preview another company package');
 select private.catalog_denied(format('select public.construction_rate_list(%L)',:'other_org'),
  array['42501'],'foreign company construction prices stay private');
 select private.catalog_denied(

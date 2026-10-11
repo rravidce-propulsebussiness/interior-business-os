@@ -14,6 +14,8 @@ import { CommandForm } from '../command-form';
 import { LineForm } from '../line-form';
 import { ConstructionSelector } from '../construction-selector';
 import { createConstructionRatesRepository } from '@business-os/database/construction-rates';
+import { createConstructionPackagesRepository } from '@business-os/database/construction-packages';
+import { documentHeaderSchema } from '@business-os/core/quotation-document';
 export default async function Quotation({
   params,
   searchParams,
@@ -154,6 +156,11 @@ export default async function Quotation({
     s.allowed('pricing.view', 'pricing')
       ? await createConstructionRatesRepository(s.client).list(s.org)
       : null;
+  const constructionPackages = constructionOptions
+    ? await createConstructionPackagesRepository(s.client).list(s.org)
+    : [];
+  // Historical header is already captured on the quotation revision.
+  const clientHeader = documentHeaderSchema.safeParse(r.document_snapshot);
   const canCost = s.allowed('quotation.view_internal_cost', 'quotation');
   const costs =
     canCost && lines?.length
@@ -186,15 +193,6 @@ export default async function Quotation({
   return (
     <main id="main-content" tabIndex={-1} className="mx-auto max-w-6xl p-6">
       <Link href="/dashboard/quotations">Quotations</Link>
-      {r.status === 'issued' && <ContractHandoff revisionId={r.id} />}
-      <SharingSection
-        revisionId={r.id}
-        status={r.status}
-        page={Math.max(
-          1,
-          Math.min(10000, Number.parseInt(filter.share_page ?? '1', 10) || 1),
-        )}
-      />
       <h1 className="my-6 text-3xl">
         {root.quotation_number} · Revision {r.revision_number}
       </h1>
@@ -224,7 +222,58 @@ export default async function Quotation({
       >
         Download PDF
       </Link>
-      <h2 className="mt-6 text-2xl">Items</h2>
+      {clientHeader.success && (
+        <section className="mt-6 grid gap-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:grid-cols-2">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-widest text-blue-700">
+              1 · Client details
+            </p>
+            <h2 className="mt-2 text-lg font-extrabold text-slate-950">
+              {clientHeader.data.customer.name}
+            </h2>
+            <p className="mt-1 text-sm text-slate-600">
+              {clientHeader.data.customer.phone} ·{' '}
+              {clientHeader.data.customer.email}
+            </p>
+            <p className="mt-2 text-xs text-slate-500">
+              {clientHeader.data.customer.legal_name}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs font-bold uppercase tracking-widest text-blue-700">
+              Project
+            </p>
+            <h2 className="mt-2 text-lg font-extrabold text-slate-950">
+              {clientHeader.data.project.name}
+            </h2>
+            <p className="mt-1 text-sm text-slate-600">
+              Project code: {clientHeader.data.project.code}
+            </p>
+          </div>
+        </section>
+      )}
+      <div className="mt-5 flex flex-wrap gap-3">
+        <Link
+          href="/dashboard/quotations/settings"
+          className="rounded-xl border border-blue-200 px-4 py-2 text-xs font-bold text-blue-700"
+        >
+          Company quotation code &amp; design ↗
+        </Link>
+        <Link
+          href="/dashboard/pricing/construction"
+          className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-slate-700"
+        >
+          Company packages and material rates ↗
+        </Link>
+      </div>
+      <h2 className="mt-6 text-2xl font-extrabold">2 · Pricing details</h2>
+      <p className="mt-1 text-xs text-slate-600">
+        Choose a fixed per-sq-ft package or build a customized quote using
+        individual material and brand rates.
+      </p>
+      <h3 className="mt-6 text-lg font-bold text-slate-900">
+        Saved quotation items
+      </h3>
       {!lines?.length && (
         <p>No items yet. Add a catalog item or authorized manual item.</p>
       )}
@@ -403,6 +452,7 @@ export default async function Quotation({
           {constructionOptions && (
             <ConstructionSelector
               rates={constructionOptions}
+              packages={constructionPackages}
               revisionId={r.id}
               version={r.version}
             />
@@ -553,6 +603,27 @@ export default async function Quotation({
           )}
         </>
       )}
+      <section className="my-6 rounded-2xl border border-slate-200 bg-white p-6">
+        <h2 className="text-lg font-extrabold text-slate-950">
+          3 · Materials and brand specifications
+        </h2>
+        <p className="mt-1 text-xs text-slate-600">
+          The selected package scope and brand specifications are included in
+          each saved quotation line. In package mode, they do not increase the
+          package price. In customized mode, every material has its own price
+          and line total. Download the customer PDF to review the final
+          presentation.
+        </p>
+      </section>
+      {r.status === 'issued' && <ContractHandoff revisionId={r.id} />}
+      <SharingSection
+        revisionId={r.id}
+        status={r.status}
+        page={Math.max(
+          1,
+          Math.min(10000, Number.parseInt(filter.share_page ?? '1', 10) || 1),
+        )}
+      />
       {r.status === 'draft' && s.allowed('quotation.issue', 'quotation') && (
         <CommandForm
           title="Issue and freeze revision"

@@ -10685,6 +10685,20 @@ export interface Database {
         Args: { p_approval_required: boolean };
         Returns: Json;
       };
+      construction_package_list: { Args: { p_org: string }; Returns: Json };
+      construction_package_quote_preview: {
+        Args: {
+          p_org: string;
+          p_package_id: string;
+          p_ids: string[];
+          p_area: number;
+        };
+        Returns: Json;
+      };
+      construction_package_save: {
+        Args: { p_org: string; p_input: Json };
+        Returns: string;
+      };
       construction_rate_list: { Args: { p_org: string }; Returns: Json };
       construction_rate_quote_preview: {
         Args: { p_org: string; p_ids: string[]; p_area: number };

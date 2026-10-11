@@ -13,10 +13,12 @@ export default async function Settings() {
   return (
     <main id="main-content" tabIndex={-1} className="mx-auto max-w-5xl p-6">
       <Link href="/dashboard/quotations">Quotations</Link>
-      <h1 className="my-6 text-3xl">Quotation settings</h1>
+      <h1 className="my-6 text-3xl">Company quotation design &amp; code</h1>
       <p>
-        Changes apply to new quotations. Existing revision snapshots keep their
-        original branding and terms.
+        Company owners control the quotation number prefix, logo, colors,
+        columns, default terms and client-facing layout. The platform Super
+        Admin does not create quotations. Changes apply to new quotations only;
+        issued document snapshots remain unchanged.
       </p>
       <MasterForm
         entity="organization_quotation_settings"
