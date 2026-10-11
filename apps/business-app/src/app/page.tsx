@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-html-link-for-pages -- Intentional full-document navigation avoids incomplete RSC Flight streams on Hostinger. */
 import Link from 'next/link';
 import { signOut } from '@business-os/auth/actions';
 import {
