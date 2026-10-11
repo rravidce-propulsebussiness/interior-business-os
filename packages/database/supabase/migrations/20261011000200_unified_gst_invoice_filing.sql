@@ -98,6 +98,27 @@ create trigger gst_assign_standard_on_invoice_insert
  after insert on private.gst_business_documents for each row
  execute function private.gst_assign_standard_on_invoice_insert();
 
+-- Old draft records without a format receive the standard when finalized.
+-- Existing issued/recorded documents with no layout remain untouched.
+create function private.gst_assign_standard_on_finalize()
+returns trigger language plpgsql security definer set search_path='' as $fn$
+begin
+ if old.status='draft' and new.status in ('issued','recorded')
+   and not exists(select 1 from private.gst_invoice_document_layouts
+                  where document_id=new.id) then
+   insert into private.gst_invoice_document_layouts(document_id,template_id,template_name,config)
+   select new.id,template_id,name,config
+   from private.gst_invoice_standard where id=true;
+   if not found then
+     raise exception 'Standard invoice format unavailable' using errcode='22023';
+   end if;
+ end if;
+ return new;
+end $fn$;
+create trigger gst_assign_standard_on_finalize
+ after update of status on private.gst_business_documents for each row
+ execute function private.gst_assign_standard_on_finalize();
+
 -- Retain signature for compatibility but ignore tenant-supplied template IDs:
 -- the server enforces a single platform-approved design for all new invoices.
 create or replace function public.gst_document_with_template_save(
