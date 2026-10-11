@@ -1,6 +1,10 @@
 import { spawnSync } from 'node:child_process';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import {
+  resolveDeploymentId,
+  validateServerActionsEncryptionKey,
+} from './hostinger-deployment.mjs';
 
 // Hostinger currently auto-selects npm for this pnpm workspace.
 // Perform the actual frozen workspace install before building one Next.js app.
@@ -12,11 +16,22 @@ if (!['business-app', 'platform-admin', 'websites'].includes(service)) {
   );
 }
 const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
-const runPnpm = (args) => {
+const nextDeploymentId = resolveDeploymentId({ cwd: root });
+const hasActionKey = validateServerActionsEncryptionKey();
+console.log(`[Business OS] Next deployment ID: ${nextDeploymentId}`);
+if (!hasActionKey) {
+  console.warn(
+    '[Business OS] NEXT_SERVER_ACTIONS_ENCRYPTION_KEY is unset. ' +
+      'For stable Server Actions across builds/instances, configure a ' +
+      'private 32-byte base64 key at BOTH build and runtime.',
+  );
+}
+
+const runPnpm = (args, overrides = {}) => {
   const result = spawnSync(
     npm,
     ['exec', '--yes', '--package=pnpm@10.34.5', '--', 'pnpm', ...args],
-    { cwd: root, stdio: 'inherit', env: { ...process.env, CI: 'true' } },
+    { cwd: root, stdio: 'inherit', env: { ...process.env, CI: 'true', ...overrides } },
   );
   if (result.error) throw result.error;
   if (result.status !== 0) process.exit(result.status || 1);
@@ -37,4 +52,4 @@ runPnpm([
   'next',
   'build',
   '--webpack',
-]);
+], { NEXT_DEPLOYMENT_ID: nextDeploymentId });
