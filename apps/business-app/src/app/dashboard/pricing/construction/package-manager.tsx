@@ -1,5 +1,5 @@
 'use client';
-import { useActionState, useEffect, useState } from 'react';
+import { useActionState, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { ConstructionPackage } from '@business-os/database/construction-packages';
 import { saveConstructionPackage } from './package-actions';
@@ -7,8 +7,9 @@ import { saveConstructionPackage } from './package-actions';
 const field='w-full rounded-xl border border-slate-300 bg-white px-3 py-3 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100';
 function PackageEditor({item,close}:{item?:ConstructionPackage;close:()=>void}){
  const router=useRouter();
+ const handled=useRef(false);
  const [state,action,pending]=useActionState(saveConstructionPackage,{message:''});
- useEffect(()=>{if(state.saved){router.refresh();close();}},[state.saved,router,close]);
+ useEffect(()=>{if(state.saved&&!handled.current){handled.current=true;router.refresh();close();}},[state.saved,router,close]);
  return <form action={action} className="mt-4 grid gap-4 rounded-2xl border border-blue-200 bg-white p-5 shadow-sm sm:grid-cols-2">
   {item&&<><input type="hidden" name="id" value={item.id}/><input type="hidden" name="version" value={item.version}/></>}
   <label className="grid gap-1 text-xs font-bold text-slate-700">Package name
