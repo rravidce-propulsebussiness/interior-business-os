@@ -285,20 +285,13 @@ export default async function OrganizationDetail({
                   <div className="mt-5">
                     <ActionForm
                       action={enablePlatformSeller}
-                      label="Create seller account"
+                      label="Enable seller storefront"
                     >
                       <input type="hidden" name="organizationId" value={id} />
-                      <label className="grid gap-2 text-sm font-medium">
-                        Seller storefront name
-                        <input
-                          required
-                          name="storeName"
-                          minLength={2}
-                          maxLength={150}
-                          defaultValue={organization.name}
-                          className={field}
-                        />
-                      </label>
+                      <p className="text-sm text-slate-600">
+                        Storefront name: <strong>{organization.name}</strong>.
+                        It always matches the company name.
+                      </p>
                     </ActionForm>
                   </div>
                 )}
