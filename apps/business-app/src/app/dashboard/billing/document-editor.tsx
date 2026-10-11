@@ -152,9 +152,10 @@ export function DocumentEditor({
                 : standard.name}
             </h2>
             <p className="mt-1 text-xs leading-5 text-slate-600">
-              Every new invoice follows the platform administrator&apos;s standard.
-              Each business supplies its own legal GST identity and customer or
-              supplier details. The format cannot change tax calculations.
+              Every new invoice follows the platform administrator&apos;s
+              standard. Each business supplies its own legal GST identity and
+              customer or supplier details. The format cannot change tax
+              calculations.
             </p>
           </div>
           <span className="rounded-xl bg-blue-100 px-3 py-2 text-xs font-bold text-blue-700">
