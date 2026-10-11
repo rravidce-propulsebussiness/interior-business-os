@@ -173,6 +173,33 @@
   padding: 10px;
   color: #1f2937;
 }
+.os-signout-form {
+  flex: 0 0 auto;
+}
+
+.os-signout-button {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 8px 12px;
+  border: 1px solid #dce4ef;
+  border-radius: 10px;
+  background: #fff;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.os-signout-button:hover,
+.os-signout-button:focus-visible {
+  border-color: #e8b8b8;
+  background: #fff3f3;
+  color: #9f2828;
+}
+
 .os-admin-profile {
   margin-left: auto;
   display: flex;
