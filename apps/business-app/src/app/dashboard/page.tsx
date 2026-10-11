@@ -1,410 +1,917 @@
 import Link from 'next/link';
+import type { ReactNode } from 'react';
 import { notFound, redirect } from 'next/navigation';
 import {
   pageServices,
   activeOrganization,
   workspaceScope,
 } from '@business-os/auth/server';
-import { signOut, switchOrganization } from '@business-os/auth/actions';
-import { canAccess, moduleNavigation } from '@business-os/auth';
+import { canAccess } from '@business-os/auth';
 import { DomainError } from '@business-os/shared';
-import { Button } from '@business-os/ui';
-import { createAutomationRepository } from '@business-os/database/automation';
+import { createCrmRepository } from '@business-os/database/crm';
+import { createQuotationRepository } from '@business-os/database/quotations';
+import { createGstRepository } from '@business-os/database/gst';
+import { commercialSearchResultSchema } from '@business-os/core/commercial';
+import { resultSchema } from './crm/service';
+import {
+  OwnerIcon,
+  OwnerShell,
+  type OwnerIconName,
+  type OwnerNavItem,
+} from './owner-shell';
+import './owner-dashboard.css';
 
-export default async function Dashboard() {
+export const dynamic = 'force-dynamic';
+
+type SearchParams = { q?: string };
+type Lead = Record<string, unknown>;
+type SiteProject = { id: string; stage: string; role: string };
+
+const number = new Intl.NumberFormat('en-IN');
+const rupees = new Intl.NumberFormat('en-IN', {
+  style: 'currency',
+  currency: 'INR',
+  maximumFractionDigits: 0,
+});
+
+function asText(value: unknown): string {
+  return typeof value === 'string' && value.trim() ? value.trim() : '';
+}
+
+function displayDate(value: unknown): string {
+  if (typeof value !== 'string' || !value) return '—';
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime())
+    ? '—'
+    : new Intl.DateTimeFormat('en-IN', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+      }).format(parsed);
+}
+
+function titleCase(value: string): string {
+  return value
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function emailDisplayName(email: string): string {
+  const identifier =
+    email.split('@')[0]?.split(/[._-]/).filter(Boolean).slice(0, 2) ?? [];
+  return identifier.map((word) => titleCase(word)).join(' ') || 'there';
+}
+
+async function optional<T>(value: PromiseLike<T>): Promise<T | null> {
+  try {
+    return await value;
+  } catch {
+    // A disabled or temporarily unavailable feature should not crash the
+    // entire company dashboard. No data is represented as unavailable.
+    return null;
+  }
+}
+
+function DashboardStat({
+  label,
+  value,
+  note,
+  icon,
+  tone,
+  href,
+}: {
+  label: string;
+  value: string;
+  note: string;
+  icon: OwnerIconName;
+  tone: string;
+  href?: string;
+}) {
+  const content = (
+    <>
+      <span className={'owner-stat-icon owner-tone-' + tone}>
+        <OwnerIcon name={icon} size={25} />
+      </span>
+      <span className="owner-stat-text">
+        <span>{label}</span>
+        <strong>{value}</strong>
+        <small>{note}</small>
+      </span>
+    </>
+  );
+  return href ? (
+    <Link href={href} className="owner-stat">
+      {content}
+    </Link>
+  ) : (
+    <div className="owner-stat">{content}</div>
+  );
+}
+
+function QuickLink({
+  href,
+  icon,
+  children,
+  primary = false,
+}: {
+  href: string;
+  icon: OwnerIconName;
+  children: ReactNode;
+  primary?: boolean;
+}) {
+  return (
+    <Link
+      href={href}
+      className={'owner-quick-button' + (primary ? ' owner-quick-primary' : '')}
+    >
+      <OwnerIcon name={icon} size={19} />
+      <span>{children}</span>
+    </Link>
+  );
+}
+
+function AccessTile({
+  href,
+  label,
+  icon,
+  tone,
+}: {
+  href: string;
+  label: string;
+  icon: OwnerIconName;
+  tone: string;
+}) {
+  return (
+    <Link className={'owner-access-tile owner-tile-' + tone} href={href}>
+      <OwnerIcon name={icon} size={27} />
+      <span>{label}</span>
+    </Link>
+  );
+}
+
+export default async function Dashboard({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}) {
   const { authorization, repository, client } = await pageServices();
   const user = await authorization.requireAuthenticatedUser();
   const scope = await workspaceScope();
-  // Platform administrators have one canonical dashboard: /admin.
-  // An organization Owner is not a platform administrator. Redirect only when
-  // every permission required by /admin's dashboard is verified server-side.
-  let canOpenPlatformDashboard = false;
+
+  // Platform Admin is a separate workspace. A company owner never gains
+  // platform access merely because they are the only person in a business.
+  let isPlatformAdmin = false;
   try {
     await authorization.requirePlatformPermission('platform.access');
     await authorization.requirePlatformPermission(
       'platform.organizations.view',
     );
     await authorization.requirePlatformPermission('platform.catalog.view');
-    canOpenPlatformDashboard = true;
+    isPlatformAdmin = true;
   } catch (error) {
     if (!(error instanceof DomainError && error.code === 'FORBIDDEN'))
       throw error;
   }
-  if (canOpenPlatformDashboard && !scope) redirect('/admin');
-  const [allOrganizations, memberships, modules] = await Promise.all([
-    repository.organizations(),
-    repository.memberships(),
-    repository.modules(),
-  ]);
-  const organizations = allOrganizations.filter((org) =>
-    memberships.some(
-      (m) =>
-        m.organization_id === org.id &&
-        m.user_id === user.id &&
-        m.status === 'active',
-    ),
-  );
+  if (isPlatformAdmin && !scope) redirect('/admin');
+
   let context: Awaited<ReturnType<typeof activeOrganization>> = null;
-  let invalidSelection = false;
   try {
     context = await activeOrganization();
   } catch (error) {
-    if (error instanceof DomainError && error.code === 'FORBIDDEN')
-      invalidSelection = true;
-    else throw error;
+    if (error instanceof DomainError && error.code === 'FORBIDDEN') notFound();
+    throw error;
   }
-  if (scope && (!context || invalidSelection)) notFound();
-  const organization = context
-    ? organizations.find((org) => org.id === context.organizationId)
-    : null;
+
+  if (!context) {
+    if (scope) notFound();
+    return (
+      <main id="main-content" className="owner-no-company">
+        <h1>No active company workspace</h1>
+        <p>
+          Your account needs an active company membership to access business
+          tools.
+        </p>
+        <Link href="/dashboard/company/invitations">
+          Review your invitations →
+        </Link>
+      </main>
+    );
+  }
+
+  const organization = await repository.organization(context.organizationId);
+  if (!organization) notFound();
   if (
     !scope &&
-    organization &&
-    process.env.BUSINESS_OS_TENANT_ROUTES_ENABLED === 'true'
-  )
+    process.env.BUSINESS_OS_TENANT_ROUTES_ENABLED === 'true' &&
+    organization.slug
+  ) {
     redirect('/' + organization.slug + '/dashboard');
-  const branches = context
-    ? await repository.branches(context.organizationId)
-    : [];
-  const canViewTeam =
-    context &&
-    canAccess(context, {
-      organizationId: context.organizationId,
-      permission: 'team.view',
-    });
-  const team =
-    context && canViewTeam ? await repository.team(context.organizationId) : [];
-  const nav = context ? moduleNavigation(context, modules) : [];
-  const notificationSummary =
-    context &&
-    canAccess(context, {
-      organizationId: context.organizationId,
-      permission: 'notification.view',
-    })
-      ? await createAutomationRepository(
-          client,
-          context.organizationId,
-        ).notifications(1, 'unread')
-      : null;
-  return (
-    <main
-      id="main-content"
-      tabIndex={-1}
-      className="dashboard-shell tenant-dashboard-v2"
-    >
-      <header className="tenant-v2-topbar">
-        <Link className="tenant-v2-brand" href="/dashboard">
-          <span className="tenant-v2-monogram" aria-hidden="true">
-            P
-          </span>
-          <span>
-            <strong>ProPulse Business OS</strong>
-            <small>Company workspace</small>
-          </span>
-        </Link>
-        <div className="tenant-v2-account">
-          <span>{user.email ?? 'Signed in'}</span>
-          <form action={signOut}>
-            <Button>Sign out</Button>
-          </form>
-        </div>
-      </header>
+  }
 
-      <section className="tenant-v2-hero">
-        <div>
-          <p className="eyebrow">Your business, one workspace</p>
-          <h1>Business overview</h1>
-          <p className="tenant-v2-lead">
-            {organization
-              ? 'Welcome to ' +
-                organization.name +
-                '. Your work, tools and team in one place.'
-              : 'Select your company to access your business tools and daily operations.'}
-          </p>
-          <div className="tenant-v2-hero-actions">
-            {context && (
-              <Link
-                className="premium-link-secondary"
-                href="/dashboard/reports/overview"
-              >
-                Management overview →
+  const orgId = context.organizationId;
+  const has = (permission: string, moduleKey?: string) =>
+    canAccess(context, {
+      organizationId: orgId,
+      permission,
+      ...(moduleKey ? { moduleKey } : {}),
+    });
+  const canLeads = has('lead.view', 'crm');
+  const canQuotes = has('quotation.view', 'quotation');
+  const canProjects = has('project.view', 'projects');
+  const canClients =
+    has('customer.view', 'quotation') || has('customer.view', 'crm');
+  const canMarketplace = has('purchase.view');
+  const canBilling = has('invoice.view', 'billing');
+  const canReports =
+    has('report.view') ||
+    has('report.financial') ||
+    has('financial_report.view', 'billing');
+  const canTeam = has('team.view');
+  const canInvite = has('team.invite') && has('role.manage');
+  const canWebsite = has('website.view', 'website');
+  const canSettings = has('organization.view');
+  const canSites = context.entitlements.includes('projects');
+  const isOwner = context.roles.some(
+    (role) => role.name.toLowerCase() === 'owner',
+  );
+  const query = (await searchParams).q?.trim().slice(0, 80) ?? '';
+
+  // Fetch only the active company's data, with its existing server/RLS guards.
+  const [
+    rawLeads,
+    rawQuotes,
+    rawProjects,
+    rawInvoices,
+    rawTeam,
+    rawPlans,
+    rawSites,
+  ] = await Promise.all([
+    canLeads
+      ? optional(
+          createCrmRepository(client, orgId).search(
+            'leads',
+            { sort: 'newest', ...(query ? { q: query } : {}) },
+            1,
+          ),
+        )
+      : Promise.resolve(null),
+    canQuotes
+      ? optional(
+          createQuotationRepository(client).search(orgId, 'quotations', query),
+        )
+      : Promise.resolve(null),
+    canProjects
+      ? optional(
+          createQuotationRepository(client).search(
+            orgId,
+            'projects',
+            query,
+            1,
+            'active',
+          ),
+        )
+      : Promise.resolve(null),
+    canBilling
+      ? optional(createGstRepository(client).list(orgId, 'sales_invoice'))
+      : Promise.resolve(null),
+    canTeam ? optional(repository.team(orgId)) : Promise.resolve(null),
+    optional(repository.plans()),
+    canSites
+      ? optional(
+          client.rpc('project_site_my_projects', { p_organization_id: orgId }),
+        )
+      : Promise.resolve(null),
+  ]);
+
+  const leadResult = rawLeads ? resultSchema.safeParse(rawLeads) : null;
+  const quoteResult = rawQuotes
+    ? commercialSearchResultSchema.safeParse(rawQuotes)
+    : null;
+  const projectResult = rawProjects
+    ? commercialSearchResultSchema.safeParse(rawProjects)
+    : null;
+  const leads = leadResult?.success ? leadResult.data : null;
+  const quotes = quoteResult?.success ? quoteResult.data : null;
+  const projects = projectResult?.success ? projectResult.data : null;
+  const invoices = Array.isArray(rawInvoices) ? rawInvoices : null;
+  const team = Array.isArray(rawTeam) ? rawTeam : null;
+  const otherMembers =
+    team?.filter(
+      (member) => member.user_id !== user.id && member.status === 'active',
+    ) ?? [];
+  const sites: SiteProject[] =
+    rawSites && !rawSites.error && Array.isArray(rawSites.data)
+      ? rawSites.data.filter(
+          (site: unknown): site is SiteProject =>
+            typeof site === 'object' &&
+            site !== null &&
+            'id' in site &&
+            typeof site.id === 'string' &&
+            'stage' in site &&
+            typeof site.stage === 'string' &&
+            'role' in site &&
+            typeof site.role === 'string',
+        )
+      : [];
+  const siteById = new Map(sites.map((site) => [site.id, site]));
+  const plan = rawPlans?.find((item) => item.id === organization.plan_id);
+  const planLabel = plan?.name || 'Business plan';
+  const accountEmail = user.email ?? '';
+  const accountLabel = emailDisplayName(accountEmail);
+
+  const month = new Date().toISOString().slice(0, 7);
+  const issuedThisMonth = invoices?.filter(
+    (doc) => doc.status === 'issued' && doc.date.startsWith(month),
+  );
+  const invoiceTotal = issuedThisMonth?.reduce(
+    (sum, document) => sum + Number(document.total || 0),
+    0,
+  );
+  const navigation: OwnerNavItem[] = [
+    { label: 'Dashboard', href: '/dashboard', icon: 'dashboard' },
+  ];
+  if (canLeads)
+    navigation.push({
+      label: 'Leads',
+      href: '/dashboard/crm/leads',
+      icon: 'leads',
+    });
+  if (canQuotes)
+    navigation.push({
+      label: 'Quotations',
+      href: '/dashboard/quotations',
+      icon: 'quotations',
+    });
+  if (canProjects)
+    navigation.push({
+      label: 'Projects',
+      href: '/dashboard/projects',
+      icon: 'projects',
+    });
+  else if (canSites)
+    navigation.push({
+      label: 'My Sites',
+      href: '/dashboard/site-projects',
+      icon: 'projects',
+    });
+  if (canClients)
+    navigation.push({
+      label: 'Clients',
+      href: '/dashboard/customers',
+      icon: 'clients',
+    });
+  if (canMarketplace) {
+    navigation.push({
+      label: 'Marketplace',
+      href: '/dashboard/marketplace',
+      icon: 'marketplace',
+    });
+    navigation.push({
+      label: 'Purchases',
+      href: '/dashboard/marketplace/orders',
+      icon: 'purchases',
+    });
+  }
+  if (canBilling) {
+    navigation.push({
+      label: 'Billing & Invoices',
+      href: '/dashboard/billing',
+      icon: 'billing',
+    });
+    navigation.push({
+      label: 'Expenses',
+      href: '/dashboard/billing?kind=purchase_bill',
+      icon: 'expenses',
+    });
+  }
+  if (canReports)
+    navigation.push({
+      label: 'Reports',
+      href: '/dashboard/reports',
+      icon: 'reports',
+    });
+  if (canTeam || has('role.view'))
+    navigation.push({
+      label: 'Team',
+      href: '/dashboard/company/team',
+      icon: 'team',
+    });
+  if (canWebsite)
+    navigation.push({
+      label: 'Website',
+      href: '/dashboard/website',
+      icon: 'globe',
+    });
+  if (canSettings)
+    navigation.push({
+      label: 'Company Settings',
+      href: '/dashboard/company/settings',
+      icon: 'settings',
+    });
+
+  const quickActions: {
+    label: string;
+    href: string;
+    icon: OwnerIconName;
+    primary?: boolean;
+  }[] = [];
+  if (has('quotation.create', 'quotation'))
+    quickActions.push({
+      label: 'Create Quotation',
+      href: '/dashboard/quotations/new',
+      icon: 'plus',
+      primary: true,
+    });
+  if (has('lead.create', 'crm'))
+    quickActions.push({
+      label: 'Add New Lead',
+      href: '/dashboard/crm/leads/new',
+      icon: 'leads',
+    });
+  if (has('invoice.create', 'billing'))
+    quickActions.push({
+      label: 'Create Invoice',
+      href: '/dashboard/billing/new?kind=sales_invoice',
+      icon: 'billing',
+    });
+  if (has('project.create', 'projects'))
+    quickActions.push({
+      label: 'Add Project',
+      href: '/dashboard/customers',
+      icon: 'projects',
+    });
+  if (has('invoice.create', 'billing'))
+    quickActions.push({
+      label: 'Add Expense',
+      href: '/dashboard/billing/new?kind=purchase_bill',
+      icon: 'expenses',
+    });
+
+  const tiles: {
+    label: string;
+    href: string;
+    icon: OwnerIconName;
+    tone: string;
+  }[] = [];
+  if (canLeads)
+    tiles.push({
+      label: 'Leads',
+      href: '/dashboard/crm/leads',
+      icon: 'leads',
+      tone: 'blue',
+    });
+  if (canQuotes)
+    tiles.push({
+      label: 'Quotations',
+      href: '/dashboard/quotations',
+      icon: 'quotations',
+      tone: 'green',
+    });
+  if (canProjects)
+    tiles.push({
+      label: 'Projects',
+      href: '/dashboard/projects',
+      icon: 'projects',
+      tone: 'purple',
+    });
+  if (canBilling)
+    tiles.push({
+      label: 'Invoices',
+      href: '/dashboard/billing',
+      icon: 'billing',
+      tone: 'orange',
+    });
+  if (canClients)
+    tiles.push({
+      label: 'Clients',
+      href: '/dashboard/customers',
+      icon: 'clients',
+      tone: 'pink',
+    });
+  if (canMarketplace)
+    tiles.push({
+      label: 'Marketplace',
+      href: '/dashboard/marketplace',
+      icon: 'marketplace',
+      tone: 'cyan',
+    });
+
+  const hasSearch = query.length > 0;
+  const hasRows =
+    (leads?.rows.length ?? 0) > 0 ||
+    (projects?.rows.length ?? 0) > 0 ||
+    (quotes?.rows.length ?? 0) > 0;
+
+  return (
+    <OwnerShell
+      companyName={organization.name}
+      accountLabel={accountLabel}
+      accountEmail={accountEmail}
+      planLabel={planLabel}
+      navigation={navigation}
+      search={query}
+      notificationsEnabled={has('notification.view')}
+    >
+      <main id="main-content" tabIndex={-1} className="owner-dashboard">
+        <section className="owner-welcome">
+          <div>
+            <p className="owner-eyebrow">
+              {isOwner ? 'Owner workspace' : 'Company workspace'}
+            </p>
+            <h1>
+              Welcome back, {accountLabel}! <span aria-hidden="true">👋</span>
+            </h1>
+            <p>
+              Here&apos;s what&apos;s happening at {organization.name} today.
+            </p>
+          </div>
+          <div className="owner-company-card">
+            <span className="owner-company-art" aria-hidden="true">
+              <OwnerIcon name="dashboard" size={35} />
+            </span>
+            <span className="owner-company-details">
+              <strong>{organization.name}</strong>
+              <small>
+                {isOwner ? 'Your business' : 'Your company'} ·{' '}
+                {titleCase(organization.status)}
+              </small>
+            </span>
+            {canWebsite && (
+              <Link className="owner-company-action" href="/dashboard/website">
+                <OwnerIcon name="globe" size={16} /> Website
               </Link>
             )}
           </div>
-        </div>
-        <div className="tenant-v2-art" aria-hidden="true">
-          <span>OS</span>
-        </div>
-      </section>
+        </section>
 
-      {invalidSelection && (
-        <p className="tenant-v2-alert" role="alert">
-          Your previously selected company is unavailable. Select an active
-          company below.
-        </p>
-      )}
+        {hasSearch && (
+          <section className="owner-search-summary" aria-live="polite">
+            <div>
+              <strong>Search within {organization.name}</strong>
+              <p>
+                Showing matches for “{query}” across the company records you can
+                access.
+              </p>
+            </div>
+            <Link href="/dashboard">Clear search</Link>
+            {!hasRows && (
+              <p className="owner-search-empty">
+                No matching leads, active projects, or quotations were found.
+              </p>
+            )}
+          </section>
+        )}
 
-      {organizations.length > 0 && scope?.kind !== 'hostname' && (
-        <form action={switchOrganization} className="dashboard-controlbar">
-          <label>
-            Active company
-            <select
-              name="organizationId"
-              defaultValue={context?.organizationId}
-              className="mt-2"
-            >
-              {organizations.map((org) => (
-                <option key={org.id} value={org.id}>
-                  {org.name}
-                </option>
+        <section className="owner-stats" aria-label="Company overview">
+          {canLeads && (
+            <DashboardStat
+              label={hasSearch ? 'Matching Leads' : 'Leads'}
+              value={leads ? number.format(leads.total) : '—'}
+              note={
+                leads
+                  ? hasSearch
+                    ? 'Search matches'
+                    : 'All visible leads'
+                  : 'Temporarily unavailable'
+              }
+              icon="leads"
+              tone="blue"
+              href="/dashboard/crm/leads"
+            />
+          )}
+          {canQuotes && (
+            <DashboardStat
+              label={hasSearch ? 'Matching Quotes' : 'Quotations'}
+              value={quotes ? number.format(quotes.total) : '—'}
+              note={
+                quotes
+                  ? hasSearch
+                    ? 'Search matches'
+                    : 'All quotations'
+                  : 'Temporarily unavailable'
+              }
+              icon="quotations"
+              tone="green"
+              href="/dashboard/quotations"
+            />
+          )}
+          {canProjects && (
+            <DashboardStat
+              label="Active Projects"
+              value={projects ? number.format(projects.total) : '—'}
+              note={
+                projects
+                  ? hasSearch
+                    ? 'Matching active projects'
+                    : 'Active projects'
+                  : 'Temporarily unavailable'
+              }
+              icon="projects"
+              tone="purple"
+              href="/dashboard/projects"
+            />
+          )}
+          {canBilling && (
+            <DashboardStat
+              label="Issued Invoices"
+              value={
+                invoiceTotal === undefined ? '—' : rupees.format(invoiceTotal)
+              }
+              note={
+                invoices
+                  ? 'This month · latest register'
+                  : 'Temporarily unavailable'
+              }
+              icon="billing"
+              tone="orange"
+              href="/dashboard/billing"
+            />
+          )}
+          {!canLeads && !canQuotes && !canProjects && !canBilling && (
+            <div className="owner-panel owner-no-modules">
+              <strong>Your company workspace is ready.</strong>
+              <p>
+                Modules become visible when they are included in your plan and
+                account access.
+              </p>
+            </div>
+          )}
+        </section>
+
+        {(quickActions.length > 0 || canInvite) && (
+          <section className="owner-quick-actions" aria-label="Quick actions">
+            <div className="owner-quick-scroll">
+              {quickActions.map((item) => (
+                <QuickLink
+                  key={item.label}
+                  href={item.href}
+                  icon={item.icon}
+                  primary={item.primary === true}
+                >
+                  {item.label}
+                </QuickLink>
               ))}
-            </select>
-          </label>
-          <Button>Switch company</Button>
-        </form>
-      )}
+            </div>
+            {canInvite && (
+              <Link
+                className="owner-quick-invite"
+                href="/dashboard/company/team"
+              >
+                <OwnerIcon name="team" size={19} /> Invite Team Member
+              </Link>
+            )}
+          </section>
+        )}
 
-      {organization && context ? (
-        <>
-          <section className="tenant-v2-metrics" aria-label="Company snapshot">
-            <div className="tenant-v2-metric">
-              <span>Accessible modules</span>
-              <strong>{nav.length}</strong>
-              <small>Available to your account</small>
+        <div className="owner-content-grid">
+          <section className="owner-panel owner-recent-panel">
+            <div className="owner-panel-heading">
+              <h2>Recent Leads</h2>
+              {canLeads && (
+                <Link href="/dashboard/crm/leads">
+                  View All <OwnerIcon name="arrow" size={15} />
+                </Link>
+              )}
             </div>
-            <div className="tenant-v2-metric">
-              <span>Company branches</span>
-              <strong>{branches.length}</strong>
-              <small>Visible branches</small>
-            </div>
-            <div className="tenant-v2-metric">
-              <span>Team memberships</span>
-              <strong>{canViewTeam ? team.length : '—'}</strong>
-              <small>
-                {canViewTeam ? 'Your company team' : 'Access restricted'}
-              </small>
-            </div>
-            <div className="tenant-v2-metric">
-              <span>Unread notifications</span>
-              <strong>
-                {notificationSummary ? (notificationSummary.unread ?? 0) : '—'}
-              </strong>
-              <small>
-                {notificationSummary ? 'Pending updates' : 'Access restricted'}
-              </small>
-            </div>
+            {!canLeads ? (
+              <p className="owner-empty">
+                Lead access is not enabled for this account.
+              </p>
+            ) : !leads ? (
+              <p className="owner-empty">
+                Lead data is temporarily unavailable.
+              </p>
+            ) : leads.rows.length === 0 ? (
+              <div className="owner-empty-state">
+                <span className="owner-empty-graphic">
+                  <OwnerIcon name="leads" size={24} />
+                </span>
+                <strong>
+                  {hasSearch
+                    ? 'No matching leads'
+                    : 'Your leads will appear here'}
+                </strong>
+                <p>
+                  {hasSearch
+                    ? 'Try another search term.'
+                    : 'Capture enquiries and follow-ups in one place.'}
+                </p>
+                {has('lead.create', 'crm') && (
+                  <Link href="/dashboard/crm/leads/new">
+                    Add your first lead →
+                  </Link>
+                )}
+              </div>
+            ) : (
+              <div className="owner-table-wrap">
+                <table className="owner-leads-table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Requirement</th>
+                      <th>Location</th>
+                      <th>Date</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {leads.rows.slice(0, 5).map((lead: Lead, i) => {
+                      const leadId = asText(lead.id);
+                      return (
+                        <tr key={leadId || String(i)}>
+                          <td>
+                            {leadId ? (
+                              <Link href={'/dashboard/crm/leads/' + leadId}>
+                                {asText(lead.name) || 'Lead'}
+                              </Link>
+                            ) : (
+                              asText(lead.name) || 'Lead'
+                            )}
+                          </td>
+                          <td>
+                            {asText(lead.requirement) ||
+                              asText(lead.project_type) ||
+                              '—'}
+                          </td>
+                          <td>
+                            {asText(lead.city) || asText(lead.location) || '—'}
+                          </td>
+                          <td>{displayDate(lead.created_at)}</td>
+                          <td>
+                            <span
+                              className={
+                                'owner-status owner-status-' +
+                                (asText(lead.lifecycle) === 'open'
+                                  ? 'blue'
+                                  : 'neutral')
+                              }
+                            >
+                              {titleCase(
+                                asText(lead.lifecycle) ||
+                                  asText(lead.status) ||
+                                  'New',
+                              )}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </section>
 
-          <div className="tenant-v2-columns">
-            <div className="tenant-v2-stack">
-              <section className="tenant-v2-panel">
-                <p className="eyebrow">Daily operations</p>
-                <h2>Quick access</h2>
-                <div className="tenant-v2-actions">
-                  {(canAccess(context, {
-                    organizationId: context.organizationId,
-                    permission: 'customer.view',
-                    moduleKey: 'quotation',
-                  }) ||
-                    canAccess(context, {
-                      organizationId: context.organizationId,
-                      permission: 'customer.view',
-                      moduleKey: 'crm',
-                    })) && (
-                    <Link href="/dashboard/customers">
-                      <span>Customers</span>
-                      <small>Contacts and enquiries</small>
-                      <b aria-hidden="true">↗</b>
-                    </Link>
-                  )}
-                  {(canViewTeam ||
-                    canAccess(context, {
-                      organizationId: context.organizationId,
-                      permission: 'role.view',
-                    })) && (
-                    <Link href="/dashboard/company/team">
-                      <span>People &amp; roles</span>
-                      <small>Employees and access</small>
-                      <b aria-hidden="true">↗</b>
-                    </Link>
-                  )}
-                  {context.entitlements.includes('projects') && (
-                    <Link href="/dashboard/site-projects">
-                      <span>My assigned sites</span>
-                      <small>
-                        Manager updates, engineers and site delivery
-                      </small>
-                      <b aria-hidden="true">↗</b>
-                    </Link>
-                  )}
-                  {canAccess(context, {
-                    organizationId: context.organizationId,
-                    permission: 'purchase.view',
-                  }) && (
-                    <Link href="/dashboard/marketplace">
-                      <span>B2B Marketplace</span>
-                      <small>Compare supplier rates</small>
-                      <b aria-hidden="true">↗</b>
-                    </Link>
-                  )}
-                  {canAccess(context, {
-                    organizationId: context.organizationId,
-                    permission: 'organization.manage',
-                  }) && (
-                    <Link href="/dashboard/marketplace/seller">
-                      <span>Seller account</span>
-                      <small>Storefront and supplier orders</small>
-                      <b aria-hidden="true">↗</b>
-                    </Link>
-                  )}
-                  {canAccess(context, {
-                    organizationId: context.organizationId,
-                    permission: 'invoice.view',
-                    moduleKey: 'billing',
-                  }) && (
-                    <Link href="/dashboard/billing">
-                      <span>Invoices &amp; GST bills</span>
-                      <small>Sales, supplier bills and GST</small>
-                      <b aria-hidden="true">↗</b>
-                    </Link>
-                  )}
-                  <Link href="/dashboard/reports">
-                    <span>Reports</span>
-                    <small>Company performance</small>
-                    <b aria-hidden="true">↗</b>
+          <section className="owner-panel owner-projects-panel">
+            <div className="owner-panel-heading">
+              <h2>Ongoing Projects</h2>
+              {canProjects && (
+                <Link href="/dashboard/projects">
+                  View All <OwnerIcon name="arrow" size={15} />
+                </Link>
+              )}
+            </div>
+            {!canProjects ? (
+              <div className="owner-empty-state">
+                <span className="owner-empty-graphic">
+                  <OwnerIcon name="projects" size={24} />
+                </span>
+                <p>Company project access is not enabled for this account.</p>
+                {canSites && (
+                  <Link href="/dashboard/site-projects">
+                    My assigned sites →
                   </Link>
-                  <Link href="/dashboard/company/invitations">
-                    <span>Invitations</span>
-                    <small>Company invitations</small>
-                    <b aria-hidden="true">↗</b>
+                )}
+              </div>
+            ) : !projects ? (
+              <p className="owner-empty">
+                Project data is temporarily unavailable.
+              </p>
+            ) : projects.rows.length === 0 ? (
+              <div className="owner-empty-state">
+                <span className="owner-empty-graphic">
+                  <OwnerIcon name="projects" size={24} />
+                </span>
+                <strong>
+                  {hasSearch
+                    ? 'No matching projects'
+                    : 'Ready for your first project'}
+                </strong>
+                <p>Manage project delivery, site updates and handover.</p>
+                {has('project.create', 'projects') && (
+                  <Link href="/dashboard/customers">
+                    Create from a client →
                   </Link>
-                  {context.entitlements.includes('billing') &&
-                    context.grants.some(
-                      (grant) =>
-                        [
-                          'contract.view',
-                          'invoice.view',
-                          'payment.view',
-                          'financial_report.view',
-                        ].includes(grant.permission) &&
-                        grant.scope.kind === 'organization',
-                    ) && (
-                      <Link href="/dashboard/finance">
-                        <span>Finance</span>
-                        <small>Commercial execution</small>
-                        <b aria-hidden="true">↗</b>
+                )}
+              </div>
+            ) : (
+              <div className="owner-project-list">
+                {projects.rows.slice(0, 4).map((project) => {
+                  const site = siteById.get(project.id);
+                  return (
+                    <Link
+                      className="owner-project-row"
+                      href={'/dashboard/projects/' + project.id}
+                      key={project.id}
+                    >
+                      <span
+                        className="owner-project-thumbnail"
+                        aria-hidden="true"
+                      >
+                        <OwnerIcon name="projects" size={24} />
+                      </span>
+                      <span className="owner-project-info">
+                        <strong>{project.name || 'Project'}</strong>
+                        <small>
+                          {site ? titleCase(site.stage) : 'Project workspace'} ·
+                          Open details
+                        </small>
+                      </span>
+                      <span
+                        className={
+                          'owner-status owner-status-' +
+                          (site?.stage === 'execution' ? 'green' : 'blue')
+                        }
+                      >
+                        {site
+                          ? titleCase(site.stage)
+                          : titleCase(project.status)}
+                      </span>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+
+          {tiles.length > 0 && (
+            <section className="owner-panel owner-access-panel">
+              <div className="owner-panel-heading">
+                <h2>Quick Access</h2>
+              </div>
+              <div className="owner-access-grid">
+                {tiles.map((tile) => (
+                  <AccessTile key={tile.label} {...tile} />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {(canTeam || canInvite) && (
+            <section className="owner-panel owner-team-panel">
+              <div className="owner-panel-heading">
+                <h2>Team Members</h2>
+                <Link href="/dashboard/company/team">
+                  Manage Team <OwnerIcon name="arrow" size={15} />
+                </Link>
+              </div>
+              <div className="owner-team-content">
+                <span className="owner-team-illustration">
+                  <OwnerIcon name="team" size={29} />
+                </span>
+                <div>
+                  <strong>
+                    {team === null
+                      ? 'Manage your company team'
+                      : otherMembers.length === 0
+                        ? 'Working alone or with a team?'
+                        : number.format(otherMembers.length) +
+                          ' other active team member' +
+                          (otherMembers.length === 1 ? '' : 's')}
+                  </strong>
+                  <p>
+                    {otherMembers.length === 0
+                      ? 'Run the business yourself. Invite employees only when you need them.'
+                      : 'You control the access given to each team member.'}
+                  </p>
+                  <div className="owner-team-buttons">
+                    {canInvite && (
+                      <Link
+                        href="/dashboard/company/team"
+                        className="owner-team-primary"
+                      >
+                        <OwnerIcon name="team" size={16} /> Invite Team Member
                       </Link>
                     )}
-                  {notificationSummary && (
-                    <Link href="/dashboard/work">
-                      <span>My work</span>
-                      <small>Tasks and notifications</small>
-                      <b aria-hidden="true">↗</b>
+                    <Link
+                      href="/dashboard/company/team"
+                      className="owner-team-secondary"
+                    >
+                      Manage Access
                     </Link>
-                  )}
-                  {canAccess(context, {
-                    organizationId: context.organizationId,
-                    permission: 'automation.view',
-                  }) && (
-                    <Link href="/dashboard/automations">
-                      <span>Automations</span>
-                      <small>Workflow management</small>
-                      <b aria-hidden="true">↗</b>
-                    </Link>
-                  )}
+                  </div>
                 </div>
-              </section>
-
-              <section className="tenant-v2-panel">
-                <p className="eyebrow">Company tools</p>
-                <h2>Enabled modules</h2>
-                {nav.length ? (
-                  <div className="tenant-v2-modules">
-                    {nav.map((item) => (
-                      <Link key={item.key} href={item.href}>
-                        <span className="tenant-v2-dot" aria-hidden="true" />
-                        {item.label}
-                        <span aria-hidden="true">→</span>
-                      </Link>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="muted">
-                    No modules are available to your account yet.
-                  </p>
-                )}
-              </section>
-            </div>
-            <aside className="tenant-v2-stack" aria-label="Company information">
-              <section className="tenant-v2-panel">
-                <p className="eyebrow">Active company</p>
-                <h2>{organization.name}</h2>
-                <dl className="tenant-v2-details">
-                  <div>
-                    <dt>Status</dt>
-                    <dd>{organization.status}</dd>
-                  </div>
-                  <div>
-                    <dt>Currency</dt>
-                    <dd>{organization.default_currency}</dd>
-                  </div>
-                  <div>
-                    <dt>Time zone</dt>
-                    <dd>{organization.default_timezone}</dd>
-                  </div>
-                  <div>
-                    <dt>Branches</dt>
-                    <dd>{branches.length}</dd>
-                  </div>
-                </dl>
-              </section>
-              <section className="tenant-v2-panel">
-                <p className="eyebrow">Secure workspace</p>
-                <h2>Only what you need</h2>
-                <p className="muted">
-                  Your workspace shows the modules and tools assigned to your
-                  company membership. Detailed permissions are managed in the
-                  employee access area rather than on this dashboard.
-                </p>
-                {(canViewTeam ||
-                  canAccess(context, {
-                    organizationId: context.organizationId,
-                    permission: 'role.view',
-                  })) && (
-                  <Link
-                    href="/dashboard/company/team"
-                    className="premium-link-secondary"
-                  >
-                    Manage access →
-                  </Link>
-                )}
-              </section>
-            </aside>
-          </div>
-        </>
-      ) : (
-        <section className="tenant-v2-panel">
-          <h2>No active company selected</h2>
-          <p>
-            Select an active membership above or ask an organization
-            administrator to invite you.
+              </div>
+            </section>
+          )}
+        </div>
+        {isOwner && (
+          <p className="owner-dashboard-note">
+            You can operate your company yourself. Employee accounts are
+            optional; access to paid modules follows your company subscription.
           </p>
-        </section>
-      )}
-      {scope?.kind !== 'hostname' && (
-        <footer className="tenant-v2-footer">
-          <div>
-            <h2>Need another business workspace?</h2>
-            <p>Apply to register a construction or interiors company.</p>
-          </div>
-          <Link
-            href="/dashboard/company/apply"
-            className="premium-link-secondary"
-          >
-            Register a company →
-          </Link>
-        </footer>
-      )}
-    </main>
+        )}
+      </main>
+    </OwnerShell>
   );
 }
