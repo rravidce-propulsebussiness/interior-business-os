@@ -2,26 +2,30 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { pageServices } from '@business-os/auth/server';
 import { createGstRepository } from '@business-os/database/gst';
+import { createGstTemplatesRepository } from '@business-os/database/gst-templates';
+import { GstTemplateStudio } from './template-studio';
 import { DomainError } from '@business-os/shared';
 
 export const dynamic = 'force-dynamic';
 export default async function PlatformBilling() {
   const { authorization, client, repository } = await pageServices();
+  let permissions: string[] = [];
   try {
     await authorization.requirePlatformPermission('platform.access');
     await authorization.requirePlatformPermission(
       'platform.organizations.view',
     );
-    await authorization.requirePlatformPermission('platform.catalog.view');
+    permissions = (await authorization.requirePlatformPermission('platform.catalog.view')).permissions;
   } catch (error) {
     if (error instanceof DomainError && error.code === 'FORBIDDEN') notFound();
     throw error;
   }
-  const [summary, tenants, modules, plans] = await Promise.all([
+  const [summary, tenants, modules, plans, templates] = await Promise.all([
     createGstRepository(client).platformSummary(),
     repository.organizationDirectory({ page: 1, pageSize: 12 }),
     repository.modules(),
     repository.plans(),
+    createGstTemplatesRepository(client).platformList(),
   ]);
   const billing = modules.find((m) => m.key === 'billing');
   const planNames = new Map(plans.map((p) => [p.id, p.name]));
@@ -35,14 +39,14 @@ export default async function PlatformBilling() {
   return (
     <main id="main-content" tabIndex={-1}>
       <p className="text-xs font-bold uppercase tracking-[.14em] text-blue-600">
-        ProPulse Business OS · Billing governance
+        ProPulse Business OS · Invoice template management
       </p>
       <div className="mt-3 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="os-secondary-heading">Billing &amp; GST invoices</h1>
+          <h1 className="os-secondary-heading">Billing &amp; Invoices</h1>
           <p className="os-secondary-subtitle">
-            Enable company billing, monitor adoption and manage subscriptions
-            without opening private customer or supplier invoices.
+            Create and customize reusable sales invoice and purchase bill designs,
+            while monitoring GST adoption without accessing private tenant documents.
           </p>
         </div>
         <Link href="/admin/organizations" className="os-action">
@@ -57,10 +61,13 @@ export default async function PlatformBilling() {
           </div>
         ))}
       </section>
-      <div className="os-content-grid mt-7">
+      <div className="mt-8">
+        <GstTemplateStudio templates={templates} canEdit={permissions.includes('platform.entitlements.manage')} />
+      </div>
+      <div className="os-content-grid mt-8">
         <section className="os-panel">
           <div className="os-panel-heading">
-            <h2>Business &amp; seller billing</h2>
+            <h2>GST document controls</h2>
           </div>
           <div className="space-y-4 text-sm leading-6">
             <div>
