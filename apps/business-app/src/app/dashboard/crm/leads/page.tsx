@@ -1,154 +1,249 @@
-import Link from 'next/link';
-import { crmServices, resultSchema, optionRows } from '../service';
-import { lookups, pageNumber, LookupSearch, type Params } from '../lookups';
-import { Pagination } from '../pagination';
+import { canAccess } from '@business-os/auth';
+import { crmServices, resultSchema } from '../service';
+import { lookups, pageNumber, type Params } from '../lookups';
+import {
+  OwnerShell,
+  type OwnerNavItem,
+} from '../../owner-shell';
+import {
+  LeadsWorkspace,
+  type LeadView,
+  type LeadOption,
+  type LeadStage,
+  type LeadTab,
+} from './workspace';
+import '../../owner-dashboard.css';
+import './leads.css';
+
+export const dynamic = 'force-dynamic';
+
+const base = '/dashboard/crm/leads';
+const number = new Intl.NumberFormat('en-IN');
+const allowedFilters = [
+  'q', 'stage_id', 'assigned_to', 'source_id', 'branch_id', 'priority',
+  'due', 'from', 'until', 'converted', 'lifecycle', 'sort', 'unassigned',
+] as const;
+
+function label(value: unknown): string {
+  return typeof value === 'string' && value.trim() ? value.trim() : '';
+}
+
+function optionalText(value: unknown): string | null {
+  return typeof value === 'string' && value.trim() ? value.trim() : null;
+}
+
+function finiteNumber(value: unknown): string | null {
+  if (typeof value !== 'number' && typeof value !== 'string') return null;
+  if (!String(value).trim() || !Number.isFinite(Number(value))) return null;
+  return String(value);
+}
+
+function searchLink(params: Params, changes: Record<string, string | null>): string {
+  const next = new URLSearchParams();
+  for (const key of allowedFilters) {
+    if (params[key]) next.set(key, params[key]!);
+  }
+  for (const [key, value] of Object.entries(changes)) {
+    if (value) next.set(key, value);
+    else next.delete(key);
+  }
+  const query = next.toString();
+  return query ? base + '?' + query : base;
+}
+
+async function metric(
+  run: Promise<unknown>,
+): Promise<number | null> {
+  try {
+    const parsed = resultSchema.parse(await run);
+    return parsed.total;
+  } catch {
+    return null;
+  }
+}
+
 export default async function Leads({
   searchParams,
 }: {
   searchParams: Promise<Params>;
 }) {
-  const p = await searchParams,
-    s = await crmServices('lead.view', true),
-    choices = await lookups(s, p),
-    page = pageNumber(p.page);
+  const p = await searchParams;
+  const s = await crmServices('lead.view', true);
+  const page = pageNumber(p.page);
+  const choices = await lookups(s, p);
   const filter = Object.fromEntries(
-    [
-      'q',
-      'stage_id',
-      'assigned_to',
-      'source_id',
-      'branch_id',
-      'priority',
-      'due',
-      'from',
-      'until',
-      'converted',
-      'lifecycle',
-      'sort',
-      'unassigned',
-    ]
-      .filter((k) => p[k])
-      .map((k) => [k, p[k]!]),
+    allowedFilters
+      .filter((key) => p[key])
+      .map((key) => [key, p[key]!]),
   );
-  const result = resultSchema.parse(await s.crm.search('leads', filter, page));
-  const selects = [
-    ['stage_id', 'Stage', optionRows(choices.stages.rows)],
-    ['assigned_to', 'Assignee', optionRows(choices.team)],
-    ['source_id', 'Source', optionRows(choices.sources.rows)],
-    ['branch_id', 'Branch', optionRows(choices.branches)],
-    [
-      'priority',
-      'Priority',
-      ['low', 'normal', 'high', 'urgent'].map((value) => ({
-        value,
-        label: value,
-      })),
-    ],
-    [
-      'lifecycle',
-      'Outcome',
-      ['open', 'won', 'lost', 'archived'].map((value) => ({
-        value,
-        label: value,
-      })),
-    ],
-    [
-      'converted',
-      'Conversion',
-      [
-        { value: 'true', label: 'Converted' },
-        { value: 'false', label: 'Not converted' },
-      ],
-    ],
-    [
-      'sort',
-      'Sort',
-      ['newest', 'oldest', 'followup', 'updated', 'budget'].map((value) => ({
-        value,
-        label: value,
-      })),
-    ],
-  ] as const;
+  const [result, organization, user, plans] = await Promise.all([
+    s.crm.search('leads', filter, page).then((value) => resultSchema.parse(value)),
+    s.repository.organization(s.org),
+    s.authorization.requireAuthenticatedUser(),
+    s.repository.plans().catch(() => null),
+  ]);
+  if (!organization) throw new Error('Company workspace not available');
+
+  // Secondary cards are optional. A failed analytics query must not make
+  // the company's lead list or existing navigation unusable.
+  const today = new Intl.DateTimeFormat('sv-SE', {
+    timeZone: organization.default_timezone || 'Asia/Kolkata',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(new Date());
+
+  const [total, newToday, dueToday, overdue, converted, lost] = await Promise.all([
+    metric(s.crm.search('leads', {})),
+    metric(s.crm.search('leads', { from: today, until: today })),
+    metric(s.crm.search('lead_followups', { queue: 'today', status: 'pending' })),
+    metric(s.crm.search('lead_followups', { queue: 'overdue', status: 'pending' })),
+    metric(s.crm.search('leads', { converted: true })),
+    metric(s.crm.search('leads', { lifecycle: 'lost' })),
+  ]);
+
+  const stages: LeadStage[] = choices.stages.rows
+    .filter((r) => typeof r.id === 'string' && typeof r.name === 'string')
+    .map((r) => ({
+      id: String(r.id),
+      name: String(r.name),
+      outcome: r.outcome === 'won' || r.outcome === 'lost' ? r.outcome : 'open',
+    }));
+  const assignees: LeadOption[] = choices.team.map((member) => ({
+    value: member.user_id,
+    label: member.full_name,
+  }));
+  const sources: LeadOption[] = choices.sources.rows.map((source) => ({
+    value: String(source.id),
+    label: String(source.name),
+  }));
+  const branches: LeadOption[] = choices.branches.map((branch) => ({
+    value: branch.id,
+    label: branch.name,
+  }));
+  const reasons: LeadOption[] = choices.reasons.rows.map((reason) => ({
+    value: String(reason.id),
+    label: String(reason.name),
+  }));
+  const stagesById = new Map(stages.map((stage) => [stage.id, stage]));
+  const sourcesById = new Map(sources.map((source) => [source.value, source.label]));
+  const teamById = new Map(assignees.map((member) => [member.value, member.label]));
+  const rows: LeadView[] = result.rows.map((r) => {
+    const stageId = label(r.stage_id);
+    const assigneeId = label(r.assigned_to);
+    return {
+      id: label(r.id),
+      version: typeof r.version === 'number' ? r.version : 1,
+      name: label(r.name) || 'Unnamed lead',
+      companyName: label(r.company_name),
+      number: label(r.lead_number),
+      phone: label(r.phone),
+      phoneNormalized: label(r.phone_normalized),
+      email: label(r.email),
+      source: sourcesById.get(label(r.source_id)) ?? label(r.source_detail) ?? '',
+      priority: label(r.priority) || 'normal',
+      lifecycle: label(r.lifecycle) || 'open',
+      stageId,
+      stageName: stagesById.get(stageId)?.name ?? label(r.lifecycle) || 'Open',
+      assignedTo: assigneeId,
+      assignedName: teamById.get(assigneeId) ?? '',
+      location: label(r.location),
+      requirement: label(r.service_type),
+      projectSize: label(r.project_size),
+      budgetMin: finiteNumber(r.budget_min),
+      budgetMax: finiteNumber(r.budget_max),
+      notes: label(r.notes),
+      nextFollowUpAt: optionalText(r.next_follow_up_at),
+      createdAt: optionalText(r.created_at),
+      updatedAt: optionalText(r.updated_at),
+      expectedStartDate: optionalText(r.expected_start_date),
+      convertedProjectId: optionalText(r.converted_project_id),
+      convertedCustomerId: optionalText(r.converted_customer_id),
+    };
+  });
+
+  const tabs: LeadTab[] = [
+    { label: 'All Leads', href: searchLink(p, { lifecycle: null, stage_id: null, converted: null, due: null }), count: total, active: !p.lifecycle && !p.stage_id && !p.converted && !p.due },
+    ...stages.filter((stage) => stage.outcome === 'open').slice(0, 4).map((stage) => ({
+      label: stage.name,
+      href: searchLink(p, { stage_id: stage.id, lifecycle: null, converted: null, due: null }),
+      count: p.stage_id === stage.id ? result.total : null,
+      active: p.stage_id === stage.id,
+    })),
+    { label: 'Converted', href: searchLink(p, { converted: 'true', lifecycle: null, stage_id: null, due: null }), count: converted, active: p.converted === 'true' },
+    { label: 'Lost', href: searchLink(p, { lifecycle: 'lost', converted: null, stage_id: null, due: null }), count: lost, active: p.lifecycle === 'lost' },
+  ];
+
+  const may = (permission: string, moduleKey?: string) => canAccess(s.context, {
+    organizationId: s.org,
+    permission,
+    ...(moduleKey ? { moduleKey } : {}),
+  });
+
+  const nav: OwnerNavItem[] = [{ label: 'Dashboard', href: '/dashboard', icon: 'dashboard' }];
+  nav.push({ label: 'Leads', href: base, icon: 'leads' });
+  if (may('quotation.view', 'quotation'))
+    nav.push({ label: 'Quotations', href: '/dashboard/quotations', icon: 'quotations' });
+  if (may('project.view', 'projects'))
+    nav.push({ label: 'Projects', href: '/dashboard/projects', icon: 'projects' });
+  if (may('customer.view', 'crm') || may('customer.view', 'quotation'))
+    nav.push({ label: 'Clients', href: '/dashboard/customers', icon: 'clients' });
+  if (may('purchase.view'))
+    nav.push({ label: 'Marketplace', href: '/dashboard/marketplace', icon: 'marketplace' });
+  if (may('invoice.view', 'billing'))
+    nav.push({ label: 'Billing & Invoices', href: '/dashboard/billing', icon: 'billing' });
+  if (may('report.view'))
+    nav.push({ label: 'Reports', href: '/dashboard/reports', icon: 'reports' });
+  if (may('team.view'))
+    nav.push({ label: 'Team', href: '/dashboard/company/team', icon: 'team' });
+  if (may('organization.view'))
+    nav.push({ label: 'Company Settings', href: '/dashboard/company/settings', icon: 'settings' });
+
+  const displayName = (user.email ?? '').split('@')[0]?.split(/[._-]/).filter(Boolean).map((word) =>
+    word.charAt(0).toUpperCase() + word.slice(1),
+  ).slice(0, 2).join(' ') || 'Owner';
+  const plan = plans?.find((item) => item.id === organization.plan_id);
+  const stats = [
+    { label: 'Total Leads', value: total === null ? '—' : number.format(total), note: 'All company leads', icon: 'leads' as const, tone: 'blue' },
+    { label: 'New Today', value: newToday === null ? '—' : number.format(newToday), note: 'Created today', icon: 'plus' as const, tone: 'purple' },
+    { label: 'Follow-ups Due', value: dueToday === null || overdue === null ? '—' : number.format(dueToday + overdue), note: overdue === null ? 'Unavailable' : 'Overdue: ' + number.format(overdue), icon: 'calendar' as const, tone: 'rose' },
+    { label: 'Converted', value: converted === null ? '—' : number.format(converted), note: 'Converted to projects', icon: 'check' as const, tone: 'green' },
+    { label: 'Lost', value: lost === null ? '—' : number.format(lost), note: 'Closed lost', icon: 'close' as const, tone: 'orange' },
+  ];
+
   return (
-    <main id="main-content" className="mx-auto max-w-6xl p-6">
-      <h1 className="text-3xl font-semibold">Leads</h1>
-      {s.allowed('lead.create') && (
-        <Link
-          className="my-4 inline-block min-h-11 rounded border p-3"
-          href="/dashboard/crm/leads/new"
-        >
-          New lead
-        </Link>
-      )}
-      <LookupSearch />
-      <form className="my-5 flex flex-wrap gap-4">
-        <label>
-          Search{' '}
-          <input name="q" defaultValue={p.q} className="rounded border p-2" />
-        </label>
-        {selects.map(([key, label, options]) => (
-          <label key={key}>
-            {label}
-            <select
-              name={key}
-              defaultValue={p[key] ?? ''}
-              className="mx-2 rounded border p-2"
-            >
-              <option value="">All</option>
-              {options.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
-          </label>
-        ))}
-        <label>
-          Created from <input type="date" name="from" defaultValue={p.from} />
-        </label>
-        <label>
-          Until <input type="date" name="until" defaultValue={p.until} />
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            name="due"
-            value="true"
-            defaultChecked={!!p.due}
-          />{' '}
-          Follow-up due
-        </label>
-        <button className="min-h-11 rounded border p-2">Filter leads</button>
-      </form>
-      {!result.rows.length && <p>No leads match these filters.</p>}
-      <ul className="grid gap-3">
-        {result.rows.map((r) => (
-          <li key={String(r.id)} className="rounded border p-4">
-            <Link
-              className="text-lg font-medium underline"
-              href={'/dashboard/crm/leads/' + String(r.id)}
-            >
-              {String(r.name)}
-            </Link>
-            <p>
-              {String(r.lead_number)} · {String(r.lifecycle)} ·{' '}
-              {String(r.phone)}
-            </p>
-            <p>
-              Next follow-up:{' '}
-              {r.next_follow_up_at
-                ? new Date(String(r.next_follow_up_at)).toLocaleString()
-                : 'Not scheduled'}
-            </p>
-          </li>
-        ))}
-      </ul>
-      <Pagination
-        path="/dashboard/crm/leads"
+    <OwnerShell
+      companyName={organization.name}
+      accountLabel={displayName}
+      accountEmail={user.email ?? ''}
+      planLabel={plan?.name ?? 'Business plan'}
+      navigation={nav}
+      search=""
+      notificationsEnabled={may('notification.view')}
+    >
+      <LeadsWorkspace
+        rows={rows}
+        stats={stats}
+        tabs={tabs}
+        stages={stages}
+        sources={sources}
+        assignees={assignees}
+        branches={branches}
+        lostReasons={reasons}
         params={p}
+        count={result.total}
         page={page}
-        total={result.total}
+        prevHref={page > 1 ? searchLink(p, { page: String(page - 1) }) : null}
+        nextHref={page * 25 < result.total ? searchLink(p, { page: String(page + 1) }) : null}
+        canCreate={s.allowed('lead.create')}
+        canManage={s.allowed('lead.manage')}
+        canAssign={s.allowed('lead.assign')}
+        canWin={s.allowed('lead.win')}
+        canNote={s.allowed('crm.activity.create')}
+        canConvert={s.allowed('lead.convert')}
+        canQuote={s.allowed('quotation.create', 'quotation')}
+        organizationName={organization.name}
       />
-    </main>
+    </OwnerShell>
   );
 }
