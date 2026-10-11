@@ -144,7 +144,7 @@ export default async function Leads({
       priority: label(r.priority) || 'normal',
       lifecycle: label(r.lifecycle) || 'open',
       stageId,
-      stageName: stagesById.get(stageId)?.name ?? label(r.lifecycle) || 'Open',
+      stageName: stagesById.get(stageId)?.name ?? (label(r.lifecycle) || 'Open'),
       assignedTo: assigneeId,
       assignedName: teamById.get(assigneeId) ?? '',
       location: label(r.location),
@@ -219,6 +219,7 @@ export default async function Leads({
       planLabel={plan?.name ?? 'Business plan'}
       navigation={nav}
       search=""
+      currentHref="/dashboard/crm/leads"
       notificationsEnabled={may('notification.view')}
     >
       <LeadsWorkspace
