@@ -48,8 +48,8 @@ export function createConstructionRatesRepository(
     save: (
       org: string,
       input: {
-        id?: string;
-        version?: number;
+        id?: string | undefined;
+        version?: number | undefined;
         category: string;
         name: string;
         specification: string;
