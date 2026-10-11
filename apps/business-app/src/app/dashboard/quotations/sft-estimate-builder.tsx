@@ -403,7 +403,7 @@ export function SftEstimateBuilder({
       <p className="text-xs leading-5 text-slate-500">
         Invoice billing and customized item pricing are separate. To apply a
         quotation-level discount, use the revision discount control. The source
-        PDF's summary and work table must agree on floor areas before the quote
+        PDF&apos;s summary and work table must agree on floor areas before the quote
         is issued.
       </p>
     </div>
