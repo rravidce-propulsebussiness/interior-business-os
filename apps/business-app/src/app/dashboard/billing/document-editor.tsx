@@ -1,7 +1,10 @@
 'use client';
 import { useState } from 'react';
 import { saveGstDocument } from './actions';
-import type { GstInvoiceAppearance, GstInvoiceTemplate } from '@business-os/database/gst-templates';
+import type {
+  GstInvoiceAppearance,
+  GstInvoiceTemplate,
+} from '@business-os/database/gst-templates';
 import type {
   GstDocument,
   GstBusinessProfile,
@@ -45,18 +48,27 @@ export function DocumentEditor({
   const suggested = templates.find(
     (template) => template.id === suggestedTemplateId,
   );
-  const initialKind = existing?.kind ?? (order ? 'sales_invoice' : suggested?.kind ?? 'sales_invoice');
-  const [kind, setKind] = useState<'sales_invoice' | 'purchase_bill'>(initialKind);
+  const initialKind =
+    existing?.kind ??
+    (order ? 'sales_invoice' : (suggested?.kind ?? 'sales_invoice'));
+  const [kind, setKind] = useState<'sales_invoice' | 'purchase_bill'>(
+    initialKind,
+  );
   const [templateId, setTemplateId] = useState(
     existing
       ? existingLayout?.templateId &&
         templates.some((template) => template.id === existingLayout.templateId)
         ? existingLayout.templateId
         : ''
-      : suggested?.id ?? templates.find((template) => template.kind === initialKind)?.id ?? '',
+      : (suggested?.id ??
+          templates.find((template) => template.kind === initialKind)?.id ??
+          ''),
   );
-  const template = templates.find((candidate) => candidate.id === templateId && candidate.kind === kind);
-  const appearance = template?.config ?? (existing ? existingLayout?.config : null);
+  const template = templates.find(
+    (candidate) => candidate.id === templateId && candidate.kind === kind,
+  );
+  const appearance =
+    template?.config ?? (existing ? existingLayout?.config : null);
 
   const [type, setType] = useState<GstDocument['documentType']>(
     existing?.documentType ?? 'tax_invoice',
@@ -83,7 +95,12 @@ export function DocumentEditor({
             },
           ]
         : Array.from(
-            { length: Math.min(10, Math.max(1, template?.config.blankRows ?? 1)) },
+            {
+              length: Math.min(
+                10,
+                Math.max(1, template?.config.blankRows ?? 1),
+              ),
+            },
             () => ({ ...empty }),
           ),
   );
@@ -147,10 +164,15 @@ export function DocumentEditor({
       <section className="rounded-2xl border border-blue-200 bg-gradient-to-br from-blue-50 via-white to-white p-5 shadow-sm sm:p-7">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[.14em] text-blue-700">Invoice layout</p>
-            <h2 className="mt-1 text-lg font-extrabold text-slate-950">Choose your document design</h2>
+            <p className="text-[11px] font-bold uppercase tracking-[.14em] text-blue-700">
+              Invoice layout
+            </p>
+            <h2 className="mt-1 text-lg font-extrabold text-slate-950">
+              Choose your document design
+            </h2>
             <p className="mt-1 text-xs leading-5 text-slate-600">
-              Your company branding comes from your billing profile. Switching layouts changes styling, not the values on an existing draft.
+              Your company branding comes from your billing profile. Switching
+              layouts changes styling, not the values on an existing draft.
             </p>
           </div>
           {appearance && (
@@ -168,16 +190,23 @@ export function DocumentEditor({
               onChange={(event) => setTemplateId(event.target.value)}
             >
               <option value="">Standard invoice layout</option>
-              {templates.filter((item) => item.kind === kind).map((item) => (
-                <option key={item.id} value={item.id}>{item.name}</option>
-              ))}
+              {templates
+                .filter((item) => item.kind === kind)
+                .map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.name}
+                  </option>
+                ))}
             </select>
           </label>
           <div className="rounded-xl border border-slate-200 bg-white p-3 text-xs leading-5 text-slate-600">
-            <span className="mb-1 block font-bold text-slate-900">Layout details</span>
+            <span className="mb-1 block font-bold text-slate-900">
+              Layout details
+            </span>
             {appearance?.subtitle || 'Standard document layout'}
             <span className="mt-1 block text-slate-500">
-              GST calculations, original supplier references and invoice numbers remain server-controlled.
+              GST calculations, original supplier references and invoice numbers
+              remain server-controlled.
             </span>
           </div>
         </div>
@@ -194,7 +223,9 @@ export function DocumentEditor({
               onChange={(e) => {
                 const next = e.target.value as typeof kind;
                 setKind(next);
-                setTemplateId(templates.find((item) => item.kind === next)?.id ?? '');
+                setTemplateId(
+                  templates.find((item) => item.kind === next)?.id ?? '',
+                );
               }}
               disabled={!!existing || !!order}
             >
@@ -369,23 +400,27 @@ export function DocumentEditor({
                       setLines((prev) =>
                         prev.length >= 50
                           ? prev
-                          : [...prev.slice(0, i + 1), { ...line }, ...prev.slice(i + 1)],
+                          : [
+                              ...prev.slice(0, i + 1),
+                              { ...line },
+                              ...prev.slice(i + 1),
+                            ],
                       )
                     }
                   >
                     Duplicate row
                   </button>
-                {lines.length > 1 && (
-                  <button
-                    type="button"
-                    className="text-sm text-rose-700"
-                    onClick={() =>
-                      setLines((prev) => prev.filter((_, j) => j !== i))
-                    }
-                  >
-                    Remove
-                  </button>
-                )}
+                  {lines.length > 1 && (
+                    <button
+                      type="button"
+                      className="text-sm text-rose-700"
+                      onClick={() =>
+                        setLines((prev) => prev.filter((_, j) => j !== i))
+                      }
+                    >
+                      Remove
+                    </button>
+                  )}
                 </div>
               </div>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -472,7 +507,10 @@ export function DocumentEditor({
             </div>
           ))}
         </div>
-        <p className="mt-3 text-xs text-slate-500">Up to 50 goods or services rows. Duplicated rows remain editable; discounts and GST are recalculated when saved.</p>
+        <p className="mt-3 text-xs text-slate-500">
+          Up to 50 goods or services rows. Duplicated rows remain editable;
+          discounts and GST are recalculated when saved.
+        </p>
         <p className="mt-4 text-right text-lg font-bold">
           Estimated total: {currency.format(total)}
         </p>

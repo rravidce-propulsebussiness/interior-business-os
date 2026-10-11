@@ -13,7 +13,12 @@ export const dynamic = 'force-dynamic';
 export default async function PrepareDocument({
   searchParams,
 }: {
-  searchParams: Promise<{ edit?: string; order?: string; error?: string; template?: string }>;
+  searchParams: Promise<{
+    edit?: string;
+    order?: string;
+    error?: string;
+    template?: string;
+  }>;
 }) {
   const params = await searchParams;
   const context = await activeOrganization();

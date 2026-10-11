@@ -15,7 +15,9 @@ export default async function PlatformBilling() {
     await authorization.requirePlatformPermission(
       'platform.organizations.view',
     );
-    permissions = (await authorization.requirePlatformPermission('platform.catalog.view')).permissions;
+    permissions = (
+      await authorization.requirePlatformPermission('platform.catalog.view')
+    ).permissions;
   } catch (error) {
     if (error instanceof DomainError && error.code === 'FORBIDDEN') notFound();
     throw error;
@@ -45,8 +47,9 @@ export default async function PlatformBilling() {
         <div>
           <h1 className="os-secondary-heading">Billing &amp; Invoices</h1>
           <p className="os-secondary-subtitle">
-            Create and customize reusable sales invoice and purchase bill designs,
-            while monitoring GST adoption without accessing private tenant documents.
+            Create and customize reusable sales invoice and purchase bill
+            designs, while monitoring GST adoption without accessing private
+            tenant documents.
           </p>
         </div>
         <Link href="/admin/organizations" className="os-action">
@@ -62,7 +65,10 @@ export default async function PlatformBilling() {
         ))}
       </section>
       <div className="mt-8">
-        <GstTemplateStudio templates={templates} canEdit={permissions.includes('platform.entitlements.manage')} />
+        <GstTemplateStudio
+          templates={templates}
+          canEdit={permissions.includes('platform.entitlements.manage')}
+        />
       </div>
       <div className="os-content-grid mt-8">
         <section className="os-panel">

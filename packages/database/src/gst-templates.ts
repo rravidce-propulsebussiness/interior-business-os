@@ -53,7 +53,9 @@ export function createGstTemplatesRepository(client: SupabaseClient<Database>) {
     platformList: () =>
       invoke<GstInvoiceTemplate[]>('gst_template_list', { p_org: null }),
     tenantList: (organizationId: string) =>
-      invoke<GstInvoiceTemplate[]>('gst_template_list', { p_org: organizationId }),
+      invoke<GstInvoiceTemplate[]>('gst_template_list', {
+        p_org: organizationId,
+      }),
     save: (input: {
       id?: string;
       name: string;

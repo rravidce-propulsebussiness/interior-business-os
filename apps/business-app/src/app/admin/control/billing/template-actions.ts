@@ -22,10 +22,12 @@ const configSchema = z
     blankRows: z.number().int().min(1).max(10),
     customFields: z
       .array(
-        z.object({
-          label: z.string().trim().min(1).max(50),
-          value: z.string().trim().max(120),
-        }).strict(),
+        z
+          .object({
+            label: z.string().trim().min(1).max(50),
+            value: z.string().trim().max(120),
+          })
+          .strict(),
       )
       .max(5),
   })
@@ -37,7 +39,9 @@ export async function saveInvoiceTemplate(
 ): Promise<TemplateActionState> {
   try {
     const { authorization, client } = await serverServices();
-    await authorization.requirePlatformPermission('platform.entitlements.manage');
+    await authorization.requirePlatformPermission(
+      'platform.entitlements.manage',
+    );
     const id = String(form.get('id') ?? '').trim();
     const config = configSchema.parse({
       layout: form.get('layout'),
@@ -47,7 +51,9 @@ export async function saveInvoiceTemplate(
       showUnit: form.get('showUnit') === 'true',
       showDiscount: form.get('showDiscount') === 'true',
       blankRows: Number(form.get('blankRows')),
-      customFields: JSON.parse(String(form.get('customFieldsJson') ?? '[]')) as unknown,
+      customFields: JSON.parse(
+        String(form.get('customFieldsJson') ?? '[]'),
+      ) as unknown,
     });
     const input = {
       ...(id ? { id: idSchema.parse(id) } : {}),
@@ -57,7 +63,10 @@ export async function saveInvoiceTemplate(
     };
     await createGstTemplatesRepository(client).save(input);
     revalidatePath('/admin/control/billing');
-    return { saved: true, message: 'Invoice layout saved. Existing documents are unchanged.' };
+    return {
+      saved: true,
+      message: 'Invoice layout saved. Existing documents are unchanged.',
+    };
   } catch (error) {
     return { message: safeFailure(error).message };
   }
@@ -69,12 +78,19 @@ export async function setInvoiceTemplateStatus(
 ): Promise<TemplateActionState> {
   try {
     const { authorization, client } = await serverServices();
-    await authorization.requirePlatformPermission('platform.entitlements.manage');
+    await authorization.requirePlatformPermission(
+      'platform.entitlements.manage',
+    );
     const id = idSchema.parse(form.get('id'));
     const active = form.get('active') === 'true';
     await createGstTemplatesRepository(client).setStatus(id, active);
     revalidatePath('/admin/control/billing');
-    return { saved: true, message: active ? 'Template activated.' : 'Template archived for new documents.' };
+    return {
+      saved: true,
+      message: active
+        ? 'Template activated.'
+        : 'Template archived for new documents.',
+    };
   } catch (error) {
     return { message: safeFailure(error).message };
   }

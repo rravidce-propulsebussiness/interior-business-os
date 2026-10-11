@@ -30,7 +30,10 @@ export default async function GstDocumentDetail({
   const gst = createGstRepository(client);
   const doc = await gst.document(context.organizationId, id);
   const profile = await gst.profile(context.organizationId);
-  const appearance = await createGstTemplatesRepository(client).documentLayout(context.organizationId,id);
+  const appearance = await createGstTemplatesRepository(client).documentLayout(
+    context.organizationId,
+    id,
+  );
   const layout = appearance?.config;
   const accent = layout?.accent ?? '#0f766e';
   const canIssue =
@@ -115,7 +118,10 @@ export default async function GstDocumentDetail({
       >
         <header className="flex flex-wrap items-start justify-between gap-6 border-b border-slate-300 pb-6">
           <div>
-            <p className="text-xs font-bold uppercase tracking-widest" style={{ color: accent }}>
+            <p
+              className="text-xs font-bold uppercase tracking-widest"
+              style={{ color: accent }}
+            >
               {doc.status === 'draft'
                 ? 'DRAFT — Not a tax document'
                 : doc.kind === 'purchase_bill'
@@ -132,7 +138,9 @@ export default async function GstDocumentDetail({
             <p className="mt-2 text-sm text-slate-600">
               Number: {doc.number ?? 'Assigned when issued'}
             </p>
-            {layout?.subtitle && <p className="mt-2 text-sm text-slate-500">{layout.subtitle}</p>}
+            {layout?.subtitle && (
+              <p className="mt-2 text-sm text-slate-500">{layout.subtitle}</p>
+            )}
           </div>
           <div className="text-sm">
             <p>
@@ -213,7 +221,9 @@ export default async function GstDocumentDetail({
                 <th className="px-2 py-3">Qty</th>
                 {layout?.showUnit && <th className="px-2 py-3">Unit</th>}
                 <th className="px-2 py-3">Rate</th>
-                {layout?.showDiscount && <th className="px-2 py-3">Discount</th>}
+                {layout?.showDiscount && (
+                  <th className="px-2 py-3">Discount</th>
+                )}
                 <th className="px-2 py-3">GST %</th>
                 <th className="px-2 py-3">Taxable</th>
                 <th className="px-2 py-3">Amount</th>
@@ -224,13 +234,17 @@ export default async function GstDocumentDetail({
                 <tr key={i} className="border-b border-slate-200">
                   <td className="px-2 py-3">
                     {l.description}
-                    {!layout?.showUnit && <span className="block text-slate-500">{l.unit}</span>}
+                    {!layout?.showUnit && (
+                      <span className="block text-slate-500">{l.unit}</span>
+                    )}
                   </td>
                   <td className="px-2 py-3">{l.hsnSac}</td>
                   <td className="px-2 py-3">{l.quantity}</td>
                   {layout?.showUnit && <td className="px-2 py-3">{l.unit}</td>}
                   <td className="px-2 py-3">{money(l.unitPrice)}</td>
-                  {layout?.showDiscount && <td className="px-2 py-3">{money(l.discount)}</td>}
+                  {layout?.showDiscount && (
+                    <td className="px-2 py-3">{money(l.discount)}</td>
+                  )}
                   <td className="px-2 py-3">{l.gstRate}%</td>
                   <td className="px-2 py-3">{money(Number(l.taxable ?? 0))}</td>
                   <td className="px-2 py-3">{money(Number(l.total ?? 0))}</td>
@@ -274,7 +288,9 @@ export default async function GstDocumentDetail({
               </p>
             ))}
             {layout?.footer && (
-              <p className="mt-3 whitespace-pre-line text-slate-600">{layout.footer}</p>
+              <p className="mt-3 whitespace-pre-line text-slate-600">
+                {layout.footer}
+              </p>
             )}
           </section>
         )}

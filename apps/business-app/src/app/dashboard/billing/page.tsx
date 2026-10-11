@@ -104,38 +104,67 @@ export default async function BusinessBilling({
       <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-blue-700">Design gallery</p>
-            <h2 className="mt-1 text-xl font-extrabold text-slate-950">Invoice &amp; purchase bill templates</h2>
+            <p className="text-xs font-bold uppercase tracking-widest text-blue-700">
+              Design gallery
+            </p>
+            <h2 className="mt-1 text-xl font-extrabold text-slate-950">
+              Invoice &amp; purchase bill templates
+            </h2>
             <p className="mt-1 text-sm text-slate-600">
-              Start with a platform layout, then enter real customer, supplier, item and GST details.
-              Quotations remain in their separate workflow.
+              Start with a platform layout, then enter real customer, supplier,
+              item and GST details. Quotations remain in their separate
+              workflow.
             </p>
           </div>
           {canCreate && (
-            <Link href="/dashboard/billing/new" className="rounded-xl bg-blue-600 px-5 py-3 text-sm font-bold text-white">
+            <Link
+              href="/dashboard/billing/new"
+              className="rounded-xl bg-blue-600 px-5 py-3 text-sm font-bold text-white"
+            >
               + Create from scratch
             </Link>
           )}
         </div>
         <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {templates.map((template) => (
-            <article key={template.id} className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
-              <div className="relative h-20 overflow-hidden bg-slate-50 p-4" style={{ borderTop: '5px solid '+template.config.accent }}>
+            <article
+              key={template.id}
+              className="overflow-hidden rounded-2xl border border-slate-200 bg-white"
+            >
+              <div
+                className="relative h-20 overflow-hidden bg-slate-50 p-4"
+                style={{ borderTop: '5px solid ' + template.config.accent }}
+              >
                 <div className="absolute right-3 top-3 rounded bg-white px-2 py-1 text-[10px] font-bold uppercase text-slate-600">
                   {template.config.layout}
                 </div>
-                <div className="text-xs font-extrabold uppercase tracking-wider" style={{ color: template.config.accent }}>
-                  {template.kind === 'sales_invoice' ? 'Tax invoice layout' : 'Supplier bill layout'}
+                <div
+                  className="text-xs font-extrabold uppercase tracking-wider"
+                  style={{ color: template.config.accent }}
+                >
+                  {template.kind === 'sales_invoice'
+                    ? 'Tax invoice layout'
+                    : 'Supplier bill layout'}
                 </div>
                 <div className="mt-2 h-1 w-3/4 rounded-full bg-slate-200" />
                 <div className="mt-2 h-1 w-1/2 rounded-full bg-slate-200" />
               </div>
               <div className="p-4">
-                <h3 className="text-sm font-extrabold text-slate-950">{template.name}</h3>
-                <p className="mt-1 text-xs text-slate-500">{template.config.blankRows} starting rows · {template.config.customFields.length} extra fields</p>
+                <h3 className="text-sm font-extrabold text-slate-950">
+                  {template.name}
+                </h3>
+                <p className="mt-1 text-xs text-slate-500">
+                  {template.config.blankRows} starting rows ·{' '}
+                  {template.config.customFields.length} extra fields
+                </p>
                 {canCreate && (
-                  <Link href={'/dashboard/billing/new?template='+encodeURIComponent(template.id)}
-                    className="mt-4 inline-flex rounded-xl border border-blue-200 bg-blue-50 px-4 py-2.5 text-xs font-bold text-blue-700 hover:bg-blue-100">
+                  <Link
+                    href={
+                      '/dashboard/billing/new?template=' +
+                      encodeURIComponent(template.id)
+                    }
+                    className="mt-4 inline-flex rounded-xl border border-blue-200 bg-blue-50 px-4 py-2.5 text-xs font-bold text-blue-700 hover:bg-blue-100"
+                  >
                     Use template →
                   </Link>
                 )}
@@ -143,7 +172,10 @@ export default async function BusinessBilling({
             </article>
           ))}
           {templates.length === 0 && (
-            <p className="col-span-full py-5 text-sm text-slate-500">No active invoice templates. You can still prepare a standard bill.</p>
+            <p className="col-span-full py-5 text-sm text-slate-500">
+              No active invoice templates. You can still prepare a standard
+              bill.
+            </p>
           )}
         </div>
       </section>
