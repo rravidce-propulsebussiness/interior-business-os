@@ -12,6 +12,8 @@ import {
 import { commercialServices } from '../../commercial/service';
 import { CommandForm } from '../command-form';
 import { LineForm } from '../line-form';
+import { ConstructionSelector } from '../construction-selector';
+import { createConstructionRatesRepository } from '@business-os/database/construction-rates';
 export default async function Quotation({
   params,
   searchParams,
@@ -145,6 +147,13 @@ export default async function Quotation({
       )
     : null;
   const command = { revision_id: r.id, version: r.version };
+  const constructionOptions =
+    editable &&
+    canOverride &&
+    r.currency === 'INR' &&
+    s.allowed('pricing.view', 'pricing')
+      ? await createConstructionRatesRepository(s.client).list(s.org)
+      : null;
   const canCost = s.allowed('quotation.view_internal_cost', 'quotation');
   const costs =
     canCost && lines?.length
@@ -391,6 +400,13 @@ export default async function Quotation({
               ]}
             />
           </details>
+          {constructionOptions && (
+            <ConstructionSelector
+              rates={constructionOptions}
+              revisionId={r.id}
+              version={r.version}
+            />
+          )}
           {matches && (
             <section className="my-6">
               <h2 className="text-2xl">Add catalog item</h2>

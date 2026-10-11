@@ -25,6 +25,25 @@ select set_config('request.jwt.claim.sub',:'owner',true);
 select private.catalog_assert((select count(*)=7 from public.catalog_items),'demo contains seven items');
 select private.catalog_assert((select count(*)=5 from public.catalog_categories),'demo contains five categories');
 select private.catalog_assert(jsonb_array_length(public.catalog_snapshot(:'org',true)->'items')=7,'snapshot returns authorized catalog');
+
+-- Company-scoped construction rates; prices are fixture-only and never seeded
+-- into real organizations.
+select public.construction_rate_save(:'org',
+ '{"category":"Steel","name":"Sample TMT Steel","specification":"Fe 500D","ratePerSqft":"200","status":"active"}'::jsonb) as construction_steel \gset
+select public.construction_rate_save(:'org',
+ '{"category":"Bricks","name":"Sample Karimnagar Bricks","specification":"Clay bricks","ratePerSqft":"100","status":"active"}'::jsonb) as construction_bricks \gset
+select private.catalog_assert(
+ (public.construction_rate_quote_preview(:'org',array[:'construction_steel'::uuid,:'construction_bricks'::uuid],1000)->>'total')::numeric=300000,
+ 'material package uses server rates multiplied by built-up area');
+select private.catalog_assert(
+ jsonb_array_length(public.construction_rate_list(:'org'))=2,
+ 'company can read its own construction rate choices');
+select private.catalog_denied(format('select public.construction_rate_list(%L)',:'other_org'),
+ array['42501'],'foreign company construction prices stay private');
+select private.catalog_denied(
+ 'select * from private.construction_quote_rates',array['42501'],
+ 'tenant cannot directly query construction price table');
+
 select private.catalog_denied(format('select public.catalog_snapshot(%L,true)',:'other_org'),array['42501'],'foreign catalog pricing snapshot denied');
 select private.catalog_assert((select count(*)=0 from public.catalog_items where organization_id=:'other_org'),'cross tenant catalog read denied');
 select private.catalog_assert((select count(*)=0 from public.price_books where organization_id=:'other_org'),'cross tenant price book read denied');
