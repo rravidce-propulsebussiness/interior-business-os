@@ -5,7 +5,7 @@ export default function CrmLayout({ children }: { children: ReactNode }) {
     <>
       <nav
         aria-label="CRM navigation"
-        className="mx-auto flex max-w-6xl flex-wrap gap-4 p-6"
+        className="crm-shared-navigation mx-auto flex max-w-6xl flex-wrap gap-4 p-6"
       >
         {[
           ['Dashboard', '/dashboard'],
