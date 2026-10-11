@@ -35,19 +35,36 @@ const input =
 export function SftEstimateBuilder({
   rates,
   packages,
+  initialSchedule,
   revisionId,
   version,
 }: {
   rates: ConstructionRate[];
   packages: ConstructionPackage[];
+  initialSchedule: SftEstimateDetails | null;
   revisionId: string;
   version: number;
 }) {
   const router = useRouter();
   const [pending, start] = useTransition();
-  const [rows, setRows] = useState<WorkRow[]>([blank()]);
-  const [brands, setBrands] = useState<Record<string, string>>({});
+  const [rows, setRows] = useState<WorkRow[]>(
+    initialSchedule?.rows.map(row=>({
+      name:row.name,lengthFeet:row.lengthFeet,widthFeet:row.widthFeet,ratePerSqft:row.ratePerSqft,
+    })) ?? [blank()],
+  );
+  const [brands, setBrands] = useState<Record<string,string>>(()=>{
+    const selected:Record<string,string>={};
+    for(const material of initialSchedule?.materials??[]){
+      const matched=rates.find(rate=>rate.status==='active'&&rate.category===material.category
+        &&rate.name===material.name&&rate.specification===material.specification);
+      if(matched)selected[material.category]=matched.id;
+    }
+    return selected;
+  });
   const [message, setMessage] = useState('');
+  const archivedBrands=(initialSchedule?.materials??[]).filter(material=>
+    !rates.some(r=>r.status==='active'&&r.category===material.category
+      &&r.name===material.name&&r.specification===material.specification));
   const [saved, setSaved] = useState(false);
   const active = rates.filter((x) => x.status === 'active');
   const categories = [...new Set(active.map((x) => x.category))].sort();
@@ -310,6 +327,12 @@ export function SftEstimateBuilder({
             </label>
           ))}
         </div>
+        {archivedBrands.length>0 && (
+          <p role="alert" className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
+            Some brands from the saved quotation are no longer active. Select a current brand before
+            resaving, or retain the original issued revision without changes.
+          </p>
+        )}
         {categories.length === 0 && (
           <p className="mt-2 text-xs text-slate-500">
             Material dropdowns will appear after the owner configures{' '}
