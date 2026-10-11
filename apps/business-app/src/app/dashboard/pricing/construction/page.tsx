@@ -3,13 +3,18 @@ import { catalogPage } from '../../catalog/access';
 import { pageServices } from '@business-os/auth/server';
 import { createConstructionRatesRepository } from '@business-os/database/construction-rates';
 import { ConstructionRatesManager } from './rates-manager';
+import { ConstructionPackagesManager } from './package-manager';
+import { createConstructionPackagesRepository } from '@business-os/database/construction-packages';
 
 export const dynamic = 'force-dynamic';
 
 export default async function ConstructionPricing() {
   const { org, canManagePrice } = await catalogPage(true);
   const { client } = await pageServices();
-  const rates = await createConstructionRatesRepository(client).list(org);
+  const [rates, packages] = await Promise.all([
+    createConstructionRatesRepository(client).list(org),
+    createConstructionPackagesRepository(client).list(org),
+  ]);
   return (
     <main
       id="main-content"
@@ -28,6 +33,7 @@ export default async function ConstructionPricing() {
           Open quotations →
         </Link>
       </nav>
+      <ConstructionPackagesManager packages={packages} canManage={canManagePrice} />
       <ConstructionRatesManager rates={rates} canManage={canManagePrice} />
     </main>
   );
