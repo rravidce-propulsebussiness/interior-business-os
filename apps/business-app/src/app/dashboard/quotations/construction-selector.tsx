@@ -210,7 +210,7 @@ export function ConstructionSelector({
         {rates.length === 0 && (
           <p className="text-xs text-slate-600">
             No construction prices are configured yet. Add company rates in
-            <a
+            <Link
               className="ml-1 text-blue-700 underline"
               href="/dashboard/pricing/construction"
             >
