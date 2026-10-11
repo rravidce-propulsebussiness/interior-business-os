@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { signOut } from '@business-os/auth/actions';
 import { usePathname } from 'next/navigation';
 import { useState, type ReactNode } from 'react';
 
@@ -24,7 +25,8 @@ type IconName =
   | 'chevron'
   | 'arrow'
   | 'check'
-  | 'close';
+  | 'close'
+  | 'logout';
 
 const paths: Record<IconName, string> = {
   dashboard: 'M3 10.5 12 3l9 7.5M5 9v12h14V9M9 21v-8h6v8',
@@ -51,6 +53,7 @@ const paths: Record<IconName, string> = {
   arrow: 'M4 12h16m-7-7 7 7-7 7',
   check: 'm4 12 5 5L20 6',
   close: 'M5 5l14 14M19 5 5 19',
+  logout: 'M10 17l5-5-5-5M15 12H3M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7',
 };
 
 export function OsIcon({
@@ -193,6 +196,9 @@ export function DashboardShell({ children }: { children: ReactNode }) {
           <Link href="/admin/automations">
             Automation health <span aria-hidden="true">↗</span>
           </Link>
+          <Link href="/" onClick={() => setOpen(false)}>
+            View home page <span aria-hidden="true">↗</span>
+          </Link>
         </div>
       </aside>
       <div className="os-workspace">
@@ -239,6 +245,12 @@ export function DashboardShell({ children }: { children: ReactNode }) {
               <small>Platform workspace</small>
             </span>
           </div>
+          <form action={signOut} className="os-signout-form">
+            <button type="submit" className="os-signout-button">
+              <OsIcon name="logout" size={17} />
+              <span>Sign out</span>
+            </button>
+          </form>
         </header>
         <div className="os-page-content">{children}</div>
       </div>
