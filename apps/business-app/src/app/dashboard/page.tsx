@@ -190,9 +190,7 @@ export default async function Dashboard({
           Your account needs an active company membership to access business
           tools.
         </p>
-        <a href="/dashboard/company/invitations">
-          Review your invitations →
-        </a>
+        <a href="/dashboard/company/invitations">Review your invitations →</a>
       </main>
     );
   }
@@ -652,10 +650,7 @@ export default async function Dashboard({
               ))}
             </div>
             {canInvite && (
-              <a
-                className="owner-quick-invite"
-                href="/dashboard/company/team"
-              >
+              <a className="owner-quick-invite" href="/dashboard/company/team">
                 <OwnerIcon name="team" size={19} /> Invite Team Member
               </a>
             )}
@@ -696,9 +691,7 @@ export default async function Dashboard({
                     : 'Capture enquiries and follow-ups in one place.'}
                 </p>
                 {has('lead.create', 'crm') && (
-                  <a href="/dashboard/crm/leads/new">
-                    Add your first lead →
-                  </a>
+                  <a href="/dashboard/crm/leads/new">Add your first lead →</a>
                 )}
               </div>
             ) : (
@@ -777,9 +770,7 @@ export default async function Dashboard({
                 </span>
                 <p>Company project access is not enabled for this account.</p>
                 {canSites && (
-                  <a href="/dashboard/site-projects">
-                    My assigned sites →
-                  </a>
+                  <a href="/dashboard/site-projects">My assigned sites →</a>
                 )}
               </div>
             ) : !projects ? (
@@ -798,9 +789,7 @@ export default async function Dashboard({
                 </strong>
                 <p>Manage project delivery, site updates and handover.</p>
                 {has('project.create', 'projects') && (
-                  <a href="/dashboard/customers">
-                    Create from a client →
-                  </a>
+                  <a href="/dashboard/customers">Create from a client →</a>
                 )}
               </div>
             ) : (

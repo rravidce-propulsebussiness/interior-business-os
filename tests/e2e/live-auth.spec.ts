@@ -31,9 +31,16 @@ test('verified session remains visible on home and sign-out clears it', async ({
   await account.getByRole('link', { name: 'Dashboard' }).click();
   await expect(page).toHaveURL(/\/(dashboard|admin)(?:\/|$)/);
   await expect(page.getByRole('main')).toBeVisible();
-  expect(clientErrors.filter((message) => /Connection closed|error #412/.test(message))).toEqual([]);
+  expect(
+    clientErrors.filter((message) =>
+      /Connection closed|error #412/.test(message),
+    ),
+  ).toEqual([]);
   await page.goto('/');
-  await page.getByRole('navigation', { name: 'Your account' }).getByRole('button', { name: 'Sign out' }).click();
+  await page
+    .getByRole('navigation', { name: 'Your account' })
+    .getByRole('button', { name: 'Sign out' })
+    .click();
   await expect(page).toHaveURL(/\/login$/);
   await page.goto('/');
   await expect(
@@ -73,7 +80,9 @@ test('live confirmed Owner can sign in and inspect tenant membership', async ({
   ).toBeVisible();
   await expect(page.locator('.owner-company-card')).toHaveCount(1);
   // Owner workspace is for one company; never show Super Admin organization directory.
-  await expect(page.getByRole('heading', { name: 'Organizations' })).toHaveCount(0);
+  await expect(
+    page.getByRole('heading', { name: 'Organizations' }),
+  ).toHaveCount(0);
   const denied = await page.request.get('/api/modules/website');
   expect(denied.status()).toBe(403);
   await page.goto('/dashboard/modules/website');

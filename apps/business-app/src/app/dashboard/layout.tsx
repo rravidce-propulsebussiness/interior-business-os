@@ -6,10 +6,6 @@ import type { ReactNode } from 'react';
 // /dashboard/notifications.
 export const dynamic = 'force-dynamic';
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export default function DashboardLayout({ children }: { children: ReactNode }) {
   return children;
 }
