@@ -166,20 +166,16 @@ export async function createPlatformCompany(
 
 export async function enablePlatformSeller(_state: State, form: FormData) {
   try {
-    const { authorization, client } = await serverServices();
+    const { authorization, client, repository } = await serverServices();
     await authorization.requirePlatformPermission(
       'platform.organizations.manage',
     );
     const organizationId = idSchema.parse(form.get('organizationId'));
-    const storeName = z
-      .string()
-      .trim()
-      .min(2)
-      .max(150)
-      .parse(form.get('storeName'));
+    const organization = await repository.organization(organizationId);
+    // A seller storefront is the company identity, not a separate name.
     await createPlatformCompaniesRepository(client).enableSeller(
       organizationId,
-      storeName,
+      organization.name,
     );
     revalidatePath('/admin/organizations/' + organizationId);
     revalidatePath('/admin/organizations');
