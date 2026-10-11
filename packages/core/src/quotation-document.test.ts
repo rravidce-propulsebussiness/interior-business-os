@@ -1,6 +1,7 @@
 import { expect, it } from 'vitest';
 import { renderQuotationDocument } from './quotation-document';
 import { quotationDocumentFixture } from './quotation-document.fixture';
+import { calculateSftEstimate,encodeSftEstimate } from './sft-quotation';
 it('escapes customer text and excludes all unlisted/internal payload fields', () => {
   const d = quotationDocumentFixture();
   d.notes = '<script>alert("x")</script>';
@@ -61,4 +62,24 @@ it('renders client, pricing, then selected construction specifications without d
   expect(html).toContain('Steel: Tata');
   expect(html).toContain('Bricks: Karimnagar');
   expect(html).toContain('133280');
+});
+
+it('prints floor-wise SFT pricing table and separate included brands without exposing snapshot encoding',()=>{
+  const d=quotationDocumentFixture();
+  d.lines[0]!.description=encodeSftEstimate(calculateSftEstimate({
+    rows:[
+      {name:'Parking Area',lengthFeet:'20',widthFeet:'8',ratePerSqft:'900'},
+      {name:'Ground floor commercial',lengthFeet:'20',widthFeet:'72',ratePerSqft:'1380'},
+    ],
+    materialIds:['11111111-1111-4111-8111-111111111111'],
+  },[{category:'Steel',name:'Tata',specification:'Fe 500D'}]));
+  const html=renderQuotationDocument(d);
+  expect(html).toContain('Work-wise SFT estimate');
+  expect(html).toContain('Parking Area');
+  expect(html).toContain('Ground floor commercial');
+  expect(html).toContain('160.00');
+  expect(html).toContain('144000.00');
+  expect(html).toContain('Steel');
+  expect(html).toContain('Tata');
+  expect(html).not.toContain('SFT_ESTIMATE_V1:');
 });
