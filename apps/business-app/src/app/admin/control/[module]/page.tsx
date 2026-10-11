@@ -142,17 +142,21 @@ export default async function PlatformControlModule({
             Steel, bricks, cement, painting &amp; material-grade choices
           </h2>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-            Each subscribed company manages its own brand-wise rates per built-up sq ft.
-            In a draft quotation, users choose one brand or material grade per category,
-            enter construction area, and save the server-calculated amount.
-            Issued quotations stay frozen. Platform admins manage company permissions here,
-            not private customer prices or quotations.
+            Each subscribed company manages its own brand-wise rates per
+            built-up sq ft. In a draft quotation, users choose one brand or
+            material grade per category, enter construction area, and save the
+            server-calculated amount. Issued quotations stay frozen. Platform
+            admins manage company permissions here, not private customer prices
+            or quotations.
           </p>
           <div className="mt-4 flex flex-wrap gap-3">
             <Link href="/admin/organizations" className="os-action">
               Configure business access ↗
             </Link>
-            <Link href="/dashboard/pricing/construction" className="os-action secondary">
+            <Link
+              href="/dashboard/pricing/construction"
+              className="os-action secondary"
+            >
               Open active company pricing ↗
             </Link>
           </div>

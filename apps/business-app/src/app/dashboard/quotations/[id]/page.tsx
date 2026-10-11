@@ -148,7 +148,9 @@ export default async function Quotation({
     : null;
   const command = { revision_id: r.id, version: r.version };
   const constructionOptions =
-    editable && canOverride && r.currency === 'INR' &&
+    editable &&
+    canOverride &&
+    r.currency === 'INR' &&
     s.allowed('pricing.view', 'pricing')
       ? await createConstructionRatesRepository(s.client).list(s.org)
       : null;
