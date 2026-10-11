@@ -95,8 +95,8 @@ select private.gst_denied(
  'dddddddd-dddd-4ddd-8ddd-dddddddddddd',:'first_invoice'),
  'platform admin cannot read tenant invoice document');
 select private.gst_denied(
- $select public.gst_filing_workpaper('dddddddd-dddd-4ddd-8ddd-dddddddddddd',
-  '2026-10-01','2026-10-31','sales_invoice')$,
+ $gst$select public.gst_filing_workpaper('dddddddd-dddd-4ddd-8ddd-dddddddddddd',
+  '2026-10-01','2026-10-31','sales_invoice')$gst$,
  'platform admin cannot extract other tenants GST workpapers');
 select private.gst_assert((public.platform_gst_summary()->>'issuedInvoices')::int>=1,
  'platform sees aggregates without tenant document contents');
