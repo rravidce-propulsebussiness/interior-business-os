@@ -678,6 +678,7 @@ label {
 
   .premium-topbar {
     padding: 0.7rem;
+    flex-wrap: wrap;
   }
 
   .premium-topbar .premium-link-secondary {
