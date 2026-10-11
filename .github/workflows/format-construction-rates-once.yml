@@ -1,0 +1,61 @@
+name: Format construction pricing (temporary)
+on:
+  pull_request:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  format:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: business_os_test
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Refresh database types from disposable PostgreSQL
+        run: |
+          pnpm db:verify
+          pnpm db:types
+        env:
+          TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:5432/business_os_test
+          ALLOW_TEST_DATABASE_RESET: 'yes'
+      - name: Format touched sources
+        run: |
+          pnpm exec prettier --write \
+            'apps/business-app/src/app/admin/control/[module]/page.tsx' \
+            'apps/business-app/src/app/dashboard/pricing/page.tsx' \
+            'apps/business-app/src/app/dashboard/pricing/construction/page.tsx' \
+            'apps/business-app/src/app/dashboard/pricing/construction/rates-manager.tsx' \
+            'apps/business-app/src/app/dashboard/pricing/construction/actions.ts' \
+            'apps/business-app/src/app/dashboard/quotations/construction-actions.ts' \
+            'apps/business-app/src/app/dashboard/quotations/construction-selector.tsx' \
+            'apps/business-app/src/app/dashboard/quotations/[id]/page.tsx' \
+            'packages/database/src/construction-rates.ts'
+      - name: Commit formatting and generated types
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add apps/business-app/src/app/admin/control apps/business-app/src/app/dashboard/pricing apps/business-app/src/app/dashboard/quotations packages/database/src/construction-rates.ts packages/database/src/generated/database.types.ts
+          if ! git diff --cached --quiet; then
+            git commit -m 'chore(construction): format pricing and regenerate database types'
+            git push origin HEAD:${{ github.head_ref }}
+          fi
