@@ -22,7 +22,9 @@ export default async function SubscriptionPlans() {
     repository.modules(),
     repository.planModules(),
   ]);
-  const canSeeOrganizations = permissions.includes('platform.organizations.view');
+  const canSeeOrganizations = permissions.includes(
+    'platform.organizations.view',
+  );
 
   // Exact counts, without transferring tenant records to the browser. Scoped
   // to organizations the authenticated platform administrator can view.

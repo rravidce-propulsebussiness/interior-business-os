@@ -96,7 +96,10 @@ function CreatePlanDialog({
             <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-blue-600">
               Membership configuration
             </p>
-            <h2 id="create-plan-title" className="mt-1 text-xl font-extrabold text-slate-950 sm:text-2xl">
+            <h2
+              id="create-plan-title"
+              className="mt-1 text-xl font-extrabold text-slate-950 sm:text-2xl"
+            >
               {state.created ? 'Plan created' : 'Create a new plan'}
             </h2>
             <p className="mt-2 text-xs leading-5 text-slate-500">
@@ -119,7 +122,9 @@ function CreatePlanDialog({
             <div className="grid size-12 place-items-center rounded-2xl bg-emerald-100 text-2xl text-emerald-700">
               ✓
             </div>
-            <p role="status" className="text-sm leading-6 text-slate-700">{state.message}</p>
+            <p role="status" className="text-sm leading-6 text-slate-700">
+              {state.message}
+            </p>
             <button
               type="button"
               onClick={onClose}
@@ -168,7 +173,9 @@ function CreatePlanDialog({
                     className="os-plans-input w-full rounded-xl px-4 py-3 text-sm font-medium"
                   />
                   <span className="block text-[11px] font-normal text-slate-500">
-                    {manualKey ? 'Custom key · clear to resume automatic naming' : 'Generated from plan name · editable'}
+                    {manualKey
+                      ? 'Custom key · clear to resume automatic naming'
+                      : 'Generated from plan name · editable'}
                   </span>
                 </label>
               </div>
@@ -215,12 +222,16 @@ function CreatePlanDialog({
                 </div>
                 {available.length === 0 && (
                   <p className="mt-4 rounded-xl bg-amber-50 p-4 text-xs text-amber-800">
-                    No active modules are configured. A plan cannot be created yet.
+                    No active modules are configured. A plan cannot be created
+                    yet.
                   </p>
                 )}
               </fieldset>
               {state.message && (
-                <p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-800">
+                <p
+                  role="alert"
+                  className="rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-800"
+                >
                   {state.message}
                 </p>
               )}
@@ -303,10 +314,19 @@ export function PlansWorkspace({
   };
 
   return (
-    <main id="main-content" tabIndex={-1} className="os-plans min-h-screen bg-[#f7f9fd] px-3 py-5 text-slate-950 sm:px-5 sm:py-7 xl:px-8">
+    <main
+      id="main-content"
+      tabIndex={-1}
+      className="os-plans min-h-screen bg-[#f7f9fd] px-3 py-5 text-slate-950 sm:px-5 sm:py-7 xl:px-8"
+    >
       <div className="mx-auto max-w-[1500px] space-y-5 sm:space-y-6">
-        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs font-medium text-slate-500">
-          <Link href="/admin" className="hover:text-blue-600">Dashboard</Link>
+        <nav
+          aria-label="Breadcrumb"
+          className="flex items-center gap-2 text-xs font-medium text-slate-500"
+        >
+          <Link href="/admin" className="hover:text-blue-600">
+            Dashboard
+          </Link>
           <span aria-hidden="true">/</span>
           <span className="text-slate-800">Membership Plans</span>
         </nav>
@@ -325,33 +345,74 @@ export function PlansWorkspace({
               onClick={() => setCreateOpen(true)}
               className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-blue-100 hover:bg-blue-700 sm:w-auto"
             >
-              <span aria-hidden="true" className="text-lg">＋</span> Create new plan
+              <span aria-hidden="true" className="text-lg">
+                ＋
+              </span>{' '}
+              Create new plan
             </button>
           )}
         </header>
 
-        <section aria-label="Subscription overview" className="grid gap-3 sm:grid-cols-3">
+        <section
+          aria-label="Subscription overview"
+          className="grid gap-3 sm:grid-cols-3"
+        >
           {[
-            { label: 'Active plans', value: active.length, note: 'Currently available bundles', tone: 'bg-blue-50 text-blue-600', icon: '▱' },
-            { label: 'Available modules', value: available.length, note: 'Active platform modules', tone: 'bg-violet-50 text-violet-600', icon: '▦' },
-            { label: 'Organizations assigned', value: assignedTotal, note: assignmentKnown ? 'Current non-archived organizations' : 'Organization counts unavailable', tone: 'bg-emerald-50 text-emerald-600', icon: '♙' },
+            {
+              label: 'Active plans',
+              value: active.length,
+              note: 'Currently available bundles',
+              tone: 'bg-blue-50 text-blue-600',
+              icon: '▱',
+            },
+            {
+              label: 'Available modules',
+              value: available.length,
+              note: 'Active platform modules',
+              tone: 'bg-violet-50 text-violet-600',
+              icon: '▦',
+            },
+            {
+              label: 'Organizations assigned',
+              value: assignedTotal,
+              note: assignmentKnown
+                ? 'Current non-archived organizations'
+                : 'Organization counts unavailable',
+              tone: 'bg-emerald-50 text-emerald-600',
+              icon: '♙',
+            },
           ].map((stat) => (
-            <article key={stat.label} className="flex min-w-0 items-center gap-4 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm shadow-slate-200/50 sm:p-5">
-              <div className={'grid size-14 shrink-0 place-items-center rounded-2xl text-2xl font-extrabold ' + stat.tone}>
+            <article
+              key={stat.label}
+              className="flex min-w-0 items-center gap-4 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm shadow-slate-200/50 sm:p-5"
+            >
+              <div
+                className={
+                  'grid size-14 shrink-0 place-items-center rounded-2xl text-2xl font-extrabold ' +
+                  stat.tone
+                }
+              >
                 {stat.icon}
               </div>
               <div className="min-w-0">
-                <p className="text-xs font-medium text-slate-600">{stat.label}</p>
+                <p className="text-xs font-medium text-slate-600">
+                  {stat.label}
+                </p>
                 <p className="mt-1 text-3xl font-extrabold leading-none text-slate-950">
                   {stat.value ?? '—'}
                 </p>
-                <p className="mt-2 text-[11px] leading-4 text-slate-500">{stat.note}</p>
+                <p className="mt-2 text-[11px] leading-4 text-slate-500">
+                  {stat.note}
+                </p>
               </div>
             </article>
           ))}
         </section>
 
-        <section aria-label="Membership plan cards" className="grid gap-4 lg:grid-cols-3">
+        <section
+          aria-label="Membership plan cards"
+          className="grid gap-4 lg:grid-cols-3"
+        >
           {ordered.map((plan, index) => {
             const included = available.filter((module) =>
               plan.moduleIds.includes(module.id),
@@ -364,11 +425,18 @@ export function PlansWorkspace({
                 key={plan.id}
                 className={
                   'flex min-w-0 flex-col overflow-hidden rounded-2xl border bg-white p-5 shadow-sm transition-shadow hover:shadow-md sm:p-6 ' +
-                  (featured ? 'border-blue-400 bg-gradient-to-b from-blue-50/60 to-white' : 'border-slate-200')
+                  (featured
+                    ? 'border-blue-400 bg-gradient-to-b from-blue-50/60 to-white'
+                    : 'border-slate-200')
                 }
               >
                 <div className="flex items-start gap-3">
-                  <div className={'grid size-12 shrink-0 place-items-center rounded-2xl text-2xl ' + tone.avatar}>
+                  <div
+                    className={
+                      'grid size-12 shrink-0 place-items-center rounded-2xl text-2xl ' +
+                      tone.avatar
+                    }
+                  >
                     {tone.icon}
                   </div>
                   <div className="min-w-0 flex-1">
@@ -376,12 +444,14 @@ export function PlansWorkspace({
                       <h2 className="text-lg font-extrabold tracking-tight text-slate-950">
                         {plan.name}
                       </h2>
-                      <span className={
-                        'rounded-full px-2.5 py-1 text-[10px] font-bold capitalize ' +
-                        (plan.status === 'active'
-                          ? 'bg-emerald-100 text-emerald-800'
-                          : 'bg-slate-100 text-slate-600')
-                      }>
+                      <span
+                        className={
+                          'rounded-full px-2.5 py-1 text-[10px] font-bold capitalize ' +
+                          (plan.status === 'active'
+                            ? 'bg-emerald-100 text-emerald-800'
+                            : 'bg-slate-100 text-slate-600')
+                        }
+                      >
                         {plan.status}
                       </span>
                     </div>
@@ -397,19 +467,33 @@ export function PlansWorkspace({
                 </div>
 
                 <div className="mt-5 flex items-center gap-2 border-t border-slate-100 pt-4">
-                  <span className="text-blue-600"><OsIcon name="dashboard" size={18} /></span>
+                  <span className="text-blue-600">
+                    <OsIcon name="dashboard" size={18} />
+                  </span>
                   <p className="text-sm font-extrabold text-slate-900">
-                    {included.length} {included.length === 1 ? 'module' : 'modules'}
+                    {included.length}{' '}
+                    {included.length === 1 ? 'module' : 'modules'}
                   </p>
                 </div>
                 <p className="mt-2 min-h-9 text-xs leading-5 text-slate-500">
                   {included.map((module) => module.name).join(', ') ||
                     'No active modules included'}
                 </p>
-                <ul className="mt-4 grid flex-1 grid-cols-2 content-start gap-x-2 gap-y-3" aria-label={plan.name + ' modules'}>
+                <ul
+                  className="mt-4 grid flex-1 grid-cols-2 content-start gap-x-2 gap-y-3"
+                  aria-label={plan.name + ' modules'}
+                >
                   {included.map((module) => (
-                    <li key={module.id} className="flex min-w-0 items-center gap-2 text-xs text-slate-700">
-                      <span className="grid size-4 shrink-0 place-items-center rounded-full bg-blue-600 text-[10px] text-white" aria-hidden="true">✓</span>
+                    <li
+                      key={module.id}
+                      className="flex min-w-0 items-center gap-2 text-xs text-slate-700"
+                    >
+                      <span
+                        className="grid size-4 shrink-0 place-items-center rounded-full bg-blue-600 text-[10px] text-white"
+                        aria-hidden="true"
+                      >
+                        ✓
+                      </span>
                       <span className="break-words">{module.name}</span>
                     </li>
                   ))}
@@ -422,9 +506,13 @@ export function PlansWorkspace({
                       <p className="text-xs font-extrabold text-slate-900">
                         {usage === null || usage === undefined
                           ? 'Count unavailable'
-                          : usage + ' ' + (usage === 1 ? 'organization' : 'organizations')}
+                          : usage +
+                            ' ' +
+                            (usage === 1 ? 'organization' : 'organizations')}
                       </p>
-                      <p className="mt-0.5 text-[10px] text-slate-500">Using this plan</p>
+                      <p className="mt-0.5 text-[10px] text-slate-500">
+                        Using this plan
+                      </p>
                     </div>
                   </div>
                   <button
@@ -444,7 +532,9 @@ export function PlansWorkspace({
           {ordered.length === 0 && (
             <div className="col-span-full rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center">
               <h2 className="text-lg font-bold">No membership plans yet</h2>
-              <p className="mt-2 text-sm text-slate-500">Create your first plan using the available modules.</p>
+              <p className="mt-2 text-sm text-slate-500">
+                Create your first plan using the available modules.
+              </p>
             </div>
           )}
         </section>
@@ -460,7 +550,9 @@ export function PlansWorkspace({
                 <OsIcon name="dashboard" size={22} />
               </span>
               <div>
-                <h2 className="text-lg font-extrabold text-slate-950">Module comparison</h2>
+                <h2 className="text-lg font-extrabold text-slate-950">
+                  Module comparison
+                </h2>
                 <p className="mt-1 text-xs text-slate-500">
                   See which platform modules each membership includes.
                 </p>
@@ -484,7 +576,10 @@ export function PlansWorkspace({
             <table className="w-full min-w-[560px] border-collapse text-xs">
               <thead className="bg-slate-50">
                 <tr>
-                  <th scope="col" className="min-w-[170px] border-b border-slate-200 px-4 py-3 text-left font-extrabold text-slate-700">
+                  <th
+                    scope="col"
+                    className="min-w-[170px] border-b border-slate-200 px-4 py-3 text-left font-extrabold text-slate-700"
+                  >
                     Module
                   </th>
                   {ordered.map((plan) => (
@@ -496,7 +591,9 @@ export function PlansWorkspace({
                         (highlightedId === plan.id ? 'bg-blue-50' : '')
                       }
                     >
-                      <span className="block font-extrabold text-slate-950">{plan.name}</span>
+                      <span className="block font-extrabold text-slate-950">
+                        {plan.name}
+                      </span>
                       <span className="mt-1 block text-[10px] font-medium text-slate-500">
                         {plan.moduleIds.length} modules
                       </span>
@@ -507,7 +604,10 @@ export function PlansWorkspace({
               <tbody>
                 {filteredModules.map((module) => (
                   <tr key={module.id} className="hover:bg-slate-50/80">
-                    <th scope="row" className="border-b border-slate-100 px-4 py-3 text-left font-semibold text-slate-700">
+                    <th
+                      scope="row"
+                      className="border-b border-slate-100 px-4 py-3 text-left font-semibold text-slate-700"
+                    >
                       {module.name}
                     </th>
                     {ordered.map((plan) => {
@@ -528,7 +628,10 @@ export function PlansWorkspace({
                               ✓
                             </span>
                           ) : (
-                            <span aria-label="Not included" className="font-bold text-slate-300">
+                            <span
+                              aria-label="Not included"
+                              className="font-bold text-slate-300"
+                            >
                               —
                             </span>
                           )}
@@ -539,7 +642,10 @@ export function PlansWorkspace({
                 ))}
                 {filteredModules.length === 0 && (
                   <tr>
-                    <td colSpan={ordered.length + 1} className="px-5 py-10 text-center text-slate-500">
+                    <td
+                      colSpan={ordered.length + 1}
+                      className="px-5 py-10 text-center text-slate-500"
+                    >
                       No modules match your search.
                     </td>
                   </tr>
@@ -548,8 +654,9 @@ export function PlansWorkspace({
             </table>
           </div>
           <p className="mt-4 text-[11px] leading-5 text-slate-500">
-            Module availability is governed by each organization’s selected plan and entitlement overrides.
-            Existing memberships are never changed when you create a new plan.
+            Module availability is governed by each organization’s selected plan
+            and entitlement overrides. Existing memberships are never changed
+            when you create a new plan.
           </p>
         </section>
       </div>
