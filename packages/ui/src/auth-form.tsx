@@ -22,7 +22,7 @@ export function AuthForm({
   useEffect(() => {
     // A fresh document avoids an incomplete RSC Flight transition immediately
     // after Supabase authentication updates the session cookies.
-    if (state.authenticated) window.location.assign('/dashboard');
+    if (state.authenticated) window.location.replace(new URL('/dashboard', window.location.origin).href);
   }, [state.authenticated]);
 
   return (
