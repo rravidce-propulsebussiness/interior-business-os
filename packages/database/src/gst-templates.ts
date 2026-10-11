@@ -67,7 +67,7 @@ export function createGstTemplatesRepository(client: SupabaseClient<Database>) {
       }),
     saveDocument: (
       organizationId: string,
-      input: Record<string, unknown>,
+      input: unknown,
       templateId: string | null,
     ) =>
       invoke<string>('gst_document_with_template_save', {
