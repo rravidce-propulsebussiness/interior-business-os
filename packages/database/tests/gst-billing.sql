@@ -36,6 +36,10 @@ select private.gst_assert(
  and (public.gst_document('dddddddd-dddd-4ddd-8ddd-dddddddddddd',:'first_invoice')->>'cgst')::numeric=171
  and (public.gst_document('dddddddd-dddd-4ddd-8ddd-dddddddddddd',:'first_invoice')->>'sgst')::numeric=171,
  'intrastate invoice calculates CGST and SGST');
+select private.gst_assert(
+ (public.gst_document_layout('dddddddd-dddd-4ddd-8ddd-dddddddddddd',:'first_invoice')->'config')
+ = (public.gst_standard_invoice_format('dddddddd-dddd-4ddd-8ddd-dddddddddddd')->'config'),
+ 'legacy invoice-save RPC receives enforced platform standard');
 select public.gst_document_finalize('dddddddd-dddd-4ddd-8ddd-dddddddddddd',:'first_invoice',1);
 select private.gst_assert(
  public.gst_document('dddddddd-dddd-4ddd-8ddd-dddddddddddd',:'first_invoice')->>'status'='issued'
@@ -70,6 +74,14 @@ select public.gst_document_save('dddddddd-dddd-4ddd-8ddd-dddddddddddd',
  ::jsonb) as bill_id \gset
 select public.gst_document_finalize('dddddddd-dddd-4ddd-8ddd-dddddddddddd',:'bill_id',1);
 select private.gst_assert(
+ (public.gst_document_layout('dddddddd-dddd-4ddd-8ddd-dddddddddddd',:'bill_id')->'config')
+ = (public.gst_document_layout('dddddddd-dddd-4ddd-8ddd-dddddddddddd',:'first_invoice')->'config'),
+ 'issued sales invoice and recorded supplier bill share one global design');
+select private.gst_assert(
+ jsonb_array_length(public.gst_filing_workpaper('dddddddd-dddd-4ddd-8ddd-dddddddddddd','2026-10-01','2026-10-31','sales_invoice'))=1
+ and jsonb_array_length(public.gst_filing_workpaper('dddddddd-dddd-4ddd-8ddd-dddddddddddd','2026-10-01','2026-10-31','purchase_bill'))=1,
+ 'filing reports include finalized bills and exclude unissued drafts');
+select private.gst_assert(
  (public.gst_document('dddddddd-dddd-4ddd-8ddd-dddddddddddd',:'bill_id')->>'status')='recorded'
  and jsonb_array_length(public.gst_documents('dddddddd-dddd-4ddd-8ddd-dddddddddddd','purchase_bill'))=1,
  'received supplier bill is recorded');
@@ -82,6 +94,10 @@ select private.gst_denied(
  format('select public.gst_document(%L,%L)',
  'dddddddd-dddd-4ddd-8ddd-dddddddddddd',:'first_invoice'),
  'platform admin cannot read tenant invoice document');
+select private.gst_denied(
+ $select public.gst_filing_workpaper('dddddddd-dddd-4ddd-8ddd-dddddddddddd',
+  '2026-10-01','2026-10-31','sales_invoice')$,
+ 'platform admin cannot extract other tenants GST workpapers');
 select private.gst_assert((public.platform_gst_summary()->>'issuedInvoices')::int>=1,
  'platform sees aggregates without tenant document contents');
 
