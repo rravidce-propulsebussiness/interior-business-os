@@ -417,7 +417,7 @@ export function PlansWorkspace({
             const included = available.filter((module) =>
               plan.moduleIds.includes(module.id),
             );
-            const tone = accents[Math.min(index, accents.length - 1)];
+            const tone = accents[Math.min(index, accents.length - 1)]!;
             const featured = mostComplete?.id === plan.id && ordered.length > 1;
             const usage = usageByPlan[plan.id];
             return (
