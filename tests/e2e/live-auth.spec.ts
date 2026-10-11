@@ -10,6 +10,8 @@ test('verified session remains visible on home and sign-out clears it', async ({
       !process.env.E2E_OWNER_PASSWORD,
     'Requires a disposable confirmed Business App account and live Supabase test setup.',
   );
+  const clientErrors: string[] = [];
+  page.on('pageerror', (error) => clientErrors.push(error.message));
   await page.goto('/login');
   await page
     .getByLabel('Email', { exact: true })
@@ -26,7 +28,12 @@ test('verified session remains visible on home and sign-out clears it', async ({
   await expect(
     page.getByRole('link', { name: 'Sign in', exact: true }),
   ).toHaveCount(0);
-  await account.getByRole('button', { name: 'Sign out' }).click();
+  await account.getByRole('link', { name: 'Dashboard' }).click();
+  await expect(page).toHaveURL(/\/(dashboard|admin)(?:\/|$)/);
+  await expect(page.getByRole('main')).toBeVisible();
+  expect(clientErrors.filter((message) => /Connection closed|error #412/.test(message))).toEqual([]);
+  await page.goto('/');
+  await page.getByRole('navigation', { name: 'Your account' }).getByRole('button', { name: 'Sign out' }).click();
   await expect(page).toHaveURL(/\/login$/);
   await page.goto('/');
   await expect(
@@ -59,25 +66,14 @@ test('live confirmed Owner can sign in and inspect tenant membership', async ({
     return;
   }
   await expect(
-    page.getByRole('heading', { name: 'Business dashboard' }),
-  ).toBeVisible();
-  await page
-    .getByLabel('Active organization')
-    .selectOption(
-      process.env.E2E_ORG_ID ?? 'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
-    );
-  await page.getByRole('button', { name: 'Switch organization' }).click();
-  await expect(
-    page.getByRole('heading', {
-      name: process.env.E2E_ORG_NAME ?? 'Demo Interiors',
-      exact: true,
-    }),
+    page.getByRole('heading', { name: /Welcome back,/i }),
   ).toBeVisible();
   await expect(
-    page
-      .getByRole('navigation', { name: 'Enabled modules' })
-      .getByRole('link', { name: 'Website', exact: true }),
-  ).toHaveCount(0);
+    page.getByRole('navigation', { name: "Your company's modules" }),
+  ).toBeVisible();
+  await expect(page.locator('.owner-company-card')).toHaveCount(1);
+  // Owner workspace is for one company; never show Super Admin organization directory.
+  await expect(page.getByRole('heading', { name: 'Organizations' })).toHaveCount(0);
   const denied = await page.request.get('/api/modules/website');
   expect(denied.status()).toBe(403);
   await page.goto('/dashboard/modules/website');
