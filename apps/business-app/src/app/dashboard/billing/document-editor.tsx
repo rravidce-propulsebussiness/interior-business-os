@@ -16,7 +16,7 @@ type Props = {
   profile: GstBusinessProfile | null;
   templates: GstInvoiceTemplate[];
   existingLayout?: GstInvoiceAppearance | null;
-  suggestedTemplateId?: string;
+  suggestedTemplateId?: string | undefined;
   order?: {
     id: string;
     productName: string;
