@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-html-link-for-pages -- Use fresh document navigations on Hostinger to avoid interrupted RSC Flight responses. */
 'use client';
 
 import { useMemo, useState } from 'react';
