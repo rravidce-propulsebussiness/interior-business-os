@@ -8,6 +8,7 @@ import {
   type GstDocumentInput,
 } from '@business-os/database/gst';
 import { idSchema, safeFailure, DomainError } from '@business-os/shared';
+import { createGstTemplatesRepository } from '@business-os/database/gst-templates';
 
 type State = { message: string };
 const gstin = z.union([
@@ -130,7 +131,12 @@ export async function saveGstDocument(form: FormData) {
       ...(marketplaceOrderId ? { marketplaceOrderId } : {}),
     });
     const input = parsed as GstDocumentInput;
-    id = await createGstRepository(client).saveDocument(org, input);
+    const templateId = String(form.get('templateId') ?? '').trim();
+    id = await createGstTemplatesRepository(client).saveDocument(
+      org,
+      input,
+      templateId ? idSchema.parse(templateId) : null,
+    );
     revalidatePath('/dashboard/billing');
   } catch (error) {
     redirect(path + '?error=' + encodeURIComponent(safeFailure(error).message));
