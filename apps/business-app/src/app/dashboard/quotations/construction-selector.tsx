@@ -141,7 +141,7 @@ function CustomizedQuote({
       <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-slate-950 p-5 text-white">
         <div>
           <p className="text-xs font-semibold text-blue-200">
-            This material's indicative amount
+            This material&apos;s indicative amount
           </p>
           <p className="mt-1 text-2xl font-extrabold">
             {selected && Number(area) > 0
