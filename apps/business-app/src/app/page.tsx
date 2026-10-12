@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-html-link-for-pages -- Fresh document navigation prevents incomplete React Flight responses on Hostinger. */
 import { signOut } from '@business-os/auth/actions';
+import { redirect } from 'next/navigation';
 import {
   createServerDatabase,
   isSupabaseConfigured,
@@ -142,7 +143,14 @@ export default async function Home() {
   } = isSupabaseConfigured()
     ? await (await createServerDatabase()).auth.getUser()
     : { data: { user: null } };
-  const signedIn = Boolean(user);
+  // A verified session owns a workspace, not the public marketing homepage.
+  // /dashboard already routes authorized platform admins to /admin and
+  // resolves business memberships (including slug-based workspaces).
+  // Keep this redirect server-side and request-scoped: no stale cookie
+  // inference or client-side Flash of the public marketing page.
+  if (user) redirect('/dashboard');
+
+  const signedIn = false;
   const workspaceHref = signedIn ? '/dashboard' : '/login';
   const marketHref = signedIn ? '/dashboard/marketplace' : '/login';
   const sellerHref = signedIn ? '/dashboard/marketplace/seller' : '/register';
