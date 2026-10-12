@@ -1,0 +1,39 @@
+name: Format premium login (temporary)
+on:
+  pull_request:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  format:
+    if: github.head_ref == 'feat/premium-dual-provider-login-20261012' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Format new auth files
+        run: |
+          pnpm exec prettier --write \
+            'apps/business-app/src/app/login/page.tsx' \
+            'apps/business-app/src/app/login/premium-login-form.tsx' \
+            'apps/business-app/src/app/login/premium-login.css' \
+            'apps/business-app/src/app/auth/provider-start.ts' \
+            'apps/business-app/src/app/auth/google/route.ts' \
+            'apps/business-app/src/app/auth/propulse/route.ts' \
+            'tests/e2e/auth.spec.ts'
+      - name: Commit formatting
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add apps/business-app/src/app/login/page.tsx apps/business-app/src/app/login/premium-login-form.tsx apps/business-app/src/app/login/premium-login.css apps/business-app/src/app/auth/provider-start.ts apps/business-app/src/app/auth/google/route.ts apps/business-app/src/app/auth/propulse/route.ts tests/e2e/auth.spec.ts
+          if ! git diff --cached --quiet; then
+            git commit -m 'style(auth): format premium dual-provider login'
+            git push origin HEAD:${{ github.head_ref }}
+          fi
