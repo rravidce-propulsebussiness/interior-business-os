@@ -5,7 +5,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { OwnerIcon, type OwnerIconName } from '../../owner-shell';
 import { runCrmCommand, saveCrm } from '../actions';
 import { SheetImportForm } from './import/sheet-import-form';
-import { ProPulseConnectPanel, type ProPulseConnectionView } from './propulse-connect-panel';
+import {
+  ProPulseConnectPanel,
+  type ProPulseConnectionView,
+} from './propulse-connect-panel';
 import { syncPropulseLeads } from './propulse-actions';
 
 export type LeadOption = { value: string; label: string };
@@ -281,7 +284,9 @@ export function LeadsWorkspace({
   propulseConnection: ProPulseConnectionView;
   initialTool: 'none' | 'sheet' | 'propulse';
 }) {
-  const [leadTool, setLeadTool] = useState<'none' | 'sheet' | 'propulse'>(initialTool);
+  const [leadTool, setLeadTool] = useState<'none' | 'sheet' | 'propulse'>(
+    initialTool,
+  );
   const [syncFeedback, setSyncFeedback] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(
     rows[0]?.id ?? null,
@@ -342,7 +347,12 @@ export function LeadsWorkspace({
   };
 
   useEffect(() => {
-    if (!propulseConnection.connected || !canCreate || !propulseConnection.configured) return;
+    if (
+      !propulseConnection.connected ||
+      !canCreate ||
+      !propulseConnection.configured
+    )
+      return;
     let active = true;
     const check = async () => {
       try {
@@ -354,7 +364,8 @@ export function LeadsWorkspace({
           setSyncFeedback(response.message);
         }
       } catch {
-        if (active) setSyncFeedback('ProPulse sync is temporarily unavailable.');
+        if (active)
+          setSyncFeedback('ProPulse sync is temporarily unavailable.');
       }
     };
     void check();
@@ -386,16 +397,28 @@ export function LeadsWorkspace({
             </a>
           )}
           {canCreate && (
-            <button type="button" className="crm-outline"
+            <button
+              type="button"
+              className="crm-outline"
               aria-expanded={leadTool === 'sheet'}
-              onClick={() => setLeadTool(leadTool === 'sheet' ? 'none' : 'sheet')}>
+              onClick={() =>
+                setLeadTool(leadTool === 'sheet' ? 'none' : 'sheet')
+              }
+            >
               <Icon name="download" /> Import Sheet
             </button>
           )}
-          <button type="button" className="crm-outline"
+          <button
+            type="button"
+            className="crm-outline"
             aria-expanded={leadTool === 'propulse'}
-            onClick={() => setLeadTool(leadTool === 'propulse' ? 'none' : 'propulse')}>
-            {propulseConnection.connected ? 'ProPulse Connected' : 'Connect ProPulse'}
+            onClick={() =>
+              setLeadTool(leadTool === 'propulse' ? 'none' : 'propulse')
+            }
+          >
+            {propulseConnection.connected
+              ? 'ProPulse Connected'
+              : 'Connect ProPulse'}
           </button>
           <a href="/dashboard/crm/pipeline" className="crm-outline">
             <OwnerIcon name="projects" size={17} /> Pipeline
@@ -422,22 +445,33 @@ export function LeadsWorkspace({
         <section className="crm-inline-lead-tool" aria-label="Sheet upload">
           <div className="crm-inline-tool-title">
             <h2>Import leads into All Leads</h2>
-            <button type="button" className="crm-outline" onClick={() => setLeadTool('none')}>Close</button>
+            <button
+              type="button"
+              className="crm-outline"
+              onClick={() => setLeadTool('none')}
+            >
+              Close
+            </button>
           </div>
           <SheetImportForm
             sources={sources}
-            stages={stages.filter((stage) => stage.outcome === 'open')
+            stages={stages
+              .filter((stage) => stage.outcome === 'open')
               .map((stage) => ({ value: stage.id, label: stage.name }))}
             canSetup={propulseConnection.canManage}
           />
         </section>
       )}
       {leadTool === 'propulse' && (
-        <ProPulseConnectPanel connection={propulseConnection}
-          onClose={() => setLeadTool('none')} />
+        <ProPulseConnectPanel
+          connection={propulseConnection}
+          onClose={() => setLeadTool('none')}
+        />
       )}
       {syncFeedback && (
-        <p className="crm-integration-message" role="status">{syncFeedback}</p>
+        <p className="crm-integration-message" role="status">
+          {syncFeedback}
+        </p>
       )}
 
       <div className="crm-kpi-row" aria-label="Lead overview">

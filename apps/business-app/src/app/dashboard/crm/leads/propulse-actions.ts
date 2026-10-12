@@ -7,7 +7,10 @@ import { z } from 'zod';
 import { crmServices } from '../service';
 
 const origin = 'https://propulsetechnologies.online';
-const matchCode = z.string().trim().regex(/^[A-Za-z0-9_-]{43}$/);
+const matchCode = z
+  .string()
+  .trim()
+  .regex(/^[A-Za-z0-9_-]{43}$/);
 const redemption = z.object({
   token: z.string().regex(/^[A-Za-z0-9_-]{43}$/),
   subject: z.string().regex(/^propulse:[0-9]+$/),
@@ -38,7 +41,12 @@ const feed = z.object({
   page: z.number().int().positive(),
   has_more: z.boolean(),
 });
-type ActionResult = { ok: boolean; message: string; created?: number; skipped?: number };
+type ActionResult = {
+  ok: boolean;
+  message: string;
+  created?: number;
+  skipped?: number;
+};
 
 function requireManager(s: Awaited<ReturnType<typeof crmServices>>) {
   if (!s.allowed('crm.source.manage') || !s.allowed('crm.pipeline.manage'))
@@ -53,15 +61,21 @@ async function proRequest(path: string, init: RequestInit) {
     signal: AbortSignal.timeout(12000),
   });
   if (!response.ok) {
-    if (response.status === 401) throw new Error('The ProPulse connection has expired. Connect again.');
-    if (response.status === 400) throw new Error('Invalid or expired pairing code. Generate a new code in ProPulse.');
+    if (response.status === 401)
+      throw new Error('The ProPulse connection has expired. Connect again.');
+    if (response.status === 400)
+      throw new Error(
+        'Invalid or expired pairing code. Generate a new code in ProPulse.',
+      );
     throw new Error('ProPulse could not be reached. Try again shortly.');
   }
   return response.json() as Promise<unknown>;
 }
 
 /** One-time pairing: independent ProPulse login proves ownership, not matching email. */
-export async function connectPropulseLeads(code: string): Promise<ActionResult> {
+export async function connectPropulseLeads(
+  code: string,
+): Promise<ActionResult> {
   try {
     const pairingCode = matchCode.parse(code);
     const s = await crmServices('lead.view');
@@ -70,31 +84,40 @@ export async function connectPropulseLeads(code: string): Promise<ActionResult> 
     // Avoid consuming a valid pairing code if this deployment lacks its
     // server-only Supabase secret/service-role credential.
     const admin = createOwnerProvisioningDatabase();
-    const verified = redemption.parse(await proRequest('/api/business-os/link/redeem', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ code: pairingCode }),
-    }));
+    const verified = redemption.parse(
+      await proRequest('/api/business-os/link/redeem', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ code: pairingCode }),
+      }),
+    );
     const { data: existing, error: priorError } = await admin
       .from('propulse_lead_connections')
       .select('access_token')
       .eq('organization_id', s.org)
       .maybeSingle();
-    if (priorError) throw new Error('Could not check existing ProPulse connection.');
-    const { error } = await admin.from('propulse_lead_connections').upsert({
-      organization_id: s.org,
-      connected_by: user.id,
-      propulse_subject: verified.subject,
-      display_email: verified.email,
-      display_name: verified.display_name,
-      access_token: verified.token,
-      token_expires_at: new Date(Date.now() + verified.expires_in * 1000).toISOString(),
-      last_synced_at: null,
-      sync_page: 1,
-    }, { onConflict: 'organization_id' });
+    if (priorError)
+      throw new Error('Could not check existing ProPulse connection.');
+    const { error } = await admin.from('propulse_lead_connections').upsert(
+      {
+        organization_id: s.org,
+        connected_by: user.id,
+        propulse_subject: verified.subject,
+        display_email: verified.email,
+        display_name: verified.display_name,
+        access_token: verified.token,
+        token_expires_at: new Date(
+          Date.now() + verified.expires_in * 1000,
+        ).toISOString(),
+        last_synced_at: null,
+        sync_page: 1,
+      },
+      { onConflict: 'organization_id' },
+    );
     if (error) {
       await proRequest('/api/business-os/link/revoke', {
-        method: 'POST', headers: { authorization: 'Bearer ' + verified.token },
+        method: 'POST',
+        headers: { authorization: 'Bearer ' + verified.token },
       }).catch(() => undefined);
       throw new Error('Could not save the ProPulse company connection.');
     }
@@ -105,9 +128,17 @@ export async function connectPropulseLeads(code: string): Promise<ActionResult> 
       }).catch(() => undefined);
     }
     revalidatePath('/dashboard/crm/leads');
-    return { ok: true, message: 'ProPulse connected. Eligible leads will appear in All Leads after syncing.' };
+    return {
+      ok: true,
+      message:
+        'ProPulse connected. Eligible leads will appear in All Leads after syncing.',
+    };
   } catch (error) {
-    return { ok: false, message: error instanceof Error ? error.message : 'Could not connect ProPulse.' };
+    return {
+      ok: false,
+      message:
+        error instanceof Error ? error.message : 'Could not connect ProPulse.',
+    };
   }
 }
 
@@ -116,21 +147,33 @@ export async function disconnectPropulseLeads(): Promise<ActionResult> {
     const s = await crmServices('lead.view');
     requireManager(s);
     const admin = createOwnerProvisioningDatabase();
-    const { data, error } = await admin.from('propulse_lead_connections')
-      .select('access_token').eq('organization_id', s.org).maybeSingle();
+    const { data, error } = await admin
+      .from('propulse_lead_connections')
+      .select('access_token')
+      .eq('organization_id', s.org)
+      .maybeSingle();
     if (error) throw new Error('Could not read connection.');
     if (data) {
       await proRequest('/api/business-os/link/revoke', {
-        method: 'POST', headers: { authorization: 'Bearer ' + data.access_token },
+        method: 'POST',
+        headers: { authorization: 'Bearer ' + data.access_token },
       });
-      const removed = await admin.from('propulse_lead_connections')
-        .delete().eq('organization_id', s.org);
+      const removed = await admin
+        .from('propulse_lead_connections')
+        .delete()
+        .eq('organization_id', s.org);
       if (removed.error) throw new Error('Could not remove connection.');
     }
     revalidatePath('/dashboard/crm/leads');
-    return { ok: true, message: 'ProPulse disconnected. Existing CRM leads are retained.' };
+    return {
+      ok: true,
+      message: 'ProPulse disconnected. Existing CRM leads are retained.',
+    };
   } catch (error) {
-    return { ok: false, message: error instanceof Error ? error.message : 'Could not disconnect.' };
+    return {
+      ok: false,
+      message: error instanceof Error ? error.message : 'Could not disconnect.',
+    };
   }
 }
 
@@ -141,15 +184,34 @@ export async function syncPropulseLeads(): Promise<ActionResult> {
   try {
     const s = await crmServices('lead.create');
     const admin = createOwnerProvisioningDatabase();
-    const { data, error } = await admin.from('propulse_lead_connections')
-      .select('organization_id,access_token,token_expires_at,last_synced_at,sync_page')
-      .eq('organization_id', s.org).maybeSingle();
-    if (error || !data) return { ok: false, message: 'Connect ProPulse to receive your eligible leads.' };
+    const { data, error } = await admin
+      .from('propulse_lead_connections')
+      .select(
+        'organization_id,access_token,token_expires_at,last_synced_at,sync_page',
+      )
+      .eq('organization_id', s.org)
+      .maybeSingle();
+    if (error || !data)
+      return {
+        ok: false,
+        message: 'Connect ProPulse to receive your eligible leads.',
+      };
     const connection = record.parse(data);
     if (Date.parse(connection.token_expires_at) < Date.now())
-      return { ok: false, message: 'ProPulse connection expired. Connect again.' };
-    if (connection.last_synced_at && Date.now() - Date.parse(connection.last_synced_at) < 90000)
-      return { ok: true, message: 'Already up to date.', created: 0, skipped: 0 };
+      return {
+        ok: false,
+        message: 'ProPulse connection expired. Connect again.',
+      };
+    if (
+      connection.last_synced_at &&
+      Date.now() - Date.parse(connection.last_synced_at) < 90000
+    )
+      return {
+        ok: true,
+        message: 'Already up to date.',
+        created: 0,
+        skipped: 0,
+      };
     // Claim a 90s lease: prevents concurrent dashboard tabs from saving twice.
     const cutoff = new Date(Date.now() - 90000).toISOString();
     const { data: claimed, error: leaseError } = await admin
@@ -159,62 +221,122 @@ export async function syncPropulseLeads(): Promise<ActionResult> {
       .or('last_synced_at.is.null,last_synced_at.lt.' + cutoff)
       .select('organization_id');
     if (leaseError || !claimed?.length)
-      return { ok: true, message: 'Sync already running.', created: 0, skipped: 0 };
+      return {
+        ok: true,
+        message: 'Sync already running.',
+        created: 0,
+        skipped: 0,
+      };
 
     const [sourcesResult, stagesResult] = await Promise.all([
       s.crm.search('lead_sources', { active: true }),
       s.crm.search('crm_pipeline_stages', { active: true }),
     ]);
-    const options = z.object({ rows: z.array(z.object({ id: z.uuid(), key: z.string() })) });
-    const source = options.parse(sourcesResult).rows.find((v) => v.key === 'propulse_marketplace');
+    const options = z.object({
+      rows: z.array(z.object({ id: z.uuid(), key: z.string() })),
+    });
+    const source = options
+      .parse(sourcesResult)
+      .rows.find((v) => v.key === 'propulse_marketplace');
     const stage = options.parse(stagesResult).rows.find((v) => v.key === 'new');
     if (!source || !stage)
-      return { ok: false, message: 'Set up CRM sources and stages before ProPulse sync.' };
-    let created = 0, skipped = 0;
+      return {
+        ok: false,
+        message: 'Set up CRM sources and stages before ProPulse sync.',
+      };
+    let created = 0,
+      skipped = 0;
     let page = connection.sync_page;
     for (let batch = 0; batch < 2; batch++) {
-      const body = feed.parse(await proRequest('/api/business-os/leads?page=' + page, {
-        method: 'GET', headers: { authorization: 'Bearer ' + connection.access_token },
-      }));
+      const body = feed.parse(
+        await proRequest('/api/business-os/leads?page=' + page, {
+          method: 'GET',
+          headers: { authorization: 'Bearer ' + connection.access_token },
+        }),
+      );
       for (const row of body.leads) {
         const key = 'propulse:' + row.lead_id;
-        const { data: found, error: findError } = await s.client.from('leads')
-          .select('id').eq('organization_id', s.org)
-          .eq('source_detail', key).limit(1);
+        const { data: found, error: findError } = await s.client
+          .from('leads')
+          .select('id')
+          .eq('organization_id', s.org)
+          .eq('source_detail', key)
+          .limit(1);
         if (findError) throw new Error('CRM lead lookup unavailable.');
-        if (found?.length) { skipped++; continue; }
+        if (found?.length) {
+          skipped++;
+          continue;
+        }
         const phone = String(row.customer_phone || '').trim();
         const email = String(row.customer_email || '').trim();
-        if (!phone || !/^(?:\+|00)?[0-9() .-]{3,50}$/.test(phone)) { skipped++; continue; }
-        const dup = z.object({ leads: z.array(z.unknown()), customers: z.array(z.unknown()) })
+        if (!phone || !/^(?:\+|00)?[0-9() .-]{3,50}$/.test(phone)) {
+          skipped++;
+          continue;
+        }
+        const dup = z
+          .object({
+            leads: z.array(z.unknown()),
+            customers: z.array(z.unknown()),
+          })
           .parse(await s.crm.duplicates(phone, email));
-        if (dup.leads.length || dup.customers.length) { skipped++; continue; }
-        const rawBudget = String(row.budget || '').replace(/[₹,\s]/g,'');
-        const amount = /^\d{1,16}(\.\d{1,2})?$/.test(rawBudget) ? rawBudget : null;
+        if (dup.leads.length || dup.customers.length) {
+          skipped++;
+          continue;
+        }
+        const rawBudget = String(row.budget || '').replace(/[₹,\s]/g, '');
+        const amount = /^\d{1,16}(\.\d{1,2})?$/.test(rawBudget)
+          ? rawBudget
+          : null;
         const input = crmSchemas.leads.parse({
-          name: (row.customer_name || 'ProPulse customer').slice(0,200),
-          phone, email: email.slice(0,254),
-          source_id: source.id, stage_id: stage.id,
+          name: (row.customer_name || 'ProPulse customer').slice(0, 200),
+          phone,
+          email: email.slice(0, 254),
+          source_id: source.id,
+          stage_id: stage.id,
           source_detail: key,
-          location: (row.city || '').slice(0,500),
-          service_type: (row.service || '').slice(0,200),
-          notes: (row.requirement || '').slice(0,10000),
-          site_address: { line1: '', line2: '', city: '', region: '', postal_code: '', country_code: '' },
-          budget_min: amount, budget_max: null, expected_start_date: null,
+          location: (row.city || '').slice(0, 500),
+          service_type: (row.service || '').slice(0, 200),
+          notes: (row.requirement || '').slice(0, 10000),
+          site_address: {
+            line1: '',
+            line2: '',
+            city: '',
+            region: '',
+            postal_code: '',
+            country_code: '',
+          },
+          budget_min: amount,
+          budget_max: null,
+          expected_start_date: null,
         });
         try {
           await s.crm.save('leads', input);
           created++;
-        } catch { skipped++; } // Concurrent duplicate or tenant validation; never leak details.
+        } catch {
+          skipped++;
+        } // Concurrent duplicate or tenant validation; never leak details.
       }
       page = body.has_more ? page + 1 : 1;
       if (!body.has_more) break;
     }
-    await admin.from('propulse_lead_connections')
-      .update({ sync_page: page }).eq('organization_id', s.org);
+    await admin
+      .from('propulse_lead_connections')
+      .update({ sync_page: page })
+      .eq('organization_id', s.org);
     if (created) revalidatePath('/dashboard/crm/leads');
-    return { ok: true, message: created ? created + ' new ProPulse leads added.' : 'ProPulse leads are up to date.', created, skipped };
+    return {
+      ok: true,
+      message: created
+        ? created + ' new ProPulse leads added.'
+        : 'ProPulse leads are up to date.',
+      created,
+      skipped,
+    };
   } catch (error) {
-    return { ok: false, message: error instanceof Error ? error.message : 'Lead sync unavailable.' };
+    return {
+      ok: false,
+      message:
+        error instanceof Error ? error.message : 'Lead sync unavailable.',
+    };
   }
 }
