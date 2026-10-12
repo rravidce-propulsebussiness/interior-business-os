@@ -1,10 +1,12 @@
 /* eslint-disable @next/next/no-html-link-for-pages -- Use fresh document navigations on Hostinger to avoid interrupted RSC Flight responses. */
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { OwnerIcon, type OwnerIconName } from '../../owner-shell';
 import { runCrmCommand, saveCrm } from '../actions';
-import { LeadsSectionNav } from './sections-nav';
+import { SheetImportForm } from './import/sheet-import-form';
+import { ProPulseConnectPanel, type ProPulseConnectionView } from './propulse-connect-panel';
+import { syncPropulseLeads } from './propulse-actions';
 
 export type LeadOption = { value: string; label: string };
 export type LeadStage = { id: string; name: string; outcome: string };
@@ -244,6 +246,7 @@ export function LeadsWorkspace({
   organizationName,
   timeZone,
   asOf,
+  propulseConnection,
 }: {
   rows: LeadView[];
   stats: {
@@ -274,7 +277,10 @@ export function LeadsWorkspace({
   organizationName: string;
   timeZone: string;
   asOf: string;
+  propulseConnection: ProPulseConnectionView;
 }) {
+  const [leadTool, setLeadTool] = useState<'none' | 'sheet' | 'propulse'>('none');
+  const [syncFeedback, setSyncFeedback] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(
     rows[0]?.id ?? null,
   );
@@ -333,6 +339,30 @@ export function LeadsWorkspace({
     }
   };
 
+  useEffect(() => {
+    if (!propulseConnection.connected || !canCreate || !propulseConnection.configured) return;
+    let active = true;
+    const check = async () => {
+      try {
+        const response = await syncPropulseLeads();
+        if (!active) return;
+        if (response.ok && (response.created ?? 0) > 0) {
+          window.location.reload();
+        } else if (!response.ok) {
+          setSyncFeedback(response.message);
+        }
+      } catch {
+        if (active) setSyncFeedback('ProPulse sync is temporarily unavailable.');
+      }
+    };
+    void check();
+    const timer = window.setInterval(() => void check(), 120000);
+    return () => {
+      active = false;
+      window.clearInterval(timer);
+    };
+  }, [propulseConnection.connected, propulseConnection.configured, canCreate]);
+
   return (
     <main id="main-content" tabIndex={-1} className="crm-leads-root">
       <div className="crm-leads-breadcrumb">
@@ -354,13 +384,17 @@ export function LeadsWorkspace({
             </a>
           )}
           {canCreate && (
-            <a href={path + '/import'} className="crm-outline">
+            <button type="button" className="crm-outline"
+              aria-expanded={leadTool === 'sheet'}
+              onClick={() => setLeadTool(leadTool === 'sheet' ? 'none' : 'sheet')}>
               <Icon name="download" /> Import Sheet
-            </a>
+            </button>
           )}
-          <a href={path + '/propulse'} className="crm-outline">
-            ProPulse Leads
-          </a>
+          <button type="button" className="crm-outline"
+            aria-expanded={leadTool === 'propulse'}
+            onClick={() => setLeadTool(leadTool === 'propulse' ? 'none' : 'propulse')}>
+            {propulseConnection.connected ? 'ProPulse Connected' : 'Connect ProPulse'}
+          </button>
           <a href="/dashboard/crm/pipeline" className="crm-outline">
             <OwnerIcon name="projects" size={17} /> Pipeline
           </a>
@@ -382,7 +416,27 @@ export function LeadsWorkspace({
         </div>
       </div>
 
-      <LeadsSectionNav active="all" />
+      {leadTool === 'sheet' && canCreate && (
+        <section className="crm-inline-lead-tool" aria-label="Sheet upload">
+          <div className="crm-inline-tool-title">
+            <h2>Import leads into All Leads</h2>
+            <button type="button" className="crm-outline" onClick={() => setLeadTool('none')}>Close</button>
+          </div>
+          <SheetImportForm
+            sources={sources}
+            stages={stages.filter((stage) => stage.outcome === 'open')
+              .map((stage) => ({ value: stage.id, label: stage.name }))}
+            canSetup={propulseConnection.canManage}
+          />
+        </section>
+      )}
+      {leadTool === 'propulse' && (
+        <ProPulseConnectPanel connection={propulseConnection}
+          onClose={() => setLeadTool('none')} />
+      )}
+      {syncFeedback && (
+        <p className="crm-integration-message" role="status">{syncFeedback}</p>
+      )}
 
       <div className="crm-kpi-row" aria-label="Lead overview">
         {stats.map((stat) => (
