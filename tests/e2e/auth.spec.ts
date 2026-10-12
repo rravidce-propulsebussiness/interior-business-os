@@ -139,7 +139,7 @@ test('unconfigured ProPulse SSO refuses login and returns a safe notice', async 
 }, info) => {
   test.skip(
     info.project.name !== 'business-app' ||
-      Boolean(process.env.PROPULSE_SSO_PROVIDER_ID),
+      process.env.PROPULSE_OAUTH_ENABLED === 'true',
     'Only test fail-closed ProPulse SSO in the unconfigured Business App.',
   );
   await page.goto('/auth/propulse');
@@ -148,6 +148,6 @@ test('unconfigured ProPulse SSO refuses login and returns a safe notice', async 
   );
   await expect(page.getByRole('heading', { name: 'Sign in' })).toBeVisible();
   await expect(page.locator('.pp-login-notice[role="alert"]')).toContainText(
-    /ProPulse sign-in is not yet connected|temporarily unavailable/,
+    /ProPulse sign-in is not yet activated|temporarily unavailable/,
   );
 });

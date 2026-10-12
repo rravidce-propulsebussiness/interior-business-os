@@ -14,7 +14,7 @@ const notices: Record<string, string> = {
   google:
     'Google sign-in could not be completed. Try again or use your email and password.',
   propulse:
-    'ProPulse sign-in is not yet connected to Business OS. Use your Business OS email and password or Google.',
+    'ProPulse sign-in is not yet activated. Once the secure account connection is configured, you can sign in with your verified ProPulse account.',
   unavailable:
     'This sign-in provider is temporarily unavailable. Please use email and password.',
   callback: 'The sign-in link could not be verified. Please try again.',

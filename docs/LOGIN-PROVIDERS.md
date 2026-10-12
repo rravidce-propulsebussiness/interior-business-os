@@ -11,15 +11,34 @@ The Business App login at `/login` supports three entry points: Supabase email/p
 
 Never redirect to user-supplied `next` URLs or return raw provider access tokens to the browser.
 
-## ProPulse Business single sign-on
+## Continue with ProPulse — custom OAuth2, no enterprise SAML
 
-The legacy ProPulse Business application at `propulsetechnologies.online` has its **own** local/JWT login system. It is **not** currently an enterprise IdP for the Business OS Supabase project. Two independent login systems cannot be linked just because an email address matches, and ProPulse passwords must never be copied or sent to Business OS.
+ProPulse at `https://propulsetechnologies.online` uses its existing secure session cookie to authenticate account holders. It now exposes a **separate OAuth2 authorization-code + S256 PKCE provider** for Business OS, without sharing passwords, JWTs, or company roles.
 
-The `Continue with ProPulse` UI is present as requested. The `/auth/propulse` start route safely redirects back to the login page with a configuration message until an approved federation is set up.
+Business OS uses Supabase **custom OAuth/OIDC providers** (`custom:propulse-business`; available on Supabase Free) and its existing `/auth/callback` PKCE session exchange.
 
-To enable it, first implement/deploy a standards-compliant identity provider or broker that authenticates the ProPulse session and issues trusted, cryptographically verified SAML assertions for Supabase SSO. Configure that IdP in the **Business OS Supabase project**, record its enterprise provider UUID, and set **server-only** `PROPULSE_SSO_PROVIDER_ID=<uuid>` in Hostinger. The UUID must refer to a trusted, audited IdP for ProPulse identities—not an arbitrary provider. The route then uses `signInWithSSO({providerId, options:{redirectTo}})` and the same server-side callback.
+Both apps are **disabled by default** and need a paired rollout:
 
-Do not enable ProPulse SSO until the underlying federation and identity verification are deployed and tested. The public button is intentionally fail-closed while unconfigured; no account is created, linked, or assigned to a company by this route.
+1. Deploy the original ProPulse code + SQL migration `20261012_propulse_business_os_oauth.sql`. Do not backfill email verification.
+2. Create one shared random **client ID + strong client secret**. In ProPulse backend set:
+   `PROPULSE_OAUTH_CLIENT_ID`, `PROPULSE_OAUTH_CLIENT_SECRET`, and
+   `PROPULSE_OAUTH_REDIRECT_URI=https://wqkjzuqiarjyoimrzalk.supabase.co/auth/v1/callback`.
+3. In the Business OS Supabase project `wqkjzuqiarjyoimrzalk`, Authentication → Providers → New Provider → Manual Configuration (OAuth2):
+   - Identifier: `custom:propulse-business`
+   - Client ID and secret: the same values as ProPulse server config
+   - Authorization URL: `https://propulsetechnologies.online/api/oauth/authorize`
+   - Token URL: `https://propulsetechnologies.online/api/oauth/token`
+   - UserInfo URL: `https://propulsetechnologies.online/api/oauth/userinfo`
+   - Scopes: `openid email profile`; PKCE enabled
+   - Ensure the callback from Supabase matches the ProPulse `PROPULSE_OAUTH_REDIRECT_URI` value **exactly**.
+4. Verify Supabase Redirect URLs include `https://sghomesinterior.in/auth/callback`. Keep `APP_ORIGIN=https://sghomesinterior.in`.
+5. Perform a disposable-account end-to-end test, then set **both** ProPulse backend and Business OS server-only `PROPULSE_OAUTH_ENABLED=true`.
+
+Existing ProPulse **password-only** signups do not prove email ownership. Such users must verify their email by following a password-reset email link, or authenticate via a verified Google account, before ProPulse can supply their identity to Business OS. Existing password-only email records are **never marked verified automatically**. Supabase will create/link its own identity using verified OAuth claims, while the Business OS authorization layer continues to require existing active company membership.
+
+Keep the toggle disabled until deployed and tested; while disabled, `/auth/propulse` shows a safe activation message. This integration is not a way to provision new organization owners or platform administrators.
+
+For the provider implementation and full rollout checklist, see `docs/PROPULSE-OAUTH-BUSINESS-OS.md` in the `propulse-business` repository.
 
 ## Smoke tests
 

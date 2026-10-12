@@ -21,13 +21,13 @@ export async function providerStart(
     return NextResponse.redirect(fallback, 303);
   }
 
-  // The main ProPulse platform currently uses a separate account system.
-  // This may be enabled only after it is connected as a verified Supabase
-  // enterprise IdP. It is never safe to infer identity from an email alone.
-  const ssoProviderId = process.env.PROPULSE_SSO_PROVIDER_ID?.trim();
+  // Explicit opt-in: the linked ProPulse application must first expose
+  // the verified OAuth2 authorization-code provider, and the Business OS
+  // Supabase project must have custom:propulse-business enabled.
+  // Until both are configured, never use an untrusted email as identity.
   if (
     provider === 'propulse' &&
-    (!ssoProviderId || !/^[a-f0-9-]{36}$/i.test(ssoProviderId))
+    process.env.PROPULSE_OAUTH_ENABLED !== 'true'
   ) {
     fallback.searchParams.set('provider_error', 'propulse');
     return NextResponse.redirect(fallback, 303);
@@ -42,15 +42,15 @@ export async function providerStart(
             provider: 'google',
             options: { redirectTo },
           })
-        : await client.auth.signInWithSSO({
-            providerId: ssoProviderId!,
+        : await client.auth.signInWithOAuth({
+            provider: 'custom:propulse-business',
             options: { redirectTo },
           });
     if (response.error || !response.data.url) {
       fallback.searchParams.set('provider_error', provider);
       return NextResponse.redirect(fallback, 303);
     }
-    // Supabase returns a trusted OAuth/SAML authorization URL. Do not allow
+    // Supabase returns a trusted OAuth authorization URL. Do not allow
     // arbitrary next/redirect_uri query params or use user metadata for access.
     const target = new URL(response.data.url);
     if (
