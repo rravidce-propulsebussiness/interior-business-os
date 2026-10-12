@@ -379,6 +379,7 @@ export default async function Leads({
       <LeadsWorkspace
         rows={rows}
         propulseConnection={propulseConnection}
+        initialTool={p.panel === 'sheet' || p.panel === 'propulse' ? p.panel : 'none'}
         stats={stats}
         tabs={tabs}
         stages={stages}
