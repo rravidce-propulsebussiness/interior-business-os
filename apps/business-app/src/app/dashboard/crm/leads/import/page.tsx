@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-html-link-for-pages -- Use full document links on Hostinger to avoid incomplete RSC Flight navigation. */
 import { crmServices } from '../../service';
 import { lookups } from '../../lookups';
 import { LeadsSectionNav } from '../sections-nav';
