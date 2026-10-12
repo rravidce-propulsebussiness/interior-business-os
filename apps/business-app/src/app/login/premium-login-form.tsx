@@ -117,9 +117,14 @@ export function PremiumLoginForm({
           </button>
         </div>
       </div>
-      {(validation || state.message) && (
+      {validation && (
         <p className="pp-login-form-feedback" role="alert">
-          {validation || state.message}
+          {validation}
+        </p>
+      )}
+      {state.message && !validation && (
+        <p className="pp-login-form-feedback" role="status">
+          {state.message}
         </p>
       )}
       <button
