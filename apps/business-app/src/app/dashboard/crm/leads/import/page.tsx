@@ -13,7 +13,12 @@ export default async function ImportLeads() {
     .filter((row) => typeof row.id === 'string' && typeof row.name === 'string')
     .map((row) => ({ value: String(row.id), label: String(row.name) }));
   const stages = choices.stages.rows
-    .filter((row) => typeof row.id === 'string' && typeof row.name === 'string' && row.outcome === 'open')
+    .filter(
+      (row) =>
+        typeof row.id === 'string' &&
+        typeof row.name === 'string' &&
+        row.outcome === 'open',
+    )
     .map((row) => ({ value: String(row.id), label: String(row.name) }));
   return (
     <main id="main-content" className="crm-leads-root">
@@ -27,12 +32,23 @@ export default async function ImportLeads() {
       <div className="crm-leads-heading">
         <div>
           <h1>Import leads</h1>
-          <p>Upload a spreadsheet, preview your leads and skip duplicates automatically.</p>
+          <p>
+            Upload a spreadsheet, preview your leads and skip duplicates
+            automatically.
+          </p>
         </div>
-        <a href="/dashboard/crm/leads" className="crm-outline">← All Leads</a>
+        <a href="/dashboard/crm/leads" className="crm-outline">
+          ← All Leads
+        </a>
       </div>
       <LeadsSectionNav active="import" />
-      <SheetImportForm sources={sources} stages={stages} canSetup={s.allowed('crm.source.manage') && s.allowed('crm.pipeline.manage')} />
+      <SheetImportForm
+        sources={sources}
+        stages={stages}
+        canSetup={
+          s.allowed('crm.source.manage') && s.allowed('crm.pipeline.manage')
+        }
+      />
     </main>
   );
 }
