@@ -217,7 +217,6 @@ export function OwnerShell({
               <div className="owner-profile-menu">
                 <strong>{companyName}</strong>
                 <small>{accountEmail}</small>
-                <a href="/">View home page</a>
                 <form action={signOut}>
                   <button type="submit">
                     <OwnerIcon name="logout" size={17} /> Sign out
