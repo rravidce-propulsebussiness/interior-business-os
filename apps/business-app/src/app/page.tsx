@@ -150,7 +150,7 @@ export default async function Home() {
   // inference or client-side Flash of the public marketing page.
   if (user) redirect('/dashboard');
 
-  const signedIn = false;
+  const signedIn = Boolean(user);
   const workspaceHref = signedIn ? '/dashboard' : '/login';
   const marketHref = signedIn ? '/dashboard/marketplace' : '/login';
   const sellerHref = signedIn ? '/dashboard/marketplace/seller' : '/register';
