@@ -32,7 +32,7 @@ export default async function ImportLeads() {
         <a href="/dashboard/crm/leads" className="crm-outline">← All Leads</a>
       </div>
       <LeadsSectionNav active="import" />
-      <SheetImportForm sources={sources} stages={stages} />
+      <SheetImportForm sources={sources} stages={stages} canSetup={s.allowed('crm.source.manage') && s.allowed('crm.pipeline.manage')} />
     </main>
   );
 }
