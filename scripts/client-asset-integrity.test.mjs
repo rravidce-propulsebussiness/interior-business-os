@@ -1,9 +1,18 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  mkdtempSync,
+  mkdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { buildClientAssetManifest, verifyClientAssets } from './client-asset-integrity.mjs';
+import {
+  buildClientAssetManifest,
+  verifyClientAssets,
+} from './client-asset-integrity.mjs';
 
 test('client chunks are parsed, hashed and verified before Hostinger starts', async () => {
   const temp = mkdtempSync(join(tmpdir(), 'business-os-assets-'));
@@ -14,11 +23,16 @@ test('client chunks are parsed, hashed and verified before Hostinger starts', as
     writeFileSync(script, 'globalThis.__testAsset = 1;\n');
     assert.equal(await buildClientAssetManifest(temp), 1);
     assert.equal(verifyClientAssets(temp), 1);
-    const manifest = JSON.parse(readFileSync(join(temp, '.next', 'client-asset-integrity.json'), 'utf8'));
+    const manifest = JSON.parse(
+      readFileSync(join(temp, '.next', 'client-asset-integrity.json'), 'utf8'),
+    );
     assert.equal(manifest.files['static/chunks/test-abc123.js'].bytes, 28);
     writeFileSync(script, 'globalThis.__testAsset =');
     assert.throws(() => verifyClientAssets(temp), /truncated or modified/);
-    await assert.rejects(() => buildClientAssetManifest(temp), /invalid or truncated syntax/);
+    await assert.rejects(
+      () => buildClientAssetManifest(temp),
+      /invalid or truncated syntax/,
+    );
   } finally {
     rmSync(temp, { recursive: true, force: true });
   }

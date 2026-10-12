@@ -42,7 +42,9 @@ if (!existsSync(resolve(appDir, '.next', 'BUILD_ID'))) {
 // Fail startup rather than serve a partially published or corrupted JavaScript
 // bundle that would leave the CRM unresponsive with SyntaxError at EOF.
 const checkedChunks = verifyClientAssets(appDir);
-console.log(`[Business OS] Verified ${checkedChunks} client JavaScript chunks against build manifest.`);
+console.log(
+  `[Business OS] Verified ${checkedChunks} client JavaScript chunks against build manifest.`,
+);
 
 // The release ID is compiled into the Next.js build. Recover it from the
 // published artifact at process startup so build/runtime stay on the same
