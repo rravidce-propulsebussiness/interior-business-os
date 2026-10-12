@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { OwnerIcon, type OwnerIconName } from '../../owner-shell';
 import { runCrmCommand, saveCrm } from '../actions';
 import { SheetImportForm } from './import/sheet-import-form';
+import { QuickAddLead } from './quick-add-lead';
 import {
   ProPulseConnectPanel,
   type ProPulseConnectionView,
@@ -282,9 +283,9 @@ export function LeadsWorkspace({
   timeZone: string;
   asOf: string;
   propulseConnection: ProPulseConnectionView;
-  initialTool: 'none' | 'sheet' | 'propulse';
+  initialTool: 'none' | 'add' | 'sheet' | 'propulse';
 }) {
-  const [leadTool, setLeadTool] = useState<'none' | 'sheet' | 'propulse'>(
+  const [leadTool, setLeadTool] = useState<'none' | 'add' | 'sheet' | 'propulse'>(
     initialTool,
   );
   const [syncFeedback, setSyncFeedback] = useState('');
@@ -392,9 +393,11 @@ export function LeadsWorkspace({
         </div>
         <div className="crm-leads-header-actions">
           {canCreate && (
-            <a href={path + '/new'} className="crm-primary">
+            <button type="button" className="crm-primary"
+              aria-expanded={leadTool === 'add'}
+              onClick={() => setLeadTool(leadTool === 'add' ? 'none' : 'add')}>
               <OwnerIcon name="plus" size={17} /> Add Lead
-            </a>
+            </button>
           )}
           {canCreate && (
             <button
@@ -441,6 +444,12 @@ export function LeadsWorkspace({
         </div>
       </div>
 
+      {leadTool === 'add' && canCreate && (
+        <QuickAddLead sources={sources}
+          stages={stages.filter((stage) => stage.outcome === 'open')
+            .map((stage) => ({ value: stage.id, label: stage.name }))}
+          onClose={() => setLeadTool('none')} />
+      )}
       {leadTool === 'sheet' && canCreate && (
         <section className="crm-inline-lead-tool" aria-label="Sheet upload">
           <div className="crm-inline-tool-title">
@@ -876,9 +885,10 @@ export function LeadsWorkspace({
               <div>
                 <a href={path}>Clear filters</a>
                 {canCreate && (
-                  <a href={path + '/new'} className="crm-primary">
+                  <button type="button" className="crm-primary"
+                    onClick={() => setLeadTool('add')}>
                     Add Lead
-                  </a>
+                  </button>
                 )}
               </div>
             </div>
