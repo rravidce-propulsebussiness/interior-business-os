@@ -67,7 +67,7 @@ export function PremiumLoginForm({
       </div>
       {(validation || state.message) && <p className="pp-login-form-feedback" role="alert">{validation || state.message}</p>}
       <button className="pp-login-submit" type="submit" disabled={pending || state.authenticated === true}>
-        <span>{pending || state.authenticated ? 'Signing in…' : 'Sign In'}</span>
+        <span>{pending || state.authenticated ? 'Signing in…' : 'Sign in'}</span>
         <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12h16m-6-6 6 6-6 6" /></svg>
       </button>
       <p className="pp-login-create-account">New to ProPulse? <a href="/register">Create an account</a></p>
