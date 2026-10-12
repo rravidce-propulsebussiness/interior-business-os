@@ -4,6 +4,7 @@
 import { useMemo, useState } from 'react';
 import { OwnerIcon, type OwnerIconName } from '../../owner-shell';
 import { runCrmCommand, saveCrm } from '../actions';
+import { LeadsSectionNav } from './sections-nav';
 
 export type LeadOption = { value: string; label: string };
 export type LeadStage = { id: string; name: string; outcome: string };
@@ -352,6 +353,14 @@ export function LeadsWorkspace({
               <OwnerIcon name="plus" size={17} /> Add Lead
             </a>
           )}
+          {canCreate && (
+            <a href={path + '/import'} className="crm-outline">
+              <Icon name="download" /> Import Sheet
+            </a>
+          )}
+          <a href={path + '/propulse'} className="crm-outline">
+            ProPulse Leads
+          </a>
           <a href="/dashboard/crm/pipeline" className="crm-outline">
             <OwnerIcon name="projects" size={17} /> Pipeline
           </a>
@@ -372,6 +381,8 @@ export function LeadsWorkspace({
           </button>
         </div>
       </div>
+
+      <LeadsSectionNav active="all" />
 
       <div className="crm-kpi-row" aria-label="Lead overview">
         {stats.map((stat) => (
