@@ -13,6 +13,7 @@ CREATE TABLE public.propulse_lead_connections (
   sync_page integer NOT NULL DEFAULT 1 CHECK (sync_page BETWEEN 1 AND 10000)
 );
 ALTER TABLE public.propulse_lead_connections ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.propulse_lead_connections FORCE ROW LEVEL SECURITY;
 REVOKE ALL ON public.propulse_lead_connections FROM PUBLIC;
 REVOKE ALL ON public.propulse_lead_connections FROM anon, authenticated;
 DO $$ BEGIN
