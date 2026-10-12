@@ -9,7 +9,8 @@ CREATE TABLE public.propulse_lead_connections (
   token_expires_at timestamptz NOT NULL,
   connected_by uuid NOT NULL REFERENCES auth.users(id),
   connected_at timestamptz NOT NULL DEFAULT now(),
-  last_synced_at timestamptz
+  last_synced_at timestamptz,
+  sync_page integer NOT NULL DEFAULT 1 CHECK (sync_page BETWEEN 1 AND 10000)
 );
 ALTER TABLE public.propulse_lead_connections ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON public.propulse_lead_connections FROM PUBLIC;
@@ -21,3 +22,8 @@ DO $$ BEGIN
 END $$;
 COMMENT ON TABLE public.propulse_lead_connections IS
   'Service-role only: owner-paired ProPulse lead-read credential. No user-readable RLS policies. Never expose access_token to clients.';
+
+-- Source-ID dedupe is tenant-specific and does not affect manual or sheet leads.
+CREATE UNIQUE INDEX IF NOT EXISTS crm_propulse_lead_source_unique
+  ON public.leads (organization_id, source_detail)
+  WHERE source_detail LIKE 'propulse:%';
