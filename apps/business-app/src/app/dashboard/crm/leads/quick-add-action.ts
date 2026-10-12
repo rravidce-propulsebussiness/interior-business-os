@@ -35,7 +35,7 @@ export async function createQuickLead(input: unknown): Promise<{ ok: boolean; me
           .eq('active', true)
           .maybeSingle(),
       ]);
-    if (sourceError || stageError || !source || !stage || stage.outcome !== 'open') {
+    if (sourceError || stageError || !source || !stage || stage.outcome !== 'open' || source.key === 'propulse_marketplace') {
       return { ok: false, message: 'Choose an active lead source and an open pipeline stage.' };
     }
     const duplicates = z.object({
