@@ -581,7 +581,8 @@
   .pp-footer nav { width: 100%; flex-wrap: wrap; gap: 18px; }
 }
 @media (max-width: 530px) {
-  .pp-header-login { display: none; }
+  .pp-header-login { padding: 0 7px; min-height: 34px; }
+  .pp-header-signup { padding: 0 8px; min-height: 34px; }
   .pp-hero h1 { font-size: clamp(32px, 8.6vw, 45px); }
   .pp-hero-actions { display: flex; gap: 10px; }
   .pp-btn { flex: 1 1 190px; padding: 10px 13px; font-size: 12px; min-height: 46px; gap: 11px; }
