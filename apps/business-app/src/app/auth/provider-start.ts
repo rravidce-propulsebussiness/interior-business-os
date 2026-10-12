@@ -1,6 +1,9 @@
 import 'server-only';
 import { NextResponse } from 'next/server';
-import { createServerDatabase, isSupabaseConfigured } from '@business-os/database/server';
+import {
+  createServerDatabase,
+  isSupabaseConfigured,
+} from '@business-os/database/server';
 
 /** Begin provider authentication using server-side PKCE.
  * No client-supplied redirect URL is accepted. Supabase authenticates identity;
@@ -22,7 +25,10 @@ export async function providerStart(
   // This may be enabled only after it is connected as a verified Supabase
   // enterprise IdP. It is never safe to infer identity from an email alone.
   const ssoProviderId = process.env.PROPULSE_SSO_PROVIDER_ID?.trim();
-  if (provider === 'propulse' && (!ssoProviderId || !/^[a-f0-9-]{36}$/i.test(ssoProviderId))) {
+  if (
+    provider === 'propulse' &&
+    (!ssoProviderId || !/^[a-f0-9-]{36}$/i.test(ssoProviderId))
+  ) {
     fallback.searchParams.set('provider_error', 'propulse');
     return NextResponse.redirect(fallback, 303);
   }
@@ -30,15 +36,16 @@ export async function providerStart(
   try {
     const client = await createServerDatabase();
     const redirectTo = new URL('/auth/callback', origin).toString();
-    const response = provider === 'google'
-      ? await client.auth.signInWithOAuth({
-          provider: 'google',
-          options: { redirectTo },
-        })
-      : await client.auth.signInWithSSO({
-          providerId: ssoProviderId!,
-          options: { redirectTo },
-        });
+    const response =
+      provider === 'google'
+        ? await client.auth.signInWithOAuth({
+            provider: 'google',
+            options: { redirectTo },
+          })
+        : await client.auth.signInWithSSO({
+            providerId: ssoProviderId!,
+            options: { redirectTo },
+          });
     if (response.error || !response.data.url) {
       fallback.searchParams.set('provider_error', provider);
       return NextResponse.redirect(fallback, 303);
@@ -46,7 +53,12 @@ export async function providerStart(
     // Supabase returns a trusted OAuth/SAML authorization URL. Do not allow
     // arbitrary next/redirect_uri query params or use user metadata for access.
     const target = new URL(response.data.url);
-    if (target.protocol !== 'https:' && !(process.env.NODE_ENV !== 'production' && target.hostname === 'localhost')) {
+    if (
+      target.protocol !== 'https:' &&
+      !(
+        process.env.NODE_ENV !== 'production' && target.hostname === 'localhost'
+      )
+    ) {
       fallback.searchParams.set('provider_error', provider);
       return NextResponse.redirect(fallback, 303);
     }
