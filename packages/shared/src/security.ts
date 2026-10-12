@@ -4,7 +4,8 @@ export function adminContentSecurityPolicy(nonce: string, development = false) {
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${development ? " 'unsafe-eval'" : ''}`,
     "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data: blob:",
+    // Homepage imagery is served from a single allowlisted photo CDN. No script/connect access is granted.
+    "img-src 'self' data: blob: https://images.unsplash.com",
     "font-src 'self'",
     "connect-src 'self'" + (development ? ' ws: wss:' : ''),
     "frame-src 'self' blob:",

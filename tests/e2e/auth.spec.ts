@@ -13,7 +13,50 @@ test('public Business App home shows guest navigation only to anonymous visitors
   await expect(
     page.getByRole('link', { name: 'Sign in to your workspace' }),
   ).toBeVisible();
+  await expect(
+    page.getByRole('link', { name: 'Sign Up', exact: true }).first(),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('link', { name: 'Explore Marketplace' }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('heading', {
+      name: 'Explore the B2B Materials Marketplace',
+    }),
+  ).toBeVisible();
   await expect(page.getByRole('button', { name: 'Sign out' })).toHaveCount(0);
+});
+
+test('public marketplace teaser never leaks private supplier rates', async ({
+  page,
+}, info) => {
+  test.skip(
+    info.project.name !== 'business-app',
+    'Public marketing homepage belongs to the Business App.',
+  );
+  await page.goto('/');
+  const market = page.locator('#marketplace');
+  await expect(
+    market.getByRole('heading', {
+      name: 'Explore the B2B Materials Marketplace',
+    }),
+  ).toBeVisible();
+  await expect(
+    market.getByRole('link', { name: 'Browse Marketplace' }),
+  ).toHaveAttribute('href', '/login');
+  await expect(market).toContainText('Material categories are illustrative');
+  await expect(market).not.toContainText('Unit price');
+  await page.setViewportSize({ width: 375, height: 812 });
+  await expect(
+    page
+      .getByRole('navigation', { name: 'Account navigation' })
+      .getByRole('link', { name: 'Sign in', exact: true }),
+  ).toBeVisible();
+  await expect(
+    page
+      .getByRole('navigation', { name: 'Account navigation' })
+      .getByRole('link', { name: 'Sign Up', exact: true }),
+  ).toBeVisible();
 });
 
 test('protected dashboards require authentication', async ({ page }, info) => {
