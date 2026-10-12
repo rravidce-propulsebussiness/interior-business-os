@@ -225,12 +225,8 @@ export default async function Home() {
               materials — in one workspace.
             </p>
             <div className="pp-hero-actions">
-              <a
-                className="pp-btn pp-btn-primary"
-                href="/register"
-              >
-                Start Your Business{' '}
-                <Glyph name="arrow" size={19} />
+              <a className="pp-btn pp-btn-primary" href="/register">
+                Start Your Business <Glyph name="arrow" size={19} />
               </a>
               <a className="pp-btn pp-btn-outline" href="#marketplace">
                 Explore Marketplace <Glyph name="arrow" size={19} />
@@ -520,11 +516,7 @@ export default async function Home() {
         </div>
         <div className="pp-marketplace-grid">
           {categories.map((category) => (
-            <a
-              className="pp-material-card"
-              href="/login"
-              key={category.title}
-            >
+            <a className="pp-material-card" href="/login" key={category.title}>
               <span
                 aria-hidden="true"
                 className={'pp-material-photo pp-material-' + category.visual}
@@ -568,12 +560,8 @@ export default async function Home() {
                 in one place.
               </span>
             </div>
-            <a
-              href="/register"
-              className="pp-audience-link"
-            >
-              Get Started{' '}
-              <Glyph name="arrow" size={15} />
+            <a href="/register" className="pp-audience-link">
+              Get Started <Glyph name="arrow" size={15} />
             </a>
           </div>
         </article>
@@ -596,8 +584,7 @@ export default async function Home() {
               </span>
             </div>
             <a href="/register" className="pp-audience-link">
-              Apply to List{' '}
-              <Glyph name="arrow" size={15} />
+              Apply to List <Glyph name="arrow" size={15} />
             </a>
           </div>
         </article>
