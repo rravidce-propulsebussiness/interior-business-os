@@ -55,7 +55,7 @@ export async function importSheetLeads(
     ] = await Promise.all([
       s.client
         .from('lead_sources')
-        .select('id')
+        .select('id,key')
         .eq('organization_id', s.org)
         .eq('id', parsed.sourceId)
         .eq('active', true)
@@ -72,6 +72,7 @@ export async function importSheetLeads(
       sourceError ||
       stageError ||
       !source ||
+      source.key === 'propulse_marketplace' ||
       !stage ||
       stage.outcome !== 'open'
     ) {

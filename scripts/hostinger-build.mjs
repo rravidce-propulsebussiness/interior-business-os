@@ -53,3 +53,15 @@ runPnpm(
   ['--filter', `@business-os/${service}`, 'exec', 'next', 'build', '--webpack'],
   { NEXT_DEPLOYMENT_ID: nextDeploymentId },
 );
+
+const verify = spawnSync(
+  process.execPath,
+  ['scripts/client-asset-integrity.mjs', service, '--build'],
+  {
+    cwd: root,
+    stdio: 'inherit',
+    env: process.env,
+  },
+);
+if (verify.error) throw verify.error;
+if (verify.status !== 0) process.exit(verify.status || 1);

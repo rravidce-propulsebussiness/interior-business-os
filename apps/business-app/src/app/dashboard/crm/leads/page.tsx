@@ -380,7 +380,9 @@ export default async function Leads({
         rows={rows}
         propulseConnection={propulseConnection}
         initialTool={
-          p.panel === 'sheet' || p.panel === 'propulse' ? p.panel : 'none'
+          p.panel === 'add' || p.panel === 'sheet' || p.panel === 'propulse'
+            ? p.panel
+            : 'none'
         }
         stats={stats}
         tabs={tabs}

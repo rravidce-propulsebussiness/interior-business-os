@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { OwnerIcon, type OwnerIconName } from '../../owner-shell';
 import { runCrmCommand, saveCrm } from '../actions';
 import { SheetImportForm } from './import/sheet-import-form';
+import { QuickAddLead } from './quick-add-lead';
 import {
   ProPulseConnectPanel,
   type ProPulseConnectionView,
@@ -282,11 +283,11 @@ export function LeadsWorkspace({
   timeZone: string;
   asOf: string;
   propulseConnection: ProPulseConnectionView;
-  initialTool: 'none' | 'sheet' | 'propulse';
+  initialTool: 'none' | 'add' | 'sheet' | 'propulse';
 }) {
-  const [leadTool, setLeadTool] = useState<'none' | 'sheet' | 'propulse'>(
-    initialTool,
-  );
+  const [leadTool, setLeadTool] = useState<
+    'none' | 'add' | 'sheet' | 'propulse'
+  >(initialTool);
   const [syncFeedback, setSyncFeedback] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(
     rows[0]?.id ?? null,
@@ -376,6 +377,14 @@ export function LeadsWorkspace({
     };
   }, [propulseConnection.connected, propulseConnection.configured, canCreate]);
 
+  useEffect(() => {
+    if (leadTool === 'none') return;
+    document.getElementById('crm-inline-action')?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
+  }, [leadTool]);
+
   return (
     <main id="main-content" tabIndex={-1} className="crm-leads-root">
       <div className="crm-leads-breadcrumb">
@@ -392,9 +401,14 @@ export function LeadsWorkspace({
         </div>
         <div className="crm-leads-header-actions">
           {canCreate && (
-            <a href={path + '/new'} className="crm-primary">
+            <button
+              type="button"
+              className="crm-primary"
+              aria-expanded={leadTool === 'add'}
+              onClick={() => setLeadTool(leadTool === 'add' ? 'none' : 'add')}
+            >
               <OwnerIcon name="plus" size={17} /> Add Lead
-            </a>
+            </button>
           )}
           {canCreate && (
             <button
@@ -441,38 +455,53 @@ export function LeadsWorkspace({
         </div>
       </div>
 
-      {leadTool === 'sheet' && canCreate && (
-        <section className="crm-inline-lead-tool" aria-label="Sheet upload">
-          <div className="crm-inline-tool-title">
-            <h2>Import leads into All Leads</h2>
-            <button
-              type="button"
-              className="crm-outline"
-              onClick={() => setLeadTool('none')}
-            >
-              Close
-            </button>
-          </div>
-          <SheetImportForm
-            sources={sources}
+      <div id="crm-inline-action">
+        {leadTool === 'add' && canCreate && (
+          <QuickAddLead
+            sources={sources.filter(
+              (source) => !/propulse/i.test(source.label),
+            )}
             stages={stages
               .filter((stage) => stage.outcome === 'open')
               .map((stage) => ({ value: stage.id, label: stage.name }))}
-            canSetup={propulseConnection.canManage}
+            onClose={() => setLeadTool('none')}
           />
-        </section>
-      )}
-      {leadTool === 'propulse' && (
-        <ProPulseConnectPanel
-          connection={propulseConnection}
-          onClose={() => setLeadTool('none')}
-        />
-      )}
-      {syncFeedback && (
-        <p className="crm-integration-message" role="status">
-          {syncFeedback}
-        </p>
-      )}
+        )}
+        {leadTool === 'sheet' && canCreate && (
+          <section className="crm-inline-lead-tool" aria-label="Sheet upload">
+            <div className="crm-inline-tool-title">
+              <h2>Import leads into All Leads</h2>
+              <button
+                type="button"
+                className="crm-outline"
+                onClick={() => setLeadTool('none')}
+              >
+                Close
+              </button>
+            </div>
+            <SheetImportForm
+              sources={sources.filter(
+                (source) => !/propulse/i.test(source.label),
+              )}
+              stages={stages
+                .filter((stage) => stage.outcome === 'open')
+                .map((stage) => ({ value: stage.id, label: stage.name }))}
+              canSetup={propulseConnection.canManage}
+            />
+          </section>
+        )}
+        {leadTool === 'propulse' && (
+          <ProPulseConnectPanel
+            connection={propulseConnection}
+            onClose={() => setLeadTool('none')}
+          />
+        )}
+        {syncFeedback && (
+          <p className="crm-integration-message" role="status">
+            {syncFeedback}
+          </p>
+        )}
+      </div>
 
       <div className="crm-kpi-row" aria-label="Lead overview">
         {stats.map((stat) => (
@@ -876,9 +905,13 @@ export function LeadsWorkspace({
               <div>
                 <a href={path}>Clear filters</a>
                 {canCreate && (
-                  <a href={path + '/new'} className="crm-primary">
+                  <button
+                    type="button"
+                    className="crm-primary"
+                    onClick={() => setLeadTool('add')}
+                  >
                     Add Lead
-                  </a>
+                  </button>
                 )}
               </div>
             </div>
