@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, type ChangeEvent } from 'react';
-import { importSheetLeads, type SheetImportResult } from './actions';
+import { importSheetLeads, initializeCrmForImports, type SheetImportResult } from './actions';
 
 type Choice = { value: string; label: string };
 type SheetRow = {
@@ -107,9 +107,11 @@ function mapRows(records: string[][]) {
 export function SheetImportForm({
   sources,
   stages,
+  canSetup,
 }: {
   sources: Choice[];
   stages: Choice[];
+  canSetup: boolean;
 }) {
   const [rows, setRows] = useState<SheetRow[]>([]);
   const [filename, setFilename] = useState('');
@@ -119,6 +121,8 @@ export function SheetImportForm({
   const [running, setRunning] = useState(false);
   const [progress, setProgress] = useState(0);
   const [report, setReport] = useState<SheetImportResult | null>(null);
+  const [setupBusy, setSetupBusy] = useState(false);
+  const [setupMessage, setSetupMessage] = useState('');
 
   async function loadFile(event: ChangeEvent<HTMLInputElement>) {
     setRows([]);
@@ -223,6 +227,20 @@ export function SheetImportForm({
           <p role="alert" className="mt-4 rounded-xl bg-amber-50 p-4 text-sm text-amber-900">
             Configure at least one active lead source and one open pipeline stage in{' '}
             <a className="font-semibold underline" href="/dashboard/crm/settings">CRM Settings</a> before importing.
+            {canSetup && (
+              <button type="button" disabled={setupBusy} onClick={async () => {
+                setSetupBusy(true);
+                const result = await initializeCrmForImports().catch(() => ({
+                  ok: false, message: 'Could not initialize CRM. Try again.',
+                }));
+                setSetupMessage(result.message);
+                setSetupBusy(false);
+                if (result.ok) window.location.reload();
+              }} className="mt-3 block rounded-lg bg-amber-900 px-4 py-2 text-sm font-bold text-white">
+                {setupBusy ? 'Setting up CRM…' : 'Set up default CRM sources and stages'}
+              </button>
+            )}
+            {setupMessage && <span className="mt-3 block" role="status">{setupMessage}</span>}
           </p>
         )}
         {filename && <p className="mt-5 text-sm text-slate-500">{filename} · {rows.length} rows loaded</p>}
