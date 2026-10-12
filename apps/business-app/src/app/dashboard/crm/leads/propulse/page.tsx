@@ -60,9 +60,9 @@ export default async function ProPulseLeads({
           </h2>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-blue-800">
             Only leads purchased by or explicitly granted to a ProPulse
-            professional should be synced into that professional&apos;s authorized
-            Business OS company. ProPulse sign-in alone does not authorize
-            receiving another professional&apos;s leads.
+            professional should be synced into that professional&apos;s
+            authorized Business OS company. ProPulse sign-in alone does not
+            authorize receiving another professional&apos;s leads.
           </p>
           <p className="mt-3 text-xs font-semibold text-blue-700">
             Automatic delivery is not active until the professional-to-company
