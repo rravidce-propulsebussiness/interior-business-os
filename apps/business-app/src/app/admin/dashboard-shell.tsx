@@ -196,9 +196,6 @@ export function DashboardShell({ children }: { children: ReactNode }) {
           <Link href="/admin/automations">
             Automation health <span aria-hidden="true">↗</span>
           </Link>
-          <Link href="/" onClick={() => setOpen(false)}>
-            View home page <span aria-hidden="true">↗</span>
-          </Link>
         </div>
       </aside>
       <div className="os-workspace">

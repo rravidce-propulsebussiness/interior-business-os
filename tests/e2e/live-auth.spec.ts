@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 test.use({ trace: 'off' });
-test('verified session remains visible on home and sign-out clears it', async ({
+test('verified session auto-redirects home to owner workspace and sign-out restores public home', async ({
   page,
 }, info) => {
   test.skip(
@@ -20,31 +20,33 @@ test('verified session remains visible on home and sign-out clears it', async ({
     .getByLabel('Password', { exact: true })
     .fill(process.env.E2E_OWNER_PASSWORD!);
   await page.getByRole('button', { name: 'Sign in', exact: true }).click();
-  await expect(page).toHaveURL(/\/(dashboard|admin)(?:\/|$)/);
+  await expect(page).toHaveURL(/\/(?:[^/?#]+\/)?(?:dashboard|admin)(?:\/|$)/);
   await page.goto('/');
-  const account = page.getByRole('navigation', { name: 'Your account' });
-  await expect(account).toBeVisible();
-  await expect(account.getByRole('link', { name: 'Dashboard' })).toBeVisible();
+  await expect(page).toHaveURL(/\/(?:[^/?#]+\/)?dashboard(?:\/|$)/);
+  await expect(
+    page.getByRole('heading', { name: /Welcome back,/i }),
+  ).toBeVisible();
   await expect(
     page.getByRole('link', { name: 'Sign in', exact: true }),
   ).toHaveCount(0);
-  await account.getByRole('link', { name: 'Dashboard' }).click();
-  await expect(page).toHaveURL(/\/(dashboard|admin)(?:\/|$)/);
-  await expect(page.getByRole('main')).toBeVisible();
   expect(
     clientErrors.filter((message) =>
       /Connection closed|error #412/.test(message),
     ),
   ).toEqual([]);
-  await page.goto('/');
+  await page.locator('.owner-profile summary').click();
   await page
-    .getByRole('navigation', { name: 'Your account' })
+    .locator('.owner-profile-menu')
     .getByRole('button', { name: 'Sign out' })
     .click();
   await expect(page).toHaveURL(/\/login$/);
   await page.goto('/');
+  await expect(page).toHaveURL(/\/$/);
   await expect(
     page.getByRole('link', { name: 'Sign in', exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: /Run your business/i }),
   ).toBeVisible();
 });
 

@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-html-link-for-pages -- Fresh document navigation prevents incomplete React Flight responses on Hostinger. */
-import { signOut } from '@business-os/auth/actions';
+import { redirect } from 'next/navigation';
 import {
   createServerDatabase,
   isSupabaseConfigured,
@@ -142,10 +142,12 @@ export default async function Home() {
   } = isSupabaseConfigured()
     ? await (await createServerDatabase()).auth.getUser()
     : { data: { user: null } };
-  const signedIn = Boolean(user);
-  const workspaceHref = signedIn ? '/dashboard' : '/login';
-  const marketHref = signedIn ? '/dashboard/marketplace' : '/login';
-  const sellerHref = signedIn ? '/dashboard/marketplace/seller' : '/register';
+  // A verified session owns a workspace, not the public marketing homepage.
+  // /dashboard already routes authorized platform admins to /admin and
+  // resolves business memberships (including slug-based workspaces).
+  // Keep this redirect server-side and request-scoped: no stale cookie
+  // inference or client-side Flash of the public marketing page.
+  if (user) redirect('/dashboard');
 
   return (
     <main id="main-content" tabIndex={-1} className="pp-home">
@@ -180,30 +182,14 @@ export default async function Home() {
           </nav>
 
           <div className="pp-header-right">
-            {signedIn ? (
-              <nav aria-label="Your account" className="pp-account-nav">
-                <span className="pp-signed-in" title={user?.email ?? undefined}>
-                  Signed in{user?.email ? ' · ' + user.email : ''}
-                </span>
-                <a className="pp-header-login" href="/dashboard">
-                  Dashboard
-                </a>
-                <form action={signOut}>
-                  <button className="pp-header-signup" type="submit">
-                    Sign out <Glyph name="arrow" size={15} />
-                  </button>
-                </form>
-              </nav>
-            ) : (
-              <nav aria-label="Account navigation" className="pp-account-nav">
-                <a href="/login" className="pp-header-login">
-                  Sign in
-                </a>
-                <a href="/register" className="pp-header-signup">
-                  Sign Up <Glyph name="arrow" size={15} />
-                </a>
-              </nav>
-            )}
+            <nav aria-label="Account navigation" className="pp-account-nav">
+              <a href="/login" className="pp-header-login">
+                Sign in
+              </a>
+              <a href="/register" className="pp-header-signup">
+                Sign Up <Glyph name="arrow" size={15} />
+              </a>
+            </nav>
             <details className="pp-mobile-nav">
               <summary aria-label="Open site menu">
                 <Glyph name="menu" size={23} />
@@ -215,19 +201,8 @@ export default async function Home() {
                 <a href="#for-sellers">For Sellers</a>
                 <a href="#how-it-works">How It Works</a>
                 <span className="pp-mobile-divider" />
-                {signedIn ? (
-                  <>
-                    <a href="/dashboard">Dashboard</a>
-                    <form action={signOut}>
-                      <button type="submit">Sign out</button>
-                    </form>
-                  </>
-                ) : (
-                  <>
-                    <a href="/login">Sign in</a>
-                    <a href="/register">Sign Up</a>
-                  </>
-                )}
+                <a href="/login">Sign in</a>
+                <a href="/register">Sign Up</a>
               </div>
             </details>
           </div>
@@ -250,27 +225,17 @@ export default async function Home() {
               materials — in one workspace.
             </p>
             <div className="pp-hero-actions">
-              <a
-                className="pp-btn pp-btn-primary"
-                href={signedIn ? '/dashboard' : '/register'}
-              >
-                {signedIn ? 'Open Your Dashboard' : 'Start Your Business'}{' '}
-                <Glyph name="arrow" size={19} />
+              <a className="pp-btn pp-btn-primary" href="/register">
+                Start Your Business <Glyph name="arrow" size={19} />
               </a>
               <a className="pp-btn pp-btn-outline" href="#marketplace">
                 Explore Marketplace <Glyph name="arrow" size={19} />
               </a>
             </div>
-            {signedIn ? (
-              <a href="/dashboard" className="pp-hero-login-hint">
-                Continue to your workspace <Glyph name="arrow" size={14} />
-              </a>
-            ) : (
-              <a href="/login" className="pp-hero-login-hint">
-                Already have an account? Sign in to your workspace{' '}
-                <Glyph name="arrow" size={14} />
-              </a>
-            )}
+            <a href="/login" className="pp-hero-login-hint">
+              Already have an account? Sign in to your workspace{' '}
+              <Glyph name="arrow" size={14} />
+            </a>
             <div
               className="pp-benefit-strip"
               aria-label="What ProPulse helps you do"
@@ -461,7 +426,7 @@ export default async function Home() {
         </div>
         <div className="pp-feature-grid">
           {tools.map((item, index) => (
-            <a className="pp-feature-card" href={workspaceHref} key={item.name}>
+            <a className="pp-feature-card" href="/login" key={item.name}>
               <div className="pp-feature-head">
                 <span className={'pp-feature-icon pp-accent-' + item.accent}>
                   <Glyph name={item.icon} size={24} />
@@ -545,17 +510,13 @@ export default async function Home() {
               connect with business suppliers.
             </p>
           </div>
-          <a className="pp-btn pp-btn-small-outline" href={marketHref}>
+          <a className="pp-btn pp-btn-small-outline" href="/login">
             Browse Marketplace <Glyph name="arrow" size={16} />
           </a>
         </div>
         <div className="pp-marketplace-grid">
           {categories.map((category) => (
-            <a
-              className="pp-material-card"
-              href={marketHref}
-              key={category.title}
-            >
+            <a className="pp-material-card" href="/login" key={category.title}>
               <span
                 aria-hidden="true"
                 className={'pp-material-photo pp-material-' + category.visual}
@@ -599,12 +560,8 @@ export default async function Home() {
                 in one place.
               </span>
             </div>
-            <a
-              href={signedIn ? '/dashboard' : '/register'}
-              className="pp-audience-link"
-            >
-              {signedIn ? 'Open Dashboard' : 'Get Started'}{' '}
-              <Glyph name="arrow" size={15} />
+            <a href="/register" className="pp-audience-link">
+              Get Started <Glyph name="arrow" size={15} />
             </a>
           </div>
         </article>
@@ -626,9 +583,8 @@ export default async function Home() {
                 required to publish.
               </span>
             </div>
-            <a href={sellerHref} className="pp-audience-link">
-              {signedIn ? 'Seller Centre' : 'Apply to List'}{' '}
-              <Glyph name="arrow" size={15} />
+            <a href="/register" className="pp-audience-link">
+              Apply to List <Glyph name="arrow" size={15} />
             </a>
           </div>
         </article>
