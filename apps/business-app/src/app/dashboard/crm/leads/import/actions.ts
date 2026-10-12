@@ -120,3 +120,46 @@ export async function importSheetLeads(
     return { ...report, error: safeFailure(error).message || 'Import failed.' };
   }
 }
+
+/** An owner-controlled, idempotent CRM starter configuration for new tenants. */
+export async function initializeCrmForImports(): Promise<{ message: string; ok: boolean }> {
+  try {
+    const s = await crmServices('lead.view');
+    if (!s.allowed('crm.source.manage') || !s.allowed('crm.pipeline.manage'))
+      return { ok: false, message: 'Only a CRM configuration manager can initialize lead sources and pipeline stages.' };
+    const [sources, stages] = await Promise.all([
+      s.crm.search('lead_sources', { active: true }),
+      s.crm.search('crm_pipeline_stages', { active: true }),
+    ]);
+    const sourceRows = z.object({ rows: z.array(z.object({ key: z.string() })) }).parse(sources).rows;
+    const stageRows = z.object({ rows: z.array(z.object({ key: z.string(), outcome: z.string() })) }).parse(stages).rows;
+    const defaultSources = [
+      { name: 'Manual Entry', key: 'manual', sort_order: 10, active: true },
+      { name: 'Sheet Upload', key: 'sheet_upload', sort_order: 20, active: true },
+      { name: 'ProPulse Marketplace', key: 'propulse_marketplace', sort_order: 30, active: true },
+    ];
+    const defaultStages = [
+      { name: 'New', key: 'new', sort_order: 10, active: true, outcome: 'open' },
+      { name: 'Contacted', key: 'contacted', sort_order: 20, active: true, outcome: 'open' },
+      { name: 'Follow-up', key: 'follow_up', sort_order: 30, active: true, outcome: 'open' },
+      { name: 'Quotation', key: 'quotation', sort_order: 40, active: true, outcome: 'open' },
+      { name: 'Won', key: 'won', sort_order: 50, active: true, outcome: 'won' },
+      { name: 'Lost', key: 'lost', sort_order: 60, active: true, outcome: 'lost' },
+    ] as const;
+    for (const source of defaultSources) {
+      if (!sourceRows.some((row) => row.key === source.key)) {
+        await s.crm.save('lead_sources', crmSchemas.lead_sources.parse(source));
+      }
+    }
+    for (const stage of defaultStages) {
+      if (!stageRows.some((row) => row.key === stage.key)) {
+        await s.crm.save('crm_pipeline_stages', crmSchemas.crm_pipeline_stages.parse(stage));
+      }
+    }
+    revalidatePath('/dashboard/crm/leads/import');
+    revalidatePath('/dashboard/crm/leads');
+    return { ok: true, message: 'CRM lead sources and stages are ready.' };
+  } catch (error) {
+    return { ok: false, message: safeFailure(error).message || 'Could not initialize CRM.' };
+  }
+}
