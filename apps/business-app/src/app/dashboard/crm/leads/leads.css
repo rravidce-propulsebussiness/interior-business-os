@@ -1263,3 +1263,16 @@ body:has(.crm-leads-root) .crm-shared-navigation {
     animation: none !important;
   }
 }
+
+/* In-page sheet import and ProPulse connection: one combined lead workspace. */
+.crm-inline-lead-tool,.crm-integrations-panel{margin:0 0 19px;padding:18px;border-radius:14px;background:#fff;border:1px solid var(--crm-border);box-shadow:var(--crm-shadow)}
+.crm-inline-tool-title,.crm-integrations-top{display:flex;justify-content:space-between;align-items:start;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+.crm-inline-tool-title h2,.crm-integrations-panel h2{font-size:17px;color:#15223e;font-weight:800}
+.crm-integrations-panel p{line-height:1.65;color:#506582}
+.crm-integrations-details{display:flex;flex-direction:column;align-items:flex-start;gap:15px}
+.crm-integrations-actions{display:flex;gap:12px;flex-wrap:wrap}
+.crm-integrations-code{display:flex;flex-direction:column;gap:8px;max-width:570px;width:100%;font-size:12px;font-weight:700;color:#425879}
+.crm-leads-root .crm-integrations-code input{width:100%;padding:13px;font-family:ui-monospace,monospace;min-height:44px}
+.crm-integration-message{padding:12px 15px;margin:10px 0;background:#edf5ff;border-radius:9px;color:#235eaa}
+.crm-integration-caption{font-size:11px;max-width:620px}
+@media(max-width:640px){.crm-inline-lead-tool,.crm-integrations-panel{padding:12px}.crm-inline-tool-title,.crm-integrations-top{gap:8px}}
