@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-html-link-for-pages -- Hostinger requires fresh document links after session transitions to avoid interrupted RSC Flight. */
 'use client';
 
 import {
