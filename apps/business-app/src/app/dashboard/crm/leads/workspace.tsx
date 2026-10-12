@@ -247,6 +247,7 @@ export function LeadsWorkspace({
   timeZone,
   asOf,
   propulseConnection,
+  initialTool,
 }: {
   rows: LeadView[];
   stats: {
@@ -278,8 +279,9 @@ export function LeadsWorkspace({
   timeZone: string;
   asOf: string;
   propulseConnection: ProPulseConnectionView;
+  initialTool: 'none' | 'sheet' | 'propulse';
 }) {
-  const [leadTool, setLeadTool] = useState<'none' | 'sheet' | 'propulse'>('none');
+  const [leadTool, setLeadTool] = useState<'none' | 'sheet' | 'propulse'>(initialTool);
   const [syncFeedback, setSyncFeedback] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(
     rows[0]?.id ?? null,
