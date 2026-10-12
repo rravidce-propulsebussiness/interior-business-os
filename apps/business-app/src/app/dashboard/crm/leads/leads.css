@@ -1341,3 +1341,11 @@ body:has(.crm-leads-root) .crm-shared-navigation {
     gap: 8px;
   }
 }
+
+/* One CRM screen: quick add, import and ProPulse integration all expand in place. */
+.crm-quick-add-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;align-items:end}
+.crm-quick-add-form label{display:flex;flex-direction:column;gap:7px;color:var(--crm-navy);font-weight:650;font-size:12px}
+.crm-leads-root .crm-quick-add-form input,.crm-leads-root .crm-quick-add-form select,.crm-leads-root .crm-quick-add-form textarea{width:100%;min-height:43px;padding:11px 12px;border:1px solid var(--crm-border);border-radius:9px;background:#fff;color:var(--crm-navy)}
+.crm-quick-add-wide{grid-column:1/-1}
+.crm-quick-add-form .crm-primary{justify-self:start;min-height:42px}
+@media(max-width:650px){.crm-quick-add-form{grid-template-columns:1fr}}
