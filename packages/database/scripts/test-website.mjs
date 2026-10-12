@@ -10,3 +10,9 @@ const sql = readFileSync(file('tests/website.sql'), 'utf8').replace(
   quote(document),
 );
 console.log(psql([], sql));
+
+const templateSql = readFileSync(
+  file('tests/website-templates.sql'),
+  'utf8',
+).replace('/*DOCUMENT*/', quote(document));
+console.log(psql([], templateSql));

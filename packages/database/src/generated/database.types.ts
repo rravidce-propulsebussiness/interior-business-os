@@ -10047,6 +10047,42 @@ export interface Database {
         };
         Relationships: [];
       };
+      website_templates: {
+        Row: {
+          id: string;
+          name: string;
+          description: string;
+          status: string;
+          document: Json;
+          version: number;
+          created_by: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          description?: string;
+          status?: string;
+          document: Json;
+          version?: number;
+          created_by: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          description?: string;
+          status?: string;
+          document?: Json;
+          version?: number;
+          created_by?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       website_versions: {
         Row: {
           id: string;
@@ -11611,6 +11647,16 @@ export interface Database {
         };
         Returns: undefined;
       };
+      website_from_template: {
+        Args: {
+          p_organization_id: string;
+          p_template_id: string;
+          p_name: string;
+          p_slug: string;
+          p_empty_document: Json;
+        };
+        Returns: string;
+      };
       website_grant_developer: {
         Args: {
           p_organization_id: string;
@@ -11621,6 +11667,10 @@ export interface Database {
       };
       website_metrics_read: {
         Args: { p_organization_id: string; p_website_id: string };
+        Returns: Json;
+      };
+      website_platform_domain_registry: {
+        Args: { p_page?: number };
         Returns: Json;
       };
       website_platform_list: { Args: { p_page?: number }; Returns: Json };
@@ -11700,6 +11750,26 @@ export interface Database {
       website_team_choices: {
         Args: { p_organization_id: string; p_website_id: string };
         Returns: Json;
+      };
+      website_template_save: {
+        Args: {
+          p_id: string;
+          p_version: number;
+          p_name: string;
+          p_description: string;
+          p_document: Json;
+        };
+        Returns: string;
+      };
+      website_template_status: {
+        Args: {
+          p_id: string;
+          p_version: number;
+          p_status: string;
+          p_proof?: string;
+          p_signature?: string;
+        };
+        Returns: number;
       };
       work_queue: {
         Args: { p_organization_id: string; p_group?: string; p_page?: number };

@@ -10,7 +10,9 @@ export function DomainPanel({
   base,
   domains,
   canManage,
+  organizationId,
 }: {
+  organizationId?: string;
   site: string;
   base: string;
   domains: {
@@ -37,8 +39,13 @@ export function DomainPanel({
           action={(f) =>
             start(async () =>
               setMessage(
-                (await addWebsiteDomain(site, String(f.get('hostname'))))
-                  .message,
+                (
+                  await addWebsiteDomain(
+                    site,
+                    String(f.get('hostname')),
+                    organizationId,
+                  )
+                ).message,
               ),
             )
           }
@@ -93,7 +100,11 @@ export function DomainPanel({
                     disabled={pending}
                     onClick={() =>
                       start(async () => {
-                        const result = await checkWebsiteDomain(site, d.id);
+                        const result = await checkWebsiteDomain(
+                          site,
+                          d.id,
+                          organizationId,
+                        );
                         setMessage(result.message);
                         setRecords(result.records);
                       })
@@ -107,8 +118,14 @@ export function DomainPanel({
                     onClick={() =>
                       start(async () =>
                         setMessage(
-                          (await removeWebsiteDomain(site, d.id, d.version))
-                            .message,
+                          (
+                            await removeWebsiteDomain(
+                              site,
+                              d.id,
+                              d.version,
+                              organizationId,
+                            )
+                          ).message,
                         ),
                       )
                     }

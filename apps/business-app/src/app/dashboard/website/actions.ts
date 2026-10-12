@@ -13,7 +13,8 @@ import {
 } from '@business-os/website-builder/compiler';
 import { websiteHtml } from '@business-os/website-builder/render';
 import { websiteServices, signWebsite } from './service';
-import { safeFailure } from '@business-os/shared';
+import { websiteJson } from '@business-os/database/website';
+import { safeFailure, idSchema } from '@business-os/shared';
 import { interiorWebsite } from '@business-os/industry-interior/website';
 import { readFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
@@ -38,7 +39,11 @@ function message(error: unknown) {
   const failure = safeFailure(error);
   return `${failure.message} Reference: ${failure.requestId}`;
 }
-export async function createWebsite(name: string, slug: string) {
+export async function createWebsite(
+  name: string,
+  slug: string,
+  templateId = '',
+) {
   try {
     const s = await websiteServices('website.manage');
     if (
@@ -48,7 +53,21 @@ export async function createWebsite(name: string, slug: string) {
       slug.length > 63
     )
       throw new Error('Enter a name and a safe subdomain slug');
-    const id = await s.website.create(name, slug, emptyWebsite(name));
+    let id: string;
+    if (templateId) {
+      const result = await s.client.rpc('website_from_template', {
+        p_organization_id: s.context.organizationId,
+        p_template_id: idSchema.parse(templateId),
+        p_name: name,
+        p_slug: slug,
+        p_empty_document: websiteJson(emptyWebsite(name)),
+      });
+      if (result.error || !result.data)
+        throw new Error(
+          'Template unavailable or your website plan does not include its features.',
+        );
+      id = result.data;
+    } else id = await s.website.create(name, slug, emptyWebsite(name));
     revalidatePath('/dashboard/website');
     return { id, message: 'Website created' };
   } catch (e) {

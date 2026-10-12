@@ -14,6 +14,7 @@ export async function savePlatformWebsite(operation: string, input: unknown) {
     });
     if (r.error) throw r.error;
     revalidatePath('/admin/website');
+    revalidatePath('/admin/domains');
     return { message: 'Platform website configuration updated.' };
   } catch {
     return {

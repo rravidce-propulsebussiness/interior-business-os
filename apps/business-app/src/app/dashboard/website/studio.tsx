@@ -33,6 +33,10 @@ export function WebsiteEditor({
   status,
   canEdit,
   canPublish,
+  saveAction = saveWebsiteSection,
+  previewAction = renderDraftPreview,
+  publishAction = publishWebsite,
+  templateMode = false,
 }: {
   id: string;
   initial: WebsiteDocument;
@@ -41,6 +45,10 @@ export function WebsiteEditor({
   status: string;
   canEdit: boolean;
   canPublish: boolean;
+  saveAction?: typeof saveWebsiteSection;
+  previewAction?: typeof renderDraftPreview;
+  publishAction?: typeof publishWebsite;
+  templateMode?: boolean;
 }) {
   const frame = useRef<HTMLIFrameElement>(null);
   const [selection, setSelection] = useState<string | null>(null);
@@ -98,7 +106,7 @@ export function WebsiteEditor({
   useEffect(() => {
     let active = true;
     const timer = setTimeout(() => {
-      renderDraftPreview(id, history.present, page.path)
+      previewAction(id, history.present, page.path)
         .then((html) => {
           if (active) {
             setPreview(html ?? '');
@@ -114,7 +122,7 @@ export function WebsiteEditor({
       active = false;
       clearTimeout(timer);
     };
-  }, [history.present, id, page.path]);
+  }, [history.present, id, page.path, previewAction]);
   const move = (node: WebsiteNode, parent: string | null, index: number) => {
     try {
       nodes(moveNode(activeNodes, node.id, parent, index));
@@ -251,12 +259,7 @@ export function WebsiteEditor({
               className="rounded border px-4 py-2 text-sm"
               onClick={() =>
                 start(async () => {
-                  const r = await saveWebsiteSection(
-                    id,
-                    version,
-                    area,
-                    document[area],
-                  );
+                  const r = await saveAction(id, version, area, document[area]);
                   setMessage(r.message);
                   if (r.version) setVersion(r.version);
                 })
@@ -271,7 +274,7 @@ export function WebsiteEditor({
               className="rounded bg-primary px-4 py-2 text-sm text-primary-foreground"
               onClick={() =>
                 start(async () => {
-                  const r = await publishWebsite(
+                  const r = await publishAction(
                     id,
                     version,
                     'Published from website studio',
@@ -281,7 +284,7 @@ export function WebsiteEditor({
                 })
               }
             >
-              Publish saved draft
+              {templateMode ? 'Publish template' : 'Publish saved draft'}
             </button>
           )}
         </div>
@@ -724,7 +727,7 @@ export function WebsiteEditor({
                     };
                     edit(next);
                     start(async () => {
-                      const r = await saveWebsiteSection(
+                      const r = await saveAction(
                         id,
                         version,
                         'sections',

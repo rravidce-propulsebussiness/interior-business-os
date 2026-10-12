@@ -18,12 +18,16 @@ export function WebsiteSettings({
   version: initialVersion,
   tab,
   canEdit,
+  saveAction = saveWebsiteSection,
+  templateMode = false,
 }: {
   id: string;
   initial: WebsiteDocument;
   version: number;
   tab: string;
   canEdit: boolean;
+  saveAction?: typeof saveWebsiteSection;
+  templateMode?: boolean;
 }) {
   const [doc, setDoc] = useState(initial),
     [version, setVersion] = useState(initialVersion),
@@ -39,13 +43,13 @@ export function WebsiteSettings({
     )[tab] ?? tab;
   const save = (key: string, value: unknown) =>
     start(async () => {
-      const r = await saveWebsiteSection(id, version, key, value);
+      const r = await saveAction(id, version, key, value);
       setMessage(r.message);
       if (r.version) setVersion(r.version);
     });
   const content = (
     <>
-      {tab === 'content' && canEdit && (
+      {tab === 'content' && canEdit && !templateMode && (
         <WebsiteSourcePicker
           id={id}
           onSelect={(item) =>
@@ -714,7 +718,9 @@ export function WebsiteSettings({
           <h2 className="mt-7 font-semibold">Sandboxed frontend components</h2>
           <p className="mt-2 text-sm text-muted-foreground">
             HTML, CSS and vanilla JavaScript. No package imports. The website
-            SDK exposes approved public data.
+            SDK exposes approved public data. After saving, add a Custom block
+            in the page editor and set its code reference to the component ID
+            shown below.
           </p>
           {doc.code.map((c, i) => (
             <div key={c.id} className="mt-5 rounded border p-4">
