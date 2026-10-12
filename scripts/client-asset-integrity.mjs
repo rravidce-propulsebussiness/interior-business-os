@@ -31,9 +31,13 @@ export function verifyClientAssets(appDir) {
   )
     throw new Error('Invalid client asset integrity manifest.');
   for (const [name, expected] of Object.entries(manifest.files)) {
+    // App Router route-group chunk names legitimately include parentheses
+    // and square brackets. Reject path traversal without banning those.
     if (
-      !/^static\/chunks\/[a-zA-Z0-9/_\-.]+\.js$/.test(name) ||
-      name.includes('..')
+      !name.startsWith('static/chunks/') ||
+      !name.endsWith('.js') ||
+      name.includes('\\\\') ||
+      name.split('/').some((segment) => !segment || segment === '.' || segment === '..')
     )
       throw new Error('Invalid client asset manifest path');
     const file = resolve(root, name);
