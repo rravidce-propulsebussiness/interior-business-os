@@ -1,4 +1,6 @@
 import { canAccess } from '@business-os/auth';
+import { createOwnerProvisioningDatabase } from '@business-os/database/server';
+import type { ProPulseConnectionView } from './propulse-connect-panel';
 import { crmServices, resultSchema } from '../service';
 import { lookups, pageNumber, type Params } from '../lookups';
 import { OwnerShell, type OwnerNavItem } from '../../owner-shell';
@@ -293,6 +295,34 @@ export default async function Leads({
       .slice(0, 2)
       .join(' ') || 'Owner';
   const plan = plans?.find((item) => item.id === organization.plan_id);
+  const propulseConnection: ProPulseConnectionView = {
+    connected: false,
+    email: '',
+    name: '',
+    lastSyncedAt: null,
+    canManage: may('crm.source.manage') && may('crm.pipeline.manage'),
+    configured: false,
+  };
+  try {
+    const admin = createOwnerProvisioningDatabase();
+    const { data, error } = await admin
+      .from('propulse_lead_connections')
+      .select('display_email,display_name,last_synced_at')
+      .eq('organization_id', s.org)
+      .maybeSingle();
+    if (!error) {
+      propulseConnection.configured = true;
+      if (data) {
+        propulseConnection.connected = true;
+        propulseConnection.email = data.display_email;
+        propulseConnection.name = data.display_name;
+        propulseConnection.lastSyncedAt = data.last_synced_at;
+      }
+    }
+  } catch {
+    // Do not stop the CRM if an optional integration has not been deployed.
+  }
+
   const stats = [
     {
       label: 'Total Leads',
@@ -348,6 +378,10 @@ export default async function Leads({
     >
       <LeadsWorkspace
         rows={rows}
+        propulseConnection={propulseConnection}
+        initialTool={
+          p.panel === 'sheet' || p.panel === 'propulse' ? p.panel : 'none'
+        }
         stats={stats}
         tabs={tabs}
         stages={stages}

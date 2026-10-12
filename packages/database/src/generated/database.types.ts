@@ -7226,6 +7226,53 @@ export interface Database {
           },
         ];
       };
+      propulse_lead_connections: {
+        Row: {
+          organization_id: string;
+          propulse_subject: string;
+          display_name: string;
+          display_email: string;
+          access_token: string;
+          token_expires_at: string;
+          connected_by: string;
+          connected_at: string;
+          last_synced_at: string | null;
+          sync_page: number;
+        };
+        Insert: {
+          organization_id: string;
+          propulse_subject: string;
+          display_name?: string;
+          display_email?: string;
+          access_token: string;
+          token_expires_at: string;
+          connected_by: string;
+          connected_at?: string;
+          last_synced_at?: string | null;
+          sync_page?: number;
+        };
+        Update: {
+          organization_id?: string;
+          propulse_subject?: string;
+          display_name?: string;
+          display_email?: string;
+          access_token?: string;
+          token_expires_at?: string;
+          connected_by?: string;
+          connected_at?: string;
+          last_synced_at?: string | null;
+          sync_page?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'propulse_lead_connections_organization_id_fkey';
+            columns: ['organization_id'];
+            isOneToOne: true;
+            referencedRelation: 'organizations';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       purchase_order_costs: {
         Row: {
           id: string;
