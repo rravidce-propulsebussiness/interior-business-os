@@ -21,8 +21,11 @@ test('client chunks are parsed, hashed and verified before Hostinger starts', as
     mkdirSync(chunkDir, { recursive: true });
     const script = join(chunkDir, 'test-abc123.js');
     writeFileSync(script, 'globalThis.__testAsset = 1;\n');
-    assert.equal(await buildClientAssetManifest(temp), 1);
-    assert.equal(verifyClientAssets(temp), 1);
+    const grouped = join(chunkDir, 'app', '(owner)');
+    mkdirSync(grouped, { recursive: true });
+    writeFileSync(join(grouped, '[lead]-chunk.js'), 'globalThis.__routeChunk = true;\n');
+    assert.equal(await buildClientAssetManifest(temp), 2);
+    assert.equal(verifyClientAssets(temp), 2);
     const manifest = JSON.parse(
       readFileSync(join(temp, '.next', 'client-asset-integrity.json'), 'utf8'),
     );
