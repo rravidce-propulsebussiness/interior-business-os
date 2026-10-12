@@ -36,8 +36,10 @@ export function verifyClientAssets(appDir) {
     if (
       !name.startsWith('static/chunks/') ||
       !name.endsWith('.js') ||
-      name.includes('\\\\') ||
-      name.split('/').some((segment) => !segment || segment === '.' || segment === '..')
+      name.includes('\\') ||
+      name
+        .split('/')
+        .some((segment) => !segment || segment === '.' || segment === '..')
     )
       throw new Error('Invalid client asset manifest path');
     const file = resolve(root, name);
