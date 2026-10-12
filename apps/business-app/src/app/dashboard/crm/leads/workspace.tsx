@@ -454,7 +454,7 @@ export function LeadsWorkspace({
 
       <div id="crm-inline-action">
       {leadTool === 'add' && canCreate && (
-        <QuickAddLead sources={sources}
+        <QuickAddLead sources={sources.filter((source) => !/propulse/i.test(source.label))}
           stages={stages.filter((stage) => stage.outcome === 'open')
             .map((stage) => ({ value: stage.id, label: stage.name }))}
           onClose={() => setLeadTool('none')} />
@@ -472,7 +472,7 @@ export function LeadsWorkspace({
             </button>
           </div>
           <SheetImportForm
-            sources={sources}
+            sources={sources.filter((source) => !/propulse/i.test(source.label))}
             stages={stages
               .filter((stage) => stage.outcome === 'open')
               .map((stage) => ({ value: stage.id, label: stage.name }))}
