@@ -94,3 +94,34 @@ test('direct module API denies anonymous callers', async ({
   expect(response.status()).toBe(401);
   expect(await response.json()).not.toHaveProperty('enabled');
 });
+
+test('premium Business OS login has real provider links and a usable password form', async ({ page }, info) => {
+  test.skip(info.project.name !== 'business-app', 'Premium login belongs to Business App.');
+  await page.goto('/login');
+  await expect(page.getByRole('heading', { level: 1, name: 'Sign in' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /Build. Manage. Grow./ })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Continue with Google' })).toHaveAttribute('href', '/auth/google');
+  await expect(page.getByRole('link', { name: 'Continue with ProPulse' })).toHaveAttribute('href', '/auth/propulse');
+  await expect(page.getByRole('link', { name: 'Forgot Password?' })).toHaveAttribute('href', '/forgot-password');
+  const password = page.getByLabel('Password', { exact: true });
+  await expect(password).toHaveAttribute('type', 'password');
+  await page.getByRole('button', { name: 'Show password' }).click();
+  await expect(password).toHaveAttribute('type', 'text');
+  await page.getByRole('button', { name: 'Hide password' }).click();
+  await expect(password).toHaveAttribute('type', 'password');
+  await page.setViewportSize({ width: 375, height: 812 });
+  await expect(page.getByRole('link', { name: 'Continue with Google' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Continue with ProPulse' })).toBeVisible();
+  await expect(page.getByLabel('Email', { exact: true })).toBeVisible();
+});
+
+test('unconfigured ProPulse SSO refuses login and returns a safe notice', async ({ page }, info) => {
+  test.skip(
+    info.project.name !== 'business-app' || Boolean(process.env.PROPULSE_SSO_PROVIDER_ID),
+    'Only test fail-closed ProPulse SSO in the unconfigured Business App.',
+  );
+  await page.goto('/auth/propulse');
+  await expect(page).toHaveURL(/\/login\?provider_error=(?:propulse|unavailable)$/);
+  await expect(page.getByRole('heading', { name: 'Sign in' })).toBeVisible();
+  await expect(page.getByRole('alert')).toContainText(/ProPulse sign-in is not yet connected|temporarily unavailable/);
+});
