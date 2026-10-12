@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-html-link-for-pages -- Use full document links on Hostinger to avoid incomplete RSC Flight navigation. */
 /* Leads workspace sections share one navigation, but independent routes/actions. */
 export function LeadsSectionNav({
   active,
