@@ -89,7 +89,7 @@ export default async function Login({ searchParams }: { searchParams: Promise<{ 
               <span><strong>ProPulse</strong><small>Business OS</small></span>
             </a>
             <div className="pp-login-intro">
-              <h1 id="login-title">Sign In</h1>
+              <h1 id="login-title">Sign in</h1>
               <p>Access your business account and continue managing your projects, leads and marketplace.</p>
             </div>
 
