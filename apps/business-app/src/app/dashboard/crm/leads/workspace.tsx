@@ -377,6 +377,14 @@ export function LeadsWorkspace({
     };
   }, [propulseConnection.connected, propulseConnection.configured, canCreate]);
 
+  useEffect(() => {
+    if (leadTool === 'none') return;
+    document.getElementById('crm-inline-action')?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
+  }, [leadTool]);
+
   return (
     <main id="main-content" tabIndex={-1} className="crm-leads-root">
       <div className="crm-leads-breadcrumb">
@@ -444,6 +452,7 @@ export function LeadsWorkspace({
         </div>
       </div>
 
+      <div id="crm-inline-action">
       {leadTool === 'add' && canCreate && (
         <QuickAddLead sources={sources}
           stages={stages.filter((stage) => stage.outcome === 'open')
@@ -482,6 +491,8 @@ export function LeadsWorkspace({
           {syncFeedback}
         </p>
       )}
+
+      </div>
 
       <div className="crm-kpi-row" aria-label="Lead overview">
         {stats.map((stat) => (
