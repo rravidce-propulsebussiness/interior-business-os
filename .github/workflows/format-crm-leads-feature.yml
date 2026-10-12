@@ -1,0 +1,38 @@
+name: Format CRM Leads Feature
+on:
+  push:
+    branches:
+      - feature/crm-leads-sheet-import-propulse-sections-20261013
+permissions:
+  contents: write
+jobs:
+  format:
+    if: "!contains(github.event.head_commit.message, '[crm-formatted]')"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Format only new CRM feature files
+        run: |
+          pnpm exec prettier --write \
+            apps/business-app/src/app/dashboard/crm/leads/import/actions.ts \
+            apps/business-app/src/app/dashboard/crm/leads/import/page.tsx \
+            apps/business-app/src/app/dashboard/crm/leads/import/sheet-import-form.tsx \
+            apps/business-app/src/app/dashboard/crm/leads/propulse/page.tsx \
+            apps/business-app/src/app/dashboard/crm/leads/sections-nav.tsx
+      - name: Commit formatting
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/business-app/src/app/dashboard/crm/leads
+          if ! git diff --cached --quiet; then
+            git commit -m "Format CRM leads feature [crm-formatted]"
+            git push origin HEAD:feature/crm-leads-sheet-import-propulse-sections-20261013
+          fi
