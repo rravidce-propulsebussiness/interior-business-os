@@ -3,6 +3,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { validateDeploymentEnvironment } from './packages/shared/src/runtime.ts';
+import { verifyClientAssets } from './scripts/client-asset-integrity.mjs';
 
 // Hostinger's lsnode.js loads this entry file with require(esm).
 // Do not use top-level await. Let Next.js run its own native HTTP router
@@ -37,6 +38,11 @@ if (!existsSync(resolve(appDir, '.next', 'BUILD_ID'))) {
     `[Business OS] Missing Next.js build artifact for ${service}. Inspect Hostinger published files.`,
   );
 }
+
+// Fail startup rather than serve a partially published or corrupted JavaScript
+// bundle that would leave the CRM unresponsive with SyntaxError at EOF.
+const checkedChunks = verifyClientAssets(appDir);
+console.log(`[Business OS] Verified ${checkedChunks} client JavaScript chunks against build manifest.`);
 
 // The release ID is compiled into the Next.js build. Recover it from the
 // published artifact at process startup so build/runtime stay on the same
