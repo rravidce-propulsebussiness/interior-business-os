@@ -287,7 +287,7 @@ export async function syncPropulseLeads(): Promise<ActionResult> {
         const amount = /^\d{1,16}(\.\d{1,2})?$/.test(rawBudget)
           ? rawBudget
           : null;
-        const input = crmSchemas.leads.parse({
+        const input = crmSchemas.leads.safeParse({
           name: (row.customer_name || 'ProPulse customer').slice(0, 200),
           phone,
           email: email.slice(0, 254),
@@ -309,8 +309,12 @@ export async function syncPropulseLeads(): Promise<ActionResult> {
           budget_max: null,
           expected_start_date: null,
         });
+        if (!input.success) {
+          skipped++;
+          continue;
+        }
         try {
-          await s.crm.save('leads', input);
+          await s.crm.save('leads', input.data);
           created++;
         } catch {
           skipped++;
