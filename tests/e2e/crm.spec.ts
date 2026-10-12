@@ -6,6 +6,8 @@ test('CRM pages require a business session', async ({ page }, info) => {
     '',
     '/leads',
     '/leads/new',
+    '/leads/import',
+    '/leads/propulse',
     '/pipeline',
     '/followups',
     '/site-visits',
