@@ -20,7 +20,5 @@ export async function authCallback(request: Request) {
     });
     if (!error) return NextResponse.redirect(new URL('/dashboard', origin));
   }
-  return NextResponse.redirect(
-    new URL('/login?confirmation=failed', origin),
-  );
+  return NextResponse.redirect(new URL('/login?confirmation=failed', origin));
 }
