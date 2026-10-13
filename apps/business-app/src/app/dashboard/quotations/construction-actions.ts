@@ -329,6 +329,7 @@ export async function saveFloorwiseSftEstimate(
       })),
       selectedPackage
         ? {
+            id: selectedPackage.id,
             name: selectedPackage.name,
             code: selectedPackage.code,
             description: selectedPackage.description,
