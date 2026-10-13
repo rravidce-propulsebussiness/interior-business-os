@@ -29,10 +29,6 @@ jobs:
           node-version-file: .node-version
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Diagnose premium quotation formatting
-        run: |
-          pnpm exec prettier --write             apps/business-app/src/app/dashboard/quotations/construction-actions.ts             apps/business-app/src/app/dashboard/quotations/premium-sft-builder.tsx             apps/business-app/src/app/dashboard/quotations/studio-editor.tsx             packages/core/src/quotation-document.test.ts             packages/core/src/quotation-document.ts             packages/core/src/sft-quotation.test.ts             packages/core/src/sft-quotation.ts
-          git diff -- apps/business-app/src/app/dashboard/quotations/construction-actions.ts apps/business-app/src/app/dashboard/quotations/premium-sft-builder.tsx apps/business-app/src/app/dashboard/quotations/studio-editor.tsx packages/core/src/quotation-document.test.ts packages/core/src/quotation-document.ts packages/core/src/sft-quotation.test.ts packages/core/src/sft-quotation.ts
       - run: node --test scripts/automation-email.test.mjs scripts/hostinger-deployment.test.mjs scripts/client-asset-integrity.test.mjs scripts/crm-unified-workspace.test.mjs
       - run: pnpm test:acceptance
       - run: pnpm security:dependency
