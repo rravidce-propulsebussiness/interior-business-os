@@ -9,7 +9,7 @@ update private.company_onboarding_policy
 set approval_required = false, updated_at = now(), changed_by = null
 where singleton = true;
 
-create function public.company_self_register(p_input jsonb)
+create or replace function public.company_self_register(p_input jsonb)
 returns jsonb language plpgsql security definer set search_path = ''
 as $self$
 declare
