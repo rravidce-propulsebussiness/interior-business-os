@@ -23,7 +23,7 @@ import './owner-dashboard.css';
 
 export const dynamic = 'force-dynamic';
 
-type SearchParams = { q?: string };
+type SearchParams = { q?: string; propulse_sync?: string };
 type Lead = Record<string, unknown>;
 type SiteProject = { id: string; stage: string; role: string };
 
@@ -182,11 +182,22 @@ export default async function Dashboard({
     throw error;
   }
 
+  const signInResult = (await searchParams).propulse_sync;
   if (!context) {
     if (scope) notFound();
     return (
       <main id="main-content" className="owner-no-company">
         <h1>No active company workspace</h1>
+        {signInResult === 'no_company' && (
+          <p>Your ProPulse account is linked, but no business profile was found there. Complete your professional company profile in ProPulse or create a new Business OS company.</p>
+        )}
+        {signInResult === 'needs_selection' && (
+          <p>You already have a company workspace, but its identity differs from the ProPulse business. We have not created a duplicate or changed access. Contact the platform administrator to confirm which company should be linked.</p>
+        )}
+        {signInResult === 'unavailable' && (
+          <p>Your ProPulse login worked, but company synchronization could not be completed. Try connecting again, or contact support if this continues.</p>
+        )}
+        <a href="/auth/propulse">Connect ProPulse business →</a>
         <p>
           Create a business workspace to start using the tools, or accept an
           invitation to join an existing company.
