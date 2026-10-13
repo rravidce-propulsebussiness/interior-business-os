@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-html-link-for-pages -- Use full document links on Hostinger to avoid incomplete RSC Flight navigation. */
 'use client';
 
-import { useState, type ChangeEvent } from 'react';
+import { useRef, useState, type ChangeEvent, type DragEvent } from 'react';
 import {
   importSheetLeads,
   initializeCrmForImports,
@@ -61,7 +61,7 @@ function downloadTemplate() {
 }
 
 /** RFC 4180 style parser: quoted commas, escaped quotes and multiline fields. */
-function readCsv(text: string): string[][] {
+function readCsv(text: string, separator = ','): string[][] {
   const records: string[][] = [];
   let record: string[] = [];
   let cell = '';
@@ -75,7 +75,7 @@ function readCsv(text: string): string[][] {
       } else {
         quoted = !quoted;
       }
-    } else if (char === ',' && !quoted) {
+    } else if (char === separator && !quoted) {
       record.push(cell);
       cell = '';
     } else if ((char === '\r' || char === '\n') && !quoted) {
@@ -169,6 +169,10 @@ export function SheetImportForm({
   stages: Choice[];
   canSetup: boolean;
 }) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [method, setMethod] = useState<'file' | 'google'>('file');
+  const [pasteText, setPasteText] = useState('');
+  const [dragActive, setDragActive] = useState(false);
   const [rows, setRows] = useState<SheetRow[]>([]);
   const [filename, setFilename] = useState('');
   const [error, setError] = useState('');
@@ -180,17 +184,14 @@ export function SheetImportForm({
   const [setupBusy, setSetupBusy] = useState(false);
   const [setupMessage, setSetupMessage] = useState('');
 
-  async function loadFile(event: ChangeEvent<HTMLInputElement>) {
+  async function prepareFile(file: File | undefined) {
     setRows([]);
     setError('');
     setReport(null);
-    const file = event.target.files?.[0];
     if (!file) return;
     setFilename(file.name);
     if (!/\.csv$/i.test(file.name)) {
-      setError(
-        'Export the spreadsheet as CSV (.csv) in Excel or Google Sheets, then select that file.',
-      );
+      setError('Choose a CSV file. In Excel: Save As → CSV; in Google Sheets: File → Download → CSV.');
       return;
     }
     if (file.size > MAX_FILE_BYTES) {
@@ -198,13 +199,35 @@ export function SheetImportForm({
       return;
     }
     try {
-      const parsed = mapRows(readCsv(await file.text()));
-      setRows(parsed);
+      setRows(mapRows(readCsv(await file.text())));
     } catch (cause) {
-      setError(
-        cause instanceof Error ? cause.message : 'Could not read this CSV.',
-      );
+      setError(cause instanceof Error ? cause.message : 'Could not read this CSV.');
     }
+  }
+
+  async function loadFile(event: ChangeEvent<HTMLInputElement>) {
+    await prepareFile(event.target.files?.[0]);
+  }
+
+  function loadGoogleRows() {
+    setRows([]);
+    setError('');
+    setReport(null);
+    try {
+      if (!pasteText.trim()) throw new Error('Copy a table from Google Sheets and paste it above.');
+      const delimiter = pasteText.includes('\t') ? '\t' : ',';
+      const parsed = mapRows(readCsv(pasteText, delimiter));
+      setRows(parsed);
+      setFilename('Google Sheets copied rows');
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Could not read pasted rows.');
+    }
+  }
+
+  function handleDrop(event: DragEvent<HTMLDivElement>) {
+    event.preventDefault();
+    setDragActive(false);
+    if (!running) void prepareFile(event.dataTransfer.files[0]);
   }
 
   async function submit() {
