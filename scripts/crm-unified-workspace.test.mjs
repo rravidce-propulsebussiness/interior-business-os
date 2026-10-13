@@ -110,8 +110,9 @@ test('Upload Leads and Google Sheets have distinct protected pages', () => {
   assert.match(pageShell, /crmServices\('lead.create', true\)/);
   assert.match(pageShell, /<OwnerShell/);
   assert.match(pageShell, /<SheetImportForm/);
-  assert.match(pageShell, /\/dashboard\/crm\/leads\/upload/);
-  assert.match(pageShell, /\/dashboard\/crm\/leads\/google-sheets/);
+  assert.match(pageShell, /const leadsPath = '\/dashboard\/crm\/leads'/);
+  assert.match(pageShell, /const uploadPath = leadsPath \+ '\/upload'/);
+  assert.match(pageShell, /const googlePath = leadsPath \+ '\/google-sheets'/);
   assert.match(leadPage, /label: 'Upload Leads'/);
   assert.match(leadPage, /label: 'Google Sheets'/);
   assert.match(crmLayout, /\['Upload Leads',/);
