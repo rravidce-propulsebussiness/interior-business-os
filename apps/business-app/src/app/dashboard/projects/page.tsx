@@ -559,7 +559,22 @@ export default async function Projects({
                 fields={[
                   { key: 'name', label: 'Project name', required: true },
                   { key: 'code', label: 'Unique project code', required: true },
+                  {
+                    key: 'industry_id',
+                    label: 'Industry',
+                    nullable: true,
+                    options: [
+                      { value: '', label: 'Choose industry' },
+                      ...industries
+                        .filter((item) => item.status === 'active')
+                        .map((item) => ({ value: item.id, label: item.name })),
+                    ],
+                  },
                   { key: 'project_type', label: 'Project type' },
+                  { key: 'site_address.line1', label: 'Site address' },
+                  { key: 'site_address.city', label: 'Site city' },
+                  { key: 'site_address.region', label: 'Site state / region' },
+                  { key: 'site_address.postal_code', label: 'Site PIN code' },
                   { key: 'notes', label: 'Internal notes', type: 'textarea' },
                 ]}
               />
