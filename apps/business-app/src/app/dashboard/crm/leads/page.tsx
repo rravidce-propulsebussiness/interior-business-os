@@ -249,7 +249,20 @@ export default async function Leads({
   const nav: OwnerNavItem[] = [
     { label: 'Dashboard', href: '/dashboard', icon: 'dashboard' },
   ];
-  nav.push({ label: 'Leads', href: base, icon: 'leads' });
+  nav.push({
+    label: 'Leads',
+    href: base,
+    icon: 'leads',
+    children: [
+      { label: 'Manage Leads', href: base },
+      ...(s.allowed('lead.create')
+        ? [
+            { label: 'Upload Leads', href: base + '/upload' },
+            { label: 'Google Sheets', href: base + '/google-sheets' },
+          ]
+        : []),
+    ],
+  });
   if (may('quotation.view', 'quotation'))
     nav.push({
       label: 'Quotations',
