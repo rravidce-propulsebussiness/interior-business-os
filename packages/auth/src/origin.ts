@@ -21,7 +21,8 @@ export function publicAuthOrigin(
   requestUrl: string,
   env: AuthEnv = process.env,
 ): string {
-  const production = env.APP_ENV === 'production' || env.NODE_ENV === 'production';
+  const production =
+    env.APP_ENV === 'production' || env.NODE_ENV === 'production';
   const configured = env.APP_ORIGIN?.trim();
   if (configured) {
     try {
@@ -52,7 +53,7 @@ export function publicAuthOrigin(
   // Production has a known canonical app domain; an internal Hostinger URL
   // must never be passed as the Supabase redirect_to or Location header.
   if (env.APP_ENV === 'staging') {
-    throw new Error('APP_ORIGIN must be set to the staging public HTTPS origin');
+    throw new Error('APP_ORIGIN must be a staging public HTTPS origin');
   }
   if (production) return productionOrigin;
 
