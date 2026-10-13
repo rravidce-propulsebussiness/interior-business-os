@@ -46,7 +46,7 @@ export default async function QuotationPackagesPage() {
         ) : (
           <QuotationPackagesManager
             packages={configurable}
-            industries={industries.filter((industry) => industry.status === 'active').map((i) => ({ key: i.key, name: i.name }))}
+            industries={industries.filter((industry) => industry.status === 'active' && industry.key !== 'construction').map((i) => ({ key: i.key, name: i.name }))}
             canManage={canManagePrice}
             currency={organization.default_currency || 'INR'}
           />
