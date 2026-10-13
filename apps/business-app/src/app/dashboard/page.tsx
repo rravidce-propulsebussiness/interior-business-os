@@ -192,6 +192,7 @@ export default async function Dashboard({
           invitation to join an existing company.
         </p>
         <a href="/dashboard/company/apply">Create your company →</a>
+        <a href="/auth/propulse">Already registered on ProPulse? Import your company →</a>
         <a href="/dashboard/company/invitations">Join an invited company →</a>
       </main>
     );
