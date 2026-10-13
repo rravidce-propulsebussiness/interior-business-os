@@ -1,5 +1,6 @@
 import 'server-only';
 import { NextResponse } from 'next/server';
+import { publicAuthOrigin } from '@business-os/auth/origin';
 import {
   createServerDatabase,
   isSupabaseConfigured,
@@ -13,7 +14,7 @@ export async function providerStart(
   request: Request,
   provider: 'google' | 'propulse',
 ) {
-  const origin = process.env.APP_ORIGIN?.trim() || new URL(request.url).origin;
+  const origin = publicAuthOrigin(request.url);
   const fallback = new URL('/login', origin);
   fallback.searchParams.set('provider_error', 'unavailable');
 

@@ -7,6 +7,7 @@ The Business App login at `/login` supports three entry points: Supabase email/p
 1. In Google Cloud, configure an OAuth 2.0 Web client and the authorized redirect URI `https://<SUPABASE_PROJECT_REF>.supabase.co/auth/v1/callback`.
 2. Enable **Google** in the **same Supabase project** used for Business OS (Authentication → Providers → Google). Store the Google client ID/secret there, not in frontend code.
 3. Configure the Supabase redirect allowlist to include `https://sghomesinterior.in/auth/callback` (plus intentional staging origins). Set `APP_ORIGIN=https://sghomesinterior.in` and use the correct Supabase public project URL and publishable key in Business App.
+   **Hostinger:** configure `APP_ORIGIN=https://sghomesinterior.in` in the Business App runtime. The OAuth start and callback routes now use the canonical public origin even if a reverse proxy exposes `0.0.0.0:3000`; a missing or invalid production origin falls back to this known production domain. Staging requires an explicit HTTPS `APP_ORIGIN`. Do not add `http://0.0.0.0:3000` to Supabase redirect allowlists.
 4. `GET /auth/google` initiates server-side PKCE with `signInWithOAuth`. The existing `/auth/callback` exchanges the code for a secure Supabase session and redirects to `/dashboard`. Existing role checks decide whether an owner, employee, or platform admin may access their workspace.
 
 Never redirect to user-supplied `next` URLs or return raw provider access tokens to the browser.
