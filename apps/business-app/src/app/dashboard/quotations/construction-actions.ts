@@ -11,6 +11,7 @@ import { createConstructionRatesRepository } from '@business-os/database/constru
 import { createConstructionPackagesRepository } from '@business-os/database/construction-packages';
 import { DomainError, idSchema, safeFailure } from '@business-os/shared';
 import { commercialServices } from '../commercial/service';
+import { snapshotConstructionPackagePdf } from '../pricing/construction/package-pdf-snapshot';
 
 const selectionSchema = z
   .object({
@@ -371,6 +372,10 @@ export async function saveFloorwiseSftEstimate(
       discount: { kind: 'none', value: '0' },
       estimated_cost_rate: null,
     });
+    const user = await s.authorization.requireAuthenticatedUser();
+    await snapshotConstructionPackagePdf(
+      s.org, rid, selectedPackage?.id ?? null, user.id,
+    );
     revalidatePath('/dashboard/quotations', 'layout');
     return {
       id,
