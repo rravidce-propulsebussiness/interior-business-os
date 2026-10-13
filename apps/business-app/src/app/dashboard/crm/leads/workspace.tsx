@@ -241,6 +241,7 @@ export function LeadsWorkspace({
   prevHref,
   nextHref,
   canCreate,
+  canConfigureCrm,
   canManage,
   canAssign,
   canWin,
@@ -273,6 +274,7 @@ export function LeadsWorkspace({
   prevHref: string | null;
   nextHref: string | null;
   canCreate: boolean;
+  canConfigureCrm: boolean;
   canManage: boolean;
   canAssign: boolean;
   canWin: boolean;
@@ -482,6 +484,7 @@ export function LeadsWorkspace({
       <div id="crm-inline-action">
         {leadTool === 'add' && canCreate && (
           <QuickAddLead
+            canConfigureCrm={canConfigureCrm}
             sources={sources.filter(
               (source) => !/propulse/i.test(source.label),
             )}
