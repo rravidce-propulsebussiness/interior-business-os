@@ -427,11 +427,11 @@ export function QuotationStudioEditor({
                   </a>
                   <a
                     className="qs-btn"
-                    href={url + '/preview'}
+                    href={url + '/pdf?view=1'}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    Open full preview ↗
+                    View complete PDF + attachments ↗
                   </a>
                 </div>
                 {status === 'draft' && canIssue && lines.length > 0 && (
