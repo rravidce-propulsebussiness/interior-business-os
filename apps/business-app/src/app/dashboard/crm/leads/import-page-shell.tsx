@@ -133,22 +133,6 @@ export async function LeadImportPage({
             ← All Leads
           </a>
         </div>
-        <nav className="crm-import-page-links" aria-label="Lead import pages">
-          <a
-            href={uploadPath}
-            aria-current={method === 'file' ? 'page' : undefined}
-            className={method === 'file' ? 'crm-import-page-active' : ''}
-          >
-            Upload Leads
-          </a>
-          <a
-            href={googlePath}
-            aria-current={method === 'google' ? 'page' : undefined}
-            className={method === 'google' ? 'crm-import-page-active' : ''}
-          >
-            Google Sheets
-          </a>
-        </nav>
         <SheetImportForm
           method={method}
           sources={sources}
