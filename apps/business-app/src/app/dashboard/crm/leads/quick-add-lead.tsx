@@ -2,16 +2,19 @@
 
 import { useState } from 'react';
 import { createQuickLead } from './quick-add-action';
+import { initializeCrmForImports } from './import/actions';
 
 type Option = { value: string; label: string };
 
 export function QuickAddLead({
   sources,
   stages,
+  canConfigureCrm,
   onClose,
 }: {
   sources: Option[];
   stages: Option[];
+  canConfigureCrm: boolean;
   onClose: () => void;
 }) {
   const [name, setName] = useState('');
@@ -27,6 +30,7 @@ export function QuickAddLead({
   );
   const [stageId, setStageId] = useState(stages[0]?.value ?? '');
   const [busy, setBusy] = useState(false);
+  const [setupBusy, setSetupBusy] = useState(false);
   const [feedback, setFeedback] = useState('');
   return (
     <section className="crm-inline-lead-tool" aria-label="Add a lead">
@@ -158,13 +162,38 @@ export function QuickAddLead({
           />
         </label>
         {(!sources.length || !stages.length) && (
-          <p
+          <div
             role="alert"
             className="crm-integration-message crm-quick-add-wide"
           >
-            Configure lead sources and pipeline stages using Import Sheet → Set
-            up default CRM first.
-          </p>
+            <p>
+              Your company needs an active lead source and an open pipeline
+              stage. You can set these up here—no spreadsheet is required.
+            </p>
+            {canConfigureCrm ? (
+              <button
+                type="button"
+                className="crm-outline"
+                disabled={setupBusy}
+                onClick={async () => {
+                  setSetupBusy(true);
+                  try {
+                    const result = await initializeCrmForImports();
+                    setFeedback(result.message);
+                    if (result.ok) window.location.reload();
+                  } catch {
+                    setFeedback('Could not initialize CRM. Please retry.');
+                  } finally {
+                    setSetupBusy(false);
+                  }
+                }}
+              >
+                {setupBusy ? 'Preparing CRM…' : 'Set up lead sources and stages'}
+              </button>
+            ) : (
+              <p>Ask your company owner to configure the CRM defaults.</p>
+            )}
+          </div>
         )}
         {feedback && (
           <p
