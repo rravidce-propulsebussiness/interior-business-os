@@ -253,8 +253,13 @@ begin
 end $f$;
 revoke all on function public.quotation_share_pdf_attachments(text)
   from public,anon,authenticated;
-grant execute on function public.quotation_share_pdf_attachments(text)
-  to service_role;
+do $grant$
+begin
+  if exists (select 1 from pg_roles where rolname='service_role') then
+    grant execute on function public.quotation_share_pdf_attachments(text)
+      to service_role;
+  end if;
+end $grant$;
 
 commit;
   then raise exception 'Unavailable link' using errcode='42501';end if;
