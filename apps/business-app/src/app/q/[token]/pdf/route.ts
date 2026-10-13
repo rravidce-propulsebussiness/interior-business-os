@@ -22,10 +22,17 @@ export async function GET(
       p_token: token,
     });
     if (error) throw new Error('Public PDF annexures unavailable');
-    const attachments = z.array(z.object({
-      storage_path: z.string().min(15).max(260),
-      byte_size: z.number().int().positive().max(15 * 1024 * 1024),
-    }).strict()).max(6).parse(data);
+    const attachments = z
+      .array(
+        z
+          .object({
+            storage_path: z.string().min(15).max(260),
+            byte_size: z.number().int().positive().max(15 * 1024 * 1024),
+          })
+          .strict(),
+      )
+      .max(6)
+      .parse(data);
     const extra: Uint8Array[] = [];
     for (const attachment of attachments) {
       const { data: file, error: storageError } = await admin.storage
