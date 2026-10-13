@@ -1,5 +1,8 @@
 import { renderQuotationDocument } from '@business-os/core/quotation-document';
-import { PdfServiceError } from '@business-os/shared/pdf';
+import { PdfServiceError, appendQuotationAnnexures } from '@business-os/shared/pdf';
+import { createOwnerProvisioningDatabase } from '@business-os/database/server';
+import { z } from 'zod';
+import { QUOTATION_PDF_BUCKET } from '../../../dashboard/quotations/quotation-storage';
 import { publicHeaders, publicQuotation, unavailable } from '../../service';
 import { renderQuotationPdf } from '../../../dashboard/quotations/pdf';
 export const runtime = 'nodejs';
@@ -11,7 +14,27 @@ export async function GET(
   try {
     const { token } = await params,
       q = await publicQuotation(token, 'pdf');
-    const bytes = await renderQuotationPdf(renderQuotationDocument(q.document));
+    const base = await renderQuotationPdf(renderQuotationDocument(q.document));
+    // publicQuotation validates token, expiry, revocation and PDF permission.
+    // Revalidate server-side before retrieving private company annexures.
+    const admin = createOwnerProvisioningDatabase();
+    const { data, error } = await admin.rpc('quotation_share_pdf_attachments', {
+      p_token: token,
+    });
+    if (error) throw new Error('Public PDF annexures unavailable');
+    const attachments = z.array(z.object({
+      storage_path: z.string().min(15).max(260),
+      byte_size: z.number().int().positive().max(15 * 1024 * 1024),
+    }).strict()).max(6).parse(data);
+    const extra: Uint8Array[] = [];
+    for (const attachment of attachments) {
+      const { data: file, error: storageError } = await admin.storage
+        .from(QUOTATION_PDF_BUCKET).download(attachment.storage_path);
+      if (storageError || !file || file.size !== attachment.byte_size)
+        throw new Error('Quotation attachment unavailable');
+      extra.push(new Uint8Array(await file.arrayBuffer()));
+    }
+    const bytes = await appendQuotationAnnexures(base, extra);
     return new Response(new Uint8Array(bytes), {
       headers: {
         ...publicHeaders,
