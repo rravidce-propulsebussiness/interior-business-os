@@ -13,7 +13,7 @@ const localHosts = new Set(['localhost', '127.0.0.1', '[::1]']);
 
 export function publicAuthOrigin(
   requestUrl: string,
-  env: Pick<NodeJS.ProcessEnv, 'APP_ORIGIN' | 'APP_ENV' | 'NODE_ENV'> = process.env,
+  env: { APP_ORIGIN?: string; APP_ENV?: string; NODE_ENV?: string } = process.env,
 ): string {
   const production = env.APP_ENV === 'production' || env.NODE_ENV === 'production';
   const configured = env.APP_ORIGIN?.trim();
