@@ -33,10 +33,7 @@ export default async function QuotationPackagesPage() {
           <span className="qs-heading-icon">▦</span>
           <div>
             <h1>Quotation Package Manager</h1>
-            <p>
-              Manage your company&apos;s construction, interior and future
-              industry packages.
-            </p>
+            <p>Manage construction, interior and future-industry packages.</p>
           </div>
         </div>
         <Link href="/dashboard/quotations" className="qs-btn">
