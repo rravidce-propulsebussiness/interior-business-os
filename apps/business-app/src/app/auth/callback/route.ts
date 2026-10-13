@@ -8,9 +8,13 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const cookieStore = await cookies();
-  const startedPropulse = cookieStore.get('business-os-propulse-oauth')?.value === 'pending';
+  const startedPropulse =
+    cookieStore.get('business-os-propulse-oauth')?.value === 'pending';
   const redirect = (destination: string) => {
-    const response = NextResponse.redirect(new URL(destination, url.origin), 303);
+    const response = NextResponse.redirect(
+      new URL(destination, url.origin),
+      303,
+    );
     response.cookies.set('business-os-propulse-oauth', '', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',

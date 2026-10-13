@@ -19,8 +19,7 @@ type CompanyResult =
 const USERINFO = 'https://propulsetechnologies.online/api/oauth/userinfo';
 
 function normalizeProfile(value: unknown) {
-  if (!value || typeof value !== 'object' || Array.isArray(value))
-    return null;
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
   const data = value as Record<string, unknown>;
   const str = (input: unknown, max: number) =>
     typeof input === 'string' ? input.trim().slice(0, max) : '';
@@ -32,8 +31,9 @@ function normalizeProfile(value: unknown) {
     ? data.services.slice(0, 30)
     : [];
   const services = rawServices
-    .filter((item): item is Record<string, unknown> =>
-      !!item && typeof item === 'object' && !Array.isArray(item),
+    .filter(
+      (item): item is Record<string, unknown> =>
+        !!item && typeof item === 'object' && !Array.isArray(item),
     )
     .map((item) => ({
       industry: str(item.industry, 100),
@@ -43,8 +43,9 @@ function normalizeProfile(value: unknown) {
     ? data.locations.slice(0, 30)
     : [];
   const locations = rawLocations
-    .filter((item): item is Record<string, unknown> =>
-      !!item && typeof item === 'object' && !Array.isArray(item),
+    .filter(
+      (item): item is Record<string, unknown> =>
+        !!item && typeof item === 'object' && !Array.isArray(item),
     )
     .map((item) => ({
       city: str(item.city, 100),
@@ -130,7 +131,10 @@ export async function syncPropulseCompany(
     if (error || !result || typeof result !== 'object' || Array.isArray(result))
       return { status: 'unavailable' };
     const value = result as Record<string, unknown>;
-    if (value.status === 'needs_selection' || value.status === 'review_required')
+    if (
+      value.status === 'needs_selection' ||
+      value.status === 'review_required'
+    )
       return { status: value.status };
     if (
       ['created', 'updated', 'matched'].includes(String(value.status)) &&

@@ -189,16 +189,32 @@ export default async function Dashboard({
       <main id="main-content" className="owner-no-company">
         <h1>No active company workspace</h1>
         {signInResult === 'no_company' && (
-          <p>Your ProPulse account is linked, but no business profile was found there. Complete your professional company profile in ProPulse or create a new Business OS company.</p>
+          <p>
+            Your ProPulse account is linked, but no business profile was found
+            there. Complete your professional company profile in ProPulse or
+            create a new Business OS company.
+          </p>
         )}
         {signInResult === 'review_required' && (
-          <p>New company registration requires platform approval. Please apply to register your business or ask an administrator for access.</p>
+          <p>
+            New company registration requires platform approval. Please apply to
+            register your business or ask an administrator for access.
+          </p>
         )}
         {signInResult === 'needs_selection' && (
-          <p>You already have a company workspace, but its identity differs from the ProPulse business. We have not created a duplicate or changed access. Contact the platform administrator to confirm which company should be linked.</p>
+          <p>
+            You already have a company workspace, but its identity differs from
+            the ProPulse business. We have not created a duplicate or changed
+            access. Contact the platform administrator to confirm which company
+            should be linked.
+          </p>
         )}
         {signInResult === 'unavailable' && (
-          <p>Your ProPulse login worked, but company synchronization could not be completed. Try connecting again, or contact support if this continues.</p>
+          <p>
+            Your ProPulse login worked, but company synchronization could not be
+            completed. Try connecting again, or contact support if this
+            continues.
+          </p>
         )}
         <a href="/auth/propulse">Connect ProPulse business →</a>
         <p>
@@ -527,19 +543,39 @@ export default async function Dashboard({
     >
       <main id="main-content" tabIndex={-1} className="owner-dashboard">
         {signInResult === 'success' && (
-          <div role="status" className="mb-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
-            ProPulse company details are connected and your company workspace is ready.
-            <a href="/dashboard/company/settings" className="ml-2 font-semibold underline">View imported details →</a>
+          <div
+            role="status"
+            className="mb-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900"
+          >
+            ProPulse company details are connected and your company workspace is
+            ready.
+            <a
+              href="/dashboard/company/settings"
+              className="ml-2 font-semibold underline"
+            >
+              View imported details →
+            </a>
           </div>
         )}
         {signInResult === 'needs_selection' && (
-          <div role="status" className="mb-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-            An existing Business OS company needs confirmation before it can be linked to ProPulse. No data or permissions were changed.
+          <div
+            role="status"
+            className="mb-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900"
+          >
+            An existing Business OS company needs confirmation before it can be
+            linked to ProPulse. No data or permissions were changed.
           </div>
         )}
         {signInResult === 'unavailable' && (
-          <div role="status" className="mb-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-            ProPulse sign-in succeeded, but company synchronization was unavailable. <a href="/auth/propulse" className="font-semibold underline">Try again →</a>
+          <div
+            role="status"
+            className="mb-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900"
+          >
+            ProPulse sign-in succeeded, but company synchronization was
+            unavailable.{' '}
+            <a href="/auth/propulse" className="font-semibold underline">
+              Try again →
+            </a>
           </div>
         )}
 
