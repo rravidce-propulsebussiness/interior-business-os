@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-html-link-for-pages -- Use full-document navigation to All Leads on Hostinger. */
 'use client';
 
 import { useRef, useState, type ChangeEvent, type DragEvent } from 'react';
@@ -592,13 +593,9 @@ export function SheetImportForm({
                   ))}
                 </ul>
               )}
-              <button
-                type="button"
-                className="crm-import-view-leads"
-                onClick={() => window.location.assign('/dashboard/crm/leads')}
-              >
+              <a className="crm-import-view-leads" href="/dashboard/crm/leads">
                 View All Leads →
-              </button>
+              </a>
             </div>
           )}
         </div>
