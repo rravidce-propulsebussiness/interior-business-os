@@ -71,7 +71,8 @@ begin
  v_status = p_input->>'status';
  if length(v_name) not between 2 and 120
     or v_code !~ '^[A-Z][A-Z0-9-]{1,19}$'
-    or v_industry !~ '^[a-z][a-z0-9_]{0,63}    or not exists (select 1 from public.industries i where i.key=v_industry and i.status='active')
+    or v_industry !~ '^[a-z][a-z0-9_]{0,63}$'
+    or not exists (select 1 from public.industries i where i.key=v_industry and i.status='active')
     or length(v_description)>2000
     or v_basis not in ('fixed','per_sqft','per_bhk','per_unit')
     or v_currency !~ '^[A-Z]{3}$'
