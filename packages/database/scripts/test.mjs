@@ -7,6 +7,7 @@ console.log(psql(['-f', file('tests/employee-invitations.sql')]));
 console.log(psql(['-f', file('tests/catalog.sql')]));
 console.log(psql(['-f', file('tests/quotation-studio-defaults.sql')]));
 console.log(psql(['-f', file('tests/quotation-owner-access.sql')]));
+console.log(psql(['-f', file('tests/quotation-signing-preflight.sql')]));
 console.log(psql(['-f', file('tests/quotations.sql')]));
 console.log(psql(['-f', file('tests/crm-starter-defaults.sql')]));
 console.log(psql(['-f', file('tests/crm.sql')]));

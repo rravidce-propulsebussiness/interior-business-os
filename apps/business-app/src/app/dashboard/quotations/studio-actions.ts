@@ -76,6 +76,19 @@ export async function createStudioQuotation(input: unknown): Promise<{
           'Company quotation branding is not configured yet. Open Quotation Settings to finish setup.',
       };
 
+    // A broken Hostinger/database signing-key pair used to create customer
+    // and project records and only then reject the final quotation. Verify
+    // the same attestation up front so retries are safe and actionable.
+    try {
+      await s.commercial.assertSigningReady(s.org);
+    } catch {
+      return {
+        ok: false,
+        message:
+          'Quotation security verification failed before saving. Please ask the platform administrator to check that Hostinger QUOTATION_SIGNING_KEY matches the Supabase quotation signing key, then sign in again.',
+      };
+    }
+
     const customerId = randomUUID();
     const baseAddress = {
       line1: '',
