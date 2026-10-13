@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation';
 import { createStudioQuotation } from './studio-actions';
 
 type Industry = { key: string; name: string };
+type ExistingCustomer = { id: string; display_name: string; phone: string; email: string };
+type ExistingProject = { id: string; customer_id: string; name: string };
+
 type QuoteLead = {
   id: string;
   lead_number: string;
@@ -19,10 +22,14 @@ type QuoteLead = {
 
 export function QuotationStudioStart({
   leads,
+  existingCustomers,
+  existingProjects,
   industries,
   defaultCurrency,
 }: {
   leads: QuoteLead[];
+  existingCustomers: ExistingCustomer[];
+  existingProjects: ExistingProject[];
   industries: Industry[];
   defaultCurrency: string;
 }) {
@@ -35,6 +42,14 @@ export function QuotationStudioStart({
   const [mode, setMode] = useState<'sft' | 'custom' | 'upload'>('sft');
   const [pending, start] = useTransition();
   const [feedback, setFeedback] = useState('');
+  const [customerId, setCustomerId] = useState('');
+  const [projectId, setProjectId] = useState('');
+  const currentCustomer = existingCustomers.find((customer) => customer.id === customerId);
+  const customerProjects = existingProjects.filter((project) => project.customer_id === customerId);
+  const selectedProject = customerProjects.find((project) => project.id === projectId);
+  const customerCrn = customerId
+    ? 'CRN-' + customerId.replaceAll('-', '').slice(0, 12).toUpperCase()
+    : '';
   const [data, setData] = useState({
     clientName: '',
     phone: '',
@@ -153,6 +168,8 @@ export function QuotationStudioStart({
           start(async () => {
             const result = await createStudioQuotation({
               ...data,
+              customerId: customerId || null,
+              projectId: projectId || null,
               industryKey: industry,
               currency: defaultCurrency,
             });
@@ -190,10 +207,17 @@ export function QuotationStudioStart({
                   (item) => item.id === event.target.value,
                 );
                 if (!lead) return;
+                const match = existingCustomers.find(
+                  (customer) =>
+                    (lead.email && customer.email.toLowerCase() === lead.email.toLowerCase()) ||
+                    (lead.phone && customer.phone.replace(/\\D/g, '') === lead.phone.replace(/\\D/g, '')),
+                );
+                setCustomerId(match?.id ?? '');
+                setProjectId('');
                 setData({
-                  clientName: lead.name || '',
-                  phone: lead.phone || '',
-                  email: lead.email || '',
+                  clientName: match?.display_name || lead.name || '',
+                  phone: match?.phone || lead.phone || '',
+                  email: match?.email || lead.email || '',
                   projectName: (lead.service_type || 'Client') + ' project',
                   location: lead.location || '',
                   plotSize: lead.project_size || '',
@@ -217,6 +241,60 @@ export function QuotationStudioStart({
             </select>
           </label>
         )}
+        <div className="qs-note" style={{ marginBottom: 16 }}>
+          Each customer has one permanent Customer Reference Number (CRN).
+          Choose an existing customer to keep their quotation history under the
+          same CRN. Creating a new quotation for an existing project opens its
+          current quotation rather than making a duplicate.
+        </div>
+        <div className="qs-fields" style={{ marginBottom: 16 }}>
+          <label className="qs-field qs-field-full">
+            Existing customer / CRN
+            <select
+              value={customerId}
+              onChange={(event) => {
+                const id = event.target.value;
+                const selected = existingCustomers.find((customer) => customer.id === id);
+                setCustomerId(id);
+                setProjectId('');
+                setData((prev) => ({
+                  ...prev,
+                  clientName: selected?.display_name ?? '',
+                  phone: selected?.phone ?? '',
+                  email: selected?.email ?? '',
+                }));
+                setFeedback('');
+              }}
+            >
+              <option value="">+ New customer (only if not registered already)</option>
+              {existingCustomers.map((customer) => (
+                <option value={customer.id} key={customer.id}>
+                  {'CRN-' + customer.id.replaceAll('-', '').slice(0, 12).toUpperCase()} · {customer.display_name} · {customer.phone}
+                </option>
+              ))}
+            </select>
+          </label>
+          {currentCustomer && (
+            <label className="qs-field qs-field-full">
+              Project under {customerCrn}
+              <select
+                value={projectId}
+                onChange={(event) => {
+                  const id = event.target.value;
+                  const project = customerProjects.find((item) => item.id === id);
+                  setProjectId(id);
+                  if (project) update('projectName', project.name);
+                  setFeedback('');
+                }}
+              >
+                <option value="">+ Create new project for this customer</option>
+                {customerProjects.map((project) => (
+                  <option key={project.id} value={project.id}>{project.name}</option>
+                ))}
+              </select>
+            </label>
+          )}
+        </div>
         <div className="qs-fields">
           <label className="qs-field">
             Client name *
@@ -224,6 +302,7 @@ export function QuotationStudioStart({
               required
               maxLength={200}
               value={data.clientName}
+              readOnly={Boolean(currentCustomer)}
               placeholder="Client full name"
               onChange={(e) => update('clientName', e.target.value)}
             />
@@ -236,6 +315,7 @@ export function QuotationStudioStart({
               minLength={3}
               maxLength={40}
               value={data.phone}
+              readOnly={Boolean(currentCustomer)}
               placeholder="+91 98765 43210"
               onChange={(e) => update('phone', e.target.value)}
             />
@@ -246,6 +326,7 @@ export function QuotationStudioStart({
               type="email"
               maxLength={254}
               value={data.email}
+              readOnly={Boolean(currentCustomer)}
               placeholder="client@example.com"
               onChange={(e) => update('email', e.target.value)}
             />
@@ -256,6 +337,7 @@ export function QuotationStudioStart({
               required
               maxLength={200}
               value={data.projectName}
+              readOnly={Boolean(selectedProject)}
               placeholder="Residential construction"
               onChange={(e) => update('projectName', e.target.value)}
             />
@@ -294,6 +376,7 @@ export function QuotationStudioStart({
         </div>
         <div className="qs-divider" />
         <div className="qs-note">
+          {customerCrn ? customerCrn + ' · ' : 'A new CRN will be assigned. '}
           Your quotation will use this company&apos;s saved name, logo, contact
           details, quotation prefix and terms. You can change pricing,
           materials, payment terms and PDF attachments after creating the draft.
