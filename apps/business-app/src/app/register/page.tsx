@@ -33,7 +33,7 @@ export default function Register() {
         <h1 id="register-title">Create your account</h1>
         <p>
           Confirm your email, sign in, and create your company workspace.
-          Employee accounts can join their team's workspace by invitation.
+          Employee accounts can join their team&apos;s workspace by invitation.
         </p>
         <AuthForm action={signUp} registerAccount />
         <div className="auth-links">
