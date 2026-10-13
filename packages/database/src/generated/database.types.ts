@@ -8393,7 +8393,6 @@ export interface Database {
           created_by: string;
           created_at?: string;
           source_package_id?: string | null;
-          source_package_id?: string | null;
         };
         Update: {
           id?: string;
@@ -8404,6 +8403,7 @@ export interface Database {
           byte_size?: number;
           created_by?: string;
           created_at?: string;
+          source_package_id?: string | null;
         };
         Relationships: [
           {
