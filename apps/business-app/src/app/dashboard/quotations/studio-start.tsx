@@ -209,8 +209,9 @@ export function QuotationStudioStart({
                 if (!lead) return;
                 const match = existingCustomers.find(
                   (customer) =>
-                    (lead.email && customer.email.toLowerCase() === lead.email.toLowerCase()) ||
-                    (lead.phone && customer.phone.replace(/\\D/g, '') === lead.phone.replace(/\\D/g, '')),
+                    customer.display_name.trim().toLowerCase() === lead.name.trim().toLowerCase() &&
+                    ((lead.email && customer.email.toLowerCase() === lead.email.toLowerCase()) ||
+                      (lead.phone && customer.phone.replace(/\D/g, '') === lead.phone.replace(/\D/g, ''))),
                 );
                 setCustomerId(match?.id ?? '');
                 setProjectId('');
