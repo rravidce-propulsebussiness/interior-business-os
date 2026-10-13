@@ -1180,6 +1180,47 @@ export interface Database {
           },
         ];
       };
+      construction_package_spec_attachments: {
+        Row: {
+          id: string;
+          organization_id: string;
+          package_id: string;
+          storage_path: string;
+          filename: string;
+          byte_size: number;
+          created_by: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          package_id: string;
+          storage_path: string;
+          filename: string;
+          byte_size: number;
+          created_by: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          package_id?: string;
+          storage_path?: string;
+          filename?: string;
+          byte_size?: number;
+          created_by?: string;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'construction_package_spec_attachments_created_by_fkey';
+            columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       contracts: {
         Row: {
           id: string;
@@ -8335,6 +8376,7 @@ export interface Database {
           id: string;
           organization_id: string;
           revision_id: string;
+          source_package_id: string | null;
           storage_path: string;
           filename: string;
           byte_size: number;
@@ -8345,6 +8387,7 @@ export interface Database {
           id?: string;
           organization_id: string;
           revision_id: string;
+          source_package_id?: string | null;
           storage_path: string;
           filename: string;
           byte_size: number;
@@ -8355,6 +8398,7 @@ export interface Database {
           id?: string;
           organization_id?: string;
           revision_id?: string;
+          source_package_id?: string | null;
           storage_path?: string;
           filename?: string;
           byte_size?: number;
