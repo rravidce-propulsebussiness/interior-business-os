@@ -191,7 +191,9 @@ export function SheetImportForm({
     if (!file) return;
     setFilename(file.name);
     if (!/\.csv$/i.test(file.name)) {
-      setError('Choose a CSV file. In Excel: Save As → CSV; in Google Sheets: File → Download → CSV.');
+      setError(
+        'Choose a CSV file. In Excel: Save As → CSV; in Google Sheets: File → Download → CSV.',
+      );
       return;
     }
     if (file.size > MAX_FILE_BYTES) {
@@ -201,7 +203,9 @@ export function SheetImportForm({
     try {
       setRows(mapRows(readCsv(await file.text())));
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'Could not read this CSV.');
+      setError(
+        cause instanceof Error ? cause.message : 'Could not read this CSV.',
+      );
     }
   }
 
@@ -214,13 +218,16 @@ export function SheetImportForm({
     setError('');
     setReport(null);
     try {
-      if (!pasteText.trim()) throw new Error('Copy a table from Google Sheets and paste it above.');
+      if (!pasteText.trim())
+        throw new Error('Copy a table from Google Sheets and paste it above.');
       const delimiter = pasteText.includes('\t') ? '\t' : ',';
       const parsed = mapRows(readCsv(pasteText, delimiter));
       setRows(parsed);
       setFilename('Google Sheets copied rows');
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'Could not read pasted rows.');
+      setError(
+        cause instanceof Error ? cause.message : 'Could not read pasted rows.',
+      );
     }
   }
 
@@ -288,9 +295,16 @@ export function SheetImportForm({
           <div className="crm-import-hero-heading">
             <div>
               <h2>Bring your leads into Business OS</h2>
-              <p>Upload customer enquiries securely, preview them and import directly into All Leads.</p>
+              <p>
+                Upload customer enquiries securely, preview them and import
+                directly into All Leads.
+              </p>
             </div>
-            <button type="button" className="crm-import-template" onClick={downloadTemplate}>
+            <button
+              type="button"
+              className="crm-import-template"
+              onClick={downloadTemplate}
+            >
               ↓ Download CSV template
             </button>
           </div>
@@ -302,149 +316,294 @@ export function SheetImportForm({
         </div>
         <div className="crm-import-content">
           <nav className="crm-import-methods" aria-label="Import method">
-            <button type="button" className={method === 'file' ? 'crm-import-method-selected' : ''}
-              aria-pressed={method === 'file'} disabled={running}
+            <button
+              type="button"
+              className={method === 'file' ? 'crm-import-method-selected' : ''}
+              aria-pressed={method === 'file'}
+              disabled={running}
               onClick={() => {
                 setMethod('file');
                 setRows([]);
                 setFilename('');
                 setError('');
                 setReport(null);
-              }}>
+              }}
+            >
               <span className="crm-import-method-symbol">↑</span>
-              <span><strong>Upload File</strong><small>CSV export from Excel</small></span>
+              <span>
+                <strong>Upload File</strong>
+                <small>CSV export from Excel</small>
+              </span>
             </button>
-            <button type="button" className={method === 'google' ? 'crm-import-method-selected' : ''}
-              aria-pressed={method === 'google'} disabled={running}
+            <button
+              type="button"
+              className={
+                method === 'google' ? 'crm-import-method-selected' : ''
+              }
+              aria-pressed={method === 'google'}
+              disabled={running}
               onClick={() => {
                 setMethod('google');
                 setRows([]);
                 setFilename('');
                 setError('');
                 setReport(null);
-              }}>
+              }}
+            >
               <span className="crm-import-method-symbol">▦</span>
-              <span><strong>Google Sheets</strong><small>Copy and paste rows</small></span>
+              <span>
+                <strong>Google Sheets</strong>
+                <small>Copy and paste rows</small>
+              </span>
             </button>
           </nav>
           {method === 'file' ? (
-            <div className={'crm-import-dropzone' + (dragActive ? ' crm-import-dragging' : '')}
-              onDragEnter={(event) => { event.preventDefault(); if (!running) setDragActive(true); }}
-              onDragOver={(event) => { event.preventDefault(); if (!running) setDragActive(true); }}
-              onDragLeave={(event) => { event.preventDefault(); setDragActive(false); }}
-              onDrop={handleDrop}>
-              <div className="crm-import-drop-icon" aria-hidden="true">↑</div>
+            <div
+              className={
+                'crm-import-dropzone' +
+                (dragActive ? ' crm-import-dragging' : '')
+              }
+              onDragEnter={(event) => {
+                event.preventDefault();
+                if (!running) setDragActive(true);
+              }}
+              onDragOver={(event) => {
+                event.preventDefault();
+                if (!running) setDragActive(true);
+              }}
+              onDragLeave={(event) => {
+                event.preventDefault();
+                setDragActive(false);
+              }}
+              onDrop={handleDrop}
+            >
+              <div className="crm-import-drop-icon" aria-hidden="true">
+                ↑
+              </div>
               <h3>Drop your leads file here</h3>
               <p>Drag and drop a CSV file, or choose it from your computer</p>
-              <button type="button" className="crm-import-primary" disabled={running}
-                onClick={() => fileInputRef.current?.click()}>Browse files</button>
-              <input ref={fileInputRef} type="file" accept=".csv,text/csv"
-                aria-label="Choose CSV lead sheet" disabled={running}
-                onChange={loadFile} className="crm-import-file-input" />
+              <button
+                type="button"
+                className="crm-import-primary"
+                disabled={running}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                Browse files
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".csv,text/csv"
+                aria-label="Choose CSV lead sheet"
+                disabled={running}
+                onChange={loadFile}
+                className="crm-import-file-input"
+              />
               <small>Excel: Save As CSV · Max 1 MB · Up to 500 rows</small>
             </div>
           ) : (
             <div className="crm-import-google-panel">
               <div className="crm-import-google-info">
-                <strong>Import from Google Sheets without sharing your sheet</strong>
-                <p>Select the header row and lead rows in Google Sheets, press Ctrl+C, then paste below.
-                  The first row should contain Name and Phone column headings.</p>
+                <strong>
+                  Import from Google Sheets without sharing your sheet
+                </strong>
+                <p>
+                  Select the header row and lead rows in Google Sheets, press
+                  Ctrl+C, then paste below. The first row should contain Name
+                  and Phone column headings.
+                </p>
               </div>
-              <label className="crm-import-paste-label" htmlFor="crm-google-sheet-paste">
+              <label
+                className="crm-import-paste-label"
+                htmlFor="crm-google-sheet-paste"
+              >
                 Paste copied spreadsheet cells
               </label>
-              <textarea id="crm-google-sheet-paste" rows={6} value={pasteText}
+              <textarea
+                id="crm-google-sheet-paste"
+                rows={6}
+                value={pasteText}
                 onChange={(event) => setPasteText(event.target.value)}
                 disabled={running}
-                placeholder={'Name\tPhone\tEmail\tLocation\tRequirement\nAsha Kumar\t+919876543210\tasha@example.com\tHyderabad\t2 BHK interiors'} />
+                placeholder={
+                  'Name\tPhone\tEmail\tLocation\tRequirement\nAsha Kumar\t+919876543210\tasha@example.com\tHyderabad\t2 BHK interiors'
+                }
+              />
               <div className="crm-import-google-footer">
-                <span>Tab-separated spreadsheet rows and CSV text are supported.</span>
-                <button type="button" className="crm-import-primary"
-                  onClick={loadGoogleRows} disabled={running || !pasteText.trim()}>
+                <span>
+                  Tab-separated spreadsheet rows and CSV text are supported.
+                </span>
+                <button
+                  type="button"
+                  className="crm-import-primary"
+                  onClick={loadGoogleRows}
+                  disabled={running || !pasteText.trim()}
+                >
                   Preview pasted leads →
                 </button>
               </div>
-              <p className="crm-import-google-note">This is a secure manual paste, not a background Google account connection.</p>
+              <p className="crm-import-google-note">
+                This is a secure manual paste, not a background Google account
+                connection.
+              </p>
             </div>
           )}
-          {error && <p role="alert" className="crm-import-error">{error}</p>}
+          {error && (
+            <p role="alert" className="crm-import-error">
+              {error}
+            </p>
+          )}
           {!!rows.length && (
             <div className="crm-import-preview">
               <div className="crm-import-section-heading">
-                <div><span className="crm-import-step">01</span>
-                  <div><h3>Review lead preview</h3>
-                    <p>{filename} · {rows.length} ready for validation</p></div></div>
+                <div>
+                  <span className="crm-import-step">01</span>
+                  <div>
+                    <h3>Review lead preview</h3>
+                    <p>
+                      {filename} · {rows.length} ready for validation
+                    </p>
+                  </div>
+                </div>
                 <span className="crm-import-count">{rows.length} leads</span>
               </div>
               <div className="crm-import-preview-scroll">
                 <table>
-                  <thead><tr><th>Customer name</th><th>Phone</th><th>Email</th><th>Location</th><th>Requirement</th></tr></thead>
-                  <tbody>{rows.slice(0, 8).map((row, index) => (
-                    <tr key={index}>
-                      <td>{row.name || '—'}</td><td>{row.phone || '—'}</td>
-                      <td>{row.email || '—'}</td><td>{row.location || '—'}</td>
-                      <td>{row.requirement || '—'}</td>
+                  <thead>
+                    <tr>
+                      <th>Customer name</th>
+                      <th>Phone</th>
+                      <th>Email</th>
+                      <th>Location</th>
+                      <th>Requirement</th>
                     </tr>
-                  ))}</tbody>
+                  </thead>
+                  <tbody>
+                    {rows.slice(0, 8).map((row, index) => (
+                      <tr key={index}>
+                        <td>{row.name || '—'}</td>
+                        <td>{row.phone || '—'}</td>
+                        <td>{row.email || '—'}</td>
+                        <td>{row.location || '—'}</td>
+                        <td>{row.requirement || '—'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
                 </table>
               </div>
-              {rows.length > 8 && <p className="crm-import-preview-extra">Showing the first 8 of {rows.length} rows.</p>}
+              {rows.length > 8 && (
+                <p className="crm-import-preview-extra">
+                  Showing the first 8 of {rows.length} rows.
+                </p>
+              )}
             </div>
           )}
           <div className="crm-import-options">
             <div className="crm-import-section-heading">
-              <div><span className="crm-import-step">02</span>
-                <div><h3>Choose import settings</h3><p>New records will enter the same All Leads workspace.</p></div>
+              <div>
+                <span className="crm-import-step">02</span>
+                <div>
+                  <h3>Choose import settings</h3>
+                  <p>New records will enter the same All Leads workspace.</p>
+                </div>
               </div>
             </div>
             <div className="crm-import-selectors">
-              <label>Lead source
-                <select value={sourceId} onChange={(event) => setSourceId(event.target.value)} disabled={running}>
-                  {!sources.length && <option value="">No active sources configured</option>}
-                  {sources.map((source) => <option key={source.value} value={source.value}>{source.label}</option>)}
+              <label>
+                Lead source
+                <select
+                  value={sourceId}
+                  onChange={(event) => setSourceId(event.target.value)}
+                  disabled={running}
+                >
+                  {!sources.length && (
+                    <option value="">No active sources configured</option>
+                  )}
+                  {sources.map((source) => (
+                    <option key={source.value} value={source.value}>
+                      {source.label}
+                    </option>
+                  ))}
                 </select>
               </label>
-              <label>Starting stage
-                <select value={stageId} onChange={(event) => setStageId(event.target.value)} disabled={running}>
-                  {!stages.length && <option value="">No open stages configured</option>}
-                  {stages.map((stage) => <option key={stage.value} value={stage.value}>{stage.label}</option>)}
+              <label>
+                Starting stage
+                <select
+                  value={stageId}
+                  onChange={(event) => setStageId(event.target.value)}
+                  disabled={running}
+                >
+                  {!stages.length && (
+                    <option value="">No open stages configured</option>
+                  )}
+                  {stages.map((stage) => (
+                    <option key={stage.value} value={stage.value}>
+                      {stage.label}
+                    </option>
+                  ))}
                 </select>
               </label>
             </div>
             {(!sources.length || !stages.length) && (
               <div role="alert" className="crm-import-warning">
-                Configure active lead sources and an open stage in CRM Settings before importing.
+                Configure active lead sources and an open stage in CRM Settings
+                before importing.
                 {canSetup && (
-                  <button type="button" disabled={setupBusy}
+                  <button
+                    type="button"
+                    disabled={setupBusy}
                     onClick={async () => {
                       setSetupBusy(true);
-                      const result = await initializeCrmForImports().catch(() => ({
-                        ok: false, message: 'Could not initialize CRM. Try again.',
-                      }));
+                      const result = await initializeCrmForImports().catch(
+                        () => ({
+                          ok: false,
+                          message: 'Could not initialize CRM. Try again.',
+                        }),
+                      );
                       setSetupMessage(result.message);
                       setSetupBusy(false);
                       if (result.ok) window.location.reload();
-                    }}>
-                    {setupBusy ? 'Setting up CRM…' : 'Set up default CRM stages and sources'}
+                    }}
+                  >
+                    {setupBusy
+                      ? 'Setting up CRM…'
+                      : 'Set up default CRM stages and sources'}
                   </button>
                 )}
                 {setupMessage && <p role="status">{setupMessage}</p>}
               </div>
             )}
             <div className="crm-import-footer-actions">
-              <div><strong>Ready to import?</strong>
-                <p>Existing phone/email matches are skipped automatically.</p></div>
-              <button type="button" className="crm-import-primary crm-import-confirm"
+              <div>
+                <strong>Ready to import?</strong>
+                <p>Existing phone/email matches are skipped automatically.</p>
+              </div>
+              <button
+                type="button"
+                className="crm-import-primary crm-import-confirm"
                 disabled={running || !rows.length || !sourceId || !stageId}
-                onClick={submit}>
-                {running ? 'Importing ' + progress + ' / ' + rows.length + '…'
+                onClick={submit}
+              >
+                {running
+                  ? 'Importing ' + progress + ' / ' + rows.length + '…'
                   : 'Import ' + rows.length + ' leads →'}
               </button>
             </div>
             {running && (
-              <div className="crm-import-progress" role="progressbar" aria-label="Lead import progress"
-                aria-valuemin={0} aria-valuemax={rows.length} aria-valuenow={progress}>
-                <span style={{ width: (rows.length ? progress / rows.length * 100 : 0) + '%' }} />
+              <div
+                className="crm-import-progress"
+                role="progressbar"
+                aria-label="Lead import progress"
+                aria-valuemin={0}
+                aria-valuemax={rows.length}
+                aria-valuenow={progress}
+              >
+                <span
+                  style={{
+                    width:
+                      (rows.length ? (progress / rows.length) * 100 : 0) + '%',
+                  }}
+                />
               </div>
             )}
           </div>
@@ -452,31 +611,78 @@ export function SheetImportForm({
             <div role="status" className="crm-import-report">
               <h3>Import results</h3>
               <div className="crm-import-report-stats">
-                <span><strong>{report.imported}</strong> Imported</span>
-                <span><strong>{report.duplicates}</strong> Duplicates skipped</span>
-                <span><strong>{report.invalid}</strong> Invalid</span>
+                <span>
+                  <strong>{report.imported}</strong> Imported
+                </span>
+                <span>
+                  <strong>{report.duplicates}</strong> Duplicates skipped
+                </span>
+                <span>
+                  <strong>{report.invalid}</strong> Invalid
+                </span>
               </div>
-              {report.error && <p className="crm-import-error">{report.error}</p>}
-              {!!report.issues.length && (
-                <ul>{report.issues.slice(0, 10).map((issue, index) => <li key={index}>{issue}</li>)}</ul>
+              {report.error && (
+                <p className="crm-import-error">{report.error}</p>
               )}
-              <button type="button" className="crm-import-view-leads"
-                onClick={() => window.location.reload()}>Refresh All Leads →</button>
+              {!!report.issues.length && (
+                <ul>
+                  {report.issues.slice(0, 10).map((issue, index) => (
+                    <li key={index}>{issue}</li>
+                  ))}
+                </ul>
+              )}
+              <button
+                type="button"
+                className="crm-import-view-leads"
+                onClick={() => window.location.reload()}
+              >
+                Refresh All Leads →
+              </button>
             </div>
           )}
         </div>
       </section>
       <aside className="crm-import-help">
-        <div className="crm-import-help-icon" aria-hidden="true">✦</div>
+        <div className="crm-import-help-icon" aria-hidden="true">
+          ✦
+        </div>
         <h3>Import without the busywork</h3>
-        <p>Bring enquiries from Excel, Google Sheets or a CSV export into the same CRM your team uses to call customers.</p>
+        <p>
+          Bring enquiries from Excel, Google Sheets or a CSV export into the
+          same CRM your team uses to call customers.
+        </p>
         <ol>
-          <li><span>1</span><div><strong>Prepare your sheet</strong><p>Include Name and Phone columns. Other fields are optional.</p></div></li>
-          <li><span>2</span><div><strong>Upload or paste</strong><p>Preview the information before saving anything.</p></div></li>
-          <li><span>3</span><div><strong>Import into All Leads</strong><p>Duplicates are checked and your team can contact customers immediately.</p></div></li>
+          <li>
+            <span>1</span>
+            <div>
+              <strong>Prepare your sheet</strong>
+              <p>Include Name and Phone columns. Other fields are optional.</p>
+            </div>
+          </li>
+          <li>
+            <span>2</span>
+            <div>
+              <strong>Upload or paste</strong>
+              <p>Preview the information before saving anything.</p>
+            </div>
+          </li>
+          <li>
+            <span>3</span>
+            <div>
+              <strong>Import into All Leads</strong>
+              <p>
+                Duplicates are checked and your team can contact customers
+                immediately.
+              </p>
+            </div>
+          </li>
         </ol>
-        <div className="crm-import-help-note"><strong>Your customer data stays private</strong>
-          <p>Imports are saved into your current company only. Google Sheets rows can be pasted without making the sheet public.</p>
+        <div className="crm-import-help-note">
+          <strong>Your customer data stays private</strong>
+          <p>
+            Imports are saved into your current company only. Google Sheets rows
+            can be pasted without making the sheet public.
+          </p>
         </div>
       </aside>
     </div>
