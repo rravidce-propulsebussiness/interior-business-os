@@ -848,3 +848,20 @@
     flex-wrap: wrap;
   }
 }
+
+.qs-quote-filters {
+  grid-template-columns: minmax(0, 1fr) minmax(145px, 185px) auto;
+  align-items: end;
+  margin-bottom: 14px;
+}
+@media (max-width: 700px) {
+  .qs-quote-filters {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .qs-quote-filters > button {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 440px) {
+  .qs-quote-filters { grid-template-columns: minmax(0, 1fr); }
+}
