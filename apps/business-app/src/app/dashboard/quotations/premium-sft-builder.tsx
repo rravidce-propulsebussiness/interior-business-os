@@ -133,7 +133,9 @@ export function PremiumSftBuilder({
   const [step, setStep] = useState<1 | 2>(1);
   const [message, setMessage] = useState('');
   const [saved, setSaved] = useState(false);
-  const categoryNames = [...new Set(activeRates.map((item) => item.category))].sort();
+  const categoryNames = [
+    ...new Set(activeRates.map((item) => item.category)),
+  ].sort();
   const materialIds = activeRates
     .filter((item) => item.id === brands[item.category])
     .map((item) => item.id);
@@ -168,8 +170,7 @@ export function PremiumSftBuilder({
           item.category === material.category &&
           item.name === material.name &&
           item.specification === material.specification,
-      ) &&
-      !brands[material.category],
+      ) && !brands[material.category],
   );
   const canSave =
     Boolean(quote) &&
@@ -228,9 +229,7 @@ export function PremiumSftBuilder({
         rows,
         materialIds,
         packageId: packageId || null,
-        sections: sections.filter(
-          (item) => item.description.trim().length > 0,
-        ),
+        sections: sections.filter((item) => item.description.trim().length > 0),
       });
       setMessage(result.message);
       setSaved(Boolean(result.id));
@@ -305,8 +304,8 @@ export function PremiumSftBuilder({
                   ))}
                 </select>
                 <span className="font-normal text-slate-500">
-                  Applies the package rate to each floor. Individual work
-                  rates may be adjusted before saving.
+                  Applies the package rate to each floor. Individual work rates
+                  may be adjusted before saving.
                 </span>
               </label>
               <Link
@@ -323,7 +322,8 @@ export function PremiumSftBuilder({
                     {selectedPackage.name}
                   </strong>
                   <p className="mt-1 text-xs leading-5 text-slate-600">
-                    {selectedPackage.description || 'Edit package scope in step two.'}
+                    {selectedPackage.description ||
+                      'Edit package scope in step two.'}
                   </p>
                 </div>
                 <strong className="text-base text-blue-700">
@@ -381,9 +381,14 @@ export function PremiumSftBuilder({
                       </div>
                       <button
                         type="button"
-                        disabled={rows.length === 1 || (row.kind === 'floor' && floorCount === 1)}
+                        disabled={
+                          rows.length === 1 ||
+                          (row.kind === 'floor' && floorCount === 1)
+                        }
                         onClick={() => {
-                          setRows((items) => items.filter((_, i) => i !== index));
+                          setRows((items) =>
+                            items.filter((_, i) => i !== index),
+                          );
                           setSaved(false);
                         }}
                         aria-label={'Remove ' + row.name}
@@ -400,7 +405,9 @@ export function PremiumSftBuilder({
                           aria-label={'Work description ' + (index + 1)}
                           maxLength={90}
                           value={row.name}
-                          onChange={(e) => update(index, { name: e.target.value })}
+                          onChange={(e) =>
+                            update(index, { name: e.target.value })
+                          }
                         />
                       </label>
                       <label className="grid gap-1.5 text-xs font-semibold text-slate-600">
@@ -412,7 +419,9 @@ export function PremiumSftBuilder({
                           max="9999.99"
                           step=".01"
                           value={row.lengthFeet}
-                          onChange={(e) => update(index, { lengthFeet: e.target.value })}
+                          onChange={(e) =>
+                            update(index, { lengthFeet: e.target.value })
+                          }
                         />
                       </label>
                       <label className="grid gap-1.5 text-xs font-semibold text-slate-600">
@@ -424,7 +433,9 @@ export function PremiumSftBuilder({
                           max="9999.99"
                           step=".01"
                           value={row.widthFeet}
-                          onChange={(e) => update(index, { widthFeet: e.target.value })}
+                          onChange={(e) =>
+                            update(index, { widthFeet: e.target.value })
+                          }
                         />
                       </label>
                       <label className="grid gap-1.5 text-xs font-semibold text-slate-600">
@@ -436,7 +447,9 @@ export function PremiumSftBuilder({
                           max="999999.99"
                           step=".01"
                           value={row.ratePerSqft}
-                          onChange={(e) => update(index, { ratePerSqft: e.target.value })}
+                          onChange={(e) =>
+                            update(index, { ratePerSqft: e.target.value })
+                          }
                         />
                       </label>
                       <div className="grid gap-1.5 text-xs font-semibold text-slate-600">
@@ -502,7 +515,9 @@ export function PremiumSftBuilder({
               <div>
                 <p className="text-xs text-blue-200">Total construction cost</p>
                 <strong className="mt-1 block text-xl font-extrabold text-white">
-                  {quote ? money(Number(quote.total)) : 'Complete areas & rates'}
+                  {quote
+                    ? money(Number(quote.total))
+                    : 'Complete areas & rates'}
                 </strong>
               </div>
             </div>
@@ -549,7 +564,9 @@ export function PremiumSftBuilder({
                       onChange={(event) => {
                         setSections((items) =>
                           items.map((item, i) =>
-                            index === i ? { ...item, title: event.target.value } : item,
+                            index === i
+                              ? { ...item, title: event.target.value }
+                              : item,
                           ),
                         );
                         setSaved(false);
@@ -567,7 +584,9 @@ export function PremiumSftBuilder({
                       onChange={(event) => {
                         setSections((items) =>
                           items.map((item, i) =>
-                            index === i ? { ...item, description: event.target.value } : item,
+                            index === i
+                              ? { ...item, description: event.target.value }
+                              : item,
                           ),
                         );
                         setSaved(false);
@@ -577,7 +596,9 @@ export function PremiumSftBuilder({
                   <button
                     type="button"
                     onClick={() => {
-                      setSections((items) => items.filter((_, i) => i !== index));
+                      setSections((items) =>
+                        items.filter((_, i) => i !== index),
+                      );
                       setSaved(false);
                     }}
                     className="mt-3 text-xs font-bold text-rose-600"
@@ -591,7 +612,10 @@ export function PremiumSftBuilder({
               type="button"
               disabled={sections.length >= 18}
               onClick={() => {
-                setSections((items) => [...items, { title: 'Custom specification', description: '' }]);
+                setSections((items) => [
+                  ...items,
+                  { title: 'Custom specification', description: '' },
+                ]);
                 setSaved(false);
               }}
               className="rounded-xl border border-blue-200 bg-white px-4 py-3 text-xs font-bold text-blue-700 disabled:opacity-40"
@@ -608,7 +632,10 @@ export function PremiumSftBuilder({
               </p>
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 {categoryNames.map((category) => (
-                  <label key={category} className="grid gap-2 text-xs font-bold text-slate-700">
+                  <label
+                    key={category}
+                    className="grid gap-2 text-xs font-bold text-slate-700"
+                  >
                     {category}
                     <select
                       className={field}
@@ -627,7 +654,9 @@ export function PremiumSftBuilder({
                         .map((item) => (
                           <option key={item.id} value={item.id}>
                             {item.name}
-                            {item.specification ? ' · ' + item.specification : ''}
+                            {item.specification
+                              ? ' · ' + item.specification
+                              : ''}
                           </option>
                         ))}
                     </select>
@@ -635,14 +664,18 @@ export function PremiumSftBuilder({
                 ))}
               </div>
               {archivedBrands.length > 0 && (
-                <p role="alert" className="mt-3 rounded-xl bg-amber-50 p-3 text-xs text-amber-800">
-                  A previously selected material is no longer available.
-                  Select an active option before resaving.
+                <p
+                  role="alert"
+                  className="mt-3 rounded-xl bg-amber-50 p-3 text-xs text-amber-800"
+                >
+                  A previously selected material is no longer available. Select
+                  an active option before resaving.
                 </p>
               )}
               {categoryNames.length === 0 && (
                 <p className="mt-3 text-xs text-slate-500">
-                  No configured brands. You can still write specifications above.
+                  No configured brands. You can still write specifications
+                  above.
                 </p>
               )}
             </div>
@@ -655,7 +688,9 @@ export function PremiumSftBuilder({
                 ← Edit floor costing
               </button>
               <Link
-                href={'/dashboard/quotations/' + revisionId + '/studio?step=files'}
+                href={
+                  '/dashboard/quotations/' + revisionId + '/studio?step=files'
+                }
                 className="rounded-xl border border-blue-200 bg-blue-50 px-5 py-3 text-sm font-bold text-blue-700"
               >
                 Attach PDF annexures ↗
@@ -690,8 +725,12 @@ export function PremiumSftBuilder({
           </div>
           {message && (
             <p
-              className={'mt-3 rounded-lg p-3 text-xs ' +
-                (saved ? 'bg-emerald-50 text-emerald-800' : 'bg-amber-50 text-amber-900')}
+              className={
+                'mt-3 rounded-lg p-3 text-xs ' +
+                (saved
+                  ? 'bg-emerald-50 text-emerald-800'
+                  : 'bg-amber-50 text-amber-900')
+              }
               role={saved ? 'status' : 'alert'}
             >
               {message}
@@ -716,9 +755,9 @@ export function PremiumSftBuilder({
             </div>
           )}
           <p className="mt-3 text-xs leading-5 text-slate-500">
-            Floor area and additional-work area are tracked separately.
-            Both amounts are included once in the quotation total. The
-            customer's uploaded PDF documents are appended on export.
+            Floor area and additional-work area are tracked separately. Both
+            amounts are included once in the quotation total. The customer's
+            uploaded PDF documents are appended on export.
           </p>
         </div>
       </section>
