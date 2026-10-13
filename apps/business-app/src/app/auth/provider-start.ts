@@ -62,7 +62,19 @@ export async function providerStart(
       fallback.searchParams.set('provider_error', provider);
       return NextResponse.redirect(fallback, 303);
     }
-    return NextResponse.redirect(target, 303);
+    const redirect = NextResponse.redirect(target, 303);
+    if (provider === 'propulse') {
+      // A short-lived, HttpOnly marker tells our callback which external
+      // provider completed. Supabase itself verifies the OAuth code.
+      redirect.cookies.set('business-os-propulse-signin', '1', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 600,
+      });
+    }
+    return redirect;
   } catch {
     fallback.searchParams.set('provider_error', provider);
     return NextResponse.redirect(fallback, 303);
