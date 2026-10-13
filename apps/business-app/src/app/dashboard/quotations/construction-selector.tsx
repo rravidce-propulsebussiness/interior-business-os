@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import type { ConstructionRate } from '@business-os/database/construction-rates';
 import type { ConstructionPackage } from '@business-os/database/construction-packages';
-import { SftEstimateBuilder } from './sft-estimate-builder';
+import { PremiumSftBuilder } from './premium-sft-builder';
 import type { SftEstimateDetails } from '@business-os/core/sft-quotation';
 import {
   previewConstructionPackage,
@@ -269,7 +269,7 @@ export function ConstructionSelector({
           </button>
         </div>
         {mode === 'sft' ? (
-          <SftEstimateBuilder
+          <PremiumSftBuilder
             rates={rates}
             packages={packages}
             initialSchedule={initialSchedule}
