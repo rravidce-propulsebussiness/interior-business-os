@@ -8376,29 +8376,29 @@ export interface Database {
           id: string;
           organization_id: string;
           revision_id: string;
-          source_package_id: string | null;
           storage_path: string;
           filename: string;
           byte_size: number;
           created_by: string;
           created_at: string;
+          source_package_id: string | null;
         };
         Insert: {
           id?: string;
           organization_id: string;
           revision_id: string;
-          source_package_id?: string | null;
           storage_path: string;
           filename: string;
           byte_size: number;
           created_by: string;
           created_at?: string;
+          source_package_id?: string | null;
+          source_package_id?: string | null;
         };
         Update: {
           id?: string;
           organization_id?: string;
           revision_id?: string;
-          source_package_id?: string | null;
           storage_path?: string;
           filename?: string;
           byte_size?: number;
