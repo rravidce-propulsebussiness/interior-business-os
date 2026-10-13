@@ -96,7 +96,9 @@ export function renderQuotationDocument(input: unknown): string {
           .map(
             (row) =>
               '<tr><td>' +
-              (row.kind === 'additional' ? '<span class="additional-work">Additional work</span>' : '') +
+              (row.kind === 'additional'
+                ? '<span class="additional-work">Additional work</span>'
+                : '') +
               escape(row.name) +
               '</td>' +
               '<td>' +
@@ -166,11 +168,14 @@ export function renderQuotationDocument(input: unknown): string {
             .join('') +
           '</section>'
         : '';
-      return '<section class="spec-pages"><div class="spec-eyebrow">SECTION 02 / PACKAGE SPECIFICATIONS</div><h2>Package materials, finishes &amp; scope</h2><p class="muted">The descriptions below form part of this quotation and are saved with this revision.</p>' +
+      return (
+        '<section class="spec-pages"><div class="spec-eyebrow">SECTION 02 / PACKAGE SPECIFICATIONS</div><h2>Package materials, finishes &amp; scope</h2><p class="muted">The descriptions below form part of this quotation and are saved with this revision.</p>' +
         packageTitle +
-        (sections || '<p class="muted">No additional written specifications supplied.</p>') +
+        (sections ||
+          '<p class="muted">No additional written specifications supplied.</p>') +
         materialChoices +
-        '<p class="muted">The material descriptions above do not add a second charge to the floor-wise estimate.</p></section>';
+        '<p class="muted">The material descriptions above do not add a second charge to the floor-wise estimate.</p></section>'
+      );
     })
     .join('');
   const otherConstructionSpecs = constructionSpecs
