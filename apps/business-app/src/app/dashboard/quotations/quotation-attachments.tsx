@@ -95,7 +95,9 @@ export function QuotationAttachments({
       setMessage(result.message || 'Removed.');
       await load();
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Could not remove PDF.');
+      setMessage(
+        error instanceof Error ? error.message : 'Could not remove PDF.',
+      );
     } finally {
       setBusy(false);
     }
@@ -149,15 +151,35 @@ export function QuotationAttachments({
           </div>
         )}
         {files.map((file, index) => (
-          <div key={file.id} className="qs-info-box" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+          <div
+            key={file.id}
+            className="qs-info-box"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 10,
+            }}
+          >
             <div style={{ minWidth: 0 }}>
-              <strong>▤ {index + 1}. {file.filename}</strong>
-              <div className="qs-muted">{(file.byte_size / 1024 / 1024).toFixed(1)} MB</div>
+              <strong>
+                ▤ {index + 1}. {file.filename}
+              </strong>
+              <div className="qs-muted">
+                {(file.byte_size / 1024 / 1024).toFixed(1)} MB
+              </div>
             </div>
             <div className="qs-toolbar">
-              <a href={url + '/' + file.id} className="qs-btn">Download</a>
+              <a href={url + '/' + file.id} className="qs-btn">
+                Download
+              </a>
               {editable && (
-                <button type="button" className="qs-btn" disabled={busy} onClick={() => void remove(file.id)}>
+                <button
+                  type="button"
+                  className="qs-btn"
+                  disabled={busy}
+                  onClick={() => void remove(file.id)}
+                >
                   Remove
                 </button>
               )}
@@ -165,7 +187,11 @@ export function QuotationAttachments({
           </div>
         ))}
       </div>
-      {message && <p role="status" className="qs-message" style={{ marginTop: 12 }}>{message}</p>}
+      {message && (
+        <p role="status" className="qs-message" style={{ marginTop: 12 }}>
+          {message}
+        </p>
+      )}
     </section>
   );
 }

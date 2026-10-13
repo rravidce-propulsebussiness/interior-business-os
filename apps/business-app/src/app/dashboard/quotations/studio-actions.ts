@@ -17,7 +17,10 @@ const createInput = z
     projectType: z.string().trim().min(2).max(100),
     plotSize: z.string().trim().max(40),
     industryKey: z.string().regex(/^[a-z][a-z0-9_]{0,63}$/),
-    currency: z.string().regex(/^[A-Z]{3}$/).default('INR'),
+    currency: z
+      .string()
+      .regex(/^[A-Z]{3}$/)
+      .default('INR'),
   })
   .strict();
 
@@ -58,8 +61,7 @@ export async function createStudioQuotation(input: unknown): Promise<{
       data: { user },
       error: authError,
     } = await s.client.auth.getUser();
-    if (authError || !user)
-      throw new DomainError('FORBIDDEN');
+    if (authError || !user) throw new DomainError('FORBIDDEN');
 
     // Quote settings must exist so the draft captures the proper tenant name.
     const { data: settings, error: settingsError } = await s.client
@@ -101,7 +103,10 @@ export async function createStudioQuotation(input: unknown): Promise<{
     await s.commercial.saveEntity(s.org, 'customers', customerInput);
 
     const projectId = randomUUID();
-    const projectCode = 'Q' + Date.now().toString(36).toUpperCase() + randomUUID().slice(0, 5).toUpperCase();
+    const projectCode =
+      'Q' +
+      Date.now().toString(36).toUpperCase() +
+      randomUUID().slice(0, 5).toUpperCase();
     await s.commercial.saveEntity(s.org, 'projects', {
       id: projectId,
       organization_id: s.org,
@@ -114,9 +119,7 @@ export async function createStudioQuotation(input: unknown): Promise<{
       project_type: values.projectType,
       site_address: baseAddress,
       status: 'active',
-      notes: values.plotSize
-        ? 'Plot / project size: ' + values.plotSize
-        : '',
+      notes: values.plotSize ? 'Plot / project size: ' + values.plotSize : '',
       assigned_user_id: null,
     });
 

@@ -192,7 +192,10 @@ export async function appendQuotationAnnexures(
   attachments: readonly Uint8Array[],
 ): Promise<Buffer> {
   if (!attachments.length) return Buffer.from(basePdf);
-  const sourceBytes = attachments.reduce((sum, value) => sum + value.byteLength, 0);
+  const sourceBytes = attachments.reduce(
+    (sum, value) => sum + value.byteLength,
+    0,
+  );
   if (sourceBytes > 30 * 1024 * 1024)
     throw new Error('Combined annexure size exceeds 30 MB');
   const merged = await PDFDocument.load(basePdf, {

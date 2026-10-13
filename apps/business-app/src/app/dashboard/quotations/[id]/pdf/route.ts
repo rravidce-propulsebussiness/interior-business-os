@@ -1,5 +1,8 @@
 import { appendQuotationAnnexures } from '@business-os/shared/pdf';
-import { QUOTATION_PDF_BUCKET, quotationAttachmentContext } from '../../quotation-storage';
+import {
+  QUOTATION_PDF_BUCKET,
+  quotationAttachmentContext,
+} from '../../quotation-storage';
 import { quotationDocument } from '../../document';
 import { renderQuotationPdf } from '../../pdf';
 import { safeFailure } from '@business-os/shared';

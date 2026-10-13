@@ -49,7 +49,10 @@ export async function ensureQuotationPdfBucket(
     fileSizeLimit: MAX_QUOTATION_PDF_BYTES,
     allowedMimeTypes: ['application/pdf'],
   });
-  if (error && !/already exists|duplicate|BucketAlreadyExists/i.test(error.message)) {
+  if (
+    error &&
+    !/already exists|duplicate|BucketAlreadyExists/i.test(error.message)
+  ) {
     throw new Error('Private quotation PDF storage is unavailable');
   }
 }

@@ -41,9 +41,25 @@ export default async function QuotationStudio({
     user,
     allIndustries,
   ] = await Promise.all([
-    s.client.from('quotations').select('id,quotation_number,status').eq('organization_id', s.org).eq('id', revision.quotation_id).maybeSingle(),
-    s.client.from('projects').select('id,industry_id,branch_id').eq('organization_id', s.org).eq('id', revision.project_id).maybeSingle(),
-    s.client.from('quotation_items').select('id,snapshot,description,optional').eq('organization_id', s.org).eq('revision_id', revision.id).order('sort_order').order('id'),
+    s.client
+      .from('quotations')
+      .select('id,quotation_number,status')
+      .eq('organization_id', s.org)
+      .eq('id', revision.quotation_id)
+      .maybeSingle(),
+    s.client
+      .from('projects')
+      .select('id,industry_id,branch_id')
+      .eq('organization_id', s.org)
+      .eq('id', revision.project_id)
+      .maybeSingle(),
+    s.client
+      .from('quotation_items')
+      .select('id,snapshot,description,optional')
+      .eq('organization_id', s.org)
+      .eq('revision_id', revision.id)
+      .order('sort_order')
+      .order('id'),
     s.repository.organization(s.org),
     s.authorization.requireAuthenticatedUser(),
     s.repository.industries(),
@@ -62,11 +78,14 @@ export default async function QuotationStudio({
         ? 'sft'
         : 'custom';
   const step =
-    query.step === 'client' || query.step === 'files' || query.step === 'preview'
+    query.step === 'client' ||
+    query.step === 'files' ||
+    query.step === 'preview'
       ? query.step
       : 'quote';
 
-  const editable = revision.status === 'draft' &&
+  const editable =
+    revision.status === 'draft' &&
     root.status !== 'cancelled' &&
     s.allowed('quotation.edit', 'quotation');
   const canIssue = s.allowed('quotation.issue', 'quotation');
@@ -76,20 +95,26 @@ export default async function QuotationStudio({
     const snap = lineSnapshotSchema.safeParse(item.snapshot);
     if (!snap.success) return [];
     const sft = parseSftEstimate(item.description);
-    return [{
-      id: item.id,
-      name: snap.data.name,
-      description: sft
-        ? sft.totalAreaSqft + ' sq ft · ' + sft.rows.length + ' work areas · floor-wise SFT'
-        : item.description,
-      quantity: snap.data.quantity,
-      unit: snap.data.unit.label,
-      rate: snap.data.display_rate,
-      amount: snap.data.final_amount,
-      optional: item.optional,
-    }];
+    return [
+      {
+        id: item.id,
+        name: snap.data.name,
+        description: sft
+          ? sft.totalAreaSqft +
+            ' sq ft · ' +
+            sft.rows.length +
+            ' work areas · floor-wise SFT'
+          : item.description,
+        quantity: snap.data.quantity,
+        unit: snap.data.unit.label,
+        rate: snap.data.display_rate,
+        amount: snap.data.final_amount,
+        optional: item.optional,
+      },
+    ];
   });
-  const existingSft = items.map((row) => parseSftEstimate(row.description)).find(Boolean) ?? null;
+  const existingSft =
+    items.map((row) => parseSftEstimate(row.description)).find(Boolean) ?? null;
   const canPriceConstruction =
     editable &&
     s.allowed('quotation.override_rate', 'quotation') &&
@@ -106,7 +131,9 @@ export default async function QuotationStudio({
   const command = { revision_id: revision.id, version: revision.version };
   const totals = revision.totals;
   const total =
-    totals && typeof totals === 'object' && !Array.isArray(totals) &&
+    totals &&
+    typeof totals === 'object' &&
+    !Array.isArray(totals) &&
     typeof totals.final_amount === 'string'
       ? totals.final_amount
       : '0';
@@ -124,9 +151,13 @@ export default async function QuotationStudio({
         status={revision.status}
         industryKey={industryKey}
         industryName={industry?.name ?? 'Project'}
-        otherIndustries={allIndustries.filter(
-          (row) => row.status === 'active' && !['construction','interior'].includes(row.key),
-        ).map((row) => ({ key: row.key, name: row.name }))}
+        otherIndustries={allIndustries
+          .filter(
+            (row) =>
+              row.status === 'active' &&
+              !['construction', 'interior'].includes(row.key),
+          )
+          .map((row) => ({ key: row.key, name: row.name }))}
         header={header.data}
         lines={saved}
         total={total}
@@ -149,7 +180,10 @@ export default async function QuotationStudio({
             <div className="qs-note">
               You need draft quotation editing and company construction pricing
               permissions to change SFT or package rates.
-              <Link className="ml-2 font-semibold underline" href="/dashboard/pricing/construction">
+              <Link
+                className="ml-2 font-semibold underline"
+                href="/dashboard/pricing/construction"
+              >
                 Company rates
               </Link>
             </div>
@@ -161,13 +195,12 @@ export default async function QuotationStudio({
               revisionId={revision.id}
               version={revision.version}
             />
-          ) : <p className="qs-note">This revision cannot be edited.</p>
+          ) : (
+            <p className="qs-note">This revision cannot be edited.</p>
+          )
         }
         filesEditor={
-          <QuotationAttachments
-            revisionId={revision.id}
-            editable={editable}
-          />
+          <QuotationAttachments revisionId={revision.id} editable={editable} />
         }
         termsEditor={
           editable ? (
@@ -183,37 +216,55 @@ export default async function QuotationStudio({
                 discount: revision.discount,
               }}
               fields={[
-                { key: 'valid_until', label: 'Valid until (YYYY-MM-DD)', required: true },
-                { key: 'terms', label: 'Materials, warranty, inclusions, exclusions, payment schedule and terms', type: 'textarea' },
-                { key: 'customer_notes', label: 'Customer notes, discounts or Price Guard details', type: 'textarea' },
-                { key: 'internal_notes', label: 'Internal notes (not in customer PDF)', type: 'textarea' },
-                ...(canDiscount ? [
-                  {
-                    key: 'discount.kind',
-                    label: 'Revision discount',
-                    options: [
-                      { value: 'none', label: 'None' },
-                      { value: 'fixed', label: 'Fixed amount' },
-                      { value: 'percentage', label: 'Percentage' },
-                    ],
-                  },
-                  { key: 'discount.value', label: 'Discount value' },
-                ] : []),
+                {
+                  key: 'valid_until',
+                  label: 'Valid until (YYYY-MM-DD)',
+                  required: true,
+                },
+                {
+                  key: 'terms',
+                  label:
+                    'Materials, warranty, inclusions, exclusions, payment schedule and terms',
+                  type: 'textarea',
+                },
+                {
+                  key: 'customer_notes',
+                  label: 'Customer notes, discounts or Price Guard details',
+                  type: 'textarea',
+                },
+                {
+                  key: 'internal_notes',
+                  label: 'Internal notes (not in customer PDF)',
+                  type: 'textarea',
+                },
+                ...(canDiscount
+                  ? [
+                      {
+                        key: 'discount.kind',
+                        label: 'Revision discount',
+                        options: [
+                          { value: 'none', label: 'None' },
+                          { value: 'fixed', label: 'Fixed amount' },
+                          { value: 'percentage', label: 'Percentage' },
+                        ],
+                      },
+                      { key: 'discount.value', label: 'Discount value' },
+                    ]
+                  : []),
               ]}
             />
           ) : (
             <div className="qs-info-box">
               <strong>Customer terms</strong>
-              <p className="whitespace-pre-wrap">{revision.terms || 'No additional terms.'}</p>
+              <p className="whitespace-pre-wrap">
+                {revision.terms || 'No additional terms.'}
+              </p>
               <p className="whitespace-pre-wrap">{revision.customer_notes}</p>
             </div>
           )
         }
         sharingEditor={
-          <SharingSection
-            revisionId={revision.id}
-            status={revision.status}
-          />
+          <SharingSection revisionId={revision.id} status={revision.status} />
         }
         issueEditor={
           <CommandForm

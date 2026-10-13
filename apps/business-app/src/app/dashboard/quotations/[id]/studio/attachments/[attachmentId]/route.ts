@@ -23,8 +23,7 @@ export async function GET(
       .eq('revision_id', ctx.revisionId)
       .eq('id', parsedAttachmentId)
       .maybeSingle();
-    if (error || !meta)
-      return new Response('PDF unavailable', { status: 404 });
+    if (error || !meta) return new Response('PDF unavailable', { status: 404 });
     const { data: blob, error: storageError } = await ctx.admin.storage
       .from(QUOTATION_PDF_BUCKET)
       .download(meta.storage_path);
@@ -33,7 +32,9 @@ export async function GET(
     const bytes = Buffer.from(await blob.arrayBuffer());
     if (bytes.toString('ascii', 0, 5) !== '%PDF-')
       return new Response('Invalid PDF', { status: 415 });
-    const filename = meta.filename.replace(/[^A-Za-z0-9.() _-]/g, '_').slice(0, 120);
+    const filename = meta.filename
+      .replace(/[^A-Za-z0-9.() _-]/g, '_')
+      .slice(0, 120);
     return new Response(new Uint8Array(bytes), {
       headers: {
         'Content-Type': 'application/pdf',

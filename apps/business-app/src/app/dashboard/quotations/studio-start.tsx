@@ -34,9 +34,24 @@ export function QuotationStudioStart({
     setFeedback('');
   };
   const methods = [
-    { key: 'sft', title: 'Per sq ft (SFT)', helper: 'Floor-wise area × rate', icon: '▦' },
-    { key: 'custom', title: 'Custom BOQ / Materials', helper: 'Item-wise dimensions and finishes', icon: '▤' },
-    { key: 'upload', title: 'Upload existing PDF', helper: 'Attach supporting quotation files', icon: '⇧' },
+    {
+      key: 'sft',
+      title: 'Per sq ft (SFT)',
+      helper: 'Floor-wise area × rate',
+      icon: '▦',
+    },
+    {
+      key: 'custom',
+      title: 'Custom BOQ / Materials',
+      helper: 'Item-wise dimensions and finishes',
+      icon: '▤',
+    },
+    {
+      key: 'upload',
+      title: 'Upload existing PDF',
+      helper: 'Attach supporting quotation files',
+      icon: '⇧',
+    },
   ] as const;
 
   return (
@@ -48,11 +63,14 @@ export function QuotationStudioStart({
             <button
               type="button"
               key={item.key}
-              className={'qs-sector' + (industry === item.key ? ' current' : '')}
+              className={
+                'qs-sector' + (industry === item.key ? ' current' : '')
+              }
               aria-pressed={industry === item.key}
               onClick={() => {
                 setIndustry(item.key);
-                if (item.key === 'interior' && mode === 'sft') setMode('custom');
+                if (item.key === 'interior' && mode === 'sft')
+                  setMode('custom');
               }}
             >
               {item.key === 'construction' ? '▦' : '▱'} {item.name}
@@ -80,7 +98,10 @@ export function QuotationStudioStart({
               ))}
             </select>
           ) : (
-            <span className="qs-sector" style={{ cursor: 'default', opacity: 0.6 }}>
+            <span
+              className="qs-sector"
+              style={{ cursor: 'default', opacity: 0.6 }}
+            >
               ◈ Other industries · Soon
             </span>
           )}
@@ -134,34 +155,75 @@ export function QuotationStudioStart({
           });
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
           <h2>Client &amp; Project Details</h2>
           <span className="qs-selected-pill">Step 01 · Details</span>
         </div>
         <div className="qs-fields">
           <label className="qs-field">
             Client name *
-            <input required maxLength={200} value={data.clientName} placeholder="Client full name" onChange={(e) => update('clientName', e.target.value)} />
+            <input
+              required
+              maxLength={200}
+              value={data.clientName}
+              placeholder="Client full name"
+              onChange={(e) => update('clientName', e.target.value)}
+            />
           </label>
           <label className="qs-field">
             Phone *
-            <input required type="tel" minLength={3} maxLength={40} value={data.phone} placeholder="+91 98765 43210" onChange={(e) => update('phone', e.target.value)} />
+            <input
+              required
+              type="tel"
+              minLength={3}
+              maxLength={40}
+              value={data.phone}
+              placeholder="+91 98765 43210"
+              onChange={(e) => update('phone', e.target.value)}
+            />
           </label>
           <label className="qs-field">
             Email
-            <input type="email" maxLength={254} value={data.email} placeholder="client@example.com" onChange={(e) => update('email', e.target.value)} />
+            <input
+              type="email"
+              maxLength={254}
+              value={data.email}
+              placeholder="client@example.com"
+              onChange={(e) => update('email', e.target.value)}
+            />
           </label>
           <label className="qs-field">
             Project name *
-            <input required maxLength={200} value={data.projectName} placeholder="Residential construction" onChange={(e) => update('projectName', e.target.value)} />
+            <input
+              required
+              maxLength={200}
+              value={data.projectName}
+              placeholder="Residential construction"
+              onChange={(e) => update('projectName', e.target.value)}
+            />
           </label>
           <label className="qs-field">
             Project location
-            <input maxLength={200} value={data.location} placeholder="Hyderabad, Telangana" onChange={(e) => update('location', e.target.value)} />
+            <input
+              maxLength={200}
+              value={data.location}
+              placeholder="Hyderabad, Telangana"
+              onChange={(e) => update('location', e.target.value)}
+            />
           </label>
           <label className="qs-field">
             Project type *
-            <select required value={data.projectType} onChange={(e) => update('projectType', e.target.value)}>
+            <select
+              required
+              value={data.projectType}
+              onChange={(e) => update('projectType', e.target.value)}
+            >
               <option>Residential</option>
               <option>Commercial</option>
               <option>Renovation</option>
@@ -170,7 +232,12 @@ export function QuotationStudioStart({
           </label>
           <label className="qs-field qs-field-full">
             Plot size or property configuration (optional)
-            <input maxLength={40} value={data.plotSize} placeholder="200 sq yards / 3BHK" onChange={(e) => update('plotSize', e.target.value)} />
+            <input
+              maxLength={40}
+              value={data.plotSize}
+              placeholder="200 sq yards / 3BHK"
+              onChange={(e) => update('plotSize', e.target.value)}
+            />
           </label>
         </div>
         <div className="qs-divider" />
@@ -179,10 +246,23 @@ export function QuotationStudioStart({
           details, quotation prefix and terms. You can change pricing,
           materials, payment terms and PDF attachments after creating the draft.
         </div>
-        {feedback && <p role="alert" className="qs-warning" style={{ marginTop: 13 }}>{feedback}</p>}
-        <div className="qs-toolbar" style={{ justifyContent: 'flex-end', marginTop: 15 }}>
-          <button className="qs-btn primary" disabled={pending || !industry} type="submit">
-            {pending ? 'Creating quotation…' : 'Create quotation and continue →'}
+        {feedback && (
+          <p role="alert" className="qs-warning" style={{ marginTop: 13 }}>
+            {feedback}
+          </p>
+        )}
+        <div
+          className="qs-toolbar"
+          style={{ justifyContent: 'flex-end', marginTop: 15 }}
+        >
+          <button
+            className="qs-btn primary"
+            disabled={pending || !industry}
+            type="submit"
+          >
+            {pending
+              ? 'Creating quotation…'
+              : 'Create quotation and continue →'}
           </button>
         </div>
       </form>

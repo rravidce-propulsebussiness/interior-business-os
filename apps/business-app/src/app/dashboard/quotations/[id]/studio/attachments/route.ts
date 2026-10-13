@@ -59,7 +59,8 @@ export async function POST(request: Request, { params }: Params) {
       .eq('organization_id', ctx.organizationId)
       .eq('revision_id', ctx.revisionId);
     if (countError) return fail('Could not check quotation file limit', 503);
-    if ((existing?.length ?? 0) >= 6) return fail('Only six PDFs per quotation', 400);
+    if ((existing?.length ?? 0) >= 6)
+      return fail('Only six PDFs per quotation', 400);
 
     // Refuse unbounded multipart uploads even if content-length was absent.
     const reader = request.body?.getReader();
@@ -85,7 +86,9 @@ export async function POST(request: Request, { params }: Params) {
     }).formData();
     const upload = form.get('file');
     if (!(upload instanceof File)) return fail('Choose a PDF file', 400);
-    const filename = upload.name.replace(/[^A-Za-z0-9.() _-]/g, '_').slice(0, 120);
+    const filename = upload.name
+      .replace(/[^A-Za-z0-9.() _-]/g, '_')
+      .slice(0, 120);
     if (
       upload.type !== 'application/pdf' ||
       !/\.pdf$/i.test(filename) ||
@@ -95,17 +98,28 @@ export async function POST(request: Request, { params }: Params) {
       return fail('Only genuine PDF files up to 15 MB are supported', 415);
     const bytes = Buffer.from(await upload.arrayBuffer());
     if (
-      (existing ?? []).reduce((sum, file) => sum + file.byte_size, bytes.length) >
+      (existing ?? []).reduce(
+        (sum, file) => sum + file.byte_size,
+        bytes.length,
+      ) >
       30 * 1024 * 1024
-    ) return fail('Combined PDF annexures cannot exceed 30 MB', 413);
+    )
+      return fail('Combined PDF annexures cannot exceed 30 MB', 413);
     try {
       await validateQuotationAnnexure(bytes);
     } catch {
-      return fail('PDF file is invalid, encrypted, or longer than 60 pages', 415);
+      return fail(
+        'PDF file is invalid, encrypted, or longer than 60 pages',
+        415,
+      );
     }
 
     await ensureQuotationPdfBucket(ctx.admin);
-    const path = [ctx.organizationId, ctx.revisionId, randomUUID() + '.pdf'].join('/');
+    const path = [
+      ctx.organizationId,
+      ctx.revisionId,
+      randomUUID() + '.pdf',
+    ].join('/');
     const { error: uploadError } = await ctx.admin.storage
       .from(QUOTATION_PDF_BUCKET)
       .upload(path, bytes, {
@@ -113,7 +127,8 @@ export async function POST(request: Request, { params }: Params) {
         upsert: false,
         cacheControl: '0',
       });
-    if (uploadError) return fail('Could not upload PDF to private storage', 503);
+    if (uploadError)
+      return fail('Could not upload PDF to private storage', 503);
     const { error: dbError } = await ctx.admin
       .from('quotation_studio_attachments')
       .insert({
@@ -133,7 +148,10 @@ export async function POST(request: Request, { params }: Params) {
       { headers: { 'Cache-Control': 'no-store' } },
     );
   } catch {
-    return fail('Could not attach PDF. Check permissions and storage settings.', 403);
+    return fail(
+      'Could not attach PDF. Check permissions and storage settings.',
+      403,
+    );
   }
 }
 
@@ -144,8 +162,11 @@ export async function DELETE(request: Request, { params }: Params) {
     const ctx = await quotationAttachmentContext(id, true);
     const raw: unknown = await request.json();
     const attachmentId =
-      raw && typeof raw === 'object' && !Array.isArray(raw) &&
-      'id' in raw && typeof raw.id === 'string' &&
+      raw &&
+      typeof raw === 'object' &&
+      !Array.isArray(raw) &&
+      'id' in raw &&
+      typeof raw.id === 'string' &&
       /^[0-9a-f]{8}-[0-9a-f-]{27}$/i.test(raw.id)
         ? raw.id
         : null;
