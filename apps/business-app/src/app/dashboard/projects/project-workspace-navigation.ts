@@ -24,7 +24,7 @@ export function projectWorkspaceNavigation(
     href: '/dashboard/projects',
     icon: 'projects',
   });
-  if (canClients)
+  if (has('customer.view', 'crm') || has('customer.view', 'quotation'))
     navigation.push({
       label: 'Clients',
       href: '/dashboard/customers',
