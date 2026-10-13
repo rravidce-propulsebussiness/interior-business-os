@@ -1,0 +1,191 @@
+'use client';
+
+import { useState, useTransition } from 'react';
+import { createStudioQuotation } from './studio-actions';
+
+type Industry = { key: string; name: string };
+
+export function QuotationStudioStart({
+  industries,
+  defaultCurrency,
+}: {
+  industries: Industry[];
+  defaultCurrency: string;
+}) {
+  const [industry, setIndustry] = useState(
+    industries.find((item) => item.key === 'construction')?.key ??
+      industries[0]?.key ??
+      '',
+  );
+  const [mode, setMode] = useState<'sft' | 'custom' | 'upload'>('sft');
+  const [pending, start] = useTransition();
+  const [feedback, setFeedback] = useState('');
+  const [data, setData] = useState({
+    clientName: '',
+    phone: '',
+    email: '',
+    projectName: '',
+    location: '',
+    plotSize: '',
+    projectType: 'Residential',
+  });
+  const update = (key: keyof typeof data, value: string) => {
+    setData((prev) => ({ ...prev, [key]: value }));
+    setFeedback('');
+  };
+  const methods = [
+    { key: 'sft', title: 'Per sq ft (SFT)', helper: 'Floor-wise area × rate', icon: '▦' },
+    { key: 'custom', title: 'Custom BOQ / Materials', helper: 'Item-wise dimensions and finishes', icon: '▤' },
+    { key: 'upload', title: 'Upload existing PDF', helper: 'Attach supporting quotation files', icon: '⇧' },
+  ] as const;
+
+  return (
+    <div className="qs-editor">
+      <section className="qs-card">
+        <h2>Choose quotation type</h2>
+        <div className="qs-sector-tabs">
+          {industries.slice(0, 2).map((item) => (
+            <button
+              type="button"
+              key={item.key}
+              className={'qs-sector' + (industry === item.key ? ' current' : '')}
+              aria-pressed={industry === item.key}
+              onClick={() => {
+                setIndustry(item.key);
+                if (item.key === 'interior' && mode === 'sft') setMode('custom');
+              }}
+            >
+              {item.key === 'construction' ? '▦' : '▱'} {item.name}
+            </button>
+          ))}
+          {industries.length > 2 ? (
+            <select
+              className="qs-sector"
+              aria-label="Other industry"
+              value={
+                industries.slice(2).some((item) => item.key === industry)
+                  ? industry
+                  : ''
+              }
+              onChange={(event) => {
+                setIndustry(event.target.value);
+                setMode('custom');
+              }}
+            >
+              <option value="">Other industries</option>
+              {industries.slice(2).map((item) => (
+                <option value={item.key} key={item.key}>
+                  {item.name}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <span className="qs-sector" style={{ cursor: 'default', opacity: 0.6 }}>
+              ◈ Other industries · Soon
+            </span>
+          )}
+        </div>
+        <div className="qs-divider" />
+        <div className="qs-method-tabs">
+          {methods.map((item) => (
+            <button
+              key={item.key}
+              type="button"
+              onClick={() => setMode(item.key)}
+              aria-pressed={mode === item.key}
+              className={'qs-method' + (mode === item.key ? ' current' : '')}
+            >
+              <span className="qs-icon-chip">{item.icon}</span>
+              <span>
+                <strong>{item.title}</strong>
+                <small>{item.helper}</small>
+              </span>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <form
+        className="qs-card"
+        onSubmit={(event) => {
+          event.preventDefault();
+          setFeedback('');
+          if (!industry) {
+            setFeedback('Select an available industry.');
+            return;
+          }
+          start(async () => {
+            const result = await createStudioQuotation({
+              ...data,
+              industryKey: industry,
+              currency: defaultCurrency,
+            });
+            if (!result.ok || !result.revisionId) {
+              setFeedback(result.message);
+              return;
+            }
+            const next = new URLSearchParams({
+              mode: mode === 'upload' ? 'pdf' : mode,
+              ...(mode === 'upload' ? { step: 'files' } : {}),
+            });
+            window.location.assign(
+              '/dashboard/quotations/' + result.revisionId + '/studio?' + next,
+            );
+          });
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <h2>Client &amp; Project Details</h2>
+          <span className="qs-selected-pill">Step 01 · Details</span>
+        </div>
+        <div className="qs-fields">
+          <label className="qs-field">
+            Client name *
+            <input required maxLength={200} value={data.clientName} placeholder="Client full name" onChange={(e) => update('clientName', e.target.value)} />
+          </label>
+          <label className="qs-field">
+            Phone *
+            <input required type="tel" minLength={3} maxLength={40} value={data.phone} placeholder="+91 98765 43210" onChange={(e) => update('phone', e.target.value)} />
+          </label>
+          <label className="qs-field">
+            Email
+            <input type="email" maxLength={254} value={data.email} placeholder="client@example.com" onChange={(e) => update('email', e.target.value)} />
+          </label>
+          <label className="qs-field">
+            Project name *
+            <input required maxLength={200} value={data.projectName} placeholder="Residential construction" onChange={(e) => update('projectName', e.target.value)} />
+          </label>
+          <label className="qs-field">
+            Project location
+            <input maxLength={200} value={data.location} placeholder="Hyderabad, Telangana" onChange={(e) => update('location', e.target.value)} />
+          </label>
+          <label className="qs-field">
+            Project type *
+            <select required value={data.projectType} onChange={(e) => update('projectType', e.target.value)}>
+              <option>Residential</option>
+              <option>Commercial</option>
+              <option>Renovation</option>
+              <option>Extension</option>
+            </select>
+          </label>
+          <label className="qs-field qs-field-full">
+            Plot size or property configuration (optional)
+            <input maxLength={40} value={data.plotSize} placeholder="200 sq yards / 3BHK" onChange={(e) => update('plotSize', e.target.value)} />
+          </label>
+        </div>
+        <div className="qs-divider" />
+        <div className="qs-note">
+          Your quotation will use this company&apos;s saved name, logo, contact
+          details, quotation prefix and terms. You can change pricing,
+          materials, payment terms and PDF attachments after creating the draft.
+        </div>
+        {feedback && <p role="alert" className="qs-warning" style={{ marginTop: 13 }}>{feedback}</p>}
+        <div className="qs-toolbar" style={{ justifyContent: 'flex-end', marginTop: 15 }}>
+          <button className="qs-btn primary" disabled={pending || !industry} type="submit">
+            {pending ? 'Creating quotation…' : 'Create quotation and continue →'}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
