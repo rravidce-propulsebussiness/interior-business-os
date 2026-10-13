@@ -31,6 +31,21 @@ export default async function NewQuotation() {
       '',
   }));
 
+  const { data: existingCustomers } = await s.client
+    .from('customers')
+    .select('id,display_name,phone,email')
+    .eq('organization_id', s.org)
+    .eq('status', 'active')
+    .order('created_at', { ascending: false })
+    .limit(150);
+  const { data: existingProjects } = await s.client
+    .from('projects')
+    .select('id,customer_id,name')
+    .eq('organization_id', s.org)
+    .eq('status', 'active')
+    .order('created_at', { ascending: false })
+    .limit(300);
+
   return (
     <QuotationStudioFrame
       companyName={organization.name}
@@ -82,6 +97,8 @@ export default async function NewQuotation() {
       <div className="qs-create-grid">
         <QuotationStudioStart
           leads={leads}
+          existingCustomers={existingCustomers ?? []}
+          existingProjects={existingProjects ?? []}
           industries={industries
             .filter((industry) => industry.status === 'active')
             .map((industry) => ({
