@@ -10869,6 +10869,7 @@ export interface Database {
       };
       company_self_register: { Args: { p_input: Json }; Returns: Json };
       construction_package_list: { Args: { p_org: string }; Returns: Json };
+      construction_package_owner_options: { Args: { p_org: string }; Returns: Json };
       construction_package_quote_preview: {
         Args: {
           p_org: string;
