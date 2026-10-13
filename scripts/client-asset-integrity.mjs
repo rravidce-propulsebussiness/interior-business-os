@@ -93,6 +93,23 @@ export async function buildClientAssetManifest(appDir) {
   return Object.keys(files).length;
 }
 
+/**
+ * Runtime check is advisory: a stale or partially published asset must be
+ * reported, but cannot prevent Next.js from starting for every route.
+ * The build step remains strict and fails before producing a release.
+ */
+export function checkClientAssetsAtStartup(appDir, log = console.warn) {
+  try {
+    return { ok: true, count: verifyClientAssets(appDir) };
+  } catch (error) {
+    log(
+      '[Business OS] Client asset integrity warning; Next.js startup continues: ' +
+        (error instanceof Error ? error.message : 'Unknown asset integrity failure'),
+    );
+    return { ok: false, count: 0 };
+  }
+}
+
 if (
   process.argv[1] &&
   resolve(process.argv[1]) === fileURLToPath(import.meta.url)
@@ -105,8 +122,19 @@ if (
     'apps',
     service,
   );
-  const count = process.argv.includes('--build')
-    ? await buildClientAssetManifest(appDir)
-    : verifyClientAssets(appDir);
-  console.log('Verified ' + count + ' Next.js client chunks for ' + service);
+  // Hostinger loads server.js through require(esm). A top-level await ANYWHERE
+  // in its transitive ESM imports makes require(esm) fail with
+  // ERR_REQUIRE_ASYNC_MODULE, resulting in a site-wide 503. Keep this entry
+  // point asynchronous only when the tool is executed directly, not imported.
+  const work = process.argv.includes('--build')
+    ? buildClientAssetManifest(appDir)
+    : Promise.resolve().then(() => verifyClientAssets(appDir));
+  work
+    .then((count) => {
+      console.log('Verified ' + count + ' Next.js client chunks for ' + service);
+    })
+    .catch((error) => {
+      console.error(error instanceof Error ? error.message : 'Client asset verification failed.');
+      process.exitCode = 1;
+    });
 }
