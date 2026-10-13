@@ -29,6 +29,10 @@ jobs:
           node-version-file: .node-version
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Diagnose quotation CSS formatting
+        run: |
+          pnpm exec prettier --write apps/business-app/src/app/dashboard/quotations/studio.css
+          git diff -- apps/business-app/src/app/dashboard/quotations/studio.css
       - run: node --test scripts/automation-email.test.mjs scripts/hostinger-deployment.test.mjs scripts/client-asset-integrity.test.mjs scripts/crm-unified-workspace.test.mjs
       - run: pnpm test:acceptance
       - run: pnpm security:dependency
