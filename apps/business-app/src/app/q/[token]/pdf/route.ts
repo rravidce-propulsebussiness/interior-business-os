@@ -1,5 +1,8 @@
 import { renderQuotationDocument } from '@business-os/core/quotation-document';
-import { PdfServiceError, appendQuotationAnnexures } from '@business-os/shared/pdf';
+import {
+  PdfServiceError,
+  appendQuotationAnnexures,
+} from '@business-os/shared/pdf';
 import { createOwnerProvisioningDatabase } from '@business-os/database/server';
 import { z } from 'zod';
 import { QUOTATION_PDF_BUCKET } from '../../../dashboard/quotations/quotation-storage';
@@ -27,7 +30,11 @@ export async function GET(
         z
           .object({
             storage_path: z.string().min(15).max(260),
-            byte_size: z.number().int().positive().max(15 * 1024 * 1024),
+            byte_size: z
+              .number()
+              .int()
+              .positive()
+              .max(15 * 1024 * 1024),
           })
           .strict(),
       )
@@ -36,7 +43,8 @@ export async function GET(
     const extra: Uint8Array[] = [];
     for (const attachment of attachments) {
       const { data: file, error: storageError } = await admin.storage
-        .from(QUOTATION_PDF_BUCKET).download(attachment.storage_path);
+        .from(QUOTATION_PDF_BUCKET)
+        .download(attachment.storage_path);
       if (storageError || !file || file.size !== attachment.byte_size)
         throw new Error('Quotation attachment unavailable');
       extra.push(new Uint8Array(await file.arrayBuffer()));
