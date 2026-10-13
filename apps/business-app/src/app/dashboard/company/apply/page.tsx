@@ -63,6 +63,22 @@ export default async function CompanyApplicationPage() {
             company data stays private to your workspace.
           </p>
         </header>
+        <section className="rounded-2xl border border-blue-200 bg-blue-50 p-5 sm:p-6">
+          <h2 className="text-lg font-semibold text-slate-950">
+            Already registered as a professional on ProPulse?
+          </h2>
+          <p className="mt-2 text-sm text-slate-700">
+            Continue with your verified ProPulse account. We will import its
+            company name, services and locations, reuse your existing workspace
+            when possible, and assign Owner access automatically.
+          </p>
+          <Link
+            href="/auth/propulse"
+            className="mt-4 inline-flex rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white"
+          >
+            Import company from ProPulse →
+          </Link>
+        </section>
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
           <h2 className="text-xl font-semibold">Business details</h2>
           <CompanyRegistrationForm>

@@ -36,6 +36,19 @@ function unwrap<T>({
   if (data === null || data === undefined) throw new DomainError('NOT_FOUND');
   return data;
 }
+function unwrapNullable<T>({
+  data,
+  error,
+}: {
+  data: T;
+  error: { code?: string } | null;
+}): T {
+  if (error)
+    throw new DomainError(
+      error.code === '42501' ? 'FORBIDDEN' : 'INTERNAL_ERROR',
+    );
+  return data;
+}
 export function createRepository(client: SupabaseClient<Database>) {
   return {
     async user() {
@@ -175,6 +188,13 @@ export function createRepository(client: SupabaseClient<Database>) {
     }) {
       return unwrap(
         await client.rpc('company_application_submit', { p_input: input }),
+      );
+    },
+    async propulseCompanyProfile(organizationId: string) {
+      return unwrapNullable(
+        await client.rpc('propulse_company_profile', {
+          p_organization_id: idSchema.parse(organizationId),
+        }),
       );
     },
     async selfRegisterCompany(input: {

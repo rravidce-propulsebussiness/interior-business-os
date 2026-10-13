@@ -11525,6 +11525,14 @@ export interface Database {
         Args: { p_organization_id: string; p_project_id: string };
         Returns: Json;
       };
+      propulse_company_import: {
+        Args: { p_user_id: string; p_subject: string; p_company: Json };
+        Returns: Json;
+      };
+      propulse_company_profile: {
+        Args: { p_organization_id: string };
+        Returns: Json;
+      };
       public_quotation: {
         Args: { p_token: string; p_operation?: string; p_input?: Json };
         Returns: Json;
