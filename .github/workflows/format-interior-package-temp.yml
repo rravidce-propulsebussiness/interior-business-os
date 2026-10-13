@@ -1,0 +1,38 @@
+name: Temporary interior package formatter
+on:
+  push:
+    branches:
+      - feat/quotation-package-selection-interior-20261013
+permissions:
+  contents: write
+jobs:
+  format:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.34.5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Format the two new files
+        run: |
+          pnpm exec prettier --write \
+            apps/business-app/src/app/dashboard/quotations/industry-package-actions.ts \
+            apps/business-app/src/app/dashboard/quotations/interior-room-builder.tsx
+      - name: Commit formatting
+        run: |
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git add -- apps/business-app/src/app/dashboard/quotations/industry-package-actions.ts \
+            apps/business-app/src/app/dashboard/quotations/interior-room-builder.tsx
+          if ! git diff --cached --quiet; then
+            git commit -m "Format industry package selection"
+            git push origin HEAD:feat/quotation-package-selection-interior-20261013
+          fi
