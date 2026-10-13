@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-html-link-for-pages, @next/next/no-location-assign-relative-destination -- Full-document navigation refreshes the newly selected company cookie. */
 'use client';
 
 import { useActionState, useEffect } from 'react';
