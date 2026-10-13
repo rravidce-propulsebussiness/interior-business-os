@@ -161,11 +161,7 @@ export default async function Quotations({
           <form
             method="get"
             action="/dashboard/quotations"
-            className="qs-fields"
-            style={{
-              gridTemplateColumns: 'minmax(0, 1fr) 170px auto',
-              marginBottom: 14,
-            }}
+            className="qs-fields qs-quote-filters"
           >
             <label className="qs-field">
               Search quote number
