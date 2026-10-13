@@ -5,11 +5,24 @@ import { useRouter } from 'next/navigation';
 import { createStudioQuotation } from './studio-actions';
 
 type Industry = { key: string; name: string };
+type QuoteLead = {
+  id: string;
+  lead_number: string;
+  name: string;
+  phone: string;
+  email: string;
+  location: string;
+  project_size: string;
+  service_type: string;
+  industryKey: string;
+};
 
 export function QuotationStudioStart({
+  leads,
   industries,
   defaultCurrency,
 }: {
+  leads: QuoteLead[];
   industries: Industry[];
   defaultCurrency: string;
 }) {
@@ -167,6 +180,40 @@ export function QuotationStudioStart({
           <h2>Client &amp; Project Details</h2>
           <span className="qs-selected-pill">Step 01 · Details</span>
         </div>
+        {leads.length > 0 && (
+          <label className="qs-field" style={{ marginBottom: 15 }}>
+            Choose from Leads (optional)
+            <select
+              defaultValue=""
+              onChange={(event) => {
+                const lead = leads.find((item) => item.id === event.target.value);
+                if (!lead) return;
+                setData({
+                  clientName: lead.name || '',
+                  phone: lead.phone || '',
+                  email: lead.email || '',
+                  projectName:
+                    (lead.service_type || 'Client') + ' project',
+                  location: lead.location || '',
+                  plotSize: lead.project_size || '',
+                  projectType: 'Residential',
+                });
+                if (industries.some((item) => item.key === lead.industryKey)) {
+                  setIndustry(lead.industryKey);
+                  if (lead.industryKey === 'interior') setMode('custom');
+                }
+                setFeedback('Lead details loaded. Review before creating the quotation.');
+              }}
+            >
+              <option value="">Enter client details manually</option>
+              {leads.map((lead) => (
+                <option key={lead.id} value={lead.id}>
+                  {lead.name || 'Unnamed lead'} · {lead.lead_number}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
         <div className="qs-fields">
           <label className="qs-field">
             Client name *
