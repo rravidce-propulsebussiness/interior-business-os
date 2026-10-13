@@ -64,7 +64,10 @@ test('Pipeline is Board View inside Leads, with its old URL redirected', () => {
   assert.doesNotMatch(leads, /href="\/dashboard\/crm\/pipeline"/);
   assert.match(leadPage, /'view'/);
   assert.match(leadPage, /key !== 'view'/);
-  assert.match(pipeline, /redirect\('\/dashboard\/crm\/leads\?' \+ query\.toString\(\)\)/);
+  assert.match(
+    pipeline,
+    /redirect\('\/dashboard\/crm\/leads\?' \+ query\.toString\(\)\)/,
+  );
   assert.match(pipeline, /query\.set\('view', 'board'\)/);
   assert.doesNotMatch(layout, /\['Pipeline', '\/dashboard\/crm\/pipeline'\]/);
   assert.match(board, /runCrmCommand/);

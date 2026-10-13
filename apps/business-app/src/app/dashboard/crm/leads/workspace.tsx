@@ -446,10 +446,20 @@ export function LeadsWorkspace({
               : 'Connect ProPulse'}
           </button>
           <nav className="crm-view-toggle" aria-label="Lead display">
-            <a href={viewLink('list')} aria-current={viewMode === 'list' ? 'page' : undefined}
-              className={viewMode === 'list' ? 'crm-view-active' : ''}>List View</a>
-            <a href={viewLink('board')} aria-current={viewMode === 'board' ? 'page' : undefined}
-              className={viewMode === 'board' ? 'crm-view-active' : ''}>Board View</a>
+            <a
+              href={viewLink('list')}
+              aria-current={viewMode === 'list' ? 'page' : undefined}
+              className={viewMode === 'list' ? 'crm-view-active' : ''}
+            >
+              List View
+            </a>
+            <a
+              href={viewLink('board')}
+              aria-current={viewMode === 'board' ? 'page' : undefined}
+              className={viewMode === 'board' ? 'crm-view-active' : ''}
+            >
+              Board View
+            </a>
           </nav>
           <button
             type="button"
@@ -534,7 +544,9 @@ export function LeadsWorkspace({
 
       <section className="crm-filter-panel" aria-label="Lead filters">
         <form action={path} method="get" className="crm-filters">
-          {viewMode === 'board' && <input type="hidden" name="view" value="board" />}
+          {viewMode === 'board' && (
+            <input type="hidden" name="view" value="board" />
+          )}
           <label className="crm-search-field">
             <OwnerIcon name="search" size={18} />
             <input
@@ -720,92 +732,205 @@ export function LeadsWorkspace({
           {rows.length ? (
             <>
               {viewMode === 'board' ? (
-                <LeadsBoardView rows={rows} stages={stages}
-                  canManage={canManage} canWin={canWin} onOpen={open} />
+                <LeadsBoardView
+                  rows={rows}
+                  stages={stages}
+                  canManage={canManage}
+                  canWin={canWin}
+                  onOpen={open}
+                />
               ) : (
-              <>
-              <div className="crm-leads-table-wrap">
-                <table className="crm-leads-table">
-                  <thead>
-                    <tr>
-                      <th className="crm-checkbox-col">
-                        <input
-                          aria-label="Select all visible leads"
-                          type="checkbox"
-                          checked={allSelected}
-                          onChange={() =>
-                            setChecked(
-                              allSelected ? [] : rows.map((row) => row.id),
-                            )
-                          }
-                        />
-                      </th>
-                      <th>Lead</th>
-                      <th>Requirement</th>
-                      <th>Location</th>
-                      <th>Stage</th>
-                      <th>Priority</th>
-                      <th>Follow-up</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
+                <>
+                  <div className="crm-leads-table-wrap">
+                    <table className="crm-leads-table">
+                      <thead>
+                        <tr>
+                          <th className="crm-checkbox-col">
+                            <input
+                              aria-label="Select all visible leads"
+                              type="checkbox"
+                              checked={allSelected}
+                              onChange={() =>
+                                setChecked(
+                                  allSelected ? [] : rows.map((row) => row.id),
+                                )
+                              }
+                            />
+                          </th>
+                          <th>Lead</th>
+                          <th>Requirement</th>
+                          <th>Location</th>
+                          <th>Stage</th>
+                          <th>Priority</th>
+                          <th>Follow-up</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {rows.map((lead, i) => (
+                          <tr
+                            key={lead.id}
+                            className={
+                              selected?.id === lead.id ? 'crm-row-selected' : ''
+                            }
+                          >
+                            <td>
+                              <input
+                                aria-label={'Select ' + lead.name}
+                                type="checkbox"
+                                checked={checked.includes(lead.id)}
+                                onChange={() => toggle(lead.id)}
+                              />
+                            </td>
+                            <td>
+                              <button
+                                type="button"
+                                className="crm-lead-identity"
+                                onClick={() => open(lead)}
+                                aria-label={'Preview ' + lead.name}
+                              >
+                                <span
+                                  className={'crm-avatar crm-avatar-' + (i % 5)}
+                                >
+                                  {firstLetters(lead.name)}
+                                </span>
+                                <span>
+                                  <strong>{lead.name}</strong>
+                                  <small>
+                                    {lead.phone || lead.number || 'No number'}
+                                  </small>
+                                </span>
+                              </button>
+                            </td>
+                            <td>
+                              <span className="crm-cell-text">
+                                {lead.requirement ||
+                                  lead.projectSize ||
+                                  'Not specified'}
+                              </span>
+                            </td>
+                            <td>
+                              <span className="crm-location">
+                                <Icon name="pin" size={15} />
+                                {lead.location || '—'}
+                              </span>
+                            </td>
+                            <td>
+                              <span
+                                className={
+                                  'crm-chip crm-chip-' + statusTone(lead)
+                                }
+                              >
+                                {lead.stageName}
+                              </span>
+                            </td>
+                            <td>
+                              <span
+                                className={
+                                  'crm-priority crm-priority-' + lead.priority
+                                }
+                              >
+                                {lead.priority}
+                              </span>
+                            </td>
+                            <td>
+                              <span
+                                className={
+                                  'crm-due crm-due-' + due(lead, asOf, timeZone)
+                                }
+                              >
+                                <Icon name="clock" size={15} />
+                                {lead.nextFollowUpAt
+                                  ? date(lead.nextFollowUpAt, true, timeZone)
+                                  : 'Not set'}
+                              </span>
+                            </td>
+                            <td>
+                              <div className="crm-row-actions">
+                                {lead.phoneNormalized && (
+                                  <a
+                                    title={'Call ' + lead.name}
+                                    aria-label={'Call ' + lead.name}
+                                    href={
+                                      'tel:' + safePhone(lead.phoneNormalized)
+                                    }
+                                  >
+                                    <Icon name="phone" size={17} />
+                                  </a>
+                                )}
+                                {whatsapp(
+                                  lead.phoneNormalized || lead.phone,
+                                ) && (
+                                  <a
+                                    title={'WhatsApp ' + lead.name}
+                                    aria-label={'WhatsApp ' + lead.name}
+                                    href={
+                                      'https://wa.me/' +
+                                      whatsapp(
+                                        lead.phoneNormalized || lead.phone,
+                                      )
+                                    }
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                  >
+                                    <Icon name="whatsapp" size={17} />
+                                  </a>
+                                )}
+                                <button
+                                  type="button"
+                                  title="Preview details"
+                                  aria-label={
+                                    'Preview details for ' + lead.name
+                                  }
+                                  onClick={() => open(lead)}
+                                >
+                                  <Icon name="more" size={18} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div className="crm-mobile-list">
                     {rows.map((lead, i) => (
-                      <tr
-                        key={lead.id}
+                      <article
                         className={
-                          selected?.id === lead.id ? 'crm-row-selected' : ''
+                          'crm-mobile-card' +
+                          (selected?.id === lead.id
+                            ? ' crm-mobile-selected'
+                            : '')
                         }
+                        key={lead.id}
                       >
-                        <td>
-                          <input
-                            aria-label={'Select ' + lead.name}
-                            type="checkbox"
-                            checked={checked.includes(lead.id)}
-                            onChange={() => toggle(lead.id)}
-                          />
-                        </td>
-                        <td>
+                        <div className="crm-mobile-header">
+                          <span className={'crm-avatar crm-avatar-' + (i % 5)}>
+                            {firstLetters(lead.name)}
+                          </span>
+                          <div>
+                            <strong>{lead.name}</strong>
+                            <small>{lead.number || lead.phone}</small>
+                          </div>
                           <button
                             type="button"
-                            className="crm-lead-identity"
                             onClick={() => open(lead)}
                             aria-label={'Preview ' + lead.name}
                           >
-                            <span
-                              className={'crm-avatar crm-avatar-' + (i % 5)}
-                            >
-                              {firstLetters(lead.name)}
-                            </span>
-                            <span>
-                              <strong>{lead.name}</strong>
-                              <small>
-                                {lead.phone || lead.number || 'No number'}
-                              </small>
-                            </span>
+                            <Icon name="chevron" />
                           </button>
-                        </td>
-                        <td>
-                          <span className="crm-cell-text">
-                            {lead.requirement ||
-                              lead.projectSize ||
-                              'Not specified'}
-                          </span>
-                        </td>
-                        <td>
-                          <span className="crm-location">
-                            <Icon name="pin" size={15} />
-                            {lead.location || '—'}
-                          </span>
-                        </td>
-                        <td>
+                        </div>
+                        <p>
+                          {lead.requirement ||
+                            lead.projectSize ||
+                            'No requirement specified'}
+                        </p>
+                        <div className="crm-mobile-chips">
                           <span
                             className={'crm-chip crm-chip-' + statusTone(lead)}
                           >
                             {lead.stageName}
                           </span>
-                        </td>
-                        <td>
                           <span
                             className={
                               'crm-priority crm-priority-' + lead.priority
@@ -813,107 +938,15 @@ export function LeadsWorkspace({
                           >
                             {lead.priority}
                           </span>
-                        </td>
-                        <td>
-                          <span
-                            className={
-                              'crm-due crm-due-' + due(lead, asOf, timeZone)
-                            }
-                          >
-                            <Icon name="clock" size={15} />
-                            {lead.nextFollowUpAt
-                              ? date(lead.nextFollowUpAt, true, timeZone)
-                              : 'Not set'}
-                          </span>
-                        </td>
-                        <td>
-                          <div className="crm-row-actions">
-                            {lead.phoneNormalized && (
-                              <a
-                                title={'Call ' + lead.name}
-                                aria-label={'Call ' + lead.name}
-                                href={'tel:' + safePhone(lead.phoneNormalized)}
-                              >
-                                <Icon name="phone" size={17} />
-                              </a>
-                            )}
-                            {whatsapp(lead.phoneNormalized || lead.phone) && (
-                              <a
-                                title={'WhatsApp ' + lead.name}
-                                aria-label={'WhatsApp ' + lead.name}
-                                href={
-                                  'https://wa.me/' +
-                                  whatsapp(lead.phoneNormalized || lead.phone)
-                                }
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                <Icon name="whatsapp" size={17} />
-                              </a>
-                            )}
-                            <button
-                              type="button"
-                              title="Preview details"
-                              aria-label={'Preview details for ' + lead.name}
-                              onClick={() => open(lead)}
-                            >
-                              <Icon name="more" size={18} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
+                        </div>
+                        <small className="crm-mobile-sub">
+                          {lead.location || 'Location not provided'} · Follow-up{' '}
+                          {date(lead.nextFollowUpAt, false, timeZone)}
+                        </small>
+                      </article>
                     ))}
-                  </tbody>
-                </table>
-              </div>
-              <div className="crm-mobile-list">
-                {rows.map((lead, i) => (
-                  <article
-                    className={
-                      'crm-mobile-card' +
-                      (selected?.id === lead.id ? ' crm-mobile-selected' : '')
-                    }
-                    key={lead.id}
-                  >
-                    <div className="crm-mobile-header">
-                      <span className={'crm-avatar crm-avatar-' + (i % 5)}>
-                        {firstLetters(lead.name)}
-                      </span>
-                      <div>
-                        <strong>{lead.name}</strong>
-                        <small>{lead.number || lead.phone}</small>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => open(lead)}
-                        aria-label={'Preview ' + lead.name}
-                      >
-                        <Icon name="chevron" />
-                      </button>
-                    </div>
-                    <p>
-                      {lead.requirement ||
-                        lead.projectSize ||
-                        'No requirement specified'}
-                    </p>
-                    <div className="crm-mobile-chips">
-                      <span className={'crm-chip crm-chip-' + statusTone(lead)}>
-                        {lead.stageName}
-                      </span>
-                      <span
-                        className={'crm-priority crm-priority-' + lead.priority}
-                      >
-                        {lead.priority}
-                      </span>
-                    </div>
-                    <small className="crm-mobile-sub">
-                      {lead.location || 'Location not provided'} · Follow-up{' '}
-                      {date(lead.nextFollowUpAt, false, timeZone)}
-                    </small>
-                  </article>
-                ))}
-              </div>
-              </>
+                  </div>
+                </>
               )}
             </>
           ) : (
