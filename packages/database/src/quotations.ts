@@ -53,6 +53,13 @@ export function createQuotationRepository(client: SupabaseClient<Database>) {
   }
   return {
     commit,
+    async assertSigningReady(org: string): Promise<void> {
+      // Verifies the same actor-bound, short-lived HMAC that commit_quotation
+      // checks, without inserting any customers, projects, or quotations.
+      const proof = await signed(org, 'commit', { action: 'create' });
+      const ready = checked(await client.rpc('quotation_signing_preflight', proof));
+      if (ready !== true) throw new DomainError('INTERNAL_ERROR');
+    },
     async search(
       org: string,
       entity: string,
