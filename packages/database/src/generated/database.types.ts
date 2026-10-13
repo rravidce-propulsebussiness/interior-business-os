@@ -11604,10 +11604,7 @@ export interface Database {
         };
         Returns: Json;
       };
-      quotation_package_list: {
-        Args: { p_org: string };
-        Returns: Json;
-      };
+      quotation_package_list: { Args: { p_org: string }; Returns: Json };
       quotation_package_save: {
         Args: { p_org: string; p_input: Json };
         Returns: string;
