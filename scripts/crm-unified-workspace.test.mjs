@@ -17,28 +17,32 @@ const root = new URL(
   import.meta.url,
 );
 
-test('manual, sheet and ProPulse actions open inline without separate lead pages', () => {
-  for (const panel of ['add', 'sheet', 'propulse']) {
+test('lead list retains inline Add and ProPulse but uses separate import routes', () => {
+  for (const panel of ['add', 'propulse']) {
     assert.match(leads, new RegExp("leadTool === '" + panel + "'"));
   }
   assert.match(leads, /<QuickAddLead/);
-  assert.match(leads, /<SheetImportForm/);
   assert.match(leads, /<ProPulseConnectPanel/);
-  assert.doesNotMatch(leads, /href=\{path \+ '\/(?:new|import|propulse)'\}/);
-  for (const [segment, panel] of [
-    ['new', 'add'],
-    ['import', 'sheet'],
-    ['propulse', 'propulse'],
-  ]) {
-    const redirect = readFileSync(
-      fileURLToPath(new URL(segment + '/page.tsx', root)),
-      'utf8',
-    );
-    assert.match(
-      redirect,
-      new RegExp('redirect\\(\\x27/dashboard/crm/leads\\?panel=' + panel),
-    );
-  }
+  assert.doesNotMatch(leads, /<SheetImportForm/);
+  assert.doesNotMatch(leads, /leadTool === 'sheet'/);
+  assert.match(leads, /href="\/dashboard\/crm\/leads\/upload"/);
+  assert.match(leads, /href="\/dashboard\/crm\/leads\/google-sheets"/);
+
+  const oldUpload = readFileSync(
+    fileURLToPath(new URL('import/page.tsx', root)),
+    'utf8',
+  );
+  const oldNew = readFileSync(
+    fileURLToPath(new URL('new/page.tsx', root)),
+    'utf8',
+  );
+  const oldProPulse = readFileSync(
+    fileURLToPath(new URL('propulse/page.tsx', root)),
+    'utf8',
+  );
+  assert.match(oldUpload, /redirect\('\/dashboard\/crm\/leads\/upload'\)/);
+  assert.match(oldNew, /panel=add/);
+  assert.match(oldProPulse, /panel=propulse/);
 });
 
 test('Pipeline is Board View inside Leads, with its old URL redirected', () => {
@@ -75,20 +79,50 @@ test('Pipeline is Board View inside Leads, with its old URL redirected', () => {
   assert.match(board, /onOpen\(lead\)/);
 });
 
-test('premium Upload Leads keeps file and Google Sheets paste inside All Leads', () => {
+test('Upload Leads and Google Sheets have distinct protected pages', () => {
+  const uploadPage = readFileSync(
+    fileURLToPath(new URL('upload/page.tsx', root)),
+    'utf8',
+  );
+  const sheetsPage = readFileSync(
+    fileURLToPath(new URL('google-sheets/page.tsx', root)),
+    'utf8',
+  );
+  const pageShell = readFileSync(
+    fileURLToPath(new URL('import-page-shell.tsx', root)),
+    'utf8',
+  );
   const importer = readFileSync(
     fileURLToPath(new URL('import/sheet-import-form.tsx', root)),
     'utf8',
   );
-  assert.match(leads, /Upload Leads/);
-  assert.match(leads, /<SheetImportForm/);
-  assert.match(importer, /Upload File/);
-  assert.match(importer, /Google Sheets/);
-  assert.match(importer, /fileInputRef\.current\?\.click\(\)/);
+  const leadPage = readFileSync(
+    fileURLToPath(new URL('page.tsx', root)),
+    'utf8',
+  );
+  const crmLayout = readFileSync(
+    fileURLToPath(new URL('../layout.tsx', root)),
+    'utf8',
+  );
+
+  assert.match(uploadPage, /method="file"/);
+  assert.match(sheetsPage, /method="google"/);
+  assert.match(pageShell, /crmServices\('lead.create', true\)/);
+  assert.match(pageShell, /<OwnerShell/);
+  assert.match(pageShell, /<SheetImportForm/);
+  assert.match(pageShell, /\/dashboard\/crm\/leads\/upload/);
+  assert.match(pageShell, /\/dashboard\/crm\/leads\/google-sheets/);
+  assert.match(leadPage, /label: 'Upload Leads'/);
+  assert.match(leadPage, /label: 'Google Sheets'/);
+  assert.match(crmLayout, /\['Upload Leads',/);
+  assert.match(crmLayout, /\['Google Sheets',/);
+
+  assert.doesNotMatch(importer, /setMethod/);
+  assert.doesNotMatch(importer, /crm-import-methods/);
+  assert.match(importer, /method === 'file'/);
   assert.match(importer, /onDrop=\{handleDrop\}/);
   assert.match(importer, /readCsv\(pasteText, delimiter\)/);
-  assert.match(importer, /Import results/);
+  assert.match(importer, /importSheetLeads/);
   assert.match(importer, /report\.duplicates/);
   assert.match(importer, /report\.invalid/);
-  assert.match(importer, /importSheetLeads/);
 });
