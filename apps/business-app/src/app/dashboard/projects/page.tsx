@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { z } from 'zod';
 import { emptyAddress } from '@business-os/core/commercial';
+import { canAccess } from '@business-os/auth';
 import { OwnerIcon, OwnerShell, type OwnerNavItem } from '../owner-shell';
 import { commercialServices } from '../commercial/service';
 import { MasterForm } from '../commercial/master-form';
@@ -213,7 +214,11 @@ export default async function Projects({
     plans.find((plan) => plan.id === organization.plan_id)?.name ??
     'Business plan';
   const has = (permission: string, moduleKey?: string) =>
-    s.allowed(permission, moduleKey);
+    canAccess(s.context, {
+      organizationId: s.org,
+      permission,
+      ...(moduleKey ? { moduleKey } : {}),
+    });
   const canCreate = has('project.create', 'projects');
   const canClients =
     has('customer.view', 'crm') || has('customer.view', 'quotation');
