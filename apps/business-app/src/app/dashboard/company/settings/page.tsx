@@ -6,7 +6,7 @@ import { canAccess } from '@business-os/auth';
 export const dynamic = 'force-dynamic';
 
 export default async function CompanySettings() {
-  const { repository } = await pageServices();
+  const { repository, client } = await pageServices();
   const context = await activeOrganization();
   if (!context) notFound();
 
@@ -20,6 +20,33 @@ export default async function CompanySettings() {
 
   const company = await repository.organization(context.organizationId);
   if (!company) notFound();
+  // Read only this tenant's linked ProPulse company, checked again in the RPC.
+  const { data: rawLinked } = await client.rpc('propulse_company_link_mine', {
+    p_organization_id: context.organizationId,
+  });
+  const linked =
+    rawLinked && typeof rawLinked === 'object' && !Array.isArray(rawLinked) &&
+    typeof rawLinked.name === 'string'
+      ? rawLinked
+      : null;
+  const services = linked && Array.isArray(linked.services)
+    ? linked.services
+        .filter((value): value is Record<string, unknown> =>
+          typeof value === 'object' && value !== null && !Array.isArray(value),
+        )
+        .map((value) => String(value.service ?? '').slice(0, 100))
+        .filter(Boolean)
+    : [];
+  const locations = linked && Array.isArray(linked.locations)
+    ? linked.locations
+        .filter((value): value is Record<string, unknown> =>
+          typeof value === 'object' && value !== null && !Array.isArray(value),
+        )
+        .map((value) => [value.city, value.state].filter(
+          (name): name is string => typeof name === 'string' && !!name,
+        ).join(', '))
+        .filter(Boolean)
+    : [];
   const options = [
     {
       label: 'Team and access',
@@ -97,6 +124,34 @@ export default async function CompanySettings() {
             platform. Your business tools and employee access can be managed
             below.
           </p>
+        </section>
+        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="text-lg font-bold">ProPulse company connection</h2>
+              <p className="mt-1 text-sm text-slate-600">
+                Verified business details update on each ProPulse sign-in.
+              </p>
+            </div>
+            <Link href="/auth/propulse" className="rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white">
+              {linked ? 'Refresh from ProPulse' : 'Connect ProPulse business'}
+            </Link>
+          </div>
+          {linked ? (
+            <dl className="mt-5 grid gap-4 text-sm sm:grid-cols-2">
+              <div><dt className="text-slate-500">Company</dt><dd className="font-semibold">{String(linked.name)}</dd></div>
+              <div><dt className="text-slate-500">Phone</dt><dd>{String(linked.phone || 'Not supplied')}</dd></div>
+              <div className="sm:col-span-2"><dt className="text-slate-500">Description</dt><dd className="mt-1 whitespace-pre-wrap">{String(linked.description || 'Not supplied')}</dd></div>
+              <div><dt className="text-slate-500">Services</dt><dd>{services.join(', ') || 'Not supplied'}</dd></div>
+              <div><dt className="text-slate-500">Locations</dt><dd>{locations.join(' · ') || 'Not supplied'}</dd></div>
+              <div className="sm:col-span-2"><dt className="text-slate-500">Last imported</dt><dd>{typeof linked.syncedAt === 'string' ? linked.syncedAt.slice(0, 19).replace('T', ' ') + ' UTC' : '—'}</dd></div>
+            </dl>
+          ) : (
+            <p className="mt-5 text-sm text-slate-600">
+              Connect the ProPulse account that owns your registered business.
+              Ordinary user accounts do not receive Owner access automatically.
+            </p>
+          )}
         </section>
         <section className="grid gap-4 sm:grid-cols-2">
           {options.map((item) => (
