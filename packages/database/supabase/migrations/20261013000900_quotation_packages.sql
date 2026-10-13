@@ -71,7 +71,52 @@ begin
  v_status = p_input->>'status';
  if length(v_name) not between 2 and 120
     or v_code !~ '^[A-Z][A-Z0-9-]{1,19}$'
-    or v_industry !~ '^[a-z][a-z0-9_]{0,63}$'
+    or v_industry !~ '^[a-z][a-z0-9_]{0,63}
+    or not exists (select 1 from public.industries i where i.key=v_industry and i.status='active')
+    or length(v_description)>2000
+    or v_basis not in ('fixed','per_sqft','per_bhk','per_unit')
+    or v_currency !~ '^[A-Z]{3}$'
+    or v_status not in ('active','inactive')
+    or coalesce(p_input->>'basePrice','') !~ '^(0|[1-9][0-9]{0,8})(\.[0-9]{1,2})?$'
+ then raise exception 'Invalid package fields' using errcode='22023'; end if;
+ v_price = (p_input->>'basePrice')::numeric;
+ if v_price<=0 or v_price>999999999.99 then
+  raise exception 'Invalid package price' using errcode='22023';
+ end if;
+
+ if v_id is null then
+   insert into private.quotation_packages(
+    organization_id,industry_key,name,code,description,pricing_basis,base_price,currency,status)
+   values(p_org,v_industry,v_name,v_code,v_description,v_basis,v_price,v_currency,v_status)
+   returning id into v_result;
+ else
+   if v_version is null or v_version<1 then
+     raise exception 'Expected version' using errcode='22023';
+   end if;
+   update private.quotation_packages
+   set industry_key=v_industry,name=v_name,code=v_code,description=v_description,
+       pricing_basis=v_basis,base_price=v_price,currency=v_currency,status=v_status,
+       version=version+1
+   where organization_id=p_org and id=v_id and version=v_version
+   returning id into v_result;
+   if v_result is null then
+     raise exception 'Package changed; reload' using errcode='40001';
+   end if;
+ end if;
+ insert into public.audit_logs(actor_user_id,organization_id,action,entity_type,entity_id,metadata)
+ values(auth.uid(),p_org,'quotation.package.saved','quotation_package',v_result::text,
+   jsonb_build_object('industry',v_industry,'code',v_code,'basis',v_basis));
+ return v_result;
+end $fn$;
+
+revoke all on function public.quotation_package_list(uuid),
+ public.quotation_package_save(uuid,jsonb) from public,anon;
+grant execute on function public.quotation_package_list(uuid),
+ public.quotation_package_save(uuid,jsonb) to authenticated;
+
+commit;
+
+    or v_industry = 'construction' -- construction has its own SFT package engine
     or not exists (select 1 from public.industries i where i.key=v_industry and i.status='active')
     or length(v_description)>2000
     or v_basis not in ('fixed','per_sqft','per_bhk','per_unit')
