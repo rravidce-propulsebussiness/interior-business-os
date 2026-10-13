@@ -6,6 +6,7 @@ import { parseSftEstimate } from '@business-os/core/sft-quotation';
 import { lineSnapshotSchema } from '@business-os/quotation-engine';
 import { createConstructionRatesRepository } from '@business-os/database/construction-rates';
 import { createConstructionPackagesRepository } from '@business-os/database/construction-packages';
+import { createQuotationPackagesRepository } from '@business-os/database/quotation-packages';
 import { QuotationStudioFrame } from '../../studio-frame';
 import { QuotationStudioEditor } from '../../studio-editor';
 import { ConstructionSelector } from '../../construction-selector';
@@ -128,6 +129,16 @@ export default async function QuotationStudio({
       ])
     : [[], []];
 
+  const canUseIndustryPackages =
+    editable &&
+    industryKey !== 'construction' &&
+    s.allowed('pricing.view', 'pricing');
+  const industryPackages = canUseIndustryPackages
+    ? await createQuotationPackagesRepository(s.client)
+        .list(s.org)
+        .catch(() => [])
+    : [];
+
   const command = { revision_id: revision.id, version: revision.version };
   const totals = revision.totals;
   const total =
@@ -194,6 +205,13 @@ export default async function QuotationStudio({
             <InteriorRoomBuilder
               revisionId={revision.id}
               version={revision.version}
+              currency={revision.currency}
+              packages={industryPackages.filter(
+                (pkg) =>
+                  pkg.status === 'active' &&
+                  pkg.industryKey === industryKey &&
+                  pkg.currency === revision.currency,
+              )}
             />
           ) : (
             <p className="qs-note">This revision cannot be edited.</p>
