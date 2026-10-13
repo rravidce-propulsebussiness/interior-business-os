@@ -403,7 +403,6 @@ export function QuotationStudioEditor({
 
           {step === 'files' && (
             <>
-              {filesEditor}
               <section className="qs-card">
                 <h2>Specifications, inclusions &amp; payment terms</h2>
                 <p className="qs-muted" style={{ marginBottom: 15 }}>
@@ -414,6 +413,7 @@ export function QuotationStudioEditor({
                 </p>
                 {termsEditor}
               </section>
+              {filesEditor}
             </>
           )}
 
