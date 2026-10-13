@@ -115,7 +115,7 @@ export function renderQuotationDocument(input: unknown): string {
               '</td></tr>',
           )
           .join('') +
-        '<tr class="total"><td>Floor built-up area</td><td></td><td></td><td>' +
+        '<tr class="total"><td>Construction cost (floors + additions)</td><td></td><td></td><td>' +
         escape(details.totalAreaSqft) +
         '</td>' +
         (h.display.unit_rate ? '<td></td>' : '') +
@@ -126,7 +126,7 @@ export function renderQuotationDocument(input: unknown): string {
     )
     .join('');
   const sftSpecifications = sftSchedules
-    .map(({ line, details }) => {
+    .map(({ details }) => {
       const packageTitle = details.package
         ? '<div class="package-banner"><span>Selected construction package</span><h3>' +
           escape(details.package.name) +
@@ -166,7 +166,7 @@ export function renderQuotationDocument(input: unknown): string {
             .join('') +
           '</section>'
         : '';
-      return '<section class="spec-pages"><div class="spec-eyebrow">02 / PACKAGE SPECIFICATIONS</div><h2>Package materials, finishes &amp; scope</h2><p class="muted">The descriptions below form part of this quotation and are saved with this revision.</p>' +
+      return '<section class="spec-pages"><div class="spec-eyebrow">SECTION 02 / PACKAGE SPECIFICATIONS</div><h2>Package materials, finishes &amp; scope</h2><p class="muted">The descriptions below form part of this quotation and are saved with this revision.</p>' +
         packageTitle +
         (sections || '<p class="muted">No additional written specifications supplied.</p>') +
         materialChoices +
