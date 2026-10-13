@@ -8,7 +8,7 @@ import { commercialServices } from '../commercial/service';
 const dimension = z.string().regex(/^(?:[1-9]\d{0,3}|0)(?:\.\d{1,2})?$/).refine((s) => Number(s) > 0);
 const money = z.string().regex(/^(?:[1-9]\d{0,5}|0)(?:\.\d{1,2})?$/).refine((s) => Number(s) > 0);
 
-export const interiorLineSchema = z
+const interiorLineSchema = z
   .object({
     revisionId: z.uuid(),
     version: z.number().int().positive(),
@@ -31,7 +31,7 @@ function decimalHundredths(raw: string): bigint {
 }
 
 /** Canonical square-foot quantity, rounded to two places without floats. */
-export function interiorAreaSqft(length: string, width: string): string {
+function interiorAreaSqft(length: string, width: string): string {
   const raw = (decimalHundredths(length) * decimalHundredths(width) + 50n) / 100n;
   return (raw / 100n).toString() + '.' + (raw % 100n).toString().padStart(2, '0');
 }
