@@ -31,32 +31,24 @@ export default async function CompanySettings() {
     typeof rawLinked.name === 'string'
       ? rawLinked
       : null;
+  const profileField = (item: unknown, field: string) => {
+    if (!item || typeof item !== 'object' || Array.isArray(item))
+      return '';
+    const value = (item as Record<string, unknown>)[field];
+    return typeof value === 'string' ? value.slice(0, 100) : '';
+  };
   const services =
     linked && Array.isArray(linked.services)
       ? linked.services
-          .filter(
-            (value): value is Record<string, unknown> =>
-              typeof value === 'object' &&
-              value !== null &&
-              !Array.isArray(value),
-          )
-          .map((value) => String(value.service ?? '').slice(0, 100))
+          .map((value) => profileField(value, 'service'))
           .filter(Boolean)
       : [];
   const locations =
     linked && Array.isArray(linked.locations)
       ? linked.locations
-          .filter(
-            (value): value is Record<string, unknown> =>
-              typeof value === 'object' &&
-              value !== null &&
-              !Array.isArray(value),
-          )
           .map((value) =>
-            [value.city, value.state]
-              .filter(
-                (name): name is string => typeof name === 'string' && !!name,
-              )
+            [profileField(value, 'city'), profileField(value, 'state')]
+              .filter(Boolean)
               .join(', '),
           )
           .filter(Boolean)
