@@ -9,7 +9,7 @@ insert into public.customers(id,organization_id,display_name) values('b0000000-0
 insert into public.projects(id,organization_id,customer_id,name,code) values('b0000000-0000-4000-8000-000000000003',:'other_org','b0000000-0000-4000-8000-000000000002','Private project','private');
 insert into public.project_areas(id,organization_id,project_id,name) values('b0000000-0000-4000-8000-000000000004',:'other_org','b0000000-0000-4000-8000-000000000003','Private area');
 insert into public.customer_contacts(organization_id,customer_id,name) values(:'other_org','b0000000-0000-4000-8000-000000000002','Private contact');
-insert into public.organization_quotation_settings(organization_id,branding) values(:'other_org','{"name":"Private studio"}');
+insert into public.organization_quotation_settings(organization_id,branding) values(:'other_org','{"name":"Private studio"}') on conflict(organization_id) do nothing;
 insert into public.quotations(id,organization_id,customer_id,project_id,quotation_number) values('b0000000-0000-4000-8000-000000000005',:'other_org','b0000000-0000-4000-8000-000000000002','b0000000-0000-4000-8000-000000000003','Q-PRIVATE');
 insert into public.quotation_revisions(id,organization_id,quotation_id,project_id,revision_number,currency,valid_until,document_snapshot) values('b0000000-0000-4000-8000-000000000006',:'other_org','b0000000-0000-4000-8000-000000000005','b0000000-0000-4000-8000-000000000003',1,'USD',current_date,'{}');
 insert into public.quotation_items(id,organization_id,revision_id,project_id,snapshot) values('b0000000-0000-4000-8000-000000000007',:'other_org','b0000000-0000-4000-8000-000000000006','b0000000-0000-4000-8000-000000000003','{"snapshot_version":1}');
