@@ -18,7 +18,13 @@ type WorkRow = {
   widthFeet: string;
   ratePerSqft: string;
 };
-type Section = { title: string; description: string };
+type Section = {
+  title: string;
+  description: string;
+  brand?: string;
+  grade?: string;
+  allowancePerSqft?: string;
+};
 const floorNames = [
   'Ground Floor',
   'First Floor',
@@ -195,13 +201,25 @@ export function PremiumSftBuilder({
             : row,
         ),
       );
-      setSections((current) =>
-        current.map((section) =>
-          section.title === 'Package scope & inclusions'
-            ? { ...section, description: choice.description }
-            : section,
-        ),
-      );
+      setSections([
+        { title: 'Package scope & inclusions', description: choice.description },
+        ...(choice.specSections.length
+          ? choice.specSections
+              .filter((section) =>
+                Boolean(
+                  section.description.trim() || section.brand.trim() ||
+                  section.grade.trim() || section.allowancePerSqft.trim(),
+                ),
+              )
+              .map((section) => ({
+                title: section.title,
+                description: section.description,
+                brand: section.brand,
+                grade: section.grade,
+                allowancePerSqft: section.allowancePerSqft,
+              }))
+          : freshSections().slice(1)),
+      ]);
     }
     setSaved(false);
     setMessage('');
@@ -229,7 +247,12 @@ export function PremiumSftBuilder({
         rows,
         materialIds,
         packageId: packageId || null,
-        sections: sections.filter((item) => item.description.trim().length > 0),
+        sections: sections.filter((item) =>
+          Boolean(
+            item.description.trim() || item.brand?.trim() ||
+            item.grade?.trim() || item.allowancePerSqft?.trim(),
+          ),
+        ),
       });
       setMessage(result.message);
       setSaved(Boolean(result.id));
@@ -454,7 +477,13 @@ export function PremiumSftBuilder({
                       </label>
                       <div className="grid gap-1.5 text-xs font-semibold text-slate-600">
                         Area
-                        <div className="rounded-xl bg-slate-50 px-3 py-3 text-sm font-extrabold text-slate-900">
+                        {selectedPackage?.attachmentFilename && (
+                <p className="rounded-xl border border-teal-200 bg-teal-50 px-4 py-3 text-xs font-semibold text-teal-800">
+                  ▤ {selectedPackage.attachmentFilename} · The company package PDF
+                  will be attached to this quotation when you save the draft.
+                </p>
+              )}
+              <div className="rounded-xl bg-slate-50 px-3 py-3 text-sm font-extrabold text-slate-900">
                           {numericArea > 0 ? numericArea.toFixed(2) : '—'} SFT
                         </div>
                       </div>
@@ -573,6 +602,32 @@ export function PremiumSftBuilder({
                       }}
                     />
                   </label>
+                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                    {([
+                      ['brand', 'Brand / manufacturer'],
+                      ['grade', 'Grade / material size'],
+                      ['allowancePerSqft', 'Price allowance per SFT (₹)'],
+                    ] as const).map(([key, title]) => (
+                      <label key={key} className="grid gap-1.5 text-xs font-semibold text-slate-600">
+                        {title}
+                        <input
+                          className={field}
+                          maxLength={key === 'allowancePerSqft' ? 40 : 120}
+                          value={section[key] ?? ''}
+                          onChange={(event) => {
+                            setSections((items) =>
+                              items.map((item, i) =>
+                                i === index
+                                  ? { ...item, [key]: event.target.value }
+                                  : item,
+                              ),
+                            );
+                            setSaved(false);
+                          }}
+                        />
+                      </label>
+                    ))}
+                  </div>
                   <label className="mt-3 grid gap-2 text-xs font-semibold text-slate-600">
                     Editable inclusions, material brands & conditions
                     <textarea
