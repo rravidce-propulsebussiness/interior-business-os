@@ -10,7 +10,11 @@ const links: { title: string; href: string; icon: OwnerIconName }[] = [
   { title: 'Dashboard', href: '/dashboard', icon: 'dashboard' },
   { title: 'CRM & Leads', href: '/dashboard/crm/leads', icon: 'leads' },
   { title: 'Quotations', href: '/dashboard/quotations', icon: 'quotations' },
-  { title: 'Package Manager', href: '/dashboard/quotations/packages', icon: 'projects' },
+  {
+    title: 'Package Manager',
+    href: '/dashboard/quotations/packages',
+    icon: 'projects',
+  },
   { title: 'Projects', href: '/dashboard/projects', icon: 'projects' },
   { title: 'Clients', href: '/dashboard/customers', icon: 'clients' },
   { title: 'Billing', href: '/dashboard/billing', icon: 'billing' },

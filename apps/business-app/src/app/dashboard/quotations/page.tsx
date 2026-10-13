@@ -44,28 +44,39 @@ export default async function Quotations({
   // present one CRN workspace per customer, keeping every historical revision.
   const revisionIds = rows.map((row) => row.id);
   const { data: revisionLinks } = revisionIds.length
-    ? await s.client.from('quotation_revisions')
+    ? await s.client
+        .from('quotation_revisions')
         .select('id,quotation_id')
         .eq('organization_id', s.org)
         .in('id', revisionIds)
     : { data: [] };
-  const quotationIds = [...new Set((revisionLinks ?? []).map((r) => r.quotation_id))];
+  const quotationIds = [
+    ...new Set((revisionLinks ?? []).map((r) => r.quotation_id)),
+  ];
   const { data: parentQuotes } = quotationIds.length
-    ? await s.client.from('quotations')
+    ? await s.client
+        .from('quotations')
         .select('id,customer_id')
         .eq('organization_id', s.org)
         .in('id', quotationIds)
     : { data: [] };
   const revisionToQuote = new Map(
-    (revisionLinks ?? []).map((revision) => [revision.id, revision.quotation_id]),
+    (revisionLinks ?? []).map((revision) => [
+      revision.id,
+      revision.quotation_id,
+    ]),
   );
   const quoteToCustomer = new Map(
     (parentQuotes ?? []).map((quote) => [quote.id, quote.customer_id]),
   );
   type QuotationRow = (typeof rows)[number];
-  const groupedMap = new Map<string, { customerId: string | null; name: string; rows: QuotationRow[] }>();
+  const groupedMap = new Map<
+    string,
+    { customerId: string | null; name: string; rows: QuotationRow[] }
+  >();
   for (const row of rows) {
-    const customerId = quoteToCustomer.get(revisionToQuote.get(row.id) ?? '') ?? null;
+    const customerId =
+      quoteToCustomer.get(revisionToQuote.get(row.id) ?? '') ?? null;
     // If a legacy row cannot be resolved, isolate it rather than incorrectly
     // grouping quotations from different customers.
     const groupId = customerId ?? row.id;
@@ -153,10 +164,13 @@ export default async function Quotations({
             <div>
               <h2>All company quotations</h2>
               <p className="qs-muted">
-                One customer CRN with all their projects, quotations and revisions.
+                One customer CRN with all their projects, quotations and
+                revisions.
               </p>
             </div>
-            <span className="qs-selected-pill">{groupedCustomers.length} customers · {total} revisions</span>
+            <span className="qs-selected-pill">
+              {groupedCustomers.length} customers · {total} revisions
+            </span>
           </div>
           <form
             method="get"
@@ -193,20 +207,42 @@ export default async function Quotations({
             <div className="qs-quotation-list">
               {groupedCustomers.map((customer) => {
                 const crn = customer.customerId
-                  ? 'CRN-' + customer.customerId.replaceAll('-', '').slice(0, 12).toUpperCase()
+                  ? 'CRN-' +
+                    customer.customerId
+                      .replaceAll('-', '')
+                      .slice(0, 12)
+                      .toUpperCase()
                   : 'Legacy quotation';
-                const projects = new Set(customer.rows.map((row) => row.project_name));
-                const quoteNumbers = new Set(customer.rows.map((row) => row.quotation_number));
+                const projects = new Set(
+                  customer.rows.map((row) => row.project_name),
+                );
+                const quoteNumbers = new Set(
+                  customer.rows.map((row) => row.quotation_number),
+                );
                 return (
-                  <section className="qs-customer-group" key={customer.customerId ?? customer.rows[0]?.id ?? customer.name}>
+                  <section
+                    className="qs-customer-group"
+                    key={
+                      customer.customerId ??
+                      customer.rows[0]?.id ??
+                      customer.name
+                    }
+                  >
                     <div className="qs-customer-header">
                       <div>
                         <span className="qs-selected-pill">{crn}</span>
                         <h3>{customer.name}</h3>
-                        <p>{projects.size} project(s) · {quoteNumbers.size} quotation(s) · {customer.rows.length} revision(s) on this page</p>
+                        <p>
+                          {projects.size} project(s) · {quoteNumbers.size}{' '}
+                          quotation(s) · {customer.rows.length} revision(s) on
+                          this page
+                        </p>
                       </div>
                       {customer.customerId && (
-                        <Link className="qs-btn" href={'/dashboard/customers/' + customer.customerId}>
+                        <Link
+                          className="qs-btn"
+                          href={'/dashboard/customers/' + customer.customerId}
+                        >
                           View customer →
                         </Link>
                       )}
@@ -219,12 +255,21 @@ export default async function Quotations({
                           className="qs-quotation-item"
                         >
                           <div>
-                            <strong>{row.quotation_number || 'Quotation'}</strong>
-                            <small>{row.project_name || 'Project'} · Revision {row.revision_number ?? 1}</small>
+                            <strong>
+                              {row.quotation_number || 'Quotation'}
+                            </strong>
+                            <small>
+                              {row.project_name || 'Project'} · Revision{' '}
+                              {row.revision_number ?? 1}
+                            </small>
                           </div>
                           <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                            <span className="qs-badge">{row.status || 'draft'}</span>
-                            <strong style={{ marginTop: 7 }}>{row.currency} {row.amount ?? '0'}</strong>
+                            <span className="qs-badge">
+                              {row.status || 'draft'}
+                            </span>
+                            <strong style={{ marginTop: 7 }}>
+                              {row.currency} {row.amount ?? '0'}
+                            </strong>
                           </div>
                         </Link>
                       ))}
@@ -232,7 +277,8 @@ export default async function Quotations({
                   </section>
                 );
               })}
-            </div>          ) : (
+            </div>
+          ) : (
             <div className="qs-empty-preview">
               <span className="qs-heading-icon">▤</span>
               <strong>

@@ -16,29 +16,42 @@ export type QuotationPackage = {
   version: number;
 };
 
-export function createQuotationPackagesRepository(client: SupabaseClient<Database>) {
+export function createQuotationPackagesRepository(
+  client: SupabaseClient<Database>,
+) {
   // The RPCs arrive in the next migration; cast until database types are regenerated.
   const rpc = client.rpc.bind(client) as unknown as (
     name: string,
     args: Record<string, unknown>,
   ) => Promise<{ data: unknown; error: { code?: string } | null }>;
-  async function invoke<T>(name: string, args: Record<string, unknown>): Promise<T> {
+  async function invoke<T>(
+    name: string,
+    args: Record<string, unknown>,
+  ): Promise<T> {
     const { data, error } = await rpc(name, args);
     if (error) {
       throw new DomainError(
-        error.code === '42501' ? 'FORBIDDEN' :
-        error.code === '23505' || error.code === '40001' ? 'CONFLICT' :
-        ['22023','22P02','23514'].includes(error.code ?? '') ? 'VALIDATION_FAILED' :
-        'INTERNAL_ERROR',
+        error.code === '42501'
+          ? 'FORBIDDEN'
+          : error.code === '23505' || error.code === '40001'
+            ? 'CONFLICT'
+            : ['22023', '22P02', '23514'].includes(error.code ?? '')
+              ? 'VALIDATION_FAILED'
+              : 'INTERNAL_ERROR',
       );
     }
     return data as T;
   }
   return {
-    list: (org: string) => invoke<QuotationPackage[]>('quotation_package_list', { p_org: org }),
-    save: (org: string, input: Omit<QuotationPackage, 'id' | 'version'> & {
-      id?: string | undefined;
-      version?: number | undefined;
-    }) => invoke<string>('quotation_package_save', { p_org: org, p_input: input }),
+    list: (org: string) =>
+      invoke<QuotationPackage[]>('quotation_package_list', { p_org: org }),
+    save: (
+      org: string,
+      input: Omit<QuotationPackage, 'id' | 'version'> & {
+        id?: string | undefined;
+        version?: number | undefined;
+      },
+    ) =>
+      invoke<string>('quotation_package_save', { p_org: org, p_input: input }),
   };
 }

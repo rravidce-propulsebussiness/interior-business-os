@@ -33,7 +33,8 @@ export default async function Customer({
       <Link href="/dashboard/customers">Customers</Link>
       <h1 className="my-6 text-3xl">{c.display_name}</h1>
       <p className="mb-5 inline-flex rounded-full bg-blue-50 px-4 py-2 text-sm font-bold text-blue-700">
-        Customer reference: CRN-{c.id.replaceAll('-', '').slice(0, 12).toUpperCase()}
+        Customer reference: CRN-
+        {c.id.replaceAll('-', '').slice(0, 12).toUpperCase()}
       </p>
       <OriginLeads customerId={id} />
       <CustomerStatementLink customerId={id} />

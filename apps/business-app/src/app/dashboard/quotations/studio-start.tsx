@@ -5,7 +5,12 @@ import { useRouter } from 'next/navigation';
 import { createStudioQuotation } from './studio-actions';
 
 type Industry = { key: string; name: string };
-type ExistingCustomer = { id: string; display_name: string; phone: string; email: string };
+type ExistingCustomer = {
+  id: string;
+  display_name: string;
+  phone: string;
+  email: string;
+};
 type ExistingProject = { id: string; customer_id: string; name: string };
 
 type QuoteLead = {
@@ -44,9 +49,15 @@ export function QuotationStudioStart({
   const [feedback, setFeedback] = useState('');
   const [customerId, setCustomerId] = useState('');
   const [projectId, setProjectId] = useState('');
-  const currentCustomer = existingCustomers.find((customer) => customer.id === customerId);
-  const customerProjects = existingProjects.filter((project) => project.customer_id === customerId);
-  const selectedProject = customerProjects.find((project) => project.id === projectId);
+  const currentCustomer = existingCustomers.find(
+    (customer) => customer.id === customerId,
+  );
+  const customerProjects = existingProjects.filter(
+    (project) => project.customer_id === customerId,
+  );
+  const selectedProject = customerProjects.find(
+    (project) => project.id === projectId,
+  );
   const customerCrn = customerId
     ? 'CRN-' + customerId.replaceAll('-', '').slice(0, 12).toUpperCase()
     : '';
@@ -209,9 +220,14 @@ export function QuotationStudioStart({
                 if (!lead) return;
                 const match = existingCustomers.find(
                   (customer) =>
-                    customer.display_name.trim().toLowerCase() === lead.name.trim().toLowerCase() &&
-                    ((lead.email && customer.email.toLowerCase() === lead.email.toLowerCase()) ||
-                      (lead.phone && customer.phone.replace(/\D/g, '') === lead.phone.replace(/\D/g, ''))),
+                    customer.display_name.trim().toLowerCase() ===
+                      lead.name.trim().toLowerCase() &&
+                    ((lead.email &&
+                      customer.email.toLowerCase() ===
+                        lead.email.toLowerCase()) ||
+                      (lead.phone &&
+                        customer.phone.replace(/\D/g, '') ===
+                          lead.phone.replace(/\D/g, ''))),
                 );
                 setCustomerId(match?.id ?? '');
                 setProjectId('');
@@ -255,7 +271,9 @@ export function QuotationStudioStart({
               value={customerId}
               onChange={(event) => {
                 const id = event.target.value;
-                const selected = existingCustomers.find((customer) => customer.id === id);
+                const selected = existingCustomers.find(
+                  (customer) => customer.id === id,
+                );
                 setCustomerId(id);
                 setProjectId('');
                 setData((prev) => ({
@@ -267,10 +285,17 @@ export function QuotationStudioStart({
                 setFeedback('');
               }}
             >
-              <option value="">+ New customer (only if not registered already)</option>
+              <option value="">
+                + New customer (only if not registered already)
+              </option>
               {existingCustomers.map((customer) => (
                 <option value={customer.id} key={customer.id}>
-                  {'CRN-' + customer.id.replaceAll('-', '').slice(0, 12).toUpperCase()} · {customer.display_name} · {customer.phone}
+                  {'CRN-' +
+                    customer.id
+                      .replaceAll('-', '')
+                      .slice(0, 12)
+                      .toUpperCase()}{' '}
+                  · {customer.display_name} · {customer.phone}
                 </option>
               ))}
             </select>
@@ -282,7 +307,9 @@ export function QuotationStudioStart({
                 value={projectId}
                 onChange={(event) => {
                   const id = event.target.value;
-                  const project = customerProjects.find((item) => item.id === id);
+                  const project = customerProjects.find(
+                    (item) => item.id === id,
+                  );
                   setProjectId(id);
                   if (project) update('projectName', project.name);
                   setFeedback('');
@@ -290,7 +317,9 @@ export function QuotationStudioStart({
               >
                 <option value="">+ Create new project for this customer</option>
                 {customerProjects.map((project) => (
-                  <option key={project.id} value={project.id}>{project.name}</option>
+                  <option key={project.id} value={project.id}>
+                    {project.name}
+                  </option>
                 ))}
               </select>
             </label>

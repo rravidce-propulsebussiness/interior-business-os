@@ -926,8 +926,12 @@
   background: #f9fbff;
 }
 @media (max-width: 700px) {
-  .qs-customer-group { padding: 11px; }
-  .qs-customer-header { align-items: flex-start; }
+  .qs-customer-group {
+    padding: 11px;
+  }
+  .qs-customer-header {
+    align-items: flex-start;
+  }
   .qs-customer-group .qs-quotation-item {
     padding: 12px;
     align-items: flex-start;
@@ -949,5 +953,7 @@
   }
 }
 @media (max-width: 440px) {
-  .qs-quote-filters { grid-template-columns: minmax(0, 1fr); }
+  .qs-quote-filters {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }

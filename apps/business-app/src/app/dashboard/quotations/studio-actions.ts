@@ -113,30 +113,48 @@ export async function createStudioQuotation(input: unknown): Promise<{
         .eq('status', 'active')
         .maybeSingle();
       if (error || !existing)
-        return { ok: false, message: 'The selected customer is not available in your company.' };
+        return {
+          ok: false,
+          message: 'The selected customer is not available in your company.',
+        };
     } else {
       const lookups = [
-        s.client.from('customers')
+        s.client
+          .from('customers')
           .select('id,display_name')
           .eq('organization_id', s.org)
           .eq('phone', values.phone)
           .limit(5),
-        ...(values.email ? [
-          s.client.from('customers')
-            .select('id,display_name')
-            .eq('organization_id', s.org)
-            .ilike('email', values.email.replaceAll('\\', '\\\\').replaceAll('%', '\\%').replaceAll('_', '\\_'))
-            .limit(5),
-        ] : []),
+        ...(values.email
+          ? [
+              s.client
+                .from('customers')
+                .select('id,display_name')
+                .eq('organization_id', s.org)
+                .ilike(
+                  'email',
+                  values.email
+                    .replaceAll('\\', '\\\\')
+                    .replaceAll('%', '\\%')
+                    .replaceAll('_', '\\_'),
+                )
+                .limit(5),
+            ]
+          : []),
       ];
       const potential = await Promise.all(lookups);
       if (potential.some((found) => found.error))
-        return { ok: false, message: 'Could not check existing customers. Please try again.' };
+        return {
+          ok: false,
+          message: 'Could not check existing customers. Please try again.',
+        };
       const duplicate = potential.flatMap((found) => found.data ?? [])[0];
       if (duplicate)
         return {
           ok: false,
-          message: 'Customer already exists: ' + duplicate.display_name +
+          message:
+            'Customer already exists: ' +
+            duplicate.display_name +
             '. Choose that customer under Existing customer to keep the same CRN.',
         };
 
@@ -169,9 +187,18 @@ export async function createStudioQuotation(input: unknown): Promise<{
         .eq('status', 'active')
         .maybeSingle();
       if (error || !selectedProject)
-        return { ok: false, message: 'This project does not belong to the selected customer.' };
-      if (selectedProject.industry_id && selectedProject.industry_id !== activeIndustry.id)
-        return { ok: false, message: 'Choose the correct industry for this existing project.' };
+        return {
+          ok: false,
+          message: 'This project does not belong to the selected customer.',
+        };
+      if (
+        selectedProject.industry_id &&
+        selectedProject.industry_id !== activeIndustry.id
+      )
+        return {
+          ok: false,
+          message: 'Choose the correct industry for this existing project.',
+        };
     } else {
       const { data: projectMatches, error } = await s.client
         .from('projects')
@@ -183,11 +210,18 @@ export async function createStudioQuotation(input: unknown): Promise<{
         .eq('status', 'active')
         .limit(2);
       if (error)
-        return { ok: false, message: 'Could not check existing projects. Please try again.' };
+        return {
+          ok: false,
+          message: 'Could not check existing projects. Please try again.',
+        };
       if (projectMatches?.length === 1) {
         projectId = projectMatches[0]!.id;
       } else if (projectMatches?.length) {
-        return { ok: false, message: 'Multiple projects share this name. Select the intended existing project.' };
+        return {
+          ok: false,
+          message:
+            'Multiple projects share this name. Select the intended existing project.',
+        };
       } else {
         projectId = randomUUID();
         const projectCode =
@@ -206,7 +240,9 @@ export async function createStudioQuotation(input: unknown): Promise<{
           project_type: values.projectType,
           site_address: baseAddress,
           status: 'active',
-          notes: values.plotSize ? 'Plot / project size: ' + values.plotSize : '',
+          notes: values.plotSize
+            ? 'Plot / project size: ' + values.plotSize
+            : '',
           assigned_user_id: null,
         });
       }
@@ -223,7 +259,10 @@ export async function createStudioQuotation(input: unknown): Promise<{
       .order('created_at', { ascending: false })
       .limit(1);
     if (quotesError)
-      return { ok: false, message: 'Could not check previous quotations. Try again.' };
+      return {
+        ok: false,
+        message: 'Could not check previous quotations. Try again.',
+      };
     if (existingQuotes?.[0]?.current_revision_id) {
       return {
         ok: true,
