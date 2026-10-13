@@ -141,3 +141,45 @@ it('prints edited package specifications on a following page with escaped conten
   expect(html).not.toContain('<script>alert(1)</script>');
   expect(html).not.toContain('SFT_ESTIMATE_V2:');
 });
+
+
+it('renders package theme and brand, grade, allowance as a safe company snapshot', () => {
+  const d = quotationDocumentFixture();
+  d.lines[0]!.description = encodeSftEstimate(
+    calculateSftEstimate(
+      {
+        rows: [{
+          name: 'Ground Floor',
+          kind: 'floor',
+          lengthFeet: '20',
+          widthFeet: '30',
+          ratePerSqft: '1950',
+        }],
+        materialIds: [],
+        sections: [{
+          title: 'Tiles / flooring',
+          brand: 'Kajaria',
+          grade: 'Vitrified 2x2',
+          allowancePerSqft: '85',
+          description: '<script>unsafe</script> only floor materials',
+        }],
+      },
+      [],
+      {
+        name: 'Royal',
+        code: 'ROYAL',
+        description: 'Company-specific package',
+        ratePerSqft: '1950',
+        themeColor: '#089E9C',
+      },
+    ),
+  );
+  const html = renderQuotationDocument(d);
+  expect(html).toContain('border-bottom:3px solid #089E9C');
+  expect(html).toContain('Kajaria');
+  expect(html).toContain('Vitrified 2x2');
+  expect(html).toContain('Material allowance:');
+  expect(html).toContain('85');
+  expect(html).not.toContain('<script>unsafe</script>');
+  expect(html).toContain('&lt;script&gt;unsafe&lt;/script&gt;');
+});
