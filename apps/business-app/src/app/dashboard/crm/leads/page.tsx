@@ -250,14 +250,6 @@ export default async function Leads({
     { label: 'Dashboard', href: '/dashboard', icon: 'dashboard' },
   ];
   nav.push({ label: 'Leads', href: base, icon: 'leads' });
-  if (s.allowed('lead.create')) {
-    nav.push({ label: 'Upload Leads', href: base + '/upload', icon: 'plus' });
-    nav.push({
-      label: 'Google Sheets',
-      href: base + '/google-sheets',
-      icon: 'leads',
-    });
-  }
   if (may('quotation.view', 'quotation'))
     nav.push({
       label: 'Quotations',
