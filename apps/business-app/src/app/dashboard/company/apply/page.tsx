@@ -69,8 +69,8 @@ export default async function CompanyApplicationPage() {
           </h2>
           <p className="mt-2 text-sm text-slate-700">
             Continue with your verified ProPulse account. We will import its
-            company name, services and locations, reuse your existing
-            workspace when possible, and assign Owner access automatically.
+            company name, services and locations, reuse your existing workspace
+            when possible, and assign Owner access automatically.
           </p>
           <Link
             href="/auth/propulse"

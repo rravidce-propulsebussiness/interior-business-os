@@ -43,7 +43,10 @@ function unwrapNullable<T>({
   data: T;
   error: { code?: string } | null;
 }): T {
-  if (error) throw new DomainError(error.code === '42501' ? 'FORBIDDEN' : 'INTERNAL_ERROR');
+  if (error)
+    throw new DomainError(
+      error.code === '42501' ? 'FORBIDDEN' : 'INTERNAL_ERROR',
+    );
   return data;
 }
 export function createRepository(client: SupabaseClient<Database>) {

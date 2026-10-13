@@ -74,7 +74,11 @@ export async function syncCompanyFromPropulse(
   if (accountError || !account.user) return null;
 
   const identities = account.user.identities ?? [];
-  if (!identities.some((identity) => identity.provider === 'custom:propulse-business'))
+  if (
+    !identities.some(
+      (identity) => identity.provider === 'custom:propulse-business',
+    )
+  )
     return null;
 
   const response = await fetch(origin + '/api/oauth/userinfo', {

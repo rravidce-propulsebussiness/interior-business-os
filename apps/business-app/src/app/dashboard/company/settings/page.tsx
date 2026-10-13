@@ -21,14 +21,22 @@ export default async function CompanySettings() {
 
   const company = await repository.organization(context.organizationId);
   if (!company) notFound();
-  const source = await repository.propulseCompanyProfile(context.organizationId);
-  const imported = z.object({
-    description: z.string().nullable().optional(),
-    phone: z.string().nullable().optional(),
-    services: z.array(z.object({industry:z.string(),service:z.string()})).optional(),
-    locations: z.array(z.object({city:z.string(),state:z.string()})).optional(),
-    syncedAt: z.string(),
-  }).safeParse(source);
+  const source = await repository.propulseCompanyProfile(
+    context.organizationId,
+  );
+  const imported = z
+    .object({
+      description: z.string().nullable().optional(),
+      phone: z.string().nullable().optional(),
+      services: z
+        .array(z.object({ industry: z.string(), service: z.string() }))
+        .optional(),
+      locations: z
+        .array(z.object({ city: z.string(), state: z.string() }))
+        .optional(),
+      syncedAt: z.string(),
+    })
+    .safeParse(source);
   const synced = imported.success ? imported.data : null;
   const options = [
     {
@@ -118,15 +126,22 @@ export default async function CompanySettings() {
                   company. Reconnect through ProPulse to refresh them.
                 </p>
               </div>
-              <Link href="/auth/propulse" className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white">
+              <Link
+                href="/auth/propulse"
+                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white"
+              >
                 Sync from ProPulse →
               </Link>
             </div>
             <dl className="mt-5 grid gap-4 sm:grid-cols-2">
               {synced.description && (
                 <div className="sm:col-span-2">
-                  <dt className="text-xs text-slate-500">Business description</dt>
-                  <dd className="mt-1 text-sm text-slate-800">{synced.description}</dd>
+                  <dt className="text-xs text-slate-500">
+                    Business description
+                  </dt>
+                  <dd className="mt-1 text-sm text-slate-800">
+                    {synced.description}
+                  </dd>
                 </div>
               )}
               {synced.phone && (
@@ -137,13 +152,18 @@ export default async function CompanySettings() {
               )}
               <div>
                 <dt className="text-xs text-slate-500">Last synced</dt>
-                <dd className="mt-1 text-sm">{new Date(synced.syncedAt).toLocaleString('en-IN')}</dd>
+                <dd className="mt-1 text-sm">
+                  {new Date(synced.syncedAt).toLocaleString('en-IN')}
+                </dd>
               </div>
               {Boolean(synced.services?.length) && (
                 <div>
                   <dt className="text-xs text-slate-500">Services</dt>
                   <dd className="mt-1 text-sm">
-                    {synced.services?.map((item) => item.service).filter(Boolean).join(', ')}
+                    {synced.services
+                      ?.map((item) => item.service)
+                      .filter(Boolean)
+                      .join(', ')}
                   </dd>
                 </div>
               )}
@@ -151,7 +171,11 @@ export default async function CompanySettings() {
                 <div>
                   <dt className="text-xs text-slate-500">Service locations</dt>
                   <dd className="mt-1 text-sm">
-                    {synced.locations?.map((item) => [item.city, item.state].filter(Boolean).join(', ')).join(' · ')}
+                    {synced.locations
+                      ?.map((item) =>
+                        [item.city, item.state].filter(Boolean).join(', '),
+                      )
+                      .join(' · ')}
                   </dd>
                 </div>
               )}
