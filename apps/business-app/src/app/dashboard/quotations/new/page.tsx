@@ -14,6 +14,19 @@ export default async function NewQuotation() {
   ]);
   if (!organization) throw new Error('Company workspace unavailable');
 
+  const { data: rawLeads } = s.allowed('lead.view', 'crm')
+    ? await s.client
+        .from('leads')
+        .select('id,lead_number,name,phone,email,location,project_size,service_type,industry_id')
+        .eq('organization_id', s.org)
+        .order('created_at', { ascending: false })
+        .limit(25)
+    : { data: [] };
+  const leads = (rawLeads ?? []).map((lead) => ({
+    ...lead,
+    industryKey: industries.find((industry) => industry.id === lead.industry_id)?.key ?? '',
+  }));
+
   return (
     <QuotationStudioFrame
       companyName={organization.name}
@@ -64,6 +77,7 @@ export default async function NewQuotation() {
 
       <div className="qs-create-grid">
         <QuotationStudioStart
+          leads={leads}
           industries={industries
             .filter((industry) => industry.status === 'active')
             .map((industry) => ({
