@@ -134,7 +134,8 @@ begin
 
     -- Reuse a *uniquely matched*, already owned Business OS company.
     -- Never choose by email or by a name belonging to another organization.
-    select count(*)::integer, min(o.id) into v_matches, v_org
+    select count(*)::integer, (array_agg(o.id order by o.created_at, o.id))[1]
+    into v_matches, v_org
     from public.organizations o
     where o.created_by = p_user_id
       and o.status in ('active','trial')
