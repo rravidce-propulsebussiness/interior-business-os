@@ -191,6 +191,7 @@ export default async function Dashboard({
           Create a business workspace to start using the tools, or accept an
           invitation to join an existing company.
         </p>
+        <a href="/auth/propulse">Import my ProPulse company →</a>
         <a href="/dashboard/company/apply">Create your company →</a>
         <a href="/dashboard/company/invitations">Join an invited company →</a>
       </main>
