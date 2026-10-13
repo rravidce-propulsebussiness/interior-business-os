@@ -99,25 +99,28 @@ it('prints floor-wise SFT pricing table and separate included brands without exp
   expect(html).not.toContain('SFT_ESTIMATE_V1:');
 });
 
-
 it('prints edited package specifications on a following page with escaped content', () => {
   const d = quotationDocumentFixture();
   d.lines[0]!.description = encodeSftEstimate(
     calculateSftEstimate(
       {
-        rows: [{
-          kind: 'floor',
-          name: 'Ground Floor',
-          lengthFeet: '20',
-          widthFeet: '20',
-          ratePerSqft: '1950',
-        }],
+        rows: [
+          {
+            kind: 'floor',
+            name: 'Ground Floor',
+            lengthFeet: '20',
+            widthFeet: '20',
+            ratePerSqft: '1950',
+          },
+        ],
         materialIds: [],
         packageId: '22222222-2222-4222-8222-222222222222',
-        sections: [{
-          title: 'Footings and steel',
-          description: 'Grade as specified, <script>alert(1)</script>',
-        }],
+        sections: [
+          {
+            title: 'Footings and steel',
+            description: 'Grade as specified, <script>alert(1)</script>',
+          },
+        ],
       },
       [],
       {
