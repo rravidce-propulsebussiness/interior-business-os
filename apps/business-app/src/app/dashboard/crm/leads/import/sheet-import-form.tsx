@@ -592,13 +592,12 @@ export function SheetImportForm({
                   ))}
                 </ul>
               )}
-              <button
-                type="button"
+              <a
                 className="crm-import-view-leads"
-                onClick={() => window.location.reload()}
+                href="/dashboard/crm/leads"
               >
-                Refresh All Leads →
-              </button>
+                View All Leads →
+              </a>
             </div>
           )}
         </div>
