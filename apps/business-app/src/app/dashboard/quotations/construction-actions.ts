@@ -312,11 +312,15 @@ export async function saveFloorwiseSftEstimate(
       new Set(options.map((r) => r.category)).size !== options.length
     )
       throw new DomainError('VALIDATION_FAILED');
-    const allPackages = await createConstructionPackagesRepository(s.client).list(s.org);
+    const allPackages = await createConstructionPackagesRepository(
+      s.client,
+    ).list(s.org);
     const activePackages = allPackages.filter((p) => p.status === 'active');
     if (activePackages.length && !parsed.packageId)
       throw new DomainError('VALIDATION_FAILED');
-    const selectedPackage = activePackages.find((p) => p.id === parsed.packageId);
+    const selectedPackage = activePackages.find(
+      (p) => p.id === parsed.packageId,
+    );
     if (parsed.packageId && !selectedPackage)
       throw new DomainError('VALIDATION_FAILED');
 
@@ -343,7 +347,9 @@ export async function saveFloorwiseSftEstimate(
       .select('id')
       .eq('organization_id', s.org)
       .eq('revision_id', rid)
-      .or('description.like.SFT_ESTIMATE_V1:%,description.like.SFT_ESTIMATE_V2:%')
+      .or(
+        'description.like.SFT_ESTIMATE_V1:%,description.like.SFT_ESTIMATE_V2:%',
+      )
       .limit(2);
     if (error || !existing || existing.length > 1)
       throw new DomainError('VALIDATION_FAILED');
