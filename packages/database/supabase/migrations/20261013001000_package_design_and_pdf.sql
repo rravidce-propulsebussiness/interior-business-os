@@ -36,6 +36,15 @@ create table public.construction_package_spec_attachments (
     references private.construction_quote_packages(organization_id,id)
     on delete cascade
 );
+-- Snapshot package PDFs on draft quotation save, not at PDF download,
+-- so subsequent package edits never alter an issued customer document.
+alter table public.quotation_studio_attachments
+ add column source_package_id uuid;
+create unique index quotation_package_spec_snapshot_unique
+ on public.quotation_studio_attachments
+ (organization_id,revision_id,source_package_id)
+ where source_package_id is not null;
+
 create index construction_package_spec_file_lookup
   on public.construction_package_spec_attachments(organization_id,package_id);
 alter table public.construction_package_spec_attachments enable row level security;
