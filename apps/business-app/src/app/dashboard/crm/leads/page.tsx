@@ -1,4 +1,5 @@
 import { canAccess } from '@business-os/auth';
+import { redirect } from 'next/navigation';
 import { createOwnerProvisioningDatabase } from '@business-os/database/server';
 import type { ProPulseConnectionView } from './propulse-connect-panel';
 import { crmServices, resultSchema } from '../service';
@@ -80,6 +81,7 @@ export default async function Leads({
   searchParams: Promise<Params>;
 }) {
   const p = await searchParams;
+  if (p.panel === 'sheet') redirect('/dashboard/crm/leads/upload');
   const s = await crmServices('lead.view', true);
   const page = pageNumber(p.page);
   const choices = await lookups(s, p);
@@ -248,6 +250,14 @@ export default async function Leads({
     { label: 'Dashboard', href: '/dashboard', icon: 'dashboard' },
   ];
   nav.push({ label: 'Leads', href: base, icon: 'leads' });
+  if (s.allowed('lead.create')) {
+    nav.push({ label: 'Upload Leads', href: base + '/upload', icon: 'plus' });
+    nav.push({
+      label: 'Google Sheets',
+      href: base + '/google-sheets',
+      icon: 'leads',
+    });
+  }
   if (may('quotation.view', 'quotation'))
     nav.push({
       label: 'Quotations',
@@ -383,9 +393,7 @@ export default async function Leads({
         rows={rows}
         propulseConnection={propulseConnection}
         initialTool={
-          p.panel === 'add' || p.panel === 'sheet' || p.panel === 'propulse'
-            ? p.panel
-            : 'none'
+          p.panel === 'add' || p.panel === 'propulse' ? p.panel : 'none'
         }
         stats={stats}
         tabs={tabs}

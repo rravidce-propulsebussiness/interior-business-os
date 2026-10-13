@@ -4,7 +4,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { OwnerIcon, type OwnerIconName } from '../../owner-shell';
 import { runCrmCommand, saveCrm } from '../actions';
-import { SheetImportForm } from './import/sheet-import-form';
 import { QuickAddLead } from './quick-add-lead';
 import { LeadsBoardView } from './board-view';
 import {
@@ -284,11 +283,11 @@ export function LeadsWorkspace({
   timeZone: string;
   asOf: string;
   propulseConnection: ProPulseConnectionView;
-  initialTool: 'none' | 'add' | 'sheet' | 'propulse';
+  initialTool: 'none' | 'add' | 'propulse';
 }) {
-  const [leadTool, setLeadTool] = useState<
-    'none' | 'add' | 'sheet' | 'propulse'
-  >(initialTool);
+  const [leadTool, setLeadTool] = useState<'none' | 'add' | 'propulse'>(
+    initialTool,
+  );
   const viewMode = params.view === 'board' ? 'board' : 'list';
   const viewLink = (nextView: 'list' | 'board') => {
     const query = new URLSearchParams();
@@ -422,16 +421,17 @@ export function LeadsWorkspace({
             </button>
           )}
           {canCreate && (
-            <button
-              type="button"
-              className="crm-outline"
-              aria-expanded={leadTool === 'sheet'}
-              onClick={() =>
-                setLeadTool(leadTool === 'sheet' ? 'none' : 'sheet')
-              }
-            >
-              <Icon name="download" /> Upload Leads
-            </button>
+            <>
+              <a className="crm-outline" href="/dashboard/crm/leads/upload">
+                <Icon name="download" /> Upload Leads
+              </a>
+              <a
+                className="crm-outline"
+                href="/dashboard/crm/leads/google-sheets"
+              >
+                Google Sheets
+              </a>
+            </>
           )}
           <button
             type="button"
@@ -490,29 +490,6 @@ export function LeadsWorkspace({
               .map((stage) => ({ value: stage.id, label: stage.name }))}
             onClose={() => setLeadTool('none')}
           />
-        )}
-        {leadTool === 'sheet' && canCreate && (
-          <section className="crm-inline-lead-tool" aria-label="Sheet upload">
-            <div className="crm-inline-tool-title">
-              <h2>Upload customer leads</h2>
-              <button
-                type="button"
-                className="crm-outline"
-                onClick={() => setLeadTool('none')}
-              >
-                Close
-              </button>
-            </div>
-            <SheetImportForm
-              sources={sources.filter(
-                (source) => !/propulse/i.test(source.label),
-              )}
-              stages={stages
-                .filter((stage) => stage.outcome === 'open')
-                .map((stage) => ({ value: stage.id, label: stage.name }))}
-              canSetup={propulseConnection.canManage}
-            />
-          </section>
         )}
         {leadTool === 'propulse' && (
           <ProPulseConnectPanel
