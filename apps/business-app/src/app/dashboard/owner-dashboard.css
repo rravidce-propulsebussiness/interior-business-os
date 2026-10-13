@@ -1082,3 +1082,15 @@ a.owner-stat:hover {
     animation-duration: 0.01ms !important;
   }
 }
+
+/* Collapsible module navigation: nested actions appear only when expanded. */
+.owner-nav-group { flex: 0 0 auto; }
+.owner-nav-group-toggle { width: 100%; border: 0; text-align: left; cursor: pointer; background: transparent; font: inherit; }
+.owner-nav-group-toggle > span:nth-child(2) { flex: 1; }
+.owner-nav-chevron { margin-left: auto; font-size: 19px; line-height: 1; transform: rotate(-90deg); transition: transform 0.18s ease; }
+.owner-nav-chevron-open { transform: rotate(0deg); }
+.owner-subnav { display: flex; flex-direction: column; margin: 3px 0 8px 23px; padding: 4px 0 4px 13px; border-left: 1px solid #3a506a; gap: 2px; }
+.owner-subnav-link { display: flex; align-items: center; gap: 12px; min-height: 37px; padding: 8px 9px; border-radius: 8px; color: #bdcbe0 !important; font-size: 12px; text-decoration: none; }
+.owner-subnav-link:hover, .owner-subnav-active { background: rgba(91,139,225,.17); color: #fff !important; }
+.owner-subnav-dot { width: 6px; height: 6px; border-radius: 50%; background: #8097b6; flex: 0 0 auto; }
+.owner-subnav-active .owner-subnav-dot { background: #fff; }
