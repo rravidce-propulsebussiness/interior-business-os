@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-html-link-for-pages -- Use reliable full document navigation between dedicated CRM pages on Hostinger. */
 import { OwnerShell, type OwnerNavItem } from '../../owner-shell';
 import { crmServices } from '../service';
 import { lookups } from '../lookups';
