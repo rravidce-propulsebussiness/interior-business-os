@@ -163,6 +163,59 @@ async function applyMetadata(bytes: Uint8Array, options: PdfOptions) {
  * Authentication, allowed data projections and snapshot integrity remain
  * the responsibility of the existing protected route and repository.
  */
+/**
+ * Uploaded annexures are PDF-only and are appended to the generated,
+ * company-branded quotation. Copying pages (rather than embedding PDF objects
+ * wholesale) avoids trusting uploaded document-level JavaScript/actions.
+ */
+export async function validateQuotationAnnexure(
+  bytes: Uint8Array,
+): Promise<number> {
+  if (
+    bytes.byteLength < 10 ||
+    bytes.byteLength > 15 * 1024 * 1024 ||
+    Buffer.from(bytes).toString('ascii', 0, 5) !== '%PDF-'
+  )
+    throw new Error('PDF annexure has an invalid header or exceeds 15 MB');
+  const pdf = await PDFDocument.load(bytes, {
+    ignoreEncryption: false,
+    updateMetadata: false,
+  });
+  const count = pdf.getPageCount();
+  if (count < 1 || count > 60)
+    throw new Error('Choose a PDF with between 1 and 60 pages');
+  return count;
+}
+
+export async function appendQuotationAnnexures(
+  basePdf: Uint8Array,
+  attachments: readonly Uint8Array[],
+): Promise<Buffer> {
+  if (!attachments.length) return Buffer.from(basePdf);
+  const sourceBytes = attachments.reduce((sum, value) => sum + value.byteLength, 0);
+  if (sourceBytes > 30 * 1024 * 1024)
+    throw new Error('Combined annexure size exceeds 30 MB');
+  const merged = await PDFDocument.load(basePdf, {
+    updateMetadata: false,
+  });
+  let count = merged.getPageCount();
+  for (const bytes of attachments) {
+    const pages = await validateQuotationAnnexure(bytes);
+    if (count + pages > 120) throw new Error('Too many quotation PDF pages');
+    const source = await PDFDocument.load(bytes, {
+      ignoreEncryption: false,
+      updateMetadata: false,
+    });
+    const copied = await merged.copyPages(source, source.getPageIndices());
+    for (const page of copied) merged.addPage(page);
+    count += pages;
+  }
+  const result = Buffer.from(await merged.save({ useObjectStreams: true }));
+  if (result.length > 60 * 1024 * 1024)
+    throw new Error('Combined PDF exceeds download limit');
+  return result;
+}
+
 export async function renderPdf(
   html: string,
   options: PdfOptions = {},
