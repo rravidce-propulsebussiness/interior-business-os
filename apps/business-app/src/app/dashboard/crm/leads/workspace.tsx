@@ -6,6 +6,7 @@ import { OwnerIcon, type OwnerIconName } from '../../owner-shell';
 import { runCrmCommand, saveCrm } from '../actions';
 import { SheetImportForm } from './import/sheet-import-form';
 import { QuickAddLead } from './quick-add-lead';
+import { LeadsBoardView } from './board-view';
 import {
   ProPulseConnectPanel,
   type ProPulseConnectionView,
@@ -288,6 +289,16 @@ export function LeadsWorkspace({
   const [leadTool, setLeadTool] = useState<
     'none' | 'add' | 'sheet' | 'propulse'
   >(initialTool);
+  const viewMode = params.view === 'board' ? 'board' : 'list';
+  const viewLink = (nextView: 'list' | 'board') => {
+    const query = new URLSearchParams();
+    for (const [key, value] of Object.entries(params)) {
+      if (value && !['panel', 'view'].includes(key)) query.set(key, value);
+    }
+    if (nextView === 'board') query.set('view', 'board');
+    const string = query.toString();
+    return string ? path + '?' + string : path;
+  };
   const [syncFeedback, setSyncFeedback] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(
     rows[0]?.id ?? null,
@@ -434,9 +445,12 @@ export function LeadsWorkspace({
               ? 'ProPulse Connected'
               : 'Connect ProPulse'}
           </button>
-          <a href="/dashboard/crm/pipeline" className="crm-outline">
-            <OwnerIcon name="projects" size={17} /> Pipeline
-          </a>
+          <nav className="crm-view-toggle" aria-label="Lead display">
+            <a href={viewLink('list')} aria-current={viewMode === 'list' ? 'page' : undefined}
+              className={viewMode === 'list' ? 'crm-view-active' : ''}>List View</a>
+            <a href={viewLink('board')} aria-current={viewMode === 'board' ? 'page' : undefined}
+              className={viewMode === 'board' ? 'crm-view-active' : ''}>Board View</a>
+          </nav>
           <button
             type="button"
             className="crm-outline"
@@ -520,6 +534,7 @@ export function LeadsWorkspace({
 
       <section className="crm-filter-panel" aria-label="Lead filters">
         <form action={path} method="get" className="crm-filters">
+          {viewMode === 'board' && <input type="hidden" name="view" value="board" />}
           <label className="crm-search-field">
             <OwnerIcon name="search" size={18} />
             <input
@@ -665,7 +680,7 @@ export function LeadsWorkspace({
           <button type="submit" className="crm-filter-apply">
             Apply
           </button>
-          <a className="crm-filter-clear" href={path}>
+          <a className="crm-filter-clear" href={viewLink(viewMode)}>
             Clear
           </a>
         </form>
@@ -704,6 +719,11 @@ export function LeadsWorkspace({
           )}
           {rows.length ? (
             <>
+              {viewMode === 'board' ? (
+                <LeadsBoardView rows={rows} stages={stages}
+                  canManage={canManage} canWin={canWin} onOpen={open} />
+              ) : (
+              <>
               <div className="crm-leads-table-wrap">
                 <table className="crm-leads-table">
                   <thead>
@@ -893,6 +913,8 @@ export function LeadsWorkspace({
                   </article>
                 ))}
               </div>
+              </>
+              )}
             </>
           ) : (
             <div className="crm-leads-empty">
@@ -903,7 +925,7 @@ export function LeadsWorkspace({
                 pipeline.
               </p>
               <div>
-                <a href={path}>Clear filters</a>
+                <a href={viewLink(viewMode)}>Clear filters</a>
                 {canCreate && (
                   <button
                     type="button"
