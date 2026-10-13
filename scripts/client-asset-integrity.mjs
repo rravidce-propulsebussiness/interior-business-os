@@ -104,7 +104,9 @@ export function checkClientAssetsAtStartup(appDir, log = console.warn) {
   } catch (error) {
     log(
       '[Business OS] Client asset integrity warning; Next.js startup continues: ' +
-        (error instanceof Error ? error.message : 'Unknown asset integrity failure'),
+        (error instanceof Error
+          ? error.message
+          : 'Unknown asset integrity failure'),
     );
     return { ok: false, count: 0 };
   }
@@ -131,10 +133,16 @@ if (
     : Promise.resolve().then(() => verifyClientAssets(appDir));
   work
     .then((count) => {
-      console.log('Verified ' + count + ' Next.js client chunks for ' + service);
+      console.log(
+        'Verified ' + count + ' Next.js client chunks for ' + service,
+      );
     })
     .catch((error) => {
-      console.error(error instanceof Error ? error.message : 'Client asset verification failed.');
+      console.error(
+        error instanceof Error
+          ? error.message
+          : 'Client asset verification failed.',
+      );
       process.exitCode = 1;
     });
 }

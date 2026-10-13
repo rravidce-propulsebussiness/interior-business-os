@@ -59,7 +59,9 @@ test('missing asset manifest does not stop Next.js startup', () => {
   const temp = mkdtempSync(join(tmpdir(), 'business-os-missing-asset-'));
   try {
     const notices = [];
-    const result = checkClientAssetsAtStartup(temp, (message) => notices.push(message));
+    const result = checkClientAssetsAtStartup(temp, (message) =>
+      notices.push(message),
+    );
     assert.deepEqual(result, { ok: false, count: 0 });
     assert.match(notices.join(' '), /startup continues/);
     assert.throws(() => verifyClientAssets(temp), /manifest missing/);
