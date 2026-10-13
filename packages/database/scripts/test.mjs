@@ -12,6 +12,9 @@ console.log(
   psql(['-f', file('tests/construction-pricing-rpc-transactions.sql')]),
 );
 console.log(psql(['-f', file('tests/construction-package-design.sql')]));
+console.log(
+  psql(['-f', file('tests/construction-package-specific-owners.sql')]),
+);
 console.log(psql(['-f', file('tests/quotations.sql')]));
 console.log(psql(['-f', file('tests/crm-starter-defaults.sql')]));
 console.log(psql(['-f', file('tests/crm.sql')]));
