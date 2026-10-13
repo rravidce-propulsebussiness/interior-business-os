@@ -102,9 +102,12 @@ export default async function MyEmployeeInvitations() {
           <section className="rounded-2xl border border-slate-200 bg-white p-6">
             <h2 className="text-xl font-semibold">No pending invitations</h2>
             <p className="mt-2 text-sm text-slate-600">
-              Ask your company administrator to invite your verified email
-              address. You can also register a new company from the dashboard.
+              To join an existing company, ask its owner to invite your verified
+              email address. Or create your own workspace now.
             </p>
+            <Link href="/dashboard/company/apply" className="mt-5 inline-flex rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white">
+              Create my company →
+            </Link>
           </section>
         )}
       </div>
