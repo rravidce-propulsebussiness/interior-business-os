@@ -77,7 +77,7 @@ begin
     or v_basis not in ('fixed','per_sqft','per_bhk','per_unit')
     or v_currency !~ '^[A-Z]{3}$'
     or v_status not in ('active','inactive')
-    or coalesce(p_input->>'basePrice','') !~ '^(0|[1-9][0-9]{0,8})(\\.[0-9]{1,2})?$'
+    or coalesce(p_input->>'basePrice','') !~ '^(0|[1-9][0-9]{0,8})(\.[0-9]{1,2})?$'
  then raise exception 'Invalid package fields' using errcode='22023'; end if;
  v_price = (p_input->>'basePrice')::numeric;
  if v_price<=0 or v_price>999999999.99 then
