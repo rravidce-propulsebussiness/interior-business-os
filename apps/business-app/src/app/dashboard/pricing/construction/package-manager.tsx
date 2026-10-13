@@ -92,16 +92,21 @@ export function ConstructionPackagesManager({
                 Edit package
               </button>
             )}
-            {canManage && editing === item.id && (
-              <PremiumPackageEditor
-                key={item.version}
-                item={item}
-                close={() => setEditing(null)}
-              />
-            )}
           </article>
         ))}
       </div>
+      {canManage &&
+        editing !== null &&
+        editing !== 'new' &&
+        packages
+          .filter((item) => item.id === editing)
+          .map((item) => (
+            <PremiumPackageEditor
+              key={item.id + ':' + item.version}
+              item={item}
+              close={() => setEditing(null)}
+            />
+          ))}
       {packages.length === 0 && (
         <p className="mt-5 rounded-xl border border-dashed border-slate-300 p-5 text-sm text-slate-600">
           No company packages yet. Create a rate and a scope to enable package
