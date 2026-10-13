@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-html-link-for-pages -- Use full document links on Hostinger to avoid incomplete RSC Flight navigation. */
 'use client';
 
 import { useRef, useState, type ChangeEvent, type DragEvent } from 'react';
