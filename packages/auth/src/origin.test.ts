@@ -6,7 +6,7 @@ describe('OAuth public URL selection behind Hostinger', () => {
   const production = { NODE_ENV: 'production' };
   const expected = 'https://sghomesinterior.in';
 
-  it('never redirects a production OAuth callback to the internal listener', () => {
+  it('never redirects production OAuth to the internal listener', () => {
     expect(publicAuthOrigin(internal, production)).toBe(expected);
     const invalid = { ...production, APP_ORIGIN: 'http://0.0.0.0:3000' };
     expect(publicAuthOrigin(internal, invalid)).toBe(expected);
