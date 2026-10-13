@@ -893,3 +893,67 @@
     transition: none;
   }
 }
+
+/* Customer-first quotation register: the CRN is the visible parent. */
+.qs-customer-group {
+  min-width: 0;
+  background: #fff;
+  border: 1px solid #dee8f6;
+  border-radius: 16px;
+  padding: 14px;
+  box-shadow: 0 8px 25px #1d3d6709;
+}
+.qs-customer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 13px;
+  flex-wrap: wrap;
+  padding: 5px 5px 15px;
+}
+.qs-customer-header h3 {
+  font-size: 17px;
+  font-weight: 800;
+  color: #11233b;
+  margin-top: 9px;
+}
+.qs-customer-header p {
+  color: #60728e;
+  font-size: 11px;
+  margin-top: 5px;
+}
+.qs-customer-group .qs-quotation-item {
+  background: #f9fbff;
+}
+@media (max-width: 700px) {
+  .qs-customer-group {
+    padding: 11px;
+  }
+  .qs-customer-header {
+    align-items: flex-start;
+  }
+  .qs-customer-group .qs-quotation-item {
+    padding: 12px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+}
+
+.qs-quote-filters {
+  grid-template-columns: minmax(0, 1fr) minmax(145px, 185px) auto;
+  align-items: end;
+  margin-bottom: 14px;
+}
+@media (max-width: 700px) {
+  .qs-quote-filters {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .qs-quote-filters > button {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 440px) {
+  .qs-quote-filters {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

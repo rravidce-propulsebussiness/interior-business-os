@@ -24,7 +24,8 @@
     "./gst": "./src/gst.ts",
     "./gst-templates": "./src/gst-templates.ts",
     "./construction-rates": "./src/construction-rates.ts",
-    "./construction-packages": "./src/construction-packages.ts"
+    "./construction-packages": "./src/construction-packages.ts",
+    "./quotation-packages": "./src/quotation-packages.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json"
