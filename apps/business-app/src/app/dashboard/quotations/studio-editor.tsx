@@ -407,8 +407,8 @@ export function QuotationStudioEditor({
               <section className="qs-card">
                 <h2>Specifications, inclusions &amp; payment terms</h2>
                 <p className="qs-muted" style={{ marginBottom: 15 }}>
-                  Your edited package inclusions print on their own PDF
-                  pages after the floor-cost schedule. Upload any existing
+                  Your edited package inclusions print on their own PDF pages
+                  after the floor-cost schedule. Upload any existing
                   specifications or plans below to append the original PDFs.
                   Edit payment milestones, warranty and exclusions here.
                 </p>
@@ -432,7 +432,9 @@ export function QuotationStudioEditor({
                     className="qs-btn ghost"
                     onClick={() => {
                       const preview =
-                        document.querySelector<HTMLIFrameElement>('.qs-preview-frame');
+                        document.querySelector<HTMLIFrameElement>(
+                          '.qs-preview-frame',
+                        );
                       if (preview?.contentWindow) preview.contentWindow.print();
                       else window.open(url + '/preview', '_blank', 'noopener');
                     }}
