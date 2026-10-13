@@ -11,7 +11,11 @@ const uploadPath = leadsPath + '/upload';
 const googlePath = leadsPath + '/google-sheets';
 
 /** Both dedicated import pages write into the same tenant-scoped CRM leads. */
-export async function LeadImportPage({ method }: { method: 'file' | 'google' }) {
+export async function LeadImportPage({
+  method,
+}: {
+  method: 'file' | 'google';
+}) {
   const s = await crmServices('lead.create', true);
   const [choices, organization, user, plans] = await Promise.all([
     lookups(s, {}),
@@ -22,17 +26,19 @@ export async function LeadImportPage({ method }: { method: 'file' | 'google' }) 
   if (!organization) throw new Error('Company workspace not available');
 
   const sources = choices.sources.rows
-    .filter((row) =>
-      typeof row.id === 'string' &&
-      typeof row.name === 'string' &&
-      row.key !== 'propulse_marketplace',
+    .filter(
+      (row) =>
+        typeof row.id === 'string' &&
+        typeof row.name === 'string' &&
+        row.key !== 'propulse_marketplace',
     )
     .map((row) => ({ value: String(row.id), label: String(row.name) }));
   const stages = choices.stages.rows
-    .filter((row) =>
-      typeof row.id === 'string' &&
-      typeof row.name === 'string' &&
-      row.outcome === 'open',
+    .filter(
+      (row) =>
+        typeof row.id === 'string' &&
+        typeof row.name === 'string' &&
+        row.outcome === 'open',
     )
     .map((row) => ({ value: String(row.id), label: String(row.name) }));
 
@@ -43,17 +49,36 @@ export async function LeadImportPage({ method }: { method: 'file' | 'google' }) 
     { label: 'Google Sheets', href: googlePath, icon: 'leads' },
   ];
   if (s.allowed('quotation.view', 'quotation'))
-    nav.push({ label: 'Quotations', href: '/dashboard/quotations', icon: 'quotations' });
+    nav.push({
+      label: 'Quotations',
+      href: '/dashboard/quotations',
+      icon: 'quotations',
+    });
   if (s.allowed('project.view', 'projects'))
-    nav.push({ label: 'Projects', href: '/dashboard/projects', icon: 'projects' });
-  if (s.allowed('customer.view', 'crm') || s.allowed('customer.view', 'quotation'))
-    nav.push({ label: 'Clients', href: '/dashboard/customers', icon: 'clients' });
+    nav.push({
+      label: 'Projects',
+      href: '/dashboard/projects',
+      icon: 'projects',
+    });
+  if (
+    s.allowed('customer.view', 'crm') ||
+    s.allowed('customer.view', 'quotation')
+  )
+    nav.push({
+      label: 'Clients',
+      href: '/dashboard/customers',
+      icon: 'clients',
+    });
   if (s.allowed('report.view'))
     nav.push({ label: 'Reports', href: '/dashboard/reports', icon: 'reports' });
   if (s.allowed('team.view'))
     nav.push({ label: 'Team', href: '/dashboard/company/team', icon: 'team' });
   if (s.allowed('organization.view'))
-    nav.push({ label: 'Company Settings', href: '/dashboard/company/settings', icon: 'settings' });
+    nav.push({
+      label: 'Company Settings',
+      href: '/dashboard/company/settings',
+      icon: 'settings',
+    });
 
   const pagePath = method === 'file' ? uploadPath : googlePath;
   const displayName =
@@ -70,7 +95,10 @@ export async function LeadImportPage({ method }: { method: 'file' | 'google' }) 
       companyName={organization.name}
       accountLabel={displayName}
       accountEmail={user.email ?? ''}
-      planLabel={plans?.find((plan) => plan.id === organization.plan_id)?.name ?? 'Business plan'}
+      planLabel={
+        plans?.find((plan) => plan.id === organization.plan_id)?.name ??
+        'Business plan'
+      }
       navigation={nav}
       search=""
       notificationsEnabled={s.allowed('notification.view')}
@@ -82,7 +110,9 @@ export async function LeadImportPage({ method }: { method: 'file' | 'google' }) 
           <span>›</span>
           <a href={leadsPath}>CRM Leads</a>
           <span>›</span>
-          <strong>{method === 'file' ? 'Upload Leads' : 'Google Sheets'}</strong>
+          <strong>
+            {method === 'file' ? 'Upload Leads' : 'Google Sheets'}
+          </strong>
         </div>
         <div className="crm-leads-heading">
           <div>
@@ -93,16 +123,34 @@ export async function LeadImportPage({ method }: { method: 'file' | 'google' }) 
                 : 'Paste rows copied from Google Sheets into your company CRM.'}
             </p>
           </div>
-          <a className="crm-outline" href={leadsPath}>← All Leads</a>
+          <a className="crm-outline" href={leadsPath}>
+            ← All Leads
+          </a>
         </div>
         <nav className="crm-import-page-links" aria-label="Lead import pages">
-          <a href={uploadPath} aria-current={method === 'file' ? 'page' : undefined}
-            className={method === 'file' ? 'crm-import-page-active' : ''}>Upload Leads</a>
-          <a href={googlePath} aria-current={method === 'google' ? 'page' : undefined}
-            className={method === 'google' ? 'crm-import-page-active' : ''}>Google Sheets</a>
+          <a
+            href={uploadPath}
+            aria-current={method === 'file' ? 'page' : undefined}
+            className={method === 'file' ? 'crm-import-page-active' : ''}
+          >
+            Upload Leads
+          </a>
+          <a
+            href={googlePath}
+            aria-current={method === 'google' ? 'page' : undefined}
+            className={method === 'google' ? 'crm-import-page-active' : ''}
+          >
+            Google Sheets
+          </a>
         </nav>
-        <SheetImportForm method={method} sources={sources} stages={stages}
-          canSetup={s.allowed('crm.source.manage') && s.allowed('crm.pipeline.manage')} />
+        <SheetImportForm
+          method={method}
+          sources={sources}
+          stages={stages}
+          canSetup={
+            s.allowed('crm.source.manage') && s.allowed('crm.pipeline.manage')
+          }
+        />
       </main>
     </OwnerShell>
   );

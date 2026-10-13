@@ -285,9 +285,9 @@ export function LeadsWorkspace({
   propulseConnection: ProPulseConnectionView;
   initialTool: 'none' | 'add' | 'propulse';
 }) {
-  const [leadTool, setLeadTool] = useState<
-    'none' | 'add' | 'propulse'
-  >(initialTool);
+  const [leadTool, setLeadTool] = useState<'none' | 'add' | 'propulse'>(
+    initialTool,
+  );
   const viewMode = params.view === 'board' ? 'board' : 'list';
   const viewLink = (nextView: 'list' | 'board') => {
     const query = new URLSearchParams();
@@ -425,7 +425,10 @@ export function LeadsWorkspace({
               <a className="crm-outline" href="/dashboard/crm/leads/upload">
                 <Icon name="download" /> Upload Leads
               </a>
-              <a className="crm-outline" href="/dashboard/crm/leads/google-sheets">
+              <a
+                className="crm-outline"
+                href="/dashboard/crm/leads/google-sheets"
+              >
                 Google Sheets
               </a>
             </>

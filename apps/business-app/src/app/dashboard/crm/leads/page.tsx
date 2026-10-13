@@ -252,7 +252,11 @@ export default async function Leads({
   nav.push({ label: 'Leads', href: base, icon: 'leads' });
   if (s.allowed('lead.create')) {
     nav.push({ label: 'Upload Leads', href: base + '/upload', icon: 'plus' });
-    nav.push({ label: 'Google Sheets', href: base + '/google-sheets', icon: 'leads' });
+    nav.push({
+      label: 'Google Sheets',
+      href: base + '/google-sheets',
+      icon: 'leads',
+    });
   }
   if (may('quotation.view', 'quotation'))
     nav.push({
@@ -389,9 +393,7 @@ export default async function Leads({
         rows={rows}
         propulseConnection={propulseConnection}
         initialTool={
-          p.panel === 'add' || p.panel === 'propulse'
-            ? p.panel
-            : 'none'
+          p.panel === 'add' || p.panel === 'propulse' ? p.panel : 'none'
         }
         stats={stats}
         tabs={tabs}

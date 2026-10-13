@@ -294,7 +294,9 @@ export function SheetImportForm({
           <div className="crm-import-eyebrow">LEAD IMPORT CENTER</div>
           <div className="crm-import-hero-heading">
             <div>
-              <h2>{method === 'file' ? 'Upload Leads' : 'Google Sheets Import'}</h2>
+              <h2>
+                {method === 'file' ? 'Upload Leads' : 'Google Sheets Import'}
+              </h2>
               <p>
                 {method === 'file'
                   ? 'Upload a CSV file, preview customer enquiries and import them into All Leads.'
