@@ -162,7 +162,7 @@ export async function createStudioQuotation(input: unknown): Promise<{
     if (projectId) {
       const { data: selectedProject, error } = await s.client
         .from('projects')
-        .select('id')
+        .select('id,industry_id')
         .eq('organization_id', s.org)
         .eq('customer_id', customerId)
         .eq('id', projectId)
@@ -170,6 +170,8 @@ export async function createStudioQuotation(input: unknown): Promise<{
         .maybeSingle();
       if (error || !selectedProject)
         return { ok: false, message: 'This project does not belong to the selected customer.' };
+      if (selectedProject.industry_id && selectedProject.industry_id !== activeIndustry.id)
+        return { ok: false, message: 'Choose the correct industry for this existing project.' };
     } else {
       const { data: projectMatches, error } = await s.client
         .from('projects')
@@ -177,6 +179,7 @@ export async function createStudioQuotation(input: unknown): Promise<{
         .eq('organization_id', s.org)
         .eq('customer_id', customerId)
         .eq('name', values.projectName)
+        .eq('industry_id', activeIndustry.id)
         .eq('status', 'active')
         .limit(2);
       if (error)
