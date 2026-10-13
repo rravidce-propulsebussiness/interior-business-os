@@ -1,5 +1,8 @@
+'use client';
+
 import Link from 'next/link';
-import type { ReactNode } from 'react';
+import { usePathname } from 'next/navigation';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { OwnerIcon, type OwnerIconName } from '../owner-shell';
 import './studio.css';
 
@@ -33,6 +36,53 @@ export function QuotationStudioFrame({
   accountEmail?: string;
   children: ReactNode;
 }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const pathname = usePathname();
+  const toggleRef = useRef<HTMLButtonElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const sidebarRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    closeRef.current?.focus();
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setMenuOpen(false);
+        toggleRef.current?.focus();
+        return;
+      }
+      if (event.key !== 'Tab' || !sidebarRef.current) return;
+      const focusable = Array.from(
+        sidebarRef.current.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled])',
+        ),
+      );
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (!first || !last) return;
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    const onResize = () => {
+      if (window.innerWidth > 900) setMenuOpen(false);
+    };
+    document.addEventListener('keydown', onKeyDown);
+    window.addEventListener('resize', onResize);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('resize', onResize);
+    };
+  }, [menuOpen]);
+
   const initials =
     companyName
       .trim()
@@ -43,29 +93,68 @@ export function QuotationStudioFrame({
 
   return (
     <div className="qs-layout">
-      <aside className="qs-sidebar">
-        <Link href="/dashboard" className="qs-brand">
+      {menuOpen && (
+        <button
+          type="button"
+          className="qs-nav-scrim"
+          aria-label="Close workspace navigation"
+          onClick={() => setMenuOpen(false)}
+        />
+      )}
+      <aside
+        ref={sidebarRef}
+        id="qs-sidebar-navigation"
+        className={'qs-sidebar' + (menuOpen ? ' qs-sidebar-open' : '')}
+        aria-label="Company navigation"
+      >
+        <Link
+          href="/dashboard"
+          className="qs-brand"
+          onClick={() => setMenuOpen(false)}
+        >
           <span className="qs-brand-mark">{initials}</span>
           <span>
             <strong>{companyName}</strong>
             <small>Business OS · Workspace</small>
           </span>
         </Link>
+        <div className="qs-mobile-heading">
+          <strong>Workspace menu</strong>
+          <button
+            ref={closeRef}
+            type="button"
+            className="qs-mobile-close-button"
+            aria-label="Close workspace menu"
+            onClick={() => {
+              setMenuOpen(false);
+              toggleRef.current?.focus();
+            }}
+          >
+            <OwnerIcon name="close" size={21} />
+          </button>
+        </div>
         <nav aria-label="Workspace navigation" className="qs-nav">
-          {links.map((entry) => (
-            <Link
-              href={entry.href}
-              key={entry.href}
-              className={
-                'qs-nav-item' +
-                (entry.title === 'Quotations' ? ' qs-active' : '')
-              }
-              aria-current={entry.title === 'Quotations' ? 'page' : undefined}
-            >
-              <OwnerIcon name={entry.icon} size={19} />
-              <span>{entry.title}</span>
-            </Link>
-          ))}
+          {links.map((entry) => {
+            const selected =
+              entry.href === '/dashboard/quotations'
+                ? pathname.startsWith('/dashboard/quotations') &&
+                  pathname !== '/dashboard/quotations/settings'
+                : pathname === entry.href ||
+                  (entry.href !== '/dashboard' &&
+                    pathname.startsWith(entry.href + '/'));
+            return (
+              <Link
+                href={entry.href}
+                key={entry.href}
+                className={'qs-nav-item' + (selected ? ' qs-active' : '')}
+                aria-current={selected ? 'page' : undefined}
+                onClick={() => setMenuOpen(false)}
+              >
+                <OwnerIcon name={entry.icon} size={19} />
+                <span>{entry.title}</span>
+              </Link>
+            );
+          })}
         </nav>
         <div className="qs-sidebar-foot">
           <span className="qs-plan-spark">✦</span>
@@ -77,6 +166,17 @@ export function QuotationStudioFrame({
       </aside>
       <div className="qs-workspace">
         <header className="qs-topbar">
+          <button
+            ref={toggleRef}
+            type="button"
+            className="qs-mobile-menu-button"
+            aria-label="Open workspace menu"
+            aria-controls="qs-sidebar-navigation"
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen(true)}
+          >
+            <OwnerIcon name="menu" size={22} />
+          </button>
           <Link href="/dashboard/quotations" className="qs-mobile-brand">
             <span className="qs-brand-mark">{initials}</span>
             <strong>{companyName}</strong>

@@ -26,6 +26,38 @@
   top: 0;
   height: 100vh;
 }
+.qs-mobile-heading,
+.qs-mobile-menu-button,
+.qs-nav-scrim {
+  display: none;
+}
+.qs-mobile-menu-button,
+.qs-mobile-close-button {
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #d8e2f1;
+  border-radius: 10px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 9px;
+  cursor: pointer;
+}
+.qs-mobile-menu-button {
+  background: #eff5ff;
+  color: #153d82;
+  flex: 0 0 auto;
+}
+.qs-mobile-close-button {
+  background: #243650;
+  border-color: #445573;
+  color: #fff;
+}
+.qs-mobile-menu-button:focus-visible,
+.qs-mobile-close-button:focus-visible,
+.qs-nav-scrim:focus-visible {
+  outline: 3px solid #7eb4ff;
+  outline-offset: 2px;
+}
 .qs-brand {
   display: flex;
   gap: 10px;
@@ -699,7 +731,50 @@
 }
 @media (max-width: 900px) {
   .qs-sidebar {
-    display: none;
+    display: flex;
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 61;
+    width: min(300px, 86vw);
+    flex: 0 0 auto;
+    height: 100dvh;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    transform: translateX(-105%);
+    visibility: hidden;
+    pointer-events: none;
+    box-shadow: 15px 0 45px #09152e3d;
+    transition:
+      transform 0.2s ease,
+      visibility 0.2s ease;
+  }
+  .qs-sidebar.qs-sidebar-open {
+    transform: translateX(0);
+    visibility: visible;
+    pointer-events: auto;
+  }
+  .qs-nav-scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    background: #071328ad;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+  }
+  .qs-mobile-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 0 9px 15px;
+    color: white;
+    font-size: 13px;
+  }
+  .qs-mobile-menu-button {
+    display: inline-flex;
   }
   .qs-topbar {
     padding: 0 15px;
@@ -711,6 +786,13 @@
     color: #152543;
     text-decoration: none;
     font-size: 12px;
+    min-width: 0;
+    margin-right: auto;
+  }
+  .qs-mobile-brand strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   .qs-top-user {
     display: none;
@@ -804,5 +886,10 @@
   }
   .qs-preview-frame {
     min-height: 480px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .qs-sidebar {
+    transition: none;
   }
 }
