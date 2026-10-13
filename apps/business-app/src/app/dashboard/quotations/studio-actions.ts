@@ -185,7 +185,7 @@ export async function createStudioQuotation(input: unknown): Promise<{
       if (error)
         return { ok: false, message: 'Could not check existing projects. Please try again.' };
       if (projectMatches?.length === 1) {
-        projectId = projectMatches[0].id;
+        projectId = projectMatches[0]!.id;
       } else if (projectMatches?.length) {
         return { ok: false, message: 'Multiple projects share this name. Select the intended existing project.' };
       } else {
