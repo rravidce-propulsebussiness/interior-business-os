@@ -8,9 +8,11 @@ import {
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
+import { createRequire } from 'node:module';
 import { join } from 'node:path';
 import {
   buildClientAssetManifest,
+  checkClientAssetsAtStartup,
   verifyClientAssets,
 } from './client-asset-integrity.mjs';
 
@@ -39,6 +41,30 @@ test('client chunks are parsed, hashed and verified before Hostinger starts', as
       () => buildClientAssetManifest(temp),
       /invalid or truncated syntax/,
     );
+  } finally {
+    rmSync(temp, { recursive: true, force: true });
+  }
+});
+
+test('Hostinger require(esm) can synchronously load the asset helper', () => {
+  // Hostinger's lsnode.js require(esm) startup fails if the imported
+  // module graph contains top-level await, even behind an unentered if.
+  const require = createRequire(import.meta.url);
+  const helper = require('./client-asset-integrity.mjs');
+  assert.equal(typeof helper.verifyClientAssets, 'function');
+  assert.equal(typeof helper.checkClientAssetsAtStartup, 'function');
+});
+
+test('missing asset manifest does not stop Next.js startup', () => {
+  const temp = mkdtempSync(join(tmpdir(), 'business-os-missing-asset-'));
+  try {
+    const notices = [];
+    const result = checkClientAssetsAtStartup(temp, (message) =>
+      notices.push(message),
+    );
+    assert.deepEqual(result, { ok: false, count: 0 });
+    assert.match(notices.join(' '), /startup continues/);
+    assert.throws(() => verifyClientAssets(temp), /manifest missing/);
   } finally {
     rmSync(temp, { recursive: true, force: true });
   }
