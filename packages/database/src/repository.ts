@@ -177,6 +177,37 @@ export function createRepository(client: SupabaseClient<Database>) {
         await client.rpc('company_application_submit', { p_input: input }),
       );
     },
+    async selfRegisterCompany(input: {
+      name: string;
+      slug: string;
+      legalName: string;
+      country: string;
+      currency: string;
+      timezone: string;
+      industries: string[];
+    }): Promise<{
+      status: 'approved' | 'pending_review';
+      organizationId?: string;
+    }> {
+      const result = unwrap(
+        await client.rpc('company_self_register', { p_input: input }),
+      );
+      if (
+        !result ||
+        typeof result !== 'object' ||
+        Array.isArray(result) ||
+        (result.status !== 'approved' && result.status !== 'pending_review') ||
+        (result.status === 'approved' && typeof result.organizationId !== 'string')
+      ) {
+        throw new DomainError('INTERNAL_ERROR');
+      }
+      return {
+        status: result.status,
+        ...(typeof result.organizationId === 'string'
+          ? { organizationId: idSchema.parse(result.organizationId) }
+          : {}),
+      };
+    },
     async myCompanyApplications() {
       return unwrap(await client.rpc('company_applications_mine'));
     },
