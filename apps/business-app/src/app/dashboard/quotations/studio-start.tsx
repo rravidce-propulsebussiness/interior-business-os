@@ -186,14 +186,15 @@ export function QuotationStudioStart({
             <select
               defaultValue=""
               onChange={(event) => {
-                const lead = leads.find((item) => item.id === event.target.value);
+                const lead = leads.find(
+                  (item) => item.id === event.target.value,
+                );
                 if (!lead) return;
                 setData({
                   clientName: lead.name || '',
                   phone: lead.phone || '',
                   email: lead.email || '',
-                  projectName:
-                    (lead.service_type || 'Client') + ' project',
+                  projectName: (lead.service_type || 'Client') + ' project',
                   location: lead.location || '',
                   plotSize: lead.project_size || '',
                   projectType: 'Residential',
@@ -202,7 +203,9 @@ export function QuotationStudioStart({
                   setIndustry(lead.industryKey);
                   if (lead.industryKey === 'interior') setMode('custom');
                 }
-                setFeedback('Lead details loaded. Review before creating the quotation.');
+                setFeedback(
+                  'Lead details loaded. Review before creating the quotation.',
+                );
               }}
             >
               <option value="">Enter client details manually</option>
