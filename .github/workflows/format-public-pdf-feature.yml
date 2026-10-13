@@ -1,0 +1,32 @@
+name: Format customer PDF route on package feature
+on:
+  push:
+    branches:
+      - feat/premium-package-design-specs-attachments-20261013
+permissions:
+  contents: write
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/premium-package-design-specs-attachments-20261013
+          persist-credentials: true
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.34.5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec prettier --write "apps/business-app/src/app/q/[token]/pdf/route.ts"
+      - name: Commit formatted route
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "apps/business-app/src/app/q/[token]/pdf/route.ts"
+          if ! git diff --cached --quiet; then
+            git commit -m "style(customer-pdf): apply exact repository Prettier formatting"
+            git push origin HEAD:feat/premium-package-design-specs-attachments-20261013
+          fi
