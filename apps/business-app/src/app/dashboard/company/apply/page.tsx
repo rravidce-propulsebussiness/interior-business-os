@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { pageServices } from '@business-os/auth/server';
-import { ActionForm } from '@business-os/ui/action-form';
-import { submitCompanyApplication } from './actions';
+import { CompanyRegistrationForm } from './company-registration-form';
 
 type ApplicationSummary = {
   id: string;
@@ -32,9 +31,8 @@ function isSummary(value: unknown): value is ApplicationSummary {
 export default async function CompanyApplicationPage() {
   const { authorization, repository } = await pageServices();
   await authorization.requireAuthenticatedUser();
-  const [industries, plans, history] = await Promise.all([
+  const [industries, history] = await Promise.all([
     repository.industries(),
-    repository.plans(),
     repository.myCompanyApplications(),
   ]);
   const applications = Array.isArray(history) ? history.filter(isSummary) : [];
@@ -60,17 +58,14 @@ export default async function CompanyApplicationPage() {
             Register your business
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-300">
-            Apply with your verified account. A Platform Administrator reviews
-            each new business before its workspace and owner access are
-            provisioned.
+            Create your company directly with your verified account. You become
+            its Owner, with 90 days of testing access to available modules. Your
+            company data stays private to your workspace.
           </p>
         </header>
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
           <h2 className="text-xl font-semibold">Business details</h2>
-          <ActionForm
-            action={submitCompanyApplication}
-            label="Submit for review"
-          >
+          <CompanyRegistrationForm>
             <label className="grid gap-2 text-sm font-medium">
               Company name
               <input
@@ -125,23 +120,6 @@ export default async function CompanyApplicationPage() {
                 billing and project modules.
               </p>
             </fieldset>
-            <label className="grid gap-2 text-sm font-medium">
-              Requested subscription
-              <select
-                name="planId"
-                defaultValue=""
-                className="rounded-lg border border-slate-300 px-4 py-3"
-              >
-                <option value="">Administrator-recommended plan</option>
-                {plans
-                  .filter((plan) => plan.status === 'active')
-                  .map((plan) => (
-                    <option key={plan.id} value={plan.id}>
-                      {plan.name}
-                    </option>
-                  ))}
-              </select>
-            </label>
             <div className="grid gap-4 sm:grid-cols-3">
               <label className="grid gap-2 text-sm font-medium">
                 Country code
@@ -175,7 +153,7 @@ export default async function CompanyApplicationPage() {
                 />
               </label>
             </div>
-          </ActionForm>
+          </CompanyRegistrationForm>
         </section>
         <section className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8">
           <h2 className="text-xl font-semibold">Your applications</h2>

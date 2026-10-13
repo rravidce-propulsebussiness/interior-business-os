@@ -188,10 +188,11 @@ export default async function Dashboard({
       <main id="main-content" className="owner-no-company">
         <h1>No active company workspace</h1>
         <p>
-          Your account needs an active company membership to access business
-          tools.
+          Create a business workspace to start using the tools, or accept an
+          invitation to join an existing company.
         </p>
-        <a href="/dashboard/company/invitations">Review your invitations →</a>
+        <a href="/dashboard/company/apply">Create your company →</a>
+        <a href="/dashboard/company/invitations">Join an invited company →</a>
       </main>
     );
   }

@@ -33,6 +33,7 @@ psql(['-f', file('supabase/seed.sql')]);
 console.log('Development catalog seed is repeatable.');
 assertionFile('isolation');
 assertionFile('company-applications');
+assertionFile('self-service-companies');
 assertionFile('employee-invitations');
 // This file creates the documented demo organization required by later seeds.
 // Its fixture setup must run even when nested regression execution is omitted.

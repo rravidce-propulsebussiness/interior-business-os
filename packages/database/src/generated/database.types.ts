@@ -10768,6 +10768,7 @@ export interface Database {
         Args: { p_approval_required: boolean };
         Returns: Json;
       };
+      company_self_register: { Args: { p_input: Json }; Returns: Json };
       construction_package_list: { Args: { p_org: string }; Returns: Json };
       construction_package_quote_preview: {
         Args: {

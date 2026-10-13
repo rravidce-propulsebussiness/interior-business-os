@@ -141,33 +141,69 @@ export function OwnerShell({
             const selected = currentHref
               ? item.href === currentHref
               : item.href === '/dashboard';
-            const childActive = item.children?.some((child) => child.href === currentHref) ?? false;
+            const childActive =
+              item.children?.some((child) => child.href === currentHref) ??
+              false;
             if (item.children?.length) {
-              const isExpanded = expanded[item.href] ?? (selected || childActive);
+              const isExpanded =
+                expanded[item.href] ?? (selected || childActive);
               return (
                 <div className="owner-nav-group" key={item.href}>
                   <button
                     type="button"
-                    className={'owner-nav-item owner-nav-group-toggle' + (selected || childActive ? ' owner-nav-active' : '')}
+                    className={
+                      'owner-nav-item owner-nav-group-toggle' +
+                      (selected || childActive ? ' owner-nav-active' : '')
+                    }
                     aria-expanded={isExpanded}
-                    aria-controls={'owner-subnav-' + item.href.replace(/[^a-z0-9]/gi, '-')}
-                    onClick={() => setExpanded((previous) => ({ ...previous, [item.href]: !isExpanded }))}
+                    aria-controls={
+                      'owner-subnav-' + item.href.replace(/[^a-z0-9]/gi, '-')
+                    }
+                    onClick={() =>
+                      setExpanded((previous) => ({
+                        ...previous,
+                        [item.href]: !isExpanded,
+                      }))
+                    }
                   >
                     <OwnerIcon name={item.icon} size={20} />
                     <span>{item.label}</span>
-                    <span className={'owner-nav-chevron' + (isExpanded ? ' owner-nav-chevron-open' : '')} aria-hidden="true">⌄</span>
+                    <span
+                      className={
+                        'owner-nav-chevron' +
+                        (isExpanded ? ' owner-nav-chevron-open' : '')
+                      }
+                      aria-hidden="true"
+                    >
+                      ⌄
+                    </span>
                   </button>
                   {isExpanded && (
-                    <div className="owner-subnav" id={'owner-subnav-' + item.href.replace(/[^a-z0-9]/gi, '-')}>
+                    <div
+                      className="owner-subnav"
+                      id={
+                        'owner-subnav-' + item.href.replace(/[^a-z0-9]/gi, '-')
+                      }
+                    >
                       {item.children.map((child) => (
                         <a
                           key={child.href}
                           href={child.href}
-                          className={'owner-subnav-link' + (child.href === currentHref ? ' owner-subnav-active' : '')}
-                          aria-current={child.href === currentHref ? 'page' : undefined}
+                          className={
+                            'owner-subnav-link' +
+                            (child.href === currentHref
+                              ? ' owner-subnav-active'
+                              : '')
+                          }
+                          aria-current={
+                            child.href === currentHref ? 'page' : undefined
+                          }
                           onClick={() => setMenuOpen(false)}
                         >
-                          <span className="owner-subnav-dot" aria-hidden="true" />
+                          <span
+                            className="owner-subnav-dot"
+                            aria-hidden="true"
+                          />
                           {child.label}
                         </a>
                       ))}
@@ -180,7 +216,9 @@ export function OwnerShell({
               <a
                 key={item.href}
                 href={item.href}
-                className={'owner-nav-item' + (selected ? ' owner-nav-active' : '')}
+                className={
+                  'owner-nav-item' + (selected ? ' owner-nav-active' : '')
+                }
                 aria-current={selected ? 'page' : undefined}
                 onClick={() => setMenuOpen(false)}
               >
