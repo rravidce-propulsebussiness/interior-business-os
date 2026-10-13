@@ -1,0 +1,73 @@
+name: Format quotation studio branch
+on:
+  push:
+    branches:
+      - feature/premium-quotation-studio-20261013
+permissions:
+  contents: write
+jobs:
+  normalize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: business_os_test
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Initialize fresh disposable database
+        run: pnpm db:verify --initialize-only
+        env:
+          TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:5432/business_os_test
+          ALLOW_TEST_DATABASE_RESET: 'yes'
+      - name: Generate canonical Supabase types
+        run: pnpm db:types
+        env:
+          TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:5432/business_os_test
+      - name: Format quotation studio files
+        run: |
+          pnpm exec prettier --write \
+            apps/business-app/src/app/dashboard/quotations/studio-actions.ts \
+            apps/business-app/src/app/dashboard/quotations/studio-frame.tsx \
+            apps/business-app/src/app/dashboard/quotations/studio-start.tsx \
+            apps/business-app/src/app/dashboard/quotations/studio-editor.tsx \
+            apps/business-app/src/app/dashboard/quotations/studio.css \
+            apps/business-app/src/app/dashboard/quotations/interior-actions.ts \
+            apps/business-app/src/app/dashboard/quotations/interior-room-builder.tsx \
+            apps/business-app/src/app/dashboard/quotations/quotation-attachments.tsx \
+            apps/business-app/src/app/dashboard/quotations/quotation-storage.ts \
+            apps/business-app/src/app/dashboard/quotations/page.tsx \
+            apps/business-app/src/app/dashboard/quotations/new/page.tsx \
+            apps/business-app/src/app/dashboard/quotations/construction-selector.tsx \
+            'apps/business-app/src/app/dashboard/quotations/[id]/studio/page.tsx' \
+            'apps/business-app/src/app/dashboard/quotations/[id]/studio/attachments/route.ts' \
+            'apps/business-app/src/app/dashboard/quotations/[id]/studio/attachments/[attachmentId]/route.ts' \
+            'apps/business-app/src/app/dashboard/quotations/[id]/pdf/route.ts' \
+            packages/shared/src/pdf.ts \
+            packages/database/src/generated/database.types.ts
+      - name: Push normalized source
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if ! git diff --quiet; then
+            git add apps/business-app/src/app/dashboard/quotations packages/shared/src/pdf.ts packages/database/src/generated/database.types.ts
+            git commit -m "chore: format Studio source and regenerate database types"
+            git push origin HEAD:feature/premium-quotation-studio-20261013
+          fi
