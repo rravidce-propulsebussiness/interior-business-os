@@ -1,216 +1,271 @@
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { z } from 'zod';
 import { pageServices } from '@business-os/auth/server';
-import { DomainError } from '@business-os/shared';
-import { OsIcon } from '../dashboard-shell';
+import { WebsitePlatformControls } from '../website/controls';
+import { DomainPanel } from '../../dashboard/website/domain-panel';
+import { websiteSchemaPending } from '../../../website-schema';
+import { validWorkspaceSlug } from '../../../workspace-paths';
 
-export default async function DomainManagement() {
-  const services = await pageServices();
-  try {
-    await services.authorization.requirePlatformPermission(
-      'platform.entitlements.manage',
-    );
-    await services.authorization.requirePlatformPermission(
-      'platform.catalog.view',
-    );
-  } catch (error) {
-    if (error instanceof DomainError && error.code === 'FORBIDDEN') notFound();
-    throw error;
-  }
-
-  const [settings, websites] = await Promise.all([
-    services.client
-      .from('website_platform_settings')
-      .select('base_domain,managed_subdomain_tls')
-      .single(),
-    services.client.rpc('website_platform_list', {}),
+const companySchema = z.object({
+  id: z.uuid(),
+  name: z.string(),
+  slug: z.string(),
+  status: z.string(),
+  websites: z.array(
+    z.object({
+      id: z.uuid(),
+      name: z.string(),
+      status: z.string(),
+      domains: z.array(
+        z.object({
+          id: z.uuid(),
+          hostname: z.string(),
+          kind: z.string(),
+          status: z.string(),
+          tls_status: z.string(),
+          challenge: z.string(),
+          version: z.number(),
+        }),
+      ),
+    }),
+  ),
+});
+export default async function DomainManagement({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const s = await pageServices();
+  await s.authorization.requirePlatformPermission(
+    'platform.entitlements.manage',
+  );
+  await s.authorization.requirePlatformPermission('platform.catalog.view');
+  await s.authorization.requirePlatformPermission(
+    'platform.organizations.view',
+  );
+  await s.authorization.requirePlatformPermission(
+    'platform.organizations.manage',
+  );
+  const query = await searchParams;
+  const page = Math.min(
+    10000,
+    Math.max(1, Number.parseInt(query.page ?? '1', 10) || 1),
+  );
+  const [settings, registry] = await Promise.all([
+    s.client.from('website_platform_settings').select('*').single(),
+    s.client.rpc('website_platform_domain_registry', { p_page: page }),
   ]);
-  if (settings.error || websites.error)
-    throw new Error('Domain controls unavailable');
-  const sites = Array.isArray(websites.data)
-    ? websites.data.flatMap((item) =>
-        item &&
-        typeof item === 'object' &&
-        !Array.isArray(item) &&
-        typeof item.id === 'string' &&
-        typeof item.name === 'string' &&
-        typeof item.organization === 'string' &&
-        typeof item.status === 'string'
-          ? [
-              {
-                id: item.id,
-                name: item.name,
-                organization: item.organization,
-                status: item.status,
-              },
-            ]
-          : [],
-      )
-    : [];
-
+  const pendingSetup = websiteSchemaPending(registry.error);
+  if (settings.error || (registry.error && !pendingSetup))
+    throw new Error('Domain configuration unavailable');
+  const companies = z
+    .array(companySchema)
+    .parse(pendingSetup ? [] : registry.data);
+  const enabled = process.env.BUSINESS_OS_TENANT_ROUTES_ENABLED === 'true';
+  const strings = (value: unknown) =>
+    Array.isArray(value)
+      ? value.filter((x): x is string => typeof x === 'string')
+      : [];
   return (
-    <main id="main-content" tabIndex={-1}>
-      <p className="text-xs font-bold uppercase tracking-[.14em] text-blue-600">
-        Website infrastructure
-      </p>
-      <div className="mt-2 flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="os-secondary-heading">Domain Management</h1>
-          <p className="os-secondary-subtitle">
-            Connect websites to domains purchased from any registrar, without
-            transferring registration.
+    <main id="main-content" className="space-y-7" tabIndex={-1}>
+      <header>
+        <p className="text-xs font-bold uppercase tracking-widest text-blue-600">
+          Company addresses
+        </p>
+        <h1 className="os-secondary-heading">Domain Configuration</h1>
+        <p className="os-secondary-subtitle">
+          Each company uses its own workspace path. A verified custom domain can
+          also open the same company dashboard.
+        </p>
+      </header>
+      <section className="grid gap-4 md:grid-cols-2">
+        <div className="rounded-xl border bg-card p-5">
+          <h2 className="font-semibold">Company workspace</h2>
+          <p className="mt-3 break-all font-mono text-sm">
+            sghomesinterior.in/rvconstruction/dashboard
+          </p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Uses the company slug, not its website subdomain slug. Members must
+            sign in to that company.
           </p>
         </div>
-        <Link className="os-action" href="/admin/website">
-          Platform website configuration →
-        </Link>
-      </div>
-
-      <div className="os-stats-grid os-domain-summary mt-6">
-        <dl className="os-stat" style={{ gridColumn: 'span 2' }}>
-          <div className="os-stat-icon os-icon-blue">
-            <OsIcon name="domain" size={24} />
-          </div>
-          <div>
-            <dt>Managed base hostname</dt>
-            <dd className="text-base!" style={{ overflowWrap: 'anywhere' }}>
-              {settings.data.base_domain || 'Not configured'}
-            </dd>
-            <p className="os-stat-note">
-              CNAME destination for verified external domains
-            </p>
-          </div>
-        </dl>
-        <dl className="os-stat">
-          <div className="os-stat-icon os-icon-green">
-            <OsIcon name="website" />
-          </div>
-          <div>
-            <dt>Known websites</dt>
-            <dd>{sites.length.toLocaleString('en-IN')}</dd>
-            <p className="os-stat-note">Platform website registry</p>
-          </div>
-        </dl>
-        <dl className="os-stat" style={{ gridColumn: 'span 2' }}>
-          <div className="os-stat-icon os-icon-purple">
-            <OsIcon name="check" size={24} />
-          </div>
-          <div>
-            <dt>Wildcard TLS configuration</dt>
-            <dd className="text-base!">
-              {settings.data.managed_subdomain_tls
-                ? 'Marked configured'
-                : 'Not configured'}
-            </dd>
-            <p className="os-stat-note">
-              Live certificate provisioning requires hosting setup and
-              verification
-            </p>
-          </div>
-        </dl>
-      </div>
-
-      <section className="os-resource-panel">
-        <div className="os-panel-heading">
-          <h2>Connect a customer’s existing domain</h2>
-          <Link href="/admin/website">Configure domain settings ↗</Link>
-        </div>
-        <p className="os-secondary-subtitle">
-          The existing tenant Website → Domains workflow creates a unique domain
-          claim and a one-time DNS ownership challenge. The Super Admin controls
-          the platform base hostname, entitlements and website suspensions;
-          modifying a tenant’s domain currently requires the tenant’s own
-          authorized website session.
-        </p>
-        <div className="os-domain-steps">
-          <div className="os-domain-step">
-            <div className="os-stat-icon os-icon-blue">
-              <OsIcon name="website" size={22} />
-            </div>
-            <strong>1. Add the website domain</strong>
-            In the business workspace, open Website Studio → Domains and add{' '}
-            <code>www.customer.com</code>. This creates a unique claim and TXT
-            challenge. Enable the customer’s custom-domain entitlement when
-            required.
-          </div>
-          <div className="os-domain-step">
-            <div className="os-stat-icon os-icon-purple">
-              <OsIcon name="domain" size={22} />
-            </div>
-            <strong>2. Update external DNS</strong>
-            At the existing registrar, create{' '}
-            <code>_business-os.www.customer.com</code> as a TXT record with the
-            generated verification value. Point the hostname’s CNAME to{' '}
-            <code>
-              {settings.data.base_domain || 'your configured platform hostname'}
-            </code>
-            .
-          </div>
-          <div className="os-domain-step">
-            <div className="os-stat-icon os-icon-green">
-              <OsIcon name="check" size={22} />
-            </div>
-            <strong>3. Provision TLS and verify</strong>
-            With Cloudflare for SaaS configured on the Business App, HTTPS
-            certificates are requested automatically. Otherwise, configure a
-            certificate at the host. Use Verify DNS and HTTPS before activation.
-          </div>
-        </div>
-        <p className="os-warning mt-5">
-          Domain connection and domain registration transfer are different
-          operations. The Business App can automatically request
-          Cloudflare-managed certificates when its SaaS integration is
-          configured. Otherwise Business OS verifies existing DNS and HTTPS; it
-          does not purchase or transfer domain registrations. Do not mark a
-          domain live until both DNS and HTTPS verification succeed.
-        </p>
-        <div className="mt-5 flex flex-wrap gap-3">
-          <Link className="os-action" href="/admin/website">
-            Configure domain/TLS platform →
-          </Link>
-          <Link className="os-action secondary" href="/admin/organizations">
-            Select customer tenant →
-          </Link>
+        <div className="rounded-xl border bg-card p-5">
+          <h2 className="font-semibold">Custom domain</h2>
+          <p className="mt-3 break-all font-mono text-sm">
+            www.rvconstruction.com/dashboard
+          </p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Use a full domain you own. DNS ownership, HTTPS, a published website
+            and hosting routes must all be ready.
+          </p>
         </div>
       </section>
-
-      <section className="os-resource-panel">
-        <div className="os-panel-heading">
-          <h2>Website registry</h2>
-          <Link href="/admin/website">Manage sites ↗</Link>
-        </div>
-        <div className="os-table-wrap">
-          <table className="os-table">
-            <thead>
-              <tr>
-                <th>Website</th>
-                <th>Organization</th>
-                <th>Status</th>
-                <th>Platform action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sites.map((site) => (
-                <tr key={site.id}>
-                  <td style={{ fontWeight: 700 }}>{site.name}</td>
-                  <td>{site.organization}</td>
-                  <td>
-                    <span className={`os-pill ${site.status}`}>
-                      {site.status}
-                    </span>
-                  </td>
-                  <td>
-                    <Link href="/admin/website">Manage website ↗</Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {sites.length === 0 && (
-            <p className="os-empty">No websites registered yet.</p>
+      <p role="status" className="rounded border p-4 text-sm">
+        {enabled
+          ? 'Company URL routing is enabled in this application runtime.'
+          : 'Company URL routing is not enabled in this runtime. Hosting configuration must be completed before company paths and custom-domain dashboards can go live.'}
+      </p>
+      <section className="space-y-4">
+        <h2 className="text-xl font-semibold">Platform domain settings</h2>
+        <p className="text-sm text-muted-foreground">
+          Set the public website hostname used for company subdomains and
+          custom-domain CNAME records. This is separate from the main Business
+          App hostname.
+        </p>
+        <WebsitePlatformControls
+          mode="domains"
+          baseDomain={settings.data.base_domain ?? ''}
+          managedTls={settings.data.managed_subdomain_tls}
+          plans={[]}
+          sites={[]}
+          allowedEmbeds={strings(settings.data.allowed_embeds)}
+          disabledComponents={strings(settings.data.disabled_components)}
+        />
+      </section>
+      <section className="space-y-4">
+        <h2 className="text-xl font-semibold">
+          Company URLs &amp; connected domains
+        </h2>
+        {pendingSetup && (
+          <p role="status" className="rounded border p-4 text-sm">
+            Company domain controls are awaiting the website templates
+            migration. Platform settings and the existing owner domain workflow
+            remain available.
+          </p>
+        )}
+        {companies.map((company) => (
+          <article
+            key={company.id}
+            className="space-y-4 rounded-xl border bg-card p-5"
+          >
+            <div className="flex flex-wrap justify-between gap-3">
+              <h3 className="text-lg font-semibold">{company.name}</h3>
+              <Link
+                className="text-sm underline"
+                href={`/admin/organizations/${company.id}`}
+              >
+                Company settings →
+              </Link>
+            </div>
+            <p className="break-all text-sm">
+              Workspace: <code>/{company.slug}/dashboard</code>
+            </p>
+            {enabled &&
+              validWorkspaceSlug(company.slug) &&
+              ['active', 'trial'].includes(company.status) && (
+                <Link
+                  className="inline-block rounded border px-3 py-2 text-sm"
+                  href={`/${company.slug}/dashboard/website`}
+                >
+                  Open company Website Studio →
+                </Link>
+              )}
+            <p className="text-xs text-muted-foreground">
+              Opening a company workspace requires your own active membership.
+              Platform admin access does not impersonate the owner.
+            </p>
+            {!company.websites.length && (
+              <p className="text-sm text-muted-foreground">
+                No company website yet. The owner can create one from a template
+                in Website Studio.
+              </p>
+            )}
+            {company.websites.map((site) => (
+              <div key={site.id} className="rounded border p-4">
+                <div className="flex flex-wrap justify-between gap-3">
+                  <p className="font-medium">
+                    {site.name} · {site.status}
+                  </p>
+                  {enabled && validWorkspaceSlug(company.slug) && (
+                    <Link
+                      className="text-sm underline"
+                      href={`/${company.slug}/dashboard/website/${site.id}/domains`}
+                    >
+                      Owner’s domain view →
+                    </Link>
+                  )}
+                </div>
+                <DomainPanel
+                  site={site.id}
+                  organizationId={company.id}
+                  domains={site.domains}
+                  base={settings.data.base_domain ?? ''}
+                  canManage={
+                    ['active', 'trial'].includes(company.status) &&
+                    !['suspended', 'archived'].includes(site.status)
+                  }
+                />
+                {!site.domains.length && (
+                  <p className="mt-2 text-sm">No connected domains.</p>
+                )}
+                {site.domains.map((domain) => (
+                  <div
+                    key={domain.hostname}
+                    className="mt-3 flex flex-wrap items-center justify-between gap-2 text-sm"
+                  >
+                    {enabled &&
+                      site.status === 'published' &&
+                      domain.status === 'active' &&
+                      domain.tls_status === 'ready' &&
+                      ['active', 'trial'].includes(company.status) && (
+                        <a
+                          className="underline"
+                          href={`https://${domain.hostname}/dashboard`}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          Open {domain.hostname}/dashboard ↗
+                        </a>
+                      )}
+                  </div>
+                ))}
+              </div>
+            ))}
+          </article>
+        ))}
+        {!pendingSetup && !companies.length && (
+          <p>No companies on this page.</p>
+        )}
+        <nav className="flex gap-4 text-sm" aria-label="Company pages">
+          {page > 1 && (
+            <Link href={`/admin/domains?page=${page - 1}`}>← Previous</Link>
           )}
-        </div>
+          <span>Page {page}</span>
+          {companies.length === 25 && page < 10000 && (
+            <Link href={`/admin/domains?page=${page + 1}`}>Next →</Link>
+          )}
+        </nav>
       </section>
+      <section className="rounded-xl border p-5 text-sm">
+        <h2 className="font-semibold">Connect a company’s domain</h2>
+        <ol className="mt-3 list-decimal space-y-2 pl-5">
+          <li>
+            Add the full hostname under the company website above, or let the
+            owner add it from Website Studio → Domains.
+          </li>
+          <li>
+            Add the generated TXT ownership record and CNAME at the company’s
+            DNS provider.
+          </li>
+          <li>
+            Route public pages to Websites and /dashboard, login, auth and
+            application assets to the Business App at the host. Configure HTTPS
+            for that hostname.
+          </li>
+          <li>
+            Select Verify DNS and HTTPS. Publish the website before using its
+            custom-domain dashboard.
+          </li>
+        </ol>
+        <p className="mt-3 text-muted-foreground">
+          A DNS record alone cannot configure your hosting router. The platform
+          TLS checkbox records completed wildcard hosting setup; it does not
+          provision a certificate.
+        </p>
+      </section>
+      <Link className="inline-block text-sm underline" href="/admin/website">
+        Website builder and template library →
+      </Link>
     </main>
   );
 }

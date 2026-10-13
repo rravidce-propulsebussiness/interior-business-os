@@ -2,7 +2,8 @@
 import { Resolver } from 'node:dns/promises';
 import { connect } from 'node:tls';
 import { isIP } from 'node:net';
-import { websiteServices, signWebsite } from './service';
+import { signWebsite } from './service';
+import { domainServices } from './domain-service';
 import { revalidatePath } from 'next/cache';
 import {
   cloudflareSaasEnabled,
@@ -28,9 +29,13 @@ function publicIp(ip: string) {
   }
   return false;
 }
-export async function addWebsiteDomain(site: string, hostname: string) {
+export async function addWebsiteDomain(
+  site: string,
+  hostname: string,
+  organizationId?: string,
+) {
   try {
-    const s = await websiteServices('website.domain.manage');
+    const s = await domainServices(organizationId);
     const host = hostname.trim().toLowerCase();
     const r = await s.client.rpc('website_domain_add', {
       p_organization_id: s.context.organizationId,
@@ -51,6 +56,7 @@ export async function addWebsiteDomain(site: string, hostname: string) {
       }
     }
     revalidatePath(`/dashboard/website/${site}/domains`);
+    revalidatePath('/admin/domains');
     return { message };
   } catch {
     return { message: 'Domain unavailable or capability disabled.' };
@@ -59,12 +65,13 @@ export async function addWebsiteDomain(site: string, hostname: string) {
 export async function checkWebsiteDomain(
   site: string,
   id: string,
+  organizationId?: string,
 ): Promise<{
   message: string;
   records: DomainDnsInstruction[];
 }> {
   try {
-    const s = await websiteServices('website.domain.manage');
+    const s = await domainServices(organizationId);
     const r = await s.client
       .from('website_domains')
       .select('*')
@@ -80,11 +87,21 @@ export async function checkWebsiteDomain(
     )
       throw new Error('Unavailable domain');
     const domain = r.data;
-    const config = await s.client.rpc('website_configuration', {
-      p_organization_id: s.context.organizationId,
-    });
-    const cfg = config.data as { platform?: { baseDomain?: string } } | null;
-    const base = cfg?.platform?.baseDomain;
+    let base: string | undefined;
+    if (organizationId) {
+      const config = await s.client
+        .from('website_platform_settings')
+        .select('base_domain')
+        .single();
+      if (config.error) throw config.error;
+      base = config.data.base_domain ?? undefined;
+    } else {
+      const config = await s.client.rpc('website_configuration', {
+        p_organization_id: s.context.organizationId,
+      });
+      const cfg = config.data as { platform?: { baseDomain?: string } } | null;
+      base = cfg?.platform?.baseDomain;
+    }
     if (!base) throw new Error('Platform domain not configured');
 
     // DNS ownership is always checked with the unique Business OS challenge,
@@ -183,6 +200,7 @@ export async function checkWebsiteDomain(
     });
     if (result.error) throw result.error;
     revalidatePath(`/dashboard/website/${site}/domains`);
+    revalidatePath('/admin/domains');
     return {
       message:
         result.data === 'active'
@@ -206,14 +224,16 @@ export async function removeWebsiteDomain(
   site: string,
   id: string,
   version: number,
+  organizationId?: string,
 ) {
-  const s = await websiteServices('website.domain.manage');
+  const s = await domainServices(organizationId);
   const r = await s.client.rpc('website_domain_remove', {
     p_organization_id: s.context.organizationId,
     p_domain_id: id,
     p_version: version,
   });
   revalidatePath(`/dashboard/website/${site}/domains`);
+  revalidatePath('/admin/domains');
   return {
     message: r.error
       ? 'Domain could not be removed. Reload and try again.'
