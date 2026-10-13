@@ -11,6 +11,11 @@ begin
   position=position+1;
   insert into public.project_areas(id,organization_id,project_id,name,sort_order) values(private.seed_uuid('business-os:demo:area:'||area_name),org,project,area_name,position) on conflict(id) do nothing;
  end loop;
- insert into public.organization_quotation_settings(id,organization_id,branding,default_terms) values(private.seed_uuid('business-os:demo:quote-settings'),org,jsonb_build_object('name','Demo Interiors','address',address,'phone','','email','','tax_identifier','','accent','#245b55','logo_data_uri',''),'Rates cover the finished work and selected specifications. Optional items are excluded from the payable total.') on conflict(organization_id) do nothing;
+ insert into public.organization_quotation_settings(id,organization_id,branding,default_terms) values(private.seed_uuid('business-os:demo:quote-settings'),org,jsonb_build_object('name','Demo Interiors','address',address,'phone','','email','','tax_identifier','','accent','#245b55','logo_data_uri',''),'Rates cover the finished work and selected specifications. Optional items are excluded from the payable total.') on conflict(organization_id) do update
+   set branding=excluded.branding,
+       default_terms=excluded.default_terms,
+       version=public.organization_quotation_settings.version+1
+   where public.organization_quotation_settings.default_terms=''
+     and public.organization_quotation_settings.branding->>'accent'='#2563EB';
 end $$;
 commit;
