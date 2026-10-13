@@ -229,7 +229,8 @@ create function public.quotation_share_pdf_attachments(p_token text)
 returns jsonb language plpgsql stable security definer set search_path='' as $f$
 declare v_org uuid;v_revision uuid;
 begin
-  if p_token is null or p_token !~ '^[0-9a-f]{64}  then raise exception 'Unavailable link' using errcode='42501';end if;
+  if p_token is null or p_token !~ '^[0-9a-f]{64}$'
+  then raise exception 'Unavailable link' using errcode='42501';end if;
   select l.organization_id,l.revision_id into v_org,v_revision
     from public.quotation_share_links l
     join private.quotation_share_secrets s on s.share_id=l.id
