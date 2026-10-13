@@ -10758,6 +10758,7 @@ export interface Database {
         Returns: Json;
       };
       company_application_submit: { Args: { p_input: Json }; Returns: string };
+      company_self_register: { Args: { p_input: Json }; Returns: Json };
       company_applications_mine: { Args: Record<string, never>; Returns: Json };
       company_applications_review: {
         Args: { p_status?: string; p_page?: number };
