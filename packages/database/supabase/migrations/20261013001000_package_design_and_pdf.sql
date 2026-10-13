@@ -229,7 +229,33 @@ create function public.quotation_share_pdf_attachments(p_token text)
 returns jsonb language plpgsql stable security definer set search_path='' as $f$
 declare v_org uuid;v_revision uuid;
 begin
-  if p_token is null or p_token !~ '^[0-9a-f]{64}
+  if p_token is null or p_token !~ '^[0-9a-f]{64}  then raise exception 'Unavailable link' using errcode='42501';end if;
+  select l.organization_id,l.revision_id into v_org,v_revision
+    from public.quotation_share_links l
+    join private.quotation_share_secrets s on s.share_id=l.id
+    join public.quotation_revisions r on r.id=l.revision_id
+    join public.quotations q on q.id=r.quotation_id
+    where s.token_hash=encode(extensions.digest(p_token,'sha256'),'hex')
+      and l.revoked_at is null
+      and (l.expires_at is null or l.expires_at>clock_timestamp())
+      and l.pdf_enabled
+      and r.status in ('issued','superseded')
+      and q.status <> 'cancelled';
+  if v_org is null or not private.entitled(v_org,'quotation')
+  then raise exception 'Unavailable link' using errcode='42501';end if;
+  return coalesce((
+    select jsonb_agg(jsonb_build_object('storage_path',a.storage_path,
+      'byte_size',a.byte_size) order by a.created_at,a.id)
+    from public.quotation_studio_attachments a
+    where a.organization_id=v_org and a.revision_id=v_revision
+  ),'[]'::jsonb);
+end $f$;
+revoke all on function public.quotation_share_pdf_attachments(text)
+  from public,anon,authenticated;
+grant execute on function public.quotation_share_pdf_attachments(text)
+  to service_role;
+
+commit;
   then raise exception 'Unavailable link' using errcode='42501';end if;
   select l.organization_id,l.revision_id into v_org,v_revision
     from public.quotation_share_links l
