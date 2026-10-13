@@ -111,6 +111,9 @@ export default async function MyEmployeeInvitations() {
             >
               Create my company →
             </Link>
+            <Link href="/auth/propulse" className="mt-3 ml-3 inline-flex rounded-xl border border-blue-200 px-5 py-3 text-sm font-semibold text-blue-700">
+              Import existing ProPulse business →
+            </Link>
           </section>
         )}
       </div>
