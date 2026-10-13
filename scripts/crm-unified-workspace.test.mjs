@@ -40,3 +40,34 @@ test('manual, sheet and ProPulse actions open inline without separate lead pages
     );
   }
 });
+
+test('Pipeline is Board View inside Leads, with its old URL redirected', () => {
+  const leadPage = readFileSync(
+    fileURLToPath(new URL('page.tsx', root)),
+    'utf8',
+  );
+  const board = readFileSync(
+    fileURLToPath(new URL('board-view.tsx', root)),
+    'utf8',
+  );
+  const pipeline = readFileSync(
+    fileURLToPath(new URL('../pipeline/page.tsx', root)),
+    'utf8',
+  );
+  const layout = readFileSync(
+    fileURLToPath(new URL('../layout.tsx', root)),
+    'utf8',
+  );
+  assert.match(leads, /<LeadsBoardView/);
+  assert.match(leads, /List View/);
+  assert.match(leads, /Board View/);
+  assert.doesNotMatch(leads, /href="\/dashboard\/crm\/pipeline"/);
+  assert.match(leadPage, /'view'/);
+  assert.match(leadPage, /key !== 'view'/);
+  assert.match(pipeline, /redirect\('\/dashboard\/crm\/leads\?' \+ query\.toString\(\)\)/);
+  assert.match(pipeline, /query\.set\('view', 'board'\)/);
+  assert.doesNotMatch(layout, /\['Pipeline', '\/dashboard\/crm\/pipeline'\]/);
+  assert.match(board, /runCrmCommand/);
+  assert.match(board, /target\.outcome !== 'open'/);
+  assert.match(board, /onOpen\(lead\)/);
+});
