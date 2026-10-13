@@ -1185,7 +1185,20 @@ export interface Database {
           id: string;
           organization_id: string;
           customer_id: string;
-          project_id: string;
+          propulse_company_link_mine: {
+        Args: { p_organization_id: string };
+        Returns: Json;
+      };
+      propulse_company_sync: {
+        Args: {
+          p_user_id: string;
+          p_subject: string;
+          p_email: string;
+          p_profile: Json;
+        };
+        Returns: Json;
+      };
+      project_id: string;
           revision_id: string;
           acceptance_id: string;
           lead_id: string | null;
