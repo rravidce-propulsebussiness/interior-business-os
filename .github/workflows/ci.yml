@@ -38,6 +38,10 @@ jobs:
           TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:5432/business_os_test
           ALLOW_TEST_DATABASE_RESET: 'yes'
       - run: pnpm exec playwright install --with-deps chromium
+      - name: Diagnose selected-owner formatting
+        run: |
+          pnpm exec prettier --write apps/business-app/src/app/dashboard/pricing/construction/package-actions.ts apps/business-app/src/app/dashboard/pricing/construction/package-manager.tsx apps/business-app/src/app/dashboard/pricing/construction/premium-package-editor.tsx apps/business-app/src/app/dashboard/quotations/packages/page.tsx packages/database/scripts/test.mjs packages/database/src/construction-packages.ts
+          git diff -- apps/business-app/src/app/dashboard/pricing/construction/package-actions.ts apps/business-app/src/app/dashboard/pricing/construction/package-manager.tsx apps/business-app/src/app/dashboard/pricing/construction/premium-package-editor.tsx apps/business-app/src/app/dashboard/quotations/packages/page.tsx packages/database/scripts/test.mjs packages/database/src/construction-packages.ts
       - run: pnpm test:recovery
       - run: pnpm check
         env:
