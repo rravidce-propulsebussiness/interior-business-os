@@ -44,9 +44,7 @@ export async function LeadImportPage({
 
   const nav: OwnerNavItem[] = [
     { label: 'Dashboard', href: '/dashboard', icon: 'dashboard' },
-    { label: 'All Leads', href: leadsPath, icon: 'leads' },
-    { label: 'Upload Leads', href: uploadPath, icon: 'plus' },
-    { label: 'Google Sheets', href: googlePath, icon: 'leads' },
+    { label: 'Leads', href: leadsPath, icon: 'leads' },
   ];
   if (s.allowed('quotation.view', 'quotation'))
     nav.push({
@@ -80,7 +78,6 @@ export async function LeadImportPage({
       icon: 'settings',
     });
 
-  const pagePath = method === 'file' ? uploadPath : googlePath;
   const displayName =
     (user.email ?? '')
       .split('@')[0]
@@ -102,7 +99,7 @@ export async function LeadImportPage({
       navigation={nav}
       search=""
       notificationsEnabled={s.allowed('notification.view')}
-      currentHref={pagePath}
+      currentHref={leadsPath}
     >
       <main id="main-content" tabIndex={-1} className="crm-leads-root">
         <div className="crm-leads-breadcrumb">
