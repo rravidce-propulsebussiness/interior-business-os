@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { PDFDocument } from 'pdf-lib';
-import {
-  appendQuotationAnnexures,
-  validateQuotationAnnexure,
-} from './pdf';
+import { appendQuotationAnnexures, validateQuotationAnnexure } from './pdf';
 
 async function fixture(pages = 1) {
   const pdf = await PDFDocument.create();
