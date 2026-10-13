@@ -2187,3 +2187,36 @@ body:has(.crm-leads-root) .crm-shared-navigation {
     width: 100%;
   }
 }
+
+/* Dedicated Upload Leads and Google Sheets pages share import styling and tenant CRM. */
+.crm-import-page-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 2px 0 20px;
+}
+.crm-import-page-links a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 11px 16px;
+  border: 1px solid #d8e5f5;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #34557a;
+  font-size: 12px;
+  font-weight: 750;
+}
+.crm-import-page-links a:hover {
+  background: #f0f6ff;
+  color: #135eab;
+}
+.crm-import-page-links .crm-import-page-active {
+  background: #174d85;
+  border-color: #174d85;
+  color: #ffffff;
+}
+.crm-import-page-links .crm-import-page-active:hover {
+  background: #123e6d;
+  color: #ffffff;
+}
