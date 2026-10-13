@@ -37,8 +37,8 @@ export function createQuotationPackagesRepository(client: SupabaseClient<Databas
   return {
     list: (org: string) => invoke<QuotationPackage[]>('quotation_package_list', { p_org: org }),
     save: (org: string, input: Omit<QuotationPackage, 'id' | 'version'> & {
-      id?: string;
-      version?: number;
+      id?: string | undefined;
+      version?: number | undefined;
     }) => invoke<string>('quotation_package_save', { p_org: org, p_input: input }),
   };
 }
