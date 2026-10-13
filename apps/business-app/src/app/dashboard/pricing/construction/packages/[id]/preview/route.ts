@@ -142,7 +142,10 @@ export async function GET(request: Request, { params }: Params) {
         },
       });
     }
-    const base = await renderPdf(html);
+    // The HTML screen has an internal preview link; PDF preflight deliberately
+    // disallows relative href values and any active content.
+    const printable = html.replace(/<nav class="actions">[\s\S]*?<\/nav>/, '');
+    const base = await renderPdf(printable);
     const { data: attachment, error } = await ctx.admin
       .from('construction_package_spec_attachments')
       .select('storage_path,byte_size')
