@@ -20,17 +20,17 @@ export default async function QuotationPackagesPage() {
     configurable,
     ownerOptions,
   ] = await Promise.all([
-      repository.organization(org),
-      authorization.requireAuthenticatedUser(),
-      repository.industries(),
-      createConstructionPackagesRepository(client).list(org),
-      createQuotationPackagesRepository(client)
-        .list(org)
-        .catch(() => null),
-      canManagePrice
-        ? createConstructionPackagesRepository(client).listOwners(org)
-        : Promise.resolve([]),
-    ]);
+    repository.organization(org),
+    authorization.requireAuthenticatedUser(),
+    repository.industries(),
+    createConstructionPackagesRepository(client).list(org),
+    createQuotationPackagesRepository(client)
+      .list(org)
+      .catch(() => null),
+    canManagePrice
+      ? createConstructionPackagesRepository(client).listOwners(org)
+      : Promise.resolve([]),
+  ]);
   if (!organization) throw new Error('Company workspace unavailable');
   return (
     <QuotationStudioFrame
