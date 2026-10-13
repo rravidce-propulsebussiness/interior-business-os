@@ -57,6 +57,7 @@ assertionFile('quotations');
 psql(['-f', file('supabase/seed-crm.sql')]);
 psql(['-f', file('supabase/seed-crm.sql')]);
 console.log('CRM demo seed is repeatable.');
+assertionFile('crm-starter-defaults');
 assertionFile('crm');
 psql(['-f', file('supabase/seed-finance.sql')]);
 psql(['-f', file('supabase/seed-finance.sql')]);
