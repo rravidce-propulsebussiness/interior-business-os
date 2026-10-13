@@ -312,6 +312,14 @@ export async function saveFloorwiseSftEstimate(
       new Set(options.map((r) => r.category)).size !== options.length
     )
       throw new DomainError('VALIDATION_FAILED');
+    const allPackages = await createConstructionPackagesRepository(s.client).list(s.org);
+    const activePackages = allPackages.filter((p) => p.status === 'active');
+    if (activePackages.length && !parsed.packageId)
+      throw new DomainError('VALIDATION_FAILED');
+    const selectedPackage = activePackages.find((p) => p.id === parsed.packageId);
+    if (parsed.packageId && !selectedPackage)
+      throw new DomainError('VALIDATION_FAILED');
+
     const calculated = calculateSftEstimate(
       parsed,
       options.map((o) => ({
@@ -319,6 +327,14 @@ export async function saveFloorwiseSftEstimate(
         name: o.name,
         specification: o.specification,
       })),
+      selectedPackage
+        ? {
+            name: selectedPackage.name,
+            code: selectedPackage.code,
+            description: selectedPackage.description,
+            ratePerSqft: selectedPackage.ratePerSqft,
+          }
+        : undefined,
     );
     const description = encodeSftEstimate(calculated);
     const { data: existing, error } = await s.client
@@ -326,7 +342,7 @@ export async function saveFloorwiseSftEstimate(
       .select('id')
       .eq('organization_id', s.org)
       .eq('revision_id', rid)
-      .like('description', 'SFT_ESTIMATE_V1:%')
+      .or('description.like.SFT_ESTIMATE_V1:%,description.like.SFT_ESTIMATE_V2:%')
       .limit(2);
     if (error || !existing || existing.length > 1)
       throw new DomainError('VALIDATION_FAILED');
@@ -335,13 +351,15 @@ export async function saveFloorwiseSftEstimate(
       area_id: null,
       sort_order: 0,
       optional: false,
-      name: 'Construction — floor-wise SFT estimate',
+      name: selectedPackage
+        ? selectedPackage.name + ' — floor-wise construction'
+        : 'Construction — floor-wise SFT estimate',
       description,
       quantity: '1',
       unit: 'complete estimate',
       rate: calculated.total,
       reason:
-        'Approved floor/work-wise built-up square footage and per-SFT rates. Material choices are inclusions, not surcharges.',
+        'Versioned floor and additional-work schedule, package scope and customer-edited specifications; brand choices are inclusions.',
       discount: { kind: 'none', value: '0' },
       estimated_cost_rate: null,
     });
