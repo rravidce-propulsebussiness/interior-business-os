@@ -338,6 +338,7 @@ export async function saveFloorwiseSftEstimate(
             code: selectedPackage.code,
             description: selectedPackage.description,
             ratePerSqft: selectedPackage.ratePerSqft,
+            themeColor: selectedPackage.themeColor,
           }
         : undefined,
     );
