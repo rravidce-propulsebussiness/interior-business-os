@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 
-/** Historic deep links now open the relevant tool inside the unified CRM. */
-export default function PreviousLeadSection() {
-  redirect('/dashboard/crm/leads?panel=sheet');
+/** Old import bookmark now opens the dedicated Upload Leads page. */
+export default function LegacyUploadRedirect() {
+  redirect('/dashboard/crm/leads/upload');
 }
