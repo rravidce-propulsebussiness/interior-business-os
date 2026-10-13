@@ -1180,6 +1180,47 @@ export interface Database {
           },
         ];
       };
+      construction_package_spec_attachments: {
+        Row: {
+          id: string;
+          organization_id: string;
+          package_id: string;
+          storage_path: string;
+          filename: string;
+          byte_size: number;
+          created_by: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          package_id: string;
+          storage_path: string;
+          filename: string;
+          byte_size: number;
+          created_by: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          package_id?: string;
+          storage_path?: string;
+          filename?: string;
+          byte_size?: number;
+          created_by?: string;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'construction_package_spec_attachments_created_by_fkey';
+            columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       contracts: {
         Row: {
           id: string;
@@ -8340,6 +8381,7 @@ export interface Database {
           byte_size: number;
           created_by: string;
           created_at: string;
+          source_package_id: string | null;
         };
         Insert: {
           id?: string;
@@ -8350,6 +8392,7 @@ export interface Database {
           byte_size: number;
           created_by: string;
           created_at?: string;
+          source_package_id?: string | null;
         };
         Update: {
           id?: string;
@@ -8360,6 +8403,7 @@ export interface Database {
           byte_size?: number;
           created_by?: string;
           created_at?: string;
+          source_package_id?: string | null;
         };
         Relationships: [
           {
@@ -11620,6 +11664,10 @@ export interface Database {
       };
       quotation_share_manage: {
         Args: { p_organization_id: string; p_action: string; p_input: Json };
+        Returns: Json;
+      };
+      quotation_share_pdf_attachments: {
+        Args: { p_token: string };
         Returns: Json;
       };
       quotation_signing_preflight: {

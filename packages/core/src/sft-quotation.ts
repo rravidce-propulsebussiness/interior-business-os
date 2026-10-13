@@ -21,6 +21,9 @@ export const sftSectionSchema = z
   .object({
     title: z.string().trim().min(2).max(90),
     description: z.string().trim().max(1100),
+    brand: z.string().trim().max(120).optional(),
+    grade: z.string().trim().max(120).optional(),
+    allowancePerSqft: z.string().trim().max(40).optional(),
   })
   .strict();
 
@@ -58,6 +61,10 @@ export const sftPackageSchema = z
     code: z.string().min(1).max(30),
     description: z.string().max(600),
     ratePerSqft: rate,
+    themeColor: z
+      .string()
+      .regex(/^#[A-Fa-f0-9]{6}$/)
+      .optional(),
   })
   .strict();
 

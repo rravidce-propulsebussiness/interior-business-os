@@ -142,10 +142,21 @@ test('unconfigured ProPulse SSO refuses login and returns a safe notice', async 
       process.env.PROPULSE_OAUTH_ENABLED === 'true',
     'Only test fail-closed ProPulse SSO in the unconfigured Business App.',
   );
-  await page.goto('/auth/propulse');
-  await expect(page).toHaveURL(
-    /\/login\?provider_error=(?:propulse|unavailable)$/,
+  // OAuth redirects use the canonical public APP_ORIGIN in production builds.
+  // CI's loopback app must not follow that redirect to the real website.
+  // Verify the redirect target and the local error screen independently.
+  const result = await page.request.get('/auth/propulse', {
+    maxRedirects: 0,
+  });
+  expect(result.status()).toBe(303);
+  const location = result.headers()['location'];
+  expect(location).toBeTruthy();
+  const destination = new URL(location!);
+  expect(destination.pathname).toBe('/login');
+  expect(['propulse', 'unavailable']).toContain(
+    destination.searchParams.get('provider_error'),
   );
+  await page.goto(destination.pathname + destination.search);
   await expect(page.getByRole('heading', { name: 'Sign in' })).toBeVisible();
   await expect(page.locator('.pp-login-notice[role="alert"]')).toContainText(
     /ProPulse sign-in is not yet activated|temporarily unavailable/,
