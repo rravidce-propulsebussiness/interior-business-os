@@ -198,14 +198,16 @@ export function ConstructionSelector({
   initialSchedule,
   revisionId,
   version,
+  initialMode = 'sft',
 }: {
   rates: ConstructionRate[];
   packages: ConstructionPackage[];
   initialSchedule: SftEstimateDetails | null;
   revisionId: string;
   version: number;
+  initialMode?: 'sft' | 'custom';
 }) {
-  const [mode, setMode] = useState<'sft' | 'custom'>('sft');
+  const [mode, setMode] = useState<'sft' | 'custom'>(initialMode);
   return (
     <section className="my-7 overflow-hidden rounded-3xl border border-blue-200 bg-white shadow-sm">
       <div className="bg-slate-950 px-6 py-7 text-white sm:px-8">
