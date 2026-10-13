@@ -9,13 +9,13 @@ export default function Register() {
         <p className="eyebrow">Business OS · account onboarding</p>
         <h2 id="register-story-title">Create your secure account.</h2>
         <p>
-          Start with an identity, then join an organization through an
-          invitation or approved workspace membership.
+          Create a verified account, then set up your own company workspace
+          and explore the Business OS tools.
         </p>
         <ul className="feature-list">
           <li>
             <span className="feature-dot" aria-hidden="true" />
-            <span>Account creation alone never grants business access.</span>
+            <span>Start your own workspace without waiting for an invitation.</span>
           </li>
           <li>
             <span className="feature-dot" aria-hidden="true" />
@@ -30,8 +30,8 @@ export default function Register() {
         <p className="eyebrow">New account</p>
         <h1 id="register-title">Create your account</h1>
         <p>
-          Confirm your email before signing in. Workspace access is granted
-          separately by an organization administrator.
+          Confirm your email, sign in, and create your company workspace.
+          Employee accounts can join their team's workspace by invitation.
         </p>
         <AuthForm action={signUp} registerAccount />
         <div className="auth-links">
