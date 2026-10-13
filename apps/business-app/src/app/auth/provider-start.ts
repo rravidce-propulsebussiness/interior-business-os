@@ -62,7 +62,19 @@ export async function providerStart(
       fallback.searchParams.set('provider_error', provider);
       return NextResponse.redirect(fallback, 303);
     }
-    return NextResponse.redirect(target, 303);
+    const redirect = NextResponse.redirect(target, 303);
+    if (provider === 'propulse') {
+      // Limit company synchronization to an actual ProPulse OAuth attempt,
+      // never to an unrelated Google/email callback.
+      redirect.cookies.set('business-os-propulse-oauth', 'pending', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/auth/callback',
+        maxAge: 600,
+      });
+    }
+    return redirect;
   } catch {
     fallback.searchParams.set('provider_error', provider);
     return NextResponse.redirect(fallback, 303);
