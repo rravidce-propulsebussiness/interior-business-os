@@ -145,15 +145,19 @@ describe('floor-wise per-SFT construction estimates', () => {
     const detail = calculateSftEstimate(schedule);
     const legacy = 'SFT_ESTIMATE_V1:' + JSON.stringify(detail);
     expect(parseSftEstimate(legacy)?.total).toBe(detail.total);
-    expect(() => calculateSftEstimate({
-      rows: [{
-        kind: 'additional',
-        name: 'Footing',
-        lengthFeet: '10',
-        widthFeet: '10',
-        ratePerSqft: '900',
-      }],
-      materialIds: [],
-    })).toThrow();
+    expect(() =>
+      calculateSftEstimate({
+        rows: [
+          {
+            kind: 'additional',
+            name: 'Footing',
+            lengthFeet: '10',
+            widthFeet: '10',
+            ratePerSqft: '900',
+          },
+        ],
+        materialIds: [],
+      }),
+    ).toThrow();
   });
 });
