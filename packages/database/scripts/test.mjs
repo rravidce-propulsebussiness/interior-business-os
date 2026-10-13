@@ -2,6 +2,7 @@ import { psql, file } from './postgres.mjs';
 console.log(psql(['-f', file('tests/isolation.sql')]));
 console.log(psql(['-f', file('tests/company-applications.sql')]));
 console.log(psql(['-f', file('tests/self-service-companies.sql')]));
+console.log(psql(['-f', file('tests/propulse-company-sync.sql')]));
 console.log(psql(['-f', file('tests/employee-invitations.sql')]));
 console.log(psql(['-f', file('tests/catalog.sql')]));
 console.log(psql(['-f', file('tests/quotations.sql')]));
