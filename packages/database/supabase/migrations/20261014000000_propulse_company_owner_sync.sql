@@ -108,7 +108,7 @@ begin
 
     -- Reuse a pre-existing workspace ONLY when the actual current Owner has
     -- an exactly matching company name, and that match is unambiguous.
-    select count(*),min(o.id) into v_count,v_matched
+    select count(*),(array_agg(o.id order by o.created_at))[1] into v_count,v_matched
     from public.organizations o
     join public.organization_memberships m on m.organization_id=o.id
     join public.membership_roles mr on mr.organization_id=o.id and mr.membership_id=m.id
@@ -128,6 +128,10 @@ begin
       if v_count>0 then
         -- Do not create a duplicate or attach the wrong business on a guess.
         return jsonb_build_object('status','needs_selection');
+      end if;
+      if coalesce((select approval_required from private.company_onboarding_policy
+        where singleton=true),true) then
+        return jsonb_build_object('status','review_required');
       end if;
       select d.plan_id into v_plan from private.provisioning_defaults d
         join public.plans p on p.id=d.plan_id and p.status='active'
