@@ -312,7 +312,7 @@ export function SheetImportForm({
                 setReport(null);
               }}>
               <span className="crm-import-method-symbol">↑</span>
-              <span><strong>Upload File</strong><small>Excel or CSV export</small></span>
+              <span><strong>Upload File</strong><small>CSV export from Excel</small></span>
             </button>
             <button type="button" className={method === 'google' ? 'crm-import-method-selected' : ''}
               aria-pressed={method === 'google'} disabled={running}
