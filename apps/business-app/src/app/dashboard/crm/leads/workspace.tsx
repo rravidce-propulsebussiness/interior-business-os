@@ -430,7 +430,7 @@ export function LeadsWorkspace({
                 setLeadTool(leadTool === 'sheet' ? 'none' : 'sheet')
               }
             >
-              <Icon name="download" /> Import Sheet
+              <Icon name="download" /> Upload Leads
             </button>
           )}
           <button
@@ -494,7 +494,7 @@ export function LeadsWorkspace({
         {leadTool === 'sheet' && canCreate && (
           <section className="crm-inline-lead-tool" aria-label="Sheet upload">
             <div className="crm-inline-tool-title">
-              <h2>Import leads into All Leads</h2>
+              <h2>Upload customer leads</h2>
               <button
                 type="button"
                 className="crm-outline"

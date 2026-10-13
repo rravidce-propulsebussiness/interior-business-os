@@ -74,3 +74,21 @@ test('Pipeline is Board View inside Leads, with its old URL redirected', () => {
   assert.match(board, /target\.outcome !== 'open'/);
   assert.match(board, /onOpen\(lead\)/);
 });
+
+test('premium Upload Leads keeps file and Google Sheets paste inside All Leads', () => {
+  const importer = readFileSync(
+    fileURLToPath(new URL('import/sheet-import-form.tsx', root)),
+    'utf8',
+  );
+  assert.match(leads, /Upload Leads/);
+  assert.match(leads, /<SheetImportForm/);
+  assert.match(importer, /Upload File/);
+  assert.match(importer, /Google Sheets/);
+  assert.match(importer, /fileInputRef\.current\?\.click\(\)/);
+  assert.match(importer, /onDrop=\{handleDrop\}/);
+  assert.match(importer, /readCsv\(pasteText, delimiter\)/);
+  assert.match(importer, /Import results/);
+  assert.match(importer, /report\.duplicates/);
+  assert.match(importer, /report\.invalid/);
+  assert.match(importer, /importSheetLeads/);
+});
