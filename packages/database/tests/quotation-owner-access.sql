@@ -1,4 +1,4 @@
-\\set ON_ERROR_STOP on
+\set ON_ERROR_STOP on
 begin;
 
 create function pg_temp.quote_owner_assert(ok boolean, label text)
