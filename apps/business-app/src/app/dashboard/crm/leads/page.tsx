@@ -32,6 +32,7 @@ const allowedFilters = [
   'lifecycle',
   'sort',
   'unassigned',
+  'view',
 ] as const;
 
 function label(value: unknown): string {
@@ -83,7 +84,7 @@ export default async function Leads({
   const page = pageNumber(p.page);
   const choices = await lookups(s, p);
   const filter = Object.fromEntries(
-    allowedFilters.filter((key) => p[key]).map((key) => [key, p[key]!]),
+    allowedFilters.filter((key) => key !== 'view' && p[key]).map((key) => [key, p[key]!]),
   );
   const [result, organization, user, plans] = await Promise.all([
     s.crm
