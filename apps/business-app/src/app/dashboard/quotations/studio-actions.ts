@@ -1,0 +1,145 @@
+'use server';
+
+import { revalidatePath } from 'next/cache';
+import { z } from 'zod';
+import { randomUUID } from 'node:crypto';
+import { quotationCommandSchema } from '@business-os/core/commercial';
+import { safeFailure, DomainError } from '@business-os/shared';
+import { commercialServices } from '../commercial/service';
+
+const createInput = z
+  .object({
+    clientName: z.string().trim().min(2).max(200),
+    phone: z.string().trim().min(3).max(40),
+    email: z.union([z.literal(''), z.email().max(254)]),
+    projectName: z.string().trim().min(2).max(200),
+    location: z.string().trim().max(200),
+    projectType: z.string().trim().min(2).max(100),
+    plotSize: z.string().trim().max(40),
+    industryKey: z.string().regex(/^[a-z][a-z0-9_]{0,63}$/),
+    currency: z.string().regex(/^[A-Z]{3}$/).default('INR'),
+  })
+  .strict();
+
+/**
+ * Real quote creation from entered client and project data.
+ *
+ * Saves a customer, its project and then a signed, versioned draft using
+ * existing tenant permission-enforced RPCs. It does not issue a quote and
+ * never use elevated credentials to bypass a user's create permissions.
+ */
+export async function createStudioQuotation(input: unknown): Promise<{
+  ok: boolean;
+  message: string;
+  revisionId?: string;
+}> {
+  try {
+    const values = createInput.parse(input);
+    const s = await commercialServices('quotation.create', 'quotation');
+    if (
+      !(
+        s.allowed('customer.create', 'crm') ||
+        s.allowed('customer.create', 'quotation')
+      ) ||
+      !s.allowed('project.create', 'projects')
+    )
+      throw new DomainError('FORBIDDEN');
+
+    const { data: activeIndustry, error: industryError } = await s.client
+      .from('industries')
+      .select('id,key')
+      .eq('key', values.industryKey)
+      .eq('status', 'active')
+      .maybeSingle();
+    if (industryError || !activeIndustry)
+      return { ok: false, message: 'Select an active company industry.' };
+
+    const {
+      data: { user },
+      error: authError,
+    } = await s.client.auth.getUser();
+    if (authError || !user)
+      throw new DomainError('FORBIDDEN');
+
+    // Quote settings must exist so the draft captures the proper tenant name.
+    const { data: settings, error: settingsError } = await s.client
+      .from('organization_quotation_settings')
+      .select('id')
+      .eq('organization_id', s.org)
+      .maybeSingle();
+    if (settingsError || !settings)
+      return {
+        ok: false,
+        message:
+          'Company quotation branding is not configured yet. Open Quotation Settings to finish setup.',
+      };
+
+    const customerId = randomUUID();
+    const baseAddress = {
+      line1: '',
+      line2: '',
+      city: values.location,
+      region: '',
+      postal_code: '',
+      country_code: 'IN',
+    };
+    const customerInput = {
+      id: customerId,
+      organization_id: s.org,
+      version: 1,
+      customer_type: 'individual',
+      display_name: values.clientName,
+      legal_name: '',
+      phone: values.phone,
+      secondary_phone: '',
+      email: values.email,
+      tax_identifier: '',
+      billing_address: baseAddress,
+      notes: '',
+      status: 'active',
+    };
+    await s.commercial.saveEntity(s.org, 'customers', customerInput);
+
+    const projectId = randomUUID();
+    const projectCode = 'Q' + Date.now().toString(36).toUpperCase() + randomUUID().slice(0, 5).toUpperCase();
+    await s.commercial.saveEntity(s.org, 'projects', {
+      id: projectId,
+      organization_id: s.org,
+      version: 1,
+      customer_id: customerId,
+      name: values.projectName,
+      code: projectCode.slice(0, 64),
+      industry_id: activeIndustry.id,
+      branch_id: null,
+      project_type: values.projectType,
+      site_address: baseAddress,
+      status: 'active',
+      notes: values.plotSize
+        ? 'Plot / project size: ' + values.plotSize
+        : '',
+      assigned_user_id: null,
+    });
+
+    const revisionId = await s.commercial.commit(
+      s.org,
+      quotationCommandSchema.parse({
+        action: 'create',
+        project_id: projectId,
+        currency: values.currency,
+      }),
+    );
+    revalidatePath('/dashboard/quotations');
+    return {
+      ok: true,
+      message: 'Branded quotation draft created.',
+      revisionId,
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      message:
+        safeFailure(error).message ||
+        'Could not create a quotation. Check your company permissions.',
+    };
+  }
+}
