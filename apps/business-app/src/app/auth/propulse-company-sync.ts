@@ -12,7 +12,7 @@ type AuthenticatedUser = {
 };
 type CompanyResult =
   | { status: 'created' | 'updated' | 'matched'; organizationId: string }
-  | { status: 'needs_selection' }
+  | { status: 'needs_selection' | 'review_required' }
   | { status: 'no_company' }
   | { status: 'unavailable' };
 
@@ -130,8 +130,8 @@ export async function syncPropulseCompany(
     if (error || !result || typeof result !== 'object' || Array.isArray(result))
       return { status: 'unavailable' };
     const value = result as Record<string, unknown>;
-    if (value.status === 'needs_selection')
-      return { status: 'needs_selection' };
+    if (value.status === 'needs_selection' || value.status === 'review_required')
+      return { status: value.status };
     if (
       ['created', 'updated', 'matched'].includes(String(value.status)) &&
       typeof value.organizationId === 'string' &&
