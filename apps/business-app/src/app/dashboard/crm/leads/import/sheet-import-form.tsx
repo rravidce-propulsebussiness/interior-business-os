@@ -212,6 +212,7 @@ export function SheetImportForm({
 
   async function loadFile(event: ChangeEvent<HTMLInputElement>) {
     await prepareFile(event.target.files?.[0]);
+    event.target.value = '';
   }
 
   function loadGoogleRows() {
@@ -239,7 +240,11 @@ export function SheetImportForm({
   }
 
   async function submit() {
-    if (running || !rows.length || !sourceId || !stageId) return;
+    if (running || !rows.length) return;
+    if (!sourceId || !stageId) {
+      setError('Select a lead source and an open pipeline stage before importing. If none are available, use the CRM setup option below.');
+      return;
+    }
     setRunning(true);
     setError('');
     setReport(null);
@@ -292,11 +297,11 @@ export function SheetImportForm({
     <div className="crm-import-workspace">
       <section className="crm-import-main" aria-label="Upload CRM leads">
         <div className="crm-import-hero">
-          <div className="crm-import-eyebrow">LEAD IMPORT CENTER</div>
+          <div className="crm-import-eyebrow">{method === 'file' ? 'CSV IMPORT' : 'SHEET IMPORT'}</div>
           <div className="crm-import-hero-heading">
             <div>
               <h2>
-                {method === 'file' ? 'Upload Leads' : 'Google Sheets Import'}
+                {method === 'file' ? 'Choose your CSV file' : 'Paste your Google Sheets data'}
               </h2>
               <p>
                 {method === 'file'
@@ -344,16 +349,12 @@ export function SheetImportForm({
               </div>
               <h3>Drop your leads file here</h3>
               <p>Drag and drop a CSV file, or choose it from your computer</p>
-              <button
-                type="button"
-                className="crm-import-primary"
-                disabled={running}
-                onClick={() => fileInputRef.current?.click()}
-              >
+              <label htmlFor="crm-import-upload-input" className="crm-import-primary crm-import-file-picker" aria-disabled={running}>
                 Browse files
-              </button>
+              </label>
               <input
                 ref={fileInputRef}
+                id="crm-import-upload-input"
                 type="file"
                 accept=".csv,text/csv"
                 aria-label="Choose CSV lead sheet"
@@ -508,8 +509,7 @@ export function SheetImportForm({
             </div>
             {(!sources.length || !stages.length) && (
               <div role="alert" className="crm-import-warning">
-                Configure active lead sources and an open stage in CRM Settings
-                before importing.
+                This company does not yet have an active lead source or open pipeline stage. Set up the default CRM options below before importing.
                 {canSetup && (
                   <button
                     type="button"
