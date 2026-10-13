@@ -26,10 +26,14 @@ export const sftSectionSchema = z
 
 export const sftEstimateInputSchema = z
   .object({
-    rows: z.array(inputRow).min(1).max(18).refine(
-      (rows) => rows.some((row) => (row.kind ?? 'floor') === 'floor'),
-      'At least one floor is required',
-    ),
+    rows: z
+      .array(inputRow)
+      .min(1)
+      .max(18)
+      .refine(
+        (rows) => rows.some((row) => (row.kind ?? 'floor') === 'floor'),
+        'At least one floor is required',
+      ),
     materialIds: z
       .array(z.uuid())
       .max(20)
