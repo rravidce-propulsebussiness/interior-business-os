@@ -54,6 +54,7 @@ console.log('Commercial demo seed is repeatable.');
 assertionFile('project-delivery');
 assertionFile('project-manager');
 assertionFile('quotation-studio-defaults');
+assertionFile('quotation-owner-access');
 assertionFile('quotations');
 psql(['-f', file('supabase/seed-crm.sql')]);
 psql(['-f', file('supabase/seed-crm.sql')]);
