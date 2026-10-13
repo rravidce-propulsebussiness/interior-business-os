@@ -42,10 +42,30 @@ export function QuotationAttachments({
   };
 
   useEffect(() => {
-    void load();
-    // Revision identity is stable while this panel is mounted.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [revisionId]);
+    let cancelled = false;
+    void fetch(url, {
+      credentials: 'same-origin',
+      cache: 'no-store',
+    })
+      .then(async (response) => {
+        const result: unknown = await response.json();
+        if (!response.ok || !result || typeof result !== 'object')
+          throw new Error('Could not load attachments');
+        if (!cancelled) {
+          const items = (result as { attachments?: Attachment[] }).attachments;
+          setFiles(Array.isArray(items) ? items : []);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setMessage('Could not load quotation PDFs. Retry or refresh.');
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [url]);
 
   const upload = async (file: File) => {
     if (busy) return;
