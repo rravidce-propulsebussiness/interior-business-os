@@ -16,7 +16,7 @@ export const catalogLineInputSchema = z
     area_id: z.uuid().nullable(),
     sort_order: z.number().int().min(0).max(10000),
     optional: z.boolean(),
-    description: z.string().max(3000),
+    description: z.string().max(14000),
     discount: discountSchema,
     override: z
       .object({ rate: decimal, reason: z.string().trim().min(3).max(500) })
@@ -32,7 +32,7 @@ export const manualLineInputSchema = z
     sort_order: z.number().int().min(0).max(10000),
     optional: z.boolean(),
     name: z.string().trim().min(1).max(200),
-    description: z.string().max(3000),
+    description: z.string().max(14000),
     quantity: decimal,
     unit: z.string().trim().min(1).max(80),
     rate: decimal,

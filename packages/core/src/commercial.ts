@@ -9,7 +9,7 @@ export const quotationCommandSchema = z.discriminatedUnion('action', [
       area_id: z.uuid().nullable(),
       sort_order: z.number().int().min(0).max(10000),
       optional: z.boolean(),
-      description: z.string().max(3000),
+      description: z.string().max(14000),
     })
     .strict(),
   z

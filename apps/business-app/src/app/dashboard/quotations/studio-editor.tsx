@@ -3,6 +3,7 @@
 import { useState, type ReactNode } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { parseSftEstimate } from '@business-os/core/sft-quotation';
 
 type Tab = 'client' | 'quote' | 'files' | 'preview';
 type Mode = 'sft' | 'custom' | 'pdf';
@@ -355,9 +356,11 @@ export function QuotationStudioEditor({
                             <td>
                               <strong>{line.name}</strong>
                               <div className="qs-muted">
-                                {line.description.length > 190
-                                  ? line.description.slice(0, 190) + '…'
-                                  : line.description}
+                                {parseSftEstimate(line.description)
+                                  ? 'Package · floor-wise costing and saved material specifications'
+                                  : line.description.length > 190
+                                    ? line.description.slice(0, 190) + '…'
+                                    : line.description}
                               </div>
                             </td>
                             <td>
@@ -400,15 +403,17 @@ export function QuotationStudioEditor({
 
           {step === 'files' && (
             <>
-              {filesEditor}
               <section className="qs-card">
                 <h2>Specifications, inclusions &amp; payment terms</h2>
                 <p className="qs-muted" style={{ marginBottom: 15 }}>
-                  Include materials, exclusions, warranty and payment
-                  milestones, as in the reference quotations.
+                  Your edited package inclusions print on their own PDF pages
+                  after the floor-cost schedule. Upload any existing
+                  specifications or plans below to append the original PDFs.
+                  Edit payment milestones, warranty and exclusions here.
                 </p>
                 {termsEditor}
               </section>
+              {filesEditor}
             </>
           )}
 
@@ -422,6 +427,20 @@ export function QuotationStudioEditor({
                   branding and saved quotation values.
                 </p>
                 <div className="qs-toolbar">
+                  <button
+                    type="button"
+                    className="qs-btn ghost"
+                    onClick={() => {
+                      const preview =
+                        document.querySelector<HTMLIFrameElement>(
+                          '.qs-preview-frame',
+                        );
+                      if (preview?.contentWindow) preview.contentWindow.print();
+                      else window.open(url + '/preview', '_blank', 'noopener');
+                    }}
+                  >
+                    Print A4 design / Save as PDF
+                  </button>
                   <a className="qs-btn primary" href={url + '/pdf'}>
                     ↓ Download quotation PDF
                   </a>
