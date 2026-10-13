@@ -523,6 +523,23 @@ export default async function Dashboard({
       notificationsEnabled={has('notification.view')}
     >
       <main id="main-content" tabIndex={-1} className="owner-dashboard">
+        {signInResult === 'success' && (
+          <div role="status" className="mb-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
+            ProPulse company details are connected and your company workspace is ready.
+            <a href="/dashboard/company/settings" className="ml-2 font-semibold underline">View imported details →</a>
+          </div>
+        )}
+        {signInResult === 'needs_selection' && (
+          <div role="status" className="mb-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+            An existing Business OS company needs confirmation before it can be linked to ProPulse. No data or permissions were changed.
+          </div>
+        )}
+        {signInResult === 'unavailable' && (
+          <div role="status" className="mb-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+            ProPulse sign-in succeeded, but company synchronization was unavailable. <a href="/auth/propulse" className="font-semibold underline">Try again →</a>
+          </div>
+        )}
+
         <section className="owner-welcome">
           <div>
             <p className="owner-eyebrow">
