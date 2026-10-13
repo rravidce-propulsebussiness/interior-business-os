@@ -32,8 +32,7 @@ export default async function CompanySettings() {
       ? rawLinked
       : null;
   const profileField = (item: unknown, field: string) => {
-    if (!item || typeof item !== 'object' || Array.isArray(item))
-      return '';
+    if (!item || typeof item !== 'object' || Array.isArray(item)) return '';
     const value = (item as Record<string, unknown>)[field];
     return typeof value === 'string' ? value.slice(0, 100) : '';
   };
