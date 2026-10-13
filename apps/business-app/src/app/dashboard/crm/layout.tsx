@@ -11,6 +11,8 @@ export default function CrmLayout({ children }: { children: ReactNode }) {
           ['Dashboard', '/dashboard'],
           ['CRM overview', '/dashboard/crm'],
           ['Leads', '/dashboard/crm/leads'],
+          ['Upload Leads', '/dashboard/crm/leads/upload'],
+          ['Google Sheets', '/dashboard/crm/leads/google-sheets'],
           ['Follow-ups', '/dashboard/crm/followups'],
           ['Site visits', '/dashboard/crm/site-visits'],
           ['CRM configuration', '/dashboard/crm/settings'],
