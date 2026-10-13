@@ -40,6 +40,47 @@ export default async function Quotations({
   if (!organization) throw new Error('Company workspace unavailable');
   const rows = commercialSearchResultSchema.parse(result).rows;
   const total = commercialSearchResultSchema.parse(result).total;
+  // Search results are revisions. Resolve their parent quotation/customer and
+  // present one CRN workspace per customer, keeping every historical revision.
+  const revisionIds = rows.map((row) => row.id);
+  const { data: revisionLinks } = revisionIds.length
+    ? await s.client.from('quotation_revisions')
+        .select('id,quotation_id')
+        .eq('organization_id', s.org)
+        .in('id', revisionIds)
+    : { data: [] };
+  const quotationIds = [...new Set((revisionLinks ?? []).map((r) => r.quotation_id))];
+  const { data: parentQuotes } = quotationIds.length
+    ? await s.client.from('quotations')
+        .select('id,customer_id')
+        .eq('organization_id', s.org)
+        .in('id', quotationIds)
+    : { data: [] };
+  const revisionToQuote = new Map(
+    (revisionLinks ?? []).map((revision) => [revision.id, revision.quotation_id]),
+  );
+  const quoteToCustomer = new Map(
+    (parentQuotes ?? []).map((quote) => [quote.id, quote.customer_id]),
+  );
+  type QuotationRow = (typeof rows)[number];
+  const groupedMap = new Map<string, { customerId: string | null; name: string; rows: QuotationRow[] }>();
+  for (const row of rows) {
+    const customerId = quoteToCustomer.get(revisionToQuote.get(row.id) ?? '') ?? null;
+    // If a legacy row cannot be resolved, isolate it rather than incorrectly
+    // grouping quotations from different customers.
+    const groupId = customerId ?? row.id;
+    const found = groupedMap.get(groupId);
+    if (found) {
+      found.rows.push(row);
+    } else {
+      groupedMap.set(groupId, {
+        customerId,
+        name: row.customer_name || 'Customer',
+        rows: [row],
+      });
+    }
+  }
+  const groupedCustomers = [...groupedMap.values()];
   const draftCount = rows.filter((r) => r.status === 'draft').length;
   const issuedCount = rows.filter((r) => r.status === 'issued').length;
   const activeTotal = rows
@@ -70,6 +111,9 @@ export default async function Quotations({
               ⚙ Company branding
             </Link>
           )}
+          <Link className="qs-btn" href="/dashboard/quotations/packages">
+            ▦ Package Manager
+          </Link>
           {s.allowed('quotation.create', 'quotation') && (
             <Link className="qs-btn primary" href="/dashboard/quotations/new">
               ＋ Create Quotation
@@ -81,7 +125,7 @@ export default async function Quotations({
       <div className="qs-kpi-grid">
         {[
           {
-            name: 'Total quotations',
+            name: 'Quotation revisions',
             value: total.toLocaleString('en-IN'),
             note: 'Current search',
           },
@@ -109,10 +153,10 @@ export default async function Quotations({
             <div>
               <h2>All company quotations</h2>
               <p className="qs-muted">
-                Your team&apos;s saved proposals, revisions and statuses.
+                One customer CRN with all their projects, quotations and revisions.
               </p>
             </div>
-            <span className="qs-selected-pill">{total} quotations</span>
+            <span className="qs-selected-pill">{groupedCustomers.length} customers · {total} revisions</span>
           </div>
           <form
             method="get"
@@ -151,30 +195,48 @@ export default async function Quotations({
           </form>
           {rows.length ? (
             <div className="qs-quotation-list">
-              {rows.map((row) => (
-                <Link
-                  key={row.id}
-                  href={'/dashboard/quotations/' + row.id + '/studio'}
-                  className="qs-quotation-item"
-                >
-                  <div>
-                    <strong>{row.quotation_number || 'Quotation'}</strong>
-                    <small>
-                      {row.customer_name || 'Client'} ·{' '}
-                      {row.project_name || 'Project'} · Revision{' '}
-                      {row.revision_number ?? 1}
-                    </small>
-                  </div>
-                  <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                    <span className="qs-badge">{row.status || 'draft'}</span>
-                    <strong style={{ marginTop: 7 }}>
-                      {row.currency} {row.amount}
-                    </strong>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          ) : (
+              {groupedCustomers.map((customer) => {
+                const crn = customer.customerId
+                  ? 'CRN-' + customer.customerId.replaceAll('-', '').slice(0, 12).toUpperCase()
+                  : 'Legacy quotation';
+                const projects = new Set(customer.rows.map((row) => row.project_name));
+                const quoteNumbers = new Set(customer.rows.map((row) => row.quotation_number));
+                return (
+                  <section className="qs-customer-group" key={customer.customerId ?? customer.rows[0].id}>
+                    <div className="qs-customer-header">
+                      <div>
+                        <span className="qs-selected-pill">{crn}</span>
+                        <h3>{customer.name}</h3>
+                        <p>{projects.size} project(s) · {quoteNumbers.size} quotation(s) · {customer.rows.length} revision(s) on this page</p>
+                      </div>
+                      {customer.customerId && (
+                        <Link className="qs-btn" href={'/dashboard/customers/' + customer.customerId}>
+                          View customer →
+                        </Link>
+                      )}
+                    </div>
+                    <div className="qs-quotation-list">
+                      {customer.rows.map((row) => (
+                        <Link
+                          key={row.id}
+                          href={'/dashboard/quotations/' + row.id + '/studio'}
+                          className="qs-quotation-item"
+                        >
+                          <div>
+                            <strong>{row.quotation_number || 'Quotation'}</strong>
+                            <small>{row.project_name || 'Project'} · Revision {row.revision_number ?? 1}</small>
+                          </div>
+                          <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                            <span className="qs-badge">{row.status || 'draft'}</span>
+                            <strong style={{ marginTop: 7 }}>{row.currency} {row.amount ?? '0'}</strong>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  </section>
+                );
+              })}
+            </div>          ) : (
             <div className="qs-empty-preview">
               <span className="qs-heading-icon">▤</span>
               <strong>
