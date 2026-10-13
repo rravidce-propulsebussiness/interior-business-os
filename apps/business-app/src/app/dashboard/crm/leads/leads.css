@@ -1380,3 +1380,37 @@ body:has(.crm-leads-root) .crm-shared-navigation {
     grid-template-columns: 1fr;
   }
 }
+
+/* List / Board are alternative views of the SAME company lead records. */
+.crm-view-toggle{display:inline-flex;align-items:center;gap:2px;padding:3px;border:1px solid #dce7f6;border-radius:11px;background:#f4f7fc;white-space:nowrap}
+.crm-view-toggle a{display:inline-flex;align-items:center;justify-content:center;padding:8px 13px;border-radius:8px;color:#546a8b;font-size:12px;font-weight:750;transition:background .16s,color .16s}
+.crm-view-toggle a:hover{color:#155bd1;background:#e5efff}
+.crm-view-toggle .crm-view-active{color:#1767da;background:#fff;box-shadow:0 1px 6px rgba(18,45,88,.10)}
+.crm-leads-board{padding:12px 12px 20px;max-width:100%;min-width:0}
+.crm-board-intro{display:flex;justify-content:space-between;flex-wrap:wrap;gap:9px;margin-bottom:13px;color:#627694;font-size:11px}
+.crm-board-feedback{margin-bottom:12px;padding:11px 14px;background:#f0f6ff;border:1px solid #d4e5ff;border-radius:9px;color:#225cb7;font-weight:650}
+.crm-board-scroll{max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;padding-bottom:13px}
+.crm-board-columns{display:flex;align-items:stretch;gap:12px;min-height:240px}
+.crm-board-column{flex:0 0 258px;width:258px;min-width:0;border:1px solid #e4ebf5;background:#f7f9fd;border-radius:13px;padding:10px}
+.crm-board-column-heading{display:flex;justify-content:space-between;align-items:center;gap:7px;padding:6px 4px 11px}
+.crm-board-column-heading h3{font-size:12px;font-weight:800;color:#1e3251;overflow-wrap:anywhere}
+.crm-board-column-heading span{display:grid;place-items:center;min-width:24px;height:24px;padding:0 7px;border-radius:8px;background:#e8effa;color:#3d638e;font-size:11px;font-weight:750}
+.crm-board-card-list{display:flex;flex-direction:column;gap:9px}
+.crm-board-card{background:#fff;border:1px solid #e4eaf4;border-radius:11px;padding:12px;box-shadow:0 2px 9px rgba(20,40,82,.035)}
+.crm-board-card[draggable=true]{cursor:grab}
+.crm-board-card[draggable=true]:active{cursor:grabbing}
+.crm-board-card-top{display:flex;gap:7px;align-items:center;min-width:0}
+.crm-board-avatar{flex:0 0 29px;width:29px;height:29px;display:grid;place-items:center;border-radius:9px;background:#e9f0ff;color:#296fca;font-size:10px;font-weight:800}
+.crm-board-card-name{flex:1;min-width:0;text-align:left;overflow-wrap:anywhere;background:none;border:0!important;color:#172e52;font-size:12px;font-weight:800;padding:0}
+.crm-board-card-name:hover{text-decoration:underline;color:#1767da}
+.crm-board-priority{font-size:9px;font-weight:750;text-transform:capitalize;color:#6e7f95}
+.crm-board-priority-high,.crm-board-priority-urgent{color:#d54f62}
+.crm-board-requirement{font-size:11px;color:#364e70;line-height:1.5;margin:10px 0 5px}
+.crm-board-meta{font-size:10px;color:#7a8ba3;line-height:1.5;overflow-wrap:anywhere}
+.crm-board-contact{display:flex;gap:7px;flex-wrap:wrap;margin:11px 0 0}
+.crm-board-contact a,.crm-board-contact button{padding:6px 9px;border:1px solid #dce8f9;border-radius:8px;background:#f5f9ff;color:#155fc8;font-size:10px;font-weight:750}
+.crm-board-contact a:hover,.crm-board-contact button:hover{background:#eaf2ff}
+.crm-board-stage-control{display:flex;flex-direction:column;gap:6px;margin-top:12px;font-size:10px;font-weight:750;color:#63799a}
+.crm-leads-root .crm-board-stage-control select{width:100%;padding:7px;min-height:34px;font-size:11px}
+.crm-board-empty{border:1px dashed #d7e1ee;border-radius:10px;padding:19px 9px;text-align:center;font-size:11px;color:#8a9bb0}
+@media(max-width:650px){.crm-leads-board{padding:9px}.crm-board-column{flex-basis:242px;width:242px}.crm-view-toggle a{padding:8px 10px}}
