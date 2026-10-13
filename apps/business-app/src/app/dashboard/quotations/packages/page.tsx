@@ -12,8 +12,14 @@ export const dynamic = 'force-dynamic';
 export default async function QuotationPackagesPage() {
   const { org, canManagePrice } = await catalogPage(true);
   const { client, repository, authorization } = await pageServices();
-  const [organization, user, industries, construction, configurable, ownerOptions] =
-    await Promise.all([
+  const [
+    organization,
+    user,
+    industries,
+    construction,
+    configurable,
+    ownerOptions,
+  ] = await Promise.all([
       repository.organization(org),
       authorization.requireAuthenticatedUser(),
       repository.industries(),
