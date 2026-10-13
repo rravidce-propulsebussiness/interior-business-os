@@ -2,6 +2,9 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import type { QuotationPackage } from '@business-os/database/quotation-packages';
+import { applyIndustryQuotationPackage } from './industry-package-actions';
 import { addInteriorStudioLine } from './interior-actions';
 
 const furniture = [
@@ -35,13 +38,36 @@ const money = new Intl.NumberFormat('en-IN', {
 export function InteriorRoomBuilder({
   revisionId,
   version,
+  packages,
+  currency,
 }: {
   revisionId: string;
   version: number;
+  packages: QuotationPackage[];
+  currency: string;
 }) {
   const router = useRouter();
   const [pending, start] = useTransition();
   const [message, setMessage] = useState('');
+  const [packageId, setPackageId] = useState('');
+  const [packageQuantity, setPackageQuantity] = useState('1');
+  const selectedPackage = packages.find((item) => item.id === packageId);
+  const packageTotal = selectedPackage
+    ? Number(selectedPackage.basePrice) * Number(packageQuantity)
+    : 0;
+  const displayPrice = (amount: number) =>
+    new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency,
+      maximumFractionDigits: 2,
+    }).format(amount);
+  const priceUnit = selectedPackage?.pricingBasis === 'per_sqft'
+    ? 'sq ft'
+    : selectedPackage?.pricingBasis === 'per_bhk'
+      ? 'BHK'
+      : selectedPackage?.pricingBasis === 'per_unit'
+        ? 'unit'
+        : 'package';
   const [entry, setEntry] = useState({
     room: 'Living Room',
     item: 'TV Unit',
@@ -69,11 +95,131 @@ export function InteriorRoomBuilder({
         <div>
           <h2>Room-wise Interior BOQ</h2>
           <p className="qs-muted">
-            Each item has dimensions, core material, finish, hardware and an
-            independent price.
+            Choose a saved company package, or build a customized room-wise BOQ
+            with dimensions, brands, hardware and prices.
           </p>
         </div>
         <span className="qs-selected-pill">L × B × ₹ / SFT</span>
+      </div>
+      <div className="mb-5 rounded-2xl border border-blue-200 bg-blue-50 p-4 sm:p-5">
+        <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <strong className="text-sm font-extrabold text-slate-950">
+              Apply a saved company package
+            </strong>
+            <p className="mt-1 text-xs text-slate-600">
+              Server-verified package price and specifications are saved to this
+              quotation. Later package edits will not change this saved line.
+            </p>
+          </div>
+          <Link
+            href="/dashboard/quotations/packages"
+            className="text-xs font-bold text-blue-700 underline"
+          >
+            Package Manager ↗
+          </Link>
+        </div>
+        {packages.length ? (
+          <div className="grid gap-3 sm:grid-cols-2">
+            <label className="qs-field">
+              Company package
+              <select
+                className={inputClass}
+                value={packageId}
+                onChange={(event) => {
+                  setPackageId(event.target.value);
+                  setPackageQuantity('1');
+                  setMessage('');
+                }}
+              >
+                <option value="">Select a package</option>
+                {packages.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.name} · {displayPrice(Number(item.basePrice))}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="qs-field">
+              Quantity ({priceUnit})
+              <input
+                className={inputClass}
+                type="number"
+                inputMode="decimal"
+                min="0.01"
+                max={
+                  selectedPackage?.pricingBasis === 'per_bhk'
+                    ? 20
+                    : selectedPackage?.pricingBasis === 'per_unit'
+                      ? 1000
+                      : 1000000
+                }
+                step={
+                  selectedPackage?.pricingBasis === 'per_unit' ||
+                  selectedPackage?.pricingBasis === 'per_bhk' ||
+                  selectedPackage?.pricingBasis === 'fixed'
+                    ? '1'
+                    : '.01'
+                }
+                disabled={!selectedPackage || selectedPackage.pricingBasis === 'fixed'}
+                value={packageQuantity}
+                onChange={(event) => setPackageQuantity(event.target.value)}
+              />
+            </label>
+            {selectedPackage && (
+              <div className="sm:col-span-2 rounded-xl border border-blue-100 bg-white p-4">
+                <p className="text-xs font-semibold text-slate-700">
+                  {selectedPackage.description || 'Company package specifications'}
+                </p>
+                <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+                  <strong className="text-xl font-black text-blue-700">
+                    {Number.isFinite(packageTotal)
+                      ? displayPrice(packageTotal)
+                      : '—'}
+                  </strong>
+                  <button
+                    type="button"
+                    className="qs-btn primary"
+                    disabled={
+                      pending ||
+                      !Number.isFinite(packageTotal) ||
+                      Number(packageQuantity) <= 0
+                    }
+                    onClick={() => {
+                      setMessage('');
+                      start(async () => {
+                        const result = await applyIndustryQuotationPackage({
+                          revisionId,
+                          version,
+                          packageId,
+                          quantity: packageQuantity,
+                        });
+                        setMessage(result.message);
+                        if (result.ok) {
+                          setPackageId('');
+                          setPackageQuantity('1');
+                          router.refresh();
+                        }
+                      });
+                    }}
+                  >
+                    {pending ? 'Applying…' : '+ Add company package'}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <p className="text-xs text-slate-600">
+            No active packages are available for this industry and currency.
+            Create one in Package Manager, or enter custom BOQ items below.
+          </p>
+        )}
+      </div>
+      <div className="mb-3">
+        <h3 className="text-sm font-extrabold text-slate-950">
+          Custom item pricing
+        </h3>
       </div>
       <form
         className="qs-fields"
