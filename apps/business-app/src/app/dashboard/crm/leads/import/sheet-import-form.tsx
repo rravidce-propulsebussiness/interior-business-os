@@ -163,13 +163,14 @@ export function SheetImportForm({
   sources,
   stages,
   canSetup,
+  method,
 }: {
   sources: Choice[];
   stages: Choice[];
   canSetup: boolean;
+  method: 'file' | 'google';
 }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [method, setMethod] = useState<'file' | 'google'>('file');
   const [pasteText, setPasteText] = useState('');
   const [dragActive, setDragActive] = useState(false);
   const [rows, setRows] = useState<SheetRow[]>([]);
@@ -293,10 +294,11 @@ export function SheetImportForm({
           <div className="crm-import-eyebrow">LEAD IMPORT CENTER</div>
           <div className="crm-import-hero-heading">
             <div>
-              <h2>Bring your leads into Business OS</h2>
+              <h2>{method === 'file' ? 'Upload Leads' : 'Google Sheets Import'}</h2>
               <p>
-                Upload customer enquiries securely, preview them and import
-                directly into All Leads.
+                {method === 'file'
+                  ? 'Upload a CSV file, preview customer enquiries and import them into All Leads.'
+                  : 'Copy rows from your private Google Sheet, preview the data and import into All Leads.'}
               </p>
             </div>
             <button
@@ -314,48 +316,6 @@ export function SheetImportForm({
           </div>
         </div>
         <div className="crm-import-content">
-          <nav className="crm-import-methods" aria-label="Import method">
-            <button
-              type="button"
-              className={method === 'file' ? 'crm-import-method-selected' : ''}
-              aria-pressed={method === 'file'}
-              disabled={running}
-              onClick={() => {
-                setMethod('file');
-                setRows([]);
-                setFilename('');
-                setError('');
-                setReport(null);
-              }}
-            >
-              <span className="crm-import-method-symbol">↑</span>
-              <span>
-                <strong>Upload File</strong>
-                <small>CSV export from Excel</small>
-              </span>
-            </button>
-            <button
-              type="button"
-              className={
-                method === 'google' ? 'crm-import-method-selected' : ''
-              }
-              aria-pressed={method === 'google'}
-              disabled={running}
-              onClick={() => {
-                setMethod('google');
-                setRows([]);
-                setFilename('');
-                setError('');
-                setReport(null);
-              }}
-            >
-              <span className="crm-import-method-symbol">▦</span>
-              <span>
-                <strong>Google Sheets</strong>
-                <small>Copy and paste rows</small>
-              </span>
-            </button>
-          </nav>
           {method === 'file' ? (
             <div
               className={
@@ -647,8 +607,9 @@ export function SheetImportForm({
         </div>
         <h3>Import without the busywork</h3>
         <p>
-          Bring enquiries from Excel, Google Sheets or a CSV export into the
-          same CRM your team uses to call customers.
+          {method === 'file'
+            ? 'Upload an Excel CSV export into the same CRM your team uses to contact customers.'
+            : 'Paste lead rows copied from Google Sheets without sharing your sheet publicly.'}
         </p>
         <ol>
           <li>
