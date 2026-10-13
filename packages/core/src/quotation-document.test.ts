@@ -142,27 +142,30 @@ it('prints edited package specifications on a following page with escaped conten
   expect(html).not.toContain('SFT_ESTIMATE_V2:');
 });
 
-
 it('renders package theme and brand, grade, allowance as a safe company snapshot', () => {
   const d = quotationDocumentFixture();
   d.lines[0]!.description = encodeSftEstimate(
     calculateSftEstimate(
       {
-        rows: [{
-          name: 'Ground Floor',
-          kind: 'floor',
-          lengthFeet: '20',
-          widthFeet: '30',
-          ratePerSqft: '1950',
-        }],
+        rows: [
+          {
+            name: 'Ground Floor',
+            kind: 'floor',
+            lengthFeet: '20',
+            widthFeet: '30',
+            ratePerSqft: '1950',
+          },
+        ],
         materialIds: [],
-        sections: [{
-          title: 'Tiles / flooring',
-          brand: 'Kajaria',
-          grade: 'Vitrified 2x2',
-          allowancePerSqft: '85',
-          description: '<script>unsafe</script> only floor materials',
-        }],
+        sections: [
+          {
+            title: 'Tiles / flooring',
+            brand: 'Kajaria',
+            grade: 'Vitrified 2x2',
+            allowancePerSqft: '85',
+            description: '<script>unsafe</script> only floor materials',
+          },
+        ],
       },
       [],
       {

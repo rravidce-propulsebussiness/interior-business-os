@@ -12,10 +12,13 @@ export const dynamic = 'force-dynamic';
 
 type Params = { params: Promise<{ id: string }> };
 const fail = (message: string, status: number) =>
-  Response.json({ message }, {
-    status,
-    headers: { 'Cache-Control': 'no-store' },
-  });
+  Response.json(
+    { message },
+    {
+      status,
+      headers: { 'Cache-Control': 'no-store' },
+    },
+  );
 const sameOrigin = (request: Request) =>
   request.headers.get('origin') === new URL(request.url).origin;
 
@@ -33,25 +36,30 @@ export async function GET(request: Request, { params }: Params) {
     if (!data) return Response.json({ attachment: null });
     if (new URL(request.url).searchParams.get('download') === '1') {
       const { data: file, error: storageError } = await ctx.admin.storage
-        .from(QUOTATION_PDF_BUCKET).download(data.storage_path);
+        .from(QUOTATION_PDF_BUCKET)
+        .download(data.storage_path);
       if (storageError || !file) return fail('PDF is unavailable', 503);
       return new Response(new Uint8Array(await file.arrayBuffer()), {
         headers: {
           'Content-Type': 'application/pdf',
-          'Content-Disposition': 'inline; filename="Package-Specifications.pdf"',
+          'Content-Disposition':
+            'inline; filename="Package-Specifications.pdf"',
           'Cache-Control': 'private, no-store',
           'X-Content-Type-Options': 'nosniff',
         },
       });
     }
-    return Response.json({
-      attachment: {
-        id: data.id,
-        filename: data.filename,
-        byte_size: data.byte_size,
-        created_at: data.created_at,
+    return Response.json(
+      {
+        attachment: {
+          id: data.id,
+          filename: data.filename,
+          byte_size: data.byte_size,
+          created_at: data.created_at,
+        },
       },
-    }, { headers: { 'Cache-Control': 'private, no-store' } });
+      { headers: { 'Cache-Control': 'private, no-store' } },
+    );
   } catch {
     return fail('You cannot access this package', 403);
   }
@@ -93,8 +101,12 @@ export async function POST(request: Request, { params }: Params) {
     const filename = upload.name
       .replace(/[^A-Za-z0-9.() _-]/g, '_')
       .slice(0, 120);
-    if (upload.type !== 'application/pdf' || !/\.pdf$/i.test(filename) ||
-        upload.size < 10 || upload.size > MAX_QUOTATION_PDF_BYTES)
+    if (
+      upload.type !== 'application/pdf' ||
+      !/\.pdf$/i.test(filename) ||
+      upload.size < 10 ||
+      upload.size > MAX_QUOTATION_PDF_BYTES
+    )
       return fail('Only PDF documents up to 15 MB are supported', 415);
     const bytes = Buffer.from(await upload.arrayBuffer());
     try {
@@ -103,7 +115,12 @@ export async function POST(request: Request, { params }: Params) {
       return fail('PDF is invalid, encrypted, or longer than 60 pages', 415);
     }
     await ensureQuotationPdfBucket(ctx.admin);
-    const path = [ctx.orgId, 'packages', ctx.packageId, randomUUID() + '.pdf'].join('/');
+    const path = [
+      ctx.orgId,
+      'packages',
+      ctx.packageId,
+      randomUUID() + '.pdf',
+    ].join('/');
     const { error: storageError } = await ctx.admin.storage
       .from(QUOTATION_PDF_BUCKET)
       .upload(path, bytes, {
@@ -124,21 +141,26 @@ export async function POST(request: Request, { params }: Params) {
     }
     const { error: rowError } = await ctx.admin
       .from('construction_package_spec_attachments')
-      .upsert({
-        organization_id: ctx.orgId,
-        package_id: ctx.packageId,
-        storage_path: path,
-        filename,
-        byte_size: bytes.byteLength,
-        created_by: ctx.userId,
-      }, { onConflict: 'organization_id,package_id' });
+      .upsert(
+        {
+          organization_id: ctx.orgId,
+          package_id: ctx.packageId,
+          storage_path: path,
+          filename,
+          byte_size: bytes.byteLength,
+          created_by: ctx.userId,
+        },
+        { onConflict: 'organization_id,package_id' },
+      );
     if (rowError) {
       await ctx.admin.storage.from(QUOTATION_PDF_BUCKET).remove([path]);
       return fail('Cannot save package PDF metadata', 503);
     }
     if (previous?.storage_path)
-      await ctx.admin.storage.from(QUOTATION_PDF_BUCKET)
-        .remove([previous.storage_path]).catch(() => undefined);
+      await ctx.admin.storage
+        .from(QUOTATION_PDF_BUCKET)
+        .remove([previous.storage_path])
+        .catch(() => undefined);
     return Response.json({ message: 'Package specification PDF attached.' });
   } catch {
     return fail('Could not upload package PDF', 403);
@@ -159,12 +181,15 @@ export async function DELETE(request: Request, { params }: Params) {
     if (error || !data) return fail('Package PDF not found', 404);
     const { error: deleted } = await ctx.admin
       .from('construction_package_spec_attachments')
-      .delete().eq('id', data.id)
+      .delete()
+      .eq('id', data.id)
       .eq('organization_id', ctx.orgId)
       .eq('package_id', ctx.packageId);
     if (deleted) return fail('Cannot remove package PDF', 503);
-    await ctx.admin.storage.from(QUOTATION_PDF_BUCKET)
-      .remove([data.storage_path]).catch(() => undefined);
+    await ctx.admin.storage
+      .from(QUOTATION_PDF_BUCKET)
+      .remove([data.storage_path])
+      .catch(() => undefined);
     return Response.json({ message: 'Package PDF removed.' });
   } catch {
     return fail('You cannot remove this PDF', 403);

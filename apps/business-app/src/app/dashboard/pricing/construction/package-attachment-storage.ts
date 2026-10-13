@@ -10,7 +10,11 @@ import {
   MAX_QUOTATION_PDF_BYTES,
 } from '../../quotations/quotation-storage';
 
-export { QUOTATION_PDF_BUCKET, ensureQuotationPdfBucket, MAX_QUOTATION_PDF_BYTES };
+export {
+  QUOTATION_PDF_BUCKET,
+  ensureQuotationPdfBucket,
+  MAX_QUOTATION_PDF_BYTES,
+};
 
 /** No public bucket URLs, arbitrary package IDs or service-role permissions
  * are exposed to clients. Every request is scoped to the signed-in tenant. */

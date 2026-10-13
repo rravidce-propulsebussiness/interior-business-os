@@ -86,8 +86,8 @@ export function renderQuotationDocument(input: unknown): string {
     return details ? [{ line, details }] : [];
   });
   const packageAccent =
-    sftSchedules.find(({ details }) => details.package?.themeColor)
-      ?.details.package?.themeColor ?? h.branding.accent;
+    sftSchedules.find(({ details }) => details.package?.themeColor)?.details
+      .package?.themeColor ?? h.branding.accent;
   const renderSftSchedule = sftSchedules
     .map(
       ({ details }) =>
@@ -144,8 +144,10 @@ export function renderQuotationDocument(input: unknown): string {
       const sections = (details.sections ?? [])
         .filter((section) =>
           Boolean(
-            section.description.trim() || section.brand?.trim() ||
-            section.grade?.trim() || section.allowancePerSqft?.trim(),
+            section.description.trim() ||
+            section.brand?.trim() ||
+            section.grade?.trim() ||
+            section.allowancePerSqft?.trim(),
           ),
         )
         .map(
@@ -163,7 +165,8 @@ export function renderQuotationDocument(input: unknown): string {
               : '') +
             (section.allowancePerSqft
               ? '<p><strong>Material allowance:</strong> ₹' +
-                escape(section.allowancePerSqft) + '/SFT</p>'
+                escape(section.allowancePerSqft) +
+                '/SFT</p>'
               : '') +
             (section.description
               ? '<p class="text">' + escape(section.description) + '</p>'

@@ -24,8 +24,8 @@ export function ConstructionPackagesManager({
           </h2>
           <p className="mt-2 text-sm leading-6 text-slate-600">
             Create branded company packages with detailed material grades,
-            per-SFT allowances, your own PDF specifications and restricted
-            owner access. The package rate is the selling rate.
+            per-SFT allowances, your own PDF specifications and restricted owner
+            access. The package rate is the selling rate.
           </p>
         </div>
         {canManage && (
@@ -38,7 +38,9 @@ export function ConstructionPackagesManager({
           </button>
         )}
       </div>
-      {editing === 'new' && <PremiumPackageEditor close={() => setEditing(null)} />}
+      {editing === 'new' && (
+        <PremiumPackageEditor close={() => setEditing(null)} />
+      )}
       <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {packages.map((item) => (
           <article
@@ -51,7 +53,9 @@ export function ConstructionPackagesManager({
                 {item.code}
               </span>
               <span className="rounded-full bg-blue-50 px-2 py-1 text-[10px] font-bold text-blue-700">
-                {item.visibility === 'owner_only' ? 'Owner only' : 'Company only'}
+                {item.visibility === 'owner_only'
+                  ? 'Owner only'
+                  : 'Company only'}
               </span>
               <span
                 className={
@@ -74,7 +78,10 @@ export function ConstructionPackagesManager({
               {item.description || 'Scope not yet described'}
             </p>
             <p className="mt-2 text-[11px] font-bold text-slate-500">
-              {item.specSections?.length ?? 0} categories · {item.attachmentFilename ? 'PDF attached' : 'Manual specifications'}
+              {item.specSections?.length ?? 0} categories ·{' '}
+              {item.attachmentFilename
+                ? 'PDF attached'
+                : 'Manual specifications'}
             </p>
             {canManage && (
               <button

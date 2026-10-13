@@ -16,26 +16,36 @@ export type PackageActionState = {
   version?: number;
 };
 
-const section = z.object({
-  title: z.string().trim().min(2).max(90),
-  brand: z.string().trim().max(120),
-  grade: z.string().trim().max(120),
-  description: z.string().trim().max(600),
-  allowancePerSqft: z.string().trim().max(40),
-}).strict();
-const schema = z.object({
-  id: idSchema.optional(),
-  version: z.number().int().positive().optional(),
-  name: z.string().trim().min(2).max(120),
-  code: z.string().trim().toUpperCase().regex(/^[A-Z][A-Z0-9-]{1,19}$/),
-  description: z.string().trim().max(600),
-  ratePerSqft: z.string().regex(/^(0|[1-9]\d{0,5})(\.\d{1,2})?$/)
-    .refine((v) => Number(v) > 0),
-  status: z.enum(['active', 'inactive']),
-  themeColor: z.string().regex(/^#[0-9a-fA-F]{6}$/),
-  visibility: z.enum(['company', 'owner_only']),
-  specSections: z.array(section).max(18),
-}).strict();
+const section = z
+  .object({
+    title: z.string().trim().min(2).max(90),
+    brand: z.string().trim().max(120),
+    grade: z.string().trim().max(120),
+    description: z.string().trim().max(600),
+    allowancePerSqft: z.string().trim().max(40),
+  })
+  .strict();
+const schema = z
+  .object({
+    id: idSchema.optional(),
+    version: z.number().int().positive().optional(),
+    name: z.string().trim().min(2).max(120),
+    code: z
+      .string()
+      .trim()
+      .toUpperCase()
+      .regex(/^[A-Z][A-Z0-9-]{1,19}$/),
+    description: z.string().trim().max(600),
+    ratePerSqft: z
+      .string()
+      .regex(/^(0|[1-9]\d{0,5})(\.\d{1,2})?$/)
+      .refine((v) => Number(v) > 0),
+    status: z.enum(['active', 'inactive']),
+    themeColor: z.string().regex(/^#[0-9a-fA-F]{6}$/),
+    visibility: z.enum(['company', 'owner_only']),
+    specSections: z.array(section).max(18),
+  })
+  .strict();
 
 export async function saveConstructionPackage(
   _state: PackageActionState,
@@ -46,11 +56,13 @@ export async function saveConstructionPackage(
     if (!org) throw new DomainError('FORBIDDEN');
     const { authorization, client } = await serverServices();
     await authorization.requirePermission(
-      org.organizationId, 'pricing.manage', { moduleKey: 'pricing' },
+      org.organizationId,
+      'pricing.manage',
+      { moduleKey: 'pricing' },
     );
-    await authorization.requirePermission(
-      org.organizationId, 'pricing.view', { moduleKey: 'pricing' },
-    );
+    await authorization.requirePermission(org.organizationId, 'pricing.view', {
+      moduleKey: 'pricing',
+    });
     const id = String(form.get('id') ?? '');
     const rawSections: unknown = JSON.parse(
       String(form.get('specSections') ?? '[]'),
@@ -68,7 +80,8 @@ export async function saveConstructionPackage(
       specSections: rawSections as ConstructionSpecSection[],
     });
     const packageId = await createConstructionPackagesRepository(client).save(
-      org.organizationId, value,
+      org.organizationId,
+      value,
     );
     revalidatePath('/dashboard/pricing/construction');
     revalidatePath('/dashboard/quotations', 'layout');
@@ -76,7 +89,8 @@ export async function saveConstructionPackage(
       saved: true,
       packageId,
       version: id ? (value.version ?? 0) + 1 : 1,
-      message: 'Package saved. You can now attach a specification PDF or preview the branded document.',
+      message:
+        'Package saved. You can now attach a specification PDF or preview the branded document.',
     };
   } catch (error) {
     return { message: safeFailure(error).message };

@@ -61,7 +61,10 @@ export const sftPackageSchema = z
     code: z.string().min(1).max(30),
     description: z.string().max(600),
     ratePerSqft: rate,
-    themeColor: z.string().regex(/^#[A-Fa-f0-9]{6}$/).optional(),
+    themeColor: z
+      .string()
+      .regex(/^#[A-Fa-f0-9]{6}$/)
+      .optional(),
   })
   .strict();
 

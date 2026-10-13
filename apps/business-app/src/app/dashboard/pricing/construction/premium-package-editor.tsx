@@ -9,19 +9,69 @@ import type {
 import { saveConstructionPackage } from './package-actions';
 
 const defaultCategories = [
-  ['Architectural plans', '', '', '2D plans, structural plans, 3D elevation and surveys'],
-  ['Steel / TMT', '', '', 'Specify manufacturer, Fe grade, steel usage standard'],
+  [
+    'Architectural plans',
+    '',
+    '',
+    '2D plans, structural plans, 3D elevation and surveys',
+  ],
+  [
+    'Steel / TMT',
+    '',
+    '',
+    'Specify manufacturer, Fe grade, steel usage standard',
+  ],
   ['Cement', '', '', 'Specify manufacturer and OPC/PPC grade'],
-  ['Sand & aggregates', '', '', 'River/M sand, aggregate size and approved source'],
+  [
+    'Sand & aggregates',
+    '',
+    '',
+    'River/M sand, aggregate size and approved source',
+  ],
   ['Bricks / blocks', '', '', 'Specify brick/AAC grade and wall thickness'],
-  ['Tiles / flooring', '', '', 'Specify tile brand, dimensions and allowance in ₹/sft'],
-  ['Kitchen & granite', '', '', 'Kitchen counter, sink, backsplash and granite allowance'],
-  ['Doors & windows', '', '', 'Main door, internal frames, UPVC/aluminium, fittings'],
-  ['Bathrooms & plumbing', '', '', 'CPVC/PVC lines, fittings, waterproofing, sanitary brands'],
-  ['Electrical', '', '', 'Wiring brand, conduits, switches and circuit provision'],
+  [
+    'Tiles / flooring',
+    '',
+    '',
+    'Specify tile brand, dimensions and allowance in ₹/sft',
+  ],
+  [
+    'Kitchen & granite',
+    '',
+    '',
+    'Kitchen counter, sink, backsplash and granite allowance',
+  ],
+  [
+    'Doors & windows',
+    '',
+    '',
+    'Main door, internal frames, UPVC/aluminium, fittings',
+  ],
+  [
+    'Bathrooms & plumbing',
+    '',
+    '',
+    'CPVC/PVC lines, fittings, waterproofing, sanitary brands',
+  ],
+  [
+    'Electrical',
+    '',
+    '',
+    'Wiring brand, conduits, switches and circuit provision',
+  ],
   ['Painting', '', '', 'Interior/exterior putty, primer and finish coats'],
-  ['Elevation & metal works', '', '', 'Facade, railing, staircase, grills and finishes'],
-  ['Exclusions & warranty', '', '', 'Exclusions, defect liability and handover terms'],
+  [
+    'Elevation & metal works',
+    '',
+    '',
+    'Facade, railing, staircase, grills and finishes',
+  ],
+  [
+    'Exclusions & warranty',
+    '',
+    '',
+    'Exclusions, defect liability and handover terms',
+  ],
 ] as const;
 const makeSection = (title: string): ConstructionSpecSection => ({
   title,
@@ -30,7 +80,14 @@ const makeSection = (title: string): ConstructionSpecSection => ({
   description: '',
   allowancePerSqft: '',
 });
-const palettes = ['#155EEF', '#089E9C', '#7945E8', '#F18B31', '#E94D69', '#334155'];
+const palettes = [
+  '#155EEF',
+  '#089E9C',
+  '#7945E8',
+  '#F18B31',
+  '#E94D69',
+  '#334155',
+];
 const field =
   'w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100';
 const label = 'grid min-w-0 gap-2 text-xs font-bold text-slate-700';
@@ -58,9 +115,7 @@ export function PremiumPackageEditor({
   const [status, setStatus] = useState(item?.status ?? 'active');
   const [description, setDescription] = useState(item?.description ?? '');
   const [themeColor, setThemeColor] = useState(item?.themeColor ?? '#155EEF');
-  const [visibility, setVisibility] = useState(
-    item?.visibility ?? 'company',
-  );
+  const [visibility, setVisibility] = useState(item?.visibility ?? 'company');
   const [sections, setSections] = useState<ConstructionSpecSection[]>(
     item?.specSections?.length
       ? item.specSections.map((section) => ({ ...section }))
@@ -100,7 +155,9 @@ export function PremiumPackageEditor({
       .catch(() => {
         if (alive) setFileMessage('Could not refresh attached PDF');
       });
-    return () => { alive = false; };
+    return () => {
+      alive = false;
+    };
   }, [fileUrl]);
 
   const updateSection = (
@@ -114,8 +171,12 @@ export function PremiumPackageEditor({
 
   async function upload(file: File) {
     if (!fileUrl || uploading) return;
-    if (!/\.pdf$/i.test(file.name) || file.type !== 'application/pdf' ||
-        file.size > 15 * 1024 * 1024 || file.size < 10) {
+    if (
+      !/\.pdf$/i.test(file.name) ||
+      file.type !== 'application/pdf' ||
+      file.size > 15 * 1024 * 1024 ||
+      file.size < 10
+    ) {
       setFileMessage('Choose a genuine PDF under 15 MB.');
       return;
     }
@@ -135,7 +196,9 @@ export function PremiumPackageEditor({
       setFileMessage(result.message ?? 'Specification PDF attached.');
       router.refresh();
     } catch (error) {
-      setFileMessage(error instanceof Error ? error.message : 'PDF upload failed');
+      setFileMessage(
+        error instanceof Error ? error.message : 'PDF upload failed',
+      );
     } finally {
       setUploading(false);
       if (fileInput.current) fileInput.current.value = '';
@@ -156,7 +219,9 @@ export function PremiumPackageEditor({
       setFileMessage('Package PDF removed.');
       router.refresh();
     } catch (error) {
-      setFileMessage(error instanceof Error ? error.message : 'Unable to remove PDF');
+      setFileMessage(
+        error instanceof Error ? error.message : 'Unable to remove PDF',
+      );
     } finally {
       setUploading(false);
     }
@@ -164,8 +229,10 @@ export function PremiumPackageEditor({
 
   const specified = sections.filter((entry) =>
     Boolean(
-      entry.description.trim() || entry.brand.trim() ||
-      entry.grade.trim() || entry.allowancePerSqft.trim(),
+      entry.description.trim() ||
+      entry.brand.trim() ||
+      entry.grade.trim() ||
+      entry.allowancePerSqft.trim(),
     ),
   );
   const previewName = name.trim() || 'Your construction package';
@@ -183,7 +250,8 @@ export function PremiumPackageEditor({
               Construction Package Builder
             </h3>
             <p className="mt-1 text-sm text-slate-500">
-              Create your package, define specifications and generate a branded PDF.
+              Create your package, define specifications and generate a branded
+              PDF.
             </p>
           </div>
           <button
@@ -195,19 +263,23 @@ export function PremiumPackageEditor({
           </button>
         </div>
         <div className="mt-6 flex items-center justify-between gap-1 text-center text-xs font-bold">
-          {['01 Package', '02 Specifications', '03 PDF Output'].map((step, i) => (
-            <div key={step} className="flex flex-1 items-center gap-2">
-              <span
-                className={
-                  'grid min-h-11 flex-1 place-items-center rounded-xl px-1 ' +
-                  (i === 0 ? 'bg-blue-600 text-white' : 'bg-white text-slate-500')
-                }
-              >
-                {step}
-              </span>
-              {i < 2 && <span className="h-px w-3 shrink-0 bg-blue-200" />}
-            </div>
-          ))}
+          {['01 Package', '02 Specifications', '03 PDF Output'].map(
+            (step, i) => (
+              <div key={step} className="flex flex-1 items-center gap-2">
+                <span
+                  className={
+                    'grid min-h-11 flex-1 place-items-center rounded-xl px-1 ' +
+                    (i === 0
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-white text-slate-500')
+                  }
+                >
+                  {step}
+                </span>
+                {i < 2 && <span className="h-px w-3 shrink-0 bg-blue-200" />}
+              </div>
+            ),
+          )}
         </div>
       </div>
       <form action={action} className="space-y-5 p-4 sm:p-7">
@@ -219,7 +291,11 @@ export function PremiumPackageEditor({
         )}
         <input type="hidden" name="themeColor" value={themeColor} />
         <input type="hidden" name="visibility" value={visibility} />
-        <input type="hidden" name="specSections" value={JSON.stringify(sections)} />
+        <input
+          type="hidden"
+          name="specSections"
+          value={JSON.stringify(sections)}
+        />
         <div className="rounded-[23px] border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
           <div className="mb-5 flex items-center gap-3">
             <span className="grid size-11 place-items-center rounded-2xl bg-blue-100 text-2xl text-blue-700">
@@ -282,7 +358,9 @@ export function PremiumPackageEditor({
                 name="status"
                 value={status}
                 onChange={(event) =>
-                  setStatus(event.target.value === 'inactive' ? 'inactive' : 'active')
+                  setStatus(
+                    event.target.value === 'inactive' ? 'inactive' : 'active',
+                  )
                 }
                 className={field}
               >
@@ -323,8 +401,8 @@ export function PremiumPackageEditor({
               </div>
               <p className="rounded-xl bg-blue-50 px-3 py-2 text-xs leading-5 text-blue-700">
                 Owner-only packages are visible to their creator and company
-                owners. Company packages are visible to authorized staff in
-                this business only — never other businesses.
+                owners. Company packages are visible to authorized staff in this
+                business only — never other businesses.
               </p>
             </div>
             <div className="sm:col-span-2 lg:col-span-1">
@@ -385,7 +463,8 @@ export function PremiumPackageEditor({
             </h4>
             <p className="mt-1 text-xs text-slate-500">
               Edit manufacturer, material grade, price allowance per sq ft and
-              inclusions separately. Allowances are descriptive, not extra charges.
+              inclusions separately. Allowances are descriptive, not extra
+              charges.
             </p>
           </div>
           <div className="grid grid-cols-2 gap-2 rounded-xl bg-[#EDF3FB] p-1">
@@ -393,8 +472,12 @@ export function PremiumPackageEditor({
               type="button"
               onClick={() => setMode('manual')}
               aria-pressed={mode === 'manual'}
-              className={'rounded-lg px-3 py-3 text-xs font-extrabold ' +
-                (mode === 'manual' ? 'bg-blue-600 text-white' : 'text-slate-600')}
+              className={
+                'rounded-lg px-3 py-3 text-xs font-extrabold ' +
+                (mode === 'manual'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-slate-600')
+              }
             >
               ✎ Manual Entry
             </button>
@@ -402,8 +485,10 @@ export function PremiumPackageEditor({
               type="button"
               onClick={() => setMode('pdf')}
               aria-pressed={mode === 'pdf'}
-              className={'rounded-lg px-3 py-3 text-xs font-extrabold ' +
-                (mode === 'pdf' ? 'bg-blue-600 text-white' : 'text-slate-600')}
+              className={
+                'rounded-lg px-3 py-3 text-xs font-extrabold ' +
+                (mode === 'pdf' ? 'bg-blue-600 text-white' : 'text-slate-600')
+              }
             >
               ▤ Attach PDF
             </button>
@@ -427,9 +512,15 @@ export function PremiumPackageEditor({
                           {String(index + 1).padStart(2, '0')} · {spec.title}
                         </strong>
                         <span className="block truncate text-xs text-slate-500">
-                          {[spec.brand, spec.grade, spec.allowancePerSqft
-                            ? 'Up to ₹' + spec.allowancePerSqft + '/sft' : '']
-                            .filter(Boolean).join(' · ') ||
+                          {[
+                            spec.brand,
+                            spec.grade,
+                            spec.allowancePerSqft
+                              ? 'Up to ₹' + spec.allowancePerSqft + '/sft'
+                              : '',
+                          ]
+                            .filter(Boolean)
+                            .join(' · ') ||
                             'Set brand, grade and material specification'}
                         </span>
                       </div>
@@ -446,7 +537,8 @@ export function PremiumPackageEditor({
                             value={spec.title}
                             maxLength={90}
                             onChange={(event) =>
-                              updateSection(index, 'title', event.target.value)}
+                              updateSection(index, 'title', event.target.value)
+                            }
                           />
                         </label>
                         <label className={label}>
@@ -457,7 +549,8 @@ export function PremiumPackageEditor({
                             value={spec.brand}
                             placeholder="e.g. Tata, UltraTech, Kajaria"
                             onChange={(event) =>
-                              updateSection(index, 'brand', event.target.value)}
+                              updateSection(index, 'brand', event.target.value)
+                            }
                           />
                         </label>
                         <label className={label}>
@@ -468,7 +561,8 @@ export function PremiumPackageEditor({
                             value={spec.grade}
                             placeholder="e.g. Fe 550D, OPC 53, 2×2"
                             onChange={(event) =>
-                              updateSection(index, 'grade', event.target.value)}
+                              updateSection(index, 'grade', event.target.value)
+                            }
                           />
                         </label>
                         <label className={label}>
@@ -480,9 +574,11 @@ export function PremiumPackageEditor({
                             placeholder="e.g. 85 for vitrified tiles"
                             onChange={(event) =>
                               updateSection(
-                                index, 'allowancePerSqft',
+                                index,
+                                'allowancePerSqft',
                                 event.target.value,
-                              )}
+                              )
+                            }
                           />
                         </label>
                         <label className={label + ' sm:col-span-2'}>
@@ -494,7 +590,12 @@ export function PremiumPackageEditor({
                             value={spec.description}
                             placeholder="Material usage, finish, exclusions, warranty and additional specification details."
                             onChange={(event) =>
-                              updateSection(index, 'description', event.target.value)}
+                              updateSection(
+                                index,
+                                'description',
+                                event.target.value,
+                              )
+                            }
                           />
                         </label>
                         <button
@@ -518,7 +619,10 @@ export function PremiumPackageEditor({
                 type="button"
                 disabled={sections.length >= 18}
                 onClick={() => {
-                  setSections((items) => [...items, makeSection('Custom category')]);
+                  setSections((items) => [
+                    ...items,
+                    makeSection('Custom category'),
+                  ]);
                   setActive(sections.length);
                 }}
                 className="mt-4 w-full rounded-xl border border-dashed border-blue-300 bg-blue-50 px-4 py-3 text-sm font-bold text-blue-700 disabled:opacity-50"
@@ -533,9 +637,10 @@ export function PremiumPackageEditor({
                 Upload your existing material specification PDF
               </strong>
               <p className="mt-2 text-xs leading-6 text-slate-600">
-                One private PDF per package, up to 15 MB and 60 pages. It will be
-                snapshotted into the quotation when the client quote is saved,
-                then appended after the pricing and manual specification pages.
+                One private PDF per package, up to 15 MB and 60 pages. It will
+                be snapshotted into the quotation when the client quote is
+                saved, then appended after the pricing and manual specification
+                pages.
               </p>
               {!currentId && (
                 <p className="mt-2 text-xs font-bold text-amber-700">
@@ -601,7 +706,8 @@ export function PremiumPackageEditor({
             </p>
             {fileMessage && (
               <p role="status" className="mt-3 text-xs text-slate-700">
-                {uploading ? 'Uploading… ' : ''}{fileMessage}
+                {uploading ? 'Uploading… ' : ''}
+                {fileMessage}
               </p>
             )}
           </section>
@@ -624,7 +730,9 @@ export function PremiumPackageEditor({
                 <h5 className="mt-3 break-words text-xs font-extrabold text-slate-900">
                   {previewName}
                 </h5>
-                <p className="mt-2 text-[10px] text-slate-500">Sample pricing · 1,000 SFT</p>
+                <p className="mt-2 text-[10px] text-slate-500">
+                  Sample pricing · 1,000 SFT
+                </p>
                 <div className="mt-3 border-t border-slate-100 pt-3">
                   <div className="flex justify-between gap-1 text-[10px]">
                     <span>Built-up floor area</span>
@@ -650,12 +758,18 @@ export function PremiumPackageEditor({
                   Material & finishes
                 </h5>
                 {specified.slice(0, 5).map((spec, index) => (
-                  <div key={index} className="mt-2 border-b border-slate-100 pb-1">
+                  <div
+                    key={index}
+                    className="mt-2 border-b border-slate-100 pb-1"
+                  >
                     <strong className="block truncate text-[10px]">
                       {spec.title}
                     </strong>
                     <span className="block truncate text-[9px] text-slate-500">
-                      {spec.brand || spec.grade || spec.description || 'Included'}
+                      {spec.brand ||
+                        spec.grade ||
+                        spec.description ||
+                        'Included'}
                     </span>
                   </div>
                 ))}
@@ -699,7 +813,11 @@ export function PremiumPackageEditor({
           {currentId ? (
             <a
               className="min-h-12 flex-1 rounded-xl border border-blue-200 bg-blue-50 px-6 py-3 text-center text-sm font-extrabold text-blue-700"
-              href={'/dashboard/pricing/construction/packages/' + currentId + '/preview'}
+              href={
+                '/dashboard/pricing/construction/packages/' +
+                currentId +
+                '/preview'
+              }
               target="_blank"
               rel="noopener noreferrer"
             >
