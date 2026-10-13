@@ -198,7 +198,7 @@ export default async function Quotations({
                 const projects = new Set(customer.rows.map((row) => row.project_name));
                 const quoteNumbers = new Set(customer.rows.map((row) => row.quotation_number));
                 return (
-                  <section className="qs-customer-group" key={customer.customerId ?? customer.rows[0].id}>
+                  <section className="qs-customer-group" key={customer.customerId ?? customer.rows[0]?.id ?? customer.name}>
                     <div className="qs-customer-header">
                       <div>
                         <span className="qs-selected-pill">{crn}</span>
