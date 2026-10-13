@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { pageServices } from '@business-os/auth/server';
 import { CompanyRegistrationForm } from './company-registration-form';
+import { CompanyIdentityFields } from './company-identity-fields';
+import './company-registration.css';
 
 type ApplicationSummary = {
   id: string;
@@ -41,7 +43,7 @@ export default async function CompanyApplicationPage() {
     <main
       id="main-content"
       tabIndex={-1}
-      className="min-h-screen bg-slate-50 px-5 py-10 text-slate-900 sm:px-8"
+      className="company-registration-page min-h-screen bg-slate-50 px-5 py-10 text-slate-900 sm:px-8"
     >
       <div className="mx-auto max-w-4xl space-y-8">
         <Link
@@ -82,27 +84,7 @@ export default async function CompanyApplicationPage() {
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
           <h2 className="text-xl font-semibold">Business details</h2>
           <CompanyRegistrationForm>
-            <label className="grid gap-2 text-sm font-medium">
-              Company name
-              <input
-                name="name"
-                required
-                maxLength={200}
-                placeholder="Your registered business name"
-                className="rounded-lg border border-slate-300 px-4 py-3"
-              />
-            </label>
-            <label className="grid gap-2 text-sm font-medium">
-              Workspace slug
-              <input
-                name="slug"
-                required
-                maxLength={80}
-                pattern="[a-z0-9]+(-[a-z0-9]+)*"
-                placeholder="my-company"
-                className="rounded-lg border border-slate-300 px-4 py-3"
-              />
-            </label>
+            <CompanyIdentityFields />
             <label className="grid gap-2 text-sm font-medium">
               Legal name (optional)
               <input
