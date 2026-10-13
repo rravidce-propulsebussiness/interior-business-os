@@ -131,9 +131,9 @@ export default async function CompanySettings() {
               <div className="sm:col-span-2"><dt className="text-slate-500">Operating locations</dt>
                 <dd className="mt-1">{sourceLabels(imported.locations,['city','state']) || 'Not added'}</dd></div>
             </dl>
-            <a href="/auth/propulse" className="mt-5 inline-flex rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white">
+            <Link href="/auth/propulse" className="mt-5 inline-flex rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white">
               Refresh from ProPulse ↗
-            </a>
+            </Link>
           </section>
         )}
         <section className="grid gap-4 sm:grid-cols-2">
