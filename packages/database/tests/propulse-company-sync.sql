@@ -6,7 +6,7 @@ begin
   if ok is distinct from true then raise exception 'FAILED: %',label; end if;
   raise notice 'PASS: %',label;
 end $$;
-create function private.propulse_denied(query text,label text)
+create function public.propulse_denied(query text,label text)
 returns void language plpgsql as $$
 begin
   begin execute query;
@@ -29,7 +29,7 @@ insert into auth.identities(user_id,provider,identity_data) values
 
 set local role authenticated;
 select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000091',true);
-select private.propulse_denied($$select public.propulse_company_sync(
+select public.propulse_denied($$select public.propulse_company_sync(
  '00000000-0000-4000-8000-000000000091','propulse:601','propulse-a@example.test',
  '{"source_id":"801","name":"Denied Direct Company","services":[],"locations":[],"industryKeys":[]}'
 )$$,'regular user cannot provision via privileged company sync');
@@ -75,15 +75,15 @@ select private.propulse_assert(
 
 set local role authenticated;
 select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000092',true);
-select private.propulse_denied(
+select public.propulse_denied(
  format('select public.propulse_company_link_mine(%L::uuid)',(:'synced'::jsonb->>'organizationId')),
  'another tenant cannot see imported contact and profile data');
 set local role service_role;
-select private.propulse_denied($$select public.propulse_company_sync(
+select public.propulse_denied($$select public.propulse_company_sync(
  '00000000-0000-4000-8000-000000000092','propulse:602','propulse-b@example.test',
  '{"source_id":"801","name":"ProPulse Interiors Renamed","services":[],"locations":[],"industryKeys":[]}'
 )$$,'another verified identity cannot take over an already-linked source ID');
-select private.propulse_denied($$select public.propulse_company_sync(
+select public.propulse_denied($$select public.propulse_company_sync(
  '00000000-0000-4000-8000-000000000093','propulse:603','unverified-propulse@example.test',
  '{"source_id":"803","name":"Unverified Business","services":[],"locations":[],"industryKeys":[]}'
 )$$,'unverified email cannot provision company');
