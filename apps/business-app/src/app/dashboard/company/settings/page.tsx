@@ -5,8 +5,19 @@ import { canAccess } from '@business-os/auth';
 
 export const dynamic = 'force-dynamic';
 
+function sourceLabels(value: unknown, fields: string[]) {
+  if (!Array.isArray(value)) return '';
+  return value.map((entry) => {
+    if (typeof entry !== 'object' || entry === null || Array.isArray(entry)) return '';
+    return fields.map((key) => {
+      const item = (entry as Record<string, unknown>)[key];
+      return typeof item === 'string' ? item : '';
+    }).filter(Boolean).join(', ');
+  }).filter(Boolean).join(' · ');
+}
+
 export default async function CompanySettings() {
-  const { repository } = await pageServices();
+  const { repository, client } = await pageServices();
   const context = await activeOrganization();
   if (!context) notFound();
 
@@ -20,6 +31,9 @@ export default async function CompanySettings() {
 
   const company = await repository.organization(context.organizationId);
   if (!company) notFound();
+  const { data: imported } = await client.from('organization_propulse_profiles')
+    .select('phone,description,services,locations,last_synced_at')
+    .eq('organization_id', context.organizationId).maybeSingle();
   const options = [
     {
       label: 'Team and access',
@@ -98,6 +112,30 @@ export default async function CompanySettings() {
             below.
           </p>
         </section>
+        {imported && (
+          <section className="rounded-2xl border border-blue-100 bg-white p-6 shadow-sm">
+            <h2 className="text-lg font-bold">ProPulse company profile</h2>
+            <p className="mt-2 text-sm text-slate-600">
+              Details from your connected ProPulse business. Company name and
+              profile are refreshed on every ProPulse sign-in.
+            </p>
+            <dl className="mt-5 grid gap-5 text-sm sm:grid-cols-2">
+              <div><dt className="text-slate-500">Contact number</dt>
+                <dd className="mt-1 font-semibold">{imported.phone || 'Not added'}</dd></div>
+              <div><dt className="text-slate-500">Last updated from ProPulse</dt>
+                <dd className="mt-1 font-semibold">{new Date(imported.last_synced_at).toLocaleDateString('en-IN')}</dd></div>
+              <div className="sm:col-span-2"><dt className="text-slate-500">About the business</dt>
+                <dd className="mt-1">{imported.description || 'Not added'}</dd></div>
+              <div className="sm:col-span-2"><dt className="text-slate-500">Services</dt>
+                <dd className="mt-1">{sourceLabels(imported.services,['industry','service']) || 'Not added'}</dd></div>
+              <div className="sm:col-span-2"><dt className="text-slate-500">Operating locations</dt>
+                <dd className="mt-1">{sourceLabels(imported.locations,['city','state']) || 'Not added'}</dd></div>
+            </dl>
+            <a href="/auth/propulse" className="mt-5 inline-flex rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white">
+              Refresh from ProPulse ↗
+            </a>
+          </section>
+        )}
         <section className="grid gap-4 sm:grid-cols-2">
           {options.map((item) => (
             <Link
