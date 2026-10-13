@@ -73,9 +73,12 @@ export function createConstructionPackagesRepository(
         p_org: org,
       }),
     listOwners: (org: string) =>
-      invoke<ConstructionPackageOwnerOption[]>('construction_package_owner_options', {
-        p_org: org,
-      }),
+      invoke<ConstructionPackageOwnerOption[]>(
+        'construction_package_owner_options',
+        {
+          p_org: org,
+        },
+      ),
     save: (
       org: string,
       input: {
