@@ -411,7 +411,8 @@ export function PremiumPackageEditor({
                   </legend>
                   <p className="mb-3 text-xs leading-5 text-slate-500">
                     The package creator always retains access. Select additional
-                    owners who may open this package code and use it in quotations.
+                    owners who may open this package code and use it in
+                    quotations.
                   </p>
                   <div className="grid gap-2 sm:grid-cols-2">
                     {ownerOptions.map((owner) => (
@@ -436,8 +437,8 @@ export function PremiumPackageEditor({
                     ))}
                     {ownerOptions.length === 0 && (
                       <p className="text-xs text-slate-500">
-                        No eligible company owner accounts are available.
-                        The package creator will retain access.
+                        No eligible company owner accounts are available. The
+                        package creator will retain access.
                       </p>
                     )}
                   </div>
@@ -446,7 +447,8 @@ export function PremiumPackageEditor({
               <p className="rounded-xl bg-blue-50 px-3 py-2 text-xs leading-5 text-blue-700">
                 Specific-owner packages are visible only to their creator and
                 the selected active company owners. Company packages are
-                available to authorized staff in this business, never other companies.
+                available to authorized staff in this business, never other
+                companies.
               </p>
             </div>
             <div className="sm:col-span-2 lg:col-span-1">
