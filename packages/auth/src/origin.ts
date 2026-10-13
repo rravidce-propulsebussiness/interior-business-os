@@ -11,9 +11,15 @@
 const productionOrigin = 'https://sghomesinterior.in';
 const localHosts = new Set(['localhost', '127.0.0.1', '[::1]']);
 
+type AuthEnv = {
+  APP_ORIGIN?: string;
+  APP_ENV?: string;
+  NODE_ENV?: string;
+};
+
 export function publicAuthOrigin(
   requestUrl: string,
-  env: { APP_ORIGIN?: string; APP_ENV?: string; NODE_ENV?: string } = process.env,
+  env: AuthEnv = process.env,
 ): string {
   const production = env.APP_ENV === 'production' || env.NODE_ENV === 'production';
   const configured = env.APP_ORIGIN?.trim();
@@ -21,15 +27,20 @@ export function publicAuthOrigin(
     try {
       const parsed = new URL(configured);
       const local =
-        !production && localHosts.has(parsed.hostname) &&
+        !production &&
+        localHosts.has(parsed.hostname) &&
         ['http:', 'https:'].includes(parsed.protocol);
       const publicHttps =
-        parsed.protocol === 'https:' && !localHosts.has(parsed.hostname) &&
+        parsed.protocol === 'https:' &&
+        !localHosts.has(parsed.hostname) &&
         parsed.hostname !== '0.0.0.0';
       if (
         (local || publicHttps) &&
-        !parsed.username && !parsed.password &&
-        parsed.pathname === '/' && !parsed.search && !parsed.hash
+        !parsed.username &&
+        !parsed.password &&
+        parsed.pathname === '/' &&
+        !parsed.search &&
+        !parsed.hash
       ) {
         return parsed.origin;
       }
@@ -47,8 +58,10 @@ export function publicAuthOrigin(
 
   try {
     const request = new URL(requestUrl);
-    if (localHosts.has(request.hostname) &&
-        ['http:', 'https:'].includes(request.protocol)) {
+    if (
+      localHosts.has(request.hostname) &&
+      ['http:', 'https:'].includes(request.protocol)
+    ) {
       return request.origin;
     }
   } catch {
