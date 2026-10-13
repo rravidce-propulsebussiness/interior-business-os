@@ -756,7 +756,7 @@ export function PremiumSftBuilder({
           )}
           <p className="mt-3 text-xs leading-5 text-slate-500">
             Floor area and additional-work area are tracked separately. Both
-            amounts are included once in the quotation total. The customer's
+            amounts are included once in the quotation total. The customer&apos;s
             uploaded PDF documents are appended on export.
           </p>
         </div>
