@@ -61,13 +61,14 @@ export function InteriorRoomBuilder({
       currency,
       maximumFractionDigits: 2,
     }).format(amount);
-  const priceUnit = selectedPackage?.pricingBasis === 'per_sqft'
-    ? 'sq ft'
-    : selectedPackage?.pricingBasis === 'per_bhk'
-      ? 'BHK'
-      : selectedPackage?.pricingBasis === 'per_unit'
-        ? 'unit'
-        : 'package';
+  const priceUnit =
+    selectedPackage?.pricingBasis === 'per_sqft'
+      ? 'sq ft'
+      : selectedPackage?.pricingBasis === 'per_bhk'
+        ? 'BHK'
+        : selectedPackage?.pricingBasis === 'per_unit'
+          ? 'unit'
+          : 'package';
   const [entry, setEntry] = useState({
     room: 'Living Room',
     item: 'TV Unit',
@@ -161,7 +162,9 @@ export function InteriorRoomBuilder({
                     ? '1'
                     : '.01'
                 }
-                disabled={!selectedPackage || selectedPackage.pricingBasis === 'fixed'}
+                disabled={
+                  !selectedPackage || selectedPackage.pricingBasis === 'fixed'
+                }
                 value={packageQuantity}
                 onChange={(event) => setPackageQuantity(event.target.value)}
               />
@@ -169,7 +172,8 @@ export function InteriorRoomBuilder({
             {selectedPackage && (
               <div className="sm:col-span-2 rounded-xl border border-blue-100 bg-white p-4">
                 <p className="text-xs font-semibold text-slate-700">
-                  {selectedPackage.description || 'Company package specifications'}
+                  {selectedPackage.description ||
+                    'Company package specifications'}
                 </p>
                 <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
                   <strong className="text-xl font-black text-blue-700">

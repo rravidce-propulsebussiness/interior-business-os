@@ -26,41 +26,51 @@ export async function applyIndustryQuotationPackage(raw: unknown): Promise<{
     const input = applySchema.parse(raw);
     const s = await commercialServices('quotation.edit', 'quotation');
     if (!s.allowed('pricing.view', 'pricing')) {
-      return { ok: false, message: 'Company pricing access is required to apply a package.' };
+      return {
+        ok: false,
+        message: 'Company pricing access is required to apply a package.',
+      };
     }
 
-    const [{ data: revision, error: revisionError }, packages] = await Promise.all([
-      s.client
-        .from('quotation_revisions')
-        .select('id,version,status,currency,project_id')
-        .eq('organization_id', s.org)
-        .eq('id', input.revisionId)
-        .maybeSingle(),
-      createQuotationPackagesRepository(s.client).list(s.org),
-    ]);
+    const [{ data: revision, error: revisionError }, packages] =
+      await Promise.all([
+        s.client
+          .from('quotation_revisions')
+          .select('id,version,status,currency,project_id')
+          .eq('organization_id', s.org)
+          .eq('id', input.revisionId)
+          .maybeSingle(),
+        createQuotationPackagesRepository(s.client).list(s.org),
+      ]);
     if (
       revisionError ||
       !revision ||
       revision.status !== 'draft' ||
       revision.version !== input.version
     ) {
-      return { ok: false, message: 'The draft changed. Refresh and try again.' };
+      return {
+        ok: false,
+        message: 'The draft changed. Refresh and try again.',
+      };
     }
 
-    const [{ data: project, error: projectError }, industries] = await Promise.all([
-      s.client
-        .from('projects')
-        .select('industry_id')
-        .eq('organization_id', s.org)
-        .eq('id', revision.project_id)
-        .maybeSingle(),
-      s.repository.industries(),
-    ]);
+    const [{ data: project, error: projectError }, industries] =
+      await Promise.all([
+        s.client
+          .from('projects')
+          .select('industry_id')
+          .eq('organization_id', s.org)
+          .eq('id', revision.project_id)
+          .maybeSingle(),
+        s.repository.industries(),
+      ]);
     if (projectError || !project) {
       return { ok: false, message: 'The selected project is unavailable.' };
     }
 
-    const industryKey = industries.find((industry) => industry.id === project.industry_id)?.key;
+    const industryKey = industries.find(
+      (industry) => industry.id === project.industry_id,
+    )?.key;
     const selected = packages.find((item) => item.id === input.packageId);
     if (
       !selected ||
@@ -69,16 +79,26 @@ export async function applyIndustryQuotationPackage(raw: unknown): Promise<{
       selected.industryKey === 'construction' ||
       selected.currency !== revision.currency
     ) {
-      return { ok: false, message: 'This company package is unavailable for the project and currency.' };
+      return {
+        ok: false,
+        message:
+          'This company package is unavailable for the project and currency.',
+      };
     }
 
     const quantity = Number(input.quantity);
     if (
       (selected.pricingBasis === 'fixed' && quantity !== 1) ||
-      (selected.pricingBasis === 'per_bhk' && (!Number.isInteger(quantity) || quantity > 20)) ||
-      (selected.pricingBasis === 'per_unit' && (!Number.isInteger(quantity) || quantity > 1000))
+      (selected.pricingBasis === 'per_bhk' &&
+        (!Number.isInteger(quantity) || quantity > 20)) ||
+      (selected.pricingBasis === 'per_unit' &&
+        (!Number.isInteger(quantity) || quantity > 1000))
     ) {
-      return { ok: false, message: 'Enter a valid quantity for the selected package pricing basis.' };
+      return {
+        ok: false,
+        message:
+          'Enter a valid quantity for the selected package pricing basis.',
+      };
     }
 
     const unit =
@@ -107,12 +127,19 @@ export async function applyIndustryQuotationPackage(raw: unknown): Promise<{
       quantity: selected.pricingBasis === 'fixed' ? '1' : input.quantity,
       unit,
       rate: selected.basePrice,
-      reason: 'Company-authorized quotation package ' + selected.code + ' at version ' + selected.version,
+      reason:
+        'Company-authorized quotation package ' +
+        selected.code +
+        ' at version ' +
+        selected.version,
       discount: { kind: 'none', value: '0' },
       estimated_cost_rate: null,
     });
     revalidatePath('/dashboard/quotations/' + input.revisionId + '/studio');
-    return { ok: true, message: 'Package added with its saved price and specifications.' };
+    return {
+      ok: true,
+      message: 'Package added with its saved price and specifications.',
+    };
   } catch (error) {
     return { ok: false, message: safeFailure(error).message };
   }
