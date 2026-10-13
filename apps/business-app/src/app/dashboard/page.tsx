@@ -191,6 +191,9 @@ export default async function Dashboard({
         {signInResult === 'no_company' && (
           <p>Your ProPulse account is linked, but no business profile was found there. Complete your professional company profile in ProPulse or create a new Business OS company.</p>
         )}
+        {signInResult === 'review_required' && (
+          <p>New company registration requires platform approval. Please apply to register your business or ask an administrator for access.</p>
+        )}
         {signInResult === 'needs_selection' && (
           <p>You already have a company workspace, but its identity differs from the ProPulse business. We have not created a duplicate or changed access. Contact the platform administrator to confirm which company should be linked.</p>
         )}
