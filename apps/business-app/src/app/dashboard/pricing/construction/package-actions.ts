@@ -43,7 +43,10 @@ const schema = z
     status: z.enum(['active', 'inactive']),
     themeColor: z.string().regex(/^#[0-9a-fA-F]{6}$/),
     visibility: z.enum(['company', 'owner_only']),
-    ownerIds: z.array(idSchema).max(30).refine((v) => new Set(v).size === v.length),
+    ownerIds: z
+      .array(idSchema)
+      .max(30)
+      .refine((v) => new Set(v).size === v.length),
     specSections: z.array(section).max(18),
   })
   .strict();
