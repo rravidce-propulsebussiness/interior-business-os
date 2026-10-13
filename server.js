@@ -3,7 +3,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { validateDeploymentEnvironment } from './packages/shared/src/runtime.ts';
-import { verifyClientAssets } from './scripts/client-asset-integrity.mjs';
+import { checkClientAssetsAtStartup } from './scripts/client-asset-integrity.mjs';
 
 // Hostinger's lsnode.js loads this entry file with require(esm).
 // Do not use top-level await. Let Next.js run its own native HTTP router
@@ -39,12 +39,15 @@ if (!existsSync(resolve(appDir, '.next', 'BUILD_ID'))) {
   );
 }
 
-// Fail startup rather than serve a partially published or corrupted JavaScript
-// bundle that would leave the CRM unresponsive with SyntaxError at EOF.
-const checkedChunks = verifyClientAssets(appDir);
-console.log(
-  `[Business OS] Verified ${checkedChunks} client JavaScript chunks against build manifest.`,
-);
+// A browser asset mismatch is important, but must not take ALL routes offline.
+// Builds continue to fail strictly on invalid chunks; runtime can still serve
+// useful pages and health endpoints while administrators correct a bad deploy.
+const clientAssets = checkClientAssetsAtStartup(appDir);
+if (clientAssets.ok) {
+  console.log(
+    `[Business OS] Verified ${clientAssets.count} client JavaScript chunks against build manifest.`,
+  );
+}
 
 // The release ID is compiled into the Next.js build. Recover it from the
 // published artifact at process startup so build/runtime stay on the same
