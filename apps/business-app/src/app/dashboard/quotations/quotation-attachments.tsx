@@ -57,7 +57,8 @@ export function QuotationAttachments({
         }
       })
       .catch(() => {
-        if (!cancelled) setMessage('Could not load quotation PDFs. Retry or refresh.');
+        if (!cancelled)
+          setMessage('Could not load quotation PDFs. Retry or refresh.');
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
