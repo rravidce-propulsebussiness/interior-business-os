@@ -1,4 +1,5 @@
 import { cookies } from 'next/headers';
+import type { Json } from '@business-os/database';
 import { NextResponse } from 'next/server';
 import { createServerDatabase } from '@business-os/database/server';
 import { authCallback } from '@business-os/auth/callback';
@@ -52,7 +53,7 @@ export async function GET(request: Request) {
           // A provider email or display name alone never grants company access.
           const { data: linked, error: syncError } = await client.rpc(
             'company_propulse_sync',
-            { p_input: profile },
+            { p_input: profile as Json },
           );
           if (!syncError && linked && typeof linked === 'object' &&
               !Array.isArray(linked) && linked.status === 'approved' &&
