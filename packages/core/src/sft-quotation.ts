@@ -49,6 +49,7 @@ export const sftMaterialSchema = z
 
 export const sftPackageSchema = z
   .object({
+    id: z.uuid().optional(),
     name: z.string().min(1).max(120),
     code: z.string().min(1).max(30),
     description: z.string().max(600),
