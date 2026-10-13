@@ -1,3 +1,4 @@
+import { validateQuotationAnnexure } from '@business-os/shared/pdf';
 import { randomUUID } from 'node:crypto';
 import {
   MAX_QUOTATION_PDF_BYTES,
@@ -52,13 +53,13 @@ export async function POST(request: Request, { params }: Params) {
   try {
     const { id } = await params;
     const ctx = await quotationAttachmentContext(id, true);
-    const { count, error: countError } = await ctx.admin
+    const { data: existing, error: countError } = await ctx.admin
       .from('quotation_studio_attachments')
-      .select('id', { count: 'exact', head: true })
+      .select('id,byte_size')
       .eq('organization_id', ctx.organizationId)
       .eq('revision_id', ctx.revisionId);
     if (countError) return fail('Could not check quotation file limit', 503);
-    if ((count ?? 0) >= 6) return fail('Only six PDFs per quotation', 400);
+    if ((existing?.length ?? 0) >= 6) return fail('Only six PDFs per quotation', 400);
 
     // Refuse unbounded multipart uploads even if content-length was absent.
     const reader = request.body?.getReader();
@@ -93,8 +94,15 @@ export async function POST(request: Request, { params }: Params) {
     )
       return fail('Only genuine PDF files up to 15 MB are supported', 415);
     const bytes = Buffer.from(await upload.arrayBuffer());
-    if (bytes.toString('ascii', 0, 5) !== '%PDF-')
-      return fail('Selected file does not contain a PDF header', 415);
+    if (
+      (existing ?? []).reduce((sum, file) => sum + file.byte_size, bytes.length) >
+      30 * 1024 * 1024
+    ) return fail('Combined PDF annexures cannot exceed 30 MB', 413);
+    try {
+      await validateQuotationAnnexure(bytes);
+    } catch {
+      return fail('PDF file is invalid, encrypted, or longer than 60 pages', 415);
+    }
 
     await ensureQuotationPdfBucket(ctx.admin);
     const path = [ctx.organizationId, ctx.revisionId, randomUUID() + '.pdf'].join('/');
