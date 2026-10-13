@@ -105,7 +105,10 @@ export default async function MyEmployeeInvitations() {
               To join an existing company, ask its owner to invite your verified
               email address. Or create your own workspace now.
             </p>
-            <Link href="/dashboard/company/apply" className="mt-5 inline-flex rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white">
+            <Link
+              href="/dashboard/company/apply"
+              className="mt-5 inline-flex rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white"
+            >
               Create my company →
             </Link>
           </section>

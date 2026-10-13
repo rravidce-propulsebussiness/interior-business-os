@@ -40,7 +40,10 @@ export function CompanyRegistrationForm({ children }: { children: ReactNode }) {
         >
           <p>{state.message}</p>
           {state.organizationId && (
-            <a className="mt-2 inline-block font-semibold text-blue-700 underline" href="/dashboard">
+            <a
+              className="mt-2 inline-block font-semibold text-blue-700 underline"
+              href="/dashboard"
+            >
               Open your dashboard →
             </a>
           )}

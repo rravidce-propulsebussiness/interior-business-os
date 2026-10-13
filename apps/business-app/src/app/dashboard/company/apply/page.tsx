@@ -59,8 +59,8 @@ export default async function CompanyApplicationPage() {
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-300">
             Create your company directly with your verified account. You become
-            its Owner, with 90 days of testing access to available modules.
-            Your company data stays private to your workspace.
+            its Owner, with 90 days of testing access to available modules. Your
+            company data stays private to your workspace.
           </p>
         </header>
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">

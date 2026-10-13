@@ -31,10 +31,16 @@ export async function submitCompanyApplication(
 
     const result = await repository.selfRegisterCompany({
       name: String(form.get('name') ?? '').trim(),
-      slug: String(form.get('slug') ?? '').trim().toLowerCase(),
+      slug: String(form.get('slug') ?? '')
+        .trim()
+        .toLowerCase(),
       legalName: String(form.get('legalName') ?? '').trim(),
-      country: String(form.get('country') ?? '').trim().toUpperCase(),
-      currency: String(form.get('currency') ?? '').trim().toUpperCase(),
+      country: String(form.get('country') ?? '')
+        .trim()
+        .toUpperCase(),
+      currency: String(form.get('currency') ?? '')
+        .trim()
+        .toUpperCase(),
       timezone: String(form.get('timezone') ?? '').trim(),
       industries,
     });
@@ -54,7 +60,13 @@ export async function submitCompanyApplication(
       };
       jar.set('business-os-organization', result.organizationId, options);
       if (process.env.BUSINESS_OS_TENANT_ROUTES_ENABLED === 'true') {
-        jar.set('business-os-workspace-route', String(form.get('slug') ?? '').trim().toLowerCase(), options);
+        jar.set(
+          'business-os-workspace-route',
+          String(form.get('slug') ?? '')
+            .trim()
+            .toLowerCase(),
+          options,
+        );
       }
       return {
         organizationId: result.organizationId,
@@ -62,7 +74,8 @@ export async function submitCompanyApplication(
       };
     }
     return {
-      message: 'Your application has been submitted for review. We will activate the workspace when it is approved.',
+      message:
+        'Your application has been submitted for review. We will activate the workspace when it is approved.',
       pendingReview: true,
     };
   } catch (error) {

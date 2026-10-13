@@ -9,13 +9,15 @@ export default function Register() {
         <p className="eyebrow">Business OS · account onboarding</p>
         <h2 id="register-story-title">Create your secure account.</h2>
         <p>
-          Create a verified account, then set up your own company workspace
-          and explore the Business OS tools.
+          Create a verified account, then set up your own company workspace and
+          explore the Business OS tools.
         </p>
         <ul className="feature-list">
           <li>
             <span className="feature-dot" aria-hidden="true" />
-            <span>Start your own workspace without waiting for an invitation.</span>
+            <span>
+              Start your own workspace without waiting for an invitation.
+            </span>
           </li>
           <li>
             <span className="feature-dot" aria-hidden="true" />

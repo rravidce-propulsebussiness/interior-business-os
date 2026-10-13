@@ -197,7 +197,8 @@ export function createRepository(client: SupabaseClient<Database>) {
         typeof result !== 'object' ||
         Array.isArray(result) ||
         (result.status !== 'approved' && result.status !== 'pending_review') ||
-        (result.status === 'approved' && typeof result.organizationId !== 'string')
+        (result.status === 'approved' &&
+          typeof result.organizationId !== 'string')
       ) {
         throw new DomainError('INTERNAL_ERROR');
       }
