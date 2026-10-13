@@ -248,14 +248,21 @@ export function createRepository(client: SupabaseClient<Database>) {
       );
     },
     async employeeInvitations(orgId: string) {
-      return unwrap(
-        await client.rpc('employee_invitations_list', {
-          p_organization_id: idSchema.parse(orgId),
-        }),
-      );
+      const result = await client.rpc('employee_invitations_list', {
+        p_organization_id: idSchema.parse(orgId),
+      });
+      // Hostinger may update application code before the verified DB rollout.
+      // Only an undefined RPC means "not installed"; all permission and other
+      // failures remain errors and cannot be silently treated as empty access.
+      if (['PGRST202', '42883'].includes(result.error?.code ?? ''))
+        return { available: false, rows: [] };
+      return { available: true, rows: unwrap(result) };
     },
     async myEmployeeInvitations() {
-      return unwrap(await client.rpc('employee_invitations_mine'));
+      const result = await client.rpc('employee_invitations_mine');
+      if (['PGRST202', '42883'].includes(result.error?.code ?? ''))
+        return { available: false, rows: [] };
+      return { available: true, rows: unwrap(result) };
     },
     async acceptEmployeeInvitation(id: string) {
       return unwrap(

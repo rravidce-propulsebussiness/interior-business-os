@@ -32,7 +32,9 @@ export default async function MyEmployeeInvitations() {
   const { authorization, repository } = await pageServices();
   await authorization.requireAuthenticatedUser();
   const result = await repository.myEmployeeInvitations();
-  const invitations = Array.isArray(result) ? result.filter(isInvitation) : [];
+  const invitations = Array.isArray(result.rows)
+    ? result.rows.filter(isInvitation)
+    : [];
   return (
     <main
       id="main-content"
@@ -60,7 +62,16 @@ export default async function MyEmployeeInvitations() {
             workspace access.
           </p>
         </header>
-        {invitations.length > 0 ? (
+        {!result.available ? (
+          <section
+            role="status"
+            className="rounded-2xl border border-amber-200 bg-amber-50 p-6 text-sm text-amber-900"
+          >
+            Employee invitations are not enabled in this environment yet. The
+            deployment administrator must verify the database and install the
+            reviewed migration before acceptance is available.
+          </section>
+        ) : invitations.length > 0 ? (
           <section className="space-y-4" aria-label="Available invitations">
             {invitations.map((invitation) => (
               <article
