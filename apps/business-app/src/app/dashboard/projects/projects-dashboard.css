@@ -226,10 +226,9 @@
 }
 .proj-filters {
   display: grid;
-  grid-template-columns: minmax(160px, 1.5fr) minmax(126px, 0.7fr) minmax(
-      133px,
-      0.8fr
-    ) auto auto;
+  grid-template-columns:
+    minmax(160px, 1.5fr) minmax(126px, 0.7fr) minmax(133px, 0.8fr)
+    auto auto;
   gap: 10px;
   align-items: stretch;
   margin-bottom: 15px;
@@ -659,10 +658,9 @@
     min-height: 205px;
   }
   .proj-filters {
-    grid-template-columns: minmax(170px, 1.5fr) minmax(120px, 0.8fr) minmax(
-        140px,
-        0.9fr
-      ) auto;
+    grid-template-columns:
+      minmax(170px, 1.5fr) minmax(120px, 0.8fr) minmax(140px, 0.9fr)
+      auto;
   }
   .proj-view-toggle {
     grid-column: 1 / -1;
