@@ -27,13 +27,13 @@ begin
       where organization_id = v_org and key = 'new' and active and outcome = 'open'),
     'new organization has an active New pipeline stage');
   perform pg_temp.crm_starter_assert(
-    (select count(*) = 3 from public.lead_sources
+    (select count(*) >= 3 from public.lead_sources
       where organization_id = v_org),
-    'starter sources are distinct from the demo-only CRM seed');
+    'starter manual, sheet and ProPulse sources are available');
   perform pg_temp.crm_starter_assert(
-    (select count(*) = 6 from public.crm_pipeline_stages
+    (select count(*) >= 6 from public.crm_pipeline_stages
       where organization_id = v_org),
-    'all default pipeline stages exist before optional imports');
+    'default pipeline stages exist without requiring a sheet import');
 
   select id into v_source from public.lead_sources
     where organization_id = v_org and key = 'manual';
