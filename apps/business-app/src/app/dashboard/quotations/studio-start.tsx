@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
 import { createStudioQuotation } from './studio-actions';
 
 type Industry = { key: string; name: string };
@@ -12,6 +13,7 @@ export function QuotationStudioStart({
   industries: Industry[];
   defaultCurrency: string;
 }) {
+  const router = useRouter();
   const [industry, setIndustry] = useState(
     industries.find((item) => item.key === 'construction')?.key ??
       industries[0]?.key ??
@@ -149,7 +151,7 @@ export function QuotationStudioStart({
               mode: mode === 'upload' ? 'pdf' : mode,
               ...(mode === 'upload' ? { step: 'files' } : {}),
             });
-            window.location.assign(
+            router.push(
               '/dashboard/quotations/' + result.revisionId + '/studio?' + next,
             );
           });
