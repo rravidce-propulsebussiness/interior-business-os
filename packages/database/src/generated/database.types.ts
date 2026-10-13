@@ -11666,6 +11666,10 @@ export interface Database {
         Args: { p_organization_id: string; p_action: string; p_input: Json };
         Returns: Json;
       };
+      quotation_share_pdf_attachments: {
+        Args: { p_token: string };
+        Returns: Json;
+      };
       quotation_signing_preflight: {
         Args: { p_message: string; p_signature: string };
         Returns: boolean;
