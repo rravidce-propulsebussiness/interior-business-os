@@ -8330,6 +8330,61 @@ export interface Database {
           },
         ];
       };
+      quotation_studio_attachments: {
+        Row: {
+          id: string;
+          organization_id: string;
+          revision_id: string;
+          storage_path: string;
+          filename: string;
+          byte_size: number;
+          created_by: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          revision_id: string;
+          storage_path: string;
+          filename: string;
+          byte_size: number;
+          created_by: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          revision_id?: string;
+          storage_path?: string;
+          filename?: string;
+          byte_size?: number;
+          created_by?: string;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'quotation_studio_attachments_created_by_fkey';
+            columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'quotation_studio_attachments_organization_id_fkey';
+            columns: ['organization_id'];
+            isOneToOne: false;
+            referencedRelation: 'organizations';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'quotation_studio_attachments_organization_id_revision_id_fkey';
+            columns: ['organization_id', 'revision_id'];
+            isOneToOne: false;
+            referencedRelation: 'quotation_revisions';
+            referencedColumns: ['organization_id', 'id'];
+          },
+        ];
+      };
       quotations: {
         Row: {
           id: string;
