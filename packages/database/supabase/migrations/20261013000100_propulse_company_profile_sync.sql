@@ -14,6 +14,7 @@ create table public.organization_propulse_profiles (
   last_synced_at timestamptz not null default now()
 );
 alter table public.organization_propulse_profiles enable row level security;
+alter table public.organization_propulse_profiles force row level security;
 revoke all on public.organization_propulse_profiles from public,anon,authenticated;
 grant select on public.organization_propulse_profiles to authenticated;
 create policy organization_propulse_profiles_read
@@ -98,7 +99,7 @@ begin
      -- Stable unique slug: never claim another organization's name-based URL.
      v_slug:=trim(both '-' from regexp_replace(lower(v_name),'[^a-z0-9]+','-','g'));
      if length(v_slug)=0 then v_slug:='propulse-business';end if;
-     v_slug:=left(v_slug,65)||'-p'||substring(v_subject from 9);
+     v_slug:=left(v_slug,57)||'-p'||substring(v_subject from 9);
      if length(v_slug)>80 then raise exception 'Invalid company slug' using errcode='22023';end if;
      select array_agg(distinct i.key order by i.key) into v_keys
      from public.industries i
