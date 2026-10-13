@@ -84,7 +84,7 @@ begin
  if v_org is null then
    -- Only reuse a tenant already created and owned by this same authenticated
    -- account. Multiple possible tenants must be selected explicitly.
-   select count(*),min(o.id) into v_count,v_org
+   select count(*),(array_agg(o.id order by o.id))[1] into v_count,v_org
      from public.organizations o
      join public.organization_memberships m
        on m.organization_id=o.id and m.user_id=v_user and m.status='active'
