@@ -1,0 +1,50 @@
+name: Format onboarding branch
+on:
+  push:
+    branches:
+      - feature/open-self-service-company-onboarding-20261013
+permissions:
+  contents: write
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Prettier exact CI-reported files
+        run: |
+          pnpm exec prettier --write \
+            apps/business-app/src/app/dashboard/company/apply/actions.ts \
+            apps/business-app/src/app/dashboard/company/apply/company-registration-form.tsx \
+            apps/business-app/src/app/dashboard/company/apply/page.tsx \
+            apps/business-app/src/app/dashboard/company/invitations/page.tsx \
+            apps/business-app/src/app/dashboard/crm/leads/import/sheet-import-form.tsx \
+            apps/business-app/src/app/dashboard/owner-dashboard.css \
+            apps/business-app/src/app/dashboard/owner-shell.tsx \
+            apps/business-app/src/app/register/page.tsx \
+            packages/database/src/repository.ts
+      - name: Commit only formatter changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if ! git diff --quiet; then
+            git add \
+              apps/business-app/src/app/dashboard/company/apply/actions.ts \
+              apps/business-app/src/app/dashboard/company/apply/company-registration-form.tsx \
+              apps/business-app/src/app/dashboard/company/apply/page.tsx \
+              apps/business-app/src/app/dashboard/company/invitations/page.tsx \
+              apps/business-app/src/app/dashboard/crm/leads/import/sheet-import-form.tsx \
+              apps/business-app/src/app/dashboard/owner-dashboard.css \
+              apps/business-app/src/app/dashboard/owner-shell.tsx \
+              apps/business-app/src/app/register/page.tsx \
+              packages/database/src/repository.ts
+            git commit -m "style: format onboarding and existing unformatted files"
+            git push origin HEAD:feature/open-self-service-company-onboarding-20261013
+          fi
