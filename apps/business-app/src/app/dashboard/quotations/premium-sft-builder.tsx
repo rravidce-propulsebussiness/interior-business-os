@@ -21,9 +21,9 @@ type WorkRow = {
 type Section = {
   title: string;
   description: string;
-  brand?: string;
-  grade?: string;
-  allowancePerSqft?: string;
+  brand?: string | undefined;
+  grade?: string | undefined;
+  allowancePerSqft?: string | undefined;
 };
 const floorNames = [
   'Ground Floor',
