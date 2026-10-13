@@ -34,8 +34,8 @@ export default async function QuotationPackagesPage() {
           <div>
             <h1>Quotation Package Manager</h1>
             <p>
-              Manage your company&apos;s construction, interior and future industry
-              packages.
+              Manage your company&apos;s construction, interior and future
+              industry packages.
             </p>
           </div>
         </div>
