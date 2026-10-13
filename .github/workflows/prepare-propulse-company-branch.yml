@@ -1,0 +1,60 @@
+name: Prepare ProPulse company branch
+on:
+  push:
+    branches: [feature/propulse-company-auto-onboarding-20261013]
+permissions:
+  contents: write
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: business_os_test
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Generate database types from verified disposable schema
+        env:
+          TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:5432/business_os_test
+          ALLOW_TEST_DATABASE_RESET: "yes"
+        run: |
+          pnpm db:verify
+          pnpm db:types
+      - name: Format exact source files
+        run: |
+          pnpm exec prettier --write \
+            apps/business-app/src/app/auth/provider-start.ts \
+            apps/business-app/src/app/auth/callback/route.ts \
+            apps/business-app/src/app/dashboard/company/settings/page.tsx \
+            apps/business-app/src/app/dashboard/page.tsx \
+            packages/database/src/generated/database.types.ts
+      - name: Commit generated types and formatting
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            apps/business-app/src/app/auth/provider-start.ts \
+            apps/business-app/src/app/auth/callback/route.ts \
+            apps/business-app/src/app/dashboard/company/settings/page.tsx \
+            apps/business-app/src/app/dashboard/page.tsx \
+            packages/database/src/generated/database.types.ts
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: generate ProPulse company schema types and format"
+            git push origin HEAD:feature/propulse-company-auto-onboarding-20261013
+          fi
