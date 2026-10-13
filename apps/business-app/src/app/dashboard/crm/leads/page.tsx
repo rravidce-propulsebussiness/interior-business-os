@@ -417,7 +417,9 @@ export default async function Leads({
             : null
         }
         canCreate={s.allowed('lead.create')}
-        canConfigureCrm={s.allowed('crm.source.manage') && s.allowed('crm.pipeline.manage')}
+        canConfigureCrm={
+          s.allowed('crm.source.manage') && s.allowed('crm.pipeline.manage')
+        }
         canManage={s.allowed('lead.manage')}
         canAssign={s.allowed('lead.assign')}
         canWin={s.allowed('lead.win')}

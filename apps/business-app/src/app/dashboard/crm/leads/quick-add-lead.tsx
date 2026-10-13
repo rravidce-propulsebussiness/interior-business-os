@@ -188,7 +188,9 @@ export function QuickAddLead({
                   }
                 }}
               >
-                {setupBusy ? 'Preparing CRM…' : 'Set up lead sources and stages'}
+                {setupBusy
+                  ? 'Preparing CRM…'
+                  : 'Set up lead sources and stages'}
               </button>
             ) : (
               <p>Ask your company owner to configure the CRM defaults.</p>
