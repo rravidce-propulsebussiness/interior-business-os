@@ -10769,6 +10769,14 @@ export interface Database {
         Returns: Json;
       };
       company_self_register: { Args: { p_input: Json }; Returns: Json };
+      propulse_company_import: {
+        Args: { p_user_id: string; p_subject: string; p_company: Json };
+        Returns: Json;
+      };
+      propulse_company_profile: {
+        Args: { p_organization_id: string };
+        Returns: Json;
+      };
       construction_package_list: { Args: { p_org: string }; Returns: Json };
       construction_package_quote_preview: {
         Args: {
