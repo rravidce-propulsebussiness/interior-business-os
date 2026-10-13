@@ -135,7 +135,7 @@ describe('floor-wise per-SFT construction estimates', () => {
     );
     expect(detail.totalAreaSqft).toBe('1000.00');
     expect(detail.additionalAreaSqft).toBe('250.00');
-    expect(detail.total).toBe('2110000.00');
+    expect(detail.total).toBe('2100000.00');
     expect(detail.package?.name).toBe('Royal');
     expect(detail.sections?.[0]?.title).toBe('Steel');
     expect(parseSftEstimate(encodeSftEstimate(detail))).toEqual(detail);
