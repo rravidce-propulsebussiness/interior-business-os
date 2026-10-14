@@ -10,6 +10,7 @@ import { ConstructionPaymentsPanel } from './construction-payments-panel';
 import { ConstructionClientPortalManager } from './construction-client-portal-panel';
 import { ConstructionTomorrowPanel } from './construction-tomorrow-panel';
 import { ConstructionProcurementWatch } from './construction-procurement-watch';
+import { ConstructionGatePanel } from './construction-gate-panel';
 import { ConstructionHandoverReadiness } from './construction-handover-readiness';
 import { AgreementReadinessPanel } from './agreement-readiness-panel';
 import '../../../owner-dashboard.css';
@@ -131,6 +132,101 @@ const constructionProcurementSchema = z.object({
         'site_marked_received',
         'blocked',
       ]),
+    }),
+  ),
+});
+const constructionTomorrowSchema = z.object({
+  can_approve: z.boolean(),
+  can_submit: z.boolean(),
+  material_choices: z.array(
+    z.object({
+      id: z.uuid(),
+      item: z.string(),
+      quantity: z.number(),
+      unit: z.string(),
+      status: z.string(),
+    }),
+  ),
+  plans: z.array(
+    z.object({
+      id: z.uuid(),
+      stage_id: z.uuid(),
+      work_date: z.string(),
+      revision: z.number().int(),
+      work_summary: z.string(),
+      labor_plan: z.array(
+        z.object({
+          trade: z.string(),
+          workers: z.number().int(),
+        }),
+      ),
+      instructions: z.string(),
+      status: z.string(),
+      submitted_at: z.string(),
+      materials: z.array(
+        z.object({
+          id: z.uuid(),
+          item: z.string(),
+          quantity: z.number(),
+          unit: z.string(),
+          status: z.string(),
+          required_quantity: z.number(),
+        }),
+      ),
+    }),
+  ),
+});
+const clientProgressManagementSchema = z.object({
+  shares: z.array(
+    z.object({
+      id: z.uuid(),
+      expires_at: z.string(),
+      revoked_at: z.string().nullable(),
+      created_at: z.string(),
+      active: z.boolean(),
+    }),
+  ),
+  reports: z.array(
+    z.object({
+      id: z.uuid(),
+      report_date: z.string(),
+      completed_work: z.string(),
+      tomorrow_plan: z.string(),
+      approved: z.boolean(),
+      published: z.boolean(),
+    }),
+  ),
+});
+const constructionGateSchema = z.object({
+  can_review: z.boolean(),
+  events: z.array(
+    z.object({
+      id: z.uuid(),
+      work_date: z.string(),
+      trade: z.string(),
+      direction: z.enum(['arrival', 'departure']),
+      workers: z.number().int(),
+      notes: z.string(),
+      recorded_at: z.string(),
+    }),
+  ),
+  comparison: z.array(
+    z.object({
+      work_date: z.string(),
+      trade: z.string(),
+      planned: z.number().int(),
+      arrived: z.number().int(),
+      departed: z.number().int(),
+      on_site: z.number().int(),
+    }),
+  ),
+  reviews: z.array(
+    z.object({
+      work_date: z.string(),
+      decision: z.enum(['verified', 'discrepancy']),
+      reason: z.string(),
+      reviewed_at: z.string(),
+      is_current: z.boolean(),
     }),
   ),
 });
@@ -519,6 +615,18 @@ export default async function ProjectDeliveryPage({
   const procurementWatch = procurementParsed?.success
     ? procurementParsed.data
     : null;
+  const gateResponse =
+    construction && site.stage === 'execution'
+      ? await s.client.rpc('construction_gate_labor_read', {
+          p_org: context.organizationId,
+          p_project: id,
+        })
+      : null;
+  const gateParsed =
+    gateResponse && !gateResponse.error
+      ? constructionGateSchema.safeParse(gateResponse.data)
+      : null;
+  const gateLabor = gateParsed?.success ? gateParsed.data : null;
   const paymentResponse =
     site.can_manage && construction
       ? await s.client.rpc('construction_payment_read', {
@@ -624,8 +732,8 @@ export default async function ProjectDeliveryPage({
   if (open || site.stage === 'handover') {
     if (isEngineer || isQuality) {
       mobileUpdateHref = '#daily-reports';
-    } else if (isWatchman) {
-      mobileUpdateHref = '#security';
+    } else if (isWatchman || gateLabor) {
+      mobileUpdateHref = gateLabor ? '#construction-labor-gate' : '#security';
     }
   }
 
@@ -739,6 +847,10 @@ export default async function ProjectDeliveryPage({
                 projectId={id}
                 data={procurementWatch}
               />
+            )}
+
+            {gateLabor && (
+              <ConstructionGatePanel projectId={id} data={gateLabor} />
             )}
 
             {clientPortalManager && (
