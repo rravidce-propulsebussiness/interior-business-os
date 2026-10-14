@@ -20,7 +20,7 @@ not claim the full system is complete.
   permissions. The company owner must authorize director assignment.
 - A construction planning panel in the existing
   `/dashboard/projects/[id]/site` page, no separate navigation app.
-  Managers enter the *actual* floors in construction order, create the
+  Managers enter the _actual_ floors in construction order, create the
   planning snapshot and assign/deactivate multiple project roles.
 - SQL regression covering role coexistence, history, stale versions,
   frozen snapshot, saved dependencies, watchman plan visibility and

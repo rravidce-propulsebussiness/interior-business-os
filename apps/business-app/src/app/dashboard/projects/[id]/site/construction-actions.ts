@@ -37,7 +37,10 @@ async function caller(projectId: string) {
   await service.authorization.requireAuthenticatedUser();
   const organization = await activeOrganization();
   if (!organization) throw new Error('Choose an active company first.');
-  return { client: service.client, organizationId: organization.organizationId };
+  return {
+    client: service.client,
+    organizationId: organization.organizationId,
+  };
 }
 function response(error: unknown): Result {
   return {
@@ -48,7 +51,10 @@ function response(error: unknown): Result {
 }
 function validateFloors(form: FormData) {
   const raw = z.string().trim().min(1).max(1800).parse(form.get('floors'));
-  const names = raw.split(',').map((name) => name.trim()).filter(Boolean);
+  const names = raw
+    .split(',')
+    .map((name) => name.trim())
+    .filter(Boolean);
   if (names.length < 1 || names.length > 64)
     throw new Error('Enter 1 to 64 floors in the intended construction order.');
   const floors = names.map((name) => ({
@@ -72,7 +78,10 @@ export async function initializeConstructionWorkflow(
 ): Promise<Result> {
   try {
     const floors = validateFloors(form);
-    const stages = expandConstructionStages(defaultConstructionWorkflow, floors);
+    const stages = expandConstructionStages(
+      defaultConstructionWorkflow,
+      floors,
+    );
     const { client, organizationId } = await caller(projectId);
     const { error } = await client.rpc('construction_project_command', {
       p_organization_id: organizationId,
@@ -136,7 +145,10 @@ export async function deactivateConstructionRole(
     });
     if (error) throw new Error(error.message);
     revalidatePath(pathFor(projectId));
-    return { saved: true, message: 'Project role deactivated; history retained.' };
+    return {
+      saved: true,
+      message: 'Project role deactivated; history retained.',
+    };
   } catch (error) {
     return response(error);
   }

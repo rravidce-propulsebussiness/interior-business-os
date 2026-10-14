@@ -43,36 +43,42 @@ const siteSchema = z.object({
 type Site = z.infer<typeof siteSchema>;
 const constructionSchema = z.object({
   can_manage: z.boolean(),
-  workflow: z.object({
-    id: z.uuid(),
-    template_code: z.string(),
-    template_version: z.string(),
-    status: z.string(),
-    version: z.number().int(),
-    floor_snapshot: z.array(z.object({ code: z.string(), name: z.string() })),
-  }).nullable(),
-  roles: z.array(z.object({
-    id: z.uuid(),
-    user_id: z.uuid(),
-    role: z.string(),
-    active: z.boolean(),
-    version: z.number().int(),
-  })),
-  stages: z.array(z.object({
-    id: z.uuid(),
-    instance_code: z.string(),
-    template_code: z.string(),
-    phase: z.string(),
-    floor_code: z.string().nullable(),
-    title: z.string(),
-    explanation: z.string(),
-    hold_point: z.string().nullable(),
-    activities: z.array(z.string()),
-    inspection_topics: z.array(z.string()),
-    dependencies: z.array(z.string()),
-    status: z.string(),
-    task_count: z.number().int().nonnegative(),
-  })),
+  workflow: z
+    .object({
+      id: z.uuid(),
+      template_code: z.string(),
+      template_version: z.string(),
+      status: z.string(),
+      version: z.number().int(),
+      floor_snapshot: z.array(z.object({ code: z.string(), name: z.string() })),
+    })
+    .nullable(),
+  roles: z.array(
+    z.object({
+      id: z.uuid(),
+      user_id: z.uuid(),
+      role: z.string(),
+      active: z.boolean(),
+      version: z.number().int(),
+    }),
+  ),
+  stages: z.array(
+    z.object({
+      id: z.uuid(),
+      instance_code: z.string(),
+      template_code: z.string(),
+      phase: z.string(),
+      floor_code: z.string().nullable(),
+      title: z.string(),
+      explanation: z.string(),
+      hold_point: z.string().nullable(),
+      activities: z.array(z.string()),
+      inspection_topics: z.array(z.string()),
+      dependencies: z.array(z.string()),
+      status: z.string(),
+      task_count: z.number().int().nonnegative(),
+    }),
+  ),
 });
 const managerDataSchema = z.object({
   updates: z.array(row),
@@ -211,10 +217,13 @@ export default async function ProjectDeliveryPage({
     p_organization_id: context.organizationId,
     p_project_id: id,
   });
-  const constructionResult = constructionSchema.safeParse(constructionResponse.data);
-  const construction = !constructionResponse.error && constructionResult.success
-    ? constructionResult.data
-    : null;
+  const constructionResult = constructionSchema.safeParse(
+    constructionResponse.data,
+  );
+  const construction =
+    !constructionResponse.error && constructionResult.success
+      ? constructionResult.data
+      : null;
   const canSeeManagerUpdates =
     site.can_manage ||
     ['site_engineer', 'quality_inspector', 'procurement'].includes(
