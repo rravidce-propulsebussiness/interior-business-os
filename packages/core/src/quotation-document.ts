@@ -147,7 +147,9 @@ export function renderQuotationDocument(input: unknown): string {
             section.description.trim() ||
             section.brand?.trim() ||
             section.grade?.trim() ||
-            section.allowancePerSqft?.trim(),
+            section.allowancePerSqft?.trim() ||
+            (section.deliverables ?? []).some((item) => item.included) ||
+            (section.fields ?? []).some((item) => item.value.trim()),
           ),
         )
         .map(
@@ -168,6 +170,21 @@ export function renderQuotationDocument(input: unknown): string {
                 escape(section.allowancePerSqft) +
                 '/SFT</p>'
               : '') +
+            (section.kind === 'plans' || section.deliverables?.length
+              ? '<p><strong>Included plans and drawings</strong></p><ul>' +
+                (section.deliverables ?? [])
+                  .filter((item) => item.included)
+                  .map((item) => '<li>' + escape(item.label) + '</li>')
+                  .join('') +
+                '</ul>'
+              : '') +
+            (section.fields ?? [])
+              .filter((item) => item.value.trim())
+              .map((item) =>
+                '<p><strong>' + escape(item.label) + ':</strong> ' +
+                escape(item.value) + '</p>',
+              )
+              .join('') +
             (section.description
               ? '<p class="text">' + escape(section.description) + '</p>'
               : '') +
