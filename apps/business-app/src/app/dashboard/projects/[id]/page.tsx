@@ -53,15 +53,19 @@ const timelineStageSchema = z.object({
 });
 const timelineStagesSchema = z.object({ stages: z.array(timelineStageSchema) });
 const timelineQualitySchema = z.object({
-  stages: z.array(z.object({
-    stage_id: z.uuid(),
-    cleared: z.boolean(),
-    inspections: z.array(z.object({
-      mandatory: z.boolean(),
-      status: z.string(),
-      current: z.boolean(),
-    })),
-  })),
+  stages: z.array(
+    z.object({
+      stage_id: z.uuid(),
+      cleared: z.boolean(),
+      inspections: z.array(
+        z.object({
+          mandatory: z.boolean(),
+          status: z.string(),
+          current: z.boolean(),
+        }),
+      ),
+    }),
+  ),
 });
 const deliveryStages = [
   {
@@ -213,9 +217,10 @@ export default async function Project({
         p_project_id: id,
       })
     : null;
-  const stageParsed = stageResponse && !stageResponse.error
-    ? timelineStagesSchema.safeParse(stageResponse.data)
-    : null;
+  const stageParsed =
+    stageResponse && !stageResponse.error
+      ? timelineStagesSchema.safeParse(stageResponse.data)
+      : null;
   const timelineStages = stageParsed?.success ? stageParsed.data.stages : [];
   const qcResponse = timelineStages.length
     ? await s.client.rpc('construction_quality_read', {
@@ -223,9 +228,10 @@ export default async function Project({
         p_project: id,
       })
     : null;
-  const qcParsed = qcResponse && !qcResponse.error
-    ? timelineQualitySchema.safeParse(qcResponse.data)
-    : null;
+  const qcParsed =
+    qcResponse && !qcResponse.error
+      ? timelineQualitySchema.safeParse(qcResponse.data)
+      : null;
   const timelineQuality = qcParsed?.success ? qcParsed.data : null;
   const currentStage = site
     ? deliveryStages.findIndex((stage) => stage.key === site.stage)
@@ -431,12 +437,20 @@ export default async function Project({
             reports={site.reports}
             gate={site.gate}
             canSeeFinance={has('contract.view', 'billing')}
-            canRequestMaterials={site.stage === 'execution' &&
-              (site.can_manage || site.role === 'site_engineer' || site.role === 'procurement')}
-            canUploadWorkPhotos={site.stage === 'execution' &&
-              (site.can_manage || site.role === 'site_engineer')}
-            canUploadCuringPhotos={site.stage === 'execution' &&
-              (site.can_manage || site.role === 'watchman')}
+            canRequestMaterials={
+              site.stage === 'execution' &&
+              (site.can_manage ||
+                site.role === 'site_engineer' ||
+                site.role === 'procurement')
+            }
+            canUploadWorkPhotos={
+              site.stage === 'execution' &&
+              (site.can_manage || site.role === 'site_engineer')
+            }
+            canUploadCuringPhotos={
+              site.stage === 'execution' &&
+              (site.can_manage || site.role === 'watchman')
+            }
           />
         )}
 
