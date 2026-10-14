@@ -150,6 +150,9 @@ export default async function PlatformControlModule({
             or quotations.
           </p>
           <div className="mt-4 flex flex-wrap gap-3">
+            <Link href="/admin/control/quotations/templates" className="os-action">
+              Configure specification rows and fields ↗
+            </Link>
             <Link href="/admin/organizations" className="os-action">
               Configure business access ↗
             </Link>
