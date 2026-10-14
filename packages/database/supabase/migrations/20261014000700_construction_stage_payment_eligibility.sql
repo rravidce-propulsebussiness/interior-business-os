@@ -119,6 +119,7 @@ begin
  can_issue=coalesce(private.finance_access(p_org,'payment_request.create'),false);
  return jsonb_build_object(
    'active_contract_id',active_contract,
+   'currency',(select currency from public.contracts where id=active_contract),
    'can_bind',can_bind,'can_issue',can_issue,
    'stage_options',coalesce((
      select jsonb_agg(jsonb_build_object(
