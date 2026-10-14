@@ -159,7 +159,7 @@ export default async function OperationsPage({
   const params = await searchParams;
   const s = await operationsServices('execution.view', true);
   const query = (params.query ?? '').trim().slice(0, 100);
-  const page = Math.max(1, Math.min(10000, Number(params.page) || 1));
+  const page = Math.max(1, Math.min(10000, Math.floor(Number(params.page) || 1)));
   const requestedId = params.project ?? '';
   const projectId = projectIdSchema.safeParse(requestedId).success ? requestedId : '';
   const has = (permission: string, moduleKey?: string) =>
@@ -301,12 +301,12 @@ export default async function OperationsPage({
           <>
             <section className="ops-summary" aria-label="Execution overview">
               <div className="ops-project-identity">
-                <span className={'ops-status ' + (selected.status === 'active' ? 'ops-status-active' : 'ops-status-neutral')}>
-                  {label(selected.status)}
+                <span className={'ops-status ' + (selected?.status === 'active' ? 'ops-status-active' : 'ops-status-neutral')}>
+                  {label(selected?.status ?? 'inactive')}
                 </span>
-                <h2>{selected.name}</h2>
-                <p>{selected.code || 'Project'} · {label(selected.project_type || 'Site execution')}</p>
-                <small><OwnerIcon name="globe" size={15}/>{address(selected.site_address)}</small>
+                <h2>{selected?.name ?? 'Project'}</h2>
+                <p>{selected?.code || 'Project'} · {label(selected?.project_type || 'Site execution')}</p>
+                <small><OwnerIcon name="globe" size={15}/>{address(selected?.site_address)}</small>
               </div>
               <div className="ops-progress-box">
                 <div
