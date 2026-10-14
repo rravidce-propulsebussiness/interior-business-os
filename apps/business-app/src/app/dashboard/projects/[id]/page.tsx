@@ -14,7 +14,7 @@ import '../../owner-dashboard.css';
 import './project-detail.css';
 
 const stageRecordSchema = z.object({
-  owned: z.array(z.object({ kind: z.string(), id: z.uuid() })),
+  owned: z.array(z.object({ kind: z.string(), id: z.uuid() })).default([]),
   links: z.array(
     z.object({
       stage_id: z.uuid(),
