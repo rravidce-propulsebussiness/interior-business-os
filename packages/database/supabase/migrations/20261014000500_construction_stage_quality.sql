@@ -165,7 +165,15 @@ begin
     and r.user_id=auth.uid() and r.active
     and r.role in ('quality_inspector','structural_engineer'))
  then raise exception 'Stage inspection workspace unavailable' using errcode='42501';end if;
- return jsonb_build_object('stages',coalesce((
+ return jsonb_build_object(
+  'available_inspections',case when can_manage then coalesce((
+    select jsonb_agg(jsonb_build_object('id',i.id,'number',i.number,
+      'status',i.status,'mandatory',i.mandatory,'is_final',i.is_final)
+      order by i.created_at desc,i.id desc)
+    from public.project_inspections i
+    where i.organization_id=p_org and i.project_id=p_project
+     and i.mandatory),'[]'::jsonb) else '[]'::jsonb end,
+  'stages',coalesce((
    select jsonb_agg(jsonb_build_object(
      'stage_id',s.id,'title',s.title,'instance_code',s.instance_code,
      'hold_point',s.hold_point,'cleared',private.construction_stage_current(p_org,p_project,s.id),
