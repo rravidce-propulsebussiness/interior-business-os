@@ -2,6 +2,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { OwnerIcon, type OwnerIconName } from '../../owner-shell';
 import { QuickAddLead } from './quick-add-lead';
 import type { LeadServiceOption } from './lead-service-options';
@@ -256,6 +257,7 @@ export function LeadsWorkspace({
   propulseConnection: ProPulseConnectionView;
   initialTool: 'none' | 'add' | 'propulse';
 }) {
+  const router = useRouter();
   const [leadTool, setLeadTool] = useState<'none' | 'add' | 'propulse'>(
     initialTool,
   );
@@ -274,7 +276,7 @@ export function LeadsWorkspace({
   const allSelected = rows.length > 0 && checked.length === rows.length;
   const open = (lead: LeadView) => {
     // The Leads list is for discovery; the detail route owns all lead actions.
-    window.location.href = path + '/' + encodeURIComponent(lead.id);
+    router.push(path + '/' + encodeURIComponent(lead.id));
   };
   const toggle = (id: string) =>
     setChecked((old) =>
