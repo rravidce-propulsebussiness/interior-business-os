@@ -58,7 +58,7 @@ begin
  -- Cannot rewrite an existing frozen planning definition.
  begin
    perform public.construction_project_command(org,project,'workflow_create',
-      '{"template":{"industry":"construction","version":"1.0.0"},"floors":[{"code":"GROUND","name":"Ground"}],"stages":[]}');
+      '{"template":{"industry":"construction","version":"1.0.0"},"floors":[{"code":"GROUND","name":"Ground"}],"stages":[{"instanceCode":"DESIGN","templateCode":"DESIGN","phase":"design","floorCode":null,"title":"Design coordination","explanation":"Frozen scope","holdPoint":"client_design","dependsOn":[],"activities":["Prepare drawings"],"inspectionTopics":[]}]}');
    raise exception 'FAIL: duplicate workflow accepted';
  exception when check_violation or unique_violation then null;
  end;
