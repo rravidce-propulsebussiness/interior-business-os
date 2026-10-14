@@ -53,9 +53,7 @@ export function makeConstructionSection(
     grade: '',
     description: '',
     allowancePerSqft: '',
-    ...(kind === 'plans'
-      ? { deliverables: [] }
-      : {}),
+    ...(kind === 'plans' ? { deliverables: [] } : {}),
     extraFields: [],
   };
 }
