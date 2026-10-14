@@ -502,7 +502,7 @@ export default async function ProjectDeliveryPage({
                 stageRecords={stageRecords}
                 canLinkRecords={construction.can_manage || isEngineer}
                 canManageLinks={construction.can_manage}
-                isWatchman={isWatchman}
+                isWatchman={role === 'watchman' && !manager}
               />
             )}
             {managerDataUnavailable && (
