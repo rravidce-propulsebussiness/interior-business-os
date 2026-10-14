@@ -73,12 +73,23 @@ const defaultCategories = [
     'Exclusions, defect liability and handover terms',
   ],
 ] as const;
+const defaultDrawings = [
+  'Architectural floor plan', 'Structural drawing', 'Electrical layout',
+  'Plumbing layout', 'Staircase detail', 'Elevation design', '3D views',
+  'Working drawings', 'Section drawing', 'Furniture layout',
+];
+const isPlanning = (section: ConstructionSpecSection) =>
+  section.kind === 'plans' ||
+  (!section.kind && /architectural|planning|drawings/i.test(section.title));
+
 const makeSection = (title: string): ConstructionSpecSection => ({
   title,
-  brand: '',
-  grade: '',
-  description: '',
-  allowancePerSqft: '',
+  kind: /architectural|planning|drawings/i.test(title) ? 'plans' : 'material',
+  deliverables: /architectural|planning|drawings/i.test(title)
+    ? defaultDrawings.map((label) => ({ label, included: true }))
+    : [],
+  fields: [],
+  brand: '', grade: '', description: '', allowancePerSqft: '',
 });
 const palettes = [
   '#155EEF',
@@ -231,7 +242,9 @@ export function PremiumPackageEditor({
       entry.description.trim() ||
       entry.brand.trim() ||
       entry.grade.trim() ||
-      entry.allowancePerSqft.trim(),
+      entry.allowancePerSqft.trim() ||
+      (entry.deliverables ?? []).some((drawing) => drawing.included) ||
+      (entry.fields ?? []).some((custom) => custom.value.trim()),
     ),
   );
   const previewName = name.trim() || 'Your construction package';
@@ -436,9 +449,9 @@ export function PremiumPackageEditor({
               Detailed Specifications
             </h4>
             <p className="mt-1 text-xs text-slate-500">
-              Edit manufacturer, material grade, price allowance per sq ft and
-              inclusions separately. Allowances are descriptive, not extra
-              charges.
+              Planning has drawing deliverables instead of brands.
+              Materials include brands, grades and allowances. Edit and
+              add custom fields to any category.
             </p>
           </div>
           <div className="grid grid-cols-2 gap-2 rounded-xl bg-[#EDF3FB] p-1">
