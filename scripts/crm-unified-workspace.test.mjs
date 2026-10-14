@@ -132,7 +132,7 @@ test('Upload Leads and Google Sheets have distinct protected pages', () => {
 });
 
 test('Leads listing opens the single canonical detail page without duplicate editors', () => {
-  assert.match(leads, /window\.location\.assign\(path \+ '\/'/);
+  assert.match(leads, /window\.location\.href = path \+ '\/'/);
   assert.match(leads, /onOpen=\{open\}/);
   assert.doesNotMatch(leads, /Open full lead workspace/);
   assert.doesNotMatch(leads, /Open full lead notes and history/);
