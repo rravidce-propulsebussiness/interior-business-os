@@ -103,7 +103,7 @@ export function ConstructionJourney({
   const pendingChecks = checks.filter((record) => value(record, 'status') !== 'passed');
   const materialsOpen = materials.filter((record) => !['received', 'rejected'].includes(value(record, 'status')));
   const operationsUrl = `/dashboard/operations?project=${projectId}`;
-  const paymentsUrl = `/dashboard/projects/${projectId}#commercial`;
+  const paymentsUrl = `/dashboard/finance/contracts?project_id=${projectId}`;
 
   return (
     <section className="cj-root" id="construction-timeline" aria-label="Construction execution timeline">
