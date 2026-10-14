@@ -112,7 +112,7 @@
   border-radius: 10px;
 }
 .sc-btn-outline {
-  color: #135cce;
+  color: #135cce !important;
   background: #ffffff;
   border: 1px solid #b9d3fc;
 }
