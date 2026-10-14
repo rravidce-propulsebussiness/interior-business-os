@@ -87,7 +87,7 @@ returns boolean language sql stable security definer set search_path='' as $$
           and cr.user_id=(select auth.uid()) and cr.active
           and cr.role in (
             'site_engineer','supervisor','quality_inspector',
-            'structural_engineer','watchman','procurement',
+            'structural_engineer','watchman','procurement','storekeeper',
             'project_manager','project_director'
           )
       )
