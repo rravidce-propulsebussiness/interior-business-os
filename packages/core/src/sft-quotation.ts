@@ -24,6 +24,12 @@ export const sftSectionSchema = z
     brand: z.string().trim().max(120).optional(),
     grade: z.string().trim().max(120).optional(),
     allowancePerSqft: z.string().trim().max(40).optional(),
+    kind: z.enum(['plans', 'material', 'general']).optional(),
+    deliverables: z.array(z.string().trim().min(2).max(100)).max(20).optional(),
+    customFields: z.array(z.object({
+      label: z.string().trim().min(2).max(70),
+      value: z.string().trim().max(200),
+    }).strict()).max(10).optional(),
   })
   .strict();
 
