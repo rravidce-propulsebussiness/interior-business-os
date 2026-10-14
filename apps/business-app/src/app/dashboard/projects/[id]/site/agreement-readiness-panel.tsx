@@ -144,8 +144,9 @@ export function AgreementReadinessPanel({
           Upload a private signed agreement PDF
         </summary>
         <p className="my-3 text-xs text-slate-600">
-          Only authorized commercial project managers can upload or read these documents.
-          They are not shared with architects, engineers or site security staff.
+          Only authorized commercial project managers can upload or read these
+          documents. They are not shared with architects, engineers or site
+          security staff.
         </p>
         <ProjectSiteMediaForm project={projectId} phase="agreement" />
       </details>
@@ -170,7 +171,8 @@ export function AgreementReadinessPanel({
               Record received signed PDF
             </h3>
             <p className="text-xs leading-5 text-slate-600">
-              Select a private Agreement PDF. Recording its receipt does not cryptographically verify signatures.
+              Select a private Agreement PDF. Recording its receipt does not
+              cryptographically verify signatures.
             </p>
             <label className="block text-xs font-semibold text-slate-800">
               Uploaded PDF

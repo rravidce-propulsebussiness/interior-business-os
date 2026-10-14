@@ -158,7 +158,11 @@ export function ProjectSiteMediaForm({
             required
             name="file"
             type="file"
-            accept={phase === 'agreement' ? 'application/pdf' : 'image/jpeg,image/png,image/webp,video/mp4,application/pdf'}
+            accept={
+              phase === 'agreement'
+                ? 'application/pdf'
+                : 'image/jpeg,image/png,image/webp,video/mp4,application/pdf'
+            }
           />
         </label>
         <label className="text-sm font-medium">
@@ -166,7 +170,13 @@ export function ProjectSiteMediaForm({
           <select
             className={control}
             name="category"
-            defaultValue={phase === 'agreement' ? 'agreement' : phase === 'design' ? 'design' : 'daily'}
+            defaultValue={
+              phase === 'agreement'
+                ? 'agreement'
+                : phase === 'design'
+                  ? 'design'
+                  : 'daily'
+            }
           >
             {phase === 'agreement' ? (
               <option value="agreement">Private signed agreement PDF</option>
