@@ -132,7 +132,18 @@ export function PremiumPackageEditor({
   const [themeColor, setThemeColor] = useState(item?.themeColor ?? '#155EEF');
   const [sections, setSections] = useState<ConstructionSpecSection[]>(
     item?.specSections?.length
-      ? item.specSections.map((section) => ({ ...section }))
+      ? item.specSections.map((section) =>
+          isPlanning(section) && !section.kind && !section.deliverables
+            ? {
+                ...section,
+                kind: 'plans',
+                deliverables: defaultDrawings.map((label) => ({
+                  label,
+                  included: true,
+                })),
+              }
+            : { ...section },
+        )
       : defaults.length
         ? defaults.map((entry) => ({
             ...makeSection(entry.title),
