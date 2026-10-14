@@ -114,7 +114,7 @@ function Metric({
   detail: string;
   tone: 'red' | 'amber' | 'blue' | 'green';
   icon: OwnerIconName;
-  href?: string;
+  href?: string | undefined;
 }) {
   const children = (
     <>
@@ -145,7 +145,7 @@ function PanelHeading({
   title: string;
   detail: string;
   icon: OwnerIconName;
-  href?: string;
+  href?: string | undefined;
 }) {
   return (
     <div className="ops-panel-heading">
