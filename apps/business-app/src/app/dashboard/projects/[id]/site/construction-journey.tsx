@@ -1,14 +1,13 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import type { ConstructionPlanningData } from './construction-planning-panel';
-import type { ConstructionQualityData } from './construction-stage-quality';
 import './construction-journey.css';
 
 type SiteRecord = Record<string, unknown>;
 type JourneyProps = {
   projectId: string;
   stages: ConstructionPlanningData['stages'];
-  quality?: ConstructionQualityData | null;
+  quality?: { stages: { stage_id: string; cleared: boolean; inspections: { mandatory: boolean; status: string; current: boolean }[] }[] } | null;
   materials: SiteRecord[];
   checks: SiteRecord[];
   media: SiteRecord[];
