@@ -44,6 +44,8 @@ begin
        'holdPoint','structural','dependsOn','[]'::jsonb,
        'activities',jsonb_build_array('Measure gridlines and foundation'),
        'inspectionTopics',jsonb_build_array('Level and cover')))));
+ if (public.construction_project_read(org,project)->'workflow'->>'status')<>'frozen'
+ then raise exception 'FAIL: authorized atomic workflow creation was left permanently in planning';end if;
  perform set_config('test.manager_stage',(
    select stage->>'id' from jsonb_array_elements(public.construction_project_read(org,project)->'stages') stage
      where stage->>'instance_code'='FOUNDATION'),true);
