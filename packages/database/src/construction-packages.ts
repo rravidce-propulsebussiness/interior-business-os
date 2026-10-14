@@ -75,6 +75,8 @@ export function createConstructionPackagesRepository(
     return data as T;
   }
   return {
+    template: () =>
+      invoke<ConstructionSpecTemplateEntry[]>('construction_spec_template_get', {}),
     list: (org: string) =>
       invoke<ConstructionPackage[]>('construction_package_list', {
         p_org: org,
