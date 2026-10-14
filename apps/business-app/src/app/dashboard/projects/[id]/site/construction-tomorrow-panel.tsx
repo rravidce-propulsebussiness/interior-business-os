@@ -110,13 +110,13 @@ export function ConstructionTomorrowPanel({
                     <input className={field} maxLength={70} required
                       placeholder="Bar benders / masons"
                       value={entry.trade}
-                      onChange={(event) => setLabor((old) => old.map((row,i) => i===index ? {...row,trade:event.target.value}:row)} />
+                      onChange={(event) => setLabor((old) => old.map((row,i) => i===index ? {...row,trade:event.target.value}:row))} />
                   </label>
                   <label className="text-xs font-semibold text-slate-700">
                     Workers
                     <input className={field} type="number" min="1" max="300" required
                       value={entry.workers}
-                      onChange={(event) => setLabor((old) => old.map((row,i) => i===index ? {...row,workers:event.target.value}:row)} />
+                      onChange={(event) => setLabor((old) => old.map((row,i) => i===index ? {...row,workers:event.target.value}:row))} />
                   </label>
                   <button className={outlined} type="button" disabled={labor.length===1}
                     onClick={() => setLabor((old) => old.filter((_,i)=>i!==index))}>Remove</button>
