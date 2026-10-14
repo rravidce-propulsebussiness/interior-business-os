@@ -16,7 +16,7 @@ begin
  if project is null then raise exception 'Demo project unavailable';end if;
  perform set_config('test.manager_project',project::text,true);
  perform public.project_site_command(org,project,'initialize','{}'::jsonb);
- agreement_media=public.project_site_media_put(org,project,'design','manager-agreement.pdf',
+ agreement_media=public.project_site_media_put(org,project,'agreement','manager-agreement.pdf',
    'application/pdf',encode(convert_to('%PDF-1.7'||chr(10)||
       'Manager test signed agreement fixture','UTF8'),'base64'),
    'Private signed paper copy test');
