@@ -135,6 +135,9 @@ export function PremiumSftBuilder({
                 : 'material'),
           ),
           ...item,
+          brand: item.brand ?? '',
+          grade: item.grade ?? '',
+          allowancePerSqft: item.allowancePerSqft ?? '',
         }))
       : freshSections(),
   );
