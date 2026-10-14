@@ -95,6 +95,10 @@ declare
  org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
  project uuid=current_setting('test.manager_project')::uuid;
  stage_id uuid=current_setting('test.manager_stage')::uuid;
+ contract_id uuid;
+ plan_id uuid;
+ template_id uuid;
+ handover_id uuid;
 begin
  if private.construction_stage_chain_current(org,project,stage_id)
  then raise exception 'FAIL: uncertified footing chain marked current';end if;
@@ -107,7 +111,54 @@ begin
  if exists(select 1 from private.site_state where organization_id=org
     and project_id=project and stage='handover')
  then raise exception 'FAIL: handover status changed despite failed clearance';end if;
- raise notice 'PASS: handover trigger requires current floor-stage certificates';
+ -- The independent Operations status and document approvals must fail
+ -- before any stage certificate has been issued for this construction project.
+ if private.construction_operations_handover_ready(org,project) then
+   raise exception 'FAIL: uncertified construction project marked handover-ready';end if;
+ select c.id into contract_id from public.contracts c
+   where c.organization_id=org and c.project_id=project and c.status='active'
+   order by c.created_at desc limit 1;
+ if contract_id is null then raise exception 'FAIL: canonical signed contract fixture missing';end if;
+ select id into plan_id from public.execution_plans
+   where organization_id=org and contract_id=contract_id;
+ if plan_id is null then
+   insert into public.execution_plans(
+      organization_id,project_id,contract_id,plan_number,status
+   ) values(org,project,contract_id,'HANDOVER-GATE-REGRESSION','punch_list')
+   returning id into plan_id;
+ else
+   update public.execution_plans set status='punch_list' where id=plan_id;
+ end if;
+ begin
+   update public.execution_plans set status='ready_for_handover' where id=plan_id;
+   raise exception 'FAIL: Operations readiness bypassed floor-stage clearance';
+ exception when check_violation then null;end;
+ begin
+   update public.execution_plans set status='handed_over' where id=plan_id;
+   raise exception 'FAIL: Operations direct handover bypassed floor-stage clearance';
+ exception when check_violation then null;end;
+ begin
+   update public.execution_plans set status='completed' where id=plan_id;
+   raise exception 'FAIL: Operations completion bypassed floor-stage clearance';
+ exception when check_violation then null;end;
+ if (select status from public.execution_plans where id=plan_id)<>'punch_list' then
+   raise exception 'FAIL: blocked Operations transition persisted';end if;
+ insert into public.handover_templates(organization_id,name,checklist)
+ values(org,'Construction gate fixture',
+   '[{"key":"documents","label":"Verified handover documents","required":true}]')
+ returning id into template_id;
+ insert into public.handover_records(
+   organization_id,project_id,plan_id,template_id,number,checklist
+ ) values(org,project,plan_id,template_id,'HANDOVER-GATE-REGRESSION',
+   '[{"key":"documents","result":"pass","required":true}]')
+ returning id into handover_id;
+ begin
+   update public.handover_records set status='approved' where id=handover_id;
+   raise exception 'FAIL: Operations issued approved handover with uncertified stages';
+ exception when check_violation then null;end;
+ if (select status from public.handover_records where id=handover_id)<>'draft' then
+   raise exception 'FAIL: rejected approved handover remained persisted';end if;
+ raise notice 'PASS: both Site Delivery and canonical Operations handover reject missing floor-stage certificates';
 end $handover_test$;
 set local role authenticated;
 
