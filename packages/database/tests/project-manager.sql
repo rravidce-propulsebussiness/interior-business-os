@@ -372,7 +372,7 @@ end$$;
 
 -- Integration regression: combined material readiness, handover, and site gate attendance.
 select set_config('request.jwt.claim.sub','22222222-2222-4222-8222-222222222222',true);
-do $
+do $$
 declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
  project uuid=current_setting('test.manager_project')::uuid;
  request_token uuid=gen_random_uuid();
