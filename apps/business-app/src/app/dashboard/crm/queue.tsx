@@ -128,7 +128,7 @@ export async function SalesQueue({
         <div className="crm-queue-heading">
           <div>
             <h1>{visits ? 'Site visits' : 'Follow-ups'}</h1>
-            <p>Everything related to your company's leads, in one workspace.</p>
+            <p>Everything related to your company&apos;s leads, in one workspace.</p>
           </div>
           <Link href={leadsPath} className="crm-queue-back">
             ← All leads
