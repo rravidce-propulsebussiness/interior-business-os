@@ -5,6 +5,9 @@ import type { Database } from './generated/database.types';
 
 export type ConstructionSpecSection = {
   title: string;
+  kind?: 'plans' | 'material' | 'general';
+  deliverables?: string[];
+  customFields?: { label: string; value: string }[];
   brand: string;
   grade: string;
   description: string;
