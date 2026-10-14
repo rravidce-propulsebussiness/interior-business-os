@@ -171,7 +171,9 @@ export function PremiumPackageEditor({
       entry.description.trim() ||
       entry.brand.trim() ||
       entry.grade.trim() ||
-      entry.allowancePerSqft.trim(),
+      entry.allowancePerSqft.trim() ||
+      entry.deliverables?.length ||
+      entry.extraFields?.some((field) => field.value.trim()),
     ),
   );
   const previewName = name.trim() || 'Your construction package';
