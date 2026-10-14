@@ -17,13 +17,13 @@ floor-aware construction stage.
 - An existing item with another `due_trigger` also becomes stage-controlled
   when a manager explicitly attaches a stage. Ordinary booking advances
   with no stage binding still use the original finance rules.
-- Multiple required stages are allowed on the *same* milestone: **all** must
+- Multiple required stages are allowed on the _same_ milestone: **all** must
   hold a currently valid quality/structural/curing certificate, as must
   every transitive predecessor in the construction stage dependency graph.
 - An active canonical contract, activated schedule and currently valid
   agreement evidence are required. A newer rejected QC review, failed
   reinspection, invalid curing observation or revoked agreement
-  automatically blocks *future* milestone issuance.
+  automatically blocks _future_ milestone issuance.
 - A BEFORE INSERT trigger on `public.payment_requests` applies the
   conditions even if the original `payment_request_issue` RPC is invoked
   directly; the new UI is not the sole enforcement point.
@@ -32,7 +32,7 @@ floor-aware construction stage.
   milestone invoice exists, preventing retroactive qualification of issued
   finance records.
 - A stage certificate makes a milestone **eligible to request**, not
-  *requested*, *invoiced* or *paid*. A separately authorized user must
+  _requested_, _invoiced_ or _paid_. A separately authorized user must
   explicitly issue the request. The command calls the original
   `payment_request_issue`, preserving numbered documents, immutable
   snapshots, exact schedule amounts, audit events and idempotency.
