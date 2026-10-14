@@ -2,22 +2,29 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { pageServices } from '@business-os/auth/server';
 import { DomainError } from '@business-os/shared';
+import { createConstructionPackagesRepository } from '@business-os/database/construction-packages';
+import { AdminSpecTemplateEditor } from './template-editor';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminQuotationGovernance() {
   // The platform role configures entitlements, never creates or reads
   // another company's private quotation or invoice documents.
-  const { authorization } = await pageServices();
+  const { authorization, client } = await pageServices();
   try {
     await authorization.requirePlatformPermission('platform.access');
     await authorization.requirePlatformPermission(
       'platform.organizations.view',
     );
+    await authorization.requirePlatformPermission(
+      'platform.organizations.manage',
+    );
   } catch (error) {
     if (error instanceof DomainError && error.code === 'FORBIDDEN') notFound();
     throw error;
   }
+  const defaults =
+    await createConstructionPackagesRepository(client).template();
   return (
     <main id="main-content" className="mx-auto max-w-6xl space-y-6 p-5 sm:p-8">
       <div className="rounded-3xl bg-slate-950 px-7 py-9 text-white">
@@ -33,6 +40,7 @@ export default async function AdminQuotationGovernance() {
           business workspace.
         </p>
       </div>
+      <AdminSpecTemplateEditor initial={defaults} />
       <div className="grid gap-4 md:grid-cols-2">
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <p className="text-xs font-bold uppercase text-blue-700">

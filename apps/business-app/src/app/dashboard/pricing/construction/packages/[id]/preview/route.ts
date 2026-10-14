@@ -35,7 +35,14 @@ export async function GET(request: Request, { params }: Params) {
       maximumFractionDigits: 0,
     }).format(Number(pkg.ratePerSqft) * 1000);
     const specs = pkg.specSections.filter((s) =>
-      Boolean(s.description || s.brand || s.grade || s.allowancePerSqft),
+      Boolean(
+        s.description ||
+        s.brand ||
+        s.grade ||
+        s.allowancePerSqft ||
+        s.deliverables?.some((drawing) => drawing.included) ||
+        s.fields?.some((entry) => entry.value.trim()),
+      ),
     );
     const specHtml = specs
       .map(
@@ -45,15 +52,36 @@ export async function GET(request: Request, { params }: Params) {
           '</span> · ' +
           escape(section.title) +
           '</h3>' +
-          (section.brand
+          (section.kind !== 'plans' && section.brand
             ? '<p>Brand: <strong>' + escape(section.brand) + '</strong></p>'
             : '') +
-          (section.grade ? '<p>Grade: ' + escape(section.grade) + '</p>' : '') +
-          (section.allowancePerSqft
+          (section.kind !== 'plans' && section.grade
+            ? '<p>Grade: ' + escape(section.grade) + '</p>'
+            : '') +
+          (section.kind !== 'plans' && section.allowancePerSqft
             ? '<p>Specified allowance: ₹' +
               escape(section.allowancePerSqft) +
               '/SFT</p>'
             : '') +
+          (section.deliverables?.length
+            ? '<p><strong>Included drawings:</strong></p><ul>' +
+              section.deliverables
+                .filter((drawing) => drawing.included)
+                .map((drawing) => '<li>' + escape(drawing.label) + '</li>')
+                .join('') +
+              '</ul>'
+            : '') +
+          (section.fields ?? [])
+            .filter((entry) => entry.value.trim())
+            .map(
+              (entry) =>
+                '<p><strong>' +
+                escape(entry.label) +
+                ':</strong> ' +
+                escape(entry.value) +
+                '</p>',
+            )
+            .join('') +
           (section.description
             ? '<p>' + escape(section.description) + '</p>'
             : '') +
@@ -125,7 +153,7 @@ export async function GET(request: Request, { params }: Params) {
       escape(total),
       '</td></tr></tbody></table></section>',
       '<section class="spec-sheet"><p class="number">02 / PACKAGE SPECIFICATIONS</p>',
-      '<h2>Materials, brands &amp; inclusions</h2>',
+      '<h2>Drawings, materials &amp; inclusions</h2>',
       '<p class="muted">Company-defined inclusions; subject to approved customer quotation.</p>',
       specHtml || '<p class="muted">No manual specifications entered.</p>',
       '<p class="muted">Material allowances describe inclusions, not additional charges.</p>',

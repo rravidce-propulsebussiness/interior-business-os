@@ -10895,6 +10895,14 @@ export interface Database {
         Args: { p_org: string; p_input: Json };
         Returns: string;
       };
+      construction_spec_template_get: {
+        Args: Record<string, never>;
+        Returns: Json;
+      };
+      construction_spec_template_save: {
+        Args: { p_sections: Json };
+        Returns: boolean;
+      };
       contract_create: {
         Args: { p_organization_id: string; p_revision_id: string };
         Returns: string;

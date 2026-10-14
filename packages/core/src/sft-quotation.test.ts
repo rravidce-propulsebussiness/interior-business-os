@@ -160,4 +160,36 @@ describe('floor-wise per-SFT construction estimates', () => {
       }),
     ).toThrow();
   });
+  it('preserves editable plan drawings and extra fields in quotation snapshots', () => {
+    const details = calculateSftEstimate({
+      rows: [{
+        kind: 'floor',
+        name: 'Ground Floor',
+        lengthFeet: '20',
+        widthFeet: '20',
+        ratePerSqft: '1950',
+      }],
+      materialIds: [],
+      sections: [{
+        kind: 'plans',
+        title: 'Architectural plans',
+        description: 'Complete construction drawings',
+        brand: '',
+        grade: '',
+        allowancePerSqft: '',
+        deliverables: [
+          { label: 'Electrical layout', included: true },
+          { label: 'Plumbing layout', included: true },
+          { label: '3D views', included: false },
+        ],
+        fields: [{ label: 'Revision rounds', value: 'Two' }],
+      }],
+    });
+    const restored = parseSftEstimate(encodeSftEstimate(details));
+    expect(restored?.sections?.[0]?.deliverables?.[0]?.label)
+      .toBe('Electrical layout');
+    expect(restored?.sections?.[0]?.fields?.[0]?.value).toBe('Two');
+    expect(details.total).toBe('780000.00');
+  });
+
 });

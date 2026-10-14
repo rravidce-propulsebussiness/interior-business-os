@@ -3,12 +3,22 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { DomainError } from '@business-os/shared';
 import type { Database } from './generated/database.types';
 
+export type PackageDrawing = { label: string; included: boolean };
+export type PackageExtraField = { label: string; value: string };
 export type ConstructionSpecSection = {
+  kind?: 'plans' | 'material' | 'custom' | undefined;
+  deliverables?: PackageDrawing[] | undefined;
+  fields?: PackageExtraField[] | undefined;
   title: string;
   brand: string;
   grade: string;
   description: string;
   allowancePerSqft: string;
+};
+export type ConstructionSpecTemplateEntry = {
+  title: string;
+  kind: 'plans' | 'material' | 'custom';
+  deliverables: string[];
 };
 export type ConstructionPackage = {
   themeColor: string;
@@ -65,6 +75,8 @@ export function createConstructionPackagesRepository(
     return data as T;
   }
   return {
+    template: () =>
+      invoke<ConstructionSpecTemplateEntry[]>('construction_spec_template_get', {}),
     list: (org: string) =>
       invoke<ConstructionPackage[]>('construction_package_list', {
         p_org: org,

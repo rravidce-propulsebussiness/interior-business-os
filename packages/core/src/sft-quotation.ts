@@ -19,6 +19,21 @@ const inputRow = z
 
 export const sftSectionSchema = z
   .object({
+    kind: z.enum(['plans', 'material', 'custom']).optional(),
+    deliverables: z
+      .array(z.object({
+        label: z.string().trim().min(2).max(90),
+        included: z.boolean(),
+      }).strict())
+      .max(16)
+      .optional(),
+    fields: z
+      .array(z.object({
+        label: z.string().trim().min(2).max(80),
+        value: z.string().trim().max(250),
+      }).strict())
+      .max(10)
+      .optional(),
     title: z.string().trim().min(2).max(90),
     description: z.string().trim().max(1100),
     brand: z.string().trim().max(120).optional(),

@@ -5,8 +5,10 @@ import { useRouter } from 'next/navigation';
 import type {
   ConstructionPackage,
   ConstructionSpecSection,
+  ConstructionSpecTemplateEntry,
 } from '@business-os/database/construction-packages';
 import { saveConstructionPackage } from './package-actions';
+import { SpecSectionFields } from './spec-section-fields';
 
 const defaultCategories = [
   [
@@ -73,8 +75,29 @@ const defaultCategories = [
     'Exclusions, defect liability and handover terms',
   ],
 ] as const;
+const defaultDrawings = [
+  'Architectural floor plan',
+  'Structural drawing',
+  'Electrical layout',
+  'Plumbing layout',
+  'Staircase detail',
+  'Elevation design',
+  '3D views',
+  'Working drawings',
+  'Section drawing',
+  'Furniture layout',
+];
+const isPlanning = (section: ConstructionSpecSection) =>
+  section.kind === 'plans' ||
+  (!section.kind && /architectural|planning|drawings/i.test(section.title));
+
 const makeSection = (title: string): ConstructionSpecSection => ({
   title,
+  kind: /architectural|planning|drawings/i.test(title) ? 'plans' : 'material',
+  deliverables: /architectural|planning|drawings/i.test(title)
+    ? defaultDrawings.map((label) => ({ label, included: true }))
+    : [],
+  fields: [],
   brand: '',
   grade: '',
   description: '',
@@ -101,9 +124,11 @@ const money = (v: number) =>
 export function PremiumPackageEditor({
   item,
   close,
+  defaults,
 }: {
   item?: ConstructionPackage;
   close: () => void;
+  defaults: ConstructionSpecTemplateEntry[];
 }) {
   const router = useRouter();
   const [state, action, pending] = useActionState(saveConstructionPackage, {
@@ -117,8 +142,28 @@ export function PremiumPackageEditor({
   const [themeColor, setThemeColor] = useState(item?.themeColor ?? '#155EEF');
   const [sections, setSections] = useState<ConstructionSpecSection[]>(
     item?.specSections?.length
-      ? item.specSections.map((section) => ({ ...section }))
-      : defaultCategories.map((record) => makeSection(record[0])),
+      ? item.specSections.map((section) =>
+          isPlanning(section) && !section.kind && !section.deliverables
+            ? {
+                ...section,
+                kind: 'plans' as const,
+                deliverables: defaultDrawings.map((label) => ({
+                  label,
+                  included: true,
+                })),
+              }
+            : { ...section },
+        )
+      : defaults.length
+        ? defaults.map((entry) => ({
+            ...makeSection(entry.title),
+            kind: entry.kind,
+            deliverables: entry.deliverables.map((label) => ({
+              label,
+              included: true,
+            })),
+          }))
+        : defaultCategories.map((record) => makeSection(record[0])),
   );
   const [mode, setMode] = useState<'manual' | 'pdf'>('manual');
   const [active, setActive] = useState(0);
@@ -231,7 +276,9 @@ export function PremiumPackageEditor({
       entry.description.trim() ||
       entry.brand.trim() ||
       entry.grade.trim() ||
-      entry.allowancePerSqft.trim(),
+      entry.allowancePerSqft.trim() ||
+      (entry.deliverables ?? []).some((drawing) => drawing.included) ||
+      (entry.fields ?? []).some((custom) => custom.value.trim()),
     ),
   );
   const previewName = name.trim() || 'Your construction package';
@@ -436,9 +483,9 @@ export function PremiumPackageEditor({
               Detailed Specifications
             </h4>
             <p className="mt-1 text-xs text-slate-500">
-              Edit manufacturer, material grade, price allowance per sq ft and
-              inclusions separately. Allowances are descriptive, not extra
-              charges.
+              Planning has drawing deliverables instead of brands. Materials
+              include brands, grades and allowances. Edit and add custom fields
+              to any category.
             </p>
           </div>
           <div className="grid grid-cols-2 gap-2 rounded-xl bg-[#EDF3FB] p-1">
@@ -486,16 +533,20 @@ export function PremiumPackageEditor({
                           {String(index + 1).padStart(2, '0')} · {spec.title}
                         </strong>
                         <span className="block truncate text-xs text-slate-500">
-                          {[
-                            spec.brand,
-                            spec.grade,
-                            spec.allowancePerSqft
-                              ? 'Up to ₹' + spec.allowancePerSqft + '/sft'
-                              : '',
-                          ]
-                            .filter(Boolean)
-                            .join(' · ') ||
-                            'Set brand, grade and material specification'}
+                          {isPlanning(spec)
+                            ? (spec.deliverables ?? []).filter(
+                                (drawing) => drawing.included,
+                              ).length + ' drawings included'
+                            : [
+                                spec.brand,
+                                spec.grade,
+                                spec.allowancePerSqft
+                                  ? 'Up to ₹' + spec.allowancePerSqft + '/sft'
+                                  : '',
+                              ]
+                                .filter(Boolean)
+                                .join(' · ') ||
+                              'Set brand, grade and material specification'}
                         </span>
                       </div>
                       <span className="text-lg text-blue-600">
@@ -515,46 +566,16 @@ export function PremiumPackageEditor({
                             }
                           />
                         </label>
-                        <label className={label}>
-                          Brand / manufacturer
-                          <input
-                            className={field}
-                            maxLength={120}
-                            value={spec.brand}
-                            placeholder="e.g. Tata, UltraTech, Kajaria"
-                            onChange={(event) =>
-                              updateSection(index, 'brand', event.target.value)
-                            }
-                          />
-                        </label>
-                        <label className={label}>
-                          Grade / material size
-                          <input
-                            className={field}
-                            maxLength={120}
-                            value={spec.grade}
-                            placeholder="e.g. Fe 550D, OPC 53, 2×2"
-                            onChange={(event) =>
-                              updateSection(index, 'grade', event.target.value)
-                            }
-                          />
-                        </label>
-                        <label className={label}>
-                          Allowance per sq ft (₹) · if applicable
-                          <input
-                            className={field}
-                            maxLength={40}
-                            value={spec.allowancePerSqft}
-                            placeholder="e.g. 85 for vitrified tiles"
-                            onChange={(event) =>
-                              updateSection(
-                                index,
-                                'allowancePerSqft',
-                                event.target.value,
-                              )
-                            }
-                          />
-                        </label>
+                        <SpecSectionFields
+                          section={spec}
+                          onChange={(next) =>
+                            setSections((all) =>
+                              all.map((entry, i) =>
+                                i === index ? next : entry,
+                              ),
+                            )
+                          }
+                        />
                         <label className={label + ' sm:col-span-2'}>
                           Scope and inclusions
                           <textarea
@@ -572,6 +593,44 @@ export function PremiumPackageEditor({
                             }
                           />
                         </label>
+                        <div className="flex flex-wrap gap-2 sm:col-span-2">
+                          <button
+                            type="button"
+                            disabled={index === 0}
+                            onClick={() => {
+                              setSections((items) => {
+                                const moved = [...items];
+                                [moved[index - 1], moved[index]] = [
+                                  moved[index]!,
+                                  moved[index - 1]!,
+                                ];
+                                return moved;
+                              });
+                              setActive(index - 1);
+                            }}
+                            className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold disabled:opacity-30"
+                          >
+                            Move up ↑
+                          </button>
+                          <button
+                            type="button"
+                            disabled={index === sections.length - 1}
+                            onClick={() => {
+                              setSections((items) => {
+                                const moved = [...items];
+                                [moved[index], moved[index + 1]] = [
+                                  moved[index + 1]!,
+                                  moved[index]!,
+                                ];
+                                return moved;
+                              });
+                              setActive(index + 1);
+                            }}
+                            className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold disabled:opacity-30"
+                          >
+                            Move down ↓
+                          </button>
+                        </div>
                         <button
                           type="button"
                           onClick={() => {
