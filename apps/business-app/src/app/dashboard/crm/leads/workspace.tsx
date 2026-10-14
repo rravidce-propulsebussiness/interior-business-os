@@ -1,9 +1,9 @@
 /* eslint-disable @next/next/no-html-link-for-pages -- Use fresh document navigations on Hostinger to avoid interrupted RSC Flight responses. */
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { OwnerIcon, type OwnerIconName } from '../../owner-shell';
-import { runCrmCommand, saveCrm } from '../actions';
 import { QuickAddLead } from './quick-add-lead';
 import type { LeadServiceOption } from './lead-service-options';
 import { LeadsBoardView } from './board-view';
@@ -54,11 +54,6 @@ export type LeadView = {
 
 const path = '/dashboard/crm/leads';
 const number = new Intl.NumberFormat('en-IN');
-const currency = new Intl.NumberFormat('en-IN', {
-  style: 'currency',
-  currency: 'INR',
-  maximumFractionDigits: 0,
-});
 
 type ActionIcon =
   | 'phone'
@@ -139,15 +134,6 @@ function firstLetters(value: string) {
       .join('') || 'LD'
   );
 }
-function text(value: string) {
-  return value.trim() || 'Not provided';
-}
-function budget(min: string | null, max: string | null) {
-  if (!min && !max) return 'Not specified';
-  if (min && max)
-    return currency.format(Number(min)) + ' – ' + currency.format(Number(max));
-  return currency.format(Number(min || max)) + (min ? ' +' : '');
-}
 function statusTone(lead: LeadView) {
   if (lead.lifecycle === 'won' || lead.convertedProjectId) return 'green';
   if (lead.lifecycle === 'lost') return 'red';
@@ -213,21 +199,6 @@ function downloadCsv(rows: LeadView[]) {
   window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-function Field({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="crm-detail-field">
-      <span>{label}</span>
-      <strong>{children}</strong>
-    </div>
-  );
-}
-
 export function LeadsWorkspace({
   rows,
   stats,
@@ -237,7 +208,6 @@ export function LeadsWorkspace({
   services,
   assignees,
   branches,
-  lostReasons,
   params,
   count,
   page,
@@ -246,11 +216,7 @@ export function LeadsWorkspace({
   canCreate,
   canConfigureCrm,
   canManage,
-  canAssign,
   canWin,
-  canNote,
-  canConvert,
-  canQuote,
   organizationName,
   timeZone,
   asOf,
@@ -291,6 +257,7 @@ export function LeadsWorkspace({
   propulseConnection: ProPulseConnectionView;
   initialTool: 'none' | 'add' | 'propulse';
 }) {
+  const router = useRouter();
   const [leadTool, setLeadTool] = useState<'none' | 'add' | 'propulse'>(
     initialTool,
   );
@@ -305,63 +272,16 @@ export function LeadsWorkspace({
     return string ? path + '?' + string : path;
   };
   const [syncFeedback, setSyncFeedback] = useState('');
-  const [selectedId, setSelectedId] = useState<string | null>(
-    rows[0]?.id ?? null,
-  );
   const [checked, setChecked] = useState<string[]>([]);
-  const [paneTab, setPaneTab] = useState<
-    'details' | 'notes' | 'activity' | 'quotes' | 'projects'
-  >('details');
-  const [stageId, setStageId] = useState(rows[0]?.stageId ?? '');
-  const [assignId, setAssignId] = useState(rows[0]?.assignedTo ?? '');
-  const [lostReason, setLostReason] = useState('');
-  const [stageNote, setStageNote] = useState('');
-  const [noteText, setNoteText] = useState('');
-  const [busy, setBusy] = useState(false);
-  const [feedback, setFeedback] = useState('');
-  const selected = useMemo(
-    () => rows.find((row) => row.id === selectedId) ?? null,
-    [rows, selectedId],
-  );
-  const chosenStage = stages.find((stage) => stage.id === stageId);
   const allSelected = rows.length > 0 && checked.length === rows.length;
-  const canSaveStage =
-    canManage &&
-    chosenStage &&
-    selected &&
-    stageId !== selected.stageId &&
-    (chosenStage.outcome !== 'won' || (canWin && stageNote.trim())) &&
-    (chosenStage.outcome !== 'lost' || lostReason);
   const open = (lead: LeadView) => {
-    setSelectedId(lead.id);
-    setStageId(lead.stageId);
-    setAssignId(lead.assignedTo);
-    setLostReason('');
-    setStageNote('');
-    setFeedback('');
-    setNoteText('');
-    setPaneTab('details');
+    // The Leads list is for discovery; the detail route owns all lead actions.
+    router.push(path + '/' + encodeURIComponent(lead.id));
   };
   const toggle = (id: string) =>
     setChecked((old) =>
       old.includes(id) ? old.filter((value) => value !== id) : [...old, id],
     );
-  const run = async (task: () => Promise<{ message: string }>) => {
-    setBusy(true);
-    setFeedback('');
-    try {
-      const response = await task();
-      if (/^(Saved\.|Updated\.)$/.test(response.message)) {
-        window.location.reload();
-        return;
-      }
-      setFeedback(response.message || 'Could not save changes.');
-    } catch {
-      setFeedback('Could not save changes. Check your connection and retry.');
-    } finally {
-      setBusy(false);
-    }
-  };
 
   useEffect(() => {
     if (
@@ -753,12 +673,7 @@ export function LeadsWorkspace({
                       </thead>
                       <tbody>
                         {rows.map((lead, i) => (
-                          <tr
-                            key={lead.id}
-                            className={
-                              selected?.id === lead.id ? 'crm-row-selected' : ''
-                            }
-                          >
+                          <tr key={lead.id}>
                             <td>
                               <input
                                 aria-label={'Select ' + lead.name}
@@ -772,7 +687,9 @@ export function LeadsWorkspace({
                                 type="button"
                                 className="crm-lead-identity"
                                 onClick={() => open(lead)}
-                                aria-label={'Preview ' + lead.name}
+                                aria-label={
+                                  'Open lead details for ' + lead.name
+                                }
                               >
                                 <span
                                   className={'crm-avatar crm-avatar-' + (i % 5)}
@@ -863,9 +780,9 @@ export function LeadsWorkspace({
                                 )}
                                 <button
                                   type="button"
-                                  title="Preview details"
+                                  title="Open lead details"
                                   aria-label={
-                                    'Preview details for ' + lead.name
+                                    'Open lead details for ' + lead.name
                                   }
                                   onClick={() => open(lead)}
                                 >
@@ -880,15 +797,7 @@ export function LeadsWorkspace({
                   </div>
                   <div className="crm-mobile-list">
                     {rows.map((lead, i) => (
-                      <article
-                        className={
-                          'crm-mobile-card' +
-                          (selected?.id === lead.id
-                            ? ' crm-mobile-selected'
-                            : '')
-                        }
-                        key={lead.id}
-                      >
+                      <article className="crm-mobile-card" key={lead.id}>
                         <div className="crm-mobile-header">
                           <span className={'crm-avatar crm-avatar-' + (i % 5)}>
                             {firstLetters(lead.name)}
@@ -900,7 +809,7 @@ export function LeadsWorkspace({
                           <button
                             type="button"
                             onClick={() => open(lead)}
-                            aria-label={'Preview ' + lead.name}
+                            aria-label={'Open lead details for ' + lead.name}
                           >
                             <Icon name="chevron" />
                           </button>
@@ -988,411 +897,6 @@ export function LeadsWorkspace({
             </div>
           </footer>
         </div>
-
-        {selected ? (
-          <aside
-            className="crm-detail-pane"
-            aria-label={'Lead preview for ' + selected.name}
-          >
-            <div className="crm-detail-header">
-              <div className="crm-detail-person">
-                <span className="crm-avatar crm-avatar-large">
-                  {firstLetters(selected.name)}
-                </span>
-                <div>
-                  <div className="crm-detail-name">
-                    <h2>{selected.name}</h2>
-                    <span
-                      className={'crm-chip crm-chip-' + statusTone(selected)}
-                    >
-                      {selected.stageName}
-                    </span>
-                  </div>
-                  <p>{selected.number || 'Lead'}</p>
-                  <small>
-                    Created {date(selected.createdAt, true, timeZone)}
-                  </small>
-                </div>
-              </div>
-              <button
-                className="crm-detail-close"
-                type="button"
-                onClick={() => setSelectedId(null)}
-                aria-label="Close lead preview"
-              >
-                <OwnerIcon name="close" size={19} />
-              </button>
-            </div>
-            <div className="crm-detail-actions">
-              {selected.phoneNormalized && (
-                <a
-                  className="crm-call-button"
-                  href={'tel:' + safePhone(selected.phoneNormalized)}
-                >
-                  <Icon name="phone" /> Call
-                </a>
-              )}
-              {whatsapp(selected.phoneNormalized || selected.phone) && (
-                <a
-                  className="crm-whatsapp-button"
-                  href={
-                    'https://wa.me/' +
-                    whatsapp(selected.phoneNormalized || selected.phone)
-                  }
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Icon name="whatsapp" /> WhatsApp
-                </a>
-              )}
-              {selected.convertedProjectId && canQuote ? (
-                <a
-                  className="crm-quote-button"
-                  href={
-                    '/dashboard/quotations?project=' +
-                    selected.convertedProjectId
-                  }
-                >
-                  <Icon name="file" /> Quotations
-                </a>
-              ) : canConvert && selected.lifecycle === 'open' ? (
-                <a
-                  className="crm-quote-button"
-                  href={path + '/' + selected.id + '/convert'}
-                >
-                  <Icon name="file" /> Convert lead
-                </a>
-              ) : null}
-            </div>
-            <div
-              className="crm-detail-tabs"
-              role="tablist"
-              aria-label="Lead details"
-            >
-              {(
-                [
-                  ['details', 'Details'],
-                  ['notes', 'Notes'],
-                  ['activity', 'Activity'],
-                  ['quotes', 'Quotations'],
-                  ['projects', 'Projects'],
-                ] as const
-              ).map(([key, value]) => (
-                <button
-                  type="button"
-                  key={key}
-                  role="tab"
-                  aria-selected={paneTab === key}
-                  onClick={() => setPaneTab(key)}
-                >
-                  {value}
-                </button>
-              ))}
-            </div>
-            <div className="crm-detail-content">
-              {paneTab === 'details' && (
-                <>
-                  <div className="crm-detail-section-heading">
-                    <h3>Basic Information</h3>
-                    <a href={path + '/' + selected.id}>
-                      <Icon name="edit" size={15} /> Edit
-                    </a>
-                  </div>
-                  <div className="crm-detail-fields">
-                    <Field label="Name">{selected.name}</Field>
-                    <Field label="Status">
-                      <span
-                        className={'crm-chip crm-chip-' + statusTone(selected)}
-                      >
-                        {selected.stageName}
-                      </span>
-                    </Field>
-                    <Field label="Phone">{text(selected.phone)}</Field>
-                    <Field label="Priority">
-                      <span
-                        className={
-                          'crm-priority crm-priority-' + selected.priority
-                        }
-                      >
-                        {selected.priority}
-                      </span>
-                    </Field>
-                    <Field label="Email">
-                      {selected.email ? (
-                        <a href={'mailto:' + selected.email}>
-                          {selected.email}
-                        </a>
-                      ) : (
-                        'Not provided'
-                      )}
-                    </Field>
-                    <Field label="Assigned to">
-                      {selected.assignedName || 'Unassigned'}
-                    </Field>
-                    <Field label="Location">{text(selected.location)}</Field>
-                    <Field label="Next follow-up">
-                      {date(selected.nextFollowUpAt, true, timeZone)}
-                    </Field>
-                    <Field label="Requirement">
-                      {text(selected.requirement)}
-                    </Field>
-                    <Field label="Source">{text(selected.source)}</Field>
-                    <Field label="Budget (est.)">
-                      {budget(selected.budgetMin, selected.budgetMax)}
-                    </Field>
-                    <Field label="Expected start">
-                      {selected.expectedStartDate || 'Not specified'}
-                    </Field>
-                  </div>
-                  {Object.keys(selected.requirements).length > 0 && (
-                    <div className="crm-summary crm-lead-detail-requirements">
-                      <strong>Project details</strong>
-                      <dl>
-                        {Object.entries(selected.requirements)
-                          .filter(([key]) => key !== 'service')
-                          .map(([key, entry]) => (
-                            <div key={key}>
-                              <dt>{key.replaceAll('_', ' ')}</dt>
-                              <dd>{entry}</dd>
-                            </div>
-                          ))}
-                      </dl>
-                    </div>
-                  )}
-                  {selected.notes && (
-                    <div className="crm-summary">
-                      <strong>Requirement summary</strong>
-                      <p>{selected.notes}</p>
-                    </div>
-                  )}
-                </>
-              )}
-              {paneTab === 'notes' && (
-                <section className="crm-pane-tab-body">
-                  <h3>Notes</h3>
-                  <p>{selected.notes || 'No requirement notes recorded.'}</p>
-                  <a href={path + '/' + selected.id}>
-                    Open full lead notes and history →
-                  </a>
-                </section>
-              )}
-              {paneTab === 'activity' && (
-                <section className="crm-pane-tab-body">
-                  <h3>Activity history</h3>
-                  <p>
-                    Calls, follow-ups, site visits and updates are recorded in
-                    the full lead workspace.
-                  </p>
-                  <a href={path + '/' + selected.id}>
-                    View activity timeline →
-                  </a>
-                </section>
-              )}
-              {paneTab === 'quotes' && (
-                <section className="crm-pane-tab-body">
-                  <h3>Quotations</h3>
-                  {selected.convertedProjectId ? (
-                    <a
-                      href={
-                        '/dashboard/quotations?project=' +
-                        selected.convertedProjectId
-                      }
-                    >
-                      View project quotations →
-                    </a>
-                  ) : (
-                    <p>
-                      Convert the lead into a project before preparing its
-                      quotation.
-                    </p>
-                  )}
-                </section>
-              )}
-              {paneTab === 'projects' && (
-                <section className="crm-pane-tab-body">
-                  <h3>Linked project</h3>
-                  {selected.convertedProjectId ? (
-                    <a
-                      href={
-                        '/dashboard/projects/' + selected.convertedProjectId
-                      }
-                    >
-                      Open linked project →
-                    </a>
-                  ) : (
-                    <p>No project is linked to this lead yet.</p>
-                  )}
-                </section>
-              )}
-
-              {canManage && selected.lifecycle !== 'archived' && (
-                <section className="crm-detail-editor">
-                  <h3>Update lead stage</h3>
-                  <label className="crm-editor-label">
-                    Pipeline stage
-                    <select
-                      value={stageId}
-                      onChange={(e) => {
-                        setStageId(e.target.value);
-                        setStageNote('');
-                        setLostReason('');
-                      }}
-                    >
-                      {stages
-                        .filter(
-                          (stage) =>
-                            stage.outcome !== 'won' ||
-                            canWin ||
-                            stage.id === selected.stageId,
-                        )
-                        .map((stage) => (
-                          <option key={stage.id} value={stage.id}>
-                            {stage.name}
-                          </option>
-                        ))}
-                    </select>
-                  </label>
-                  {chosenStage?.outcome === 'lost' &&
-                    stageId !== selected.stageId && (
-                      <label className="crm-editor-label">
-                        Reason for loss
-                        <select
-                          value={lostReason}
-                          onChange={(e) => setLostReason(e.target.value)}
-                        >
-                          <option value="">Select a reason</option>
-                          {lostReasons.map((reason) => (
-                            <option key={reason.value} value={reason.value}>
-                              {reason.label}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
-                    )}
-                  {stageId !== selected.stageId &&
-                    (chosenStage?.outcome === 'won' ||
-                      chosenStage?.outcome === 'lost') && (
-                      <label className="crm-editor-label">
-                        Outcome note
-                        <textarea
-                          rows={2}
-                          maxLength={3000}
-                          value={stageNote}
-                          onChange={(e) => setStageNote(e.target.value)}
-                          placeholder="Why is this lead moving to this stage?"
-                        />
-                      </label>
-                    )}
-                  <button
-                    type="button"
-                    className="crm-editor-primary"
-                    disabled={!canSaveStage || busy}
-                    onClick={() =>
-                      run(() =>
-                        runCrmCommand({
-                          action: 'stage',
-                          id: selected.id,
-                          version: selected.version,
-                          stage_id: stageId,
-                          lost_reason_id: lostReason || null,
-                          note: stageNote,
-                        }),
-                      )
-                    }
-                  >
-                    Save stage change
-                  </button>
-                </section>
-              )}
-              {canAssign && selected.lifecycle !== 'archived' && (
-                <section className="crm-detail-editor">
-                  <h3>Assign lead</h3>
-                  <div className="crm-inline-editor">
-                    <select
-                      aria-label="Assignee"
-                      value={assignId}
-                      onChange={(e) => setAssignId(e.target.value)}
-                    >
-                      <option value="">Unassigned</option>
-                      {assignees.map((member) => (
-                        <option value={member.value} key={member.value}>
-                          {member.label}
-                        </option>
-                      ))}
-                    </select>
-                    <button
-                      type="button"
-                      disabled={busy || assignId === selected.assignedTo}
-                      onClick={() =>
-                        run(() =>
-                          runCrmCommand({
-                            action: 'assign',
-                            id: selected.id,
-                            version: selected.version,
-                            assigned_to: assignId || null,
-                          }),
-                        )
-                      }
-                    >
-                      Assign
-                    </button>
-                  </div>
-                </section>
-              )}
-              {canNote && selected.lifecycle !== 'archived' && (
-                <section className="crm-detail-editor">
-                  <h3>Add note</h3>
-                  <textarea
-                    rows={2}
-                    maxLength={10000}
-                    placeholder="Record a call or update..."
-                    value={noteText}
-                    onChange={(e) => setNoteText(e.target.value)}
-                  />
-                  <button
-                    type="button"
-                    className="crm-editor-primary"
-                    disabled={busy || !noteText.trim()}
-                    onClick={() =>
-                      run(() =>
-                        saveCrm('lead_activities', {
-                          lead_id: selected.id,
-                          activity_type: 'note',
-                          subject: 'Lead note',
-                          body: noteText,
-                        }),
-                      )
-                    }
-                  >
-                    Save note
-                  </button>
-                </section>
-              )}
-              {feedback && (
-                <p role="alert" className="crm-action-feedback">
-                  {feedback}
-                </p>
-              )}
-            </div>
-            <div className="crm-detail-footer">
-              <a href={path + '/' + selected.id}>
-                <Icon name="eye" /> Open full lead workspace{' '}
-                <Icon name="chevron" size={15} />
-              </a>
-            </div>
-          </aside>
-        ) : (
-          <aside className="crm-detail-placeholder">
-            <OwnerIcon name="leads" size={33} />
-            <h2>Lead preview</h2>
-            <p>Select a lead to view contact details and actions.</p>
-            {rows[0] && (
-              <button type="button" onClick={() => open(rows[0]!)}>
-                Preview first lead
-              </button>
-            )}
-          </aside>
-        )}
       </section>
       <p className="crm-leads-scope">
         Showing authorized leads for {organizationName}. CSV export includes
