@@ -6,6 +6,7 @@ import {
   ConstructionStageQuality,
   type ConstructionQualityData,
 } from './construction-stage-quality';
+import { ConstructionFieldPanel, type ConstructionFieldData } from './construction-field-panel';
 import {
   assignConstructionRole,
   deactivateConstructionRole,
@@ -100,11 +101,15 @@ export function ConstructionPlanningPanel({
   data,
   memberOptions,
   quality,
+  field,
+  dailyReports = [],
 }: {
   projectId: string;
   data: ConstructionPlanningData;
   memberOptions: { id: string; label: string }[];
   quality?: ConstructionQualityData | null;
+  field?: ConstructionFieldData | null;
+  dailyReports?: { id: string; date: string }[];
 }) {
   const [message, setMessage] = useState('');
   const [pending, start] = useTransition();
@@ -310,6 +315,15 @@ export function ConstructionPlanningPanel({
                               </div>
                             )}
                           </details>
+                          {field && (
+                            <ConstructionFieldPanel
+                              projectId={projectId}
+                              stageId={stage.id}
+                              phase={stage.phase}
+                              data={field}
+                              reports={dailyReports}
+                            />
+                          )}
                           {quality?.stages.find(
                             (entry) => entry.stage_id === stage.id,
                           ) && (
