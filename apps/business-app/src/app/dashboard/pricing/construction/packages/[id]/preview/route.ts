@@ -49,11 +49,11 @@ export async function GET(request: Request, { params }: Params) {
           '</span> · ' +
           escape(section.title) +
           '</h3>' +
-          (section.brand
+          (section.kind !== 'plans' && section.brand
             ? '<p>Brand: <strong>' + escape(section.brand) + '</strong></p>'
             : '') +
-          (section.grade ? '<p>Grade: ' + escape(section.grade) + '</p>' : '') +
-          (section.allowancePerSqft
+          (section.kind !== 'plans' && section.grade ? '<p>Grade: ' + escape(section.grade) + '</p>' : '') +
+          (section.kind !== 'plans' && section.allowancePerSqft
             ? '<p>Specified allowance: ₹' +
               escape(section.allowancePerSqft) +
               '/SFT</p>'
