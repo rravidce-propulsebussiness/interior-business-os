@@ -163,7 +163,7 @@ create function public.construction_payment_command(
  p_org uuid,p_project uuid,p_action text,p_input jsonb default '{}'::jsonb
 ) returns uuid language plpgsql security definer set search_path='' as $$
 declare item public.payment_schedule_items; stage private.construction_project_stages;
- c public.contracts; target uuid; request_note text;due date;
+ target uuid; request_note text;due date;
 begin
  if not coalesce(private.construction_can_manage(p_org,p_project),false)
  then raise exception 'Project manager required' using errcode='42501';end if;
