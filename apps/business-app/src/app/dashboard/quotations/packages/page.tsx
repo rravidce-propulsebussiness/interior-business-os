@@ -12,8 +12,9 @@ export const dynamic = 'force-dynamic';
 export default async function QuotationPackagesPage() {
   const { org, canManagePrice } = await catalogPage(true);
   const { client, repository, authorization } = await pageServices();
-  const [organization, user, industries, construction, configurable] =
-    await Promise.all([
+  const [
+    organization, user, industries, construction, configurable, defaultSections,
+  ] = await Promise.all([
       repository.organization(org),
       authorization.requireAuthenticatedUser(),
       repository.industries(),
@@ -21,6 +22,7 @@ export default async function QuotationPackagesPage() {
       createQuotationPackagesRepository(client)
         .list(org)
         .catch(() => null),
+      createConstructionPackagesRepository(client).defaultSections(org),
     ]);
   if (!organization) throw new Error('Company workspace unavailable');
   return (
@@ -49,6 +51,7 @@ export default async function QuotationPackagesPage() {
       </div>
       <div className="space-y-6">
         <ConstructionPackagesManager
+          defaultSections={defaultSections}
           packages={construction}
           canManage={canManagePrice}
         />
