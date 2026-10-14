@@ -49,7 +49,7 @@ authenticated media routes; payment data requires separate Billing permission.
 
 1. Merge/review the earlier construction PR stack (#88 → #89 → #90 → #91 →
    #110) before this draft PR. Resolve the current base-branch merge conflict.
-2. On a *disposable* database, run `pnpm db:verify`,
+2. On a _disposable_ database, run `pnpm db:verify`,
    `pnpm db:types:check`, the new
    `construction-stage-record-links.sql` test, lint, TypeScript, unit tests,
    builds, Playwright and cross-role/cross-tenant negative tests.
