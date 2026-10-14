@@ -87,10 +87,49 @@ returns boolean language sql stable security definer set search_path='' as $$
           and cr.user_id=(select auth.uid()) and cr.active
           and cr.role in (
             'site_engineer','supervisor','quality_inspector',
-            'structural_engineer','watchman','procurement'
+            'structural_engineer','watchman','procurement',
+            'project_manager','project_director'
           )
       )
    ),false);
+$$;
+
+-- Restrict legacy manager/command fallback when a person has a narrowly
+-- scoped construction role, even if their organization-wide project.manage
+-- grant would otherwise elevate them in the old single-role Site Delivery RPC.
+create or replace function private.site_is_manager(org uuid,project uuid)
+returns boolean language sql stable security definer set search_path='' as $$
+ select coalesce(private.site_access(org,project) and (
+   private.site_owner(org)
+   or private.site_role(org,project)='manager'
+   or exists(select 1 from private.construction_project_roles cr
+       where cr.organization_id=org and cr.project_id=project
+         and cr.user_id=(select auth.uid()) and cr.active
+         and cr.role in ('project_director','project_manager'))
+   or (private.site_role(org,project) is null
+      and not exists(select 1 from private.construction_project_roles cr
+         where cr.organization_id=org and cr.project_id=project
+           and cr.user_id=(select auth.uid()) and cr.active)
+      and private.has_permission(org,'project.manage'))
+ ),false);
+$$;
+
+create or replace function private.site_allowed(org uuid,project uuid,roles text[])
+returns boolean language sql stable security definer set search_path='' as $$
+ select coalesce(private.site_access(org,project) and (
+   private.site_owner(org)
+   or private.site_role(org,project)=any(roles)
+   or ('manager'=any(roles) and exists(
+       select 1 from private.construction_project_roles cr
+       where cr.organization_id=org and cr.project_id=project
+         and cr.user_id=(select auth.uid()) and cr.active
+         and cr.role in ('project_director','project_manager')))
+   or (private.site_role(org,project) is null
+       and not exists(select 1 from private.construction_project_roles cr
+          where cr.organization_id=org and cr.project_id=project
+            and cr.user_id=(select auth.uid()) and cr.active)
+       and private.has_permission(org,'project.manage'))
+ ),false);
 $$;
 
 create function private.construction_tomorrow_staff(p_org uuid,p_project uuid)
