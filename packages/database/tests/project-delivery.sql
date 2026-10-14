@@ -92,7 +92,7 @@ end $$;
 
 -- An assigned architect can read design drawings, but never agreement PDF bytes.
 select set_config('request.jwt.claim.sub','33333333-3333-4333-8333-333333333333',true);
-do $
+do $$
 declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
  project uuid=current_setting('test.project_site_id')::uuid;
  agreement_media uuid=current_setting('test.agreement_media_id')::uuid;
@@ -106,7 +106,7 @@ begin
    raise exception 'FAIL: architect can download signed agreement';
  exception when insufficient_privilege then null;end;
  raise notice 'PASS: commercial agreement metadata and bytes isolated from architectural role';
-end$;
+end$$;
 
 -- Watchman can record gate events only, not change design/client approval.
 select set_config('request.jwt.claim.sub','22222222-2222-4222-8222-222222222222',true);
