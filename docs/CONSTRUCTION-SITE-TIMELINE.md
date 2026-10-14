@@ -1,6 +1,7 @@
 # Connected construction journey and site evidence
 
 ## UI
+
 The existing Project detail page (`/dashboard/projects/[id]`) and Site Delivery
 (`/dashboard/projects/[id]/site`) share `ConstructionJourney`, a single
 mobile-first construction timeline. It uses the project-specific floor-stage
@@ -21,6 +22,7 @@ Payments, invoice/receipt allocations, and purchase orders remain in canonical
 Billing/Procurement. A stage-specific payment trigger is NOT implemented.
 
 ## Who can update
+
 - Site engineer or authorized manager: daily field report, work-start and
   progress photos, workers actually on site, tomorrow's planned labour,
   tomorrow's activities and needed materials.
@@ -37,7 +39,9 @@ Billing/Procurement. A stage-specific payment trigger is NOT implemented.
   inspections, review and clearance; no unchecked 'passed' progress is inferred.
 
 ## Migrations (draft branch only)
+
 Apply **in order** after Phases 1–4 and environment verification:
+
 1. `20261015000100_site_curing_photo_access.sql`
    - Add private media category `curing`.
    - Allow active authorized watchmen to upload image-only curing photos after
@@ -58,6 +62,7 @@ be applied independently to an earlier production database. No live Supabase
 or Hostinger deployment has been performed.
 
 ## Validation before production
+
 - Run disposable `db:verify` and `project-delivery.sql` regression tests;
   verify generated types, TypeScript, ESLint, formatting, Playwright and Next
   production build on the merged dependency chain.
