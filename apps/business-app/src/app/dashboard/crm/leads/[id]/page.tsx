@@ -99,7 +99,6 @@ export default async function LeadDetail({
       href: leadPath,
       icon: 'leads',
       children: [
-        { label: 'CRM Overview', href: '/dashboard/crm' },
         { label: 'All Leads', href: leadPath },
         { label: 'Follow-ups', href: '/dashboard/crm/followups' },
         { label: 'Site Visits', href: '/dashboard/crm/site-visits' },

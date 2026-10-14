@@ -49,7 +49,6 @@ export async function LeadImportPage({
       href: leadsPath,
       icon: 'leads',
       children: [
-        { label: 'CRM Overview', href: '/dashboard/crm' },
         { label: 'All Leads', href: leadsPath },
         { label: 'Follow-ups', href: '/dashboard/crm/followups' },
         { label: 'Site Visits', href: '/dashboard/crm/site-visits' },

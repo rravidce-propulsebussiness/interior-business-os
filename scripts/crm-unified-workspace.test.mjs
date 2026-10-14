@@ -147,3 +147,39 @@ test('Leads listing opens the single canonical detail page without duplicate edi
   assert.match(detail, /id="lead-site-visits"/);
   assert.match(detail, /id="lead-activity"/);
 });
+
+test('legacy CRM overview and commercial response pages redirect to their canonical workspaces', () => {
+  const crmPage = readFileSync(
+    fileURLToPath(new URL('../page.tsx', root)),
+    'utf8',
+  );
+  const commercialPage = readFileSync(
+    fileURLToPath(new URL('../commercial/page.tsx', root)),
+    'utf8',
+  );
+  const layout = readFileSync(
+    fileURLToPath(new URL('../layout.tsx', root)),
+    'utf8',
+  );
+  const quotationsPage = readFileSync(
+    fileURLToPath(new URL('../../quotations/page.tsx', root)),
+    'utf8',
+  );
+  const leadPage = readFileSync(
+    fileURLToPath(new URL('page.tsx', root)),
+    'utf8',
+  );
+
+  assert.match(crmPage, /redirect\('\/dashboard\/crm\/leads'\)/);
+  assert.match(commercialPage, /response_status/);
+  assert.match(commercialPage, /redirect\('\/dashboard\/quotations\?/);
+  assert.match(commercialPage, /allowedStatuses/);
+  assert.doesNotMatch(commercialPage, /<main|Quotation customer responses/);
+  assert.doesNotMatch(layout, /crm-shared-navigation/);
+  assert.doesNotMatch(leadPage, /label: 'CRM Overview'/);
+  assert.match(quotationsPage, /customer_response\.view/);
+  assert.match(quotationsPage, /showResponses/);
+  assert.match(quotationsPage, /quotation_response_queue/);
+  assert.match(quotationsPage, /id="customer-responses"/);
+  assert.match(quotationsPage, /p_organization_id: s\.org/);
+});

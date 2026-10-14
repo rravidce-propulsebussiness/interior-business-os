@@ -292,7 +292,6 @@ export default async function Leads({
     href: base,
     icon: 'leads',
     children: [
-      { label: 'CRM Overview', href: '/dashboard/crm' },
       { label: 'All Leads', href: base },
       { label: 'Follow-ups', href: '/dashboard/crm/followups' },
       { label: 'Site Visits', href: '/dashboard/crm/site-visits' },

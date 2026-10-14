@@ -78,6 +78,9 @@ export default async function Settings({
   };
   return (
     <main id="main-content" className="mx-auto max-w-5xl p-6">
+      <Link className="mb-3 inline-block underline" href="/dashboard/crm/leads">
+        ← CRM / Leads
+      </Link>
       <h1 className="text-3xl font-semibold">CRM configuration</h1>
       <nav className="my-5 flex flex-wrap gap-5">
         {entities.map(([key, label]) => (
