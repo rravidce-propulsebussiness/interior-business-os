@@ -103,21 +103,35 @@ const constructionFieldSchema = z.object({
 });
 const constructionProcurementSchema = z.object({
   can_update: z.boolean(),
-  materials: z.array(z.object({
-    material_id: z.uuid(),
-    name: z.string(),
-    unit: z.string(),
-    request_quantity: z.number(),
-    required_quantity: z.number(),
-    request_status: z.enum(['requested','approved','ordered','received','rejected']),
-    source: z.enum(['undecided','marketplace','outside']),
-    vendor_reference: z.string(),
-    work_date: z.string(),
-    stage_id: z.uuid(),
-    stage_title: z.string(),
-    plan_id: z.uuid(),
-    readiness: z.enum(['approval_required','ordering_required','delivery_pending','site_marked_received','blocked']),
-  })),
+  materials: z.array(
+    z.object({
+      material_id: z.uuid(),
+      name: z.string(),
+      unit: z.string(),
+      request_quantity: z.number(),
+      required_quantity: z.number(),
+      request_status: z.enum([
+        'requested',
+        'approved',
+        'ordered',
+        'received',
+        'rejected',
+      ]),
+      source: z.enum(['undecided', 'marketplace', 'outside']),
+      vendor_reference: z.string(),
+      work_date: z.string(),
+      stage_id: z.uuid(),
+      stage_title: z.string(),
+      plan_id: z.uuid(),
+      readiness: z.enum([
+        'approval_required',
+        'ordering_required',
+        'delivery_pending',
+        'site_marked_received',
+        'blocked',
+      ]),
+    }),
+  ),
 });
 const constructionTomorrowSchema = z.object({
   can_approve: z.boolean(),
@@ -490,16 +504,20 @@ export default async function ProjectDeliveryPage({
       ? constructionTomorrowSchema.safeParse(tomorrowResponse.data)
       : null;
   const tomorrowWork = tomorrowParsed?.success ? tomorrowParsed.data : null;
-  const procurementResponse = construction && (site.can_manage || site.role === 'procurement')
-    ? await s.client.rpc('construction_procurement_watch', {
-        p_org: context.organizationId,
-        p_project: id,
-      })
+  const procurementResponse =
+    construction && (site.can_manage || site.role === 'procurement')
+      ? await s.client.rpc('construction_procurement_watch', {
+          p_org: context.organizationId,
+          p_project: id,
+        })
+      : null;
+  const procurementParsed =
+    procurementResponse && !procurementResponse.error
+      ? constructionProcurementSchema.safeParse(procurementResponse.data)
+      : null;
+  const procurementWatch = procurementParsed?.success
+    ? procurementParsed.data
     : null;
-  const procurementParsed = procurementResponse && !procurementResponse.error
-    ? constructionProcurementSchema.safeParse(procurementResponse.data)
-    : null;
-  const procurementWatch = procurementParsed?.success ? procurementParsed.data : null;
   const paymentResponse =
     site.can_manage && construction
       ? await s.client.rpc('construction_payment_read', {

@@ -10926,6 +10926,10 @@ export interface Database {
         Args: { p_org: string; p_project: string };
         Returns: Json;
       };
+      construction_procurement_watch: {
+        Args: { p_org: string; p_project: string };
+        Returns: Json;
+      };
       construction_project_command: {
         Args: {
           p_organization_id: string;
