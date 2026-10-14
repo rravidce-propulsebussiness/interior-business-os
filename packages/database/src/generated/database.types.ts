@@ -10921,6 +10921,19 @@ export interface Database {
         Args: { p_org: string; p_input: Json };
         Returns: string;
       };
+      construction_stage_record_command: {
+        Args: {
+          p_organization_id: string;
+          p_project_id: string;
+          p_action: string;
+          p_input?: Json;
+        };
+        Returns: Json;
+      };
+      construction_stage_record_read: {
+        Args: { p_organization_id: string; p_project_id: string };
+        Returns: Json;
+      };
       contract_create: {
         Args: { p_organization_id: string; p_revision_id: string };
         Returns: string;
