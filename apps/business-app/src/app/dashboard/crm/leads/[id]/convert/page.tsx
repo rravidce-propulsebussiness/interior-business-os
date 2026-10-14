@@ -25,6 +25,19 @@ export default async function Convert({
     .eq('id', id)
     .maybeSingle();
   if (!l) notFound();
+  // The database independently rejects every un-won conversion.
+  // Show the same rule here instead of offering a form that cannot save.
+  if (!l.converted_at && l.lifecycle !== 'won') {
+    return (
+      <main id="main-content" className="mx-auto max-w-4xl space-y-4 p-6">
+        <h1 className="text-2xl font-bold">Close this lead as Won first</h1>
+        <p>Purchasing a ProPulse lead only adds an enquiry to CRM. The business must win the customer before converting it into a Client and Project.</p>
+        <Link className="underline" href={'/dashboard/crm/leads/' + id}>
+          ← Return to lead and update stage
+        </Link>
+      </main>
+    );
+  }
   const commercial = createQuotationRepository(s.client);
   const matches = z
     .object({
