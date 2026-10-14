@@ -20,10 +20,11 @@ export default async function CommercialResponses({
 }) {
   const params = await searchParams;
   const status =
-    params.status === '' ? 'all' :
-    params.status && allowedStatuses.has(params.status)
-      ? params.status
-      : 'awaiting';
+    !params.status || params.status === 'all'
+      ? 'all'
+      : allowedStatuses.has(params.status)
+        ? params.status
+        : 'awaiting';
   const page = Math.max(
     1,
     Math.min(10000, Number.parseInt(params.page ?? '1', 10) || 1),
