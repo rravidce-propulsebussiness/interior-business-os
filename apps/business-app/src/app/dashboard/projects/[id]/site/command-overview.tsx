@@ -179,10 +179,10 @@ export function SiteCommandOverview(props: SiteCommandOverviewProps) {
           <div className="sc-hero-title">
             <p className="sc-overline">Business OS · Project workspace</p>
             <div className="sc-project-title-row">
-              <h1>Site Delivery</h1>
+              <h1>{projectName}</h1>
               <span className="sc-stage-badge">{stageTitle}</span>
             </div>
-            <p className="sc-project-name">{projectName}</p>
+            <p className="sc-project-name">Site Delivery workspace</p>
             <p className="sc-project-meta">
               {projectCode || 'Project code not set'}
               <span aria-hidden="true"> · </span>
@@ -192,6 +192,9 @@ export function SiteCommandOverview(props: SiteCommandOverviewProps) {
             </p>
           </div>
           <div className="sc-hero-actions">
+            <Link className="sc-btn sc-btn-outline" href={'/dashboard/projects/' + projectId}>
+              <OwnerIcon name="projects" size={17} /> Project details
+            </Link>
             {canUploadEvidence && (
               <a className="sc-btn sc-btn-outline" href="#media">
                 <OwnerIcon name="plus" size={17} /> Upload evidence
@@ -356,223 +359,6 @@ export function SiteCommandOverview(props: SiteCommandOverviewProps) {
         )}
       </nav>
 
-      <section className="sc-overview" id="overview">
-        <div className="sc-overview-main">
-          {(isEngineer || isQuality) && (
-            <article className="sc-surface">
-              <PanelHeading
-                title="Latest site progress"
-                icon="calendar"
-                href={reportSection ? '#daily-reports' : undefined}
-                action="All reports"
-              />
-              {latestReport ? (
-                <>
-                  <p className="sc-reported-date">
-                    Report dated{' '}
-                    {field(latestReport, 'report_date') || 'not recorded'}
-                  </p>
-                  <div className="sc-progress-tiles">
-                    <div>
-                      <span className="sc-tile-icon sc-green">
-                        <OwnerIcon name="check" size={19} />
-                      </span>
-                      <strong>Work completed</strong>
-                      <p>
-                        {field(latestReport, 'completed_work') || 'Not entered'}
-                      </p>
-                    </div>
-                    <div>
-                      <span className="sc-tile-icon sc-blue">
-                        <OwnerIcon name="leads" size={19} />
-                      </span>
-                      <strong>Labour count</strong>
-                      <p>
-                        {field(latestReport, 'worker_count') || 'Not entered'}
-                      </p>
-                    </div>
-                    <div>
-                      <span className="sc-tile-icon sc-amber">
-                        <OwnerIcon name="calendar" size={19} />
-                      </span>
-                      <strong>Tomorrow’s plan</strong>
-                      <p>
-                        {field(latestReport, 'tomorrow_plan') || 'Not entered'}
-                      </p>
-                    </div>
-                    <div>
-                      <span className="sc-tile-icon sc-orange">
-                        <OwnerIcon name="bell" size={19} />
-                      </span>
-                      <strong>Blockers</strong>
-                      <p>
-                        {field(latestReport, 'blockers') || 'None recorded'}
-                      </p>
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <p className="sc-empty">
-                  No daily site reports yet. Engineer updates will appear here
-                  after submission.
-                </p>
-              )}
-            </article>
-          )}
-          {canSeeManagerUpdates && (
-            <article className="sc-surface">
-              <PanelHeading
-                title="Manager instructions"
-                icon="team"
-                href={managerSection ? '#manager-updates' : undefined}
-                action="All updates"
-              />
-              {latestUpdate ? (
-                <div className="sc-instructions">
-                  <p className="sc-reported-date">
-                    {field(latestUpdate, 'report_date')}
-                  </p>
-                  <p>
-                    <strong>Site health:</strong>{' '}
-                    {pretty(field(latestUpdate, 'health')) || 'Not entered'}
-                  </p>
-                  <p>
-                    <strong>Progress:</strong>{' '}
-                    {field(latestUpdate, 'summary') || 'Not entered'}
-                  </p>
-                  <p>
-                    <strong>Next priorities:</strong>{' '}
-                    {field(latestUpdate, 'tomorrow_priorities') ||
-                      'Not entered'}
-                  </p>
-                  {field(latestUpdate, 'site_instructions') && (
-                    <p>
-                      <strong>Team instructions:</strong>{' '}
-                      {field(latestUpdate, 'site_instructions')}
-                    </p>
-                  )}
-                </div>
-              ) : (
-                <p className="sc-empty">
-                  No project-manager update published yet.
-                </p>
-              )}
-            </article>
-          )}
-          {isWatchman && !isEngineer && !canSeeManagerUpdates && (
-            <article className="sc-surface">
-              <PanelHeading
-                icon="calendar"
-                title="Security & curing"
-                href={securitySection ? '#security' : undefined}
-                action="Open log"
-              />
-              <p className="sc-empty">
-                Record material arrivals, labour entry, site rounds and curing
-                activities without commercial access.
-              </p>
-            </article>
-          )}
-          {isDesign && !isEngineer && (
-            <article className="sc-surface">
-              <PanelHeading
-                title="Technical design"
-                icon="projects"
-                href={stage !== 'not_started' ? '#design' : undefined}
-                action="Design reviews"
-              />
-              <p className="sc-empty">
-                Submit revised drawings, review current approvals and follow the
-                client-approval workflow.
-              </p>
-            </article>
-          )}
-        </div>
-        <div className="sc-overview-aside">
-          <article className="sc-surface">
-            <PanelHeading title="Delivery status" icon="check" />
-            <div className="sc-current-stage">
-              <strong>{stageTitle}</strong>
-              <span>Current workflow stage</span>
-            </div>
-            <div className="sc-data-line">
-              <span>Recorded reports</span>
-              <strong>{reports.length}</strong>
-            </div>
-            {isQuality && (
-              <div className="sc-data-line">
-                <span>Open quality checks</span>
-                <strong>{openChecks}</strong>
-              </div>
-            )}
-            <div className="sc-data-line">
-              <span>Assigned access</span>
-              <strong>
-                {isManager ? 'Manager' : pretty(role ?? 'Member')}
-              </strong>
-            </div>
-          </article>
-          {(isDesign || isEngineer || isQuality) && latestMedia.length > 0 && (
-            <article className="sc-surface">
-              <PanelHeading
-                title="Recent evidence"
-                icon="projects"
-                href={canUploadEvidence ? '#media' : undefined}
-                action="All files"
-              />
-              <div className="sc-evidence-list">
-                {latestMedia.map((file) => (
-                  <a
-                    href={
-                      '/dashboard/projects/' +
-                      projectId +
-                      '/site/media/' +
-                      file.id
-                    }
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    key={String(file.id)}
-                  >
-                    <OwnerIcon name="quotations" size={18} />
-                    <span>
-                      <strong>
-                        {field(file, 'filename') || 'Site evidence'}
-                      </strong>
-                      <small>{pretty(field(file, 'category'))}</small>
-                    </span>
-                    <span aria-hidden="true">↗</span>
-                  </a>
-                ))}
-              </div>
-            </article>
-          )}
-          {isQuality && (
-            <article className="sc-surface">
-              <PanelHeading
-                title="Quality checklist"
-                icon="check"
-                href={qualitySection ? '#quality' : undefined}
-                action="View checks"
-              />
-              <div className="sc-quality">
-                <strong>
-                  {passedChecks} of {checks.length} passed
-                </strong>
-                <div className="sc-quality-track">
-                  <span
-                    style={{
-                      width: checks.length
-                        ? Math.round((passedChecks / checks.length) * 100) + '%'
-                        : '0%',
-                    }}
-                  />
-                </div>
-                <small>{openChecks} pending, failed or requiring recheck</small>
-              </div>
-            </article>
-          )}
-        </div>
-      </section>
     </>
   );
 }
