@@ -5,7 +5,10 @@ import { z } from 'zod';
  * not completed work, progress percentages, inspections, payments, or approvals.
  * PostgreSQL remains authoritative for all execution transitions and permissions.
  */
-const stageCode = z.string().regex(/^[A-Z][A-Z0-9_]*$/).max(50);
+const stageCode = z
+  .string()
+  .regex(/^[A-Z][A-Z0-9_]*$/)
+  .max(50);
 const activity = z.string().trim().min(3).max(240);
 const phase = z.enum([
   'preconstruction',
@@ -51,7 +54,8 @@ export const constructionWorkflowTemplateSchema = z
 export type ConstructionWorkflowTemplate = z.infer<
   typeof constructionWorkflowTemplateSchema
 >;
-export type ConstructionStageTemplate = ConstructionWorkflowTemplate['stages'][number];
+export type ConstructionStageTemplate =
+  ConstructionWorkflowTemplate['stages'][number];
 
 function stage(
   code: string,
@@ -87,9 +91,14 @@ export const defaultConstructionWorkflow: ConstructionWorkflowTemplate = {
   industry: 'construction',
   version: '1.0.0',
   stages: [
-    stage('PRECONSTRUCTION', 'preconstruction', 'Agreement & preconstruction',
+    stage(
+      'PRECONSTRUCTION',
+      'preconstruction',
+      'Agreement & preconstruction',
       'Confirm the commercial scope and site readiness before physical work.',
-      [], 'contract', [
+      [],
+      'contract',
+      [
         'Accepted quotation and frozen specifications',
         'Agreement preparation and evidenced execution',
         'Contractual booking amount where applicable',
@@ -97,10 +106,16 @@ export const defaultConstructionWorkflow: ConstructionWorkflowTemplate = {
         'Soil investigation and report where required',
         'Permits, permissions and site readiness documentation',
         'Preliminary construction schedule',
-      ]),
-    stage('DESIGN', 'design', 'Architectural & structural design',
+      ],
+    ),
+    stage(
+      'DESIGN',
+      'design',
+      'Architectural & structural design',
       'Control revisions and release only authorized drawings to the site.',
-      ['PRECONSTRUCTION'], 'client_design', [
+      ['PRECONSTRUCTION'],
+      'client_design',
+      [
         'Client design requirements and concept drawings',
         'Architectural floor plans and revisions',
         'Client comments, updated drawings and layout approval',
@@ -109,11 +124,21 @@ export const defaultConstructionWorkflow: ConstructionWorkflowTemplate = {
         'Structural engineer review and approval',
         'Electrical, plumbing and MEP design coordination',
         'Controlled construction drawing issue and revision register',
-      ], ['Latest approved architectural layout', 'Approved structural drawings',
-        'Relevant services coordination and drawing release']),
-    stage('SITE_PREP', 'site_preparation', 'Site preparation & excavation',
+      ],
+      [
+        'Latest approved architectural layout',
+        'Approved structural drawings',
+        'Relevant services coordination and drawing release',
+      ],
+    ),
+    stage(
+      'SITE_PREP',
+      'site_preparation',
+      'Site preparation & excavation',
       'Verify levels, layout, soil conditions and excavation before PCC.',
-      ['DESIGN'], 'quality', [
+      ['DESIGN'],
+      'quality',
+      [
         'Site clearance and existing road/site level survey',
         'Boundary and reference point verification',
         'Site marking, grid lines and layout',
@@ -121,11 +146,21 @@ export const defaultConstructionWorkflow: ConstructionWorkflowTemplate = {
         'Founding level and soil verification',
         'Dewatering or ground treatment where specified',
         'QC clearance for PCC',
-      ], ['Excavation dimensions and depth', 'Soil/founding-level verification',
-        'Approved PCC pre-work inspection']),
-    stage('FOUNDATION', 'foundation', 'Foundation & footings',
+      ],
+      [
+        'Excavation dimensions and depth',
+        'Soil/founding-level verification',
+        'Approved PCC pre-work inspection',
+      ],
+    ),
+    stage(
+      'FOUNDATION',
+      'foundation',
+      'Foundation & footings',
       'Execute PCC, footing steel, concreting, curing and safe backfill.',
-      ['SITE_PREP'], 'structural', [
+      ['SITE_PREP'],
+      'structural',
+      [
         'PCC preparation, concrete placement, curing and inspection',
         'Footing layout and dimensions verification',
         'Steel procurement, grade, brand, diameter and batch checks',
@@ -138,12 +173,21 @@ export const defaultConstructionWorkflow: ConstructionWorkflowTemplate = {
         'Pedestal / starter columns',
         'Underground sump and relevant substructures where specified',
         'Backfilling, soil filling and compaction verification',
-      ], ['Steel grade, batch, spacing, lap, anchorage and cover',
+      ],
+      [
+        'Steel grade, batch, spacing, lap, anchorage and cover',
         'Concrete grade/source, shuttering and pre-pour clearance',
-        'Actual footing dimensions, curing and test evidence']),
-    stage('PLINTH', 'plinth', 'Plinth & ground preparation',
+        'Actual footing dimensions, curing and test evidence',
+      ],
+    ),
+    stage(
+      'PLINTH',
+      'plinth',
+      'Plinth & ground preparation',
       'Complete plinth structural work and verify soil and ground levels.',
-      ['FOUNDATION'], 'structural', [
+      ['FOUNDATION'],
+      'structural',
+      [
         'Plinth column reinforcement and shuttering',
         'Plinth beam reinforcement and tying',
         'Stirrups, joints, laps, cover and pre-pour inspection',
@@ -152,11 +196,21 @@ export const defaultConstructionWorkflow: ConstructionWorkflowTemplate = {
         'Soil/murram filling in approved layers',
         'Soil level, compaction and ground-floor preparation',
         'QC clearance before next construction stage',
-      ], ['Plinth reinforcement and cover', 'Curing log',
-        'Ground and compaction level evidence']),
-    stage('RCC', 'superstructure', 'RCC structure',
+      ],
+      [
+        'Plinth reinforcement and cover',
+        'Curing log',
+        'Ground and compaction level evidence',
+      ],
+    ),
+    stage(
+      'RCC',
+      'superstructure',
+      'RCC structure',
       'Repeat the engineered structural cycle for each configured floor.',
-      ['PLINTH'], 'structural', [
+      ['PLINTH'],
+      'structural',
+      [
         'Column reinforcement, formwork and alignment',
         'Column inspection, concrete placement and curing',
         'Beam and slab shuttering, beam reinforcement',
@@ -167,12 +221,23 @@ export const defaultConstructionWorkflow: ConstructionWorkflowTemplate = {
         'Curing rounds and inspection',
         'Deshuttering approval where applicable',
         'Slab levels and structural acceptance checks',
-      ], ['Column/beam/slab reinforcement and formwork',
+      ],
+      [
+        'Column/beam/slab reinforcement and formwork',
         'Embedded services, concrete tests and pre-pour inspection',
-        'Deshuttering authorization and curing evidence'], true, true),
-    stage('MASONRY', 'masonry', 'Masonry & concealed services',
+        'Deshuttering authorization and curing evidence',
+      ],
+      true,
+      true,
+    ),
+    stage(
+      'MASONRY',
+      'masonry',
+      'Masonry & concealed services',
       'Coordinate walls, openings and services after the floor structure.',
-      ['RCC'], 'quality', [
+      ['RCC'],
+      'quality',
+      [
         'Brick/block procurement and material inspection',
         'Wall layout, line, level and alignment',
         'Masonry execution',
@@ -181,12 +246,22 @@ export const defaultConstructionWorkflow: ConstructionWorkflowTemplate = {
         'Pressure and leakage tests',
         'Lintels, sunshades and chajjas where specified',
         'Internal/external masonry quality checks',
-      ], ['Masonry alignment and materials',
+      ],
+      [
+        'Masonry alignment and materials',
         'Opening dimensions and service coordination',
-        'Concealed services and test evidence'], true),
-    stage('FINISHES', 'finishes', 'Plaster, waterproofing & finishes',
+        'Concealed services and test evidence',
+      ],
+      true,
+    ),
+    stage(
+      'FINISHES',
+      'finishes',
+      'Plaster, waterproofing & finishes',
       'Execute finishing works with documented quality tests.',
-      ['MASONRY'], 'quality', [
+      ['MASONRY'],
+      'quality',
+      [
         'Internal and external plastering and curing',
         'Wet-area waterproofing preparation and application',
         'Waterproofing and leakage tests',
@@ -198,11 +273,22 @@ export const defaultConstructionWorkflow: ConstructionWorkflowTemplate = {
         'Plumbing sanitary and other fixtures',
         'Railings, gates and external works',
         'Finishing corrections and touch-ups',
-      ], ['Approved waterproofing system and tests',
-        'Levels and finishes quality', 'Electrical/plumbing function tests'], true),
-    stage('HANDOVER', 'handover', 'Final inspection & handover',
+      ],
+      [
+        'Approved waterproofing system and tests',
+        'Levels and finishes quality',
+        'Electrical/plumbing function tests',
+      ],
+      true,
+    ),
+    stage(
+      'HANDOVER',
+      'handover',
+      'Final inspection & handover',
       'Release handover only after mandatory quality and document clearance.',
-      ['FINISHES'], 'handover', [
+      ['FINISHES'],
+      'handover',
+      [
         'Final site inspections and punch list',
         'Defect rectification and reinspection',
         'Electrical and plumbing functional testing',
@@ -213,9 +299,13 @@ export const defaultConstructionWorkflow: ConstructionWorkflowTemplate = {
         'Contractual final-payment certification where required',
         'Handover documents and warranty start',
         'Defect service and warranty tracking',
-      ], ['Mandatory inspections and critical snags closed',
+      ],
+      [
+        'Mandatory inspections and critical snags closed',
         'Handover documents and client acknowledgement',
-        'Final contract-specified certifications']),
+        'Final contract-specified certifications',
+      ],
+    ),
   ],
 };
 
@@ -241,10 +331,13 @@ export interface ConstructionStageInstance {
 }
 
 /** Validate references, prevent cycles, and forbid a previous-floor gate on global stages. */
-export function validateConstructionTemplate(input: unknown): ConstructionWorkflowTemplate {
+export function validateConstructionTemplate(
+  input: unknown,
+): ConstructionWorkflowTemplate {
   const template = constructionWorkflowTemplateSchema.parse(input);
   const byCode = new Map(template.stages.map((item) => [item.code, item]));
-  if (byCode.size !== template.stages.length) throw new Error('Duplicate stage code');
+  if (byCode.size !== template.stages.length)
+    throw new Error('Duplicate stage code');
   const visited = new Set<string>();
   const visiting = new Set<string>();
   function walk(code: string): void {
@@ -273,7 +366,11 @@ export function expandConstructionStages(
   floorsInput: unknown,
 ): ConstructionStageInstance[] {
   const template = validateConstructionTemplate(templateInput);
-  const floors = z.array(constructionFloorSchema).min(1).max(64).parse(floorsInput);
+  const floors = z
+    .array(constructionFloorSchema)
+    .min(1)
+    .max(64)
+    .parse(floorsInput);
   if (new Set(floors.map((floor) => floor.code)).size !== floors.length)
     throw new Error('Duplicate floor code');
   const byCode = new Map(template.stages.map((stage) => [stage.code, stage]));
@@ -294,7 +391,8 @@ export function expandConstructionStages(
       });
       if (current.previousFloorRequired && floor) {
         const index = floors.findIndex((item) => item.code === floor.code);
-        if (index > 0) dependsOn.push(instanceCode(current.code, floors[index - 1]));
+        if (index > 0)
+          dependsOn.push(instanceCode(current.code, floors[index - 1]));
       }
       instances.push({
         instanceCode: instanceCode(current.code, floor),

@@ -8,21 +8,21 @@ an approved execution plan, or a client-facing progress calculation.
 
 ## 1. Existing architecture map
 
-| User workflow | Existing canonical implementation | Reuse and boundary |
-| --- | --- | --- |
-| Identity, tenant, permissions | `organization_memberships`, `roles`, `role_permissions`, `organization_entitlements`, checked private predicates | Keep Auth and tenant checks authoritative in PostgreSQL. No self-asserted organization, project or role IDs. |
-| Enquiry and customer | `leads`, `customers`, `projects` and CRM conversion RPCs | Reuse customer and project references; no duplicate homeowner or lead entity. |
-| Quote acceptance | `quotation_revisions`, `quotation_customer_responses`, `contract_create` | Accepted quotation revision is an immutable commercial input, **not** a signed agreement. |
-| Agreements and commercial scope | `contracts`, frozen `source_snapshot`, `change_orders` | Keep canonical contracts and approved changes; add separately audited evidence of agreement execution and enforce a physical-work gate. |
-| Milestone financing | `payment_schedules`, `payment_schedule_items`, `payment_requests` | Only link stage triggers to existing schedule items. `payment_request_issue` already handles repeated live requests. |
-| Billing and collections | `invoices`, `payments`, `payment_allocations`, `receipts` | Never mirror money or infer collection from stage completion. |
-| Project execution plan | `execution_plans`, `execution_plan_revisions`, `project_milestones`, `work_packages`, `project_tasks`, `task_dependencies` | These are the canonical approved plan, task weights and dependency engine; extend rather than create parallel task or progress totals. |
-| Procurement | Execution estimate, requisition, RFQ, PO, receipts, inventory lots and signed movements | `private.site_material_needs` is only a field request; bind it to the canonical requisition chain after approval, not a substitute purchase. |
-| Formal quality | `inspection_templates`, `project_inspections`, successor reinspection, `project_snags` | Canonical pass/fail, checklist snapshots, rework and closure. `private.site_checks` are separate informal site notes; cannot certify a hold point. |
-| Site delivery and files | `private.site_state`, `site_team`, `site_designs`, `site_reports`, `site_checks`, `site_gate`, `site_media`, `site_events` | Reuse site reports, manager review and existing protected media route. Keep internal project media private. |
-| Manager review | `site_manager_updates`, `site_report_reviews`, `site_material_quantity_revisions` | Append-only manager instructions/reviews and quantity corrections already exist. |
-| Notifications | Existing automation outbox, worker, notification preferences | Publish only authorized recipient projections, idempotently. |
-| UI | `/dashboard/projects`, `/[id]`, `/[id]/site`, `/dashboard/operations` | Keep one OwnerShell/navigation and link canonical records. |
+| User workflow                   | Existing canonical implementation                                                                                          | Reuse and boundary                                                                                                                                 |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Identity, tenant, permissions   | `organization_memberships`, `roles`, `role_permissions`, `organization_entitlements`, checked private predicates           | Keep Auth and tenant checks authoritative in PostgreSQL. No self-asserted organization, project or role IDs.                                       |
+| Enquiry and customer            | `leads`, `customers`, `projects` and CRM conversion RPCs                                                                   | Reuse customer and project references; no duplicate homeowner or lead entity.                                                                      |
+| Quote acceptance                | `quotation_revisions`, `quotation_customer_responses`, `contract_create`                                                   | Accepted quotation revision is an immutable commercial input, **not** a signed agreement.                                                          |
+| Agreements and commercial scope | `contracts`, frozen `source_snapshot`, `change_orders`                                                                     | Keep canonical contracts and approved changes; add separately audited evidence of agreement execution and enforce a physical-work gate.            |
+| Milestone financing             | `payment_schedules`, `payment_schedule_items`, `payment_requests`                                                          | Only link stage triggers to existing schedule items. `payment_request_issue` already handles repeated live requests.                               |
+| Billing and collections         | `invoices`, `payments`, `payment_allocations`, `receipts`                                                                  | Never mirror money or infer collection from stage completion.                                                                                      |
+| Project execution plan          | `execution_plans`, `execution_plan_revisions`, `project_milestones`, `work_packages`, `project_tasks`, `task_dependencies` | These are the canonical approved plan, task weights and dependency engine; extend rather than create parallel task or progress totals.             |
+| Procurement                     | Execution estimate, requisition, RFQ, PO, receipts, inventory lots and signed movements                                    | `private.site_material_needs` is only a field request; bind it to the canonical requisition chain after approval, not a substitute purchase.       |
+| Formal quality                  | `inspection_templates`, `project_inspections`, successor reinspection, `project_snags`                                     | Canonical pass/fail, checklist snapshots, rework and closure. `private.site_checks` are separate informal site notes; cannot certify a hold point. |
+| Site delivery and files         | `private.site_state`, `site_team`, `site_designs`, `site_reports`, `site_checks`, `site_gate`, `site_media`, `site_events` | Reuse site reports, manager review and existing protected media route. Keep internal project media private.                                        |
+| Manager review                  | `site_manager_updates`, `site_report_reviews`, `site_material_quantity_revisions`                                          | Append-only manager instructions/reviews and quantity corrections already exist.                                                                   |
+| Notifications                   | Existing automation outbox, worker, notification preferences                                                               | Publish only authorized recipient projections, idempotently.                                                                                       |
+| UI                              | `/dashboard/projects`, `/[id]`, `/[id]/site`, `/dashboard/operations`                                                      | Keep one OwnerShell/navigation and link canonical records.                                                                                         |
 
 Source landmarks: `docs/PROJECT-DELIVERY.md`,
 `docs/PROJECT-EXECUTION.md`, `docs/CONTRACTS.md`,
@@ -48,8 +48,8 @@ Source landmarks: `docs/PROJECT-DELIVERY.md`,
    Add project-scoped role assignments and action grants with a legacy role
    compatibility view. Never broaden `watchman` access via the old helper.
 3. **Execution hierarchy:** `site_state.stage` has only design,
-   client_approved, execution and handover. Keep it as the *coarse delivery
-   lifecycle*. Attach versioned construction stage instances to the existing
+   client_approved, execution and handover. Keep it as the _coarse delivery
+   lifecycle_. Attach versioned construction stage instances to the existing
    approved `execution_plan_revisions` and project tasks, not to duplicate
    financial milestones.
 4. **Hold points:** `private.site_checks` can be marked passed by site
@@ -114,7 +114,7 @@ contract. Clearances include actor, timestamp, reason/evidence source and an
 approved-contract-scope fingerprint. A staff attestation is **not** a
 verified e-signature. Only company-authorized commercial actors can record
 clearance; exceptions need explicit company-owner authority and reason.
-Enforce on *both* site delivery start and execution plan start in the
+Enforce on _both_ site delivery start and execution plan start in the
 database. Approved scope changes invalidate stale clearance where applicable.
 
 **M3 — Stages, dependencies and QC.** Snapshot template and approved plan
@@ -134,7 +134,7 @@ Scheduled curing is project-specification-based, never a universal duration.
 
 **M5 — Client access and media.** Invite/verify customer-project users,
 expose allowlisted client-only views, restricted plan versions, approved
-photos, certificates, tomorrow plans and existing financial *customer*
+photos, certificates, tomorrow plans and existing financial _customer_
 projections. Publish through checked actions and the existing outbox.
 Keep private media protected behind authorized same-origin or signed access.
 
@@ -152,7 +152,7 @@ checks, browser E2E, build and hosted smoke before enabling production.
   certifying stage work, issuing a request, issuing an invoice and recording
   a payment are different events.
 - A payment milestone maps to `payment_schedule_items.id`; stage
-  certification may *enable* `payment_request_issue`, but only a qualified
+  certification may _enable_ `payment_request_issue`, but only a qualified
   Billing actor or approved worker issues the canonical request.
 - Draft and active templates use versions. An in-flight project's approved
   template snapshot is immutable; editing defaults cannot mutate project
