@@ -205,7 +205,7 @@ export function QuickAddLead({
             </span>
             <div>
               <h3>Service Type</h3>
-              <p>Based on your company's registered services</p>
+              <p>Based on your company&apos;s registered services</p>
             </div>
           </div>
           {services.length === 1 ? (
