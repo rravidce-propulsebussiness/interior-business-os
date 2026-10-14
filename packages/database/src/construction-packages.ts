@@ -10,11 +10,8 @@ export type ConstructionSpecSection = {
   description: string;
   allowancePerSqft: string;
 };
-export type ConstructionPackageOwnerOption = { id: string; name: string };
 export type ConstructionPackage = {
-  ownerIds: string[];
   themeColor: string;
-  visibility: 'company' | 'owner_only';
   specSections: ConstructionSpecSection[];
   attachmentFilename: string | null;
   id: string;
@@ -72,13 +69,6 @@ export function createConstructionPackagesRepository(
       invoke<ConstructionPackage[]>('construction_package_list', {
         p_org: org,
       }),
-    listOwners: (org: string) =>
-      invoke<ConstructionPackageOwnerOption[]>(
-        'construction_package_owner_options',
-        {
-          p_org: org,
-        },
-      ),
     save: (
       org: string,
       input: {
@@ -90,8 +80,6 @@ export function createConstructionPackagesRepository(
         ratePerSqft: string;
         status: 'active' | 'inactive';
         themeColor: string;
-        visibility: 'company' | 'owner_only';
-        ownerIds: string[];
         specSections: ConstructionSpecSection[];
       },
     ) =>

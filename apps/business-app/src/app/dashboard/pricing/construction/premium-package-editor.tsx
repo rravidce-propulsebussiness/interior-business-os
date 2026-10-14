@@ -4,7 +4,6 @@ import { useActionState, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type {
   ConstructionPackage,
-  ConstructionPackageOwnerOption,
   ConstructionSpecSection,
 } from '@business-os/database/construction-packages';
 import { saveConstructionPackage } from './package-actions';
@@ -102,11 +101,9 @@ const money = (v: number) =>
 export function PremiumPackageEditor({
   item,
   close,
-  ownerOptions,
 }: {
   item?: ConstructionPackage;
   close: () => void;
-  ownerOptions: ConstructionPackageOwnerOption[];
 }) {
   const router = useRouter();
   const [state, action, pending] = useActionState(saveConstructionPackage, {
@@ -118,8 +115,6 @@ export function PremiumPackageEditor({
   const [status, setStatus] = useState(item?.status ?? 'active');
   const [description, setDescription] = useState(item?.description ?? '');
   const [themeColor, setThemeColor] = useState(item?.themeColor ?? '#155EEF');
-  const [visibility, setVisibility] = useState(item?.visibility ?? 'company');
-  const [ownerIds, setOwnerIds] = useState<string[]>(item?.ownerIds ?? []);
   const [sections, setSections] = useState<ConstructionSpecSection[]>(
     item?.specSections?.length
       ? item.specSections.map((section) => ({ ...section }))
@@ -294,8 +289,6 @@ export function PremiumPackageEditor({
           </>
         )}
         <input type="hidden" name="themeColor" value={themeColor} />
-        <input type="hidden" name="visibility" value={visibility} />
-        <input type="hidden" name="ownerIds" value={JSON.stringify(ownerIds)} />
         <input
           type="hidden"
           name="specSections"
@@ -311,7 +304,7 @@ export function PremiumPackageEditor({
                 Package Details
               </h4>
               <p className="text-xs text-slate-500">
-                Pricing, visibility, theme and business branding.
+                Pricing, specifications, theme and company branding.
               </p>
             </div>
           </div>
@@ -373,82 +366,17 @@ export function PremiumPackageEditor({
                 <option value="inactive">Inactive</option>
               </select>
             </label>
-            <div className="grid gap-2 sm:col-span-2">
-              <span className="text-xs font-bold text-slate-700">
-                Package visibility
-              </span>
-              <div
-                className="flex flex-wrap gap-2"
-                role="group"
-                aria-label="Who may use this package"
-              >
-                {[
-                  { id: 'owner_only', title: 'Specific owner', icon: '♙' },
-                  { id: 'company', title: 'Company only', icon: '▣' },
-                ].map((option) => (
-                  <button
-                    key={option.id}
-                    type="button"
-                    aria-pressed={visibility === option.id}
-                    onClick={() =>
-                      setVisibility(option.id as 'company' | 'owner_only')
-                    }
-                    className={
-                      'min-h-11 rounded-xl px-4 py-2 text-xs font-bold ' +
-                      (visibility === option.id
-                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
-                        : 'border border-slate-200 bg-slate-50 text-slate-700')
-                    }
-                  >
-                    {option.icon} {option.title}
-                  </button>
-                ))}
+            <div className="sm:col-span-2 rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-50 to-teal-50 p-4">
+              <div className="flex items-center gap-2 text-sm font-extrabold text-slate-900">
+                <span className="grid size-9 place-items-center rounded-xl bg-white text-lg text-blue-700">
+                  ▣
+                </span>
+                Private to your company
               </div>
-              {visibility === 'owner_only' && (
-                <fieldset className="rounded-xl border border-blue-100 bg-white p-3">
-                  <legend className="px-1 text-xs font-extrabold text-slate-800">
-                    Choose permitted company owners
-                  </legend>
-                  <p className="mb-3 text-xs leading-5 text-slate-500">
-                    The package creator always retains access. Select additional
-                    owners who may open this package code and use it in
-                    quotations.
-                  </p>
-                  <div className="grid gap-2 sm:grid-cols-2">
-                    {ownerOptions.map((owner) => (
-                      <label
-                        key={owner.id}
-                        className="flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border border-slate-200 p-3 text-xs font-bold text-slate-700"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={ownerIds.includes(owner.id)}
-                          onChange={(event) =>
-                            setOwnerIds((current) =>
-                              event.target.checked
-                                ? [...current, owner.id]
-                                : current.filter((id) => id !== owner.id),
-                            )
-                          }
-                          className="size-4 accent-blue-600"
-                        />
-                        <span>{owner.name}</span>
-                      </label>
-                    ))}
-                    {ownerOptions.length === 0 && (
-                      <p className="text-xs text-slate-500">
-                        No eligible company owner accounts are available. The
-                        package creator will retain access.
-                      </p>
-                    )}
-                  </div>
-                </fieldset>
-              )}
-              <p className="rounded-xl bg-blue-50 px-3 py-2 text-xs leading-5 text-blue-700">
-                Specific-owner packages are visible only to their creator and
-                the selected active company owners. Company packages are
-                available to authorized staff in this business, never other
-                companies.
+              <p className="mt-2 text-xs leading-6 text-slate-600">
+                All packages are owned by your company. Authorized team members
+                can use your saved rates and specifications. Other companies
+                cannot view or reuse your packages.
               </p>
             </div>
             <div className="sm:col-span-2 lg:col-span-1">
