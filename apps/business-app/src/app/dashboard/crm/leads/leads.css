@@ -2461,3 +2461,25 @@ body:has(.crm-leads-root) .crm-shared-navigation {
   .crm-lead-editor .crm-lead-submit-bar .crm-primary { width: 100%; }
   .crm-lead-hero h2 { font-size: 21px; }
 }
+
+.crm-lead-detail-requirements dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 15px;
+  margin-top: 12px;
+}
+.crm-lead-detail-requirements dt {
+  color: #69809c;
+  font-size: 11px;
+  text-transform: capitalize;
+  margin-bottom: 3px;
+}
+.crm-lead-detail-requirements dd {
+  color: #172e52;
+  font-weight: 700;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 440px) {
+  .crm-lead-detail-requirements dl { grid-template-columns: 1fr; }
+}
