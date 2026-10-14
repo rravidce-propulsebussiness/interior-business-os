@@ -19,6 +19,9 @@ type WorkRow = {
   ratePerSqft: string;
 };
 type Section = {
+  kind?: 'plans' | 'material' | 'custom';
+  deliverables?: { label: string; included: boolean }[];
+  fields?: { label: string; value: string }[];
   title: string;
   description: string;
   brand?: string | undefined;
