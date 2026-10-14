@@ -23,6 +23,12 @@ const section = z
     grade: z.string().trim().max(120),
     description: z.string().trim().max(600),
     allowancePerSqft: z.string().trim().max(40),
+    kind: z.enum(['plans', 'material', 'general']).optional(),
+    deliverables: z.array(z.string().trim().min(2).max(100)).max(20).optional(),
+    customFields: z.array(z.object({
+      label: z.string().trim().min(2).max(70),
+      value: z.string().trim().max(200),
+    }).strict()).max(10).optional(),
   })
   .strict();
 const schema = z
