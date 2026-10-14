@@ -257,22 +257,38 @@ it.skipIf(!process.env.TEST_DATABASE_URL)(
       );
       run(
         auth(
-          `select public.project_agreement_command('${org}','${project}','${contract}','record_signed_pdf',${json({
-            media_id: agreementMedia,
-            note: 'Paper agreement received for the test; digital signatures not verified',
-          })})`,
+          `select public.project_agreement_command('${org}','${project}','${contract}','record_signed_pdf',${json(
+            {
+              media_id: agreementMedia,
+              note: 'Paper agreement received for the test; digital signatures not verified',
+            },
+          )})`,
         ),
       );
-      run(auth(`select public.contract_transition('${org}','${contract}',1,'active')`));
+      run(
+        auth(
+          `select public.contract_transition('${org}','${contract}',1,'active')`,
+        ),
+      );
       const paymentSchedule = run(
         auth(
           `select public.payment_schedule_save('${org}','${contract}',${json({
             label: 'Fixture construction payment schedule',
-            items: [{ label: 'Handover payment', calculation_type: 'remaining', value: '0' }],
+            items: [
+              {
+                label: 'Handover payment',
+                calculation_type: 'remaining',
+                value: '0',
+              },
+            ],
           })})`,
         ),
       );
-      run(auth(`select public.payment_schedule_activate('${org}','${paymentSchedule}',1)`));
+      run(
+        auth(
+          `select public.payment_schedule_activate('${org}','${paymentSchedule}',1)`,
+        ),
+      );
 
       call('operations_plan', 'status', {
         id: plan,
