@@ -14,31 +14,37 @@ import '../../owner-dashboard.css';
 import './project-detail.css';
 
 const stageRecordSchema = z.object({
-  links: z.array(z.object({
-    stage_id: z.uuid(),
-    kind: z.string(),
-    record_id: z.uuid(),
-  })),
-  payments: z.array(z.object({
-    stage_id: z.uuid(),
-    item_id: z.uuid(),
-    contract_id: z.uuid(),
-    label: z.string(),
-    amount: z.string(),
-    due_date: z.string().nullable(),
-    currency: z.string(),
-    contract_number: z.string(),
-    request_number: z.string().nullable(),
-    request_status: z.string().nullable(),
-  })),
-  options: z.array(z.object({
-    id: z.uuid(),
-    contract_id: z.uuid(),
-    label: z.string(),
-    amount: z.string(),
-    currency: z.string(),
-    contract_number: z.string(),
-  })),
+  links: z.array(
+    z.object({
+      stage_id: z.uuid(),
+      kind: z.string(),
+      record_id: z.uuid(),
+    }),
+  ),
+  payments: z.array(
+    z.object({
+      stage_id: z.uuid(),
+      item_id: z.uuid(),
+      contract_id: z.uuid(),
+      label: z.string(),
+      amount: z.string(),
+      due_date: z.string().nullable(),
+      currency: z.string(),
+      contract_number: z.string(),
+      request_number: z.string().nullable(),
+      request_status: z.string().nullable(),
+    }),
+  ),
+  options: z.array(
+    z.object({
+      id: z.uuid(),
+      contract_id: z.uuid(),
+      label: z.string(),
+      amount: z.string(),
+      currency: z.string(),
+      contract_number: z.string(),
+    }),
+  ),
 });
 
 export const dynamic = 'force-dynamic';
@@ -261,16 +267,20 @@ export default async function Project({
       ? timelineQualitySchema.safeParse(qcResponse.data)
       : null;
   const timelineQuality = qcParsed?.success ? qcParsed.data : null;
-  const stageRecordResponse = site && timelineStages.length
-    ? await s.client.rpc('construction_stage_record_read', {
-        p_organization_id: s.org,
-        p_project_id: id,
-      })
+  const stageRecordResponse =
+    site && timelineStages.length
+      ? await s.client.rpc('construction_stage_record_read', {
+          p_organization_id: s.org,
+          p_project_id: id,
+        })
+      : null;
+  const stageRecordParsed =
+    stageRecordResponse && !stageRecordResponse.error
+      ? stageRecordSchema.safeParse(stageRecordResponse.data)
+      : null;
+  const stageRecords = stageRecordParsed?.success
+    ? stageRecordParsed.data
     : null;
-  const stageRecordParsed = stageRecordResponse && !stageRecordResponse.error
-    ? stageRecordSchema.safeParse(stageRecordResponse.data)
-    : null;
-  const stageRecords = stageRecordParsed?.success ? stageRecordParsed.data : null;
   const currentStage = site
     ? deliveryStages.findIndex((stage) => stage.key === site.stage)
     : -1;
