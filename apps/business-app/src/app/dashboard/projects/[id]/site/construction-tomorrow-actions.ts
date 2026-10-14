@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { activeOrganization, serverServices } from '@business-os/auth/server';
+import type { Json } from '@business-os/database';
 
 export type TomorrowResult = { saved: boolean; message: string };
 const uuid = z.uuid();
@@ -28,7 +29,7 @@ const materialsSchema = z
 async function invoke(
   projectId: string,
   action: 'submit' | 'review',
-  input: Record<string, unknown>,
+  input: Record<string, Json>,
 ): Promise<TomorrowResult> {
   try {
     uuid.parse(projectId);
