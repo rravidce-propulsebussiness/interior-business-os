@@ -42,6 +42,27 @@ begin
 end $assert$;
 set local role authenticated;
 
+-- Regression: older clients use object-style drawing choices and "fields".
+select public.construction_package_save(
+  'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
+  jsonb_build_object(
+    'name','Older plan specification', 'code','OLD-PLAN-SPECS',
+    'description','Legacy payload compatibility','ratePerSqft','1950',
+    'status','inactive','specSections',jsonb_build_array(
+      jsonb_build_object(
+        'title','Architectural plans','kind','plans',
+        'brand','','grade','','allowancePerSqft','','description','',
+        'deliverables',jsonb_build_array(
+          jsonb_build_object('label','Electrical layout','included',true)
+        ),
+        'fields',jsonb_build_array(
+          jsonb_build_object('label','Drawing sheets','value','A3 PDF')
+        )
+      )
+    )
+  )
+) is not null as legacy_payload_accepted;
+
 do $assert$
 begin
   begin
