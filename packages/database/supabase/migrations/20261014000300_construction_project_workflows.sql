@@ -137,11 +137,18 @@ $$;
 create function private.construction_can_manage(org uuid, project uuid)
 returns boolean language sql stable security definer set search_path='' as $$
  select private.construction_project_access(org,project)
-   and (private.site_is_manager(org,project)
+   and (private.site_owner(org)
+     or private.site_role(org,project)='manager'
      or exists(select 1 from private.construction_project_roles r
         where r.organization_id=org and r.project_id=project
           and r.user_id=(select auth.uid()) and r.active
-          and r.role in ('project_director','project_manager')));
+          and r.role in ('project_director','project_manager'))
+     -- Explicitly assigned restricted construction roles take precedence over
+     -- unrelated organization-level project.manage grants.
+     or (not exists(select 1 from private.construction_project_roles r
+         where r.organization_id=org and r.project_id=project
+           and r.user_id=(select auth.uid()) and r.active)
+       and private.site_is_manager(org,project)));
 $$;
 
 create function public.construction_project_read(p_organization_id uuid,p_project_id uuid)
