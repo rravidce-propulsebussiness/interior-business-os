@@ -145,6 +145,31 @@ begin
     public.construction_tomorrow_read(org,project)->'plans') plan
     where plan->>'id'=current_setting('test.tomorrow_plan'))<>'approved'
  then raise exception 'FAIL: approved plan has not been published to assigned field staff';end if;
+ -- A revised next-day plan supersedes the previous approval without mutating
+ -- yesterday's decisions or creating a purchase order.
+ record=jsonb_build_object('id',public.construction_tomorrow_command(org,project,'submit',
+   jsonb_build_object(
+    'stage_id',current_setting('test.manager_stage')::uuid,
+    'work_date',current_date+1,
+    'work_summary','Revised bar bending with additional steel cover checks',
+    'labor',jsonb_build_array(jsonb_build_object('trade','Bar benders','workers',5)),
+    'materials',jsonb_build_array(jsonb_build_object(
+      'id',current_setting('test.manager_material')::uuid,'quantity',12)),
+    'instructions','Engineer reviewed change to tomorrow bar bending preparation')));
+ if (select plan->>'status' from jsonb_array_elements(
+    public.construction_tomorrow_read(org,project)->'plans') plan
+    where plan->>'id'=current_setting('test.tomorrow_plan'))<>'superseded'
+ then raise exception 'FAIL: old approved manpower plan remained current after revision';end if;
+ begin
+    perform public.construction_tomorrow_command(org,project,'review',
+      jsonb_build_object('plan_id',current_setting('test.tomorrow_plan')::uuid,
+        'decision','approved','reason','Must not reapprove previous workforce revision'));
+    raise exception 'FAIL: superseded plan was approved';
+ exception when check_violation then null;end;
+ perform public.construction_tomorrow_command(org,project,'review',
+   jsonb_build_object('plan_id',record->>'id',
+     'decision','approved','reason','Approved revised steel cover plan with five bar benders'));
+
  begin
    perform public.construction_tomorrow_command(org,project,'submit',
       jsonb_build_object('stage_id',current_setting('test.manager_stage')::uuid,
