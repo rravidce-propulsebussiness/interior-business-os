@@ -145,7 +145,7 @@ begin
  return v_result;
 end $fn$;
 
-create function public.construction_spec_template_get(p_org uuid default null)
+create function public.construction_package_field_template_get(p_org uuid default null)
 returns jsonb language plpgsql volatile security definer set search_path='' as $get$
 begin
  if p_org is null then
@@ -158,7 +158,7 @@ begin
  return (select sections from private.construction_spec_field_templates where singleton);
 end $get$;
 
-create function public.platform_construction_spec_template_save(p_sections jsonb)
+create function public.platform_construction_package_field_template_save(p_sections jsonb)
 returns boolean language plpgsql volatile security definer set search_path='' as $set$
 begin
  perform private.require_platform('platform.organizations.manage');
@@ -176,10 +176,10 @@ begin
  return true;
 end $set$;
 
-revoke all on function public.construction_spec_template_get(uuid),
- public.platform_construction_spec_template_save(jsonb)
+revoke all on function public.construction_package_field_template_get(uuid),
+ public.platform_construction_package_field_template_save(jsonb)
  from public,anon,authenticated;
-grant execute on function public.construction_spec_template_get(uuid),
- public.platform_construction_spec_template_save(jsonb)
+grant execute on function public.construction_package_field_template_get(uuid),
+ public.platform_construction_package_field_template_save(jsonb)
  to authenticated;
 commit;
