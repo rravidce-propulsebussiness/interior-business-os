@@ -66,6 +66,7 @@ begin
  record=public.project_site_command(org,project,'material_add',
   '{"item":"Cement","quantity":100,"unit":"bags","notes":"Measured manually"}');
  material=(record->>'id')::uuid;
+ perform set_config('test.manager_material',material::text,true);
  perform public.project_site_manager_command(org,project,'material_quantity_correct',
   jsonb_build_object('id',material,'quantity',115.5,'reason','Updated manual site measure for footing'));
  if (public.project_site_read(org,project)->'materials'->0->>'quantity')::numeric<>115.5
@@ -94,6 +95,28 @@ begin
   'report_date',current_date,'completed_work','Curing and shuttering check',
   'tomorrow_plan','Inspect grid line columns','worker_count',9));
  perform set_config('test.manager_report',record->>'id',true);
+ -- Engineer proposes tomorrow's actual work and labor, but does not authorize it.
+ record=jsonb_build_object('id',public.construction_tomorrow_command(org,project,'submit',
+    jsonb_build_object(
+      'stage_id',current_setting('test.manager_stage')::uuid,
+      'work_date',current_date+1,
+      'work_summary','Bar bending, placement and footing pre-pour checks',
+      'labor',jsonb_build_array(
+         jsonb_build_object('trade','Bar benders','workers',4),
+         jsonb_build_object('trade','Helpers','workers',3)),
+      'materials',jsonb_build_array(jsonb_build_object(
+         'id',current_setting('test.manager_material')::uuid,'quantity',14)),
+      'instructions','Check steel cover and site safety before pouring')));
+ perform set_config('test.tomorrow_plan',record->>'id',true);
+ if (public.construction_tomorrow_read(org,project)->'plans'->0->>'status')<>'submitted'
+ then raise exception 'FAIL: engineer tomorrow proposal not pending manager review';end if;
+ begin
+   perform public.construction_tomorrow_command(org,project,'review',
+      jsonb_build_object('plan_id',current_setting('test.tomorrow_plan')::uuid,
+       'decision','approved','reason','Engineer cannot self-approve work'));
+   raise exception 'FAIL: site engineer approved own next-day labor plan';
+ exception when insufficient_privilege then null;end;
+
  if jsonb_array_length(public.project_site_manager_read(org,project)->'updates')<>2 then
   raise exception 'Site engineer cannot read manager next-day instructions';end if;
  if jsonb_array_length(public.project_site_my_projects(org))<1 then
@@ -112,6 +135,24 @@ select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111'
 do $$
 declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';project uuid=current_setting('test.manager_project')::uuid;report uuid=current_setting('test.manager_report')::uuid;record jsonb;
 begin
+
+ if (public.construction_tomorrow_read(org,project)->'plans'->0->>'status')<>'submitted'
+ then raise exception 'FAIL: manager cannot see engineer labor proposal';end if;
+ perform public.construction_tomorrow_command(org,project,'review',
+    jsonb_build_object('plan_id',current_setting('test.tomorrow_plan')::uuid,
+       'decision','approved','reason','Approved steel fixing crew and measured existing steel need'));
+ if (select plan->>'status' from jsonb_array_elements(
+    public.construction_tomorrow_read(org,project)->'plans') plan
+    where plan->>'id'=current_setting('test.tomorrow_plan'))<>'approved'
+ then raise exception 'FAIL: approved plan has not been published to assigned field staff';end if;
+ perform pg_temp.site_denied(format(
+    'select public.construction_tomorrow_command(%L,%L,''submit'',%L)',
+    org,project,jsonb_build_object('stage_id',current_setting('test.manager_stage')::uuid,
+      'work_date',current_date+1,'work_summary','Invalid material from another company',
+      'labor',jsonb_build_array(jsonb_build_object('trade','Helpers','workers',2)),
+      'materials',jsonb_build_array(jsonb_build_object('id',gen_random_uuid(),'quantity',4)),
+      'instructions','Must reject material references outside this project')),
+    'cross-project material use should fail');
  record=public.project_site_manager_command(org,project,'report_review',
   jsonb_build_object('report_id',report,'decision','changes_requested',
   'note','Add inspection photos and gridline references'));
@@ -208,6 +249,19 @@ do $$
 declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
  project uuid=current_setting('test.manager_project')::uuid;
 begin
+
+ begin
+   perform public.construction_tomorrow_read(org,project);
+   raise exception 'FAIL: watchman can read detailed labour plan';
+ exception when insufficient_privilege then null;end;
+ begin
+   perform public.construction_tomorrow_command(org,project,'submit',
+     jsonb_build_object('stage_id',current_setting('test.manager_stage')::uuid,
+       'work_date',current_date+1,'work_summary','Fake watchman plan',
+       'labor',jsonb_build_array(jsonb_build_object('trade','Helpers','workers',2)),
+       'materials','[]'::jsonb,'instructions','Unapproved watcher instruction'));
+   raise exception 'FAIL: watchman can create site work plan';
+ exception when insufficient_privilege then null;end;
  if jsonb_array_length(public.construction_field_read(org,project)->'stage_reports')<>0
  then raise exception 'FAIL: watchman obtained engineers daily reports';end if;
  begin
