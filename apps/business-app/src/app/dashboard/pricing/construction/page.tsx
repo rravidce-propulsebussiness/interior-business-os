@@ -11,9 +11,10 @@ export const dynamic = 'force-dynamic';
 export default async function ConstructionPricing() {
   const { org, canManagePrice } = await catalogPage(true);
   const { client } = await pageServices();
-  const [rates, packages] = await Promise.all([
+  const [rates, packages, defaultSections] = await Promise.all([
     createConstructionRatesRepository(client).list(org),
     createConstructionPackagesRepository(client).list(org),
+    createConstructionPackagesRepository(client).defaultSections(org),
   ]);
   return (
     <main
@@ -34,6 +35,7 @@ export default async function ConstructionPricing() {
         </Link>
       </nav>
       <ConstructionPackagesManager
+        defaultSections={defaultSections}
         packages={packages}
         canManage={canManagePrice}
       />
