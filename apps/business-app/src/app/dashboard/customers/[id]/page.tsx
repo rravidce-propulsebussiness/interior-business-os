@@ -56,7 +56,7 @@ function Stat({
 }: {
   label: string;
   value: string;
-  href?: string;
+  href?: string | undefined;
   icon: 'quotations' | 'projects' | 'expenses';
 }) {
   const children = (
