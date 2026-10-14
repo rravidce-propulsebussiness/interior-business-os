@@ -20,24 +20,31 @@ async function call(
     await services.authorization.requireAuthenticatedUser();
     const org = await activeOrganization();
     if (!org) throw new Error('Choose a company first');
-    const { error } = await services.client.rpc('construction_gate_labor_command', {
-      p_org: org.organizationId,
-      p_project: projectId,
-      p_action: operation,
-      p_input: input,
-    });
+    const { error } = await services.client.rpc(
+      'construction_gate_labor_command',
+      {
+        p_org: org.organizationId,
+        p_project: projectId,
+        p_action: operation,
+        p_input: input,
+      },
+    );
     if (error) throw new Error(error.message);
     revalidatePath('/dashboard/projects/' + projectId + '/site');
     return {
       saved: true,
-      message: operation === 'review'
-        ? 'Manager reconciliation saved; previous security events are preserved.'
-        : 'Worker gate event added to the existing Site Delivery security log.',
+      message:
+        operation === 'review'
+          ? 'Manager reconciliation saved; previous security events are preserved.'
+          : 'Worker gate event added to the existing Site Delivery security log.',
     };
   } catch (error) {
     return {
       saved: false,
-      message: error instanceof Error ? error.message.slice(0, 240) : 'Unable to record labor event.',
+      message:
+        error instanceof Error
+          ? error.message.slice(0, 240)
+          : 'Unable to record labor event.',
     };
   }
 }
@@ -47,17 +54,35 @@ export async function recordLaborGateEvent(
   form: FormData,
 ): Promise<LaborGateResult> {
   try {
-    const operation = z.enum(['arrival', 'departure']).parse(form.get('direction'));
+    const operation = z
+      .enum(['arrival', 'departure'])
+      .parse(form.get('direction'));
     return await call(projectId, operation, {
       work_date: day.parse(form.get('work_date')),
-      trade: z.string().trim().regex(/^[A-Za-z][A-Za-z /-]{1,69}$/).parse(form.get('trade')),
-      workers: z.coerce.number().int().min(1).max(500).parse(form.get('workers')),
-      notes: z.string().trim().max(1500).parse(form.get('notes') ?? ''),
+      trade: z
+        .string()
+        .trim()
+        .regex(/^[A-Za-z][A-Za-z /-]{1,69}$/)
+        .parse(form.get('trade')),
+      workers: z.coerce
+        .number()
+        .int()
+        .min(1)
+        .max(500)
+        .parse(form.get('workers')),
+      notes: z
+        .string()
+        .trim()
+        .max(1500)
+        .parse(form.get('notes') ?? ''),
     });
   } catch (error) {
     return {
       saved: false,
-      message: error instanceof Error ? error.message.slice(0, 220) : 'Invalid gate entry.',
+      message:
+        error instanceof Error
+          ? error.message.slice(0, 220)
+          : 'Invalid gate entry.',
     };
   }
 }
@@ -77,7 +102,10 @@ export async function reviewLaborGateDay(
   } catch (error) {
     return {
       saved: false,
-      message: error instanceof Error ? error.message.slice(0, 220) : 'Invalid reconciliation.',
+      message:
+        error instanceof Error
+          ? error.message.slice(0, 220)
+          : 'Invalid reconciliation.',
     };
   }
 }

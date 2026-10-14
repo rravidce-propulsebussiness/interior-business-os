@@ -10895,6 +10895,19 @@ export interface Database {
         Args: { p_org: string; p_project: string };
         Returns: Json;
       };
+      construction_gate_labor_command: {
+        Args: {
+          p_org: string;
+          p_project: string;
+          p_action: string;
+          p_input?: Json;
+        };
+        Returns: string;
+      };
+      construction_gate_labor_read: {
+        Args: { p_org: string; p_project: string };
+        Returns: Json;
+      };
       construction_package_list: { Args: { p_org: string }; Returns: Json };
       construction_package_owner_options: {
         Args: { p_org: string };
