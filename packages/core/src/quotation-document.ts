@@ -177,13 +177,22 @@ export function renderQuotationDocument(input: unknown): string {
               ? '<p><strong>Included drawings</strong></p><ul>' +
                 section.deliverables
                   .map((drawing) => '<li>' + escape(drawing) + '</li>')
-                  .join('') + '</ul>'
+                  .join('') +
+                '</ul>'
               : '') +
             (section.customFields?.length
-              ? '<dl>' + section.customFields
-                  .map((extra) => '<dt><strong>' + escape(extra.label) +
-                    ':</strong></dt><dd>' + escape(extra.value) + '</dd>')
-                  .join('') + '</dl>'
+              ? '<dl>' +
+                section.customFields
+                  .map(
+                    (extra) =>
+                      '<dt><strong>' +
+                      escape(extra.label) +
+                      ':</strong></dt><dd>' +
+                      escape(extra.value) +
+                      '</dd>',
+                  )
+                  .join('') +
+                '</dl>'
               : '') +
             '</div></article>',
         )
