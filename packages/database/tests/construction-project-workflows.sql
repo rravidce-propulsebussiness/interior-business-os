@@ -48,11 +48,12 @@ begin
  if wf is null then raise exception 'Missing workflow';end if;
  select public.construction_project_read(org,project) into read_data;
  if jsonb_array_length(read_data->'stages')<>2
-    or (select count(*) from private.construction_stage_dependencies
-      where organization_id=org and project_id=project)<>1
+    or not exists(select 1 from jsonb_array_elements(read_data->'stages') stage
+       where stage->>'instance_code'='FOUNDATION'
+          and stage->'dependencies' @> '["DESIGN"]'::jsonb)
  then raise exception 'Stage dependencies not stored';end if;
- if exists(select 1 from private.construction_project_stages
-   where organization_id=org and project_id=project and status<>'not_started')
+ if exists(select 1 from jsonb_array_elements(read_data->'stages') stage
+    where stage->>'status'<>'not_started')
  then raise exception 'Planning created fictitious completion';end if;
  -- Cannot rewrite an existing frozen planning definition.
  begin
@@ -64,8 +65,10 @@ begin
  -- Immutable role event log plus optimistic deactivation.
  perform public.construction_project_command(org,project,'role_deactivate',
    jsonb_build_object('id',first_role,'version',1));
- if (select count(*) from private.construction_project_roles
-      where organization_id=org and project_id=project and user_id='33333333-3333-4333-8333-333333333333'::uuid and active)<>1
+ select public.construction_project_read(org,project) into read_data;
+ if (select count(*) from jsonb_array_elements(read_data->'roles') r
+     where r->>'user_id'='33333333-3333-4333-8333-333333333333'
+       and r->>'active'='true')<>1
  then raise exception 'Deactivation removed other active role';end if;
  begin
    perform public.construction_project_command(org,project,'role_deactivate',
