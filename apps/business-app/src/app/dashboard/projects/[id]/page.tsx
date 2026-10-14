@@ -14,6 +14,7 @@ import '../../owner-dashboard.css';
 import './project-detail.css';
 
 const stageRecordSchema = z.object({
+  owned: z.array(z.object({ kind: z.string(), id: z.uuid() })),
   links: z.array(
     z.object({
       stage_id: z.uuid(),
@@ -486,7 +487,11 @@ export default async function Project({
             gate={site.gate}
             canSeeFinance={has('contract.view', 'billing')}
             stageRecords={stageRecords}
-            canLinkRecords={Boolean(stageRecords && site.can_manage)}
+            canLinkRecords={Boolean(
+              stageRecords && (site.can_manage || site.role === 'site_engineer')
+            )}
+            canManageLinks={site.can_manage}
+            isWatchman={site.role === 'watchman' && !site.can_manage}
             canRequestMaterials={
               site.stage === 'execution' &&
               (site.can_manage ||
