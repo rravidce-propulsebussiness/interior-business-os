@@ -64,6 +64,10 @@ export function createConstructionPackagesRepository(
       invoke<ConstructionPackage[]>('construction_package_list', {
         p_org: org,
       }),
+    defaultSections: (org: string) =>
+      invoke<ConstructionSpecSection[]>('construction_spec_template_get', {
+        p_org: org,
+      }),
     save: (
       org: string,
       input: {
