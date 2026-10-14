@@ -671,10 +671,7 @@ export function LeadsWorkspace({
                       </thead>
                       <tbody>
                         {rows.map((lead, i) => (
-                          <tr
-                            key={lead.id}
-                            
-                          >
+                          <tr key={lead.id}>
                             <td>
                               <input
                                 aria-label={'Select ' + lead.name}
@@ -899,8 +896,6 @@ export function LeadsWorkspace({
             </div>
           </footer>
         </div>
-
-
       </section>
       <p className="crm-leads-scope">
         Showing authorized leads for {organizationName}. CSV export includes
