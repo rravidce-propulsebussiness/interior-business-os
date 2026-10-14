@@ -2221,7 +2221,6 @@ body:has(.crm-leads-root) .crm-shared-navigation {
   color: #ffffff;
 }
 
-
 /* Company-industry-aware manual lead form. Scoped so import and CRM boards
    retain their existing layout and control styling. */
 .crm-lead-editor {
@@ -2444,22 +2443,35 @@ body:has(.crm-leads-root) .crm-shared-navigation {
   justify-content: center;
 }
 @media (max-width: 650px) {
-  .crm-lead-editor .crm-lead-hero { padding: 16px; }
-  .crm-lead-editor .crm-lead-form { padding: 11px; gap: 11px; }
+  .crm-lead-editor .crm-lead-hero {
+    padding: 16px;
+  }
+  .crm-lead-editor .crm-lead-form {
+    padding: 11px;
+    gap: 11px;
+  }
   .crm-lead-editor .crm-lead-section,
-  .crm-lead-editor .crm-lead-service-panel { padding: 13px; }
+  .crm-lead-editor .crm-lead-service-panel {
+    padding: 13px;
+  }
   .crm-lead-editor .crm-quick-add-form {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 11px 9px;
   }
-  .crm-lead-editor .crm-quick-add-form label { font-size: 11px; }
+  .crm-lead-editor .crm-quick-add-form label {
+    font-size: 11px;
+  }
   .crm-lead-editor .crm-quick-add-form input,
   .crm-lead-editor .crm-quick-add-form select {
     font-size: 12px;
     padding: 10px 8px;
   }
-  .crm-lead-editor .crm-lead-submit-bar .crm-primary { width: 100%; }
-  .crm-lead-hero h2 { font-size: 21px; }
+  .crm-lead-editor .crm-lead-submit-bar .crm-primary {
+    width: 100%;
+  }
+  .crm-lead-hero h2 {
+    font-size: 21px;
+  }
 }
 
 .crm-lead-detail-requirements dl {
@@ -2481,5 +2493,7 @@ body:has(.crm-leads-root) .crm-shared-navigation {
   overflow-wrap: anywhere;
 }
 @media (max-width: 440px) {
-  .crm-lead-detail-requirements dl { grid-template-columns: 1fr; }
+  .crm-lead-detail-requirements dl {
+    grid-template-columns: 1fr;
+  }
 }
