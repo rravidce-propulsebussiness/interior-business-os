@@ -6,6 +6,7 @@ import { SiteCommandOverview } from './command-overview';
 import { SiteAccessState } from './site-access-state';
 import { SiteActivity } from './site-activity';
 import { ConstructionPlanningPanel } from './construction-planning-panel';
+import { ConstructionJourney } from './construction-journey';
 import { AgreementReadinessPanel } from './agreement-readiness-panel';
 import '../../../owner-dashboard.css';
 import './site-command.css';
@@ -434,6 +435,24 @@ export default async function ProjectDeliveryPage({
               gate={site.gate}
               media={site.media}
             />
+            {construction && (
+              <ConstructionJourney
+                projectId={id}
+                stages={construction.stages}
+                quality={constructionQuality}
+                materials={site.materials}
+                checks={site.checks}
+                media={site.media}
+                reports={site.reports}
+                gate={site.gate}
+                managerUpdates={managerData.updates}
+                canSeeFinance={has('contract.view', 'billing')}
+                inSiteWorkspace
+                canRequestMaterials={open && (isEngineer || isProcurement)}
+                canUploadWorkPhotos={open && isEngineer}
+                canUploadCuringPhotos={open && isWatchman}
+              />
+            )}
             {managerDataUnavailable && (
               <div className="sc-service-alert" role="status">
                 Manager updates are temporarily unavailable. Existing Site
@@ -1063,7 +1082,7 @@ export default async function ProjectDeliveryPage({
                   <Heading
                     eyebrow="Materials"
                     title="Quantities and purchasing"
-                    detail="Request measured quantities for site marking and execution, approve procurement, then record whether the actual purchase is from a Business OS seller or an outside supplier. A request does not itself create a purchase order."
+                    detail="Site engineers and project managers can request the actual required quantity. Project managers review/correct requests; procurement staff approve, order and record delivery with an actual supplier reference. A request is not a purchase order."
                   />
                   <div className="flex flex-wrap gap-3 text-sm">
                     <Link
@@ -1088,7 +1107,7 @@ export default async function ProjectDeliveryPage({
                   {open && (isEngineer || isProcurement) && (
                     <details className={formDetails}>
                       <summary className="cursor-pointer font-semibold">
-                        Request material / planned quantity
+                        Site engineer / project manager: request materials
                       </summary>
                       <div className="mt-4">
                         <Action
@@ -1434,6 +1453,35 @@ export default async function ProjectDeliveryPage({
                       />
                     </div>
                   </details>
+                )}
+                {open && (manager || role === 'watchman') && (
+                  <div className="mt-5 rounded-xl border border-blue-200 bg-blue-50/40 p-4">
+                    <h3 className="text-sm font-bold text-slate-900">Watchman curing photo evidence</h3>
+                    <p className="my-2 text-xs leading-5 text-slate-600">
+                      Record a curing round above first, then upload a site photo with
+                      its time and location. Photos remain private to this project.
+                      Watchmen cannot upload unrelated site or contract files.
+                    </p>
+                    <ProjectSiteMediaForm project={id} phase="curing" />
+                  </div>
+                )}
+                {site.media.some((item) => value(item, 'category') === 'curing') && (
+                  <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                    {site.media.filter((item) => value(item, 'category') === 'curing').slice(0, 8).map((item) => (
+                      <a
+                        key={item.id}
+                        href={`/dashboard/projects/${id}/site/media/${item.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="overflow-hidden rounded-xl border border-slate-200 bg-white"
+                      >
+                        <span className="block truncate p-3 text-xs font-semibold">
+                          {value(item, 'caption') || 'Curing photo'}
+                        </span>
+                        <span className="block px-3 pb-3 text-xs text-blue-700">View private photo ↗</span>
+                      </a>
+                    ))}
+                  </div>
                 )}
                 <div className="mt-4 space-y-2">
                   {site.gate.map((entry) => (
