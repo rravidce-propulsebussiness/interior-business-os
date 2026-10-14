@@ -12,12 +12,13 @@ export const dynamic = 'force-dynamic';
 export default async function QuotationPackagesPage() {
   const { org, canManagePrice } = await catalogPage(true);
   const { client, repository, authorization } = await pageServices();
-  const [organization, user, industries, construction, configurable] =
+  const [organization, user, industries, construction, configurable, defaults] =
     await Promise.all([
       repository.organization(org),
       authorization.requireAuthenticatedUser(),
       repository.industries(),
       createConstructionPackagesRepository(client).list(org),
+      createConstructionPackagesRepository(client).template(),
       createQuotationPackagesRepository(client)
         .list(org)
         .catch(() => null),
@@ -49,6 +50,7 @@ export default async function QuotationPackagesPage() {
       </div>
       <div className="space-y-6">
         <ConstructionPackagesManager
+          defaults={defaults}
           packages={construction}
           canManage={canManagePrice}
         />
