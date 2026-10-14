@@ -58,6 +58,7 @@ assertionFile('quotation-owner-access');
 assertionFile('quotation-signing-preflight');
 assertionFile('construction-pricing-rpc-transactions');
 assertionFile('construction-package-design');
+assertionFile('construction-spec-template');
 assertionFile('construction-package-specific-owners');
 assertionFile('quotations');
 psql(['-f', file('supabase/seed-crm.sql')]);
