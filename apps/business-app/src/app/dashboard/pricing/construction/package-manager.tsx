@@ -1,20 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import type {
-  ConstructionPackage,
-  ConstructionPackageOwnerOption,
-} from '@business-os/database/construction-packages';
+import type { ConstructionPackage } from '@business-os/database/construction-packages';
 import { PremiumPackageEditor } from './premium-package-editor';
 
 export function ConstructionPackagesManager({
   packages,
   canManage,
-  ownerOptions,
 }: {
   packages: ConstructionPackage[];
   canManage: boolean;
-  ownerOptions: ConstructionPackageOwnerOption[];
 }) {
   const [editing, setEditing] = useState<string | null>(null);
   return (
@@ -29,8 +24,8 @@ export function ConstructionPackagesManager({
           </h2>
           <p className="mt-2 text-sm leading-6 text-slate-600">
             Create branded company packages with detailed material grades,
-            per-SFT allowances, your own PDF specifications and restricted owner
-            access. The package rate is the selling rate.
+            per-SFT allowances and your own PDF specifications. Every
+            package stays private to your company.
           </p>
         </div>
         {canManage && (
@@ -45,7 +40,6 @@ export function ConstructionPackagesManager({
       </div>
       {editing === 'new' && (
         <PremiumPackageEditor
-          ownerOptions={ownerOptions}
           close={() => setEditing(null)}
         />
       )}
@@ -61,9 +55,7 @@ export function ConstructionPackagesManager({
                 {item.code}
               </span>
               <span className="rounded-full bg-blue-50 px-2 py-1 text-[10px] font-bold text-blue-700">
-                {item.visibility === 'owner_only'
-                  ? 'Owner only'
-                  : 'Company only'}
+                Company package
               </span>
               <span
                 className={
@@ -112,7 +104,6 @@ export function ConstructionPackagesManager({
             <PremiumPackageEditor
               key={item.id + ':' + item.version}
               item={item}
-              ownerOptions={ownerOptions}
               close={() => setEditing(null)}
             />
           ))}
