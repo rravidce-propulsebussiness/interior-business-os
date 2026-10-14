@@ -150,6 +150,15 @@ begin
        'reason','Watchman must not approve independent curing verification'));
    raise exception 'FAIL: watchman authorized their own curing verification';
  exception when insufficient_privilege then null;end;
+ begin
+   perform public.construction_payment_read(org,project);
+   raise exception 'FAIL: watchman accessed stage-linked contract payment amounts';
+ exception when insufficient_privilege then null;end;
+ begin
+   perform public.construction_payment_command(org,project,'stage_link',jsonb_build_object(
+      'item_id',gen_random_uuid(),'stage_id',current_setting('test.manager_stage')::uuid));
+   raise exception 'FAIL: watchman controlled stage-payment bindings';
+ exception when insufficient_privilege then null;end;
  raise notice 'PASS: watchman cannot read engineers tomorrow plan or link it';
 end$$;
 rollback;
