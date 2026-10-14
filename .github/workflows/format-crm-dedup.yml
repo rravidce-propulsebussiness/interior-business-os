@@ -1,0 +1,44 @@
+name: Format CRM consolidation
+on:
+  push:
+    branches:
+      - fix/remove-duplicate-crm-overview-commercial
+    paths:
+      - .github/workflows/format-crm-dedup.yml
+permissions:
+  contents: write
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Format changed CRM and quotation files
+        run: >-
+          pnpm exec prettier --write
+          apps/business-app/src/app/dashboard/crm/page.tsx
+          apps/business-app/src/app/dashboard/crm/commercial/page.tsx
+          apps/business-app/src/app/dashboard/crm/layout.tsx
+          apps/business-app/src/app/dashboard/crm/leads/page.tsx
+          apps/business-app/src/app/dashboard/crm/leads/workspace.tsx
+          apps/business-app/src/app/dashboard/crm/leads/import-page-shell.tsx
+          'apps/business-app/src/app/dashboard/crm/leads/[id]/page.tsx'
+          apps/business-app/src/app/dashboard/crm/queue.tsx
+          apps/business-app/src/app/dashboard/crm/settings/page.tsx
+          apps/business-app/src/app/dashboard/quotations/page.tsx
+          scripts/crm-unified-workspace.test.mjs
+      - name: Commit formatted files
+        run: |
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git add apps/business-app/src/app/dashboard/crm/ apps/business-app/src/app/dashboard/quotations/page.tsx scripts/crm-unified-workspace.test.mjs
+          if ! git diff --cached --quiet; then
+            git commit -m "Format CRM consolidation changes"
+            git push origin HEAD:fix/remove-duplicate-crm-overview-commercial
+          fi
