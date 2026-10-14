@@ -31,14 +31,19 @@ export function QuotationStudioStart({
   existingProjects,
   industries,
   defaultCurrency,
+  initialCustomerId = '',
 }: {
   leads: QuoteLead[];
   existingCustomers: ExistingCustomer[];
   existingProjects: ExistingProject[];
   industries: Industry[];
   defaultCurrency: string;
+  initialCustomerId?: string;
 }) {
   const router = useRouter();
+  const initialCustomer = existingCustomers.find(
+    (customer) => customer.id === initialCustomerId,
+  );
   const [industry, setIndustry] = useState(
     industries.find((item) => item.key === 'construction')?.key ??
       industries[0]?.key ??
@@ -47,7 +52,7 @@ export function QuotationStudioStart({
   const [mode, setMode] = useState<'sft' | 'custom' | 'upload'>('sft');
   const [pending, start] = useTransition();
   const [feedback, setFeedback] = useState('');
-  const [customerId, setCustomerId] = useState('');
+  const [customerId, setCustomerId] = useState(initialCustomer?.id ?? '');
   const [projectId, setProjectId] = useState('');
   const currentCustomer = existingCustomers.find(
     (customer) => customer.id === customerId,
@@ -62,9 +67,9 @@ export function QuotationStudioStart({
     ? 'CRN-' + customerId.replaceAll('-', '').slice(0, 12).toUpperCase()
     : '';
   const [data, setData] = useState({
-    clientName: '',
-    phone: '',
-    email: '',
+    clientName: initialCustomer?.display_name ?? '',
+    phone: initialCustomer?.phone ?? '',
+    email: initialCustomer?.email ?? '',
     projectName: '',
     location: '',
     plotSize: '',
