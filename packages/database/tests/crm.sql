@@ -24,6 +24,9 @@ do $$declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';lead uuid;followup 
  perform pg_temp.crm_denied(format('select public.crm_save(%L,''lead_activities'',%L::jsonb)',org,jsonb_build_object('lead_id',lead,'activity_type','customer_response','body','forged')),'manual system activity rejected');
  select l.version into version from public.leads l where id=lead;
  perform pg_temp.crm_denied(format('select public.crm_command(%L,''stage'',%L::jsonb)',org,jsonb_build_object('id',lead,'version',version,'stage_id',(select id from public.crm_pipeline_stages where organization_id=org and key='lost'))),'Lost requires reason');
+ perform pg_temp.crm_denied(format('select public.crm_convert(%L,%L::jsonb)',org,jsonb_build_object('id',lead,'version',version)),'Open lead cannot convert');
+ perform public.crm_command(org,'stage',jsonb_build_object('id',lead,'version',version,'stage_id',(select id from public.crm_pipeline_stages where organization_id=org and key='won'),'note','Customer accepted proposal'));
+ select l.version into version from public.leads l where id=lead;
  perform pg_temp.crm_denied(format('select public.crm_convert(%L,%L::jsonb)',org,jsonb_build_object('id',lead,'version',version,'project_id','99999999-9999-4999-8999-999999999999')),'conversion rolls back unavailable project');
  perform pg_temp.crm_assert(not exists(select 1 from public.customers where organization_id=org and email='crm@example.test'),'failed conversion creates no customer');
  converted=public.crm_convert(org,jsonb_build_object('id',lead,'version',version,'project_name','CRM project'));
