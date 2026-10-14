@@ -125,7 +125,7 @@ returns boolean language sql stable security definer set search_path='' as $$
          where qr2.stage_id=s.id and qr2.review_kind='quality')
        and private.construction_inspection_valid(qr.inspection_id))
    and (
-      s.hold_point<>'structural'
+      s.hold_point is distinct from 'structural'
       or (
         c.structural_review_id is not null
         and c.structural_review_id<>c.quality_review_id
@@ -197,7 +197,7 @@ declare
  stage private.construction_project_stages; inspect public.project_inspections;
  q private.construction_stage_reviews; sr private.construction_stage_reviews;
  actor uuid=auth.uid(); result_id uuid; kind text; decision text; why text;
- reviewer_role text; paid_plan boolean;
+ reviewer_role text;
 begin
  if not private.construction_project_access(p_org,p_project)
  then raise exception 'Unavailable construction project' using errcode='42501';end if;
@@ -252,7 +252,7 @@ begin
     if kind='structural' and stage.hold_point<>'structural'
     then raise exception 'Structural sign-off is only for structural hold points'
       using errcode='22023';end if;
-    select * into inspect from public.project_inspections i
+    select i.* into inspect from public.project_inspections i
      join private.construction_stage_inspections link on link.inspection_id=i.id
      where link.organization_id=p_org and link.project_id=p_project
        and link.stage_id=stage.id and i.organization_id=p_org
