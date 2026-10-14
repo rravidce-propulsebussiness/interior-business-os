@@ -24,6 +24,7 @@ import {
 import { leadServiceFromIndustryKey } from '../lead-service-options';
 import '../../../owner-dashboard.css';
 import './lead-detail.css';
+import '../lead-category.css';
 
 export default async function LeadDetail({
   params,
