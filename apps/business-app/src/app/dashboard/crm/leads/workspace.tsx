@@ -274,7 +274,7 @@ export function LeadsWorkspace({
   const allSelected = rows.length > 0 && checked.length === rows.length;
   const open = (lead: LeadView) => {
     // The Leads list is for discovery; the detail route owns all lead actions.
-    window.location.assign(path + '/' + encodeURIComponent(lead.id));
+    window.location.href = path + '/' + encodeURIComponent(lead.id);
   };
   const toggle = (id: string) =>
     setChecked((old) =>
