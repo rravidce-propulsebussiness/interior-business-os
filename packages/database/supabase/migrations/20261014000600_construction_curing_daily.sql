@@ -235,11 +235,11 @@ begin
  if not allowed then raise exception 'Site field workspace unavailable' using errcode='42501';end if;
  return jsonb_build_object(
   'can_manage',manager,
-  'can_verify',manager or exists(
+  'can_verify',coalesce(manager or exists(
     select 1 from private.construction_project_roles role
     where role.organization_id=p_org and role.project_id=p_project
       and role.user_id=auth.uid() and role.active and role.role='site_engineer'
-  ) or private.site_role(p_org,p_project)='site_engineer',
+  ) or private.site_role(p_org,p_project)='site_engineer',false),
   'plans',coalesce((select jsonb_agg(jsonb_build_object(
     'id',plan.id,'stage_id',plan.stage_id,'pour_reference',plan.pour_reference,
     'pour_date',plan.pour_date,'minimum_days',plan.minimum_days,'method',plan.method,
@@ -291,10 +291,10 @@ begin
    jsonb_typeof(p_input) is distinct from 'object' or octet_length(p_input::text)>14000
  then raise exception 'Unknown construction field command' using errcode='22023';end if;
  manager=private.construction_can_manage(p_org,p_project);
- engineer=exists(select 1 from private.construction_project_roles role
+ engineer=coalesce(exists(select 1 from private.construction_project_roles role
     where role.organization_id=p_org and role.project_id=p_project and role.user_id=actor
       and role.active and role.role='site_engineer')
-    or private.site_role(p_org,p_project)='site_engineer';
+    or private.site_role(p_org,p_project)='site_engineer',false);
  observer=coalesce(manager or engineer or exists(
     select 1 from private.construction_project_roles role
     where role.organization_id=p_org and role.project_id=p_project and role.user_id=actor
@@ -351,7 +351,7 @@ begin
    values (p_org,p_project,plan.id,(p_input->>'observed_on')::date,
      p_input->>'result',note,actor) returning id into result_id;
  elsif p_action='curing_verify' then
-   if not (manager or engineer) or
+   if not coalesce(manager or engineer,false) or
      p_input-array['observation_id','decision','reason']<>'{}'::jsonb
    then raise exception 'Engineer verification required' using errcode='42501';end if;
    select ob.* into observation from private.construction_curing_observations ob
