@@ -10,7 +10,7 @@ export default function CrmLayout({ children }: { children: ReactNode }) {
         {[
           ['Dashboard', '/dashboard'],
           ['CRM Overview', '/dashboard/crm'],
-          ['All Leads · Follow-ups · Site Visits', '/dashboard/crm/leads'],
+          ['Leads', '/dashboard/crm/leads'],
         ].map(([label, href]) => (
           <Link className="min-h-11 py-2 underline" key={href} href={href!}>
             {label}
