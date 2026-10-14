@@ -180,9 +180,13 @@ export function renderQuotationDocument(input: unknown): string {
               : '') +
             (section.fields ?? [])
               .filter((item) => item.value.trim())
-              .map((item) =>
-                '<p><strong>' + escape(item.label) + ':</strong> ' +
-                escape(item.value) + '</p>',
+              .map(
+                (item) =>
+                  '<p><strong>' +
+                  escape(item.label) +
+                  ':</strong> ' +
+                  escape(item.value) +
+                  '</p>',
               )
               .join('') +
             (section.description
