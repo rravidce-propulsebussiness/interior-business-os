@@ -396,7 +396,7 @@ begin
  raise notice 'PASS: watchman cannot read engineers tomorrow plan or link it';
 end$$;
 select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',true);
-do $
+do $$
 declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
  project uuid=current_setting('test.manager_project')::uuid;
  projection jsonb;
@@ -413,5 +413,5 @@ begin
  if projection->'reviews'->0->>'is_current'<>'true'
  then raise exception 'FAIL: verified labour attendance is immediately stale';end if;
  raise notice 'PASS: manager can audit live gate counts without creating payroll or stock';
-end$;
+end$$;
 rollback;
