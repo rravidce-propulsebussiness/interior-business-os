@@ -63,13 +63,21 @@ export async function SiteAccessState({ projectId }: { projectId: string }) {
             <nav className="sc-breadcrumb" aria-label="Breadcrumb">
               <Link href="/dashboard/projects">Projects</Link>
               <span aria-hidden="true">›</span>
-              <Link href={'/dashboard/projects/' + projectId}>{project.name}</Link>
+              <Link href={'/dashboard/projects/' + projectId}>
+                {project.name}
+              </Link>
               <span aria-hidden="true">›</span>
               <strong>Site delivery</strong>
             </nav>
             <section className="sc-access-card">
-              <span className="sc-access-icon"><OwnerIcon name="projects" size={30}/></span>
-              <h1>{inactive ? 'Activate this project to open Site Delivery' : 'Site Delivery access is not available yet'}</h1>
+              <span className="sc-access-icon">
+                <OwnerIcon name="projects" size={30} />
+              </span>
+              <h1>
+                {inactive
+                  ? 'Activate this project to open Site Delivery'
+                  : 'Site Delivery access is not available yet'}
+              </h1>
               <p>
                 {inactive
                   ? 'The project is currently inactive. Site Delivery can only be opened for active projects.'
@@ -84,12 +92,20 @@ export async function SiteAccessState({ projectId }: { projectId: string }) {
                 </p>
               </div>
               <div className="sc-access-actions">
-                <Link className="sc-btn sc-btn-primary" href={'/dashboard/projects/' + projectId}>
-                  <OwnerIcon name="arrow" size={16}/> Back to project
+                <Link
+                  className="sc-btn sc-btn-primary"
+                  href={'/dashboard/projects/' + projectId}
+                >
+                  <OwnerIcon name="arrow" size={16} /> Back to project
                 </Link>
-                {canManage && <Link className="sc-btn sc-btn-outline" href={'/dashboard/projects/' + projectId + '#settings'}>
-                  <OwnerIcon name="settings" size={16}/> Project settings
-                </Link>}
+                {canManage && (
+                  <Link
+                    className="sc-btn sc-btn-outline"
+                    href={'/dashboard/projects/' + projectId + '#settings'}
+                  >
+                    <OwnerIcon name="settings" size={16} /> Project settings
+                  </Link>
+                )}
               </div>
             </section>
           </div>

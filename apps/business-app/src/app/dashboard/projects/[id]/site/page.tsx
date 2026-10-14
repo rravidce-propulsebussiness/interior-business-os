@@ -291,8 +291,9 @@ export default async function ProjectDeliveryPage({
             />
             {managerDataUnavailable && (
               <div className="sc-service-alert" role="status">
-                Manager updates are temporarily unavailable. Existing Site Delivery
-                records and other actions remain accessible according to your role.
+                Manager updates are temporarily unavailable. Existing Site
+                Delivery records and other actions remain accessible according
+                to your role.
               </div>
             )}
             <div id="overview" className="sc-activity-anchor">
@@ -305,7 +306,9 @@ export default async function ProjectDeliveryPage({
                 isProcurement={isProcurement}
                 isWatchman={isWatchman}
                 isDesign={isDesign}
-                canSeeManagerUpdates={canSeeManagerUpdates && !managerDataUnavailable}
+                canSeeManagerUpdates={
+                  canSeeManagerUpdates && !managerDataUnavailable
+                }
                 canViewOperations={has('execution.view')}
                 reports={site.reports}
                 updates={managerData.updates}

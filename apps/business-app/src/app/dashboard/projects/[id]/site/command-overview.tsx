@@ -127,7 +127,8 @@ export function SiteCommandOverview(props: SiteCommandOverviewProps) {
   const canSubmitReport = isEngineer && stage === 'execution';
   const deliveryActive = stage === 'execution' || stage === 'handover';
   const reportSection = (isEngineer || isQuality) && deliveryActive;
-  const managerSection = canSeeManagerUpdates && deliveryActive && !managerDataUnavailable;
+  const managerSection =
+    canSeeManagerUpdates && deliveryActive && !managerDataUnavailable;
   const materialSection = (isEngineer || isProcurement) && deliveryActive;
   const qualitySection = isQuality && deliveryActive;
   const securitySection = isWatchman && deliveryActive;
@@ -165,7 +166,10 @@ export function SiteCommandOverview(props: SiteCommandOverviewProps) {
             </p>
           </div>
           <div className="sc-hero-actions">
-            <Link className="sc-btn sc-btn-outline" href={'/dashboard/projects/' + projectId}>
+            <Link
+              className="sc-btn sc-btn-outline"
+              href={'/dashboard/projects/' + projectId}
+            >
               <OwnerIcon name="projects" size={17} /> Project details
             </Link>
             {canUploadEvidence && (
@@ -331,7 +335,6 @@ export function SiteCommandOverview(props: SiteCommandOverviewProps) {
           </a>
         )}
       </nav>
-
     </>
   );
 }
