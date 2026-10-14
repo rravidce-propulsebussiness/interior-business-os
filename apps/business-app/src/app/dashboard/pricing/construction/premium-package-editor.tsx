@@ -553,10 +553,18 @@ export function PremiumPackageEditor({
                       {spec.title}
                     </strong>
                     <span className="block truncate text-[9px] text-slate-500">
-                      {spec.brand ||
-                        spec.grade ||
-                        spec.description ||
-                        'Included'}
+                      {spec.kind === 'plans'
+                        ? spec.deliverables?.join(' · ') ||
+                          spec.description ||
+                          'Drawing deliverables'
+                        : spec.brand ||
+                          spec.grade ||
+                          spec.extraFields
+                            ?.filter((field) => field.value.trim())
+                            .map((field) => field.value)
+                            .join(' · ') ||
+                          spec.description ||
+                          'Included'}
                     </span>
                   </div>
                 ))}
