@@ -11,13 +11,21 @@ export const dynamic = 'force-dynamic';
 const tokenSchema = z.string().regex(/^[0-9a-f]{64}$/);
 const projectionSchema = z.object({
   project: z.object({ name: z.string(), code: z.string() }),
-  stages: z.array(z.object({
-    title: z.string(), floor: z.string().nullable(), phase: z.string(),
-    certified: z.boolean(),
-  })),
-  updates: z.array(z.object({
-    date: z.string(), completed: z.string(), tomorrow: z.string(),
-  })),
+  stages: z.array(
+    z.object({
+      title: z.string(),
+      floor: z.string().nullable(),
+      phase: z.string(),
+      certified: z.boolean(),
+    }),
+  ),
+  updates: z.array(
+    z.object({
+      date: z.string(),
+      completed: z.string(),
+      tomorrow: z.string(),
+    }),
+  ),
   as_of: z.string(),
 });
 
@@ -58,28 +66,39 @@ export async function GET(
     const { token } = await params;
     const valid = tokenSchema.safeParse(token);
     if (!valid.success) return unavailable();
-    const response = await createPublicDatabase().rpc('construction_client_view', {
-      p_token: valid.data,
-    });
+    const response = await createPublicDatabase().rpc(
+      'construction_client_view',
+      {
+        p_token: valid.data,
+      },
+    );
     if (response.error || !response.data) return unavailable();
     const parsed = projectionSchema.safeParse(response.data);
     if (!parsed.success) return unavailable();
     const { project, stages, updates, as_of } = parsed.data;
     const esc = escapeHtml;
-    const stageCards = stages.map((stage) => `
+    const stageCards = stages
+      .map(
+        (stage) => `
       <article>
         <p class="floor">${esc(stage.floor || 'Project-wide')} · ${esc(stage.phase)}</p>
         <h3>${esc(stage.title)}</h3>
         <span class="status${stage.certified ? ' complete' : ''}">${stage.certified ? 'Quality cleared' : 'Work / quality checks in progress'}</span>
       </article>
-    `).join('');
-    const updatesHtml = updates.map((update) => `
+    `,
+      )
+      .join('');
+    const updatesHtml = updates
+      .map(
+        (update) => `
       <article class="update">
         <p class="floor">Site update · ${esc(update.date)}</p>
         <p class="label">Completed work</p><p>${esc(update.completed)}</p>
         <p class="label">Tomorrow's work</p><p>${esc(update.tomorrow)}</p>
       </article>
-    `).join('');
+    `,
+      )
+      .join('');
     const html = `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${esc(project.name)} · Construction progress</title><style>${css}</style></head>

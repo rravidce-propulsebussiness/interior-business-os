@@ -14,7 +14,8 @@ const uuid = z.uuid();
 
 async function command(
   projectId: string,
-  operation: 'share_create' | 'share_revoke' | 'report_publish' | 'report_unpublish',
+  operation:
+    'share_create' | 'share_revoke' | 'report_publish' | 'report_unpublish',
   input: Record<string, string>,
 ): Promise<ClientShareResult> {
   try {
@@ -23,18 +24,26 @@ async function command(
     await services.authorization.requireAuthenticatedUser();
     const organization = await activeOrganization();
     if (!organization) throw new Error('Select an active company.');
-    const { data, error } = await services.client.rpc('construction_client_manage', {
-      p_org: organization.organizationId,
-      p_project: projectId,
-      p_action: operation,
-      p_input: input,
-    });
+    const { data, error } = await services.client.rpc(
+      'construction_client_manage',
+      {
+        p_org: organization.organizationId,
+        p_project: projectId,
+        p_action: operation,
+        p_input: input,
+      },
+    );
     if (error) throw new Error(error.message);
-    const result = z.object({
-      share_id: uuid.optional(),
-      event_id: uuid.optional(),
-      token: z.string().regex(/^[0-9a-f]{64}$/).optional(),
-    }).parse(data);
+    const result = z
+      .object({
+        share_id: uuid.optional(),
+        event_id: uuid.optional(),
+        token: z
+          .string()
+          .regex(/^[0-9a-f]{64}$/)
+          .optional(),
+      })
+      .parse(data);
     revalidatePath('/dashboard/projects/' + projectId + '/site');
     return {
       saved: true,
@@ -51,7 +60,10 @@ async function command(
   } catch (error) {
     return {
       saved: false,
-      message: error instanceof Error ? error.message.slice(0, 240) : 'Client sharing failed.',
+      message:
+        error instanceof Error
+          ? error.message.slice(0, 240)
+          : 'Client sharing failed.',
     };
   }
 }
