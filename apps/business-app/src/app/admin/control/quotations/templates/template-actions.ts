@@ -45,7 +45,7 @@ export async function saveGlobalConstructionTemplate(
         message: 'Reduce template category or field details (12 KB maximum).',
       };
     const { error } = await client.rpc(
-      'platform_construction_spec_template_save',
+      'platform_construction_package_field_template_save',
       {
         p_sections: sections,
       },
