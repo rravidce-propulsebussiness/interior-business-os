@@ -142,7 +142,7 @@ export function QuickAddLead({
           </div>
           {services.length === 1 ? (
             <div className="crm-lead-locked-service">
-              <strong>{services[0].label}</strong>
+              <strong>{services[0]?.label}</strong>
               <span>Company service</span>
             </div>
           ) : services.length > 1 ? (
