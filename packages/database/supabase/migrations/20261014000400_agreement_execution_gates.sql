@@ -45,7 +45,7 @@ declare v_id uuid;v_bytes bytea;v_stage text;begin
  or length(p_filename) not between 1 and 180 or (position('/' in p_filename)>0 or position(chr(92) in p_filename)>0 or p_filename ~ '[[:cntrl:]]') or length(coalesce(p_caption,''))>500 or length(p_base64)>11500000 then raise exception 'Invalid media' using errcode='22023';end if;
  select stage into v_stage from private.site_state where project_id=p_project_id and organization_id=p_organization_id;
  if p_category='agreement' then
-  if v_stage is null or p_mime<>'application/pdf'
+  if p_mime<>'application/pdf'
     or not private.construction_can_manage(p_organization_id,p_project_id)
     or not private.finance_access(p_organization_id,'contract.manage')
   then raise exception 'Private agreement PDF requires authorized commercial project manager' using errcode='42501';end if;
