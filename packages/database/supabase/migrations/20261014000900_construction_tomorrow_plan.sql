@@ -72,7 +72,7 @@ end$$;
 -- existing read-only Site Delivery shell, but this does not give them
 -- legacy site command permissions or manager status.
 create or replace function private.site_access(org uuid,project uuid)
-returns boolean language sql stable security definer set search_path='' as $
+returns boolean language sql stable security definer set search_path='' as $$
  select coalesce(
    private.is_member(org)
    and private.entitled(org,'projects')
@@ -91,7 +91,7 @@ returns boolean language sql stable security definer set search_path='' as $
           )
       )
    ),false);
-$;
+$$;
 
 create function private.construction_tomorrow_staff(p_org uuid,p_project uuid)
 returns boolean language sql stable security definer set search_path='' as $$
