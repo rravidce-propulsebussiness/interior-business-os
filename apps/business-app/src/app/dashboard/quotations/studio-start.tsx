@@ -321,15 +321,26 @@ export function QuotationStudioStart({
             </select>
           </label>
           {matchingCustomers.length > 0 && (
-            <div className="qs-warning" role="alert" style={{ marginBottom: 15 }}>
+            <div
+              className="qs-warning"
+              role="alert"
+              style={{ marginBottom: 15 }}
+            >
               <strong>
-                Existing client {matchingCustomers.length > 1 ? 'accounts found' : 'account found'}.
+                Existing client{' '}
+                {matchingCustomers.length > 1
+                  ? 'accounts found'
+                  : 'account found'}
+                .
               </strong>
               <p>
                 These contact details already have a CRN. Choose the correct
                 existing account instead of creating another customer.
               </p>
-              <div className="qs-toolbar" style={{ flexWrap: 'wrap', marginTop: 10 }}>
+              <div
+                className="qs-toolbar"
+                style={{ flexWrap: 'wrap', marginTop: 10 }}
+              >
                 {matchingCustomers.map((customer) => (
                   <button
                     type="button"
@@ -338,7 +349,10 @@ export function QuotationStudioStart({
                     onClick={() => selectCustomer(customer)}
                   >
                     {'CRN-' +
-                      customer.id.replaceAll('-', '').slice(0, 12).toUpperCase()}
+                      customer.id
+                        .replaceAll('-', '')
+                        .slice(0, 12)
+                        .toUpperCase()}
                     {' · '}
                     {customer.display_name}
                   </button>

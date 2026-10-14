@@ -17,6 +17,6 @@ export function contactMatches(
   const storedEmail = customer.email.trim().toLowerCase();
   return Boolean(
     (phone && storedPhone && phone === storedPhone) ||
-      (email && storedEmail && email === storedEmail),
+    (email && storedEmail && email === storedEmail),
   );
 }

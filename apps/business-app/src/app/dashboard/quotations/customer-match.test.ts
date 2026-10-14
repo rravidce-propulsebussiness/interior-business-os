@@ -25,6 +25,8 @@ describe('customer identity in quotation creation', () => {
         { phone: '9000359865', email: '' },
       ),
     ).toBe(false);
-    expect(contactMatches({ phone: '', email: '' }, { phone: '', email: '' })).toBe(false);
+    expect(
+      contactMatches({ phone: '', email: '' }, { phone: '', email: '' }),
+    ).toBe(false);
   });
 });
