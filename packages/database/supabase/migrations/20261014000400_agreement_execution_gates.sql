@@ -106,25 +106,33 @@ end$$;
 create function private.project_site_agreement_gate()
 returns trigger language plpgsql security definer set search_path='' as $$
 begin
- if new.stage='execution' and old.stage is distinct from new.stage then
-    perform private.project_agreement_require(new.organization_id,new.project_id);
+ if tg_op='INSERT' then
+   if new.stage='execution' then
+      perform private.project_agreement_require(new.organization_id,new.project_id);
+   end if;
+ elsif new.stage='execution' and old.stage is distinct from new.stage then
+   perform private.project_agreement_require(new.organization_id,new.project_id);
  end if;
  return new;
 end$$;
 create trigger project_site_agreement_execution_gate
- before update of stage on private.site_state
+ before insert or update of stage on private.site_state
  for each row execute function private.project_site_agreement_gate();
 
 create function private.project_ops_agreement_gate()
 returns trigger language plpgsql security definer set search_path='' as $$
 begin
- if new.status='in_progress' and old.status is distinct from new.status then
-    perform private.project_agreement_require(new.organization_id,new.project_id);
+ if tg_op='INSERT' then
+   if new.status='in_progress' then
+      perform private.project_agreement_require(new.organization_id,new.project_id);
+   end if;
+ elsif new.status='in_progress' and old.status is distinct from new.status then
+   perform private.project_agreement_require(new.organization_id,new.project_id);
  end if;
  return new;
 end$$;
 create trigger project_ops_agreement_execution_gate
- before update of status on public.execution_plans
+ before insert or update of status on public.execution_plans
  for each row execute function private.project_ops_agreement_gate();
 
 create function public.project_agreement_read(p_organization_id uuid,p_project_id uuid)
