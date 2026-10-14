@@ -36,8 +36,8 @@ begin
       ))
     ))
   ) then raise exception 'Custom drawing fields should be accepted'; end if;
-  if has_function_privilege('anon','public.construction_spec_template_get(uuid)','EXECUTE')
-    or has_function_privilege('anon','public.platform_construction_spec_template_save(jsonb)','EXECUTE')
+  if has_function_privilege('anon','public.construction_package_field_template_get(uuid)','EXECUTE')
+    or has_function_privilege('anon','public.platform_construction_package_field_template_save(jsonb)','EXECUTE')
   then raise exception 'Template functions must be authenticated'; end if;
   raise notice 'PASS: global templates, architectural plan fields and access guards';
 end $test$;
