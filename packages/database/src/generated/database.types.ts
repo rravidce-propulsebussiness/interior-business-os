@@ -10886,6 +10886,19 @@ export interface Database {
         Args: { p_org: string; p_input: Json };
         Returns: string;
       };
+      construction_project_command: {
+        Args: {
+          p_organization_id: string;
+          p_project_id: string;
+          p_action: string;
+          p_input?: Json;
+        };
+        Returns: Json;
+      };
+      construction_project_read: {
+        Args: { p_organization_id: string; p_project_id: string };
+        Returns: Json;
+      };
       construction_rate_list: { Args: { p_org: string }; Returns: Json };
       construction_rate_quote_preview: {
         Args: { p_org: string; p_ids: string[]; p_area: number };
