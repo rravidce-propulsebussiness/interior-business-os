@@ -26,6 +26,7 @@ select public.construction_package_save(
   )
 ) as regression_package_id \gset
 select set_config('app.test_package_id', :'regression_package_id', true);
+reset role;
 
 do $assert$
 declare d jsonb;
@@ -39,6 +40,7 @@ begin
   then raise exception 'Saved drawing fields were not preserved'; end if;
   raise notice 'PASS: company plan fields and custom rows saved';
 end $assert$;
+set local role authenticated;
 
 do $assert$
 begin
