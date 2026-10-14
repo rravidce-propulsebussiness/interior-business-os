@@ -437,7 +437,6 @@ export default async function Customer({
             )}
           </div>
 
-
           <section className="cp-panel cp-wide-panel" id="activity">
             <div className="cp-section-heading">
               <h2>
@@ -478,7 +477,6 @@ export default async function Customer({
               </div>
             )}
           </section>
-
 
           {canManage && (
             <details id="edit-customer" className="cp-edit-panel cp-panel">
@@ -557,7 +555,6 @@ export default async function Customer({
             )}
           </section>
         </main>
-
       </OwnerShell>
     </div>
   );

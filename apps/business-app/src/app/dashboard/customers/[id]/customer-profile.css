@@ -691,7 +691,6 @@ a.cp-stat:hover {
   .cp-record-grid {
     grid-template-columns: 1fr;
   }
-
 }
 @media (max-width: 430px) {
   .cp-hero {

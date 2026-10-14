@@ -11,7 +11,7 @@ describe('Customer Profile uses one navigation and one copy of related actions',
   it('keeps the customer record and its protected company navigation', () => {
     expect(page).toContain("from '../../owner-shell'");
     expect(page).toContain('<OwnerShell');
-    expect(page).toContain("currentHref=\"/dashboard/customers\"");
+    expect(page).toContain('currentHref="/dashboard/customers"');
     expect(page).toContain("from('customers')");
     expect(page).toContain('Customer account');
   });
@@ -29,7 +29,9 @@ describe('Customer Profile uses one navigation and one copy of related actions',
     expect(page).not.toContain('id="payments"');
     expect(page).not.toContain('href="#payments"');
     expect(page).toContain('label="Account statement"');
-    expect(page).toContain('href={canSeeStatement ? statementHref : undefined}');
+    expect(page).toContain(
+      'href={canSeeStatement ? statementHref : undefined}',
+    );
     expect(page).toContain('id="projects"');
     expect(page).toContain('id="quotes"');
     expect(page).toContain('id="activity"');
