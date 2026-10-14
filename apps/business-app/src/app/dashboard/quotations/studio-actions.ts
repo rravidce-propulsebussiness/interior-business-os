@@ -6,6 +6,7 @@ import { randomUUID } from 'node:crypto';
 import { quotationCommandSchema } from '@business-os/core/commercial';
 import { safeFailure, DomainError } from '@business-os/shared';
 import { commercialServices } from '../commercial/service';
+import { contactMatches } from './customer-match';
 
 const createInput = z
   .object({
@@ -118,10 +119,20 @@ export async function createStudioQuotation(input: unknown): Promise<{
           message: 'The selected customer is not available in your company.',
         };
     } else {
+      const escapedName = values.clientName
+        .replaceAll('\\', '\\\\')
+        .replaceAll('%', '\\%')
+        .replaceAll('_', '\\_');
       const lookups = [
         s.client
           .from('customers')
-          .select('id,display_name')
+          .select('id,display_name,phone,email')
+          .eq('organization_id', s.org)
+          .ilike('display_name', escapedName)
+          .limit(250),
+        s.client
+          .from('customers')
+          .select('id,display_name,phone,email')
           .eq('organization_id', s.org)
           .eq('phone', values.phone)
           .limit(5),
@@ -129,7 +140,7 @@ export async function createStudioQuotation(input: unknown): Promise<{
           ? [
               s.client
                 .from('customers')
-                .select('id,display_name')
+                .select('id,display_name,phone,email')
                 .eq('organization_id', s.org)
                 .ilike(
                   'email',
@@ -148,14 +159,21 @@ export async function createStudioQuotation(input: unknown): Promise<{
           ok: false,
           message: 'Could not check existing customers. Please try again.',
         };
-      const duplicate = potential.flatMap((found) => found.data ?? [])[0];
-      if (duplicate)
+      const matches = [
+        ...new Map(
+          potential
+            .flatMap((found) => found.data ?? [])
+            .filter((customer) => contactMatches(customer, values))
+            .map((customer) => [customer.id, customer]),
+        ).values(),
+      ];
+      if (matches.length)
         return {
           ok: false,
           message:
-            'Customer already exists: ' +
-            duplicate.display_name +
-            '. Choose that customer under Existing customer to keep the same CRN.',
+            'These contact details already belong to ' +
+            matches.length +
+            ' customer account(s). Choose the correct Existing customer / CRN before making another quotation.',
         };
 
       customerId = randomUUID();

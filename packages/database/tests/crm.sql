@@ -70,6 +70,19 @@ do $$declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';source uuid;stage u
  perform pg_temp.crm_assert((select notes='Updated after source deactivation' from public.leads where id=lead),'existing inactive-source lead remains editable');
 end$$;
 reset role;
+-- Database-level duplicate guard works even when the quotation form is
+-- submitted twice and the two requests overlap.
+do $$
+begin
+  begin
+    insert into public.customers(organization_id,display_name,phone,email)
+    values ('dddddddd-dddd-4ddd-8ddd-dddddddddddd',
+      'CRM verification','0044 20 7946 0958','');
+    raise exception 'FAIL: duplicate customer unexpectedly inserted';
+  exception when unique_violation then
+    raise notice 'PASS: duplicate CRN denied with alternate phone format';
+  end;
+end$$;
 do $$declare t text;begin foreach t in array array['lead_sources','crm_pipeline_stages','crm_lost_reasons','crm_requirement_fields','leads','lead_activities','lead_followups','site_visits','quotation_share_links','quotation_customer_responses'] loop perform pg_temp.crm_assert((select relrowsecurity and relforcerowsecurity from pg_class where oid=('public.'||t)::regclass),'forced RLS: '||t);end loop;end$$;
 set local request.jwt.claim.sub='55555555-5555-4555-8555-555555555555';
 set local role authenticated;
