@@ -29,6 +29,15 @@ jobs:
           node-version-file: .node-version
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Temporary format output
+        run: |
+          pnpm exec prettier --write "apps/business-app/src/app/admin/control/quotations/page.tsx" "apps/business-app/src/app/admin/control/quotations/template-actions.ts" "apps/business-app/src/app/admin/control/quotations/template-editor.tsx" "apps/business-app/src/app/dashboard/pricing/construction/package-actions.ts" "apps/business-app/src/app/dashboard/pricing/construction/package-manager.tsx" "apps/business-app/src/app/dashboard/pricing/construction/packages/[id]/preview/route.ts" "apps/business-app/src/app/dashboard/pricing/construction/premium-package-editor.tsx" "apps/business-app/src/app/dashboard/pricing/construction/spec-section-fields.tsx" "packages/core/src/quotation-document.test.ts" "packages/core/src/quotation-document.ts" "packages/core/src/sft-quotation.test.ts" "packages/core/src/sft-quotation.ts" "packages/database/src/construction-packages.ts"
+          node - <<'NODE'
+          const fs = require('node:fs');
+          for (const p of ["apps/business-app/src/app/admin/control/quotations/page.tsx","apps/business-app/src/app/admin/control/quotations/template-actions.ts","apps/business-app/src/app/admin/control/quotations/template-editor.tsx","apps/business-app/src/app/dashboard/pricing/construction/package-actions.ts","apps/business-app/src/app/dashboard/pricing/construction/package-manager.tsx","apps/business-app/src/app/dashboard/pricing/construction/packages/[id]/preview/route.ts","apps/business-app/src/app/dashboard/pricing/construction/premium-package-editor.tsx","apps/business-app/src/app/dashboard/pricing/construction/spec-section-fields.tsx","packages/core/src/quotation-document.test.ts","packages/core/src/quotation-document.ts","packages/core/src/sft-quotation.test.ts","packages/core/src/sft-quotation.ts","packages/database/src/construction-packages.ts"]) {
+            console.log('FORMAT_JSON:' + JSON.stringify({path:p,content:fs.readFileSync(p,'utf8')}));
+          }
+          NODE
       - run: node --test scripts/automation-email.test.mjs scripts/hostinger-deployment.test.mjs scripts/client-asset-integrity.test.mjs scripts/crm-unified-workspace.test.mjs
       - run: pnpm test:acceptance
       - run: pnpm security:dependency
