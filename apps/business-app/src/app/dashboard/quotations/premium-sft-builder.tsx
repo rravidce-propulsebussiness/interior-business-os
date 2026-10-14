@@ -225,6 +225,9 @@ export function PremiumSftBuilder({
                 brand: section.brand,
                 grade: section.grade,
                 allowancePerSqft: section.allowancePerSqft,
+                kind: section.kind,
+                deliverables: section.deliverables,
+                fields: section.fields,
               }))
           : freshSections().slice(1)),
       ]);
