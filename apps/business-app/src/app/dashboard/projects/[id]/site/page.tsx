@@ -6,6 +6,7 @@ import { SiteCommandOverview } from './command-overview';
 import { SiteAccessState } from './site-access-state';
 import { SiteActivity } from './site-activity';
 import { ConstructionPlanningPanel } from './construction-planning-panel';
+import { AgreementReadinessPanel } from './agreement-readiness-panel';
 import '../../../owner-dashboard.css';
 import './site-command.css';
 import './site-premium.css';
@@ -41,6 +42,22 @@ const siteSchema = z.object({
   events: z.array(z.record(z.string(), z.unknown())),
 });
 type Site = z.infer<typeof siteSchema>;
+const agreementSchema = z.object({
+  contract_id: z.uuid().nullable(),
+  contract_number: z.string().nullable(),
+  contract_status: z.string().nullable(),
+  contract_value: z.string().nullable(),
+  currency: z.string().nullable(),
+  active_contract_count: z.number().int().nonnegative(),
+  active_schedule: z.boolean(),
+  clearance_event_id: z.uuid().nullable(),
+  clearance_type: z.string().nullable(),
+  clearance_media_id: z.uuid().nullable(),
+  clearance_recorded_at: z.string().nullable(),
+  current_scope: z.boolean(),
+  execution_authorized: z.boolean(),
+  can_authorize_exception: z.boolean(),
+});
 const constructionSchema = z.object({
   can_manage: z.boolean(),
   workflow: z
@@ -211,6 +228,25 @@ export default async function ProjectDeliveryPage({
   const parsed = siteSchema.safeParse(result.data);
   if (!parsed.success) return <SiteAccessState projectId={id} />;
   const site: Site = parsed.data;
+  const agreementResponse = site.can_manage
+    ? await s.client.rpc('project_agreement_read', {
+        p_organization_id: context.organizationId,
+        p_project_id: id,
+      })
+    : null;
+  const agreementParsed = agreementResponse && !agreementResponse.error
+    ? agreementSchema.safeParse(agreementResponse.data)
+    : null;
+  const agreement = agreementParsed?.success ? agreementParsed.data : null;
+  const agreementPdfChoices = site.media
+    .filter((media) => value(media, 'mime') === 'application/pdf')
+    .map((media) => ({
+      id: value(media, 'id'),
+      filename: value(media, 'filename'),
+      category: value(media, 'category'),
+      mime: value(media, 'mime'),
+    }));
+
   // Staged rollout: preserve existing Site Delivery if the new RPC is not yet
   // installed on the verified environment; never infer missing stages.
   const constructionResponse = await s.client.rpc('construction_project_read', {
@@ -372,6 +408,13 @@ export default async function ProjectDeliveryPage({
               />
             </div>
 
+            {agreement && (
+              <AgreementReadinessPanel
+                projectId={id}
+                state={agreement}
+                files={agreementPdfChoices}
+              />
+            )}
             {construction && (
               <ConstructionPlanningPanel
                 projectId={id}
