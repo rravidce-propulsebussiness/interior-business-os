@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import Link from 'next/link';
+import { ConstructionStageQuality, type ConstructionQualityData } from './construction-stage-quality';
 import {
   assignConstructionRole,
   deactivateConstructionRole,
@@ -95,10 +96,12 @@ export function ConstructionPlanningPanel({
   projectId,
   data,
   memberOptions,
+  quality,
 }: {
   projectId: string;
   data: ConstructionPlanningData;
   memberOptions: { id: string; label: string }[];
+  quality?: ConstructionQualityData | null;
 }) {
   const [message, setMessage] = useState('');
   const [pending, start] = useTransition();
@@ -304,6 +307,15 @@ export function ConstructionPlanningPanel({
                               </div>
                             )}
                           </details>
+                          {quality?.stages.find((entry) => entry.stage_id === stage.id) && (
+                            <ConstructionStageQuality
+                              projectId={projectId}
+                              stageId={stage.id}
+                              canManage={managers}
+                              quality={quality.stages.find((entry) => entry.stage_id === stage.id)!}
+                              choices={quality.available_inspections}
+                            />
+                          )}
                         </div>
                       ))}
                     </div>
