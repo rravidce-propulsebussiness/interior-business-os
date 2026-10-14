@@ -4,6 +4,7 @@ import { OwnerShell } from '../../../owner-shell';
 import { projectWorkspaceNavigation } from '../../project-workspace-navigation';
 import { SiteCommandOverview } from './command-overview';
 import { SiteAccessState } from './site-access-state';
+import { SiteActivity } from './site-activity';
 import '../../../owner-dashboard.css';
 import './site-command.css';
 import './site-premium.css';
@@ -288,6 +289,32 @@ export default async function ProjectDeliveryPage({
               gate={site.gate}
               media={site.media}
             />
+            {managerDataUnavailable && (
+              <div className="sc-service-alert" role="status">
+                Manager updates are temporarily unavailable. Existing Site Delivery
+                records and other actions remain accessible according to your role.
+              </div>
+            )}
+            <div id="overview" className="sc-activity-anchor">
+              <SiteActivity
+                projectId={id}
+                stage={site.stage}
+                isManager={manager}
+                isEngineer={isEngineer}
+                isQuality={isQuality}
+                isProcurement={isProcurement}
+                isWatchman={isWatchman}
+                isDesign={isDesign}
+                canSeeManagerUpdates={canSeeManagerUpdates && !managerDataUnavailable}
+                canViewOperations={has('execution.view')}
+                reports={site.reports}
+                updates={managerData.updates}
+                checks={site.checks}
+                materials={site.materials}
+                gate={site.gate}
+                media={site.media}
+              />
+            </div>
 
             {site.stage === 'not_started' && (
               <section className={card} id="initialize">
