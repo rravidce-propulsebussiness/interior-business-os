@@ -8,6 +8,7 @@ import { SiteActivity } from './site-activity';
 import { ConstructionPlanningPanel } from './construction-planning-panel';
 import { ConstructionPaymentsPanel } from './construction-payments-panel';
 import { ConstructionClientPortalManager } from './construction-client-portal-panel';
+import { ConstructionTomorrowPanel } from './construction-tomorrow-panel';
 import { AgreementReadinessPanel } from './agreement-readiness-panel';
 import '../../../owner-dashboard.css';
 import './site-command.css';
@@ -98,6 +99,26 @@ const constructionFieldSchema = z.object({
       created_by: z.uuid(),
     }),
   ),
+});
+const constructionTomorrowSchema = z.object({
+  can_approve: z.boolean(),
+  can_submit: z.boolean(),
+  material_choices: z.array(z.object({
+    id: z.uuid(), item: z.string(), quantity: z.number(),
+    unit: z.string(), status: z.string(),
+  })),
+  plans: z.array(z.object({
+    id: z.uuid(), stage_id: z.uuid(), work_date: z.string(),
+    revision: z.number().int(), work_summary: z.string(),
+    labor_plan: z.array(z.object({
+      trade: z.string(), workers: z.number().int(),
+    })),
+    instructions: z.string(), status: z.string(), submitted_at: z.string(),
+    materials: z.array(z.object({
+      id: z.uuid(), item: z.string(), quantity: z.number(), unit: z.string(),
+      status: z.string(), required_quantity: z.number(),
+    })),
+  })),
 });
 const clientProgressManagementSchema = z.object({
   shares: z.array(
@@ -418,6 +439,16 @@ export default async function ProjectDeliveryPage({
       ? constructionFieldSchema.safeParse(fieldResponse.data)
       : null;
   const constructionField = fieldParsed?.success ? fieldParsed.data : null;
+  const tomorrowResponse = construction
+    ? await s.client.rpc('construction_tomorrow_read', {
+        p_org: context.organizationId,
+        p_project: id,
+      })
+    : null;
+  const tomorrowParsed = tomorrowResponse && !tomorrowResponse.error
+    ? constructionTomorrowSchema.safeParse(tomorrowResponse.data)
+    : null;
+  const tomorrowWork = tomorrowParsed?.success ? tomorrowParsed.data : null;
   const paymentResponse =
     site.can_manage && construction
       ? await s.client.rpc('construction_payment_read', {
@@ -618,6 +649,18 @@ export default async function ProjectDeliveryPage({
                     id: String(report.id),
                     date: String(report.report_date),
                   }))}
+              />
+            )}
+
+            {construction && tomorrowWork && (
+              <ConstructionTomorrowPanel
+                projectId={id}
+                stages={construction.stages.map((stage) => ({
+                  id: stage.id,
+                  title: stage.title,
+                  instance_code: stage.instance_code,
+                }))}
+                data={tomorrowWork}
               />
             )}
 
