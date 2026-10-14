@@ -1346,8 +1346,7 @@ export default async function ProjectDeliveryPage({
           <Link href="/dashboard/projects" aria-current="page">
             <span aria-hidden="true">▱</span>Projects
           </Link>
-          <a href={mobileUpdateHref}
-          >
+          <a href={mobileUpdateHref}>
             <span aria-hidden="true">＋</span>Site updates
           </a>
           <a href="#overview">
