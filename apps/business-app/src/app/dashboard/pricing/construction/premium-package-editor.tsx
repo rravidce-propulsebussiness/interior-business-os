@@ -136,7 +136,7 @@ export function PremiumPackageEditor({
           isPlanning(section) && !section.kind && !section.deliverables
             ? {
                 ...section,
-                kind: 'plans',
+                kind: 'plans' as const,
                 deliverables: defaultDrawings.map((label) => ({
                   label,
                   included: true,
