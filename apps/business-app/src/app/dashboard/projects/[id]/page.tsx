@@ -488,7 +488,8 @@ export default async function Project({
             canSeeFinance={has('contract.view', 'billing')}
             stageRecords={stageRecords}
             canLinkRecords={Boolean(
-              stageRecords && (site.can_manage || site.role === 'site_engineer')
+              stageRecords &&
+              (site.can_manage || site.role === 'site_engineer'),
             )}
             canManageLinks={site.can_manage}
             isWatchman={site.role === 'watchman' && !site.can_manage}
