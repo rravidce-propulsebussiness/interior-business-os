@@ -4,6 +4,9 @@ import { pageNumber, type Params } from './lookups';
 import { Pagination } from './pagination';
 import { MasterForm } from '../commercial/master-form';
 import { runCrmCommand } from './actions';
+import { OwnerShell, type OwnerNavItem } from '../owner-shell';
+import '../owner-dashboard.css';
+import './queue.css';
 export async function SalesQueue({
   params,
   visits = false,
@@ -29,11 +32,91 @@ export async function SalesQueue({
       page,
     ),
   );
+
+  const [organization, user, plans] = await Promise.all([
+    s.repository.organization(s.org),
+    s.authorization.requireAuthenticatedUser(),
+    s.repository.plans().catch(() => null),
+  ]);
+  if (!organization) throw new Error('Company workspace not available');
+  const leadsPath = '/dashboard/crm/leads';
+  const nav: OwnerNavItem[] = [
+    { label: 'Dashboard', href: '/dashboard', icon: 'dashboard' },
+    {
+      label: 'CRM',
+      href: leadsPath,
+      icon: 'leads',
+      children: [
+        { label: 'CRM Overview', href: '/dashboard/crm' },
+        { label: 'All Leads', href: leadsPath },
+        { label: 'Follow-ups', href: '/dashboard/crm/followups' },
+        { label: 'Site Visits', href: '/dashboard/crm/site-visits' },
+        ...(s.allowed('lead.create')
+          ? [
+              { label: 'Upload Leads', href: leadsPath + '/upload' },
+              { label: 'Google Sheets', href: leadsPath + '/google-sheets' },
+            ]
+          : []),
+        ...(s.allowed('crm.pipeline.manage')
+          ? [{ label: 'CRM Settings', href: '/dashboard/crm/settings' }]
+          : []),
+      ],
+    },
+    ...(s.allowed('quotation.view', 'quotation')
+      ? [{ label: 'Quotations', href: '/dashboard/quotations', icon: 'quotations' as const }]
+      : []),
+    ...(s.allowed('project.view', 'projects')
+      ? [{ label: 'Projects', href: '/dashboard/projects', icon: 'projects' as const }]
+      : []),
+  ];
+  const displayName =
+    (user.email ?? '')
+      .split('@')[0]
+      ?.split(/[._-]/)
+      .filter(Boolean)
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .slice(0, 2)
+      .join(' ') || 'Owner';
+  const leadIds = [
+    ...new Set(
+      result.rows
+        .map((row) => row.lead_id)
+        .filter((id): id is string => typeof id === 'string'),
+    ),
+  ];
+  const leads = leadIds.length
+    ? await s.client
+        .from('leads')
+        .select('id,name,lead_number,phone,phone_normalized')
+        .eq('organization_id', s.org)
+        .in('id', leadIds)
+    : { data: [] };
+  const linkedLeads = new Map((leads.data ?? []).map((lead) => [lead.id, lead]));
   return (
-    <main id="main-content" className="mx-auto max-w-5xl p-6">
-      <h1 className="text-3xl font-semibold">
-        {visits ? 'Site visits' : 'Follow-ups'}
-      </h1>
+    <OwnerShell
+      companyName={organization.name}
+      accountLabel={displayName}
+      accountEmail={user.email ?? ''}
+      planLabel={plans?.find((plan) => plan.id === organization.plan_id)?.name ?? 'Business plan'}
+      navigation={nav}
+      search=""
+      currentHref={path}
+      notificationsEnabled={s.allowed('notification.view')}
+    >
+      <main id="main-content" className="crm-lead-queue-root">
+<p className="crm-queue-breadcrumb"><Link href={leadsPath}>CRM / Leads</Link> <span>›</span> {visits ? 'Site visits' : 'Follow-ups'}</p>
+      <div className="crm-queue-heading">
+        <div>
+          <h1>{visits ? 'Site visits' : 'Follow-ups'}</h1>
+          <p>Everything related to your company's leads, in one workspace.</p>
+        </div>
+        <Link href={leadsPath} className="crm-queue-back">← All leads</Link>
+      </div>
+      <nav className="crm-queue-tabs" aria-label="Lead work">
+        <Link href={leadsPath}>All leads</Link>
+        <Link aria-current={!visits ? 'page' : undefined} href="/dashboard/crm/followups">Follow-ups</Link>
+        <Link aria-current={visits ? 'page' : undefined} href="/dashboard/crm/site-visits">Site visits</Link>
+      </nav>
       <form className="my-5 flex flex-wrap gap-4">
         <label>
           Queue{' '}
@@ -68,16 +151,25 @@ export async function SalesQueue({
         )}
         <button className="min-h-11 rounded border p-2">Filter queue</button>
       </form>
-      {!result.rows.length && <p>No records in this queue.</p>}
+      <p className="crm-queue-total">{result.total} {visits ? 'site visits' : 'follow-ups'} in this view</p>
+      {!result.rows.length && <p className="crm-queue-empty">No records in this queue. Try a different filter.</p>}
       <ul>
         {result.rows.map((r) => (
           <li key={String(r.id)} className="my-4 rounded border p-4">
-            <Link
-              className="underline"
-              href={'/dashboard/crm/leads/' + String(r.lead_id)}
-            >
-              Open lead workspace
-            </Link>
+            <div className="crm-queue-lead-line">
+              <div>
+                <strong>{linkedLeads.get(String(r.lead_id))?.name || 'Lead'}</strong>
+                <small>{linkedLeads.get(String(r.lead_id))?.lead_number || ''}</small>
+              </div>
+              <Link href={leadsPath + '/' + String(r.lead_id)}>
+                View lead →
+              </Link>
+            </div>
+            {linkedLeads.get(String(r.lead_id))?.phone && (
+              <a className="crm-queue-phone" href={'tel:' + (linkedLeads.get(String(r.lead_id))?.phone_normalized || linkedLeads.get(String(r.lead_id))?.phone)}>
+                Call customer
+              </a>
+            )}
             <p>
               {new Date(
                 String(visits ? r.scheduled_at : r.due_at),
@@ -112,6 +204,7 @@ export async function SalesQueue({
         page={page}
         total={result.total}
       />
-    </main>
+      </main>
+    </OwnerShell>
   );
 }
