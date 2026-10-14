@@ -94,9 +94,9 @@ do $handover_test$
 declare
  org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
  project uuid=current_setting('test.manager_project')::uuid;
- stage uuid=current_setting('test.manager_stage')::uuid;
+ stage_id uuid=current_setting('test.manager_stage')::uuid;
 begin
- if private.construction_stage_chain_current(org,project,stage)
+ if private.construction_stage_chain_current(org,project,stage_id)
  then raise exception 'FAIL: uncertified footing chain marked current';end if;
  begin
    update private.site_state set stage='handover'
