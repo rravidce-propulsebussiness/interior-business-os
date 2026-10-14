@@ -16,12 +16,15 @@ export default async function AdminQuotationGovernance() {
     await authorization.requirePlatformPermission(
       'platform.organizations.view',
     );
-    await authorization.requirePlatformPermission('platform.organizations.manage');
+    await authorization.requirePlatformPermission(
+      'platform.organizations.manage',
+    );
   } catch (error) {
     if (error instanceof DomainError && error.code === 'FORBIDDEN') notFound();
     throw error;
   }
-  const defaults = await createConstructionPackagesRepository(client).template();
+  const defaults =
+    await createConstructionPackagesRepository(client).template();
   return (
     <main id="main-content" className="mx-auto max-w-6xl space-y-6 p-5 sm:p-8">
       <div className="rounded-3xl bg-slate-950 px-7 py-9 text-white">
