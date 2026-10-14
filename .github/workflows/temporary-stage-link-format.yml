@@ -1,0 +1,31 @@
+name: Temporary stage-link format capture
+on:
+  push:
+    branches:
+      - feature/construction-stage-linked-records-20261015
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Format and emit changed source fragments
+        run: |
+          pnpm exec prettier --write 'apps/business-app/src/app/dashboard/projects/[id]/page.tsx' 'apps/business-app/src/app/dashboard/projects/[id]/site/page.tsx' 'apps/business-app/src/app/dashboard/projects/[id]/site/construction-journey.tsx' 'apps/business-app/src/app/dashboard/projects/[id]/site/construction-journey.css' 'apps/business-app/src/app/dashboard/projects/[id]/site/stage-record-actions.ts' 'apps/business-app/src/app/dashboard/projects/[id]/site/stage-record-linker.tsx' 'packages/database/scripts/verify.mjs' 'packages/database/scripts/test.mjs' 'docs/CONSTRUCTION-STAGE-RECORDS.md'
+          node <<'NODE'
+          const fs = require('node:fs');
+          for (const path of ["apps/business-app/src/app/dashboard/projects/[id]/page.tsx","apps/business-app/src/app/dashboard/projects/[id]/site/page.tsx","apps/business-app/src/app/dashboard/projects/[id]/site/construction-journey.tsx","apps/business-app/src/app/dashboard/projects/[id]/site/construction-journey.css","apps/business-app/src/app/dashboard/projects/[id]/site/stage-record-actions.ts","apps/business-app/src/app/dashboard/projects/[id]/site/stage-record-linker.tsx","packages/database/scripts/verify.mjs","packages/database/scripts/test.mjs","docs/CONSTRUCTION-STAGE-RECORDS.md"]) {
+            const contents = fs.readFileSync(path,'utf8');
+            const parts = contents.match(/[\s\S]{1,600}/g) || [''];
+            for(let i=0;i<parts.length;i++)
+              process.stdout.write('FMTCHUNK|' + path + '|' + i + '|' + parts.length + '|' + JSON.stringify(parts[i]) + '\n');
+          }
+          NODE
