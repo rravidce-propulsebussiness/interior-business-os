@@ -187,30 +187,38 @@ it('renders package theme and brand, grade, allowance as a safe company snapshot
   expect(html).toContain('&lt;script&gt;unsafe&lt;/script&gt;');
 });
 
-
 it('prints architectural drawing deliverables and custom fields without brand labels', () => {
   const d = quotationDocumentFixture();
   d.lines[0]!.description = encodeSftEstimate(
     calculateSftEstimate({
-      rows: [{
-        name: 'Ground Floor', kind: 'floor',
-        lengthFeet: '20', widthFeet: '20', ratePerSqft: '1950',
-      }],
+      rows: [
+        {
+          name: 'Ground Floor',
+          kind: 'floor',
+          lengthFeet: '20',
+          widthFeet: '20',
+          ratePerSqft: '1950',
+        },
+      ],
       materialIds: [],
-      sections: [{
-        kind: 'plans',
-        title: 'Architectural plans',
-        description: 'Structural design deliverables',
-        brand: 'Should not print',
-        grade: 'Should not print',
-        allowancePerSqft: '0',
-        deliverables: [
-          { label: 'Electrical plan', included: true },
-          { label: '3D views', included: true },
-          { label: 'Plumbing plan', included: false },
-        ],
-        fields: [{ label: 'Design revisions', value: 'Two rounds <private>' }],
-      }],
+      sections: [
+        {
+          kind: 'plans',
+          title: 'Architectural plans',
+          description: 'Structural design deliverables',
+          brand: 'Should not print',
+          grade: 'Should not print',
+          allowancePerSqft: '0',
+          deliverables: [
+            { label: 'Electrical plan', included: true },
+            { label: '3D views', included: true },
+            { label: 'Plumbing plan', included: false },
+          ],
+          fields: [
+            { label: 'Design revisions', value: 'Two rounds <private>' },
+          ],
+        },
+      ],
     }),
   );
   const html = renderQuotationDocument(d);
