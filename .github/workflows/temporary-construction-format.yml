@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - feature/construction-visual-timeline-site-evidence-20261015
+  pull_request:
 permissions:
   contents: read
 jobs:
