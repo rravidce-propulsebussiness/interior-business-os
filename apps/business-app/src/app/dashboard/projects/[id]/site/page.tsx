@@ -10,6 +10,7 @@ import { ConstructionPaymentsPanel } from './construction-payments-panel';
 import { ConstructionClientPortalManager } from './construction-client-portal-panel';
 import { ConstructionTomorrowPanel } from './construction-tomorrow-panel';
 import { ConstructionProcurementWatch } from './construction-procurement-watch';
+import { ConstructionHandoverReadiness } from './construction-handover-readiness';
 import { AgreementReadinessPanel } from './agreement-readiness-panel';
 import '../../../owner-dashboard.css';
 import './site-command.css';
@@ -1779,6 +1780,24 @@ export default async function ProjectDeliveryPage({
                   Pending site checks: {pendingChecks.length} · Material items
                   awaiting closure: {pendingMaterials.length}
                 </p>
+                {construction && constructionQuality && (
+                  <ConstructionHandoverReadiness
+                    workflowStatus={construction.workflow?.status ?? null}
+                    pendingChecks={pendingChecks.length}
+                    pendingMaterials={pendingMaterials.length}
+                    stages={constructionQuality.stages.map((stage) => ({
+                      id: stage.stage_id,
+                      title: stage.title,
+                      instance_code: stage.instance_code,
+                      hold_point: stage.hold_point,
+                      cleared: stage.cleared,
+                      floor_code:
+                        construction.stages.find(
+                          (planned) => planned.id === stage.stage_id,
+                        )?.floor_code ?? null,
+                    }))}
+                  />
+                )}
                 <Action
                   project={id}
                   operation="handover"

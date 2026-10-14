@@ -86,6 +86,31 @@ begin
  raise notice 'PASS: manager creates append-only updates and preserves manual quantity history';
 end $$;
 
+-- A direct state transition must not bypass current construction stage
+-- certifications, even when invoked by a database administrator. The original
+-- manager UI does not decide readiness; its database persistence does.
+set local role postgres;
+do $handover_test$
+declare
+ org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
+ project uuid=current_setting('test.manager_project')::uuid;
+ stage_id uuid=current_setting('test.manager_stage')::uuid;
+begin
+ if private.construction_stage_chain_current(org,project,stage_id)
+ then raise exception 'FAIL: uncertified footing chain marked current';end if;
+ begin
+   update private.site_state set stage='handover'
+     where organization_id=org and project_id=project;
+   raise exception 'FAIL: direct handover bypassed construction stage certificates';
+ exception when check_violation then null;
+ end;
+ if exists(select 1 from private.site_state where organization_id=org
+    and project_id=project and stage='handover')
+ then raise exception 'FAIL: handover status changed despite failed clearance';end if;
+ raise notice 'PASS: handover trigger requires current floor-stage certificates';
+end $handover_test$;
+set local role authenticated;
+
 -- Site engineer enters a real report and cannot perform manager commands.
 select set_config('request.jwt.claim.sub','33333333-3333-4333-8333-333333333333',true);
 do $$
