@@ -51,6 +51,13 @@ begin
   execute format('revoke all on private.%I from public,anon,authenticated',t);
  end loop;
 end$$;
+-- Preserve the actual order of multiple manager review decisions entered
+-- within the same PostgreSQL transaction (now() timestamps can be equal).
+alter table private.site_report_reviews
+ add column review_sequence bigint generated always as identity;
+create unique index site_report_review_order on
+ private.site_report_reviews(organization_id,project_id,report_id,review_sequence desc);
+
 create trigger construction_client_publication_immutable
  before update or delete on private.construction_client_publications
  for each row execute function private.ops_immutable();
@@ -119,7 +126,7 @@ begin
         select later.id from private.site_report_reviews later
         where later.organization_id=p_org and later.project_id=p_project
            and later.report_id=v_report_id
-        order by later.created_at desc,later.id desc limit 1)
+        order by later.review_sequence desc limit 1)
  ) then raise exception 'Latest manager review must approve report before publication'
    using errcode='23514';end if;
  insert into private.construction_client_publications(
@@ -148,7 +155,7 @@ begin
         select review.decision='approved' from private.site_report_reviews review
         where review.organization_id=p_org and review.project_id=p_project
           and review.report_id=r.id
-        order by review.created_at desc,review.id desc limit 1),false),
+        order by review.review_sequence desc limit 1),false),
       'published',coalesce((
         select e.decision='publish' from private.construction_client_publications e
         where e.organization_id=p_org and e.project_id=p_project
@@ -230,7 +237,7 @@ begin
           and review.id=(select latest.id from private.site_report_reviews latest
              where latest.organization_id=s.organization_id and latest.project_id=s.project_id
               and latest.report_id=r.id
-             order by latest.created_at desc,latest.id desc limit 1))
+             order by latest.review_sequence desc limit 1))
       and r.id in (select id from private.site_reports scope
         where scope.organization_id=s.organization_id and scope.project_id=s.project_id
         order by scope.report_date desc,scope.created_at desc,scope.id desc limit 40)
