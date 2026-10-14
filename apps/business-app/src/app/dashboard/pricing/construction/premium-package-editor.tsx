@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import type {
   ConstructionPackage,
   ConstructionSpecSection,
+  ConstructionSpecTemplateEntry,
 } from '@business-os/database/construction-packages';
 import { saveConstructionPackage } from './package-actions';
 import { SpecSectionFields } from './spec-section-fields';
@@ -113,9 +114,11 @@ const money = (v: number) =>
 export function PremiumPackageEditor({
   item,
   close,
+  defaults,
 }: {
   item?: ConstructionPackage;
   close: () => void;
+  defaults: ConstructionSpecTemplateEntry[];
 }) {
   const router = useRouter();
   const [state, action, pending] = useActionState(saveConstructionPackage, {
@@ -130,7 +133,16 @@ export function PremiumPackageEditor({
   const [sections, setSections] = useState<ConstructionSpecSection[]>(
     item?.specSections?.length
       ? item.specSections.map((section) => ({ ...section }))
-      : defaultCategories.map((record) => makeSection(record[0])),
+      : defaults.length
+        ? defaults.map((entry) => ({
+            ...makeSection(entry.title),
+            kind: entry.kind,
+            deliverables: entry.deliverables.map((label) => ({
+              label,
+              included: true,
+            })),
+          }))
+        : defaultCategories.map((record) => makeSection(record[0])),
   );
   const [mode, setMode] = useState<'manual' | 'pdf'>('manual');
   const [active, setActive] = useState(0);
