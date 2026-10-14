@@ -36,7 +36,10 @@ export async function GET(request: Request, { params }: Params) {
     }).format(Number(pkg.ratePerSqft) * 1000);
     const specs = pkg.specSections.filter((s) =>
       Boolean(
-        s.description || s.brand || s.grade || s.allowancePerSqft ||
+        s.description ||
+        s.brand ||
+        s.grade ||
+        s.allowancePerSqft ||
         s.deliverables?.some((drawing) => drawing.included) ||
         s.fields?.some((entry) => entry.value.trim()),
       ),
@@ -52,7 +55,9 @@ export async function GET(request: Request, { params }: Params) {
           (section.kind !== 'plans' && section.brand
             ? '<p>Brand: <strong>' + escape(section.brand) + '</strong></p>'
             : '') +
-          (section.kind !== 'plans' && section.grade ? '<p>Grade: ' + escape(section.grade) + '</p>' : '') +
+          (section.kind !== 'plans' && section.grade
+            ? '<p>Grade: ' + escape(section.grade) + '</p>'
+            : '') +
           (section.kind !== 'plans' && section.allowancePerSqft
             ? '<p>Specified allowance: ₹' +
               escape(section.allowancePerSqft) +
@@ -68,8 +73,14 @@ export async function GET(request: Request, { params }: Params) {
             : '') +
           (section.fields ?? [])
             .filter((entry) => entry.value.trim())
-            .map((entry) => '<p><strong>' + escape(entry.label) +
-              ':</strong> ' + escape(entry.value) + '</p>')
+            .map(
+              (entry) =>
+                '<p><strong>' +
+                escape(entry.label) +
+                ':</strong> ' +
+                escape(entry.value) +
+                '</p>',
+            )
             .join('') +
           (section.description
             ? '<p>' + escape(section.description) + '</p>'
