@@ -72,13 +72,13 @@ export function ConstructionTomorrowPanel({
       id="construction-tomorrow-plan"
     >
       <p className="text-xs font-bold uppercase tracking-[.18em] text-blue-700">
-        Tomorrow's Site Plan
+        Tomorrow&apos;s Site Plan
       </p>
       <h2 className="mt-2 text-xl font-bold text-slate-900">
         Work, labour & required materials
       </h2>
       <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-        Engineers prepare tomorrow's stage work with actual trade-wise headcount
+        Engineers prepare tomorrow&apos;s stage work with actual trade-wise headcount
         and already recorded material needs. Managers review and approve the
         plan. A proposed material quantity does not place an order or reserve
         stock.
@@ -133,7 +133,7 @@ export function ConstructionTomorrowPanel({
             </label>
           </div>
           <label className="block text-xs font-semibold text-slate-800">
-            Tomorrow's planned activities
+            Tomorrow&apos;s planned activities
             <textarea
               name="work_summary"
               required
@@ -332,7 +332,7 @@ export function ConstructionTomorrowPanel({
             disabled={pending || stages.length === 0}
             className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-bold text-white disabled:opacity-50"
           >
-            Submit tomorrow's work for approval
+            Submit tomorrow&apos;s work for approval
           </button>
         </form>
       )}
