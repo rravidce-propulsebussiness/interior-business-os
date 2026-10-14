@@ -30,6 +30,22 @@ begin
   '{"evidence":"Client confirmed final drawings by project meeting; reference C-108"}');
  begin
   perform public.project_site_command(org,project,'execution_start','{}'::jsonb);
+ record=public.construction_project_command(org,project,'workflow_create',
+  jsonb_build_object('template',jsonb_build_object('industry','construction','version','1.0.0'),
+    'floors',jsonb_build_array(jsonb_build_object('code','GROUND','name','Ground')),
+    'stages',jsonb_build_array(jsonb_build_object(
+       'instanceCode','FOUNDATION','templateCode','FOUNDATION','phase','foundation',
+       'floorCode',null,'title','Footing and steel installation',
+       'explanation','Inspect footing for final acceptance',
+       'holdPoint','structural','dependsOn','[]'::jsonb,
+       'activities',jsonb_build_array('Measure gridlines and foundation'),
+       'inspectionTopics',jsonb_build_array('Level and cover')))));
+ perform set_config('test.manager_stage',(
+   select stage->>'id' from jsonb_array_elements(public.construction_project_read(org,project)->'stages') stage
+     where stage->>'instance_code'='FOUNDATION'),true);
+ perform public.construction_project_command(org,project,'role_assign',
+   '{"user_id":"22222222-2222-4222-8222-222222222222","role":"watchman"}'::jsonb);
+
   raise exception 'FAIL: site execution without contract evidence';
  exception when check_violation then null;end;
  perform pg_temp.site_signed_agreement(org,project,agreement_media);
@@ -105,6 +121,29 @@ begin
  if jsonb_array_length(public.project_site_manager_read(org,project)->'reviews')<>2
   or jsonb_array_length(public.project_site_read(org,project)->'reports')<>1
  then raise exception 'Manager approval history or original report missing';end if;
+ perform public.construction_field_command(org,project,'report_link',jsonb_build_object(
+    'stage_id',current_setting('test.manager_stage')::uuid,
+    'report_id',report));
+ if (select item->>'tomorrow_plan' from jsonb_array_elements(
+     public.construction_field_read(org,project)->'stage_reports') item
+     where item->>'report_id'=report::text)<> 'Inspect grid line columns'
+ then raise exception 'FAIL: stage lost canonical tomorrow plan reference';end if;
+
  raise notice 'PASS: manager approval/rework decisions append and preserve engineer report';
 end $$;
+select set_config('request.jwt.claim.sub','22222222-2222-4222-8222-222222222222',true);
+do $
+declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
+ project uuid=current_setting('test.manager_project')::uuid;
+begin
+ if jsonb_array_length(public.construction_field_read(org,project)->'stage_reports')<>0
+ then raise exception 'FAIL: watchman obtained engineers daily reports';end if;
+ begin
+   perform public.construction_field_command(org,project,'report_link',jsonb_build_object(
+      'stage_id',current_setting('test.manager_stage')::uuid,
+      'report_id',current_setting('test.manager_report')::uuid));
+   raise exception 'FAIL: watchman can attach engineering daily report';
+ exception when insufficient_privilege then null;end;
+ raise notice 'PASS: watchman cannot read engineers tomorrow plan or link it';
+end$;
 rollback;
