@@ -26,7 +26,7 @@ do $$declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';c uuid;p uuid;r uui
    'select public.operations_plan(%L,''status'',%L)',
    org,jsonb_build_object('id',p,'version',1,'status','in_progress')),
    'physical Operations plan cannot begin without evidenced agreement');
- media=public.project_site_media_put(org,c,'design','execution-agreement.pdf',
+ media=public.project_site_media_put(org,c,'agreement','execution-agreement.pdf',
    'application/pdf',encode(convert_to('%PDF-1.7'||chr(10)||
      'Paper agreement in disposable fixture','UTF8'),'base64'),
    'Uploaded paper agreement evidence fixture');
