@@ -44,7 +44,6 @@ const managerDataSchema = z.object({
 });
 type ManagerData = z.infer<typeof managerDataSchema>;
 
-
 function value(row: Record<string, unknown>, key: string) {
   const field = row[key];
   return typeof field === 'string' || typeof field === 'number'
