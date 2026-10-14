@@ -83,7 +83,7 @@ function PanelHeading({
 }: {
   icon: 'calendar' | 'team' | 'check' | 'projects';
   title: string;
-  href?: string;
+  href?: string | undefined;
   action?: string;
 }) {
   return (
@@ -363,7 +363,7 @@ export function SiteCommandOverview(props: SiteCommandOverviewProps) {
               <PanelHeading
                 title="Latest site progress"
                 icon="calendar"
-                href={reportSection ? "#daily-reports" : undefined}
+                href={reportSection ? '#daily-reports' : undefined}
                 action="All reports"
               />
               {latestReport ? (
@@ -424,7 +424,7 @@ export function SiteCommandOverview(props: SiteCommandOverviewProps) {
               <PanelHeading
                 title="Manager instructions"
                 icon="team"
-                href={managerSection ? "#manager-updates" : undefined}
+                href={managerSection ? '#manager-updates' : undefined}
                 action="All updates"
               />
               {latestUpdate ? (
@@ -464,7 +464,7 @@ export function SiteCommandOverview(props: SiteCommandOverviewProps) {
               <PanelHeading
                 icon="calendar"
                 title="Security & curing"
-                href={securitySection ? "#security" : undefined}
+                href={securitySection ? '#security' : undefined}
                 action="Open log"
               />
               <p className="sc-empty">
@@ -478,7 +478,7 @@ export function SiteCommandOverview(props: SiteCommandOverviewProps) {
               <PanelHeading
                 title="Technical design"
                 icon="projects"
-                href={stage !== "not_started" ? "#design" : undefined}
+                href={stage !== 'not_started' ? '#design' : undefined}
                 action="Design reviews"
               />
               <p className="sc-empty">
@@ -517,7 +517,7 @@ export function SiteCommandOverview(props: SiteCommandOverviewProps) {
               <PanelHeading
                 title="Recent evidence"
                 icon="projects"
-                href={canUploadEvidence ? "#media" : undefined}
+                href={canUploadEvidence ? '#media' : undefined}
                 action="All files"
               />
               <div className="sc-evidence-list">
@@ -551,7 +551,7 @@ export function SiteCommandOverview(props: SiteCommandOverviewProps) {
               <PanelHeading
                 title="Quality checklist"
                 icon="check"
-                href={qualitySection ? "#quality" : undefined}
+                href={qualitySection ? '#quality' : undefined}
                 action="View checks"
               />
               <div className="sc-quality">
