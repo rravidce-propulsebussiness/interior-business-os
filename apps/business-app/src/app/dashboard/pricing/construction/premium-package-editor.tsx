@@ -612,7 +612,14 @@ export function PremiumPackageEditor({
                                                   included: false,
                                                 })),
                                             }
-                                          : {}),
+                                          : nextKind === 'custom'
+                                            ? {
+                                                brand: '',
+                                                grade: '',
+                                                allowancePerSqft: '',
+                                                deliverables: [],
+                                              }
+                                            : { deliverables: [] }),
                                       },
                                 ),
                               );
