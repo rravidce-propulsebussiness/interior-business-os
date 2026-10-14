@@ -929,10 +929,16 @@ export default async function ProjectDeliveryPage({
                             },
                             {
                               name: 'worker_count',
-                              label: 'Workers on site',
+                              label: 'Workers on site today (actual)',
                               input: 'number',
                               required: true,
                               initial: '0',
+                            },
+                            {
+                              name: 'tomorrow_workers',
+                              label: 'Workers required for tomorrow (planned)',
+                              input: 'number',
+                              placeholder: 'Enter expected labour count',
                             },
                             {
                               name: 'completed_work',
@@ -988,6 +994,12 @@ export default async function ProjectDeliveryPage({
                           <strong>Tomorrow:</strong>{' '}
                           {value(report, 'tomorrow_plan')}
                         </p>
+                        {value(report, 'tomorrow_workers') && (
+                          <p className="mt-2">
+                            <strong>Labour needed tomorrow:</strong>{' '}
+                            {value(report, 'tomorrow_workers')} workers (planned)
+                          </p>
+                        )}
                         {value(report, 'blockers') && (
                           <p className="mt-2 text-amber-800">
                             <strong>Blockers:</strong>{' '}
