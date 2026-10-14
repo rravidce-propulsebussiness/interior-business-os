@@ -360,7 +360,7 @@ export function ConstructionJourney({
                       <div className="cj-activity">
                         <div className="cj-section-title">
                           <div>
-                            <h4>Site records & tomorrow's plan</h4>
+                            <h4>Site records &amp; tomorrow&apos;s plan</h4>
                             <p>
                               Project-wide site records (not individually linked
                               to this stage).
@@ -397,7 +397,7 @@ export function ConstructionJourney({
                                 </p>
                                 <p className="cj-labour">
                                   <strong>
-                                    Tomorrow's labour requirement:
+                                    Tomorrow&apos;s labour requirement:
                                   </strong>{' '}
                                   {value(latestReport, 'tomorrow_workers') ||
                                     'Not planned'}
@@ -411,7 +411,7 @@ export function ConstructionJourney({
                             )}
                             {latestManager && (
                               <p className="cj-note">
-                                <strong>Manager's next priorities:</strong>{' '}
+                                <strong>Manager&apos;s next priorities:</strong>{' '}
                                 {value(latestManager, 'tomorrow_priorities')}
                               </p>
                             )}
