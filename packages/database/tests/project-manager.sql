@@ -10,7 +10,7 @@ do $$
 declare
  org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
  project uuid;
- rec uuid;material uuid;record jsonb;item text;kind text;agreement_media uuid;
+ rec uuid;material uuid;record jsonb;item text;kind text;agreement_media uuid;field_media uuid;
 begin
  select id into project from public.projects where organization_id=org and code='demo-3bhk';
  if project is null then raise exception 'Demo project unavailable';end if;
@@ -34,6 +34,10 @@ begin
  exception when check_violation then null;end;
  perform pg_temp.site_signed_agreement(org,project,agreement_media);
  perform public.project_site_command(org,project,'execution_start','{}'::jsonb);
+ field_media=public.project_site_media_put(org,project,'site','daily-evidence.pdf',
+   'application/pdf',encode(convert_to('%PDF-1.4'||chr(10)||'Site evidence fixture','UTF8'),'base64'),
+   'Scoped site evidence should not be downloadable without legacy media permission');
+ perform set_config('test.manager_site_media',field_media::text,true);
  record=public.construction_project_command(org,project,'workflow_create',
   jsonb_build_object('template',jsonb_build_object('industry','construction','version','1.0.0'),
     'floors',jsonb_build_array(jsonb_build_object('code','GROUND','name','Ground')),
@@ -297,6 +301,26 @@ begin
  if jsonb_array_length(work->'plans')<1 or
     work->'plans'->0->>'status'<>'approved'
  then raise exception 'FAIL: supervisor-only staff cannot see approved next-day work';end if;
+
+ begin
+  perform public.project_site_media_get(org,project,
+    current_setting('test.manager_site_media')::uuid);
+  raise exception 'FAIL: construction-only supervisor downloaded private site media';
+ exception when insufficient_privilege then null;end;
+ begin
+  perform public.project_site_command(org,project,'report_add',
+    jsonb_build_object('report_date',current_date,
+      'completed_work','Supervisor cannot create legacy report',
+      'tomorrow_plan','Unapproved plan','worker_count',99));
+  raise exception 'FAIL: construction-only supervisor wrote a legacy site report';
+ exception when insufficient_privilege then null;end;
+ begin
+  perform public.project_site_manager_command(org,project,'manager_update',
+    jsonb_build_object('report_date',current_date,'health','on_track',
+      'summary','Unauthorized manager update',
+      'tomorrow_priorities','Must be rejected'));
+  raise exception 'FAIL: construction-only supervisor used manager command';
+ exception when insufficient_privilege then null;end;
  raise notice 'PASS: scoped construction supervisor can open site and only see approved plan';
 end$$;
 select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',true);
