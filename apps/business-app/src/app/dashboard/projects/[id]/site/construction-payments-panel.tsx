@@ -59,10 +59,15 @@ export function ConstructionPaymentsPanel({
     data.stage_options.map((stage) => [stage.id, stage.title]),
   );
   const formatAmount = (value: string) => {
-    const amount = Number(value);
-    return Number.isFinite(amount)
-      ? amount.toLocaleString('en-IN', { maximumFractionDigits: 2 })
-      : value;
+    // Display the exact canonical decimal rather than rounding through JS Number.
+    const match = /^(\\d+)(\\.\\d+)?$/.exec(value);
+    if (!match) return value;
+    const integer = match[1] ?? value;
+    const fractional = match[2] ?? '';
+    const head = integer.length > 3 ? integer.slice(0, -3) : '';
+    const tail = integer.length > 3 ? integer.slice(-3) : integer;
+    const grouped = head.replace(/\\B(?=(\\d{2})+(?!\\d))/g, ',');
+    return (head ? grouped + ',' : '') + tail + fractional;
   };
 
   return (
