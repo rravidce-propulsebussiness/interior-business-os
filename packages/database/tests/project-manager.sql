@@ -369,4 +369,69 @@ begin
  exception when insufficient_privilege then null;end;
  raise notice 'PASS: watchman cannot read engineers tomorrow plan or link it';
 end$$;
+
+-- Integration regression: combined material readiness, handover, and site gate attendance.
+select set_config('request.jwt.claim.sub','22222222-2222-4222-8222-222222222222',true);
+do $$
+declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
+ project uuid=current_setting('test.manager_project')::uuid;
+begin
+ perform public.construction_gate_labor_command(org,project,'arrival',
+   jsonb_build_object('work_date',current_date,'trade','Helpers','workers',7,
+     'notes','Seven workers entered site after safety briefing'));
+ perform public.construction_gate_labor_command(org,project,'departure',
+   jsonb_build_object('work_date',current_date,'trade','Helpers','workers',3,
+     'notes','Three helpers finished and departed site'));
+ begin
+   perform public.construction_gate_labor_command(org,project,'departure',
+     jsonb_build_object('work_date',current_date,'trade','Helpers','workers',8,
+       'notes','Cannot leave more workers than recorded on site'));
+   raise exception 'FAIL: security gate permits excess departures';
+ exception when check_violation then null;end;
+ if jsonb_array_length(public.construction_gate_labor_read(org,project)->'comparison')<>0
+ then raise exception 'FAIL: watchman obtained private labour plan comparison';end if;
+ begin
+   perform public.construction_gate_labor_command(org,project,'review',
+    jsonb_build_object('work_date',current_date,'decision','verified',
+      'reason','Watchman cannot independently approve his gate record'));
+   raise exception 'FAIL: watchman verified own security gate record';
+ exception when insufficient_privilege then null;end;
+
+ raise notice 'PASS: watchman gate records remain project-scoped and cannot approve their own work';
+end$$;
+select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',true);
+do $$
+declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
+ project uuid=current_setting('test.manager_project')::uuid;
+ projection jsonb;
+begin
+ projection=public.construction_gate_labor_read(org,project);
+ if not exists(select 1 from jsonb_array_elements(projection->'comparison') row
+      where row->>'trade'='helpers' and row->>'arrived'='7'
+        and row->>'departed'='3' and row->>'on_site'='4')
+ then raise exception 'FAIL: reconciliation of existing gate arrival/departure counts';end if;
+ perform public.construction_gate_labor_command(org,project,'review',
+   jsonb_build_object('work_date',current_date,'decision','verified',
+     'reason','Manager checked watchman gate events and reconciled four workers onsite'));
+ projection=public.construction_gate_labor_read(org,project);
+ if projection->'reviews'->0->>'is_current'<>'true'
+ then raise exception 'FAIL: verified labour attendance is immediately stale';end if;
+ perform set_config('request.jwt.claim.sub','22222222-2222-4222-8222-222222222222',true);
+ perform public.construction_gate_labor_command(org,project,'arrival',
+   jsonb_build_object('work_date',current_date,'trade','Helpers','workers',1,
+     'notes','Additional helper entered after earlier manager verification'));
+ perform set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',true);
+ projection=public.construction_gate_labor_read(org,project);
+ if projection->'reviews'->0->>'is_current'<>'false'
+ then raise exception 'FAIL: manager verified attendance despite newer gate activity';end if;
+ perform public.construction_gate_labor_command(org,project,'review',
+   jsonb_build_object('work_date',current_date,'decision','discrepancy',
+     'reason','One additional helper joined after the originally reviewed security count'));
+ projection=public.construction_gate_labor_read(org,project);
+ if projection->'reviews'->0->>'is_current'<>'true'
+    or projection->'reviews'->0->>'decision'<>'discrepancy'
+ then raise exception 'FAIL: manager cannot append a revised labor reconciliation';end if;
+ raise notice 'PASS: manager can audit live gate counts without creating payroll or stock';
+end$$;
+
 rollback;
