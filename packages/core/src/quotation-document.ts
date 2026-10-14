@@ -220,7 +220,7 @@ export function renderQuotationDocument(input: unknown): string {
           '</section>'
         : '';
       return (
-        '<section class="spec-pages"><div class="spec-eyebrow">SECTION 02 / PACKAGE SPECIFICATIONS</div><h2>Package materials, finishes &amp; scope</h2><p class="muted">The descriptions below form part of this quotation and are saved with this revision.</p>' +
+        '<section class="spec-pages"><div class="spec-eyebrow">SECTION 02 / PACKAGE SPECIFICATIONS</div><h2>Package drawings, materials &amp; scope</h2><p class="muted">The descriptions below form part of this quotation and are saved with this revision.</p>' +
         packageTitle +
         (sections ||
           '<p class="muted">No additional written specifications supplied.</p>') +
