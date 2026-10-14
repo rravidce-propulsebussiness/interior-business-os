@@ -237,10 +237,15 @@ export default async function ProjectDeliveryPage({
     plans.find((plan) => plan.id === organization.plan_id)?.name ??
     'Business plan';
   let mobileUpdateHref = '#overview';
-  if (site.stage !== 'not_started' && isDesign) mobileUpdateHref = '#design';
+  if (site.stage !== 'not_started' && isDesign) {
+    mobileUpdateHref = '#design';
+  }
   if (open || site.stage === 'handover') {
-    if (isEngineer || isQuality) mobileUpdateHref = '#daily-reports';
-    else if (isWatchman) mobileUpdateHref = '#security';
+    if (isEngineer || isQuality) {
+      mobileUpdateHref = '#daily-reports';
+    } else if (isWatchman) {
+      mobileUpdateHref = '#security';
+    }
   }
 
   return (
