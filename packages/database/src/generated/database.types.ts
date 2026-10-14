@@ -10887,10 +10887,6 @@ export interface Database {
         Returns: string;
       };
       construction_rate_list: { Args: { p_org: string }; Returns: Json };
-      construction_spec_template_get: {
-        Args: { p_org?: string };
-        Returns: Json;
-      };
       construction_rate_quote_preview: {
         Args: { p_org: string; p_ids: string[]; p_area: number };
         Returns: Json;
@@ -10898,6 +10894,10 @@ export interface Database {
       construction_rate_save: {
         Args: { p_org: string; p_input: Json };
         Returns: string;
+      };
+      construction_spec_template_get: {
+        Args: { p_org?: string };
+        Returns: Json;
       };
       contract_create: {
         Args: { p_organization_id: string; p_revision_id: string };
@@ -11488,10 +11488,6 @@ export interface Database {
         Args: { p_organization_id: string; p_id: string; p_reason: string };
         Returns: string;
       };
-      platform_construction_spec_template_save: {
-        Args: { p_sections: Json };
-        Returns: boolean;
-      };
       platform_company_create: { Args: { p_input: Json }; Returns: Json };
       platform_company_directory: {
         Args: {
@@ -11527,6 +11523,10 @@ export interface Database {
       platform_company_seller_enable: {
         Args: { p_organization_id: string; p_store_name: string };
         Returns: string;
+      };
+      platform_construction_spec_template_save: {
+        Args: { p_sections: Json };
+        Returns: boolean;
       };
       platform_context: { Args: Record<string, never>; Returns: Json };
       platform_gst_summary: { Args: Record<string, never>; Returns: Json };
