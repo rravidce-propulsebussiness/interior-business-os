@@ -10,8 +10,8 @@ Phase 8 base: procurement readiness (PR #98) and watchman labour gate
 checks do **not** validate applying both branch histories in one database.
 
 This branch extends **Phase 10 / PR #100**, whose history already contains
-Phase 9 procurement-readiness PR #98, and reintroduces the *independently
-reviewable* gate-register changes as a later migration. No production
+Phase 9 procurement-readiness PR #98, and reintroduces the _independently
+reviewable_ gate-register changes as a later migration. No production
 database or working main-branch files were changed by this integration.
 
 ## Deterministic migrations
@@ -31,6 +31,7 @@ that use the timestamp prefix as a unique migration identifier.
 ## Combined UI and permissions
 
 `/dashboard/projects/[id]/site` retains both:
+
 - Manager/procurement's approved next-day material demand and readiness;
 - Watchman's worker arrival/departure panel and manager's reconciliation;
 - The Phase 10 handover-readiness component.
