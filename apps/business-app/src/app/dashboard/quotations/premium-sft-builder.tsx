@@ -123,7 +123,16 @@ export function PremiumSftBuilder({
   );
   const [sections, setSections] = useState<Section[]>(
     initialSchedule?.sections?.length
-      ? initialSchedule.sections.map((item) => ({ ...item }))
+      ? initialSchedule.sections.map((item) => ({
+          ...item,
+          kind: item.kind === 'custom' ? 'general' : item.kind,
+          deliverables: (item.deliverables ?? []).flatMap((drawing) =>
+            typeof drawing === 'string'
+              ? [drawing]
+              : drawing.included ? [drawing.label] : [],
+          ),
+          customFields: item.customFields ?? item.fields ?? [],
+        }))
       : freshSections(),
   );
   const [brands, setBrands] = useState<Record<string, string>>(() => {
