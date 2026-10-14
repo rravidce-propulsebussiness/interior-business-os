@@ -12,6 +12,7 @@ import {
   type LeadStage,
   type LeadTab,
 } from './workspace';
+import { leadServiceFromIndustryKey, type LeadServiceOption } from './lead-service-options';
 import '../../owner-dashboard.css';
 import './leads.css';
 
@@ -90,15 +91,37 @@ export default async function Leads({
       .filter((key) => key !== 'view' && p[key])
       .map((key) => [key, p[key]!]),
   );
-  const [result, organization, user, plans] = await Promise.all([
+  const [result, organization, user, plans, companyIndustries, industries] = await Promise.all([
     s.crm
       .search('leads', filter, page)
       .then((value) => resultSchema.parse(value)),
     s.repository.organization(s.org),
     s.authorization.requireAuthenticatedUser(),
     s.repository.plans().catch(() => null),
+    s.client.from('organization_industries')
+      .select('industry_id')
+      .eq('organization_id', s.org),
+    s.repository.industries(),
   ]);
   if (!organization) throw new Error('Company workspace not available');
+  // Only active industries explicitly assigned to the current tenant may be
+  // offered. If membership lookup fails, fail closed instead of offering all.
+  const assignedIndustries = new Set(
+    companyIndustries.error
+      ? []
+      : (companyIndustries.data ?? []).map((entry) => entry.industry_id),
+  );
+  const services: LeadServiceOption[] = [];
+  for (const industry of industries) {
+    if (!assignedIndustries.has(industry.id)) continue;
+    const value = leadServiceFromIndustryKey(industry.key);
+    if (value && !services.some((entry) => entry.value === value))
+      services.push({
+        value,
+        label: value === 'construction' ? 'Construction' : 'Interiors',
+      });
+  }
+
 
   // Secondary cards are optional. A failed analytics query must not make
   // the company's lead list or existing navigation unusable.
@@ -404,6 +427,7 @@ export default async function Leads({
         tabs={tabs}
         stages={stages}
         sources={sources}
+        services={services}
         assignees={assignees}
         branches={branches}
         lostReasons={reasons}
