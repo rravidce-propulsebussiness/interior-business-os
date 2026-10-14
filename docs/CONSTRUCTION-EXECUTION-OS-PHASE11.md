@@ -38,6 +38,24 @@ The original Site Delivery guard stays in place; both handover routes now
 require current independent construction-stage clearances. Projects without
 a configured construction workflow preserve their former Operations behavior.
 
+## Workflow freeze correction
+
+The existing manager-only `construction_project_command('workflow_create')`
+persisted a complete stage/dependency snapshot but left the workflow
+status at its default `planning`. No normal transition to `frozen`
+existed, so the original Site Delivery handover gate could not be satisfied.
+
+Additive migration `20261014001500_construction_workflow_freeze.sql` freezes
+the workflow when the manager's **atomic** workflow-create command begins
+inserting its stages. All stage creation and dependency validation remain in
+the same transaction; any invalid/failed creation rolls the freeze back.
+The stage plan, certifications, and contracts remain independently gated.
+
+**Existing project records are not backfilled or edited.** An already-persisted
+`planning` workflow requires an explicit staging-reviewed migration/remediation
+plan before completing handover. The Site Delivery UI now displays the
+actual stored workflow status instead of calling every plan 'Planning'.
+
 There are **no** new customer, project, task, inspection, finance, inventory,
 handover, or warranty tables. Historic handover records remain untouched,
 and rejected updates cannot publish new approved document snapshots.
@@ -48,7 +66,15 @@ The existing disposable `packages/database/tests/project-manager.sql`
 fixture now checks direct owner-level Operations status changes for readiness,
 handover, and completion, plus a direct handover document approval. Every
 attempt must raise a PostgreSQL `23514` constraint violation, and both
-canonical records must remain unchanged. Earlier Site Delivery checks remain.
+canonical records must remain unchanged. It also asserts that newly created
+stage snapshots are frozen. Earlier Site Delivery checks remain.
+
+The existing `packages/database/tests/operations.sql` regression deliberately
+invalidated the current footing certificate by recording inadequate curing.
+It now proves Operations handover is rejected at that point, and succeeds only
+after a corrected curing round, independent verification, fresh quality and
+structural reviews, and a new stage certificate. It queries the authorized
+quality read RPC; private readiness helpers stay inaccessible to staff.
 
 `pnpm db:verify` runs the fixture on a **new disposable PostgreSQL** instance
 with `ALLOW_TEST_DATABASE_RESET=yes`; this is required before merge.
