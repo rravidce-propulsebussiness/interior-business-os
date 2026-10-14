@@ -1342,11 +1342,15 @@ export default async function ProjectDeliveryPage({
           </Link>
           <a
             href={
-              isEngineer || isQuality
+              (site.stage === 'execution' || site.stage === 'handover') &&
+              (isEngineer || isQuality)
                 ? '#daily-reports'
-                : isWatchman
+                : (site.stage === 'execution' || site.stage === 'handover') &&
+                    isWatchman
                   ? '#security'
-                  : '#design'
+                  : site.stage !== 'not_started' && isDesign
+                    ? '#design'
+                    : '#overview'
             }
           >
             <span aria-hidden="true">＋</span>Site updates
