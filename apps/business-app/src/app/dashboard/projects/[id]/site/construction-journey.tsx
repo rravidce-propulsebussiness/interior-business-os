@@ -19,6 +19,7 @@ export type ConstructionStageRecordData = {
     request_number: string | null;
     request_status: string | null;
   }[];
+  owned: { kind: string; id: string }[];
   options: {
     id: string;
     contract_id: string;
@@ -51,6 +52,8 @@ type JourneyProps = {
   canUploadCuringPhotos?: boolean;
   stageRecords?: ConstructionStageRecordData | null;
   canLinkRecords?: boolean;
+  canManageLinks?: boolean;
+  isWatchman?: boolean;
 };
 
 const phaseNames: Record<string, string> = {
@@ -170,6 +173,8 @@ export function ConstructionJourney({
   canUploadCuringPhotos = false,
   stageRecords,
   canLinkRecords = false,
+  canManageLinks = false,
+  isWatchman = false,
 }: JourneyProps) {
   const base = `/dashboard/projects/${projectId}/site`;
   const linkedRecords = (
@@ -184,7 +189,7 @@ export function ConstructionJourney({
     );
     return records.filter((record) => associated.has(value(record, 'id')));
   };
-  const stageOptions: StageLinkOption[] = [
+  const allStageOptions: StageLinkOption[] = [
     ...reports.map((item) => ({
       kind: 'report' as const,
       id: value(item, 'id'),
@@ -221,7 +226,13 @@ export function ConstructionJourney({
       label: `${item.contract_number}: ${item.label} · ${item.currency} ${item.amount}`,
     })),
   ];
+  const engineerOwned = new Set(
+    (stageRecords?.owned ?? []).map((item) => item.kind + ':' + item.id),
+  );
   const go = (hash: string) => (inSiteWorkspace ? hash : base + hash);
+  const stageOptions = canManageLinks
+    ? allStageOptions
+    : allStageOptions.filter((item) => engineerOwned.has(item.kind + ':' + item.id));
   const qualityByStage = new Map(
     (quality?.stages ?? []).map((entry) => [entry.stage_id, entry]),
   );
@@ -285,20 +296,74 @@ export function ConstructionJourney({
         <Link href={go('#materials')}>Materials</Link>
         <Link href={go('#security')}>Curing</Link>
         <Link href={go('#team')}>Team</Link>
-        {canSeeFinance && <Link href={paymentsUrl}>Payments</Link>}
+        {canSeeFinance && !isWatchman && <Link href={paymentsUrl}>Payments</Link>}
       </nav>
       {!stages.length ? (
-        <div className="cj-empty">
-          <h3>Construction stages not configured yet</h3>
-          <p>
-            The project manager can set the actual floors and stage dependencies
-            in the site workspace. No progress, check or payment figures have
-            been guessed.
-          </p>
-          <Link href={go('#construction-planning')}>
-            Set up the construction stage plan →
-          </Link>
-        </div>
+        isWatchman ? (
+          <div className="cj-empty cj-curing-panel">
+            <h3>Curing &amp; security rounds</h3>
+            <p>
+              Record each curing round, capture a photo, and note the slab,
+              footing or column location. Detailed construction plans and
+              billing are available only to their authorized project roles.
+            </p>
+            <div className="cj-stat-grid">
+              <div>
+                <span>Curing rounds recorded</span>
+                <strong>{curingRounds.length}</strong>
+              </div>
+              <div>
+                <span>Your curing photos</span>
+                <strong>{curingMedia.length}</strong>
+              </div>
+            </div>
+            {curingRounds.length ? (
+              <div className="cj-linked-group">
+                <strong>Recent rounds</strong>
+                {curingRounds.slice(0, 6).map((round) => (
+                  <p key={value(round, 'id')}>
+                    {date(value(round, 'created_at'))}: {value(round, 'description')}
+                  </p>
+                ))}
+              </div>
+            ) : (
+              <p>No curing rounds recorded yet.</p>
+            )}
+            {curingMedia.length > 0 && (
+              <div className="cj-linked-group">
+                <strong>Photo evidence</strong>
+                <div className="cj-gallery">
+                  {curingMedia.map((item) => (
+                    <EvidenceTile
+                      key={value(item, 'id')}
+                      item={item}
+                      projectId={projectId}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+            {canUploadCuringPhotos && (
+              <Link href={go('#security')}>
+                Record curing round &amp; upload evidence →
+              </Link>
+            )}
+          </div>
+        ) : (
+          <div className="cj-empty">
+            <h3>Construction stages not available</h3>
+            <p>
+              The project manager may need to configure the stage plan, or your
+              current role may not have access to construction stages. No
+              progress, check or payment figures have been guessed.
+            </p>
+            {canManageLinks && (
+              <Link href={go('#construction-planning')}>
+                Manage construction stages →
+              </Link>
+            )}
+          </div>
+        )
       ) : (
         <div className="cj-track">
           {stages.map((stage, index) => {
