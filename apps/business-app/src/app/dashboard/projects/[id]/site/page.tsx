@@ -16,6 +16,34 @@ import { z } from 'zod';
 import { activeOrganization, pageServices } from '@business-os/auth/server';
 import { ProjectSiteForm, ProjectSiteMediaForm, type SiteField } from './forms';
 
+const stageRecordSchema = z.object({
+  links: z.array(z.object({
+    stage_id: z.uuid(),
+    kind: z.string(),
+    record_id: z.uuid(),
+  })),
+  payments: z.array(z.object({
+    stage_id: z.uuid(),
+    item_id: z.uuid(),
+    contract_id: z.uuid(),
+    label: z.string(),
+    amount: z.string(),
+    due_date: z.string().nullable(),
+    currency: z.string(),
+    contract_number: z.string(),
+    request_number: z.string().nullable(),
+    request_status: z.string().nullable(),
+  })),
+  options: z.array(z.object({
+    id: z.uuid(),
+    contract_id: z.uuid(),
+    label: z.string(),
+    amount: z.string(),
+    currency: z.string(),
+    contract_number: z.string(),
+  })),
+});
+
 export const dynamic = 'force-dynamic';
 
 const row = z.object({ id: z.uuid() }).passthrough();
@@ -317,6 +345,16 @@ export default async function ProjectDeliveryPage({
   const constructionQuality = qualityResult?.success
     ? qualityResult.data
     : null;
+  const stageRecordResponse = construction
+    ? await s.client.rpc('construction_stage_record_read', {
+        p_organization_id: context.organizationId,
+        p_project_id: id,
+      })
+    : null;
+  const stageRecordParsed = stageRecordResponse && !stageRecordResponse.error
+    ? stageRecordSchema.safeParse(stageRecordResponse.data)
+    : null;
+  const stageRecords = stageRecordParsed?.success ? stageRecordParsed.data : null;
   const canSeeManagerUpdates =
     site.can_manage ||
     ['site_engineer', 'quality_inspector', 'procurement'].includes(
@@ -451,6 +489,8 @@ export default async function ProjectDeliveryPage({
                 canRequestMaterials={open && (isEngineer || isProcurement)}
                 canUploadWorkPhotos={open && isEngineer}
                 canUploadCuringPhotos={open && isWatchman}
+                stageRecords={stageRecords}
+                canLinkRecords={construction.can_manage}
               />
             )}
             {managerDataUnavailable && (
