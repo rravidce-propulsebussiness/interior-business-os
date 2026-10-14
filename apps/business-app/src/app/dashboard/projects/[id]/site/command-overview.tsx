@@ -19,6 +19,7 @@ export type SiteCommandOverviewProps = {
   reports: RecordRow[];
   reviews: RecordRow[];
   managerUpdates: RecordRow[];
+  managerDataUnavailable: boolean;
   checks: RecordRow[];
   materials: RecordRow[];
   gate: RecordRow[];
@@ -75,27 +76,6 @@ function Metric({
   );
 }
 
-function PanelHeading({
-  icon,
-  title,
-  href,
-  action,
-}: {
-  icon: 'calendar' | 'team' | 'check' | 'projects';
-  title: string;
-  href?: string | undefined;
-  action?: string;
-}) {
-  return (
-    <div className="sc-panel-heading">
-      <h2>
-        <OwnerIcon name={icon} size={19} /> {title}
-      </h2>
-      {href && <a href={href}>{action ?? 'View all'} ›</a>}
-    </div>
-  );
-}
-
 export function SiteCommandOverview(props: SiteCommandOverviewProps) {
   const {
     projectId,
@@ -112,7 +92,7 @@ export function SiteCommandOverview(props: SiteCommandOverviewProps) {
     canSeeManagerUpdates,
     reports,
     reviews,
-    managerUpdates,
+    managerDataUnavailable,
     checks,
     materials,
     gate,
@@ -141,20 +121,13 @@ export function SiteCommandOverview(props: SiteCommandOverviewProps) {
   const openMaterials = materials.filter(
     (material) => !['received', 'rejected'].includes(field(material, 'status')),
   ).length;
-  const latestReport = [...reports].sort((a, b) =>
-    field(b, 'report_date').localeCompare(field(a, 'report_date')),
-  )[0];
-  const latestUpdate = [...managerUpdates].sort((a, b) =>
-    field(b, 'report_date').localeCompare(field(a, 'report_date')),
-  )[0];
   const canUploadEvidence =
     (isDesign || isEngineer || isQuality) &&
     (stage === 'design' || stage === 'execution');
   const canSubmitReport = isEngineer && stage === 'execution';
-  const latestMedia = media.slice(0, 4);
   const deliveryActive = stage === 'execution' || stage === 'handover';
   const reportSection = (isEngineer || isQuality) && deliveryActive;
-  const managerSection = canSeeManagerUpdates && deliveryActive;
+  const managerSection = canSeeManagerUpdates && deliveryActive && !managerDataUnavailable;
   const materialSection = (isEngineer || isProcurement) && deliveryActive;
   const qualitySection = isQuality && deliveryActive;
   const securitySection = isWatchman && deliveryActive;
@@ -265,7 +238,7 @@ export function SiteCommandOverview(props: SiteCommandOverviewProps) {
           <Metric
             title="Daily reports"
             count={reports.length}
-            caption="Recorded updates"
+            caption="Most recent reports (up to 40)"
             icon="quotations"
             color="sc-blue"
             href="#daily-reports"
@@ -295,7 +268,7 @@ export function SiteCommandOverview(props: SiteCommandOverviewProps) {
           <Metric
             title="Material requests"
             count={materials.length}
-            caption={openMaterials + ' awaiting closure'}
+            caption={openMaterials + ' awaiting closure (latest 70)'}
             icon="purchases"
             color="sc-orange"
             href="#materials"
