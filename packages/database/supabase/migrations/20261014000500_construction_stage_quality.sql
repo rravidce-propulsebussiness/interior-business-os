@@ -296,7 +296,7 @@ begin
     perform private.project_agreement_require(p_org,p_project);
     if private.construction_stage_current(p_org,p_project,stage.id)
     then raise exception 'Stage already has a current certified clearance'
-      using errcode='23505';end if;
+      using errcode='23514';end if;
     if not exists(select 1 from public.execution_plans p
        where p.organization_id=p_org and p.project_id=p_project
          and p.status in ('in_progress','punch_list','ready_for_handover'))
