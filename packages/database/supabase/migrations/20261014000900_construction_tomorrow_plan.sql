@@ -69,12 +69,13 @@ end$$;
 
 create function private.construction_tomorrow_staff(p_org uuid,p_project uuid)
 returns boolean language sql stable security definer set search_path='' as $$
- select coalesce(private.construction_can_manage(p_org,p_project)
-  or private.site_role(p_org,p_project)='site_engineer'
-  or exists(select 1 from private.construction_project_roles role
-     where role.organization_id=p_org and role.project_id=p_project
-       and role.user_id=(select auth.uid()) and role.active
-       and role.role in ('site_engineer','supervisor')),false);
+ select coalesce(private.construction_project_access(p_org,p_project)
+  and (private.construction_can_manage(p_org,p_project)
+    or private.site_role(p_org,p_project)='site_engineer'
+    or exists(select 1 from private.construction_project_roles role
+       where role.organization_id=p_org and role.project_id=p_project
+         and role.user_id=(select auth.uid()) and role.active
+         and role.role in ('site_engineer','supervisor'))),false);
 $$;
 
 create function private.construction_tomorrow_state(p_org uuid,p_project uuid,p_plan uuid)
