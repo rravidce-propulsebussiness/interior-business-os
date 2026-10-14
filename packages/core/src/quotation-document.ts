@@ -149,7 +149,7 @@ export function renderQuotationDocument(input: unknown): string {
             section.grade?.trim() ||
             section.allowancePerSqft?.trim() ||
             Boolean(section.deliverables?.length) ||
-            Boolean(section.customFields?.length),
+            Boolean(section.customFields?.length || section.fields?.length),
           ),
         )
         .map(
@@ -176,13 +176,15 @@ export function renderQuotationDocument(input: unknown): string {
             (section.deliverables?.length
               ? '<p><strong>Included drawings</strong></p><ul>' +
                 section.deliverables
-                  .map((drawing) => '<li>' + escape(drawing) + '</li>')
+                  .map((drawing) => typeof drawing === 'string'
+                    ? '<li>' + escape(drawing) + '</li>'
+                    : drawing.included ? '<li>' + escape(drawing.label) + '</li>' : '')
                   .join('') +
                 '</ul>'
               : '') +
-            (section.customFields?.length
+            (section.customFields?.length || section.fields?.length
               ? '<dl>' +
-                section.customFields
+                (section.customFields ?? section.fields ?? [])
                   .map(
                     (extra) =>
                       '<dt><strong>' +
