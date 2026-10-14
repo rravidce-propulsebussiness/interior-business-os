@@ -45,13 +45,19 @@ export async function LeadImportPage({
   const nav: OwnerNavItem[] = [
     { label: 'Dashboard', href: '/dashboard', icon: 'dashboard' },
     {
-      label: 'Leads',
+      label: 'CRM',
       href: leadsPath,
       icon: 'leads',
       children: [
-        { label: 'Manage Leads', href: leadsPath },
+        { label: 'CRM Overview', href: '/dashboard/crm' },
+        { label: 'All Leads', href: leadsPath },
+        { label: 'Follow-ups', href: '/dashboard/crm/followups' },
+        { label: 'Site Visits', href: '/dashboard/crm/site-visits' },
         { label: 'Upload Leads', href: uploadPath },
         { label: 'Google Sheets', href: googlePath },
+        ...(s.allowed('crm.pipeline.manage')
+          ? [{ label: 'CRM Settings', href: '/dashboard/crm/settings' }]
+          : []),
       ],
     },
   ];
