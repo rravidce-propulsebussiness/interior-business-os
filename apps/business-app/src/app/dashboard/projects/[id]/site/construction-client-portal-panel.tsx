@@ -63,7 +63,7 @@ export function ConstructionClientPortalManager({
       </h2>
       <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
         Customers can view floor and stage clearance, plus reports that the
-        project manager explicitly publishes after reviewing the site engineer's
+        project manager explicitly publishes after reviewing the site engineer&apos;s
         updates. Contracts, prices, staff contacts, design files and unpublished
         reports remain private.
       </p>
@@ -199,7 +199,7 @@ export function ConstructionClientPortalManager({
                 {report.completed_work}
               </p>
               <p className="mt-3 text-xs font-bold uppercase tracking-wide text-slate-500">
-                Tomorrow's work
+                Tomorrow&apos;s work
               </p>
               <p className="mt-1 whitespace-pre-wrap text-sm text-slate-800">
                 {report.tomorrow_plan}
