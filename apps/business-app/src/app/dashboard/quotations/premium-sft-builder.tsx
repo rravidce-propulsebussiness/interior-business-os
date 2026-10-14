@@ -21,6 +21,9 @@ type WorkRow = {
 type Section = {
   title: string;
   description: string;
+  kind?: 'plans' | 'material' | 'custom' | undefined;
+  deliverables?: { label: string; included: boolean }[] | undefined;
+  fields?: { label: string; value: string }[] | undefined;
   brand?: string | undefined;
   grade?: string | undefined;
   allowancePerSqft?: string | undefined;
@@ -213,7 +216,9 @@ export function PremiumSftBuilder({
                   section.description.trim() ||
                   section.brand.trim() ||
                   section.grade.trim() ||
-                  section.allowancePerSqft.trim(),
+                  section.allowancePerSqft.trim() ||
+                  section.deliverables?.some((d) => d.included) ||
+                  section.fields?.some((v) => v.label.trim() && v.value.trim()),
                 ),
               )
               .map((section) => ({
@@ -222,6 +227,9 @@ export function PremiumSftBuilder({
                 brand: section.brand,
                 grade: section.grade,
                 allowancePerSqft: section.allowancePerSqft,
+                kind: section.kind,
+                deliverables: section.deliverables,
+                fields: section.fields,
               }))
           : freshSections().slice(1)),
       ]);
@@ -257,7 +265,9 @@ export function PremiumSftBuilder({
             item.description.trim() ||
             item.brand?.trim() ||
             item.grade?.trim() ||
-            item.allowancePerSqft?.trim(),
+            item.allowancePerSqft?.trim() ||
+            item.deliverables?.some((d) => d.included) ||
+            item.fields?.some((v) => v.label.trim() && v.value.trim()),
           ),
         ),
       });
@@ -610,37 +620,125 @@ export function PremiumSftBuilder({
                       }}
                     />
                   </label>
-                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                    {(
-                      [
-                        ['brand', 'Brand / manufacturer'],
-                        ['grade', 'Grade / material size'],
-                        ['allowancePerSqft', 'Price allowance per SFT (₹)'],
-                      ] as const
-                    ).map(([key, title]) => (
-                      <label
-                        key={key}
-                        className="grid gap-1.5 text-xs font-semibold text-slate-600"
-                      >
-                        {title}
-                        <input
-                          className={field}
-                          maxLength={key === 'allowancePerSqft' ? 40 : 120}
-                          value={section[key] ?? ''}
-                          onChange={(event) => {
-                            setSections((items) =>
-                              items.map((item, i) =>
-                                i === index
-                                  ? { ...item, [key]: event.target.value }
-                                  : item,
-                              ),
-                            );
-                            setSaved(false);
-                          }}
-                        />
-                      </label>
-                    ))}
-                  </div>
+                  {section.kind !== 'plans' &&
+                    section.kind !== 'custom' &&
+                    !/^(architectural plans|planning & drawings)$/i.test(
+                      section.title,
+                    ) && (
+                      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                        {(
+                          [
+                            ['brand', 'Brand / manufacturer'],
+                            ['grade', 'Grade / material size'],
+                            ['allowancePerSqft', 'Price allowance per SFT (₹)'],
+                          ] as const
+                        ).map(([key, title]) => (
+                          <label
+                            key={key}
+                            className="grid gap-1.5 text-xs font-semibold text-slate-600"
+                          >
+                            {title}
+                            <input
+                              className={field}
+                              maxLength={key === 'allowancePerSqft' ? 40 : 120}
+                              value={section[key] ?? ''}
+                              onChange={(event) => {
+                                setSections((items) =>
+                                  items.map((item, i) =>
+                                    i === index
+                                      ? { ...item, [key]: event.target.value }
+                                      : item,
+                                  ),
+                                );
+                                setSaved(false);
+                              }}
+                            />
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                  {section.deliverables && (
+                    <fieldset className="mt-3 rounded-xl border border-blue-100 bg-blue-50 p-3">
+                      <legend className="px-1 text-xs font-extrabold text-blue-800">
+                        Included drawings / plans
+                      </legend>
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        {section.deliverables.map((drawing, drawingIndex) => (
+                          <label
+                            key={drawingIndex}
+                            className="flex items-center gap-2 rounded-lg bg-white p-2 text-xs text-slate-700"
+                          >
+                            <input
+                              className="size-4 accent-blue-600"
+                              type="checkbox"
+                              checked={drawing.included}
+                              onChange={(e) => {
+                                setSections((items) =>
+                                  items.map((item, i) =>
+                                    i === index
+                                      ? {
+                                          ...item,
+                                          deliverables: (
+                                            item.deliverables ?? []
+                                          ).map((d, j) =>
+                                            j === drawingIndex
+                                              ? {
+                                                  ...d,
+                                                  included: e.target.checked,
+                                                }
+                                              : d,
+                                          ),
+                                        }
+                                      : item,
+                                  ),
+                                );
+                                setSaved(false);
+                              }}
+                            />
+                            {drawing.label}
+                          </label>
+                        ))}
+                      </div>
+                    </fieldset>
+                  )}
+                  {(section.fields ?? []).length > 0 && (
+                    <div className="mt-3 grid gap-2 rounded-xl border border-slate-200 p-3">
+                      <strong className="text-xs text-slate-700">
+                        Custom specification fields
+                      </strong>
+                      {(section.fields ?? []).map((part, fieldIndex) => (
+                        <label
+                          key={fieldIndex}
+                          className="grid gap-1.5 text-xs font-semibold text-slate-600"
+                        >
+                          {part.label}
+                          <input
+                            className={field}
+                            maxLength={250}
+                            value={part.value}
+                            onChange={(e) => {
+                              setSections((items) =>
+                                items.map((item, i) =>
+                                  i === index
+                                    ? {
+                                        ...item,
+                                        fields: (item.fields ?? []).map(
+                                          (d, j) =>
+                                            j === fieldIndex
+                                              ? { ...d, value: e.target.value }
+                                              : d,
+                                        ),
+                                      }
+                                    : item,
+                                ),
+                              );
+                              setSaved(false);
+                            }}
+                          />
+                        </label>
+                      ))}
+                    </div>
+                  )}
                   <label className="mt-3 grid gap-2 text-xs font-semibold text-slate-600">
                     Editable inclusions, material brands & conditions
                     <textarea

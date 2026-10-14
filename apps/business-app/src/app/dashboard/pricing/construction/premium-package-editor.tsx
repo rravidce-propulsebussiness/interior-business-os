@@ -10,7 +10,7 @@ import { saveConstructionPackage } from './package-actions';
 
 const defaultCategories = [
   [
-    'Architectural plans',
+    'Planning & Drawings',
     '',
     '',
     '2D plans, structural plans, 3D elevation and surveys',
@@ -73,8 +73,36 @@ const defaultCategories = [
     'Exclusions, defect liability and handover terms',
   ],
 ] as const;
-const makeSection = (title: string): ConstructionSpecSection => ({
+const planNames = [
+  'Architectural floor plan',
+  'Structural drawing',
+  'Electrical layout',
+  'Plumbing layout',
+  'Staircase details',
+  'Elevation drawing',
+  '3D elevation / views',
+  'Section drawings',
+  'Working drawings',
+  'Site layout',
+] as const;
+const isPlanSection = (s: ConstructionSpecSection) =>
+  s.kind === 'plans' ||
+  (!s.kind && /^(architectural plans|planning & drawings)$/i.test(s.title));
+const makeSection = (
+  title: string,
+  kind: 'plans' | 'material' | 'custom' = 'material',
+): ConstructionSpecSection => ({
   title,
+  kind,
+  ...(kind === 'plans'
+    ? {
+        deliverables: planNames.map((name) => ({
+          label: name,
+          included: false,
+        })),
+      }
+    : {}),
+  fields: [],
   brand: '',
   grade: '',
   description: '',
@@ -117,8 +145,23 @@ export function PremiumPackageEditor({
   const [themeColor, setThemeColor] = useState(item?.themeColor ?? '#155EEF');
   const [sections, setSections] = useState<ConstructionSpecSection[]>(
     item?.specSections?.length
-      ? item.specSections.map((section) => ({ ...section }))
-      : defaultCategories.map((record) => makeSection(record[0])),
+      ? item.specSections.map((section) =>
+          isPlanSection(section)
+            ? {
+                ...section,
+                kind: 'plans' as const,
+                brand: '',
+                grade: '',
+                allowancePerSqft: '',
+                deliverables:
+                  section.deliverables ??
+                  planNames.map((name) => ({ label: name, included: false })),
+              }
+            : { ...section },
+        )
+      : defaultCategories.map((record, index) =>
+          makeSection(record[0], index === 0 ? 'plans' : 'material'),
+        ),
   );
   const [mode, setMode] = useState<'manual' | 'pdf'>('manual');
   const [active, setActive] = useState(0);
@@ -159,6 +202,34 @@ export function PremiumPackageEditor({
     };
   }, [fileUrl]);
 
+  const updateCustomField = (
+    index: number,
+    fieldIndex: number,
+    key: 'label' | 'value',
+    value: string,
+  ) =>
+    setSections((all) =>
+      all.map((spec, i) =>
+        i === index
+          ? {
+              ...spec,
+              fields: (spec.fields ?? []).map((part, n) =>
+                n === fieldIndex ? { ...part, [key]: value } : part,
+              ),
+            }
+          : spec,
+      ),
+    );
+  const moveSection = (index: number, offset: -1 | 1) => {
+    const target = index + offset;
+    if (target < 0 || target >= sections.length) return;
+    setSections((prev) => {
+      const copy = [...prev];
+      [copy[index], copy[target]] = [copy[target]!, copy[index]!];
+      return copy;
+    });
+    setActive(target);
+  };
   const updateSection = (
     index: number,
     key: keyof ConstructionSpecSection,
@@ -231,7 +302,9 @@ export function PremiumPackageEditor({
       entry.description.trim() ||
       entry.brand.trim() ||
       entry.grade.trim() ||
-      entry.allowancePerSqft.trim(),
+      entry.allowancePerSqft.trim() ||
+      entry.deliverables?.some((x) => x.included) ||
+      entry.fields?.some((x) => x.label.trim() && x.value.trim()),
     ),
   );
   const previewName = name.trim() || 'Your construction package';
@@ -487,15 +560,28 @@ export function PremiumPackageEditor({
                         </strong>
                         <span className="block truncate text-xs text-slate-500">
                           {[
-                            spec.brand,
-                            spec.grade,
-                            spec.allowancePerSqft
-                              ? 'Up to ₹' + spec.allowancePerSqft + '/sft'
-                              : '',
+                            ...(isPlanSection(spec)
+                              ? [
+                                  (spec.deliverables ?? []).filter(
+                                    (d) => d.included,
+                                  ).length + ' drawings included',
+                                ]
+                              : [
+                                  spec.brand,
+                                  spec.grade,
+                                  spec.allowancePerSqft
+                                    ? 'Up to ₹' + spec.allowancePerSqft + '/SFT'
+                                    : '',
+                                ]),
+                            ...(spec.fields?.map((part) =>
+                              part.label && part.value
+                                ? part.label + ': ' + part.value
+                                : '',
+                            ) ?? []),
                           ]
                             .filter(Boolean)
                             .join(' · ') ||
-                            'Set brand, grade and material specification'}
+                            'Edit specification and included scope'}
                         </span>
                       </div>
                       <span className="text-lg text-blue-600">
@@ -515,46 +601,237 @@ export function PremiumPackageEditor({
                             }
                           />
                         </label>
-                        <label className={label}>
-                          Brand / manufacturer
-                          <input
+                        <label className={label + ' sm:col-span-2'}>
+                          Category type
+                          <select
                             className={field}
-                            maxLength={120}
-                            value={spec.brand}
-                            placeholder="e.g. Tata, UltraTech, Kajaria"
-                            onChange={(event) =>
-                              updateSection(index, 'brand', event.target.value)
+                            value={
+                              isPlanSection(spec)
+                                ? 'plans'
+                                : (spec.kind ?? 'material')
                             }
-                          />
+                            onChange={(e) => {
+                              const nextKind = e.target.value as
+                                'plans' | 'material' | 'custom';
+                              setSections((all) =>
+                                all.map((part, n) =>
+                                  n !== index
+                                    ? part
+                                    : {
+                                        ...part,
+                                        kind: nextKind,
+                                        ...(nextKind === 'plans'
+                                          ? {
+                                              brand: '',
+                                              grade: '',
+                                              allowancePerSqft: '',
+                                              deliverables:
+                                                part.deliverables ??
+                                                planNames.map((name) => ({
+                                                  label: name,
+                                                  included: false,
+                                                })),
+                                            }
+                                          : nextKind === 'custom'
+                                            ? {
+                                                brand: '',
+                                                grade: '',
+                                                allowancePerSqft: '',
+                                                deliverables: [],
+                                              }
+                                            : { deliverables: [] }),
+                                      },
+                                ),
+                              );
+                            }}
+                          >
+                            <option value="plans">
+                              Planning / drawings (no brands)
+                            </option>
+                            <option value="material">
+                              Material / finish (brand and grade)
+                            </option>
+                            <option value="custom">
+                              General / custom specification
+                            </option>
+                          </select>
                         </label>
-                        <label className={label}>
-                          Grade / material size
-                          <input
-                            className={field}
-                            maxLength={120}
-                            value={spec.grade}
-                            placeholder="e.g. Fe 550D, OPC 53, 2×2"
-                            onChange={(event) =>
-                              updateSection(index, 'grade', event.target.value)
-                            }
-                          />
-                        </label>
-                        <label className={label}>
-                          Allowance per sq ft (₹) · if applicable
-                          <input
-                            className={field}
-                            maxLength={40}
-                            value={spec.allowancePerSqft}
-                            placeholder="e.g. 85 for vitrified tiles"
-                            onChange={(event) =>
-                              updateSection(
-                                index,
-                                'allowancePerSqft',
-                                event.target.value,
-                              )
-                            }
-                          />
-                        </label>
+                        {isPlanSection(spec) ? (
+                          <fieldset className="sm:col-span-2 rounded-2xl border border-blue-100 bg-blue-50/40 p-4">
+                            <legend className="px-2 text-xs font-extrabold text-blue-800">
+                              Included drawing deliverables
+                            </legend>
+                            <p className="mb-3 text-xs text-slate-600">
+                              Choose the plans included in this package. Rename
+                              a drawing or add your own; no brand, grade or
+                              material rate is required.
+                            </p>
+                            <div className="space-y-2">
+                              {(spec.deliverables ?? []).map(
+                                (drawing, drawingIndex) => (
+                                  <div
+                                    key={drawingIndex}
+                                    className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white p-2"
+                                  >
+                                    <input
+                                      aria-label={'Include ' + drawing.label}
+                                      type="checkbox"
+                                      checked={drawing.included}
+                                      className="size-5 shrink-0 accent-blue-600"
+                                      onChange={(e) =>
+                                        setSections((all) =>
+                                          all.map((part, n) =>
+                                            n === index
+                                              ? {
+                                                  ...part,
+                                                  deliverables: (
+                                                    part.deliverables ?? []
+                                                  ).map((d, j) =>
+                                                    j === drawingIndex
+                                                      ? {
+                                                          ...d,
+                                                          included:
+                                                            e.target.checked,
+                                                        }
+                                                      : d,
+                                                  ),
+                                                }
+                                              : part,
+                                          ),
+                                        )
+                                      }
+                                    />
+                                    <input
+                                      aria-label={
+                                        'Drawing ' +
+                                        (drawingIndex + 1) +
+                                        ' name'
+                                      }
+                                      className={field + ' flex-1'}
+                                      maxLength={90}
+                                      value={drawing.label}
+                                      onChange={(e) =>
+                                        setSections((all) =>
+                                          all.map((part, n) =>
+                                            n === index
+                                              ? {
+                                                  ...part,
+                                                  deliverables: (
+                                                    part.deliverables ?? []
+                                                  ).map((d, j) =>
+                                                    j === drawingIndex
+                                                      ? {
+                                                          ...d,
+                                                          label: e.target.value,
+                                                        }
+                                                      : d,
+                                                  ),
+                                                }
+                                              : part,
+                                          ),
+                                        )
+                                      }
+                                    />
+                                    <button
+                                      type="button"
+                                      aria-label={
+                                        'Remove drawing ' + drawing.label
+                                      }
+                                      className="min-h-10 rounded-lg px-2 text-xs font-bold text-rose-600"
+                                      onClick={() =>
+                                        setSections((all) =>
+                                          all.map((part, n) =>
+                                            n === index
+                                              ? {
+                                                  ...part,
+                                                  deliverables: (
+                                                    part.deliverables ?? []
+                                                  ).filter(
+                                                    (_, j) =>
+                                                      j !== drawingIndex,
+                                                  ),
+                                                }
+                                              : part,
+                                          ),
+                                        )
+                                      }
+                                    >
+                                      Remove
+                                    </button>
+                                  </div>
+                                ),
+                              )}
+                            </div>
+                            <button
+                              type="button"
+                              disabled={(spec.deliverables?.length ?? 0) >= 16}
+                              className="mt-3 rounded-xl border border-blue-300 bg-white px-4 py-2.5 text-xs font-bold text-blue-700 disabled:opacity-40"
+                              onClick={() =>
+                                setSections((all) =>
+                                  all.map((part, n) =>
+                                    n === index
+                                      ? {
+                                          ...part,
+                                          deliverables: [
+                                            ...(part.deliverables ?? []),
+                                            {
+                                              label: 'New drawing',
+                                              included: true,
+                                            },
+                                          ],
+                                        }
+                                      : part,
+                                  ),
+                                )
+                              }
+                            >
+                              + Add drawing / plan
+                            </button>
+                          </fieldset>
+                        ) : spec.kind !== 'custom' ? (
+                          <>
+                            <label className={label}>
+                              Brand / manufacturer
+                              <input
+                                className={field}
+                                maxLength={120}
+                                value={spec.brand}
+                                placeholder="e.g. Tata, UltraTech, Kajaria"
+                                onChange={(e) =>
+                                  updateSection(index, 'brand', e.target.value)
+                                }
+                              />
+                            </label>
+                            <label className={label}>
+                              Grade / material size
+                              <input
+                                className={field}
+                                maxLength={120}
+                                value={spec.grade}
+                                placeholder="e.g. Fe 550D, OPC 53, 2×2"
+                                onChange={(e) =>
+                                  updateSection(index, 'grade', e.target.value)
+                                }
+                              />
+                            </label>
+                            <label className={label}>
+                              Allowance per sq ft (₹) · optional
+                              <input
+                                className={field}
+                                maxLength={40}
+                                value={spec.allowancePerSqft}
+                                placeholder="e.g. 85 for vitrified tiles"
+                                onChange={(e) =>
+                                  updateSection(
+                                    index,
+                                    'allowancePerSqft',
+                                    e.target.value,
+                                  )
+                                }
+                              />
+                            </label>
+                          </>
+                        ) : null}
                         <label className={label + ' sm:col-span-2'}>
                           Scope and inclusions
                           <textarea
@@ -562,7 +839,11 @@ export function PremiumPackageEditor({
                             rows={4}
                             maxLength={600}
                             value={spec.description}
-                            placeholder="Material usage, finish, exclusions, warranty and additional specification details."
+                            placeholder={
+                              isPlanSection(spec)
+                                ? 'Number of drawing revisions, site visits, 3D views, approvals and exclusions.'
+                                : 'Material usage, finish, exclusions, warranty and additional specification details.'
+                            }
                             onChange={(event) =>
                               updateSection(
                                 index,
@@ -572,6 +853,127 @@ export function PremiumPackageEditor({
                             }
                           />
                         </label>
+                        <fieldset className="sm:col-span-2 rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                          <legend className="px-2 text-xs font-extrabold text-slate-800">
+                            Custom fields
+                          </legend>
+                          <p className="mb-3 text-xs text-slate-600">
+                            Add your own labelled fields, such as drawing
+                            revisions, approved brand, warranty, thickness or
+                            finish. They will appear in the generated quotation
+                            PDF.
+                          </p>
+                          <div className="space-y-2">
+                            {(spec.fields ?? []).map((part, fieldIndex) => (
+                              <div
+                                key={fieldIndex}
+                                className="grid gap-2 rounded-xl border border-slate-200 bg-white p-3 sm:grid-cols-[1fr_1fr_auto]"
+                              >
+                                <input
+                                  className={field}
+                                  aria-label={
+                                    'Custom field ' + (fieldIndex + 1) + ' name'
+                                  }
+                                  placeholder="Field label"
+                                  maxLength={80}
+                                  value={part.label}
+                                  onChange={(e) =>
+                                    updateCustomField(
+                                      index,
+                                      fieldIndex,
+                                      'label',
+                                      e.target.value,
+                                    )
+                                  }
+                                />
+                                <input
+                                  className={field}
+                                  aria-label={
+                                    'Custom field ' +
+                                    (fieldIndex + 1) +
+                                    ' value'
+                                  }
+                                  placeholder="Field value"
+                                  maxLength={250}
+                                  value={part.value}
+                                  onChange={(e) =>
+                                    updateCustomField(
+                                      index,
+                                      fieldIndex,
+                                      'value',
+                                      e.target.value,
+                                    )
+                                  }
+                                />
+                                <button
+                                  type="button"
+                                  className="min-h-10 rounded-lg border border-rose-200 px-3 text-xs font-bold text-rose-600"
+                                  onClick={() =>
+                                    setSections((all) =>
+                                      all.map((section, n) =>
+                                        n === index
+                                          ? {
+                                              ...section,
+                                              fields: (
+                                                section.fields ?? []
+                                              ).filter(
+                                                (_, j) => j !== fieldIndex,
+                                              ),
+                                            }
+                                          : section,
+                                      ),
+                                    )
+                                  }
+                                >
+                                  Remove
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                          <button
+                            type="button"
+                            disabled={(spec.fields?.length ?? 0) >= 10}
+                            onClick={() =>
+                              setSections((all) =>
+                                all.map((section, n) =>
+                                  n === index
+                                    ? {
+                                        ...section,
+                                        fields: [
+                                          ...(section.fields ?? []),
+                                          {
+                                            label: 'New field',
+                                            value: '',
+                                          },
+                                        ],
+                                      }
+                                    : section,
+                                ),
+                              )
+                            }
+                            className="mt-3 min-h-10 rounded-xl border border-blue-200 bg-white px-4 py-2 text-xs font-bold text-blue-700 disabled:opacity-40"
+                          >
+                            + Add field
+                          </button>
+                        </fieldset>
+                        <div className="flex flex-wrap gap-2 sm:col-span-2">
+                          <button
+                            type="button"
+                            disabled={index === 0}
+                            onClick={() => moveSection(index, -1)}
+                            className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold disabled:opacity-30"
+                          >
+                            ↑ Move up
+                          </button>
+                          <button
+                            type="button"
+                            disabled={index === sections.length - 1}
+                            onClick={() => moveSection(index, 1)}
+                            className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold disabled:opacity-30"
+                          >
+                            ↓ Move down
+                          </button>
+                        </div>
                         <button
                           type="button"
                           onClick={() => {
@@ -595,7 +997,7 @@ export function PremiumPackageEditor({
                 onClick={() => {
                   setSections((items) => [
                     ...items,
-                    makeSection('Custom category'),
+                    makeSection('Custom category', 'custom'),
                   ]);
                   setActive(sections.length);
                 }}

@@ -35,7 +35,14 @@ export async function GET(request: Request, { params }: Params) {
       maximumFractionDigits: 0,
     }).format(Number(pkg.ratePerSqft) * 1000);
     const specs = pkg.specSections.filter((s) =>
-      Boolean(s.description || s.brand || s.grade || s.allowancePerSqft),
+      Boolean(
+        s.description ||
+        s.brand ||
+        s.grade ||
+        s.allowancePerSqft ||
+        s.deliverables?.some((d) => d.included) ||
+        s.fields?.some((field) => field.label.trim() && field.value.trim()),
+      ),
     );
     const specHtml = specs
       .map(
@@ -53,6 +60,27 @@ export async function GET(request: Request, { params }: Params) {
             ? '<p>Specified allowance: ₹' +
               escape(section.allowancePerSqft) +
               '/SFT</p>'
+            : '') +
+          (section.deliverables?.some((d) => d.included)
+            ? '<div><strong>Included plans &amp; drawings</strong><ul>' +
+              section.deliverables
+                .filter((d) => d.included)
+                .map((d) => '<li>' + escape(d.label) + '</li>')
+                .join('') +
+              '</ul></div>'
+            : '') +
+          (section.fields?.length
+            ? section.fields
+                .filter((f) => f.label.trim() && f.value.trim())
+                .map(
+                  (f) =>
+                    '<p><strong>' +
+                    escape(f.label) +
+                    ':</strong> ' +
+                    escape(f.value) +
+                    '</p>',
+                )
+                .join('')
             : '') +
           (section.description
             ? '<p>' + escape(section.description) + '</p>'

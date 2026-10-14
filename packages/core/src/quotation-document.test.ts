@@ -186,3 +186,49 @@ it('renders package theme and brand, grade, allowance as a safe company snapshot
   expect(html).not.toContain('<script>unsafe</script>');
   expect(html).toContain('&lt;script&gt;unsafe&lt;/script&gt;');
 });
+
+it('renders editable planning deliverables and company custom fields safely', () => {
+  const document = quotationDocumentFixture();
+  document.lines[0]!.description = encodeSftEstimate(
+    calculateSftEstimate({
+      rows: [
+        {
+          kind: 'floor',
+          name: 'Ground Floor',
+          lengthFeet: '20',
+          widthFeet: '30',
+          ratePerSqft: '1950',
+        },
+      ],
+      materialIds: [],
+      sections: [
+        {
+          kind: 'plans',
+          title: 'Planning & Drawings',
+          brand: '',
+          grade: '',
+          description: 'Two design revisions included.',
+          allowancePerSqft: '',
+          deliverables: [
+            { label: 'Electrical layout', included: true },
+            { label: 'Structural drawing', included: true },
+            { label: 'Plumbing layout', included: false },
+          ],
+          fields: [
+            { label: 'Number of revisions', value: '2' },
+            { label: 'Site visit', value: '<script>unsafe</script>' },
+          ],
+        },
+      ],
+    }),
+  );
+  const html = renderQuotationDocument(document);
+  expect(html).toContain('Planning &amp; Drawings');
+  expect(html).toContain('Electrical layout');
+  expect(html).toContain('Structural drawing');
+  expect(html).not.toContain('<li>Plumbing layout</li>');
+  expect(html).toContain('Number of revisions');
+  expect(html).toContain('2');
+  expect(html).toContain('&lt;script&gt;unsafe&lt;/script&gt;');
+  expect(html).not.toContain('<script>unsafe</script>');
+});
