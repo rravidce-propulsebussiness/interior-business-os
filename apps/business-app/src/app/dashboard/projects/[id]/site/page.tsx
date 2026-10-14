@@ -17,6 +17,7 @@ import { activeOrganization, pageServices } from '@business-os/auth/server';
 import { ProjectSiteForm, ProjectSiteMediaForm, type SiteField } from './forms';
 
 const stageRecordSchema = z.object({
+  owned: z.array(z.object({ kind: z.string(), id: z.uuid() })),
   links: z.array(
     z.object({
       stage_id: z.uuid(),
@@ -499,7 +500,9 @@ export default async function ProjectDeliveryPage({
                 canUploadWorkPhotos={open && isEngineer}
                 canUploadCuringPhotos={open && isWatchman}
                 stageRecords={stageRecords}
-                canLinkRecords={construction.can_manage}
+                canLinkRecords={construction.can_manage || isEngineer}
+                canManageLinks={construction.can_manage}
+                isWatchman={isWatchman}
               />
             )}
             {managerDataUnavailable && (
