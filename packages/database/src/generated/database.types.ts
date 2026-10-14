@@ -10895,7 +10895,7 @@ export interface Database {
         Args: { p_org: string; p_input: Json };
         Returns: string;
       };
-      construction_spec_template_get: {
+      construction_package_field_template_get: {
         Args: { p_org?: string };
         Returns: Json;
       };
@@ -11524,7 +11524,7 @@ export interface Database {
         Args: { p_organization_id: string; p_store_name: string };
         Returns: string;
       };
-      platform_construction_spec_template_save: {
+      platform_construction_package_field_template_save: {
         Args: { p_sections: Json };
         Returns: boolean;
       };
