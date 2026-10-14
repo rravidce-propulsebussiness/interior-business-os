@@ -19,6 +19,12 @@ export function ConstructionHandoverReadiness({
   pendingMaterials: number;
 }) {
   const pending = stages.filter((stage) => !stage.cleared);
+  const stats = [
+    ['Workflow', workflowStatus?.replaceAll('_', ' ') ?? 'Not configured'],
+    ['Certified stages', String(stages.length - pending.length)],
+    ['Stages awaiting QC', String(pending.length)],
+    ['Open site checks / needs', `${pendingChecks} / ${pendingMaterials}`],
+  ];
   return (
     <div className="mb-5 rounded-2xl border border-blue-200 bg-blue-50/60 p-4 sm:p-5">
       <h3 className="text-base font-bold text-slate-900">
@@ -26,17 +32,13 @@ export function ConstructionHandoverReadiness({
       </h3>
       {!workflowStatus ? (
         <p className="mt-2 text-sm text-slate-700">
-          No frozen construction workflow is linked; original Site Delivery rules apply.
+          No frozen construction workflow is linked; original Site Delivery
+          rules apply.
         </p>
       ) : (
         <>
           <div className="mt-3 grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
-            {[
-              ['Workflow', workflowStatus.replaceAll('_', ' ')],
-              ['Certified stages', String(stages.length - pending.length)],
-              ['Stages awaiting QC', String(pending.length)],
-              ['Open site checks / needs', `${pendingChecks} / ${pendingMaterials}`],
-            ].map(([label, value]) => (
+            {stats.map(([label, value]) => (
               <div key={label} className="rounded-xl bg-white p-3">
                 <p className="text-xs text-slate-600">{label}</p>
                 <p className="mt-1 font-bold text-slate-900">{value}</p>
@@ -47,7 +49,10 @@ export function ConstructionHandoverReadiness({
             <ul className="mt-3 max-h-52 space-y-2 overflow-auto rounded-xl bg-white p-3">
               {pending.map((stage) => (
                 <li key={stage.id} className="text-sm text-slate-800">
-                  <strong>{stage.floor_code ? `${stage.floor_code} · ` : ''}{stage.title}</strong>
+                  <strong>
+                    {stage.floor_code ? `${stage.floor_code} · ` : ''}
+                    {stage.title}
+                  </strong>
                   <span className="ml-2 text-xs text-amber-800">
                     {stage.hold_point === 'structural'
                       ? 'QC and structural clearance required'
