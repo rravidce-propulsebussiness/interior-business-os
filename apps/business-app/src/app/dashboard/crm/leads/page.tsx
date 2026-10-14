@@ -199,6 +199,16 @@ export default async function Leads({
       assignedName: teamById.get(assigneeId) ?? '',
       location: label(r.location),
       requirement: label(r.service_type),
+      requirements:
+        r.requirements && typeof r.requirements === 'object' &&
+        !Array.isArray(r.requirements)
+          ? Object.fromEntries(
+              Object.entries(r.requirements).filter(
+                (item): item is [string, string] =>
+                  typeof item[1] === 'string' && Boolean(item[1].trim()),
+              ),
+            )
+          : {},
       projectSize: label(r.project_size),
       budgetMin: finiteNumber(r.budget_min),
       budgetMax: finiteNumber(r.budget_max),
