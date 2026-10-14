@@ -2,7 +2,10 @@
 
 import { useState, useTransition } from 'react';
 import Link from 'next/link';
-import { ConstructionStageQuality, type ConstructionQualityData } from './construction-stage-quality';
+import {
+  ConstructionStageQuality,
+  type ConstructionQualityData,
+} from './construction-stage-quality';
 import {
   assignConstructionRole,
   deactivateConstructionRole,
@@ -307,12 +310,16 @@ export function ConstructionPlanningPanel({
                               </div>
                             )}
                           </details>
-                          {quality?.stages.find((entry) => entry.stage_id === stage.id) && (
+                          {quality?.stages.find(
+                            (entry) => entry.stage_id === stage.id,
+                          ) && (
                             <ConstructionStageQuality
                               projectId={projectId}
                               stageId={stage.id}
                               canManage={managers}
-                              quality={quality.stages.find((entry) => entry.stage_id === stage.id)!}
+                              quality={quality.stages.find(
+                                (entry) => entry.stage_id === stage.id,
+                              )!}
                               choices={quality.available_inspections}
                             />
                           )}
