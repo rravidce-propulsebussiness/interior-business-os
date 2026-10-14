@@ -1,0 +1,40 @@
+name: Temporary Operations formatter
+on:
+  push:
+    branches:
+      - feat/premium-operations-dashboard-20261014
+permissions:
+  contents: write
+jobs:
+  format:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.34.5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Format bounded Operations files
+        run: |
+          pnpm exec prettier --write \
+            apps/business-app/src/app/dashboard/operations/page.tsx \
+            apps/business-app/src/app/dashboard/operations/layout.tsx \
+            apps/business-app/src/app/dashboard/operations/operations-dashboard.css
+      - name: Commit formatting
+        run: |
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git add -- apps/business-app/src/app/dashboard/operations/page.tsx \
+            apps/business-app/src/app/dashboard/operations/layout.tsx \
+            apps/business-app/src/app/dashboard/operations/operations-dashboard.css
+          if ! git diff --cached --quiet; then
+            git commit -m "Format premium Operations dashboard"
+            git push origin HEAD:feat/premium-operations-dashboard-20261014
+          fi
