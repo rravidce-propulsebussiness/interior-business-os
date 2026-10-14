@@ -3,12 +3,16 @@ reset role;
 delete from public.organization_entitlements where organization_id='dddddddd-dddd-4ddd-8ddd-dddddddddddd' and not enabled and module_id in(select id from public.modules where key='billing');
 set local request.jwt.claim.sub='11111111-1111-4111-8111-111111111111';
 set local role authenticated;
-do $$declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';c uuid;p uuid;r uuid;t uuid;t2 uuid;m uuid;pkg uuid;v integer;template uuid;i uuid;i2 uuid;s uuid;h uuid;ht uuid;vendor uuid;wo uuid;wm uuid;doc jsonb;begin
+do $$declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';c uuid;p uuid;r uuid;t uuid;t2 uuid;m uuid;pkg uuid;v integer;template uuid;i uuid;i2 uuid;s uuid;h uuid;ht uuid;vendor uuid;wo uuid;wm uuid;doc jsonb;media uuid;contract uuid;schedule uuid;begin
  select id into c from public.contracts where revision_id in(select r.id from public.quotation_revisions r join public.quotations q on q.id=r.quotation_id where q.quotation_number='EXECUTION-TEST');
  p=public.operations_plan(org,'create',jsonb_build_object('contract_id',c));
  perform pg_temp.execution_assert(p=public.operations_plan(org,'create',jsonb_build_object('contract_id',c)),'plan creation retry returns same plan');
  select id into r from public.execution_plan_revisions where plan_id=p and status='draft';
  select project_id into c from public.execution_plans where id=p;
+ -- The plan itself may be drafted without physical authorization. Moving it
+ -- to in_progress later must require an evidenced active agreement.
+ contract=(select contract_id from public.execution_plans where id=p);
+ perform public.project_site_command(org,c,'initialize','{}'::jsonb);
  pkg=public.operations_save(org,'work_packages',jsonb_build_object('project_id',c,'plan_id',p,'name','Installation'));
  m=public.operations_save(org,'project_milestones',jsonb_build_object('project_id',c,'plan_id',p,'name','Install'));
  t=public.operations_save(org,'project_tasks',jsonb_build_object('project_id',c,'plan_id',p,'work_package_id',pkg,'milestone_id',m,'title','Preparation','weight','2'));
@@ -18,6 +22,21 @@ do $$declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';c uuid;p uuid;r uui
  perform pg_temp.execution_denied(format('select public.operations_task(%L,''task'',%L)',org,jsonb_build_object('id',t2,'version',2,'status','done')),'unfinished predecessor blocks completion');
  perform public.operations_plan(org,'approve',jsonb_build_object('id',r,'version',1));
  select snapshot into doc from public.execution_plan_revisions where id=r;
+ perform pg_temp.execution_denied(format(
+   'select public.operations_plan(%L,''status'',%L)',
+   org,jsonb_build_object('id',p,'version',1,'status','in_progress')),
+   'physical Operations plan cannot begin without evidenced agreement');
+ media=public.project_site_media_put(org,c,'design','execution-agreement.pdf',
+   'application/pdf',encode(convert_to('%PDF-1.7'||chr(10)||
+     'Paper agreement in disposable fixture','UTF8'),'base64'),
+   'Uploaded paper agreement evidence fixture');
+ perform public.project_agreement_command(org,c,contract,'record_signed_pdf',
+   jsonb_build_object('media_id',media,
+     'note','Signed paper agreement received for test; no electronic signature verification'));
+ perform public.contract_transition(org,contract,1,'active');
+ schedule=public.payment_schedule_save(org,contract,
+   '{"label":"Contractual execution schedule","items":[{"label":"Final completion","calculation_type":"remaining","value":"0"}]}'::jsonb);
+ perform public.payment_schedule_activate(org,schedule,1);
  perform public.operations_plan(org,'status',jsonb_build_object('id',p,'version',1,'status','in_progress'));
  perform pg_temp.execution_denied(format('select public.operations_task(%L,''task'',%L)',org,jsonb_build_object('id',t,'version',1,'status','blocked')),'blocked task requires reason');
  perform public.operations_task(org,'task',jsonb_build_object('id',t,'version',1,'status','blocked','reason','Waiting for materials'));
