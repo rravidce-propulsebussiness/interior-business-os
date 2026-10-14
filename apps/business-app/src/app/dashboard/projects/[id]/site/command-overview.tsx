@@ -152,6 +152,12 @@ export function SiteCommandOverview(props: SiteCommandOverviewProps) {
     (stage === 'design' || stage === 'execution');
   const canSubmitReport = isEngineer && stage === 'execution';
   const latestMedia = media.slice(0, 4);
+  const deliveryActive = stage === 'execution' || stage === 'handover';
+  const reportSection = (isEngineer || isQuality) && deliveryActive;
+  const managerSection = canSeeManagerUpdates && deliveryActive;
+  const materialSection = (isEngineer || isProcurement) && deliveryActive;
+  const qualitySection = isQuality && deliveryActive;
+  const securitySection = isWatchman && deliveryActive;
 
   return (
     <>
@@ -252,7 +258,7 @@ export function SiteCommandOverview(props: SiteCommandOverviewProps) {
       </header>
 
       <section className="sc-metrics" aria-label="Project record counts">
-        {(isEngineer || isQuality) && (
+        {reportSection && (
           <Metric
             title="Daily reports"
             count={reports.length}
@@ -262,7 +268,7 @@ export function SiteCommandOverview(props: SiteCommandOverviewProps) {
             href="#daily-reports"
           />
         )}
-        {canSeeManagerUpdates && (
+        {managerSection && (
           <Metric
             title="Pending reviews"
             count={awaitingReview}
@@ -272,7 +278,7 @@ export function SiteCommandOverview(props: SiteCommandOverviewProps) {
             href="#daily-reports"
           />
         )}
-        {isQuality && (
+        {qualitySection && (
           <Metric
             title="Quality checks"
             count={checks.length}
@@ -282,7 +288,7 @@ export function SiteCommandOverview(props: SiteCommandOverviewProps) {
             href="#quality"
           />
         )}
-        {(isEngineer || isProcurement) && (
+        {materialSection && (
           <Metric
             title="Material requests"
             count={materials.length}
@@ -292,7 +298,7 @@ export function SiteCommandOverview(props: SiteCommandOverviewProps) {
             href="#materials"
           />
         )}
-        {isWatchman && (
+        {securitySection && (
           <Metric
             title="Security & curing"
             count={gate.length}
@@ -302,7 +308,7 @@ export function SiteCommandOverview(props: SiteCommandOverviewProps) {
             href="#security"
           />
         )}
-        {isDesign && !isEngineer && (
+        {isDesign && !isEngineer && canUploadEvidence && (
           <Metric
             title="Design files"
             count={media.length}
@@ -318,22 +324,22 @@ export function SiteCommandOverview(props: SiteCommandOverviewProps) {
         <a className="sc-tab-current" href="#overview">
           <OwnerIcon name="dashboard" size={16} /> Overview
         </a>
-        {(isEngineer || isQuality) && (
+        {reportSection && (
           <a href="#daily-reports">
             <OwnerIcon name="quotations" size={16} /> Daily reports
           </a>
         )}
-        {(isEngineer || isProcurement) && (
+        {materialSection && (
           <a href="#materials">
             <OwnerIcon name="purchases" size={16} /> Materials
           </a>
         )}
-        {isQuality && (
+        {qualitySection && (
           <a href="#quality">
             <OwnerIcon name="check" size={16} /> Quality
           </a>
         )}
-        {isWatchman && (
+        {securitySection && (
           <a href="#security">
             <OwnerIcon name="calendar" size={16} /> Security &amp; curing
           </a>
@@ -357,7 +363,7 @@ export function SiteCommandOverview(props: SiteCommandOverviewProps) {
               <PanelHeading
                 title="Latest site progress"
                 icon="calendar"
-                href="#daily-reports"
+                href={reportSection ? "#daily-reports" : undefined}
                 action="All reports"
               />
               {latestReport ? (
@@ -418,7 +424,7 @@ export function SiteCommandOverview(props: SiteCommandOverviewProps) {
               <PanelHeading
                 title="Manager instructions"
                 icon="team"
-                href="#manager-updates"
+                href={managerSection ? "#manager-updates" : undefined}
                 action="All updates"
               />
               {latestUpdate ? (
@@ -458,7 +464,7 @@ export function SiteCommandOverview(props: SiteCommandOverviewProps) {
               <PanelHeading
                 icon="calendar"
                 title="Security & curing"
-                href="#security"
+                href={securitySection ? "#security" : undefined}
                 action="Open log"
               />
               <p className="sc-empty">
@@ -472,7 +478,7 @@ export function SiteCommandOverview(props: SiteCommandOverviewProps) {
               <PanelHeading
                 title="Technical design"
                 icon="projects"
-                href="#design"
+                href={stage !== "not_started" ? "#design" : undefined}
                 action="Design reviews"
               />
               <p className="sc-empty">
@@ -511,7 +517,7 @@ export function SiteCommandOverview(props: SiteCommandOverviewProps) {
               <PanelHeading
                 title="Recent evidence"
                 icon="projects"
-                href="#media"
+                href={canUploadEvidence ? "#media" : undefined}
                 action="All files"
               />
               <div className="sc-evidence-list">
@@ -545,7 +551,7 @@ export function SiteCommandOverview(props: SiteCommandOverviewProps) {
               <PanelHeading
                 title="Quality checklist"
                 icon="check"
-                href="#quality"
+                href={qualitySection ? "#quality" : undefined}
                 action="View checks"
               />
               <div className="sc-quality">
