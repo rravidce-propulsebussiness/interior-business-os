@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { runCrmCommand } from '../actions';
 import type { LeadStage, LeadView } from './workspace';
+import { leadCategoryLabel } from './lead-category';
 
 const currency = new Intl.NumberFormat('en-IN', {
   style: 'currency',
@@ -173,6 +174,14 @@ export function LeadsBoardView({
                           {lead.priority}
                         </span>
                       </div>
+                      <span
+                        className={
+                          'crm-lead-service-badge crm-lead-service-' +
+                          (lead.category ?? 'unclassified')
+                        }
+                      >
+                        {leadCategoryLabel(lead.category)}
+                      </span>
                       <p className="crm-board-requirement">
                         {lead.requirement ||
                           lead.projectSize ||

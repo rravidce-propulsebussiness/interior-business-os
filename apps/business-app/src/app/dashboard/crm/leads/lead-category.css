@@ -1,0 +1,96 @@
+/* Canonical lead service identity, shared by the lead list, board and detail. */
+.crm-lead-service-badge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  max-width: 100%;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 5px 10px;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+.crm-lead-service-construction {
+  background: #e9f2ff;
+  border-color: #c3dcff;
+  color: #115abd;
+}
+.crm-lead-service-interior {
+  background: #f1eaff;
+  border-color: #dbccfa;
+  color: #7134aa;
+}
+.crm-lead-service-unclassified {
+  background: #fff4dc;
+  border-color: #ffe0a0;
+  color: #935b08;
+}
+.crm-leads-root .crm-lead-identity > span:last-child {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  min-width: 0;
+}
+.crm-leads-root .crm-mobile-header .crm-lead-service-badge {
+  margin-top: 5px;
+}
+.crm-leads-root .crm-board-card > .crm-lead-service-badge {
+  margin-top: 8px;
+}
+.crm-lead-category-editor {
+  padding: 17px 20px;
+  margin: 16px 0;
+  background: #fff;
+  border: 1px solid #e4eaf5;
+  border-radius: 15px;
+}
+.crm-lead-category-editor label {
+  display: block;
+  color: #1c3153;
+  font-weight: 800;
+  font-size: 13px;
+  margin-bottom: 9px;
+}
+.crm-lead-category-controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.crm-lead-category-controls select {
+  flex: 1 1 180px;
+  min-width: 0;
+  min-height: 42px;
+}
+.crm-lead-category-controls button {
+  padding: 10px 16px;
+  background: #246cf0;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  border-radius: 10px;
+}
+.crm-lead-category-controls button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.crm-lead-category-editor p {
+  color: #617493;
+  font-size: 12px;
+  line-height: 1.5;
+  margin-top: 9px;
+}
+@media (max-width: 520px) {
+  .crm-lead-service-badge {
+    font-size: 10px;
+    white-space: normal;
+  }
+  .crm-lead-category-editor {
+    padding: 14px;
+  }
+  .crm-lead-category-controls button {
+    flex: 1 1 auto;
+  }
+}

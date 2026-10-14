@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { OwnerIcon, type OwnerIconName } from '../../owner-shell';
 import { QuickAddLead } from './quick-add-lead';
 import type { LeadServiceOption } from './lead-service-options';
+import { leadCategoryLabel, type LeadCategory } from './lead-category';
 import { LeadsBoardView } from './board-view';
 import {
   ProPulseConnectPanel,
@@ -39,6 +40,7 @@ export type LeadView = {
   assignedName: string;
   location: string;
   requirement: string;
+  category: LeadCategory;
   requirements: Record<string, string>;
   projectSize: string;
   budgetMin: string | null;
@@ -696,6 +698,14 @@ export function LeadsWorkspace({
                                 </span>
                                 <span>
                                   <strong>{lead.name}</strong>
+                                  <span
+                                    className={
+                                      'crm-lead-service-badge crm-lead-service-' +
+                                      (lead.category ?? 'unclassified')
+                                    }
+                                  >
+                                    {leadCategoryLabel(lead.category)}
+                                  </span>
                                   <small>
                                     {lead.phone || lead.number || 'No number'}
                                   </small>
@@ -803,6 +813,14 @@ export function LeadsWorkspace({
                           <div>
                             <strong>{lead.name}</strong>
                             <small>{lead.number || lead.phone}</small>
+                            <span
+                              className={
+                                'crm-lead-service-badge crm-lead-service-' +
+                                (lead.category ?? 'unclassified')
+                              }
+                            >
+                              {leadCategoryLabel(lead.category)}
+                            </span>
                           </div>
                           <button
                             type="button"

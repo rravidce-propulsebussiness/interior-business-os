@@ -15,8 +15,16 @@ import { runCrmCommand, saveCrm } from '../../actions';
 import { Pagination } from '../../pagination';
 import { OwnerShell, type OwnerNavItem } from '../../../owner-shell';
 import { LeadMeetActions } from './lead-meet-actions';
+import { LeadCategoryEditor } from './lead-category-editor';
+import {
+  leadCategoryLabel,
+  leadRequirementLabel,
+  resolveLeadCategory,
+} from '../lead-category';
+import { leadServiceFromIndustryKey } from '../lead-service-options';
 import '../../../owner-dashboard.css';
 import './lead-detail.css';
+import '../lead-category.css';
 
 export default async function LeadDetail({
   params,
@@ -85,12 +93,33 @@ export default async function LeadDetail({
         : {}),
     }));
 
-  const [organization, user, plans] = await Promise.all([
-    s.repository.organization(s.org),
-    s.authorization.requireAuthenticatedUser(),
-    s.repository.plans().catch(() => null),
-  ]);
+  const [organization, user, plans, memberships, industries] =
+    await Promise.all([
+      s.repository.organization(s.org),
+      s.authorization.requireAuthenticatedUser(),
+      s.repository.plans().catch(() => null),
+      s.client
+        .from('organization_industries')
+        .select('industry_id')
+        .eq('organization_id', s.org),
+      s.repository.industries(),
+    ]);
   if (!organization) throw new Error('Company workspace not available');
+  const enabledIds = new Set(
+    memberships.error
+      ? []
+      : (memberships.data ?? []).map((item) => item.industry_id),
+  );
+  const enabledIndustries = industries.filter(
+    (industry) => enabledIds.has(industry.id) && industry.status === 'active',
+  );
+  const category = resolveLeadCategory(l, enabledIndustries);
+  const categoryLabel = leadCategoryLabel(category);
+  const categoryOptions = enabledIndustries
+    .map((industry) => leadServiceFromIndustryKey(industry.key))
+    .filter((value): value is 'construction' | 'interior' => value !== null);
+  const serviceOptions = [...new Set(categoryOptions)];
+  const requirementLabel = leadRequirementLabel(l);
   const leadPath = '/dashboard/crm/leads';
   const nav: OwnerNavItem[] = [
     { label: 'Dashboard', href: '/dashboard', icon: 'dashboard' },
@@ -200,6 +229,14 @@ export default async function LeadDetail({
               <div className="crm-lead-detail-name-line">
                 <h2>{l.name}</h2>
                 <span className="crm-lead-detail-badge">{l.lifecycle}</span>
+                <span
+                  className={
+                    'crm-lead-service-badge crm-lead-service-' +
+                    (category ?? 'unclassified')
+                  }
+                >
+                  {categoryLabel}
+                </span>
                 <span className="crm-lead-detail-priority">
                   {l.priority} priority
                 </span>
@@ -219,8 +256,12 @@ export default async function LeadDetail({
               <strong>{l.email || 'Not specified'}</strong>
             </div>
             <div>
-              <span>Service</span>
-              <strong>{l.service_type || 'Not specified'}</strong>
+              <span>Service category</span>
+              <strong>{categoryLabel}</strong>
+            </div>
+            <div>
+              <span>Project requirement</span>
+              <strong>{requirementLabel || 'Not specified'}</strong>
             </div>
             <div>
               <span>Budget</span>
@@ -258,6 +299,14 @@ export default async function LeadDetail({
             </a>
           </div>
         </section>
+        {s.allowed('lead.manage') && l.lifecycle !== 'archived' && (
+          <LeadCategoryEditor
+            leadId={id}
+            version={l.version}
+            currentCategory={category}
+            categories={serviceOptions}
+          />
+        )}
         <nav className="crm-lead-detail-tabs" aria-label="Lead sections">
           <a href="#lead-daily-actions">Actions</a>
           <a href="#lead-followups">Follow-ups</a>
@@ -658,7 +707,14 @@ export default async function LeadDetail({
                 title="Save lead details"
                 submitAction={saveCrm.bind(null, 'leads')}
                 initial={initial}
-                fields={[...leadFields(choices, true), ...requirementFields]}
+                fields={[
+                  ...leadFields(choices, true).filter(
+                    (field) =>
+                      field.key !== 'industry_id' &&
+                      field.key !== 'service_type',
+                  ),
+                  ...requirementFields,
+                ]}
               />
             </details>
             <details>
