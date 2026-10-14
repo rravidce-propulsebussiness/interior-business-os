@@ -162,9 +162,7 @@ test('legacy CRM overview and commercial response pages redirect to their canoni
     'utf8',
   );
   const quotationsPage = readFileSync(
-    fileURLToPath(
-      new URL('../../quotations/page.tsx', root),
-    ),
+    fileURLToPath(new URL('../../quotations/page.tsx', root)),
     'utf8',
   );
   const leadPage = readFileSync(
