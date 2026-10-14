@@ -181,6 +181,17 @@ begin
  then raise exception 'FAIL: procurement watch invented or lost canonical PO reference';end if;
  if (public.construction_procurement_watch(org,project)->>'can_update')<>'true'
  then raise exception 'FAIL: authorized project owner cannot act on procurement queue';end if;
+ -- The multi-role procurement projection can be read by an explicitly
+ -- assigned staff member, but the legacy material_update write still
+ -- requires its own site_team role. No permission upgrade by inference.
+ perform public.construction_project_command(org,project,'role_assign',
+   '{"user_id":"33333333-3333-4333-8333-333333333333","role":"procurement"}'::jsonb);
+ perform set_config('request.jwt.claim.sub','33333333-3333-4333-8333-333333333333',true);
+ if jsonb_array_length(public.construction_procurement_watch(org,project)->'materials')<>1
+   or (public.construction_procurement_watch(org,project)->>'can_update')<>'false'
+ then raise exception 'FAIL: scoped procurement viewer gained legacy ordering powers';end if;
+ perform set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',true);
+
 
 
  begin
