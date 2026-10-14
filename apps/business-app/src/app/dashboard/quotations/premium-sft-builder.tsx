@@ -10,6 +10,7 @@ import {
 import type { ConstructionRate } from '@business-os/database/construction-rates';
 import type { ConstructionPackage } from '@business-os/database/construction-packages';
 import { saveFloorwiseSftEstimate } from './construction-actions';
+import { SpecSectionFields } from '../pricing/construction/spec-section-fields';
 
 type WorkRow = {
   kind: 'floor' | 'additional';
@@ -617,35 +618,22 @@ export function PremiumSftBuilder({
                     />
                   </label>
                   <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                    {(
-                      [
-                        ['brand', 'Brand / manufacturer'],
-                        ['grade', 'Grade / material size'],
-                        ['allowancePerSqft', 'Price allowance per SFT (₹)'],
-                      ] as const
-                    ).map(([key, title]) => (
-                      <label
-                        key={key}
-                        className="grid gap-1.5 text-xs font-semibold text-slate-600"
-                      >
-                        {title}
-                        <input
-                          className={field}
-                          maxLength={key === 'allowancePerSqft' ? 40 : 120}
-                          value={section[key] ?? ''}
-                          onChange={(event) => {
-                            setSections((items) =>
-                              items.map((item, i) =>
-                                i === index
-                                  ? { ...item, [key]: event.target.value }
-                                  : item,
-                              ),
-                            );
-                            setSaved(false);
-                          }}
-                        />
-                      </label>
-                    ))}
+                    <SpecSectionFields
+                      section={{
+                        ...section,
+                        brand: section.brand ?? '',
+                        grade: section.grade ?? '',
+                        allowancePerSqft: section.allowancePerSqft ?? '',
+                      }}
+                      onChange={(next) => {
+                        setSections((current) =>
+                          current.map((entry, n) =>
+                            n === index ? next : entry,
+                          ),
+                        );
+                        setSaved(false);
+                      }}
+                    />
                   </div>
                   <label className="mt-3 grid gap-2 text-xs font-semibold text-slate-600">
                     Editable inclusions, material brands & conditions
