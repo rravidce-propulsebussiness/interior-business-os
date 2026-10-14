@@ -1,0 +1,37 @@
+name: Format quote identity fix
+on:
+  push:
+    branches:
+      - fix/quotation-duplicate-crn-protection
+    paths:
+      - .github/workflows/format-quote-identity-fix.yml
+permissions:
+  contents: write
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Format updated quotation files
+        run: >-
+          pnpm exec prettier --write
+          apps/business-app/src/app/dashboard/quotations/studio-actions.ts
+          apps/business-app/src/app/dashboard/quotations/studio-start.tsx
+          apps/business-app/src/app/dashboard/quotations/customer-match.ts
+          apps/business-app/src/app/dashboard/quotations/customer-match.test.ts
+      - name: Commit formatting
+        run: |
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git add apps/business-app/src/app/dashboard/quotations/
+          if ! git diff --cached --quiet; then
+            git commit -m "Format quotation duplicate-CRN prevention"
+            git push origin HEAD:fix/quotation-duplicate-crn-protection
+          fi
