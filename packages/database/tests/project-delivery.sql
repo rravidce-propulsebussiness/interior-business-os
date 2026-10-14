@@ -78,7 +78,10 @@ begin
  perform public.project_site_command(org,project,'check_update',
    jsonb_build_object('id',check_id,'status','passed','notes','Verified'));
  perform public.project_site_command(org,project,'report_add',
-   jsonb_build_object('report_date',current_date::text,'completed_work','Site clearing and marking','tomorrow_plan','Footing gridline inspection','worker_count',8));
+   jsonb_build_object('report_date',current_date::text,'completed_work','Site clearing and marking','tomorrow_plan','Footing gridline inspection','worker_count',8,'tomorrow_workers',12));
+ if (public.project_site_read(org,project)->'reports'->0->>'tomorrow_workers') <> '12' then
+   raise exception 'Tomorrow labour requirement was not saved separately';
+ end if;
  begin
    perform public.project_site_command(org,project,'handover','{}');
    raise exception 'FAIL: handover without formal inspections allowed';
@@ -110,9 +113,30 @@ end$$;
 
 -- Watchman can record gate events only, not change design/client approval.
 select set_config('request.jwt.claim.sub','22222222-2222-4222-8222-222222222222',true);
-do $$
+do $
 declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd'; project uuid=current_setting('test.project_site_id')::uuid;
+ curing_photo uuid;
+ png text=encode(decode('89504e470d0a1a0a','hex'),'base64');
 begin
+ begin
+   perform public.project_site_media_put(org,project,'curing','curing.png',
+     'image/png',png,'Footing curing at 06:00 ground level');
+   raise exception 'FAIL: watchman uploaded curing photo without a curing round';
+ exception when check_violation then null; end;
+ perform public.project_site_command(org,project,'gate_add',
+   '{"kind":"curing","description":"Footing curing morning round","notes":"06:00, east grid"}');
+ curing_photo=public.project_site_media_put(org,project,'curing','curing.png',
+   'image/png',png,'Footing curing at 06:00 ground level');
+ if not exists (select 1 from jsonb_array_elements(
+   public.project_site_read(org,project)->'media') m where m->>'id'=curing_photo::text)
+ then raise exception 'FAIL: curing photo missing from watchman private gallery'; end if;
+ if public.project_site_media_get(org,project,curing_photo)->>'mime' <> 'image/png'
+ then raise exception 'FAIL: watchman cannot read own curing photo'; end if;
+ begin
+   perform public.project_site_media_put(org,project,'site','work.png',
+     'image/png',png,'Non curing project photo');
+   raise exception 'FAIL: watchman uploaded unrelated site photo';
+ exception when insufficient_privilege then null; end;
  perform public.project_site_command(org,project,'gate_add',
   '{"kind":"material_delivery","description":"Cement truck arrived","notes":"Check delivery against PO"}');
  begin
@@ -125,6 +149,6 @@ begin
     or jsonb_array_length(public.project_site_read(org,project)->'materials')<>0 then
    raise exception 'FAIL: watchman can read restricted data';
  end if;
- raise notice 'PASS: watchman restricted to gate records';
+ raise notice 'PASS: watchman restricted to gate events and own curing photos';
 end $$;
 rollback;
