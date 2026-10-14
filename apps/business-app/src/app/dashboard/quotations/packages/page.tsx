@@ -18,10 +18,10 @@ export default async function QuotationPackagesPage() {
       authorization.requireAuthenticatedUser(),
       repository.industries(),
       createConstructionPackagesRepository(client).list(org),
-      createConstructionPackagesRepository(client).template(),
       createQuotationPackagesRepository(client)
         .list(org)
         .catch(() => null),
+      createConstructionPackagesRepository(client).template(),
     ]);
   if (!organization) throw new Error('Company workspace unavailable');
   return (
