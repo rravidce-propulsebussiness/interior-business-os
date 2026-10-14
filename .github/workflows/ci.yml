@@ -29,6 +29,10 @@ jobs:
           node-version-file: .node-version
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Diagnose package field formatting
+        run: |
+          pnpm exec prettier --write "apps/business-app/src/app/dashboard/pricing/construction/package-actions.ts" "apps/business-app/src/app/dashboard/pricing/construction/packages/[id]/preview/route.ts" "apps/business-app/src/app/dashboard/pricing/construction/premium-package-editor.tsx" "apps/business-app/src/app/dashboard/quotations/premium-sft-builder.tsx" "packages/core/src/package-custom-fields.test.ts" "packages/core/src/quotation-document.ts" "packages/core/src/sft-quotation.ts" "packages/database/src/construction-packages.ts"
+          git diff -- "apps/business-app/src/app/dashboard/pricing/construction/package-actions.ts" "apps/business-app/src/app/dashboard/pricing/construction/packages/[id]/preview/route.ts" "apps/business-app/src/app/dashboard/pricing/construction/premium-package-editor.tsx" "apps/business-app/src/app/dashboard/quotations/premium-sft-builder.tsx" "packages/core/src/package-custom-fields.test.ts" "packages/core/src/quotation-document.ts" "packages/core/src/sft-quotation.ts" "packages/database/src/construction-packages.ts"
       - run: node --test scripts/automation-email.test.mjs scripts/hostinger-deployment.test.mjs scripts/client-asset-integrity.test.mjs scripts/crm-unified-workspace.test.mjs
       - run: pnpm test:acceptance
       - run: pnpm security:dependency

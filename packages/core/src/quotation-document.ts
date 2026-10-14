@@ -147,7 +147,9 @@ export function renderQuotationDocument(input: unknown): string {
             section.description.trim() ||
             section.brand?.trim() ||
             section.grade?.trim() ||
-            section.allowancePerSqft?.trim(),
+            section.allowancePerSqft?.trim() ||
+            Boolean(section.deliverables?.length) ||
+            Boolean(section.customFields?.length || section.fields?.length),
           ),
         )
         .map(
@@ -170,6 +172,29 @@ export function renderQuotationDocument(input: unknown): string {
               : '') +
             (section.description
               ? '<p class="text">' + escape(section.description) + '</p>'
+              : '') +
+            (section.deliverables?.length
+              ? '<p><strong>Included drawings</strong></p><ul>' +
+                section.deliverables
+                  .map((drawing) => typeof drawing === 'string'
+                    ? '<li>' + escape(drawing) + '</li>'
+                    : drawing.included ? '<li>' + escape(drawing.label) + '</li>' : '')
+                  .join('') +
+                '</ul>'
+              : '') +
+            (section.customFields?.length || section.fields?.length
+              ? '<dl>' +
+                (section.customFields ?? section.fields ?? [])
+                  .map(
+                    (extra) =>
+                      '<dt><strong>' +
+                      escape(extra.label) +
+                      ':</strong></dt><dd>' +
+                      escape(extra.value) +
+                      '</dd>',
+                  )
+                  .join('') +
+                '</dl>'
               : '') +
             '</div></article>',
         )

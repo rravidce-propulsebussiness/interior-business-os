@@ -24,6 +24,9 @@ type Section = {
   brand?: string | undefined;
   grade?: string | undefined;
   allowancePerSqft?: string | undefined;
+  kind?: 'plans' | 'material' | 'general' | undefined;
+  deliverables?: string[] | undefined;
+  customFields?: { label: string; value: string }[] | undefined;
 };
 const floorNames = [
   'Ground Floor',
@@ -120,7 +123,16 @@ export function PremiumSftBuilder({
   );
   const [sections, setSections] = useState<Section[]>(
     initialSchedule?.sections?.length
-      ? initialSchedule.sections.map((item) => ({ ...item }))
+      ? initialSchedule.sections.map((item) => ({
+          ...item,
+          kind: item.kind === 'custom' ? 'general' : item.kind,
+          deliverables: (item.deliverables ?? []).flatMap((drawing) =>
+            typeof drawing === 'string'
+              ? [drawing]
+              : drawing.included ? [drawing.label] : [],
+          ),
+          customFields: item.customFields ?? item.fields ?? [],
+        }))
       : freshSections(),
   );
   const [brands, setBrands] = useState<Record<string, string>>(() => {
@@ -213,7 +225,9 @@ export function PremiumSftBuilder({
                   section.description.trim() ||
                   section.brand.trim() ||
                   section.grade.trim() ||
-                  section.allowancePerSqft.trim(),
+                  section.allowancePerSqft.trim() ||
+                  Boolean(section.deliverables?.length) ||
+                  Boolean(section.customFields?.length),
                 ),
               )
               .map((section) => ({
@@ -222,6 +236,9 @@ export function PremiumSftBuilder({
                 brand: section.brand,
                 grade: section.grade,
                 allowancePerSqft: section.allowancePerSqft,
+                kind: section.kind,
+                deliverables: section.deliverables,
+                customFields: section.customFields,
               }))
           : freshSections().slice(1)),
       ]);
@@ -257,7 +274,9 @@ export function PremiumSftBuilder({
             item.description.trim() ||
             item.brand?.trim() ||
             item.grade?.trim() ||
-            item.allowancePerSqft?.trim(),
+            item.allowancePerSqft?.trim() ||
+            Boolean(item.deliverables?.length) ||
+            Boolean(item.customFields?.length),
           ),
         ),
       });
@@ -610,36 +629,212 @@ export function PremiumSftBuilder({
                       }}
                     />
                   </label>
-                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                    {(
-                      [
-                        ['brand', 'Brand / manufacturer'],
-                        ['grade', 'Grade / material size'],
-                        ['allowancePerSqft', 'Price allowance per SFT (₹)'],
-                      ] as const
-                    ).map(([key, title]) => (
-                      <label
-                        key={key}
-                        className="grid gap-1.5 text-xs font-semibold text-slate-600"
+                  {section.kind === 'plans' ||
+                  (!section.kind && /^architectural/i.test(section.title)) ? (
+                    <div className="mt-3 space-y-2">
+                      <p className="text-xs font-semibold text-slate-700">
+                        Included plans and drawing deliverables
+                      </p>
+                      {(section.deliverables ?? []).map(
+                        (drawing, drawingIndex) => (
+                          <div
+                            key={drawingIndex}
+                            className="flex items-center gap-2"
+                          >
+                            <input
+                              className={field}
+                              maxLength={100}
+                              aria-label="Drawing deliverable"
+                              value={drawing}
+                              onChange={(event) => {
+                                setSections((items) =>
+                                  items.map((item, i) =>
+                                    i === index
+                                      ? {
+                                          ...item,
+                                          deliverables: (
+                                            item.deliverables ?? []
+                                          ).map((d, j) =>
+                                            j === drawingIndex
+                                              ? event.target.value
+                                              : d,
+                                          ),
+                                        }
+                                      : item,
+                                  ),
+                                );
+                                setSaved(false);
+                              }}
+                            />
+                            <button
+                              type="button"
+                              className="rounded-lg border border-rose-200 px-3 py-2 text-xs text-rose-600"
+                              onClick={() => {
+                                setSections((items) =>
+                                  items.map((item, i) =>
+                                    i === index
+                                      ? {
+                                          ...item,
+                                          deliverables: (
+                                            item.deliverables ?? []
+                                          ).filter(
+                                            (_, j) => j !== drawingIndex,
+                                          ),
+                                        }
+                                      : item,
+                                  ),
+                                );
+                                setSaved(false);
+                              }}
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        ),
+                      )}
+                      <button
+                        type="button"
+                        disabled={(section.deliverables?.length ?? 0) >= 20}
+                        className="rounded-lg bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700 disabled:opacity-40"
+                        onClick={() => {
+                          setSections((items) =>
+                            items.map((item, i) =>
+                              i === index
+                                ? {
+                                    ...item,
+                                    deliverables: [
+                                      ...(item.deliverables ?? []),
+                                      'New drawing',
+                                    ],
+                                  }
+                                : item,
+                            ),
+                          );
+                          setSaved(false);
+                        }}
                       >
-                        {title}
-                        <input
-                          className={field}
-                          maxLength={key === 'allowancePerSqft' ? 40 : 120}
-                          value={section[key] ?? ''}
-                          onChange={(event) => {
+                        + Add drawing
+                      </button>
+                    </div>
+                  ) : section.kind !== 'general' ? (
+                    <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                      {(
+                        [
+                          ['brand', 'Brand / manufacturer'],
+                          ['grade', 'Grade / material size'],
+                          ['allowancePerSqft', 'Price allowance per SFT (₹)'],
+                        ] as const
+                      ).map(([key, title]) => (
+                        <label
+                          key={key}
+                          className="grid gap-1.5 text-xs font-semibold text-slate-600"
+                        >
+                          {title}
+                          <input
+                            className={field}
+                            maxLength={key === 'allowancePerSqft' ? 40 : 120}
+                            value={section[key] ?? ''}
+                            onChange={(event) => {
+                              setSections((items) =>
+                                items.map((item, i) =>
+                                  i === index
+                                    ? { ...item, [key]: event.target.value }
+                                    : item,
+                                ),
+                              );
+                              setSaved(false);
+                            }}
+                          />
+                        </label>
+                      ))}
+                    </div>
+                  ) : null}
+                  <div className="mt-4 space-y-2">
+                    <p className="text-xs font-semibold text-slate-700">
+                      Additional fields
+                    </p>
+                    {(section.customFields ?? []).map((extra, fieldIndex) => (
+                      <div
+                        key={fieldIndex}
+                        className="grid gap-2 sm:grid-cols-[1fr_1fr_auto]"
+                      >
+                        {(['label', 'value'] as const).map((key) => (
+                          <input
+                            key={key}
+                            className={field}
+                            maxLength={key === 'label' ? 70 : 200}
+                            aria-label={'Custom ' + key}
+                            value={extra[key]}
+                            onChange={(event) => {
+                              setSections((items) =>
+                                items.map((item, i) =>
+                                  i === index
+                                    ? {
+                                        ...item,
+                                        customFields: (
+                                          item.customFields ?? []
+                                        ).map((part, j) =>
+                                          j === fieldIndex
+                                            ? {
+                                                ...part,
+                                                [key]: event.target.value,
+                                              }
+                                            : part,
+                                        ),
+                                      }
+                                    : item,
+                                ),
+                              );
+                              setSaved(false);
+                            }}
+                          />
+                        ))}
+                        <button
+                          type="button"
+                          className="rounded-lg border border-rose-200 px-3 py-2 text-xs text-rose-600"
+                          onClick={() => {
                             setSections((items) =>
                               items.map((item, i) =>
                                 i === index
-                                  ? { ...item, [key]: event.target.value }
+                                  ? {
+                                      ...item,
+                                      customFields: (
+                                        item.customFields ?? []
+                                      ).filter((_, j) => j !== fieldIndex),
+                                    }
                                   : item,
                               ),
                             );
                             setSaved(false);
                           }}
-                        />
-                      </label>
+                        >
+                          Remove
+                        </button>
+                      </div>
                     ))}
+                    <button
+                      type="button"
+                      disabled={(section.customFields?.length ?? 0) >= 10}
+                      className="rounded-lg border border-blue-200 px-3 py-2 text-xs text-blue-700 disabled:opacity-40"
+                      onClick={() => {
+                        setSections((items) =>
+                          items.map((item, i) =>
+                            i === index
+                              ? {
+                                  ...item,
+                                  customFields: [
+                                    ...(item.customFields ?? []),
+                                    { label: 'New field', value: '' },
+                                  ],
+                                }
+                              : item,
+                          ),
+                        );
+                        setSaved(false);
+                      }}
+                    >
+                      + Add field
+                    </button>
                   </div>
                   <label className="mt-3 grid gap-2 text-xs font-semibold text-slate-600">
                     Editable inclusions, material brands & conditions
