@@ -174,6 +174,7 @@ export default async function LeadDetail({
         <div className="crm-lead-detail-contact">
           <div><span>Phone</span><strong>{l.phone || 'Not specified'}</strong></div>
           <div><span>Email</span><strong>{l.email || 'Not specified'}</strong></div>
+          <div><span>Service</span><strong>{l.service_type || 'Not specified'}</strong></div>
           <div><span>Budget</span><strong>{l.budget_min ?? 'Not specified'} – {l.budget_max ?? 'Not specified'}</strong></div>
           <div><span>Next follow-up</span><strong>{l.next_follow_up_at ? new Date(l.next_follow_up_at).toLocaleString('en-IN') : 'Not scheduled'}</strong></div>
         </div>
