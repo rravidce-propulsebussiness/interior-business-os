@@ -166,7 +166,7 @@ export function renderQuotationDocument(input: unknown): string {
               allowancePerSqft: section.allowancePerSqft ?? '',
               title: section.title,
               description: section.description,
-              kind: section.kind,
+              ...(section.kind ? { kind: section.kind } : {}),
             }) === 'material' && section.brand
               ? '<p><strong>Brand:</strong> ' + escape(section.brand) + '</p>'
               : '') +
