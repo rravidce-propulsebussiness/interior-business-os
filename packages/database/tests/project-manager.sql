@@ -412,6 +412,21 @@ begin
  projection=public.construction_gate_labor_read(org,project);
  if projection->'reviews'->0->>'is_current'<>'true'
  then raise exception 'FAIL: verified labour attendance is immediately stale';end if;
+ perform set_config('request.jwt.claim.sub','22222222-2222-4222-8222-222222222222',true);
+ perform public.construction_gate_labor_command(org,project,'arrival',
+   jsonb_build_object('work_date',current_date,'trade','Helpers','workers',1,
+     'notes','Additional helper entered after earlier manager verification'));
+ perform set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',true);
+ projection=public.construction_gate_labor_read(org,project);
+ if projection->'reviews'->0->>'is_current'<>'false'
+ then raise exception 'FAIL: manager verified attendance despite newer gate activity';end if;
+ perform public.construction_gate_labor_command(org,project,'review',
+   jsonb_build_object('work_date',current_date,'decision','discrepancy',
+     'reason','One additional helper joined after the originally reviewed security count'));
+ projection=public.construction_gate_labor_read(org,project);
+ if projection->'reviews'->0->>'is_current'<>'true'
+    or projection->'reviews'->0->>'decision'<>'discrepancy'
+ then raise exception 'FAIL: manager cannot append a revised labor reconciliation';end if;
  raise notice 'PASS: manager can audit live gate counts without creating payroll or stock';
 end$$;
 rollback;
