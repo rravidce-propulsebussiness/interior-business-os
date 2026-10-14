@@ -15,6 +15,8 @@ begin
  perform public.project_site_command(org,project,'initialize','{}'::jsonb);
  perform public.project_site_command(org,project,'assign',
    '{"user_id":"22222222-2222-4222-8222-222222222222","role":"watchman","active":true}'::jsonb);
+ perform public.project_site_command(org,project,'assign',
+   '{"user_id":"33333333-3333-4333-8333-333333333333","role":"site_engineer","active":true}'::jsonb);
  contract=pg_temp.site_signed_agreement(org,project);
  perform set_config('test.link_contract',contract::text,true);
  perform public.construction_project_command(org,project,'workflow_create',
@@ -44,7 +46,7 @@ do $records$
 declare
  org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
  project uuid=current_setting('test.link_project')::uuid;
- item uuid;photo uuid;report uuid;check_id uuid;gate_id uuid;
+ item uuid;photo uuid;report uuid;check_id uuid;gate_id uuid;engineer_item uuid;engineer_report uuid;
 begin
  insert into private.site_reports(organization_id,project_id,report_date,
    completed_work,tomorrow_plan,worker_count,created_by)
@@ -59,6 +61,19 @@ begin
    '11111111-1111-4111-8111-111111111111')
  returning id into item;
  perform set_config('test.link_material',item::text,true);
+ insert into private.site_material_needs(organization_id,project_id,
+   item,quantity,unit,requested_by)
+ values(org,project,'PCC cement for plinth',30,'bags',
+   '33333333-3333-4333-8333-333333333333')
+ returning id into engineer_item;
+ perform set_config('test.link_engineer_material',engineer_item::text,true);
+ insert into private.site_reports(organization_id,project_id,report_date,
+   completed_work,tomorrow_plan,worker_count,created_by)
+ values(org,project,current_date,'Today checked PCC bedding',
+   'Tomorrow prepare beam shuttering',4,
+   '33333333-3333-4333-8333-333333333333')
+ returning id into engineer_report;
+ perform set_config('test.link_engineer_report',engineer_report::text,true);
  insert into private.site_media(organization_id,project_id,
    filename,mime,bytes,category,caption,uploaded_by)
  values(org,project,'footing.png','image/png',decode('89504e470d0a1a0a','hex'),
@@ -152,6 +167,35 @@ begin
 end$audit$;
 set local role authenticated;
 
+-- An engineer may self-assign ONLY their own construction site records.
+select set_config('request.jwt.claim.sub','33333333-3333-4333-8333-333333333333',true);
+do $engineer$
+declare
+ org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
+ project uuid=current_setting('test.link_project')::uuid;
+ stage uuid=current_setting('test.link_first')::uuid;
+ own_material uuid=current_setting('test.link_engineer_material')::uuid;
+ my_data jsonb;
+begin
+ my_data=public.construction_stage_record_read(org,project);
+ if jsonb_array_length(my_data->'owned')<>2
+    or not exists(select 1 from jsonb_array_elements(my_data->'owned') x
+      where x->>'kind'='material' and x->>'id'=own_material::text)
+ then raise exception 'FAIL: engineer did not receive exactly own linkable records';end if;
+ if jsonb_array_length(my_data->'options')<>0
+   or jsonb_array_length(my_data->'payments')<>0
+ then raise exception 'FAIL: engineer received billing data';end if;
+ perform public.construction_stage_record_command(org,project,'link',
+   jsonb_build_object('stage_id',stage,'kind','material','record_id',own_material));
+ begin
+   perform public.construction_stage_record_command(org,project,'link',
+     jsonb_build_object('stage_id',stage,'kind','material',
+       'record_id',current_setting('test.link_material')::uuid));
+   raise exception 'FAIL: engineer linked a coworker material request';
+ exception when insufficient_privilege then null;end;
+ raise notice 'PASS: engineer can associate only own field reports and material requests';
+end$engineer$;
+
 -- The assigned security role must never see payment amounts or issue links.
 select set_config('request.jwt.claim.sub','22222222-2222-4222-8222-222222222222',true);
 do $watchman$
@@ -167,6 +211,7 @@ begin
   raise exception 'FAIL: watchman linked a payment';
  exception when insufficient_privilege then null;end;
  if jsonb_array_length(public.construction_stage_record_read(org,project)->'payments')<>0
- then raise exception 'FAIL: watchman saw financial information';end if;
+   or jsonb_array_length(public.construction_stage_record_read(org,project)->'owned')<>0
+ then raise exception 'FAIL: watchman saw financial or stage-linkable records';end if;
 end$watchman$;
 rollback;
