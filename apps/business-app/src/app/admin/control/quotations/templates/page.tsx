@@ -17,9 +17,7 @@ export default async function PlatformConstructionSpecTemplatesPage() {
     if (error instanceof DomainError && error.code === 'FORBIDDEN') notFound();
     throw error;
   }
-  const { data, error } = await client.rpc('construction_spec_template_get', {
-    p_org: null,
-  });
+  const { data, error } = await client.rpc('construction_spec_template_get', {});
   if (error) throw new Error('Platform specification defaults unavailable');
   return (
     <main id="main-content" className="mx-auto max-w-5xl space-y-6 px-4 py-8">
