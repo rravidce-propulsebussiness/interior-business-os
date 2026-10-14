@@ -44,28 +44,6 @@ const managerDataSchema = z.object({
 });
 type ManagerData = z.infer<typeof managerDataSchema>;
 
-const stages = [
-  {
-    key: 'design',
-    title: 'Design & engineering',
-    sub: 'Architecture · 3D · structure',
-  },
-  {
-    key: 'client_approved',
-    title: 'Client approval',
-    sub: 'Record approval evidence',
-  },
-  {
-    key: 'execution',
-    title: 'Site execution',
-    sub: 'Marking · materials · daily reports',
-  },
-  {
-    key: 'handover',
-    title: 'Quality & handover',
-    sub: 'Complete outstanding checks',
-  },
-] as const;
 
 function value(row: Record<string, unknown>, key: string) {
   const field = row[key];
@@ -225,10 +203,6 @@ export default async function ProjectDeliveryPage({
     manager || role === 'quality_inspector' || role === 'site_engineer';
   const isProcurement = manager || role === 'procurement';
   const isWatchman = manager || role === 'watchman';
-  const phaseIndex =
-    site.stage === 'not_started'
-      ? -1
-      : stages.findIndex((s) => s.key === site.stage);
   const open = site.stage === 'execution';
   const pendingChecks = site.checks.filter(
     (c) => value(c, 'status') !== 'passed',
