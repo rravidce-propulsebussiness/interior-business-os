@@ -10887,6 +10887,10 @@ export interface Database {
         Returns: string;
       };
       construction_rate_list: { Args: { p_org: string }; Returns: Json };
+      construction_spec_template_get: {
+        Args: { p_org?: string };
+        Returns: Json;
+      };
       construction_rate_quote_preview: {
         Args: { p_org: string; p_ids: string[]; p_area: number };
         Returns: Json;
@@ -11483,6 +11487,10 @@ export interface Database {
       payment_void: {
         Args: { p_organization_id: string; p_id: string; p_reason: string };
         Returns: string;
+      };
+      platform_construction_spec_template_save: {
+        Args: { p_sections: Json };
+        Returns: boolean;
       };
       platform_company_create: { Args: { p_input: Json }; Returns: Json };
       platform_company_directory: {
