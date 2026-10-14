@@ -9,6 +9,7 @@ import { commercialServices } from '../../commercial/service';
 import { MasterForm } from '../../commercial/master-form';
 import { OwnerIcon, OwnerShell } from '../../owner-shell';
 import { projectWorkspaceNavigation } from '../project-workspace-navigation';
+import { ConstructionJourney } from './site/construction-journey';
 import '../../owner-dashboard.css';
 import './project-detail.css';
 
@@ -23,6 +24,9 @@ const siteSummarySchema = z.object({
     'execution',
     'handover',
   ]),
+  role: z.string().nullable(),
+  can_manage: z.boolean(),
+  gate: z.array(siteRow),
   team: z.array(siteRow),
   member_options: z.array(z.object({ id: z.uuid(), label: z.string() })),
   reports: z.array(siteRow),
@@ -32,6 +36,33 @@ const siteSummarySchema = z.object({
   designs: z.array(siteRow),
 });
 type SiteSummary = z.infer<typeof siteSummarySchema>;
+const timelineStageSchema = z.object({
+  id: z.uuid(),
+  instance_code: z.string(),
+  template_code: z.string(),
+  phase: z.string(),
+  floor_code: z.string().nullable(),
+  title: z.string(),
+  explanation: z.string(),
+  hold_point: z.string().nullable(),
+  activities: z.array(z.string()),
+  inspection_topics: z.array(z.string()),
+  dependencies: z.array(z.string()),
+  status: z.string(),
+  task_count: z.number().int().nonnegative(),
+});
+const timelineStagesSchema = z.object({ stages: z.array(timelineStageSchema) });
+const timelineQualitySchema = z.object({
+  stages: z.array(z.object({
+    stage_id: z.uuid(),
+    cleared: z.boolean(),
+    inspections: z.array(z.object({
+      mandatory: z.boolean(),
+      status: z.string(),
+      current: z.boolean(),
+    })),
+  })),
+});
 const deliveryStages = [
   {
     key: 'design',
@@ -176,6 +207,26 @@ export default async function Project({
     ? null
     : siteSummarySchema.safeParse(siteResponse.data);
   const site: SiteSummary | null = siteResult?.success ? siteResult.data : null;
+  const stageResponse = site
+    ? await s.client.rpc('construction_project_read', {
+        p_organization_id: s.org,
+        p_project_id: id,
+      })
+    : null;
+  const stageParsed = stageResponse && !stageResponse.error
+    ? timelineStagesSchema.safeParse(stageResponse.data)
+    : null;
+  const timelineStages = stageParsed?.success ? stageParsed.data.stages : [];
+  const qcResponse = timelineStages.length
+    ? await s.client.rpc('construction_quality_read', {
+        p_org: s.org,
+        p_project: id,
+      })
+    : null;
+  const qcParsed = qcResponse && !qcResponse.error
+    ? timelineQualitySchema.safeParse(qcResponse.data)
+    : null;
+  const timelineQuality = qcParsed?.success ? qcParsed.data : null;
   const currentStage = site
     ? deliveryStages.findIndex((stage) => stage.key === site.stage)
     : -1;
@@ -278,10 +329,18 @@ export default async function Project({
             <OwnerIcon name="dashboard" size={16} />
             Overview
           </a>
-          <a href="#delivery">
+          <a href="#construction-timeline">
             <OwnerIcon name="calendar" size={16} />
-            Delivery
+            Timeline
           </a>
+          <Link href={deliveryUrl + '#daily-reports'}>
+            <OwnerIcon name="globe" size={16} />
+            Site updates
+          </Link>
+          <Link href={deliveryUrl + '#materials'}>
+            <OwnerIcon name="purchases" size={16} />
+            Materials
+          </Link>
           <a href="#team">
             <OwnerIcon name="team" size={16} />
             Team
@@ -360,6 +419,26 @@ export default async function Project({
             </div>
           </div>
         </section>
+
+        {site && (
+          <ConstructionJourney
+            projectId={id}
+            stages={timelineStages}
+            quality={timelineQuality}
+            materials={site.materials}
+            checks={site.checks}
+            media={site.media}
+            reports={site.reports}
+            gate={site.gate}
+            canSeeFinance={has('contract.view', 'billing')}
+            canRequestMaterials={site.stage === 'execution' &&
+              (site.can_manage || site.role === 'site_engineer' || site.role === 'procurement')}
+            canUploadWorkPhotos={site.stage === 'execution' &&
+              (site.can_manage || site.role === 'site_engineer')}
+            canUploadCuringPhotos={site.stage === 'execution' &&
+              (site.can_manage || site.role === 'watchman')}
+          />
+        )}
 
         <div className="pd-content-grid" id="overview">
           <div className="pd-main-column">
