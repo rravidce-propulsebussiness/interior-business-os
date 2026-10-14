@@ -588,23 +588,35 @@ export function PremiumPackageEditor({
                           <select
                             className={field}
                             value={isPlanSection(spec) ? 'plans' : (spec.kind ?? 'material')}
-                            onChange={(e) =>
-                              setSections((all) => all.map((part, n) =>
-                                n !== index ? part : {
-                                  ...part,
-                                  kind: e.target.value as 'plans' | 'material' | 'custom',
-                                  ...(e.target.value === 'plans'
-                                    ? {
-                                        brand: '',
-                                        grade: '',
-                                        allowancePerSqft: '',
-                                        deliverables: part.deliverables ??
-                                          planNames.map((name) => ({ label: name, included: false })),
-                                      }
-                                    : {}),
-                                }),
-                              ))
-                            }
+                            onChange={(e) => {
+                              const nextKind = e.target.value as
+                                | 'plans'
+                                | 'material'
+                                | 'custom';
+                              setSections((all) =>
+                                all.map((part, n) =>
+                                  n !== index
+                                    ? part
+                                    : {
+                                        ...part,
+                                        kind: nextKind,
+                                        ...(nextKind === 'plans'
+                                          ? {
+                                              brand: '',
+                                              grade: '',
+                                              allowancePerSqft: '',
+                                              deliverables:
+                                                part.deliverables ??
+                                                planNames.map((name) => ({
+                                                  label: name,
+                                                  included: false,
+                                                })),
+                                            }
+                                          : {}),
+                                      },
+                                ),
+                              );
+                            }}
                           >
                             <option value="plans">Planning / drawings (no brands)</option>
                             <option value="material">Material / finish (brand and grade)</option>
