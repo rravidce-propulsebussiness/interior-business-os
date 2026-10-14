@@ -228,7 +228,7 @@ export function SiteActivity(props: SiteActivityProps) {
                 </div>
                 <div className="sc-report-split">
                   <div>
-                    <strong>Tomorrow's plan</strong>
+                    <strong>Tomorrow&apos;s plan</strong>
                     <p>{field(latest, 'tomorrow_plan') || 'No plan entered'}</p>
                   </div>
                   <div>
