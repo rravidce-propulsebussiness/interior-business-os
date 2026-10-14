@@ -6,9 +6,9 @@ import type { Database } from './generated/database.types';
 export type ConstructionSpecField = { label: string; value: string };
 export type ConstructionPlanDeliverable = { label: string; included: boolean };
 export type ConstructionSpecSection = {
-  kind?: 'plans' | 'material' | 'custom';
-  deliverables?: ConstructionPlanDeliverable[];
-  fields?: ConstructionSpecField[];
+  kind?: 'plans' | 'material' | 'custom' | undefined;
+  deliverables?: ConstructionPlanDeliverable[] | undefined;
+  fields?: ConstructionSpecField[] | undefined;
   title: string;
   brand: string;
   grade: string;
