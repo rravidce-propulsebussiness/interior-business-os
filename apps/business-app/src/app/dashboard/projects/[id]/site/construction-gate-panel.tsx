@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useRef, useState, useTransition } from 'react';
 import {
   recordLaborGateEvent,
   reviewLaborGateDay,
@@ -48,12 +48,17 @@ export function ConstructionGatePanel({
   data: ConstructionGateData;
 }) {
   const [pending, start] = useTransition();
+  const pendingGateRequestId = useRef<string | null>(null);
   const [notice, setNotice] = useState('');
   const [reviewNotes, setReviewNotes] = useState<Record<string, string>>({});
-  const run = (task: () => Promise<LaborGateResult>) => {
+  const run = (
+    task: () => Promise<LaborGateResult>,
+    onSuccess?: () => void,
+  ) => {
     start(async () => {
       const result = await task();
       setNotice(result.message);
+      if (result.saved) onSuccess?.();
     });
   };
   const dateOptions = [...new Set(data.comparison.map((row) => row.work_date))];
@@ -81,10 +86,20 @@ export function ConstructionGatePanel({
       </p>
       <form
         className="mt-5 space-y-4 rounded-xl border border-slate-200 bg-slate-50 p-4"
+        onChange={() => {
+          pendingGateRequestId.current = null;
+        }}
         onSubmit={(event) => {
           event.preventDefault();
           const payload = new FormData(event.currentTarget);
-          run(() => recordLaborGateEvent(projectId, payload));
+          pendingGateRequestId.current ??= crypto.randomUUID();
+          payload.set('request_id', pendingGateRequestId.current);
+          run(
+            () => recordLaborGateEvent(projectId, payload),
+            () => {
+              pendingGateRequestId.current = null;
+            },
+          );
         }}
       >
         <div className="grid gap-3 sm:grid-cols-2">

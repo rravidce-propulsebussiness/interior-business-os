@@ -375,10 +375,29 @@ select set_config('request.jwt.claim.sub','22222222-2222-4222-8222-222222222222'
 do $$
 declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
  project uuid=current_setting('test.manager_project')::uuid;
+ request_token uuid=gen_random_uuid();
+ first_record uuid;replayed_record uuid;
 begin
- perform public.construction_gate_labor_command(org,project,'arrival',
+ first_record=public.construction_gate_labor_command(org,project,'arrival',
    jsonb_build_object('work_date',current_date,'trade','Helpers','workers',7,
-     'notes','Seven workers entered site after safety briefing'));
+     'notes','Seven workers entered site after safety briefing',
+     'request_id',request_token));
+ replayed_record=public.construction_gate_labor_command(org,project,'arrival',
+   jsonb_build_object('work_date',current_date,'trade','Helpers','workers',7,
+     'notes','Seven workers entered site after safety briefing',
+     'request_id',request_token));
+ perform set_config('test.gate_request_id',request_token::text,true);
+ if first_record<>replayed_record then
+   raise exception 'FAIL: retry produced a second canonical worker entry';end if;
+ if jsonb_array_length(public.construction_gate_labor_read(org,project)->'events')<>1 then
+   raise exception 'FAIL: repeated arrival changed actual worker counts';end if;
+ begin
+   perform public.construction_gate_labor_command(org,project,'arrival',
+     jsonb_build_object('work_date',current_date,'trade','Helpers','workers',9,
+       'notes','Seven workers entered site after safety briefing',
+       'request_id',request_token));
+   raise exception 'FAIL: conflicting replay accepted a changed worker count';
+ exception when check_violation then null;end;
  perform public.construction_gate_labor_command(org,project,'departure',
    jsonb_build_object('work_date',current_date,'trade','Helpers','workers',3,
      'notes','Three helpers finished and departed site'));
@@ -405,6 +424,14 @@ declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
  project uuid=current_setting('test.manager_project')::uuid;
  projection jsonb;
 begin
+ -- Another project member cannot reuse the original watchman's request token.
+ begin
+   perform public.construction_gate_labor_command(org,project,'arrival',
+     jsonb_build_object('work_date',current_date,'trade','Helpers','workers',7,
+       'notes','Seven workers entered site after safety briefing',
+       'request_id',current_setting('test.gate_request_id')::uuid));
+   raise exception 'FAIL: manager replayed an event belonging to another staff member';
+ exception when check_violation then null;end;
  projection=public.construction_gate_labor_read(org,project);
  if not exists(select 1 from jsonb_array_elements(projection->'comparison') row
       where row->>'trade'='helpers' and row->>'arrived'='7'
