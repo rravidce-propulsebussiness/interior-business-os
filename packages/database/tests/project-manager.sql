@@ -44,6 +44,8 @@ begin
        'holdPoint','structural','dependsOn','[]'::jsonb,
        'activities',jsonb_build_array('Measure gridlines and foundation'),
        'inspectionTopics',jsonb_build_array('Level and cover')))));
+ if (public.construction_project_read(org,project)->'workflow'->>'status')<>'frozen'
+ then raise exception 'FAIL: authorized atomic workflow creation was left permanently in planning';end if;
  perform set_config('test.manager_stage',(
    select stage->>'id' from jsonb_array_elements(public.construction_project_read(org,project)->'stages') stage
      where stage->>'instance_code'='FOUNDATION'),true);
@@ -95,6 +97,10 @@ declare
  org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
  project uuid=current_setting('test.manager_project')::uuid;
  stage_id uuid=current_setting('test.manager_stage')::uuid;
+ v_contract uuid;
+ v_plan uuid;
+ v_template uuid;
+ v_handover uuid;
 begin
  if private.construction_stage_chain_current(org,project,stage_id)
  then raise exception 'FAIL: uncertified footing chain marked current';end if;
@@ -107,7 +113,54 @@ begin
  if exists(select 1 from private.site_state where organization_id=org
     and project_id=project and stage='handover')
  then raise exception 'FAIL: handover status changed despite failed clearance';end if;
- raise notice 'PASS: handover trigger requires current floor-stage certificates';
+ -- The independent Operations status and document approvals must fail
+ -- before any stage certificate has been issued for this construction project.
+ if private.construction_operations_handover_ready(org,project) then
+   raise exception 'FAIL: uncertified construction project marked handover-ready';end if;
+ select c.id into v_contract from public.contracts c
+   where c.organization_id=org and c.project_id=project and c.status='active'
+   order by c.created_at desc limit 1;
+ if v_contract is null then raise exception 'FAIL: canonical signed contract fixture missing';end if;
+ select id into v_plan from public.execution_plans
+   where organization_id=org and contract_id=v_contract;
+ if v_plan is null then
+   insert into public.execution_plans(
+      organization_id,project_id,contract_id,plan_number,status
+   ) values(org,project,v_contract,'HANDOVER-GATE-REGRESSION','punch_list')
+   returning id into v_plan;
+ else
+   update public.execution_plans set status='punch_list' where id=v_plan;
+ end if;
+ begin
+   update public.execution_plans set status='ready_for_handover' where id=v_plan;
+   raise exception 'FAIL: Operations readiness bypassed floor-stage clearance';
+ exception when check_violation then null;end;
+ begin
+   update public.execution_plans set status='handed_over' where id=v_plan;
+   raise exception 'FAIL: Operations direct handover bypassed floor-stage clearance';
+ exception when check_violation then null;end;
+ begin
+   update public.execution_plans set status='completed' where id=v_plan;
+   raise exception 'FAIL: Operations completion bypassed floor-stage clearance';
+ exception when check_violation then null;end;
+ if (select status from public.execution_plans where id=v_plan)<>'punch_list' then
+   raise exception 'FAIL: blocked Operations transition persisted';end if;
+ insert into public.handover_templates(organization_id,name,checklist)
+ values(org,'Construction gate fixture',
+   '[{"key":"documents","label":"Verified handover documents","required":true}]')
+ returning id into v_template;
+ insert into public.handover_records(
+   organization_id,project_id,plan_id,template_id,number,checklist
+ ) values(org,project,v_plan,v_template,'HANDOVER-GATE-REGRESSION',
+   '[{"key":"documents","result":"pass","required":true}]')
+ returning id into v_handover;
+ begin
+   update public.handover_records set status='approved' where id=v_handover;
+   raise exception 'FAIL: Operations issued approved handover with uncertified stages';
+ exception when check_violation then null;end;
+ if (select status from public.handover_records where id=v_handover)<>'draft' then
+   raise exception 'FAIL: rejected approved handover remained persisted';end if;
+ raise notice 'PASS: both Site Delivery and canonical Operations handover reject missing floor-stage certificates';
 end $handover_test$;
 set local role authenticated;
 

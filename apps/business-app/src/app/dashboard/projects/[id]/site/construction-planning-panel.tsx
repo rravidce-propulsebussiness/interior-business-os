@@ -151,7 +151,8 @@ export function ConstructionPlanningPanel({
           </div>
           {data.workflow && (
             <span className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-800">
-              Planning · v{data.workflow.template_version}
+              {data.workflow.status === 'frozen' ? 'Frozen' : 'Planning'} · v
+              {data.workflow.template_version}
             </span>
           )}
         </div>
