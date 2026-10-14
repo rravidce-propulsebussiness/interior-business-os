@@ -1,0 +1,21 @@
+name: Inspect site command formatting
+on:
+  push:
+    branches: [feature/premium-site-delivery-20261014]
+permissions:
+  contents: read
+jobs:
+  format-diff:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Show Prettier changes
+        run: |
+          pnpm exec prettier --write 'apps/business-app/src/app/dashboard/projects/[id]/site/page.tsx'
+          git diff -- 'apps/business-app/src/app/dashboard/projects/[id]/site/page.tsx'
