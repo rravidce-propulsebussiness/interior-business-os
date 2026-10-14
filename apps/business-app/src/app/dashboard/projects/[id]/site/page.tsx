@@ -3,8 +3,10 @@ import { canAccess } from '@business-os/auth';
 import { OwnerShell } from '../../../owner-shell';
 import { projectWorkspaceNavigation } from '../../project-workspace-navigation';
 import { SiteCommandOverview } from './command-overview';
+import { SiteAccessState } from './site-access-state';
 import '../../../owner-dashboard.css';
 import './site-command.css';
+import './site-premium.css';
 import { notFound } from 'next/navigation';
 import { z } from 'zod';
 import { activeOrganization, pageServices } from '@business-os/auth/server';
@@ -164,15 +166,16 @@ export default async function ProjectDeliveryPage({
     p_organization_id: context.organizationId,
     p_project_id: id,
   });
-  if (result.error) notFound();
+  if (result.error) return <SiteAccessState projectId={id} />;
   const parsed = siteSchema.safeParse(result.data);
-  if (!parsed.success) notFound();
+  if (!parsed.success) return <SiteAccessState projectId={id} />;
   const site: Site = parsed.data;
   const canSeeManagerUpdates =
     site.can_manage ||
     ['site_engineer', 'quality_inspector', 'procurement'].includes(
       site.role ?? '',
     );
+  let managerDataUnavailable = false;
   let managerData: ManagerData = {
     updates: [],
     reviews: [],
@@ -183,10 +186,12 @@ export default async function ProjectDeliveryPage({
       p_organization_id: context.organizationId,
       p_project_id: id,
     });
-    if (response.error) notFound();
     const selected = managerDataSchema.safeParse(response.data);
-    if (!selected.success) notFound();
-    managerData = selected.data;
+    if (response.error || !selected.success) {
+      managerDataUnavailable = true;
+    } else {
+      managerData = selected.data;
+    }
   }
   const latestReviews = new Map<string, Record<string, unknown>>();
   for (const review of managerData.reviews) {
@@ -277,6 +282,7 @@ export default async function ProjectDeliveryPage({
               reports={site.reports}
               reviews={managerData.reviews}
               managerUpdates={managerData.updates}
+              managerDataUnavailable={managerDataUnavailable}
               checks={site.checks}
               materials={site.materials}
               gate={site.gate}
