@@ -9,7 +9,7 @@ alter table private.site_media add constraint site_media_category_check
  check(category in ('design','daily','site','inspection','agreement'));
 
 create or replace function public.project_site_read(p_organization_id uuid,p_project_id uuid)
-returns jsonb language plpgsql stable security definer set search_path='' as $
+returns jsonb language plpgsql stable security definer set search_path='' as $$
 declare v_role text;manager boolean;result jsonb;begin
  if not private.site_access(p_organization_id,p_project_id) then
   raise exception 'Project workspace unavailable' using errcode='42501';
@@ -35,10 +35,10 @@ declare v_role text;manager boolean;result jsonb;begin
   'events',case when manager then coalesce((select jsonb_agg(to_jsonb(d) order by d.created_at desc) from (select actor_id,action,created_at from private.site_events where organization_id=p_organization_id and project_id=p_project_id order by created_at desc limit 30)d),'[]'::jsonb) else '[]'::jsonb end
  ) into result from public.projects p left join private.site_state s on s.organization_id=p_organization_id and s.project_id=p.id where p.organization_id=p_organization_id and p.id=p_project_id;
  return result;
-end$;
+end$$;
 
 create or replace function public.project_site_media_put(p_organization_id uuid,p_project_id uuid,p_category text,p_filename text,p_mime text,p_base64 text,p_caption text default '')
-returns uuid language plpgsql security definer set search_path='' as $
+returns uuid language plpgsql security definer set search_path='' as $$
 declare v_id uuid;v_bytes bytea;v_stage text;begin
  if not private.site_allowed(p_organization_id,p_project_id,array['manager','architect','structural_designer','site_engineer','quality_inspector']) then raise exception 'Media access denied' using errcode='42501';end if;
  if p_category not in ('design','daily','site','inspection','agreement') or p_mime not in ('image/jpeg','image/png','image/webp','video/mp4','application/pdf')
@@ -67,10 +67,10 @@ declare v_id uuid;v_bytes bytea;v_stage text;begin
  values(p_organization_id,p_project_id,p_filename,p_mime,v_bytes,coalesce(p_caption,''),p_category,auth.uid()) returning id into v_id;
  perform private.site_log(p_organization_id,p_project_id,'media.uploaded',v_id);
  return v_id;
-end$;
+end$$;
 
 create or replace function public.project_site_media_get(p_organization_id uuid,p_project_id uuid,p_id uuid)
-returns jsonb language plpgsql stable security definer set search_path='' as $
+returns jsonb language plpgsql stable security definer set search_path='' as $$
 declare m private.site_media;role text;begin
  if not private.site_access(p_organization_id,p_project_id) then raise exception 'Media not available' using errcode='42501';end if;
  role=private.site_role(p_organization_id,p_project_id);
@@ -84,7 +84,7 @@ declare m private.site_media;role text;begin
  if m.category='design' and role in ('watchman','procurement') and not private.site_is_manager(p_organization_id,p_project_id) then raise exception 'Media not permitted' using errcode='42501';end if;
  if m.category<>'design' and role in ('architect','structural_designer') and not private.site_is_manager(p_organization_id,p_project_id) then raise exception 'Media not permitted' using errcode='42501';end if;
  return jsonb_build_object('filename',m.filename,'mime',m.mime,'base64',encode(m.bytes,'base64'));
-end$;
+end$$;
 
 -- Composite foreign keys guard the organization AND the project, not just a
 -- globally unique identifier supplied by a client.
