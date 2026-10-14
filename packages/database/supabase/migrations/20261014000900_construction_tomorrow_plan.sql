@@ -67,6 +67,32 @@ begin
  end loop;
 end$$;
 
+-- Construction assignments coexist with legacy one-role Site Delivery
+-- assignments. New project-specific field staff must be able to OPEN the
+-- existing read-only Site Delivery shell, but this does not give them
+-- legacy site command permissions or manager status.
+create or replace function private.site_access(org uuid,project uuid)
+returns boolean language sql stable security definer set search_path='' as $
+ select coalesce(
+   private.is_member(org)
+   and private.entitled(org,'projects')
+   and exists(select 1 from public.projects p where p.organization_id=org
+      and p.id=project and p.status='active')
+   and (
+      private.has_permission(org,'project.manage')
+      or private.site_role(org,project) is not null
+      or exists(
+        select 1 from private.construction_project_roles cr
+        where cr.organization_id=org and cr.project_id=project
+          and cr.user_id=(select auth.uid()) and cr.active
+          and cr.role in (
+            'site_engineer','supervisor','quality_inspector',
+            'structural_engineer','watchman','procurement'
+          )
+      )
+   ),false);
+$;
+
 create function private.construction_tomorrow_staff(p_org uuid,p_project uuid)
 returns boolean language sql stable security definer set search_path='' as $$
  select coalesce(private.construction_project_access(p_org,p_project)
