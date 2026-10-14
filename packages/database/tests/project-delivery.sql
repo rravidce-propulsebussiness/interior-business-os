@@ -1,7 +1,9 @@
 \set ON_ERROR_STOP on
 begin;
+\ir site-agreement-quotation-fixture.sql
 -- Uses seeded disposable Demo Interiors tenant and project; leaves no records.
 set local role authenticated;
+\ir site-agreement-helper.sql
 select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',true);
 do $$
 declare
@@ -22,7 +24,15 @@ begin
    raise exception 'Project initialization did not enter design stage';
  end if;
  begin
+   -- Approved drawings alone do NOT allow a site start without the signed agreement.
+ begin
    perform public.project_site_command(org,project,'execution_start','{}');
+   raise exception 'FAIL: no agreement permitted site work';
+ exception when check_violation then null;end;
+ perform pg_temp.site_signed_agreement(org,project);
+ if (public.project_agreement_read(org,project)->>'execution_authorized')<>'true'
+ then raise exception 'Signed agreement and active schedule not recognized';end if;
+ perform public.project_site_command(org,project,'execution_start','{}');
    raise exception 'FAIL: site execution started without client approval';
  exception when insufficient_privilege then null;
  end;
