@@ -14,7 +14,7 @@ begin
     select 1 from jsonb_array_elements(samples) x
     where x->>'title'='Architectural plans'
     and x->>'kind'='plans'
-    and x->'deliverables' ? 'Electrical layout'
+    and jsonb_array_length(x->'deliverables')=0
   ) then raise exception 'Architectural drawings missing from template';end if;
   invalid := jsonb_build_array(jsonb_build_object(
     'title','Architectural plans','kind','plans',
