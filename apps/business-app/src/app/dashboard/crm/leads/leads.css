@@ -1101,7 +1101,7 @@ body:has(.crm-leads-root) .crm-shared-navigation {
     padding-inline: 16px;
   }
   .crm-workspace-grid {
-      grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 @media (max-width: 1150px) {
