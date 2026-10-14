@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import { ProjectSiteMediaForm } from './forms';
 import {
   recordSignedAgreement,
   createAgreementException,
@@ -49,7 +50,7 @@ export function AgreementReadinessPanel({
   const [feedback, setFeedback] = useState('');
   const [revokeReason, setRevokeReason] = useState('');
   const pdfs = files.filter(
-    (item) => item.mime === 'application/pdf' && item.category === 'design',
+    (item) => item.mime === 'application/pdf' && item.category === 'agreement',
   );
   const canRecord =
     Boolean(state.contract_id) &&
@@ -138,6 +139,16 @@ export function AgreementReadinessPanel({
           commercial contract selection before authorizing site execution.
         </p>
       )}
+      <details className="mt-5 rounded-xl border border-blue-200 bg-blue-50/30 p-4">
+        <summary className="cursor-pointer text-sm font-semibold text-blue-900">
+          Upload a private signed agreement PDF
+        </summary>
+        <p className="my-3 text-xs text-slate-600">
+          Only authorized commercial project managers can upload or read these documents.
+          They are not shared with architects, engineers or site security staff.
+        </p>
+        <ProjectSiteMediaForm project={projectId} phase="agreement" />
+      </details>
       {canRecord && (
         <div className="mt-5 grid gap-5 lg:grid-cols-2">
           <form
@@ -159,9 +170,7 @@ export function AgreementReadinessPanel({
               Record received signed PDF
             </h3>
             <p className="text-xs leading-5 text-slate-600">
-              Select a previously uploaded private project PDF. This records the
-              staff receipt of a paper copy; it does not cryptographically
-              verify signatures.
+              Select a private Agreement PDF. Recording its receipt does not cryptographically verify signatures.
             </p>
             <label className="block text-xs font-semibold text-slate-800">
               Uploaded PDF
