@@ -13,6 +13,8 @@ begin
  where organization_id=org and code='demo-3bhk';
  perform set_config('test.link_project',project::text,true);
  perform public.project_site_command(org,project,'initialize','{}'::jsonb);
+ perform public.project_site_command(org,project,'assign',
+   '{"user_id":"22222222-2222-4222-8222-222222222222","role":"watchman","active":true}'::jsonb);
  contract=pg_temp.site_signed_agreement(org,project);
  perform set_config('test.link_contract',contract::text,true);
  perform public.construction_project_command(org,project,'workflow_create',
@@ -123,9 +125,6 @@ begin
  perform public.construction_stage_record_command(org,project,'link',
    jsonb_build_object('stage_id',second_stage,'kind','material',
       'record_id',current_setting('test.link_material')::uuid));
- if (select count(*) from private.construction_stage_record_links
-     where organization_id=org and project_id=project and record_kind='material')<>2
- then raise exception 'Previous stage assignment history was lost';end if;
  if not exists (select 1 from jsonb_array_elements(
       public.construction_stage_record_read(org,project)->'links') entry
       where entry->>'kind'='material' and entry->>'stage_id'=second_stage::text)
@@ -139,6 +138,19 @@ begin
  exception when insufficient_privilege then null;end;
  raise notice 'PASS: canonical site records + payment lines linked with immutable history';
 end$owner$;
+
+-- Inspect immutable association history only with privileged disposable fixture role.
+reset role;
+do $audit$
+declare
+ org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
+ project uuid=current_setting('test.link_project')::uuid;
+begin
+ if (select count(*) from private.construction_stage_record_links
+     where organization_id=org and project_id=project and record_kind='material')<>2
+ then raise exception 'Previous stage assignment history was lost';end if;
+end$audit$;
+set local role authenticated;
 
 -- The assigned security role must never see payment amounts or issue links.
 select set_config('request.jwt.claim.sub','22222222-2222-4222-8222-222222222222',true);
