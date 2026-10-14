@@ -115,8 +115,11 @@ test('Upload Leads and Google Sheets have distinct protected pages', () => {
   assert.match(pageShell, /const googlePath = leadsPath \+ '\/google-sheets'/);
   assert.match(leadPage, /label: 'Upload Leads'/);
   assert.match(leadPage, /label: 'Google Sheets'/);
-  assert.match(crmLayout, /\['Upload Leads',/);
-  assert.match(crmLayout, /\['Google Sheets',/);
+  // Imports belong inside the unified Leads menu rather than the global CRM bar.
+  assert.doesNotMatch(crmLayout, /\['Upload Leads',/);
+  assert.doesNotMatch(crmLayout, /\['Google Sheets',/);
+  assert.match(leadPage, /label: 'Follow-ups'/);
+  assert.match(leadPage, /label: 'Site Visits'/);
 
   assert.doesNotMatch(importer, /setMethod/);
   assert.doesNotMatch(importer, /crm-import-methods/);
