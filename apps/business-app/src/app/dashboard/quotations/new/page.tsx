@@ -5,7 +5,12 @@ import { QuotationStudioStart } from '../studio-start';
 
 export const dynamic = 'force-dynamic';
 
-export default async function NewQuotation() {
+export default async function NewQuotation({
+  searchParams,
+}: {
+  searchParams: Promise<{ customer?: string }>;
+}) {
+  const { customer } = await searchParams;
   const s = await commercialServices('quotation.create', 'quotation', true);
   const [organization, user, industries] = await Promise.all([
     s.repository.organization(s.org),
@@ -106,6 +111,7 @@ export default async function NewQuotation() {
               name: industry.name,
             }))}
           defaultCurrency={organization.default_currency || 'INR'}
+          initialCustomerId={customer ?? ''}
         />
         <aside className="qs-editor">
           <div className="qs-create-hero">
