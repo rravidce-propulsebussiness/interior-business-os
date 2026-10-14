@@ -13,6 +13,26 @@ export type ConstructionSpecSection = {
   description: string;
   allowancePerSqft: string;
 };
+/** Normalize earlier package rows without changing stored company data.
+ * A previous release stored drawing selections as {label,included} and
+ * added named fields under "fields". New editors consume a common format. */
+export function normalizeConstructionSpecSection(
+  raw: ConstructionSpecSection,
+): ConstructionSpecSection {
+  const legacy = raw as unknown as {
+    kind?: 'plans' | 'material' | 'custom' | 'general';
+    deliverables?: Array<string | { label: string; included: boolean }>;
+    fields?: { label: string; value: string }[];
+  };
+  return {
+    ...raw,
+    kind: legacy.kind === 'custom' ? 'general' : legacy.kind,
+    deliverables: (legacy.deliverables ?? []).flatMap((item) =>
+      typeof item === 'string' ? [item] : item.included ? [item.label] : [],
+    ),
+    customFields: raw.customFields ?? legacy.fields ?? [],
+  };
+}
 export type ConstructionPackage = {
   themeColor: string;
   specSections: ConstructionSpecSection[];
@@ -68,10 +88,15 @@ export function createConstructionPackagesRepository(
     return data as T;
   }
   return {
-    list: (org: string) =>
-      invoke<ConstructionPackage[]>('construction_package_list', {
-        p_org: org,
-      }),
+    list: async (org: string) => {
+      const packages = await invoke<ConstructionPackage[]>(
+        'construction_package_list', { p_org: org },
+      );
+      return packages.map((item) => ({
+        ...item,
+        specSections: item.specSections.map(normalizeConstructionSpecSection),
+      }));
+    },
     save: (
       org: string,
       input: {
