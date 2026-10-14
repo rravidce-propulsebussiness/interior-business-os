@@ -78,10 +78,10 @@ export function ConstructionTomorrowPanel({
         Work, labour & required materials
       </h2>
       <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-        Engineers prepare tomorrow&apos;s stage work with actual trade-wise headcount
-        and already recorded material needs. Managers review and approve the
-        plan. A proposed material quantity does not place an order or reserve
-        stock.
+        Engineers prepare tomorrow&apos;s stage work with actual trade-wise
+        headcount and already recorded material needs. Managers review and
+        approve the plan. A proposed material quantity does not place an order
+        or reserve stock.
       </p>
       {data.can_submit && (
         <form
