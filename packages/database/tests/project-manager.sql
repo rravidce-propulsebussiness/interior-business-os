@@ -115,6 +115,11 @@ begin
  record=public.project_site_manager_command(org,project,'report_review',
   jsonb_build_object('report_id',report,'decision','changes_requested',
   'note','Add inspection photos and gridline references'));
+ begin
+  perform public.construction_client_manage(org,project,'report_publish',
+    jsonb_build_object('report_id',report));
+  raise exception 'FAIL: report published without latest manager approval';
+ exception when check_violation then null;end;
  perform public.project_site_manager_command(org,project,'report_review',
   jsonb_build_object('report_id',report,'decision','approved',
   'note','Reviewed revised evidence independently'));
@@ -128,9 +133,76 @@ begin
      public.construction_field_read(org,project)->'stage_reports') item
      where item->>'report_id'=report::text)<> 'Inspect grid line columns'
  then raise exception 'FAIL: stage lost canonical tomorrow plan reference';end if;
+ record=public.construction_client_manage(org,project,'share_create','{}'::jsonb);
+ perform set_config('test.client_token',record->>'token',true);
+ perform set_config('test.client_share',record->>'share_id',true);
+ perform public.construction_client_manage(org,project,'report_publish',
+   jsonb_build_object('report_id',report));
+ if (select candidate->>'published' from jsonb_array_elements(
+    public.construction_client_manage_read(org,project)->'reports') candidate
+    where candidate->>'id'=report::text)<>'true'
+ then raise exception 'FAIL: approved report not marked published';end if;
 
  raise notice 'PASS: manager approval/rework decisions append and preserve engineer report';
 end $$;
+
+-- Public capability exposes only manager-approved and explicitly published
+-- daily report content, not private staff updates, financial data or media.
+set local role anon;
+do $$
+declare projection jsonb;
+begin
+ projection=public.construction_client_view(current_setting('test.client_token'));
+ if jsonb_array_length(projection->'updates')<>1
+   or projection->'updates'->0->>'tomorrow'<>'Inspect grid line columns'
+ then raise exception 'FAIL: client projection does not match approved daily report';end if;
+ if projection ? 'contract' or projection ? 'payments' or projection ? 'inspections'
+   or projection::text like '%Private staff note%'
+   or projection::text like '%Approve manual cement%'
+ then raise exception 'FAIL: client projection leaked sensitive staff or finance fields';end if;
+ if jsonb_array_length(projection->'stages')<>1
+ then raise exception 'FAIL: client-safe stage list missing';end if;
+ raise notice 'PASS: anonymous customer projection contains only approved and published site update';
+end$$;
+set local role authenticated;
+select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',true);
+do $$
+declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
+ project uuid=current_setting('test.manager_project')::uuid;
+ report uuid=current_setting('test.manager_report')::uuid;
+begin
+ perform public.construction_client_manage(org,project,'report_unpublish',
+   jsonb_build_object('report_id',report));
+end$$;
+set local role anon;
+do $$
+declare projection jsonb;
+begin
+ projection=public.construction_client_view(current_setting('test.client_token'));
+ if jsonb_array_length(projection->'updates')<>0
+ then raise exception 'FAIL: unpublished daily report still visible';end if;
+ raise notice 'PASS: unpublish immediately removes daily customer report';
+end$$;
+set local role authenticated;
+select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',true);
+do $$
+declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
+ project uuid=current_setting('test.manager_project')::uuid;
+begin
+ perform public.construction_client_manage(org,project,'share_revoke',
+   jsonb_build_object('share_id',current_setting('test.client_share')::uuid));
+end$$;
+set local role anon;
+do $$
+begin
+ begin
+  perform public.construction_client_view(current_setting('test.client_token'));
+  raise exception 'FAIL: revoked customer capability still works';
+ exception when insufficient_privilege then null;end;
+ raise notice 'PASS: revoked project progress link no longer works';
+end$$;
+set local role authenticated;
+
 select set_config('request.jwt.claim.sub','22222222-2222-4222-8222-222222222222',true);
 do $$
 declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
