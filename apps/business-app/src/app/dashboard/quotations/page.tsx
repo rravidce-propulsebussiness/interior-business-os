@@ -4,6 +4,8 @@ import {
   searchSchema,
 } from '@business-os/core/commercial';
 import { commercialServices } from '../commercial/service';
+import { crmResult } from '@business-os/database/crm';
+import { resultSchema } from '../crm/service';
 import { QuotationStudioFrame } from './studio-frame';
 
 export const dynamic = 'force-dynamic';
@@ -11,7 +13,13 @@ export const dynamic = 'force-dynamic';
 export default async function Quotations({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; page?: string; status?: string }>;
+  searchParams: Promise<{
+    q?: string;
+    page?: string;
+    status?: string;
+    response_status?: string;
+    response_page?: string;
+  }>;
 }) {
   const p = await searchParams;
   const filter = searchSchema.parse({
@@ -38,6 +46,51 @@ export default async function Quotations({
       .maybeSingle(),
   ]);
   if (!organization) throw new Error('Company workspace unavailable');
+  const responseStatuses = [
+    'awaiting',
+    'approved',
+    'changes_requested',
+    'declined',
+  ] as const;
+  const canViewResponses = s.allowed(
+    'quotation.customer_response.view',
+    'quotation',
+  );
+  const showResponses =
+    canViewResponses && typeof p.response_status === 'string';
+  const selectedResponseStatus =
+    p.response_status === 'all'
+      ? 'all'
+      : responseStatuses.find((status) => status === p.response_status) ??
+        'awaiting';
+  const responsePage = Math.max(
+    1,
+    Math.min(10000, Number.parseInt(p.response_page ?? '1', 10) || 1),
+  );
+  type ResponseResult = ReturnType<typeof resultSchema.parse>;
+  let customerResponses: ResponseResult | null = null;
+  let responsesUnavailable = false;
+  if (showResponses) {
+    try {
+      customerResponses = resultSchema.parse(
+        crmResult(
+          await s.client.rpc('quotation_response_queue', {
+            p_organization_id: s.org,
+            p_status: selectedResponseStatus === 'all' ? '' : selectedResponseStatus,
+            p_page: responsePage,
+          }),
+        ),
+      );
+    } catch {
+      // An unavailable optional response queue must not break quotation access.
+      responsesUnavailable = true;
+    }
+  }
+  const responseHref = (status: string, page = 1) => {
+    const query = new URLSearchParams({ response_status: status });
+    if (page > 1) query.set('response_page', String(page));
+    return '/dashboard/quotations?' + query.toString() + '#customer-responses';
+  };
   const rows = commercialSearchResultSchema.parse(result).rows;
   const total = commercialSearchResultSchema.parse(result).total;
   // Search results are revisions. Resolve their parent quotation/customer and
@@ -132,6 +185,118 @@ export default async function Quotations({
           )}
         </div>
       </div>
+
+      {canViewResponses && (
+        <div className="qs-toolbar" style={{ marginBottom: 14 }}>
+          <Link
+            className="qs-btn"
+            href={responseHref('awaiting')}
+            aria-current={showResponses ? 'page' : undefined}
+          >
+            Customer responses
+          </Link>
+        </div>
+      )}
+      {showResponses && (
+        <section
+          id="customer-responses"
+          className="qs-card"
+          style={{ marginBottom: 18, scrollMarginTop: 24 }}
+          aria-label="Quotation customer responses"
+        >
+          <div className="qs-heading">
+            <div>
+              <h2>Customer responses</h2>
+              <p className="qs-muted">
+                Track quotation approval, requested changes and declined proposals.
+              </p>
+            </div>
+            <Link className="qs-btn" href="/dashboard/quotations">
+              All quotations
+            </Link>
+          </div>
+          <form
+            action="/dashboard/quotations"
+            method="get"
+            className="qs-fields qs-quote-filters"
+          >
+            <label className="qs-field">
+              Response status
+              <select name="response_status" defaultValue={selectedResponseStatus}>
+                <option value="all">All responses</option>
+                {responseStatuses.map((status) => (
+                  <option key={status} value={status}>
+                    {status.replaceAll('_', ' ')}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <button className="qs-btn primary" type="submit">
+              Filter responses
+            </button>
+          </form>
+          {responsesUnavailable ? (
+            <p className="qs-muted" role="alert">
+              Customer responses are temporarily unavailable. Quotations remain accessible below.
+            </p>
+          ) : customerResponses?.rows.length ? (
+            <div className="qs-quotation-list">
+              {customerResponses.rows.map((response) => (
+                <Link
+                  key={String(response.id)}
+                  href={'/dashboard/quotations/' + String(response.id)}
+                  className="qs-quotation-item"
+                >
+                  <div>
+                    <strong>
+                      {String(response.quotation_number || 'Quotation')}
+                      {' · '}Revision {String(response.revision_number ?? 1)}
+                    </strong>
+                    <small>
+                      {String(response.customer_name || 'Customer')}
+                      {' · '}
+                      {String(response.project_name || 'Project')}
+                    </small>
+                    {response.comment && (
+                      <small style={{ whiteSpace: 'pre-wrap' }}>
+                        {String(response.comment)}
+                      </small>
+                    )}
+                  </div>
+                  <span className="qs-badge">
+                    {String(response.response_status || 'awaiting').replaceAll('_', ' ')}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <p className="qs-muted">No issued quotations match this response filter.</p>
+          )}
+          {customerResponses && (
+            <div className="qs-toolbar" style={{ marginTop: 14 }}>
+              {responsePage > 1 && (
+                <Link
+                  className="qs-btn"
+                  href={responseHref(selectedResponseStatus, responsePage - 1)}
+                >
+                  ← Previous
+                </Link>
+              )}
+              <span className="qs-muted">
+                {customerResponses.total} records · Page {responsePage}
+              </span>
+              {responsePage * 25 < customerResponses.total && (
+                <Link
+                  className="qs-btn"
+                  href={responseHref(selectedResponseStatus, responsePage + 1)}
+                >
+                  Next →
+                </Link>
+              )}
+            </div>
+          )}
+        </section>
+      )}
 
       <div className="qs-kpi-grid">
         {[
