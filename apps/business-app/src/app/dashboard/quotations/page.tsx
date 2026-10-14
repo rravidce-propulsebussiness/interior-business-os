@@ -257,7 +257,7 @@ export default async function Quotations({
                       {' · '}
                       {String(response.project_name || 'Project')}
                     </small>
-                    {response.comment && (
+                    {Boolean(response.comment) && (
                       <small style={{ whiteSpace: 'pre-wrap' }}>
                         {String(response.comment)}
                       </small>
