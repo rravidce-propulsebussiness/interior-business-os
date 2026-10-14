@@ -16,6 +16,10 @@ import {
   leadServiceFromIndustryKey,
   type LeadServiceOption,
 } from './lead-service-options';
+import {
+  leadRequirementLabel,
+  resolveLeadCategory,
+} from './lead-category';
 import '../../owner-dashboard.css';
 import './leads.css';
 
@@ -174,6 +178,9 @@ export default async function Leads({
     label: String(reason.name),
   }));
   const stagesById = new Map(stages.map((stage) => [stage.id, stage]));
+  const enabledIndustryEntries = industries.filter(
+    (entry) => assignedIndustries.has(entry.id) && entry.status === 'active',
+  );
   const sourcesById = new Map(
     sources.map((source) => [source.value, source.label]),
   );
@@ -202,7 +209,8 @@ export default async function Leads({
       assignedTo: assigneeId,
       assignedName: teamById.get(assigneeId) ?? '',
       location: label(r.location),
-      requirement: label(r.service_type),
+      category: resolveLeadCategory(r, enabledIndustryEntries),
+      requirement: leadRequirementLabel(r),
       requirements:
         r.requirements &&
         typeof r.requirements === 'object' &&
