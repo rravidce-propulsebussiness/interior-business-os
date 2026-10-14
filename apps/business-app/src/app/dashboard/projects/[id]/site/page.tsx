@@ -9,6 +9,7 @@ import { ConstructionPlanningPanel } from './construction-planning-panel';
 import { ConstructionPaymentsPanel } from './construction-payments-panel';
 import { ConstructionClientPortalManager } from './construction-client-portal-panel';
 import { ConstructionTomorrowPanel } from './construction-tomorrow-panel';
+import { ConstructionGatePanel } from './construction-gate-panel';
 import { AgreementReadinessPanel } from './agreement-readiness-panel';
 import '../../../owner-dashboard.css';
 import './site-command.css';
@@ -97,6 +98,39 @@ const constructionFieldSchema = z.object({
       blockers: z.string(),
       worker_count: z.number().int(),
       created_by: z.uuid(),
+    }),
+  ),
+});
+const constructionGateSchema = z.object({
+  can_review: z.boolean(),
+  events: z.array(
+    z.object({
+      id: z.uuid(),
+      work_date: z.string(),
+      trade: z.string(),
+      direction: z.enum(['arrival', 'departure']),
+      workers: z.number().int(),
+      notes: z.string(),
+      recorded_at: z.string(),
+    }),
+  ),
+  comparison: z.array(
+    z.object({
+      work_date: z.string(),
+      trade: z.string(),
+      planned: z.number().int(),
+      arrived: z.number().int(),
+      departed: z.number().int(),
+      on_site: z.number().int(),
+    }),
+  ),
+  reviews: z.array(
+    z.object({
+      work_date: z.string(),
+      decision: z.enum(['verified', 'discrepancy']),
+      reason: z.string(),
+      reviewed_at: z.string(),
+      is_current: z.boolean(),
     }),
   ),
 });
@@ -471,6 +505,18 @@ export default async function ProjectDeliveryPage({
       ? constructionTomorrowSchema.safeParse(tomorrowResponse.data)
       : null;
   const tomorrowWork = tomorrowParsed?.success ? tomorrowParsed.data : null;
+  const gateResponse =
+    construction && site.stage === 'execution'
+      ? await s.client.rpc('construction_gate_labor_read', {
+          p_org: context.organizationId,
+          p_project: id,
+        })
+      : null;
+  const gateParsed =
+    gateResponse && !gateResponse.error
+      ? constructionGateSchema.safeParse(gateResponse.data)
+      : null;
+  const gateLabor = gateParsed?.success ? gateParsed.data : null;
   const paymentResponse =
     site.can_manage && construction
       ? await s.client.rpc('construction_payment_read', {
@@ -576,8 +622,8 @@ export default async function ProjectDeliveryPage({
   if (open || site.stage === 'handover') {
     if (isEngineer || isQuality) {
       mobileUpdateHref = '#daily-reports';
-    } else if (isWatchman) {
-      mobileUpdateHref = '#security';
+    } else if (isWatchman || gateLabor) {
+      mobileUpdateHref = gateLabor ? '#construction-labor-gate' : '#security';
     }
   }
 
@@ -684,6 +730,10 @@ export default async function ProjectDeliveryPage({
                 }))}
                 data={tomorrowWork}
               />
+            )}
+
+            {gateLabor && (
+              <ConstructionGatePanel projectId={id} data={gateLabor} />
             )}
 
             {clientPortalManager && (
