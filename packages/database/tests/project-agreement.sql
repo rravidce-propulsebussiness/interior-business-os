@@ -11,6 +11,9 @@ declare
 begin
  select id into project from public.projects where organization_id=org and code='demo-3bhk';
  perform public.project_site_command(org,project,'initialize','{}'::jsonb);
+ if public.project_agreement_read(org,project)->>'current_scope'<>'false'
+    or public.project_agreement_read(org,project)->>'execution_authorized'<>'false'
+ then raise exception 'FAIL: unprepared contract readiness must fail closed';end if;
  contract=pg_temp.site_signed_agreement(org,project);
  if (public.project_agreement_read(org,project)->>'execution_authorized')<>'true'
  then raise exception 'FAIL: genuine agreement evidence not recognized';end if;
