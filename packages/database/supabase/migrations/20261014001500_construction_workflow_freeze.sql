@@ -25,18 +25,9 @@ after insert on private.construction_project_stages
 for each row
 execute function private.construction_freeze_created_workflow();
 
--- Historical planning statuses were produced by the same single-transaction
--- manager command. Freeze only workflows that already have persisted stages.
--- Do not touch stage definitions, approval history, finance, or incomplete rows.
-update private.construction_project_workflows w
-set status='frozen',version=w.version+1
-where w.status='planning'
-  and exists (
-    select 1 from private.construction_project_stages s
-    where s.organization_id=w.organization_id
-      and s.project_id=w.project_id
-      and s.workflow_id=w.id
-  );
+-- Intentionally NO automatic backfill: any pre-existing planning workflow
+-- requires an explicit review/remediation plan in the verified staging
+-- environment. Do not rewrite a live project's approval state on migration.
 
 revoke all on function private.construction_freeze_created_workflow()
 from public, anon, authenticated;
