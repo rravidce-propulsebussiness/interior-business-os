@@ -6,6 +6,7 @@ import { SiteCommandOverview } from './command-overview';
 import { SiteAccessState } from './site-access-state';
 import { SiteActivity } from './site-activity';
 import { ConstructionPlanningPanel } from './construction-planning-panel';
+import { ConstructionPaymentsPanel } from './construction-payments-panel';
 import { AgreementReadinessPanel } from './agreement-readiness-panel';
 import '../../../owner-dashboard.css';
 import './site-command.css';
@@ -94,6 +95,35 @@ const constructionFieldSchema = z.object({
       blockers: z.string(),
       worker_count: z.number().int(),
       created_by: z.uuid(),
+    }),
+  ),
+});
+const constructionPaymentSchema = z.object({
+  active_contract_id: z.uuid().nullable(),
+  currency: z.string().nullable(),
+  can_bind: z.boolean(),
+  can_issue: z.boolean(),
+  stage_options: z.array(
+    z.object({
+      id: z.uuid(),
+      instance_code: z.string(),
+      title: z.string(),
+      current: z.boolean(),
+    }),
+  ),
+  items: z.array(
+    z.object({
+      id: z.uuid(),
+      contract_id: z.uuid(),
+      schedule_id: z.uuid(),
+      label: z.string(),
+      expected_amount: z.string(),
+      due_trigger: z.string(),
+      due_date: z.string().nullable(),
+      linked_stage_ids: z.array(z.uuid()),
+      is_stage_milestone: z.boolean(),
+      eligible: z.boolean(),
+      issued_request_id: z.uuid().nullable(),
     }),
   ),
 });
@@ -366,6 +396,20 @@ export default async function ProjectDeliveryPage({
       ? constructionFieldSchema.safeParse(fieldResponse.data)
       : null;
   const constructionField = fieldParsed?.success ? fieldParsed.data : null;
+  const paymentResponse =
+    site.can_manage && construction
+      ? await s.client.rpc('construction_payment_read', {
+          p_org: context.organizationId,
+          p_project: id,
+        })
+      : null;
+  const paymentParsed =
+    paymentResponse && !paymentResponse.error
+      ? constructionPaymentSchema.safeParse(paymentResponse.data)
+      : null;
+  const constructionPayments = paymentParsed?.success
+    ? paymentParsed.data
+    : null;
   const canSeeManagerUpdates =
     site.can_manage ||
     ['site_engineer', 'quality_inspector', 'procurement'].includes(
@@ -538,6 +582,13 @@ export default async function ProjectDeliveryPage({
                     id: String(report.id),
                     date: String(report.report_date),
                   }))}
+              />
+            )}
+
+            {constructionPayments && (
+              <ConstructionPaymentsPanel
+                projectId={id}
+                data={constructionPayments}
               />
             )}
 
