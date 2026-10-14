@@ -20,7 +20,7 @@ begin
    raise exception 'Project owner fixture lacks project.manage grant';
  end if;
  result=public.project_site_command(org,project,'initialize','{}');
- agreement_media=public.project_site_media_put(org,project,'design','paper-agreement.pdf',
+ agreement_media=public.project_site_media_put(org,project,'agreement','paper-agreement.pdf',
    'application/pdf',encode(convert_to('%PDF-1.7'||chr(10)||
       'Preloaded paper agreement record for regression','UTF8'),'base64'),
    'Paper agreement reference; record as signed only after authorization');
