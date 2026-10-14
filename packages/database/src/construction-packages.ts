@@ -3,7 +3,12 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { DomainError } from '@business-os/shared';
 import type { Database } from './generated/database.types';
 
+export type PackageDrawing = { label: string; included: boolean };
+export type PackageExtraField = { label: string; value: string };
 export type ConstructionSpecSection = {
+  kind?: 'plans' | 'material' | 'custom';
+  deliverables?: PackageDrawing[];
+  fields?: PackageExtraField[];
   title: string;
   brand: string;
   grade: string;
