@@ -68,7 +68,11 @@ function Stat({
         <span>{label}</span>
         <strong>{value}</strong>
       </span>
-      {href && <span className="cp-stat-arrow" aria-hidden="true">›</span>}
+      {href && (
+        <span className="cp-stat-arrow" aria-hidden="true">
+          ›
+        </span>
+      )}
     </>
   );
   return href ? (
@@ -165,8 +169,10 @@ export default async function Customer({
         ? whatsappDigits
         : '';
   const projectHref = '/dashboard/projects?customer=' + encodeURIComponent(id);
-  const timelineHref = '/dashboard/customers/' + encodeURIComponent(id) + '/activity';
-  const statementHref = '/dashboard/finance/statements/' + encodeURIComponent(id);
+  const timelineHref =
+    '/dashboard/customers/' + encodeURIComponent(id) + '/activity';
+  const statementHref =
+    '/dashboard/finance/statements/' + encodeURIComponent(id);
   const recentRecords = [
     ...projects.map((item) => ({
       id: 'project-' + item.id,
@@ -216,11 +222,15 @@ export default async function Customer({
               <span
                 className={
                   'cp-status ' +
-                  (customer.status === 'active' ? 'cp-status-active' : 'cp-status-inactive')
+                  (customer.status === 'active'
+                    ? 'cp-status-active'
+                    : 'cp-status-inactive')
                 }
               >
                 <span aria-hidden="true">●</span>
-                {customer.status === 'active' ? 'Active customer' : 'Inactive customer'}
+                {customer.status === 'active'
+                  ? 'Active customer'
+                  : 'Inactive customer'}
               </span>
               <CustomerReference value={reference} />
             </div>
@@ -266,23 +276,24 @@ export default async function Customer({
             {canCreateQuote && customer.status === 'active' && (
               <Link
                 className="cp-action"
-                href={'/dashboard/quotations/new?customer=' + encodeURIComponent(id)}
+                href={
+                  '/dashboard/quotations/new?customer=' + encodeURIComponent(id)
+                }
               >
                 <OwnerIcon name="quotations" size={18} /> New quote
               </Link>
             )}
             {canCreateProject && (
-              <Link
-                className="cp-action"
-                href={projectHref + '&new=1'}
-              >
+              <Link className="cp-action" href={projectHref + '&new=1'}>
                 <OwnerIcon name="projects" size={18} /> New project
               </Link>
             )}
           </div>
 
           <nav className="cp-tabs" aria-label="Customer record sections">
-            <a href="#overview" className="cp-tab-current">Overview</a>
+            <a href="#overview" className="cp-tab-current">
+              Overview
+            </a>
             {canSeeProjects && <a href="#projects">Projects</a>}
             {canSeeQuotes && <a href="#quotes">Quotes</a>}
             {canSeeStatement && <a href="#payments">Payments</a>}
@@ -292,20 +303,34 @@ export default async function Customer({
           <div className="cp-section-grid" id="overview">
             <section className="cp-panel">
               <div className="cp-section-heading">
-                <h2><span aria-hidden="true">♟</span> Contact information</h2>
-                {canManage && <a className="cp-small-action" href="#edit-customer">✎ Edit</a>}
+                <h2>
+                  <span aria-hidden="true">♟</span> Contact information
+                </h2>
+                {canManage && (
+                  <a className="cp-small-action" href="#edit-customer">
+                    ✎ Edit
+                  </a>
+                )}
               </div>
               <dl className="cp-info">
                 <div>
                   <dt>☎ Phone</dt>
-                  <dd>{phone ? <a href={'tel:' + phone}>{customer.phone}</a> : 'Not provided'}</dd>
+                  <dd>
+                    {phone ? (
+                      <a href={'tel:' + phone}>{customer.phone}</a>
+                    ) : (
+                      'Not provided'
+                    )}
+                  </dd>
                 </div>
                 <div>
                   <dt>✉ Email</dt>
                   <dd>
                     {customer.email ? (
                       <a href={'mailto:' + customer.email}>{customer.email}</a>
-                    ) : 'Not provided'}
+                    ) : (
+                      'Not provided'
+                    )}
                   </dd>
                 </div>
               </dl>
@@ -313,14 +338,32 @@ export default async function Customer({
 
             <section className="cp-panel">
               <div className="cp-section-heading">
-                <h2><OwnerIcon name="clients" size={20} /> Customer details</h2>
-                {canManage && <a className="cp-small-action" href="#edit-customer">✎ Edit details</a>}
+                <h2>
+                  <OwnerIcon name="clients" size={20} /> Customer details
+                </h2>
+                {canManage && (
+                  <a className="cp-small-action" href="#edit-customer">
+                    ✎ Edit details
+                  </a>
+                )}
               </div>
               <dl className="cp-info">
-                <div><dt>Customer name</dt><dd>{display(customer.display_name)}</dd></div>
-                <div><dt>Legal name</dt><dd>{display(customer.legal_name)}</dd></div>
-                <div><dt>Secondary phone</dt><dd>{display(customer.secondary_phone)}</dd></div>
-                <div><dt>Customer type</dt><dd>{display(customer.customer_type)}</dd></div>
+                <div>
+                  <dt>Customer name</dt>
+                  <dd>{display(customer.display_name)}</dd>
+                </div>
+                <div>
+                  <dt>Legal name</dt>
+                  <dd>{display(customer.legal_name)}</dd>
+                </div>
+                <div>
+                  <dt>Secondary phone</dt>
+                  <dd>{display(customer.secondary_phone)}</dd>
+                </div>
+                <div>
+                  <dt>Customer type</dt>
+                  <dd>{display(customer.customer_type)}</dd>
+                </div>
               </dl>
             </section>
           </div>
@@ -329,20 +372,32 @@ export default async function Customer({
             {canSeeProjects && (
               <section className="cp-panel" id="projects">
                 <div className="cp-section-heading">
-                  <h2><OwnerIcon name="projects" size={20} /> Projects</h2>
-                  <Link className="cp-small-action" href={projectHref}>View all →</Link>
+                  <h2>
+                    <OwnerIcon name="projects" size={20} /> Projects
+                  </h2>
+                  <Link className="cp-small-action" href={projectHref}>
+                    View all →
+                  </Link>
                 </div>
                 {projects.length ? (
                   <div className="cp-record-list">
                     {projects.map((project) => (
-                      <Link href={'/dashboard/projects/' + project.id} key={project.id}>
-                        <span><strong>{project.name}</strong><small>{project.status}</small></span>
+                      <Link
+                        href={'/dashboard/projects/' + project.id}
+                        key={project.id}
+                      >
+                        <span>
+                          <strong>{project.name}</strong>
+                          <small>{project.status}</small>
+                        </span>
                         <span aria-hidden="true">›</span>
                       </Link>
                     ))}
                   </div>
                 ) : (
-                  <p className="cp-muted">No projects linked to this customer yet.</p>
+                  <p className="cp-muted">
+                    No projects linked to this customer yet.
+                  </p>
                 )}
               </section>
             )}
@@ -350,18 +405,31 @@ export default async function Customer({
             {canSeeQuotes && (
               <section className="cp-panel" id="quotes">
                 <div className="cp-section-heading">
-                  <h2><OwnerIcon name="quotations" size={20} /> Quotations</h2>
-                  <Link className="cp-small-action" href="/dashboard/quotations">Quotation studio →</Link>
+                  <h2>
+                    <OwnerIcon name="quotations" size={20} /> Quotations
+                  </h2>
+                  <Link
+                    className="cp-small-action"
+                    href="/dashboard/quotations"
+                  >
+                    Quotation studio →
+                  </Link>
                 </div>
                 <p className="cp-muted">
                   {quoteResult.count
-                    ? String(quoteResult.count) + ' quotation record(s) linked to ' + reference + '. All revisions are kept together.'
+                    ? String(quoteResult.count) +
+                      ' quotation record(s) linked to ' +
+                      reference +
+                      '. All revisions are kept together.'
                     : 'No quotations linked to this customer yet.'}
                 </p>
                 {canCreateQuote && customer.status === 'active' && (
                   <Link
                     className="cp-inline-link"
-                    href={'/dashboard/quotations/new?customer=' + encodeURIComponent(id)}
+                    href={
+                      '/dashboard/quotations/new?customer=' +
+                      encodeURIComponent(id)
+                    }
                   >
                     + Create customer quotation
                   </Link>
@@ -373,30 +441,45 @@ export default async function Customer({
           {canSeeStatement && (
             <section className="cp-panel cp-wide-panel" id="payments">
               <div className="cp-section-heading">
-                <h2><OwnerIcon name="expenses" size={20} /> Payments &amp; statement</h2>
-                <Link className="cp-small-action" href={statementHref}>Open statement →</Link>
+                <h2>
+                  <OwnerIcon name="expenses" size={20} /> Payments &amp;
+                  statement
+                </h2>
+                <Link className="cp-small-action" href={statementHref}>
+                  Open statement →
+                </Link>
               </div>
               <p className="cp-muted">
-                Review customer invoices, receipts and balances in their authorized account statement.
+                Review customer invoices, receipts and balances in their
+                authorized account statement.
               </p>
             </section>
           )}
 
           <section className="cp-panel cp-wide-panel" id="activity">
             <div className="cp-section-heading">
-              <h2><OwnerIcon name="calendar" size={20} /> Recent activity</h2>
-              <Link className="cp-small-action" href={timelineHref}>View full timeline →</Link>
+              <h2>
+                <OwnerIcon name="calendar" size={20} /> Recent activity
+              </h2>
+              <Link className="cp-small-action" href={timelineHref}>
+                View full timeline →
+              </Link>
             </div>
             {recentRecords.length ? (
               <div className="cp-activity-list">
                 {recentRecords.map((record) => (
                   <Link key={record.id} href={record.href}>
-                    <span className="cp-activity-mark" aria-hidden="true">●</span>
+                    <span className="cp-activity-mark" aria-hidden="true">
+                      ●
+                    </span>
                     <span>
                       <strong>{record.title}</strong>
-                      <small>{record.kind} · {record.date
-                        ? new Date(record.date).toLocaleDateString('en-IN')
-                        : 'Date unavailable'}</small>
+                      <small>
+                        {record.kind} ·{' '}
+                        {record.date
+                          ? new Date(record.date).toLocaleDateString('en-IN')
+                          : 'Date unavailable'}
+                      </small>
                     </span>
                     <span aria-hidden="true">›</span>
                   </Link>
@@ -406,31 +489,48 @@ export default async function Customer({
               <div className="cp-empty-state">
                 <OwnerIcon name="calendar" size={28} />
                 <strong>No project or quotation records yet</strong>
-                <p>Customer interactions and other records can be viewed in the full activity timeline.</p>
+                <p>
+                  Customer interactions and other records can be viewed in the
+                  full activity timeline.
+                </p>
               </div>
             )}
-            <div className="cp-origin-leads"><OriginLeads customerId={id} /></div>
+            <div className="cp-origin-leads">
+              <OriginLeads customerId={id} />
+            </div>
           </section>
 
           <section className="cp-panel cp-wide-panel" id="records">
             <div className="cp-section-heading">
-              <h2><OwnerIcon name="reports" size={20} /> Related records</h2>
+              <h2>
+                <OwnerIcon name="reports" size={20} /> Related records
+              </h2>
             </div>
             <div className="cp-record-list">
               {canSeeStatement && (
-                <Link href={statementHref}>Customer account statement <span aria-hidden="true">›</span></Link>
+                <Link href={statementHref}>
+                  Customer account statement <span aria-hidden="true">›</span>
+                </Link>
               )}
-              <Link href={timelineHref}>Customer activity timeline <span aria-hidden="true">›</span></Link>
+              <Link href={timelineHref}>
+                Customer activity timeline <span aria-hidden="true">›</span>
+              </Link>
               {canSeeProjects && (
-                <Link href={projectHref}>Projects for this customer <span aria-hidden="true">›</span></Link>
+                <Link href={projectHref}>
+                  Projects for this customer <span aria-hidden="true">›</span>
+                </Link>
               )}
             </div>
           </section>
 
           {canManage && (
             <details id="edit-customer" className="cp-edit-panel cp-panel">
-              <summary>✎ Edit customer information <span aria-hidden="true">⌄</span></summary>
-              <p className="cp-muted">Changes are saved to this customer record under the same CRN.</p>
+              <summary>
+                ✎ Edit customer information <span aria-hidden="true">⌄</span>
+              </summary>
+              <p className="cp-muted">
+                Changes are saved to this customer record under the same CRN.
+              </p>
               <MasterForm
                 entity="customers"
                 title="Save customer"
@@ -442,19 +542,30 @@ export default async function Customer({
 
           <section className="cp-panel cp-wide-panel" id="contacts">
             <div className="cp-section-heading">
-              <h2><OwnerIcon name="clients" size={20} /> Additional contacts</h2>
+              <h2>
+                <OwnerIcon name="clients" size={20} /> Additional contacts
+              </h2>
               <span className="cp-muted">{contacts.length} contact(s)</span>
             </div>
-            {contacts.length === 0 && <p className="cp-muted">No additional contacts added.</p>}
+            {contacts.length === 0 && (
+              <p className="cp-muted">No additional contacts added.</p>
+            )}
             {contacts.map((contact) => (
               <details key={contact.id} className="cp-contact-row">
                 <summary>
-                  <span><strong>{contact.name}</strong>
-                    <small>{contact.is_primary ? 'Primary contact' : display(contact.role)}</small>
+                  <span>
+                    <strong>{contact.name}</strong>
+                    <small>
+                      {contact.is_primary
+                        ? 'Primary contact'
+                        : display(contact.role)}
+                    </small>
                   </span>
                   <span aria-hidden="true">⌄</span>
                 </summary>
-                <p>{display(contact.phone)} · {display(contact.email)}</p>
+                <p>
+                  {display(contact.phone)} · {display(contact.email)}
+                </p>
                 {canManage && (
                   <MasterForm
                     entity="customer_contacts"
@@ -467,7 +578,9 @@ export default async function Customer({
             ))}
             {canManage && (
               <details className="cp-contact-row cp-add-contact">
-                <summary>+ Add contact <span aria-hidden="true">⌄</span></summary>
+                <summary>
+                  + Add contact <span aria-hidden="true">⌄</span>
+                </summary>
                 <MasterForm
                   entity="customer_contacts"
                   initial={{
@@ -488,13 +601,31 @@ export default async function Customer({
           </section>
         </main>
         <nav className="cp-mobile-nav" aria-label="Mobile workspace navigation">
-          <Link href="/dashboard"><OwnerIcon name="dashboard" size={21} />Dashboard</Link>
-          <Link href={has('lead.view', 'crm') ? '/dashboard/crm/leads' : '/dashboard/customers'}
-            aria-current="page"><OwnerIcon name="clients" size={21} />CRM</Link>
+          <Link href="/dashboard">
+            <OwnerIcon name="dashboard" size={21} />
+            Dashboard
+          </Link>
+          <Link
+            href={
+              has('lead.view', 'crm')
+                ? '/dashboard/crm/leads'
+                : '/dashboard/customers'
+            }
+            aria-current="page"
+          >
+            <OwnerIcon name="clients" size={21} />
+            CRM
+          </Link>
           {canSeeProjects && (
-            <Link href={projectHref}><OwnerIcon name="projects" size={21} />Projects</Link>
+            <Link href={projectHref}>
+              <OwnerIcon name="projects" size={21} />
+              Projects
+            </Link>
           )}
-          <a href="#records"><OwnerIcon name="menu" size={21} />More</a>
+          <a href="#records">
+            <OwnerIcon name="menu" size={21} />
+            More
+          </a>
         </nav>
       </OwnerShell>
     </div>

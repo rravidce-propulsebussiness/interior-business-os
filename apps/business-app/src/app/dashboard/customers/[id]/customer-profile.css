@@ -9,7 +9,11 @@
 }
 .customer-profile-theme .owner-workspace {
   background:
-    radial-gradient(ellipse at 90% 0%, rgba(23, 83, 148, .19), transparent 39rem),
+    radial-gradient(
+      ellipse at 90% 0%,
+      rgba(23, 83, 148, 0.19),
+      transparent 39rem
+    ),
     linear-gradient(145deg, #061624 0%, #051522 65%, #041321 100%);
   min-width: 0;
 }
@@ -84,9 +88,13 @@
   border: 1px solid #3078c1;
   border-radius: 20px;
   background:
-    radial-gradient(ellipse at 97% 100%, rgba(30, 54, 174, .46), transparent 55%),
+    radial-gradient(
+      ellipse at 97% 100%,
+      rgba(30, 54, 174, 0.46),
+      transparent 55%
+    ),
     linear-gradient(108deg, #123c65 0%, #0a2a48 54%, #071e36 100%);
-  box-shadow: 0 12px 50px rgba(0, 4, 15, .18);
+  box-shadow: 0 12px 50px rgba(0, 4, 15, 0.18);
   overflow: hidden;
 }
 .cp-avatar {
@@ -98,7 +106,9 @@
   border: 3px solid #30dcff;
   border-radius: 50%;
   background: linear-gradient(135deg, #4085ff, #2436af);
-  box-shadow: 0 0 0 5px rgba(27, 87, 177, .23), 0 12px 38px rgba(15, 83, 211, .24);
+  box-shadow:
+    0 0 0 5px rgba(27, 87, 177, 0.23),
+    0 12px 38px rgba(15, 83, 211, 0.24);
   color: #fff;
   font-size: 52px;
   font-weight: 780;
@@ -122,7 +132,7 @@
   padding: 4px 10px;
   border: 1px solid #627389;
   border-radius: 30px;
-  background: rgba(10, 24, 42, .7);
+  background: rgba(10, 24, 42, 0.7);
   color: #cad8e9;
   font-size: 12px;
   font-weight: 700;
@@ -130,7 +140,7 @@
 .cp-status-active {
   border-color: #03a672;
   color: #45f2a9;
-  background: rgba(0, 92, 66, .28);
+  background: rgba(0, 92, 66, 0.28);
 }
 .cp-status-active span {
   color: #13e999;
@@ -143,7 +153,7 @@
   width: fit-content;
   max-width: 100%;
   border: 1px solid #355b84;
-  background: rgba(17, 48, 79, .68);
+  background: rgba(17, 48, 79, 0.68);
   border-radius: 24px;
   padding: 7px 9px 7px 13px;
   color: #ccdcf2;
@@ -152,7 +162,7 @@
 }
 .cp-reference strong {
   color: #fff;
-  letter-spacing: .015em;
+  letter-spacing: 0.015em;
 }
 .customer-profile-theme .cp-copy {
   padding: 5px 9px;
@@ -186,7 +196,9 @@
   gap: 14px;
   border-radius: 13px;
   padding: 16px;
-  transition: border-color .2s, transform .2s;
+  transition:
+    border-color 0.2s,
+    transform 0.2s;
 }
 a.cp-stat:hover {
   border-color: #3998e3;
@@ -302,7 +314,7 @@ a.cp-stat:hover {
   border-radius: 15px;
   min-width: 0;
   padding: 17px;
-  box-shadow: 0 12px 33px rgba(0, 8, 17, .1);
+  box-shadow: 0 12px 33px rgba(0, 8, 17, 0.1);
   scroll-margin-top: 25px;
 }
 .cp-wide-panel {
@@ -325,7 +337,7 @@ a.cp-stat:hover {
   font-size: 17px;
   color: #f2f7ff;
   font-weight: 760;
-  letter-spacing: -.02em;
+  letter-spacing: -0.02em;
   margin: 0;
 }
 .cp-section-heading h2 svg,
@@ -590,7 +602,7 @@ a.cp-stat:hover {
     color: #fff;
     font-size: 19px;
     font-weight: 850;
-    letter-spacing: -.03em;
+    letter-spacing: -0.03em;
   }
   .customer-profile-theme .owner-profile-avatar {
     background: linear-gradient(130deg, #4969aa, #182f6b);
@@ -666,8 +678,8 @@ a.cp-stat:hover {
     min-height: 70px;
     padding: 7px 12px calc(9px + env(safe-area-inset-bottom));
     border-top: 1px solid #204465;
-    background: rgba(4, 24, 42, .98);
-    box-shadow: 0 -8px 30px rgba(0, 4, 14, .38);
+    background: rgba(4, 24, 42, 0.98);
+    box-shadow: 0 -8px 30px rgba(0, 4, 14, 0.38);
     z-index: 14;
   }
   .cp-mobile-nav > a {

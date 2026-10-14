@@ -14,7 +14,9 @@ export function CustomerReference({ value }: { value: string }) {
   }
   return (
     <div className="cp-reference">
-      <span>Customer ID: <strong>{value}</strong></span>
+      <span>
+        Customer ID: <strong>{value}</strong>
+      </span>
       <button
         type="button"
         onClick={copyReference}
