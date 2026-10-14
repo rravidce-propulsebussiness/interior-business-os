@@ -83,6 +83,7 @@ export function ConstructionGatePanel({
       </p>
       <form
         className="mt-5 space-y-4 rounded-xl border border-slate-200 bg-slate-50 p-4"
+        onChange={() => { pendingGateRequestId.current = null; }}
         onSubmit={(event) => {
           event.preventDefault();
           const payload = new FormData(event.currentTarget);
