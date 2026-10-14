@@ -185,6 +185,10 @@ export function SiteCommandOverview(props: SiteCommandOverviewProps) {
               <a className="sc-btn sc-btn-primary" href="#manager-updates">
                 <OwnerIcon name="plus" size={17} /> Manager update
               </a>
+            ) : isManager && stage === 'not_started' ? (
+              <a className="sc-btn sc-btn-primary" href="#initialize">
+                <OwnerIcon name="plus" size={17} /> Start delivery
+              </a>
             ) : null}
           </div>
         </div>
