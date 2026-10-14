@@ -997,7 +997,8 @@ export default async function ProjectDeliveryPage({
                         {value(report, 'tomorrow_workers') && (
                           <p className="mt-2">
                             <strong>Labour needed tomorrow:</strong>{' '}
-                            {value(report, 'tomorrow_workers')} workers (planned)
+                            {value(report, 'tomorrow_workers')} workers
+                            (planned)
                           </p>
                         )}
                         {value(report, 'blockers') && (
@@ -1468,31 +1469,41 @@ export default async function ProjectDeliveryPage({
                 )}
                 {open && (manager || role === 'watchman') && (
                   <div className="mt-5 rounded-xl border border-blue-200 bg-blue-50/40 p-4">
-                    <h3 className="text-sm font-bold text-slate-900">Watchman curing photo evidence</h3>
+                    <h3 className="text-sm font-bold text-slate-900">
+                      Watchman curing photo evidence
+                    </h3>
                     <p className="my-2 text-xs leading-5 text-slate-600">
-                      Record a curing round above first, then upload a site photo with
-                      its time and location. Photos remain private to this project.
-                      Watchmen cannot upload unrelated site or contract files.
+                      Record a curing round above first, then upload a site
+                      photo with its time and location. Photos remain private to
+                      this project. Watchmen cannot upload unrelated site or
+                      contract files.
                     </p>
                     <ProjectSiteMediaForm project={id} phase="curing" />
                   </div>
                 )}
-                {site.media.some((item) => value(item, 'category') === 'curing') && (
+                {site.media.some(
+                  (item) => value(item, 'category') === 'curing',
+                ) && (
                   <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                    {site.media.filter((item) => value(item, 'category') === 'curing').slice(0, 8).map((item) => (
-                      <a
-                        key={item.id}
-                        href={`/dashboard/projects/${id}/site/media/${item.id}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="overflow-hidden rounded-xl border border-slate-200 bg-white"
-                      >
-                        <span className="block truncate p-3 text-xs font-semibold">
-                          {value(item, 'caption') || 'Curing photo'}
-                        </span>
-                        <span className="block px-3 pb-3 text-xs text-blue-700">View private photo ↗</span>
-                      </a>
-                    ))}
+                    {site.media
+                      .filter((item) => value(item, 'category') === 'curing')
+                      .slice(0, 8)
+                      .map((item) => (
+                        <a
+                          key={item.id}
+                          href={`/dashboard/projects/${id}/site/media/${item.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="overflow-hidden rounded-xl border border-slate-200 bg-white"
+                        >
+                          <span className="block truncate p-3 text-xs font-semibold">
+                            {value(item, 'caption') || 'Curing photo'}
+                          </span>
+                          <span className="block px-3 pb-3 text-xs text-blue-700">
+                            View private photo ↗
+                          </span>
+                        </a>
+                      ))}
                   </div>
                 )}
                 <div className="mt-4 space-y-2">
