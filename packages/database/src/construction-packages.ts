@@ -15,6 +15,11 @@ export type ConstructionSpecSection = {
   description: string;
   allowancePerSqft: string;
 };
+export type ConstructionSpecTemplateEntry = {
+  title: string;
+  kind: 'plans' | 'material' | 'custom';
+  deliverables: string[];
+};
 export type ConstructionPackage = {
   themeColor: string;
   specSections: ConstructionSpecSection[];
