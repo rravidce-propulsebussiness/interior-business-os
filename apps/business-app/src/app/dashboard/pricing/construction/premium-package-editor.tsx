@@ -76,9 +76,16 @@ const defaultCategories = [
   ],
 ] as const;
 const defaultDrawings = [
-  'Architectural floor plan', 'Structural drawing', 'Electrical layout',
-  'Plumbing layout', 'Staircase detail', 'Elevation design', '3D views',
-  'Working drawings', 'Section drawing', 'Furniture layout',
+  'Architectural floor plan',
+  'Structural drawing',
+  'Electrical layout',
+  'Plumbing layout',
+  'Staircase detail',
+  'Elevation design',
+  '3D views',
+  'Working drawings',
+  'Section drawing',
+  'Furniture layout',
 ];
 const isPlanning = (section: ConstructionSpecSection) =>
   section.kind === 'plans' ||
@@ -91,7 +98,10 @@ const makeSection = (title: string): ConstructionSpecSection => ({
     ? defaultDrawings.map((label) => ({ label, included: true }))
     : [],
   fields: [],
-  brand: '', grade: '', description: '', allowancePerSqft: '',
+  brand: '',
+  grade: '',
+  description: '',
+  allowancePerSqft: '',
 });
 const palettes = [
   '#155EEF',
@@ -473,9 +483,9 @@ export function PremiumPackageEditor({
               Detailed Specifications
             </h4>
             <p className="mt-1 text-xs text-slate-500">
-              Planning has drawing deliverables instead of brands.
-              Materials include brands, grades and allowances. Edit and
-              add custom fields to any category.
+              Planning has drawing deliverables instead of brands. Materials
+              include brands, grades and allowances. Edit and add custom fields
+              to any category.
             </p>
           </div>
           <div className="grid grid-cols-2 gap-2 rounded-xl bg-[#EDF3FB] p-1">
@@ -524,18 +534,19 @@ export function PremiumPackageEditor({
                         </strong>
                         <span className="block truncate text-xs text-slate-500">
                           {isPlanning(spec)
-                            ? (spec.deliverables ?? []).filter((drawing) => drawing.included).length +
-                              ' drawings included'
+                            ? (spec.deliverables ?? []).filter(
+                                (drawing) => drawing.included,
+                              ).length + ' drawings included'
                             : [
-                            spec.brand,
-                            spec.grade,
-                            spec.allowancePerSqft
-                              ? 'Up to ₹' + spec.allowancePerSqft + '/sft'
-                              : '',
-                          ]
-                            .filter(Boolean)
-                            .join(' · ') ||
-                            'Set brand, grade and material specification'}
+                                spec.brand,
+                                spec.grade,
+                                spec.allowancePerSqft
+                                  ? 'Up to ₹' + spec.allowancePerSqft + '/sft'
+                                  : '',
+                              ]
+                                .filter(Boolean)
+                                .join(' · ') ||
+                              'Set brand, grade and material specification'}
                         </span>
                       </div>
                       <span className="text-lg text-blue-600">
@@ -559,7 +570,9 @@ export function PremiumPackageEditor({
                           section={spec}
                           onChange={(next) =>
                             setSections((all) =>
-                              all.map((entry, i) => i === index ? next : entry),
+                              all.map((entry, i) =>
+                                i === index ? next : entry,
+                              ),
                             )
                           }
                         />
@@ -587,8 +600,10 @@ export function PremiumPackageEditor({
                             onClick={() => {
                               setSections((items) => {
                                 const moved = [...items];
-                                [moved[index - 1], moved[index]] =
-                                  [moved[index]!, moved[index - 1]!];
+                                [moved[index - 1], moved[index]] = [
+                                  moved[index]!,
+                                  moved[index - 1]!,
+                                ];
                                 return moved;
                               });
                               setActive(index - 1);
@@ -603,8 +618,10 @@ export function PremiumPackageEditor({
                             onClick={() => {
                               setSections((items) => {
                                 const moved = [...items];
-                                [moved[index], moved[index + 1]] =
-                                  [moved[index + 1]!, moved[index]!];
+                                [moved[index], moved[index + 1]] = [
+                                  moved[index + 1]!,
+                                  moved[index]!,
+                                ];
                                 return moved;
                               });
                               setActive(index + 1);
