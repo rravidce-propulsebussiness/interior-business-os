@@ -13,6 +13,11 @@ import {
 } from '../../lookups';
 import { runCrmCommand, saveCrm } from '../../actions';
 import { Pagination } from '../../pagination';
+import { OwnerShell, type OwnerNavItem } from '../../../owner-shell';
+import { LeadMeetActions } from './lead-meet-actions';
+import '../../../owner-dashboard.css';
+import './lead-detail.css';
+
 export default async function LeadDetail({
   params,
   searchParams,
@@ -79,33 +84,127 @@ export default async function LeadDetail({
           }
         : {}),
     }));
+
+  const [organization, user, plans] = await Promise.all([
+    s.repository.organization(s.org),
+    s.authorization.requireAuthenticatedUser(),
+    s.repository.plans().catch(() => null),
+  ]);
+  if (!organization) throw new Error('Company workspace not available');
+  const leadPath = '/dashboard/crm/leads';
+  const nav: OwnerNavItem[] = [
+    { label: 'Dashboard', href: '/dashboard', icon: 'dashboard' },
+    {
+      label: 'CRM',
+      href: leadPath,
+      icon: 'leads',
+      children: [
+        { label: 'CRM Overview', href: '/dashboard/crm' },
+        { label: 'All Leads', href: leadPath },
+        { label: 'Follow-ups', href: '/dashboard/crm/followups' },
+        { label: 'Site Visits', href: '/dashboard/crm/site-visits' },
+        ...(s.allowed('lead.create')
+          ? [
+              { label: 'Upload Leads', href: leadPath + '/upload' },
+              { label: 'Google Sheets', href: leadPath + '/google-sheets' },
+            ]
+          : []),
+        ...(s.allowed('crm.pipeline.manage')
+          ? [{ label: 'CRM Settings', href: '/dashboard/crm/settings' }]
+          : []),
+      ],
+    },
+    ...(s.allowed('quotation.view', 'quotation')
+      ? [{ label: 'Quotations', href: '/dashboard/quotations', icon: 'quotations' as const }]
+      : []),
+    ...(s.allowed('project.view', 'projects')
+      ? [{ label: 'Projects', href: '/dashboard/projects', icon: 'projects' as const }]
+      : []),
+    ...(s.allowed('customer.view', 'crm') || s.allowed('customer.view', 'quotation')
+      ? [{ label: 'Clients', href: '/dashboard/customers', icon: 'clients' as const }]
+      : []),
+    ...(s.allowed('organization.view')
+      ? [{ label: 'Company Settings', href: '/dashboard/company/settings', icon: 'settings' as const }]
+      : []),
+  ];
+  const displayName =
+    (user.email ?? '')
+      .split('@')[0]
+      ?.split(/[._-]/)
+      .filter(Boolean)
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .slice(0, 2)
+      .join(' ') || 'Owner';
   return (
-    <main id="main-content" className="mx-auto max-w-6xl p-6">
-      <h1 className="text-3xl font-semibold">{l.name}</h1>
-      <p>
-        {l.lead_number} · {l.lifecycle} · {l.priority} priority
-      </p>
-      <a
-        className="my-3 inline-block min-h-11 underline"
-        href={'tel:' + l.phone_normalized}
-      >
-        Call {l.phone}
-      </a>
-      <p>
-        {l.email} · {l.location}
-      </p>
-      <p>
-        Budget: {l.budget_min ?? 'Not specified'} –{' '}
-        {l.budget_max ?? 'Not specified'}
-      </p>
-      <p>
-        Next follow-up:{' '}
-        {l.next_follow_up_at
-          ? new Date(l.next_follow_up_at).toLocaleString()
-          : 'Not scheduled'}
-      </p>
-      <p className="whitespace-pre-wrap">{l.notes}</p>
-      <LookupSearch />
+    <OwnerShell
+      companyName={organization.name}
+      accountLabel={displayName}
+      accountEmail={user.email ?? ''}
+      planLabel={plans?.find((plan) => plan.id === organization.plan_id)?.name ?? 'Business plan'}
+      navigation={nav}
+      search=""
+      currentHref={leadPath}
+      notificationsEnabled={s.allowed('notification.view')}
+    >
+      <main id="main-content" className="crm-lead-detail-root">
+      <nav className="crm-lead-detail-breadcrumb" aria-label="Breadcrumb">
+        <Link href={leadPath}>CRM / Leads</Link>
+        <span aria-hidden="true">›</span>
+        <strong>{l.lead_number || 'Lead details'}</strong>
+      </nav>
+      <div className="crm-lead-detail-page-heading">
+        <div>
+          <h1>Lead details</h1>
+          <p>Customer information, discussions, visits and next actions in one place.</p>
+        </div>
+        <Link className="crm-lead-detail-back" href={leadPath}>← All leads</Link>
+      </div>
+      <section className="crm-lead-detail-hero" aria-label="Customer lead">
+        <div className="crm-lead-detail-identity">
+          <span className="crm-lead-detail-avatar" aria-hidden="true">{l.name?.trim().charAt(0).toUpperCase() || 'L'}</span>
+          <div>
+            <div className="crm-lead-detail-name-line">
+              <h2>{l.name}</h2>
+              <span className="crm-lead-detail-badge">{l.lifecycle}</span>
+              <span className="crm-lead-detail-priority">{l.priority} priority</span>
+            </div>
+            <p>{l.lead_number} {l.location ? ' · ' + l.location : ''}</p>
+          </div>
+        </div>
+        <div className="crm-lead-detail-contact">
+          <div><span>Phone</span><strong>{l.phone || 'Not specified'}</strong></div>
+          <div><span>Email</span><strong>{l.email || 'Not specified'}</strong></div>
+          <div><span>Budget</span><strong>{l.budget_min ?? 'Not specified'} – {l.budget_max ?? 'Not specified'}</strong></div>
+          <div><span>Next follow-up</span><strong>{l.next_follow_up_at ? new Date(l.next_follow_up_at).toLocaleString('en-IN') : 'Not scheduled'}</strong></div>
+        </div>
+        <div className="crm-lead-detail-primary-actions">
+          <a className="crm-lead-button-blue" href={'tel:' + (l.phone_normalized || l.phone)}>Call customer</a>
+          {l.email && <a className="crm-lead-button-light" href={'mailto:' + l.email}>Email</a>}
+          <a className="crm-lead-button-light" href="#lead-followups">Follow-up</a>
+          <a className="crm-lead-button-light" href="#lead-site-visits">Site visit</a>
+        </div>
+      </section>
+      <nav className="crm-lead-detail-tabs" aria-label="Lead sections">
+        <a href="#lead-daily-actions">Actions</a>
+        <a href="#lead-followups">Follow-ups</a>
+        <a href="#lead-site-visits">Site visits</a>
+        <a href="#lead-meeting">Google Meet</a>
+        <a href="#lead-activity">Activity</a>
+        <a href="#lead-details">Edit details</a>
+      </nav>
+      <section className="crm-lead-detail-summary" aria-label="Lead notes">
+        <strong>Customer notes</strong>
+        <p className="whitespace-pre-wrap">{l.notes || 'No customer notes yet.'}</p>
+      </section>
+      <div id="lead-meeting">
+        <LeadMeetActions
+          leadId={id}
+          leadName={l.name}
+          email={l.email}
+          canRecord={s.allowed('crm.activity.create')}
+        />
+      </div>
+
       {l.converted_project_id ? (
         <section className="my-6 rounded border p-4">
           <h2 className="text-xl font-semibold">Converted</h2>
@@ -145,9 +244,9 @@ export default async function LeadDetail({
       )}
       <div className="grid gap-8 lg:grid-cols-2">
         <section>
-          <h2 className="text-2xl font-semibold">Daily actions</h2>
+          <h2 id="lead-daily-actions" className="text-2xl font-semibold">Daily actions</h2>
           {s.allowed('crm.activity.create') && (
-            <details open>
+            <details>
               <summary>Add note or communication record</summary>
               <MasterForm
                 title="Add activity"
@@ -334,7 +433,7 @@ export default async function LeadDetail({
               />
             </details>
           )}
-          <h2 className="mt-6 text-xl font-semibold">Pending follow-ups</h2>
+          <h2 id="lead-followups" className="mt-6 text-xl font-semibold">Pending follow-ups</h2>
           {!tasks.rows.length && <p>No pending follow-ups.</p>}
           {tasks.rows.map((f) => (
             <article key={String(f.id)} className="my-3 rounded border p-4">
@@ -374,7 +473,7 @@ export default async function LeadDetail({
               View all follow-ups
             </Link>
           )}
-          <h2 className="mt-6 text-xl font-semibold">Site visits</h2>
+          <h2 id="lead-site-visits" className="mt-6 text-xl font-semibold">Site visits</h2>
           {!siteVisits.rows.length && <p>No site visits.</p>}
           {siteVisits.rows.map((v) => (
             <article key={String(v.id)} className="my-3 rounded border p-4">
@@ -436,7 +535,7 @@ export default async function LeadDetail({
           )}
         </section>
         <section>
-          <h2 className="text-2xl font-semibold">Activity timeline</h2>
+          <h2 id="lead-activity" className="text-2xl font-semibold">Activity timeline</h2>
           {!timeline.rows.length && <p>No activity yet.</p>}
           <ol className="my-4 grid gap-4">
             {timeline.rows.map((a) => (
@@ -458,6 +557,7 @@ export default async function LeadDetail({
           />
         </section>
       </div>
+      <div id="lead-details"><LookupSearch /></div>
       {s.allowed('lead.manage') && l.lifecycle !== 'archived' && (
         <>
           <details className="my-6">
@@ -484,6 +584,7 @@ export default async function LeadDetail({
           </details>
         </>
       )}
-    </main>
+      </main>
+    </OwnerShell>
   );
 }
