@@ -85,7 +85,7 @@ do $$declare lead uuid;mapping jsonb;r uuid;n uuid;expired_revision uuid;link js
  link=public.quotation_share_manage('${org}','create',jsonb_build_object('revision_id',expired_revision));
  response=public.public_quotation(link->>'token','respond','{"action":"declined","name":"Ravi","comment":"Timing changed","acknowledged":true}');
  perform pg_temp.assert_value(response->>'action'='declined','decline recorded');
- perform pg_temp.assert_value((select lifecycle='open' from public.leads where id=lead),'decline does not automatically lose lead');
+ perform pg_temp.assert_value((select lifecycle='won' from public.leads where id=lead),'declining an issued quotation does not undo an already Won deal');
  expired_revision=pg_temp.commit_quote(jsonb_build_object('action','clone','revision_id',n,'version',2));
  perform pg_temp.commit_quote(jsonb_build_object('action','edit_revision','revision_id',expired_revision,'version',1,'terms','','customer_notes','','internal_notes','private sales note','valid_until','2000-01-01','discount','{"kind":"none","value":"0"}'::jsonb));
  perform pg_temp.commit_quote(jsonb_build_object('action','issue','revision_id',expired_revision,'version',2));
