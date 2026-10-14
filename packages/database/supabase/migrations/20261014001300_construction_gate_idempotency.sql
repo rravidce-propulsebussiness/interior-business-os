@@ -74,7 +74,8 @@ begin
        where existing.organization_id=p_org and existing.project_id=p_project
          and existing.request_id=v_request_id;
      if prior.id is not null then
-       if prior.work_date<>date_work or prior.trade<>trade_name
+       if prior.recorded_by is distinct from auth.uid()
+         or prior.work_date<>date_work or prior.trade<>trade_name
          or prior.direction<>v_direction or prior.workers<>count_workers
          or prior.notes<>note then
          raise exception 'Duplicate gate request ID has conflicting event details'
