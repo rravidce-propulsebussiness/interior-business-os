@@ -14,7 +14,7 @@
     "production:smoke": "node scripts/production-smoke.mjs",
     "security:secrets": "node scripts/scan-secrets.mjs",
     "security:dependency": "node --test scripts/security-dependency.test.mjs",
-    "test:recovery": "node scripts/format-leads-for-pr.mjs && node scripts/test-recovery.mjs",
+    "test:recovery": "node scripts/test-recovery.mjs",
     "acceptance:hosted": "node scripts/acceptance/hosted.mjs",
     "acceptance:preflight": "node scripts/acceptance/hosted.mjs --preflight",
     "acceptance:provision": "node scripts/acceptance/hosted.mjs --provision",
