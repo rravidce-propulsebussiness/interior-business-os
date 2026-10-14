@@ -10869,8 +10869,6 @@ export interface Database {
       };
       company_self_register: { Args: { p_input: Json }; Returns: Json };
       construction_package_list: { Args: { p_org: string }; Returns: Json };
-      construction_spec_template_get: { Args: never; Returns: Json };
-      construction_spec_template_save: { Args: { p_sections: Json }; Returns: boolean };
       construction_package_owner_options: {
         Args: { p_org: string };
         Returns: Json;
@@ -10896,6 +10894,14 @@ export interface Database {
       construction_rate_save: {
         Args: { p_org: string; p_input: Json };
         Returns: string;
+      };
+      construction_spec_template_get: {
+        Args: Record<string, never>;
+        Returns: Json;
+      };
+      construction_spec_template_save: {
+        Args: { p_sections: Json };
+        Returns: boolean;
       };
       contract_create: {
         Args: { p_organization_id: string; p_revision_id: string };
