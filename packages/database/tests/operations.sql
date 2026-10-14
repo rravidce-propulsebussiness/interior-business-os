@@ -231,6 +231,40 @@ do $$declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';c uuid;p uuid;r uui
  h=public.operations_handover(org,'create',jsonb_build_object('plan_id',p,'template_id',ht));
  perform pg_temp.execution_denied(format('select public.operations_handover(%L,''approve'',%L)',org,jsonb_build_object('id',h,'version',1,'results','[{"key":"keys","result":"pass"}]'::jsonb,'materials_review','Stock reconciled','commercial_review','Outstanding reviewed')),'pending final inspection blocks handover');
  perform public.operations_inspection(org,'approve',jsonb_build_object('id',i2,'version',1,'status','passed','results','[{"key":"finish","result":"pass","note":"Repaired"}]'::jsonb));
+ -- Operations and Site Delivery must enforce the SAME stage certifications.
+ -- The earlier deliberate insufficient-curing observation invalidated the
+ -- previous immutable certificate; a passed final inspection alone is not enough.
+ perform pg_temp.execution_denied(format(
+   'select public.operations_handover(%L,''approve'',%L)',
+   org,jsonb_build_object('id',h,'version',1,'results',
+     '[{"key":"keys","result":"pass"}]'::jsonb,
+     'materials_review','Stock reconciled',
+     'commercial_review','Outstanding reviewed')),
+   'Operations handover cannot bypass a stale structural curing certificate');
+ perform set_config('request.jwt.claim.sub','33333333-3333-4333-8333-333333333333',true);
+ curing_round=public.construction_field_command(org,c,'curing_observe',jsonb_build_object(
+   'plan_id',curing_plan,'observed_on',current_date-1,
+   'result','wet','note','Rework completed; follow-up evidence confirms concrete kept wet'));
+ perform set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',true);
+ perform public.construction_field_command(org,c,'curing_verify',jsonb_build_object(
+   'observation_id',curing_round,'decision','verified',
+   'reason','Manager independently verified corrected wet-curing round after rework'));
+ qc_review=public.construction_quality_command(org,c,'review',jsonb_build_object(
+   'stage_id',qc_stage,'inspection_id',qc_inspection,
+   'review_kind','quality','decision','approved',
+   'notes','New independent quality review after curing correction and rework'));
+ perform set_config('request.jwt.claim.sub','33333333-3333-4333-8333-333333333333',true);
+ struct_review=public.construction_quality_command(org,c,'review',jsonb_build_object(
+   'stage_id',qc_stage,'inspection_id',qc_inspection,
+   'review_kind','structural','decision','approved',
+   'notes','New independent structural review after concrete curing correction'));
+ perform set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',true);
+ qc_clear=public.construction_quality_command(org,c,'stage_clear',jsonb_build_object(
+   'stage_id',qc_stage,
+   'notes','New independent stage clearance after corrected curing and reinspection'));
+ perform pg_temp.execution_assert(
+   private.construction_stage_chain_current(org,c,qc_stage),
+   'reworked and independently recertified footing chain may proceed to handover');
  perform public.operations_handover(org,'approve',jsonb_build_object('id',h,'version',1,'results','[{"key":"keys","result":"pass"}]'::jsonb,'materials_review','Stock reconciled','commercial_review','Outstanding reviewed','internal_notes','Private staff note','customer_notes','Keys delivered'));
  perform pg_temp.execution_assert((select status='handed_over' from public.execution_plans where id=p),'handover transitions physical plan');
  perform pg_temp.execution_assert((select not(document_snapshot ? 'internal_notes') and document_snapshot->>'notes'='Keys delivered' from public.handover_records where id=h),'handover customer snapshot excludes staff notes');
