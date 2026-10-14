@@ -27,16 +27,18 @@ describe('lead industry identity', () => {
   });
 
   it('supports explicit legacy category values but never guesses from BHK', () => {
-    expect(resolveLeadCategory({ service_type: '3bhk' }, industries)).toBeNull();
+    expect(
+      resolveLeadCategory({ service_type: '3bhk' }, industries),
+    ).toBeNull();
     expect(
       resolveLeadCategory(
         { service_type: '3bhk', requirements: { service: 'interior' } },
         industries,
       ),
     ).toBe('interior');
-    expect(resolveLeadCategory({ service_type: 'Construction' }, industries)).toBe(
-      'construction',
-    );
+    expect(
+      resolveLeadCategory({ service_type: 'Construction' }, industries),
+    ).toBe('construction');
     expect(leadCategoryLabel(null)).toBe('Needs classification');
   });
 

@@ -64,12 +64,17 @@ export function LeadCategoryEditor({
             <option value="interior">Interiors</option>
           )}
         </select>
-        <button type="submit" disabled={busy || !category || category === currentCategory}>
+        <button
+          type="submit"
+          disabled={busy || !category || category === currentCategory}
+        >
           {busy ? 'Saving…' : 'Save category'}
         </button>
       </div>
       {!currentCategory && (
-        <p>Confirm whether this customer needs construction or interior services.</p>
+        <p>
+          Confirm whether this customer needs construction or interior services.
+        </p>
       )}
       {message && <p role="status">{message}</p>}
     </form>

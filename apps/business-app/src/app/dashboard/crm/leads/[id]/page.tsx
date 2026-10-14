@@ -106,7 +106,9 @@ export default async function LeadDetail({
     ]);
   if (!organization) throw new Error('Company workspace not available');
   const enabledIds = new Set(
-    memberships.error ? [] : (memberships.data ?? []).map((item) => item.industry_id),
+    memberships.error
+      ? []
+      : (memberships.data ?? []).map((item) => item.industry_id),
   );
   const enabledIndustries = industries.filter(
     (industry) => enabledIds.has(industry.id) && industry.status === 'active',
@@ -706,13 +708,13 @@ export default async function LeadDetail({
                 submitAction={saveCrm.bind(null, 'leads')}
                 initial={initial}
                 fields={[
-                    ...leadFields(choices, true).filter(
-                      (field) =>
-                        field.key !== 'industry_id' &&
-                        field.key !== 'service_type',
-                    ),
-                    ...requirementFields,
-                  ]}
+                  ...leadFields(choices, true).filter(
+                    (field) =>
+                      field.key !== 'industry_id' &&
+                      field.key !== 'service_type',
+                  ),
+                  ...requirementFields,
+                ]}
               />
             </details>
             <details>

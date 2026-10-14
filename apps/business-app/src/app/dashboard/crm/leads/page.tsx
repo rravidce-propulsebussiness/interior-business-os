@@ -16,10 +16,7 @@ import {
   leadServiceFromIndustryKey,
   type LeadServiceOption,
 } from './lead-service-options';
-import {
-  leadRequirementLabel,
-  resolveLeadCategory,
-} from './lead-category';
+import { leadRequirementLabel, resolveLeadCategory } from './lead-category';
 import '../../owner-dashboard.css';
 import './leads.css';
 import './lead-category.css';

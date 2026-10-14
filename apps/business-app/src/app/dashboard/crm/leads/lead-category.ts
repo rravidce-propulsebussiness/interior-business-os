@@ -8,7 +8,10 @@ export type IndustryIdentity = { id: string; key: string };
 
 const canonicalCategory = (value: unknown): LeadService | null => {
   if (typeof value !== 'string') return null;
-  const normalized = value.trim().toLowerCase().replace(/[\s-]+/g, '_');
+  const normalized = value
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]+/g, '_');
   if (normalized === 'construction') return 'construction';
   if (['interior', 'interiors', 'interior_design'].includes(normalized))
     return 'interior';
