@@ -1,0 +1,32 @@
+name: Format site command center feature
+on:
+  push:
+    branches:
+      - feature/premium-site-delivery-20261014
+permissions:
+  contents: write
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Format site command center
+        run: |
+          pnpm exec prettier --write 'apps/business-app/src/app/dashboard/projects/[id]/site/page.tsx' 'apps/business-app/src/app/dashboard/projects/[id]/site/command-overview.tsx' 'apps/business-app/src/app/dashboard/projects/[id]/site/site-command.css'
+      - name: Commit formatting
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add 'apps/business-app/src/app/dashboard/projects/[id]/site/page.tsx' 'apps/business-app/src/app/dashboard/projects/[id]/site/command-overview.tsx' 'apps/business-app/src/app/dashboard/projects/[id]/site/site-command.css'
+          if ! git diff --cached --quiet; then
+            git commit -m "style(site): format premium command center"
+            git push origin HEAD:feature/premium-site-delivery-20261014
+          fi
