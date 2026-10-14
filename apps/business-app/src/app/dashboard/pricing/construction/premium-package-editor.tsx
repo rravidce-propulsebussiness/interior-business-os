@@ -100,6 +100,26 @@ const makeSection = (
   description: '',
   allowancePerSqft: '',
 });
+/** Older company packages stored named fields as "fields" and drawing
+ * choices as { label, included }. Normalize only in the editor; saving
+ * creates the new editable format without dropping selected legacy rows. */
+const normalizeSection = (section: ConstructionSpecSection): ConstructionSpecSection => {
+  const legacy = section as ConstructionSpecSection & {
+    fields?: { label: string; value: string }[];
+    deliverables?: Array<string | { label: string; included: boolean }>;
+    kind?: 'plans' | 'material' | 'general' | 'custom';
+  };
+  return {
+    ...section,
+    kind: legacy.kind === 'custom' ? 'general' : legacy.kind,
+    deliverables: (legacy.deliverables ?? []).flatMap((entry) =>
+      typeof entry === 'string'
+        ? [entry]
+        : entry.included ? [entry.label] : [],
+    ),
+    customFields: section.customFields ?? legacy.fields ?? [],
+  };
+};
 const palettes = [
   '#155EEF',
   '#089E9C',
@@ -137,7 +157,7 @@ export function PremiumPackageEditor({
   const [themeColor, setThemeColor] = useState(item?.themeColor ?? '#155EEF');
   const [sections, setSections] = useState<ConstructionSpecSection[]>(
     item?.specSections?.length
-      ? item.specSections.map((section) => ({ ...section }))
+      ? item.specSections.map(normalizeSection)
       : defaultCategories.map((record) =>
           makeSection(
             record[0] === 'Architectural plans'
