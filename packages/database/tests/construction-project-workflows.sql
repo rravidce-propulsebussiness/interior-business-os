@@ -91,9 +91,7 @@ select set_config('request.jwt.claim.sub','22222222-2222-4222-8222-222222222222'
 do $$
 declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd'; project uuid=current_setting('test.construction_project')::uuid;
 begin
- raise notice 'watchman diagnosis: can_manage=%, owner=%, old_site_role=%, roles=%',
-   private.construction_can_manage(org,project),private.site_owner(org),
-   private.site_role(org,project),public.construction_project_read(org,project)->'roles';
+ raise notice 'watchman authorized projection: %',public.construction_project_read(org,project);
  if jsonb_array_length(public.construction_project_read(org,project)->'stages')<>0
  then raise exception 'FAIL: watchman can read engineering stages';end if;
  begin
