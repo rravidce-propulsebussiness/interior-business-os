@@ -192,7 +192,7 @@ export function PremiumPackageEditor({
   const updateSection = (
     index: number,
     key: keyof ConstructionSpecSection,
-    value: string,
+    value: string | string[],
   ) =>
     setSections((all) =>
       all.map((entry, i) => (i === index ? { ...entry, [key]: value } : entry)),
