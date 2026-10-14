@@ -3,7 +3,7 @@ reset role;
 delete from public.organization_entitlements where organization_id='dddddddd-dddd-4ddd-8ddd-dddddddddddd' and not enabled and module_id in(select id from public.modules where key='billing');
 set local request.jwt.claim.sub='11111111-1111-4111-8111-111111111111';
 set local role authenticated;
-do $$declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';c uuid;p uuid;r uuid;t uuid;t2 uuid;m uuid;pkg uuid;v integer;template uuid;i uuid;i2 uuid;s uuid;h uuid;ht uuid;vendor uuid;wo uuid;wm uuid;doc jsonb;media uuid;contract uuid;schedule uuid;begin
+do $$declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';c uuid;p uuid;r uuid;t uuid;t2 uuid;m uuid;pkg uuid;v integer;template uuid;i uuid;i2 uuid;s uuid;h uuid;ht uuid;vendor uuid;wo uuid;wm uuid;doc jsonb;media uuid;contract uuid;schedule uuid;qc_stage uuid;qc_tpl uuid;qc_inspection uuid;qc_wf uuid;qc_review uuid;struct_review uuid;qc_clear uuid;qc_data jsonb;begin
  select id into c from public.contracts where revision_id in(select r.id from public.quotation_revisions r join public.quotations q on q.id=r.quotation_id where q.quotation_number='EXECUTION-TEST');
  p=public.operations_plan(org,'create',jsonb_build_object('contract_id',c));
  perform pg_temp.execution_assert(p=public.operations_plan(org,'create',jsonb_build_object('contract_id',c)),'plan creation retry returns same plan');
@@ -46,6 +46,76 @@ do $$declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';c uuid;p uuid;r uui
  perform pg_temp.execution_assert((select status='done' and completion_percentage='100' from public.project_tasks where id=t),'100 percent completes task');
  perform public.operations_task(org,'task',jsonb_build_object('id',t2,'version',2,'status','done'));
  perform public.operations_task(org,'milestone',jsonb_build_object('id',m,'version',1,'status','completed'));
+
+ -- New construction stage certification binds ACTUAL canonical Operations
+ -- task completion and passed mandatory inspection; it cannot invent progress.
+ qc_wf=(public.construction_project_command(org,c,'workflow_create',jsonb_build_object(
+   'template',jsonb_build_object('industry','construction','version','1.0.0'),
+   'floors',jsonb_build_array(jsonb_build_object('code','GROUND','name','Ground')),
+   'stages',jsonb_build_array(jsonb_build_object(
+     'instanceCode','FOUNDATION','templateCode','FOUNDATION',
+     'phase','foundation','floorCode',null,'title','Footing bar and concrete QC',
+     'explanation','Independent steel and pre-pour clearance required',
+     'holdPoint','structural','dependsOn',jsonb_build_array(),
+     'activities',jsonb_build_array('Footing reinforcement inspection'),
+     'inspectionTopics',jsonb_build_array('Bar spacing and cover check'))))))->>'id';
+ select id into qc_stage from private.construction_project_stages
+  where organization_id=org and project_id=c and instance_code='FOUNDATION';
+ perform public.construction_project_command(org,c,'task_link',jsonb_build_object(
+   'stage_id',qc_stage,'task_id',t));
+ perform public.construction_project_command(org,c,'role_assign',
+    jsonb_build_object('user_id',auth.uid(),'role','quality_inspector'));
+ perform public.construction_project_command(org,c,'role_assign',
+    '{"user_id":"33333333-3333-4333-8333-333333333333","role":"structural_engineer"}'::jsonb);
+ perform pg_temp.execution_denied(format(
+    'select public.construction_quality_command(%L,%L,''stage_clear'',%L)',
+    org,c,jsonb_build_object('stage_id',qc_stage,
+      'notes','Unreviewed footing work must not certify')),
+    'stage certification requires formal inspection and independent reviewers');
+ qc_tpl=public.operations_save(org,'inspection_templates',
+    '{"name":"Footing steel pre-pour","is_final":false,"mandatory":true,"checklist":[{"key":"bars","label":"Spacing verified","required":true}]}'::jsonb);
+ qc_inspection=public.operations_inspection(org,'create',jsonb_build_object(
+    'project_id',c,'template_id',qc_tpl,'inspector_id',auth.uid()));
+ perform public.construction_quality_command(org,c,'inspection_link',
+    jsonb_build_object('stage_id',qc_stage,'inspection_id',qc_inspection));
+ perform pg_temp.execution_denied(format(
+    'select public.construction_quality_command(%L,%L,''review'',%L)',
+    org,c,jsonb_build_object('stage_id',qc_stage,'inspection_id',qc_inspection,
+      'review_kind','quality','decision','approved','notes','Unpassed inspection cannot approve')),
+    'quality reviewer cannot certify an unpassed inspection');
+ perform public.operations_inspection(org,'approve',
+    jsonb_build_object('id',qc_inspection,'version',1,'status','passed',
+       'results','[{"key":"bars","result":"pass","note":"Checked"}]'::jsonb));
+ qc_review=public.construction_quality_command(org,c,'review',jsonb_build_object(
+    'stage_id',qc_stage,'inspection_id',qc_inspection,
+    'review_kind','quality','decision','approved',
+    'notes','Physical bar spacing and cover verified on the passed inspection'));
+ perform pg_temp.execution_denied(format(
+    'select public.construction_quality_command(%L,%L,''stage_clear'',%L)',
+    org,c,jsonb_build_object('stage_id',qc_stage,
+      'notes','Structural sign-off must be independent')),
+    'independent structural reviewer required for footing hold point');
+ perform set_config('request.jwt.claim.sub','33333333-3333-4333-8333-333333333333',true);
+ struct_review=public.construction_quality_command(org,c,'review',jsonb_build_object(
+   'stage_id',qc_stage,'inspection_id',qc_inspection,
+   'review_kind','structural','decision','approved',
+   'notes','Independently checked reinforcement and footing structural readiness'));
+ perform set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',true);
+ qc_clear=public.construction_quality_command(org,c,'stage_clear',jsonb_build_object(
+   'stage_id',qc_stage,
+   'notes','Footing stage certified after complete tasks and separate quality reviews'));
+ select public.construction_quality_read(org,c) into qc_data;
+ perform pg_temp.execution_assert(
+   (select item->>'cleared'='true'
+    from jsonb_array_elements(qc_data->'stages') item
+    where item->>'stage_id'=qc_stage::text),
+   'structural footing stage clearance requires actual Operations inspection and independent approvals');
+ perform pg_temp.execution_denied(format(
+    'select public.construction_quality_command(%L,%L,''stage_clear'',%L)',
+    org,c,jsonb_build_object('stage_id',qc_stage,
+      'notes','Duplicate certificate must not issue')),
+    'stage certificate is immutable and cannot be issued twice');
+
  perform pg_temp.execution_assert((select snapshot=doc from public.execution_plan_revisions where id=r),'progress preserves approved plan snapshot');
  perform public.operations_plan(org,'revise',jsonb_build_object('id',p,'version',2));
  perform pg_temp.execution_assert((select count(*)=2 from public.execution_plan_revisions where plan_id=p),'plan revision preserves predecessor');
