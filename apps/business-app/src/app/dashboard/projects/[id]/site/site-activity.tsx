@@ -184,7 +184,18 @@ export function SiteActivity(props: SiteActivityProps) {
           },
         ]
       : []),
-    ...(isManager
+    ...(isManager && stage === 'not_started'
+      ? [
+          {
+            key: 'initialize',
+            label: 'Initialize Site Delivery',
+            info: 'Start the design and approval workflow',
+            href: '#initialize',
+            icon: 'projects' as const,
+          },
+        ]
+      : []),
+    ...(isManager && stage !== 'not_started'
       ? [
           {
             key: 'team',
