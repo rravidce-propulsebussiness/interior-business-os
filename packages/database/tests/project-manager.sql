@@ -1,8 +1,10 @@
 \set ON_ERROR_STOP on
 begin;
+\ir site-agreement-quotation-fixture.sql
 -- Disposable demo project, transaction always rolls back. Manager updates are
 -- deliberately kept separate from previous Phase 7 regression fixtures.
 set local role authenticated;
+\ir site-agreement-helper.sql
 select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',true);
 do $$
 declare
@@ -22,6 +24,11 @@ begin
  end loop;
  perform public.project_site_command(org,project,'client_approve',
   '{"evidence":"Client confirmed final drawings by project meeting; reference C-108"}');
+ begin
+  perform public.project_site_command(org,project,'execution_start','{}'::jsonb);
+  raise exception 'FAIL: site execution without contract evidence';
+ exception when check_violation then null;end;
+ perform pg_temp.site_signed_agreement(org,project);
  perform public.project_site_command(org,project,'execution_start','{}'::jsonb);
  record=public.project_site_manager_command(org,project,'manager_update',jsonb_build_object(
   'report_date',current_date,'health','at_risk',
