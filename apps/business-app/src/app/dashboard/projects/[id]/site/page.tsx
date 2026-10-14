@@ -234,9 +234,10 @@ export default async function ProjectDeliveryPage({
         p_project_id: id,
       })
     : null;
-  const agreementParsed = agreementResponse && !agreementResponse.error
-    ? agreementSchema.safeParse(agreementResponse.data)
-    : null;
+  const agreementParsed =
+    agreementResponse && !agreementResponse.error
+      ? agreementSchema.safeParse(agreementResponse.data)
+      : null;
   const agreement = agreementParsed?.success ? agreementParsed.data : null;
   const agreementPdfChoices = site.media
     .filter((media) => value(media, 'mime') === 'application/pdf')

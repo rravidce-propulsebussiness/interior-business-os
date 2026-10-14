@@ -12,8 +12,9 @@ records remain the existing Business OS tables. This phase adds only the
 financial entity, quote snapshot or payment ledger is introduced.
 
 The new `project_agreement_command` accepts:
+
 - `record_signed_pdf`: records receipt of an already-uploaded **private**
-  project PDF, with a required employee evidence note. This does *not* verify
+  project PDF, with a required employee evidence note. This does _not_ verify
   cryptographic signatures and is not presented as an integrated e-signature.
 - `owner_exception`: only a verified company owner can record an exceptional
   contractual clearance with a detailed reason and supporting reference.
@@ -26,12 +27,14 @@ approved change-order set. Newly approved commercial changes invalidate a
 stale clearance until a new agreement/amendment record is provided.
 
 `private.project_agreement_authorized` requires:
+
 1. Exactly one active canonical project contract.
 2. An activated existing payment schedule for that contract.
 3. A current signed-copy event or owner exception without a later revocation.
 4. Matching immutable accepted-quote scope and approved changes.
 
 Two BEFORE INSERT / UPDATE execution triggers enforce the **same** guard:
+
 - `private.site_state.stage='execution'` (Site Delivery).
 - `public.execution_plans.status='in_progress'` (Operations).
 

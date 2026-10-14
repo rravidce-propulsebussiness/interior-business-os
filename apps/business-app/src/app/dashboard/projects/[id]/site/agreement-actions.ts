@@ -9,11 +9,18 @@ const id = z.uuid();
 const messageFor = (error: unknown): Result => ({
   saved: false,
   message:
-    error instanceof Error ? error.message.slice(0, 240) : 'Agreement operation failed.',
+    error instanceof Error
+      ? error.message.slice(0, 240)
+      : 'Agreement operation failed.',
 });
-async function call(projectId: string, contractId: string, action: string, input: {
-  [key: string]: string;
-}): Promise<Result> {
+async function call(
+  projectId: string,
+  contractId: string,
+  action: string,
+  input: {
+    [key: string]: string;
+  },
+): Promise<Result> {
   try {
     id.parse(projectId);
     id.parse(contractId);
@@ -30,7 +37,10 @@ async function call(projectId: string, contractId: string, action: string, input
     });
     if (error) throw new Error(error.message);
     revalidatePath('/dashboard/projects/' + projectId + '/site');
-    return { saved: true, message: 'Agreement record saved. The contract history is preserved.' };
+    return {
+      saved: true,
+      message: 'Agreement record saved. The contract history is preserved.',
+    };
   } catch (error) {
     return messageFor(error);
   }
@@ -57,8 +67,18 @@ export async function createAgreementException(
   form: FormData,
 ): Promise<Result> {
   try {
-    const reason = z.string().trim().min(30).max(3000).parse(form.get('reason'));
-    const reference = z.string().trim().min(8).max(1000).parse(form.get('reference'));
+    const reason = z
+      .string()
+      .trim()
+      .min(30)
+      .max(3000)
+      .parse(form.get('reason'));
+    const reference = z
+      .string()
+      .trim()
+      .min(8)
+      .max(1000)
+      .parse(form.get('reference'));
     return await call(projectId, contractId, 'owner_exception', {
       reason,
       reference,
