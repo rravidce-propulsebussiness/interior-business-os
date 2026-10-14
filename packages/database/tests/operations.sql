@@ -59,8 +59,9 @@ do $$declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';c uuid;p uuid;r uui
      'holdPoint','structural','dependsOn',jsonb_build_array(),
      'activities',jsonb_build_array('Footing reinforcement inspection'),
      'inspectionTopics',jsonb_build_array('Bar spacing and cover check'))))))->>'id';
- select id into qc_stage from private.construction_project_stages
-  where organization_id=org and project_id=c and instance_code='FOUNDATION';
+ select (stage->>'id')::uuid into qc_stage
+   from jsonb_array_elements(public.construction_project_read(org,c)->'stages') stage
+   where stage->>'instance_code'='FOUNDATION';
  perform public.construction_project_command(org,c,'task_link',jsonb_build_object(
    'stage_id',qc_stage,'task_id',t));
  perform public.construction_project_command(org,c,'role_assign',
