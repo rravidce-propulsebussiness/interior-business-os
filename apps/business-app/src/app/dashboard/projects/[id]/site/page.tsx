@@ -263,7 +263,8 @@ export default async function ProjectDeliveryPage({
     'Business plan';
 
   return (
-    <OwnerShell
+    <div className="site-command-theme">
+      <OwnerShell
       companyName={organization.name}
       accountLabel={accountLabel}
       accountEmail={email}
@@ -1325,6 +1326,15 @@ export default async function ProjectDeliveryPage({
         </footer>
         </div>
       </main>
-    </OwnerShell>
+      <nav className="sc-mobile-bottom" aria-label="Mobile workspace navigation">
+        <Link href="/dashboard"><span aria-hidden="true">⌂</span>Dashboard</Link>
+        <Link href="/dashboard/projects" aria-current="page"><span aria-hidden="true">▱</span>Projects</Link>
+        <a href={isEngineer || isQuality ? '#daily-reports' : isWatchman ? '#security' : '#design'}>
+          <span aria-hidden="true">＋</span>Site updates
+        </a>
+        <a href="#overview"><span aria-hidden="true">⋯</span>Overview</a>
+      </nav>
+      </OwnerShell>
+    </div>
   );
 }
