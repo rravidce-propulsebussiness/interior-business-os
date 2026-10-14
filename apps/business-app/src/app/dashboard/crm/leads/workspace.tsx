@@ -326,9 +326,7 @@ export function LeadsWorkspace({
       <div className="crm-leads-breadcrumb">
         <a href="/dashboard">Workspace</a>
         <Icon name="chevron" size={13} />
-        <a href="/dashboard/crm">CRM</a>
-        <Icon name="chevron" size={13} />
-        <strong>Leads</strong>
+        <strong>CRM / Leads</strong>
       </div>
       <div className="crm-leads-heading">
         <div>
