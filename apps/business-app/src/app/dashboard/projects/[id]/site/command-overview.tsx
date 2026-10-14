@@ -174,7 +174,14 @@ export function SiteCommandOverview(props: SiteCommandOverviewProps) {
               <OwnerIcon name="projects" size={17} /> Project details
             </Link>
             {canUploadEvidence && (
-              <a className="sc-btn sc-btn-outline" href={isWatchman && !isEngineer && !isDesign ? '#security' : '#media'}>
+              <a
+                className="sc-btn sc-btn-outline"
+                href={
+                  isWatchman && !isEngineer && !isDesign
+                    ? '#security'
+                    : '#media'
+                }
+              >
                 <OwnerIcon name="plus" size={17} /> Upload evidence
               </a>
             )}
