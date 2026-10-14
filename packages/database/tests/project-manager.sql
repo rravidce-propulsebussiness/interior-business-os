@@ -90,7 +90,7 @@ end $$;
 -- certifications, even when invoked by a database administrator. The original
 -- manager UI does not decide readiness; its database persistence does.
 set local role postgres;
-do $
+do $handover_test$
 declare
  org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
  project uuid=current_setting('test.manager_project')::uuid;
@@ -108,7 +108,7 @@ begin
     and project_id=project and stage='handover')
  then raise exception 'FAIL: handover status changed despite failed clearance';end if;
  raise notice 'PASS: handover trigger requires current floor-stage certificates';
-end$;
+end $handover_test$;
 set local role authenticated;
 
 -- Site engineer enters a real report and cannot perform manager commands.
