@@ -113,7 +113,7 @@ end$$;
 
 -- Watchman can record gate events only, not change design/client approval.
 select set_config('request.jwt.claim.sub','22222222-2222-4222-8222-222222222222',true);
-do $
+do $watchman$
 declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd'; project uuid=current_setting('test.project_site_id')::uuid;
  curing_photo uuid;
  png text=encode(decode('89504e470d0a1a0a','hex'),'base64');
@@ -150,5 +150,5 @@ begin
    raise exception 'FAIL: watchman can read restricted data';
  end if;
  raise notice 'PASS: watchman restricted to gate events and own curing photos';
-end $$;
+end $watchman$;
 rollback;
