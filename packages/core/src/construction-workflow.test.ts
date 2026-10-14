@@ -79,12 +79,12 @@ describe('construction workflow blueprint', () => {
       }),
     ).toThrow('Duplicate stage code');
     const invalid = structuredClone(defaultConstructionWorkflow);
-    invalid.stages[0].dependsOn.push('UNREGISTERED');
+    invalid.stages[0]!.dependsOn.push('UNREGISTERED');
     expect(() => validateConstructionTemplate(invalid)).toThrow(
       'Unknown stage dependency',
     );
     const cycle = structuredClone(defaultConstructionWorkflow);
-    cycle.stages[0].dependsOn.push('HANDOVER');
+    cycle.stages[0]!.dependsOn.push('HANDOVER');
     expect(() => validateConstructionTemplate(cycle)).toThrow(
       'Circular stage dependency',
     );
@@ -97,6 +97,6 @@ describe('construction workflow blueprint', () => {
     expect(stage).not.toHaveProperty('completionPercentage');
     expect(stage).not.toHaveProperty('certified');
     expect(stage).not.toHaveProperty('paid');
-    expect(stage.holdPoint).toBe('contract');
+    expect(stage?.holdPoint).toBe('contract');
   });
 });
