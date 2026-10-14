@@ -52,12 +52,14 @@ Delivery PDF store. It also supports revocation and owner-only documented
 exceptions. **A previously uploaded PDF alone does not mean signing is
 complete; the authorized manager must record actual signed-copy receipt.**
 
-**Known integration gap:** The existing media upload RPC permits design
-uploads in the Design phase, not after the `client_approved` transition.
-An agreement PDF must currently be uploaded during that phase. A dedicated,
-restricted late-agreement upload should be added before production enablement.
-Do not solve it by exposing the PDFs publicly or by granting unrelated
-site personnel document access.
+**Private agreement PDFs:** The existing protected site-media storage now
+has a dedicated `agreement` category. Uploads are PDF-only, commercial-role
+checked, and allowed before or after design approval. Agreement documents
+are excluded from architect/site-engineer media listing and downloads;
+financially authorized project managers can select an uploaded copy from the
+Agreement Readiness panel. The storage backend is still private PostgreSQL
+bytea (8 MiB maximum); migration to private object storage remains a
+separately verified follow-up.
 
 ## Tests and readiness
 
