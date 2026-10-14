@@ -6,9 +6,9 @@ export type ConstructionSpecSection = {
   grade: string;
   description: string;
   allowancePerSqft: string;
-  kind?: ConstructionSpecKind;
-  deliverables?: string[];
-  extraFields?: ConstructionExtraField[];
+  kind?: ConstructionSpecKind | undefined;
+  deliverables?: string[] | undefined;
+  extraFields?: ConstructionExtraField[] | undefined;
 };
 
 export const ARCHITECTURAL_PLAN_OPTIONS = [
