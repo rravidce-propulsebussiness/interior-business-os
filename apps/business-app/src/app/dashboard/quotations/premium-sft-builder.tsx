@@ -9,6 +9,13 @@ import {
 } from '@business-os/core/sft-quotation';
 import type { ConstructionRate } from '@business-os/database/construction-rates';
 import type { ConstructionPackage } from '@business-os/database/construction-packages';
+import {
+  constructionSectionKind,
+  filledConstructionSection,
+  makeConstructionSection,
+  type ConstructionSpecSection,
+} from '@business-os/core/construction-specifications';
+import { SpecificationFieldsEditor } from '../pricing/construction/specification-fields-editor';
 import { saveFloorwiseSftEstimate } from './construction-actions';
 
 type WorkRow = {
@@ -18,13 +25,7 @@ type WorkRow = {
   widthFeet: string;
   ratePerSqft: string;
 };
-type Section = {
-  title: string;
-  description: string;
-  brand?: string | undefined;
-  grade?: string | undefined;
-  allowancePerSqft?: string | undefined;
-};
+type Section = ConstructionSpecSection;
 const floorNames = [
   'Ground Floor',
   'First Floor',
@@ -79,8 +80,13 @@ const makeRow = (
   ratePerSqft: price,
 });
 const freshSections = (): Section[] => [
-  { title: 'Package scope & inclusions', description: '' },
-  ...specificationTopics.map((title) => ({ title, description: '' })),
+  {
+    ...makeConstructionSection('Package scope & inclusions', 'custom'),
+    description: '',
+  },
+  ...specificationTopics.map((title, index) =>
+    makeConstructionSection(title, index === 0 ? 'plans' : 'material'),
+  ),
 ];
 
 export function PremiumSftBuilder({
@@ -120,7 +126,19 @@ export function PremiumSftBuilder({
   );
   const [sections, setSections] = useState<Section[]>(
     initialSchedule?.sections?.length
-      ? initialSchedule.sections.map((item) => ({ ...item }))
+      ? initialSchedule.sections.map((item) => ({
+          ...makeConstructionSection(
+            item.title,
+            item.kind ??
+              (/architectural|drawings|plans/i.test(item.title)
+                ? 'plans'
+                : 'material'),
+          ),
+          ...item,
+          brand: item.brand ?? '',
+          grade: item.grade ?? '',
+          allowancePerSqft: item.allowancePerSqft ?? '',
+        }))
       : freshSections(),
   );
   const [brands, setBrands] = useState<Record<string, string>>(() => {
@@ -203,25 +221,15 @@ export function PremiumSftBuilder({
       );
       setSections([
         {
-          title: 'Package scope & inclusions',
+          ...makeConstructionSection('Package scope & inclusions', 'custom'),
           description: choice.description,
         },
         ...(choice.specSections.length
           ? choice.specSections
-              .filter((section) =>
-                Boolean(
-                  section.description.trim() ||
-                  section.brand.trim() ||
-                  section.grade.trim() ||
-                  section.allowancePerSqft.trim(),
-                ),
-              )
+              .filter(filledConstructionSection)
               .map((section) => ({
-                title: section.title,
-                description: section.description,
-                brand: section.brand,
-                grade: section.grade,
-                allowancePerSqft: section.allowancePerSqft,
+                ...section,
+                kind: constructionSectionKind(section),
               }))
           : freshSections().slice(1)),
       ]);
@@ -252,14 +260,7 @@ export function PremiumSftBuilder({
         rows,
         materialIds,
         packageId: packageId || null,
-        sections: sections.filter((item) =>
-          Boolean(
-            item.description.trim() ||
-            item.brand?.trim() ||
-            item.grade?.trim() ||
-            item.allowancePerSqft?.trim(),
-          ),
-        ),
+        sections: sections.filter(filledConstructionSection),
       });
       setMessage(result.message);
       setSaved(Boolean(result.id));
@@ -582,114 +583,14 @@ export function PremiumSftBuilder({
                 changing them does not silently change floor rates.
               </p>
             </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              {sections.map((section, index) => (
-                <details
-                  key={index}
-                  className="group rounded-2xl border border-slate-200 bg-white p-4"
-                  open={index === 0 ? true : undefined}
-                >
-                  <summary className="cursor-pointer text-sm font-extrabold text-slate-950">
-                    {String(index + 1).padStart(2, '0')} · {section.title}
-                  </summary>
-                  <label className="mt-4 grid gap-2 text-xs font-semibold text-slate-600">
-                    Section title
-                    <input
-                      className={field}
-                      maxLength={90}
-                      value={section.title}
-                      onChange={(event) => {
-                        setSections((items) =>
-                          items.map((item, i) =>
-                            index === i
-                              ? { ...item, title: event.target.value }
-                              : item,
-                          ),
-                        );
-                        setSaved(false);
-                      }}
-                    />
-                  </label>
-                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                    {(
-                      [
-                        ['brand', 'Brand / manufacturer'],
-                        ['grade', 'Grade / material size'],
-                        ['allowancePerSqft', 'Price allowance per SFT (₹)'],
-                      ] as const
-                    ).map(([key, title]) => (
-                      <label
-                        key={key}
-                        className="grid gap-1.5 text-xs font-semibold text-slate-600"
-                      >
-                        {title}
-                        <input
-                          className={field}
-                          maxLength={key === 'allowancePerSqft' ? 40 : 120}
-                          value={section[key] ?? ''}
-                          onChange={(event) => {
-                            setSections((items) =>
-                              items.map((item, i) =>
-                                i === index
-                                  ? { ...item, [key]: event.target.value }
-                                  : item,
-                              ),
-                            );
-                            setSaved(false);
-                          }}
-                        />
-                      </label>
-                    ))}
-                  </div>
-                  <label className="mt-3 grid gap-2 text-xs font-semibold text-slate-600">
-                    Editable inclusions, material brands & conditions
-                    <textarea
-                      className={field + ' min-h-32 resize-y leading-6'}
-                      maxLength={1100}
-                      rows={5}
-                      placeholder="Enter the specification included with this package…"
-                      value={section.description}
-                      onChange={(event) => {
-                        setSections((items) =>
-                          items.map((item, i) =>
-                            index === i
-                              ? { ...item, description: event.target.value }
-                              : item,
-                          ),
-                        );
-                        setSaved(false);
-                      }}
-                    />
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSections((items) =>
-                        items.filter((_, i) => i !== index),
-                      );
-                      setSaved(false);
-                    }}
-                    className="mt-3 text-xs font-bold text-rose-600"
-                  >
-                    Remove section
-                  </button>
-                </details>
-              ))}
-            </div>
-            <button
-              type="button"
-              disabled={sections.length >= 18}
-              onClick={() => {
-                setSections((items) => [
-                  ...items,
-                  { title: 'Custom specification', description: '' },
-                ]);
+            <SpecificationFieldsEditor
+              sections={sections}
+              onChange={(next) => {
+                setSections(next);
                 setSaved(false);
               }}
-              className="rounded-xl border border-blue-200 bg-white px-4 py-3 text-xs font-bold text-blue-700 disabled:opacity-40"
-            >
-              + Add specification section
-            </button>
+              heading="Customize drawings, materials and field rows for this quote"
+            />
             <div className="rounded-2xl border border-slate-200 bg-white p-5">
               <h4 className="text-sm font-extrabold text-slate-950">
                 Material & brand choices

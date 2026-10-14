@@ -8,6 +8,7 @@
     "./commercial": "./src/commercial.ts",
     "./quotation-document": "./src/quotation-document.ts",
     "./sft-quotation": "./src/sft-quotation.ts",
+    "./construction-specifications": "./src/construction-specifications.ts",
     "./crm": "./src/crm.ts",
     "./quotation-sharing": "./src/quotation-sharing.ts",
     "./finance": "./src/finance.ts",

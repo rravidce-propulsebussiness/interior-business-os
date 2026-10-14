@@ -3,13 +3,8 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { DomainError } from '@business-os/shared';
 import type { Database } from './generated/database.types';
 
-export type ConstructionSpecSection = {
-  title: string;
-  brand: string;
-  grade: string;
-  description: string;
-  allowancePerSqft: string;
-};
+export type { ConstructionSpecSection } from '@business-os/core/construction-specifications';
+import type { ConstructionSpecSection } from '@business-os/core/construction-specifications';
 export type ConstructionPackage = {
   themeColor: string;
   specSections: ConstructionSpecSection[];
@@ -67,6 +62,10 @@ export function createConstructionPackagesRepository(
   return {
     list: (org: string) =>
       invoke<ConstructionPackage[]>('construction_package_list', {
+        p_org: org,
+      }),
+    defaultSections: (org: string) =>
+      invoke<ConstructionSpecSection[]>('construction_package_field_template_get', {
         p_org: org,
       }),
     save: (

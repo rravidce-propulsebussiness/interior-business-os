@@ -10868,6 +10868,10 @@ export interface Database {
         Returns: Json;
       };
       company_self_register: { Args: { p_input: Json }; Returns: Json };
+      construction_package_field_template_get: {
+        Args: { p_org?: string };
+        Returns: Json;
+      };
       construction_package_list: { Args: { p_org: string }; Returns: Json };
       construction_package_owner_options: {
         Args: { p_org: string };
@@ -11519,6 +11523,10 @@ export interface Database {
       platform_company_seller_enable: {
         Args: { p_organization_id: string; p_store_name: string };
         Returns: string;
+      };
+      platform_construction_package_field_template_save: {
+        Args: { p_sections: Json };
+        Returns: boolean;
       };
       platform_context: { Args: Record<string, never>; Returns: Json };
       platform_gst_summary: { Args: Record<string, never>; Returns: Json };

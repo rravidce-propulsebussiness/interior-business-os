@@ -1,3 +1,4 @@
+import { constructionSectionKind } from '@business-os/core/construction-specifications';
 import { renderPdf, appendQuotationAnnexures } from '@business-os/shared/pdf';
 import {
   packageAttachmentContext,
@@ -35,7 +36,14 @@ export async function GET(request: Request, { params }: Params) {
       maximumFractionDigits: 0,
     }).format(Number(pkg.ratePerSqft) * 1000);
     const specs = pkg.specSections.filter((s) =>
-      Boolean(s.description || s.brand || s.grade || s.allowancePerSqft),
+      Boolean(
+        s.description ||
+        s.brand ||
+        s.grade ||
+        s.allowancePerSqft ||
+        s.deliverables?.length ||
+        s.extraFields?.some((field) => field.value.trim()),
+      ),
     );
     const specHtml = specs
       .map(
@@ -45,14 +53,35 @@ export async function GET(request: Request, { params }: Params) {
           '</span> · ' +
           escape(section.title) +
           '</h3>' +
-          (section.brand
+          (constructionSectionKind(section) === 'material' && section.brand
             ? '<p>Brand: <strong>' + escape(section.brand) + '</strong></p>'
             : '') +
-          (section.grade ? '<p>Grade: ' + escape(section.grade) + '</p>' : '') +
-          (section.allowancePerSqft
+          (constructionSectionKind(section) === 'material' && section.grade
+            ? '<p>Grade: ' + escape(section.grade) + '</p>'
+            : '') +
+          (constructionSectionKind(section) === 'material' &&
+          section.allowancePerSqft
             ? '<p>Specified allowance: ₹' +
               escape(section.allowancePerSqft) +
               '/SFT</p>'
+            : '') +
+          (section.deliverables?.length
+            ? '<p><strong>Drawing deliverables:</strong> ' +
+              section.deliverables.map(escape).join(' · ') +
+              '</p>'
+            : '') +
+          (section.extraFields?.length
+            ? section.extraFields
+                .filter((field) => field.value.trim())
+                .map(
+                  (field) =>
+                    '<p><strong>' +
+                    escape(field.label) +
+                    ':</strong> ' +
+                    escape(field.value) +
+                    '</p>',
+                )
+                .join('')
             : '') +
           (section.description
             ? '<p>' + escape(section.description) + '</p>'

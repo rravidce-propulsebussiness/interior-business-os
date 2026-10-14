@@ -1,3 +1,4 @@
+import { constructionSectionKind } from './construction-specifications';
 import { z } from 'zod';
 import { addressSchema, brandingSchema } from './commercial';
 import { parseSftEstimate } from './sft-quotation';
@@ -147,7 +148,9 @@ export function renderQuotationDocument(input: unknown): string {
             section.description.trim() ||
             section.brand?.trim() ||
             section.grade?.trim() ||
-            section.allowancePerSqft?.trim(),
+            section.allowancePerSqft?.trim() ||
+            section.deliverables?.length ||
+            section.extraFields?.some((field) => field.value.trim()),
           ),
         )
         .map(
@@ -157,16 +160,41 @@ export function renderQuotationDocument(input: unknown): string {
             '</div><div><h3>' +
             escape(section.title) +
             '</h3>' +
-            (section.brand
+            (constructionSectionKind({
+              brand: section.brand ?? '',
+              grade: section.grade ?? '',
+              allowancePerSqft: section.allowancePerSqft ?? '',
+              title: section.title,
+              description: section.description,
+              ...(section.kind ? { kind: section.kind } : {}),
+            }) === 'material' && section.brand
               ? '<p><strong>Brand:</strong> ' + escape(section.brand) + '</p>'
               : '') +
-            (section.grade
+            (section.kind !== 'plans' && section.grade
               ? '<p><strong>Grade:</strong> ' + escape(section.grade) + '</p>'
               : '') +
-            (section.allowancePerSqft
+            (section.kind !== 'plans' && section.allowancePerSqft
               ? '<p><strong>Material allowance:</strong> ₹' +
                 escape(section.allowancePerSqft) +
                 '/SFT</p>'
+              : '') +
+            (section.deliverables?.length
+              ? '<p><strong>Included drawings:</strong> ' +
+                section.deliverables.map(escape).join(' · ') +
+                '</p>'
+              : '') +
+            (section.extraFields?.length
+              ? section.extraFields
+                  .filter((field) => field.value.trim())
+                  .map(
+                    (field) =>
+                      '<p><strong>' +
+                      escape(field.label) +
+                      ':</strong> ' +
+                      escape(field.value) +
+                      '</p>',
+                  )
+                  .join('')
               : '') +
             (section.description
               ? '<p class="text">' + escape(section.description) + '</p>'
@@ -192,7 +220,7 @@ export function renderQuotationDocument(input: unknown): string {
           '</section>'
         : '';
       return (
-        '<section class="spec-pages"><div class="spec-eyebrow">SECTION 02 / PACKAGE SPECIFICATIONS</div><h2>Package materials, finishes &amp; scope</h2><p class="muted">The descriptions below form part of this quotation and are saved with this revision.</p>' +
+        '<section class="spec-pages"><div class="spec-eyebrow">SECTION 02 / PACKAGE SPECIFICATIONS</div><h2>Package drawings, materials &amp; scope</h2><p class="muted">The descriptions below form part of this quotation and are saved with this revision.</p>' +
         packageTitle +
         (sections ||
           '<p class="muted">No additional written specifications supplied.</p>') +

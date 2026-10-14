@@ -6,80 +6,14 @@ import type {
   ConstructionPackage,
   ConstructionSpecSection,
 } from '@business-os/database/construction-packages';
+import {
+  constructionSectionKind,
+  defaultConstructionSpecSections,
+  makeConstructionSection,
+} from '@business-os/core/construction-specifications';
+import { SpecificationFieldsEditor } from './specification-fields-editor';
 import { saveConstructionPackage } from './package-actions';
 
-const defaultCategories = [
-  [
-    'Architectural plans',
-    '',
-    '',
-    '2D plans, structural plans, 3D elevation and surveys',
-  ],
-  [
-    'Steel / TMT',
-    '',
-    '',
-    'Specify manufacturer, Fe grade, steel usage standard',
-  ],
-  ['Cement', '', '', 'Specify manufacturer and OPC/PPC grade'],
-  [
-    'Sand & aggregates',
-    '',
-    '',
-    'River/M sand, aggregate size and approved source',
-  ],
-  ['Bricks / blocks', '', '', 'Specify brick/AAC grade and wall thickness'],
-  [
-    'Tiles / flooring',
-    '',
-    '',
-    'Specify tile brand, dimensions and allowance in ₹/sft',
-  ],
-  [
-    'Kitchen & granite',
-    '',
-    '',
-    'Kitchen counter, sink, backsplash and granite allowance',
-  ],
-  [
-    'Doors & windows',
-    '',
-    '',
-    'Main door, internal frames, UPVC/aluminium, fittings',
-  ],
-  [
-    'Bathrooms & plumbing',
-    '',
-    '',
-    'CPVC/PVC lines, fittings, waterproofing, sanitary brands',
-  ],
-  [
-    'Electrical',
-    '',
-    '',
-    'Wiring brand, conduits, switches and circuit provision',
-  ],
-  ['Painting', '', '', 'Interior/exterior putty, primer and finish coats'],
-  [
-    'Elevation & metal works',
-    '',
-    '',
-    'Facade, railing, staircase, grills and finishes',
-  ],
-  [
-    'Exclusions & warranty',
-    '',
-    '',
-    'Exclusions, defect liability and handover terms',
-  ],
-] as const;
-const makeSection = (title: string): ConstructionSpecSection => ({
-  title,
-  brand: '',
-  grade: '',
-  description: '',
-  allowancePerSqft: '',
-});
 const palettes = [
   '#155EEF',
   '#089E9C',
@@ -101,9 +35,11 @@ const money = (v: number) =>
 export function PremiumPackageEditor({
   item,
   close,
+  defaultSections,
 }: {
   item?: ConstructionPackage;
   close: () => void;
+  defaultSections: ConstructionSpecSection[];
 }) {
   const router = useRouter();
   const [state, action, pending] = useActionState(saveConstructionPackage, {
@@ -115,13 +51,25 @@ export function PremiumPackageEditor({
   const [status, setStatus] = useState(item?.status ?? 'active');
   const [description, setDescription] = useState(item?.description ?? '');
   const [themeColor, setThemeColor] = useState(item?.themeColor ?? '#155EEF');
-  const [sections, setSections] = useState<ConstructionSpecSection[]>(
-    item?.specSections?.length
-      ? item.specSections.map((section) => ({ ...section }))
-      : defaultCategories.map((record) => makeSection(record[0])),
-  );
+  const [sections, setSections] = useState<ConstructionSpecSection[]>(() => {
+    const template = item?.specSections?.length
+      ? item.specSections
+      : defaultSections.length
+        ? defaultSections
+        : defaultConstructionSpecSections();
+    return template.map((section) => {
+      const kind = constructionSectionKind(section);
+      return {
+        ...makeConstructionSection(section.title, kind),
+        ...section,
+        kind,
+        ...(kind === 'plans'
+          ? { brand: '', grade: '', allowancePerSqft: '' }
+          : {}),
+      };
+    });
+  });
   const [mode, setMode] = useState<'manual' | 'pdf'>('manual');
-  const [active, setActive] = useState(0);
   const [attachmentName, setAttachmentName] = useState<string | null>(
     item?.attachmentFilename ?? null,
   );
@@ -158,15 +106,6 @@ export function PremiumPackageEditor({
       alive = false;
     };
   }, [fileUrl]);
-
-  const updateSection = (
-    index: number,
-    key: keyof ConstructionSpecSection,
-    value: string,
-  ) =>
-    setSections((all) =>
-      all.map((entry, i) => (i === index ? { ...entry, [key]: value } : entry)),
-    );
 
   async function upload(file: File) {
     if (!fileUrl || uploading) return;
@@ -231,7 +170,9 @@ export function PremiumPackageEditor({
       entry.description.trim() ||
       entry.brand.trim() ||
       entry.grade.trim() ||
-      entry.allowancePerSqft.trim(),
+      entry.allowancePerSqft.trim() ||
+      entry.deliverables?.length ||
+      entry.extraFields?.some((field) => field.value.trim()),
     ),
   );
   const previewName = name.trim() || 'Your construction package';
@@ -468,142 +409,13 @@ export function PremiumPackageEditor({
             </button>
           </div>
           {mode === 'manual' && (
-            <>
-              <div className="mt-4 space-y-2">
-                {sections.map((spec, index) => (
-                  <div
-                    key={index}
-                    className="overflow-hidden rounded-xl border border-slate-200 bg-[#F9FBFF]"
-                  >
-                    <button
-                      type="button"
-                      onClick={() => setActive(active === index ? -1 : index)}
-                      aria-expanded={active === index}
-                      className="flex w-full items-center justify-between gap-2 px-4 py-3.5 text-left"
-                    >
-                      <div className="min-w-0">
-                        <strong className="block truncate text-sm text-slate-900">
-                          {String(index + 1).padStart(2, '0')} · {spec.title}
-                        </strong>
-                        <span className="block truncate text-xs text-slate-500">
-                          {[
-                            spec.brand,
-                            spec.grade,
-                            spec.allowancePerSqft
-                              ? 'Up to ₹' + spec.allowancePerSqft + '/sft'
-                              : '',
-                          ]
-                            .filter(Boolean)
-                            .join(' · ') ||
-                            'Set brand, grade and material specification'}
-                        </span>
-                      </div>
-                      <span className="text-lg text-blue-600">
-                        {active === index ? '−' : '›'}
-                      </span>
-                    </button>
-                    {active === index && (
-                      <div className="grid gap-3 border-t border-slate-200 bg-white p-4 sm:grid-cols-2">
-                        <label className={label + ' sm:col-span-2'}>
-                          Category name
-                          <input
-                            className={field}
-                            value={spec.title}
-                            maxLength={90}
-                            onChange={(event) =>
-                              updateSection(index, 'title', event.target.value)
-                            }
-                          />
-                        </label>
-                        <label className={label}>
-                          Brand / manufacturer
-                          <input
-                            className={field}
-                            maxLength={120}
-                            value={spec.brand}
-                            placeholder="e.g. Tata, UltraTech, Kajaria"
-                            onChange={(event) =>
-                              updateSection(index, 'brand', event.target.value)
-                            }
-                          />
-                        </label>
-                        <label className={label}>
-                          Grade / material size
-                          <input
-                            className={field}
-                            maxLength={120}
-                            value={spec.grade}
-                            placeholder="e.g. Fe 550D, OPC 53, 2×2"
-                            onChange={(event) =>
-                              updateSection(index, 'grade', event.target.value)
-                            }
-                          />
-                        </label>
-                        <label className={label}>
-                          Allowance per sq ft (₹) · if applicable
-                          <input
-                            className={field}
-                            maxLength={40}
-                            value={spec.allowancePerSqft}
-                            placeholder="e.g. 85 for vitrified tiles"
-                            onChange={(event) =>
-                              updateSection(
-                                index,
-                                'allowancePerSqft',
-                                event.target.value,
-                              )
-                            }
-                          />
-                        </label>
-                        <label className={label + ' sm:col-span-2'}>
-                          Scope and inclusions
-                          <textarea
-                            className={field + ' min-h-28 resize-y'}
-                            rows={4}
-                            maxLength={600}
-                            value={spec.description}
-                            placeholder="Material usage, finish, exclusions, warranty and additional specification details."
-                            onChange={(event) =>
-                              updateSection(
-                                index,
-                                'description',
-                                event.target.value,
-                              )
-                            }
-                          />
-                        </label>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setSections((items) =>
-                              items.filter((_, i) => i !== index),
-                            );
-                            setActive(-1);
-                          }}
-                          className="justify-self-start text-xs font-bold text-rose-600"
-                        >
-                          Remove category
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-              <button
-                type="button"
-                disabled={sections.length >= 18}
-                onClick={() => {
-                  setSections((items) => [
-                    ...items,
-                    makeSection('Custom category'),
-                  ]);
-                  setActive(sections.length);
-                }}
-                className="mt-4 w-full rounded-xl border border-dashed border-blue-300 bg-blue-50 px-4 py-3 text-sm font-bold text-blue-700 disabled:opacity-50"
-              >
-                + Add specification category
-              </button>
-            </>
+            <div className="mt-4">
+              <SpecificationFieldsEditor
+                sections={sections}
+                onChange={setSections}
+                heading="Editable package specifications"
+              />
+            </div>
           )}
           {mode === 'pdf' && (
             <div className="mt-4 rounded-xl border border-dashed border-blue-200 bg-blue-50/50 p-5">
@@ -740,10 +552,18 @@ export function PremiumPackageEditor({
                       {spec.title}
                     </strong>
                     <span className="block truncate text-[9px] text-slate-500">
-                      {spec.brand ||
-                        spec.grade ||
-                        spec.description ||
-                        'Included'}
+                      {spec.kind === 'plans'
+                        ? spec.deliverables?.join(' · ') ||
+                          spec.description ||
+                          'Drawing deliverables'
+                        : spec.brand ||
+                          spec.grade ||
+                          spec.extraFields
+                            ?.filter((field) => field.value.trim())
+                            .map((field) => field.value)
+                            .join(' · ') ||
+                          spec.description ||
+                          'Included'}
                     </span>
                   </div>
                 ))}
