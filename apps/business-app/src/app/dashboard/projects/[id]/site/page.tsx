@@ -236,6 +236,12 @@ export default async function ProjectDeliveryPage({
   const planLabel =
     plans.find((plan) => plan.id === organization.plan_id)?.name ??
     'Business plan';
+  let mobileUpdateHref = '#overview';
+  if (site.stage !== 'not_started' && isDesign) mobileUpdateHref = '#design';
+  if (open || site.stage === 'handover') {
+    if (isEngineer || isQuality) mobileUpdateHref = '#daily-reports';
+    else if (isWatchman) mobileUpdateHref = '#security';
+  }
 
   return (
     <div className="site-command-theme">
@@ -1340,18 +1346,7 @@ export default async function ProjectDeliveryPage({
           <Link href="/dashboard/projects" aria-current="page">
             <span aria-hidden="true">▱</span>Projects
           </Link>
-          <a
-            href={
-              (site.stage === 'execution' || site.stage === 'handover') &&
-              (isEngineer || isQuality)
-                ? '#daily-reports'
-                : (site.stage === 'execution' || site.stage === 'handover') &&
-                    isWatchman
-                  ? '#security'
-                  : site.stage !== 'not_started' && isDesign
-                    ? '#design'
-                    : '#overview'
-            }
+          <a href={mobileUpdateHref}
           >
             <span aria-hidden="true">＋</span>Site updates
           </a>
