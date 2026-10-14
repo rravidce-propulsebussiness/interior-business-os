@@ -164,8 +164,8 @@ begin
    and id=p_project and status='active' for update;
  if not found then raise exception 'Project not active' using errcode='42501';end if;
  perform private.project_agreement_require(p_org,p_project);
- if not exists(select 1 from private.site_state where organization_id=p_org
-      and project_id=p_project and stage='execution')
+ if not exists(select 1 from private.site_state site where site.organization_id=p_org
+      and site.project_id=p_project and site.stage='execution')
    and not exists(select 1 from public.execution_plans where organization_id=p_org
       and project_id=p_project and status in ('in_progress','punch_list','ready_for_handover'))
  then raise exception 'Physical execution has not begun' using errcode='23514';end if;
