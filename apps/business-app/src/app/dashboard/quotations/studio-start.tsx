@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { createStudioQuotation } from './studio-actions';
+import { contactMatches } from './customer-match';
 
 type Industry = { key: string; name: string };
 type ExistingCustomer = {
@@ -75,6 +76,20 @@ export function QuotationStudioStart({
     plotSize: '',
     projectType: 'Residential',
   });
+  const matchingCustomers = !customerId
+    ? existingCustomers.filter((customer) => contactMatches(customer, data))
+    : [];
+  const selectCustomer = (customer: ExistingCustomer) => {
+    setCustomerId(customer.id);
+    setProjectId('');
+    setData((previous) => ({
+      ...previous,
+      clientName: customer.display_name,
+      phone: customer.phone,
+      email: customer.email,
+    }));
+    setFeedback('');
+  };
   const update = (key: keyof typeof data, value: string) => {
     setData((prev) => ({ ...prev, [key]: value }));
     setFeedback('');
@@ -305,6 +320,32 @@ export function QuotationStudioStart({
               ))}
             </select>
           </label>
+          {matchingCustomers.length > 0 && (
+            <div className="qs-warning" role="alert" style={{ marginBottom: 15 }}>
+              <strong>
+                Existing client {matchingCustomers.length > 1 ? 'accounts found' : 'account found'}.
+              </strong>
+              <p>
+                These contact details already have a CRN. Choose the correct
+                existing account instead of creating another customer.
+              </p>
+              <div className="qs-toolbar" style={{ flexWrap: 'wrap', marginTop: 10 }}>
+                {matchingCustomers.map((customer) => (
+                  <button
+                    type="button"
+                    className="qs-btn"
+                    key={customer.id}
+                    onClick={() => selectCustomer(customer)}
+                  >
+                    {'CRN-' +
+                      customer.id.replaceAll('-', '').slice(0, 12).toUpperCase()}
+                    {' · '}
+                    {customer.display_name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
           {currentCustomer && (
             <label className="qs-field qs-field-full">
               Project under {customerCrn}
@@ -411,7 +452,11 @@ export function QuotationStudioStart({
         </div>
         <div className="qs-divider" />
         <div className="qs-note">
-          {customerCrn ? customerCrn + ' · ' : 'A new CRN will be assigned. '}
+          {customerCrn
+            ? customerCrn + ' · '
+            : matchingCustomers.length
+              ? 'Select a matching existing CRN first. '
+              : 'A new CRN will be assigned. '}
           Your quotation will use this company&apos;s saved name, logo, contact
           details, quotation prefix and terms. You can change pricing,
           materials, payment terms and PDF attachments after creating the draft.
@@ -427,7 +472,7 @@ export function QuotationStudioStart({
         >
           <button
             className="qs-btn primary"
-            disabled={pending || !industry}
+            disabled={pending || !industry || matchingCustomers.length > 0}
             type="submit"
           >
             {pending
