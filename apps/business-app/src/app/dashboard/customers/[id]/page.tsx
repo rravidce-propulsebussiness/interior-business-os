@@ -210,7 +210,7 @@ export default async function Customer({
             <span aria-hidden="true">/</span>
             <Link href="/dashboard/customers">Customers</Link>
             <span aria-hidden="true">/</span>
-            <span>Customer profile</span>
+            <span>Customer account</span>
           </nav>
 
           <header className="cp-hero">
@@ -218,6 +218,7 @@ export default async function Customer({
               {customer.display_name?.trim().charAt(0).toUpperCase() || 'C'}
             </span>
             <div className="cp-hero-content">
+              <p className="cp-account-eyebrow">Customer account</p>
               <h1>{customer.display_name}</h1>
               <span
                 className={
@@ -235,6 +236,9 @@ export default async function Customer({
               <CustomerReference value={reference} />
             </div>
           </header>
+          <div className="cp-origin-leads cp-origin-near-header">
+            <OriginLeads customerId={id} />
+          </div>
 
           <div className="cp-stats" aria-label="Customer summary">
             <Stat
@@ -296,7 +300,6 @@ export default async function Customer({
             </a>
             {canSeeProjects && <a href="#projects">Projects</a>}
             {canSeeQuotes && <a href="#quotes">Quotes</a>}
-            {canSeeStatement && <a href="#payments">Payments</a>}
             <a href="#activity">Activity</a>
           </nav>
 
@@ -348,10 +351,6 @@ export default async function Customer({
                 )}
               </div>
               <dl className="cp-info">
-                <div>
-                  <dt>Customer name</dt>
-                  <dd>{display(customer.display_name)}</dd>
-                </div>
                 <div>
                   <dt>Legal name</dt>
                   <dd>{display(customer.legal_name)}</dd>
@@ -438,24 +437,6 @@ export default async function Customer({
             )}
           </div>
 
-          {canSeeStatement && (
-            <section className="cp-panel cp-wide-panel" id="payments">
-              <div className="cp-section-heading">
-                <h2>
-                  <OwnerIcon name="expenses" size={20} /> Payments &amp;
-                  statement
-                </h2>
-                <Link className="cp-small-action" href={statementHref}>
-                  Open statement →
-                </Link>
-              </div>
-              <p className="cp-muted">
-                Review customer invoices, receipts and balances in their
-                authorized account statement.
-              </p>
-            </section>
-          )}
-
           <section className="cp-panel cp-wide-panel" id="activity">
             <div className="cp-section-heading">
               <h2>
@@ -495,32 +476,6 @@ export default async function Customer({
                 </p>
               </div>
             )}
-            <div className="cp-origin-leads">
-              <OriginLeads customerId={id} />
-            </div>
-          </section>
-
-          <section className="cp-panel cp-wide-panel" id="records">
-            <div className="cp-section-heading">
-              <h2>
-                <OwnerIcon name="reports" size={20} /> Related records
-              </h2>
-            </div>
-            <div className="cp-record-list">
-              {canSeeStatement && (
-                <Link href={statementHref}>
-                  Customer account statement <span aria-hidden="true">›</span>
-                </Link>
-              )}
-              <Link href={timelineHref}>
-                Customer activity timeline <span aria-hidden="true">›</span>
-              </Link>
-              {canSeeProjects && (
-                <Link href={projectHref}>
-                  Projects for this customer <span aria-hidden="true">›</span>
-                </Link>
-              )}
-            </div>
           </section>
 
           {canManage && (
@@ -600,33 +555,6 @@ export default async function Customer({
             )}
           </section>
         </main>
-        <nav className="cp-mobile-nav" aria-label="Mobile workspace navigation">
-          <Link href="/dashboard">
-            <OwnerIcon name="dashboard" size={21} />
-            Dashboard
-          </Link>
-          <Link
-            href={
-              has('lead.view', 'crm')
-                ? '/dashboard/crm/leads'
-                : '/dashboard/customers'
-            }
-            aria-current="page"
-          >
-            <OwnerIcon name="clients" size={21} />
-            CRM
-          </Link>
-          {canSeeProjects && (
-            <Link href={projectHref}>
-              <OwnerIcon name="projects" size={21} />
-              Projects
-            </Link>
-          )}
-          <a href="#records">
-            <OwnerIcon name="menu" size={21} />
-            More
-          </a>
-        </nav>
       </OwnerShell>
     </div>
   );
