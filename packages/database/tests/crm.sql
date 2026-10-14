@@ -72,7 +72,7 @@ end$$;
 reset role;
 -- Database-level duplicate guard works even when the quotation form is
 -- submitted twice and the two requests overlap.
-do $
+do $$
 begin
   begin
     insert into public.customers(organization_id,display_name,phone,email)
@@ -82,8 +82,8 @@ begin
   exception when unique_violation then
     raise notice 'PASS: duplicate CRN denied with alternate phone format';
   end;
-end$;
-do $declare t text;begin foreach t in array array['lead_sources','crm_pipeline_stages','crm_lost_reasons','crm_requirement_fields','leads','lead_activities','lead_followups','site_visits','quotation_share_links','quotation_customer_responses'] loop perform pg_temp.crm_assert((select relrowsecurity and relforcerowsecurity from pg_class where oid=('public.'||t)::regclass),'forced RLS: '||t);end loop;end$$;
+end$$;
+do $$declare t text;begin foreach t in array array['lead_sources','crm_pipeline_stages','crm_lost_reasons','crm_requirement_fields','leads','lead_activities','lead_followups','site_visits','quotation_share_links','quotation_customer_responses'] loop perform pg_temp.crm_assert((select relrowsecurity and relforcerowsecurity from pg_class where oid=('public.'||t)::regclass),'forced RLS: '||t);end loop;end$$;
 set local request.jwt.claim.sub='55555555-5555-4555-8555-555555555555';
 set local role authenticated;
 do $$declare t text;count_rows integer;begin foreach t in array array['lead_sources','crm_pipeline_stages','crm_lost_reasons','crm_requirement_fields','leads','lead_activities','lead_followups','site_visits','quotation_share_links','quotation_customer_responses'] loop execute format('select count(*) from public.%I',t) into count_rows;perform pg_temp.crm_assert(count_rows=0,'nonmember cannot read: '||t);end loop;
