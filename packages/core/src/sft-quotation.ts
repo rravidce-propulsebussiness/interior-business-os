@@ -24,8 +24,16 @@ export const sftSectionSchema = z
     brand: z.string().trim().max(120).optional(),
     grade: z.string().trim().max(120).optional(),
     allowancePerSqft: z.string().trim().max(40).optional(),
-    kind: z.enum(['plans', 'material', 'general']).optional(),
-    deliverables: z.array(z.string().trim().min(2).max(100)).max(20).optional(),
+    kind: z.enum(['plans', 'material', 'general', 'custom']).optional(),
+    deliverables: z.array(
+      z.union([
+        z.string().trim().min(2).max(100),
+        z.object({
+          label: z.string().trim().min(2).max(90),
+          included: z.boolean(),
+        }).strict(),
+      ]),
+    ).max(20).optional(),
     customFields: z
       .array(
         z
@@ -37,6 +45,10 @@ export const sftSectionSchema = z
       )
       .max(10)
       .optional(),
+    fields: z.array(z.object({
+      label: z.string().trim().min(2).max(80),
+      value: z.string().trim().max(250),
+    }).strict()).max(10).optional(),
   })
   .strict();
 
