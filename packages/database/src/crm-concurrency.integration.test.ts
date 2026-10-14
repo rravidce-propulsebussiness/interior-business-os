@@ -62,9 +62,12 @@ it.skipIf(!process.env.TEST_DATABASE_URL)(
       `begin;set local request.jwt.claim.sub='${actor}';insert into public.organizations(id,name,slug,default_currency,country_code,created_by,status) values('${org}','CRM concurrency','crm-${org}','INR','IN','${actor}','active');insert into public.organization_memberships(organization_id,user_id,status) values('${org}','${actor}','active');insert into public.roles(organization_id,key,name,is_owner) values('${org}','owner','Owner',true);insert into public.role_permissions(organization_id,role_id,permission_id) select '${org}',r.id,p.id from public.roles r cross join public.permissions p join private.role_template_permissions t on t.permission_key=p.key and t.role_key='owner' where r.organization_id='${org}';insert into public.membership_roles(organization_id,membership_id,role_id) select '${org}',m.id,r.id from public.organization_memberships m join public.roles r on r.organization_id=m.organization_id where m.organization_id='${org}' and r.key='owner';insert into public.organization_entitlements(organization_id,module_id,enabled,source) select '${org}',id,true,'manual' from public.modules where key in ('crm','quotation','projects');insert into public.lead_sources(id,organization_id,name,key) values('${source}','${org}','Referral','referral');insert into public.crm_pipeline_stages(id,organization_id,name,key) values('${stage}','${org}','New','race_new');insert into public.leads(id,organization_id,lead_number,name,phone,source_id,stage_id) values('${lead}','${org}','FIXTURE','Race lead','+12025550147','${source}','${stage}');insert into public.customers(id,organization_id,display_name) values('${customer}','${org}','Existing customer');insert into public.projects(id,organization_id,customer_id,name,code) values('${project}','${org}','${customer}','Existing project','existing');commit;`,
     );
     // Conversion races must start from a genuinely Won lead, not an open enquiry.
+    const wonStage = run(
+      `select id from public.crm_pipeline_stages where organization_id='${org}' and key='won'`,
+    );
     run(
       auth(
-        `select public.crm_command('${org}','stage','{"id":"${lead}","version":1,"stage_id":"${run(`select id from public.crm_pipeline_stages where organization_id='${org}' and key='won'`)}","note":"Client accepted agreement"}')`,
+        `select public.crm_command('${org}','stage','{"id":"${lead}","version":1,"stage_id":"${wonStage}","note":"Client accepted agreement"}')`,
       ),
     );
     const convert = auth(
