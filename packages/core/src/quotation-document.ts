@@ -149,7 +149,9 @@ export function renderQuotationDocument(input: unknown): string {
             section.grade?.trim() ||
             section.allowancePerSqft?.trim() ||
             section.deliverables?.some((d) => d.included) ||
-            section.fields?.some((field) => field.label.trim() && field.value.trim()),
+            section.fields?.some(
+              (field) => field.label.trim() && field.value.trim(),
+            ),
           ),
         )
         .map(
@@ -172,14 +174,24 @@ export function renderQuotationDocument(input: unknown): string {
               : '') +
             (section.deliverables?.some((d) => d.included)
               ? '<div class="plan-list"><strong>Included plans &amp; drawings</strong><ul>' +
-                section.deliverables.filter((d) => d.included)
-                  .map((d) => '<li>' + escape(d.label) + '</li>').join('') +
+                section.deliverables
+                  .filter((d) => d.included)
+                  .map((d) => '<li>' + escape(d.label) + '</li>')
+                  .join('') +
                 '</ul></div>'
               : '') +
             (section.fields?.length
-              ? section.fields.filter((field) => field.label.trim() && field.value.trim())
-                  .map((field) => '<p><strong>' + escape(field.label) + ':</strong> ' +
-                    escape(field.value) + '</p>').join('')
+              ? section.fields
+                  .filter((field) => field.label.trim() && field.value.trim())
+                  .map(
+                    (field) =>
+                      '<p><strong>' +
+                      escape(field.label) +
+                      ':</strong> ' +
+                      escape(field.value) +
+                      '</p>',
+                  )
+                  .join('')
               : '') +
             (section.description
               ? '<p class="text">' + escape(section.description) + '</p>'
