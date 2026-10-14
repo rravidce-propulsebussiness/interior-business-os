@@ -127,13 +127,13 @@ end$$;
 
 create function private.construction_project_access(org uuid, project uuid)
 returns boolean language sql stable security definer set search_path='' as $$
- select private.is_member(org) and private.entitled(org,'projects')
+ select coalesce(private.is_member(org) and private.entitled(org,'projects')
    and exists(select 1 from public.projects p
      where p.organization_id=org and p.id=project and p.status='active')
-   and (private.site_access(org,project)
+   and (coalesce(private.site_access(org,project),false)
      or exists(select 1 from private.construction_project_roles r
        where r.organization_id=org and r.project_id=project
-         and r.user_id=(select auth.uid()) and r.active));
+         and r.user_id=(select auth.uid()) and r.active)),false);
 $$;
 
 create function private.construction_can_manage(org uuid, project uuid)
