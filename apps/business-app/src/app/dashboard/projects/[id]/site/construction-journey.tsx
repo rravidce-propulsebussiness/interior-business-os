@@ -1,9 +1,33 @@
 import Image from 'next/image';
+import { StageRecordLinker, type StageLinkOption } from './stage-record-linker';
 import Link from 'next/link';
 import type { ConstructionPlanningData } from './construction-planning-panel';
 import './construction-journey.css';
 
 type SiteRecord = Record<string, unknown>;
+export type ConstructionStageRecordData = {
+  links: { stage_id: string; kind: string; record_id: string }[];
+  payments: {
+    stage_id: string;
+    item_id: string;
+    contract_id: string;
+    label: string;
+    amount: string;
+    due_date: string | null;
+    currency: string;
+    contract_number: string;
+    request_number: string | null;
+    request_status: string | null;
+  }[];
+  options: {
+    id: string;
+    contract_id: string;
+    label: string;
+    amount: string;
+    currency: string;
+    contract_number: string;
+  }[];
+};
 type JourneyProps = {
   projectId: string;
   stages: ConstructionPlanningData['stages'];
@@ -25,6 +49,8 @@ type JourneyProps = {
   canRequestMaterials?: boolean;
   canUploadWorkPhotos?: boolean;
   canUploadCuringPhotos?: boolean;
+  stageRecords?: ConstructionStageRecordData | null;
+  canLinkRecords?: boolean;
 };
 
 const phaseNames: Record<string, string> = {
@@ -142,8 +168,55 @@ export function ConstructionJourney({
   canRequestMaterials = false,
   canUploadWorkPhotos = false,
   canUploadCuringPhotos = false,
+  stageRecords,
+  canLinkRecords = false,
 }: JourneyProps) {
   const base = `/dashboard/projects/${projectId}/site`;
+  const linkedRecords = (
+    stageId: string,
+    kind: string,
+    records: SiteRecord[],
+  ) => {
+    const associated = new Set(
+      (stageRecords?.links ?? [])
+        .filter((item) => item.stage_id === stageId && item.kind === kind)
+        .map((item) => item.record_id),
+    );
+    return records.filter((record) => associated.has(value(record, 'id')));
+  };
+  const stageOptions: StageLinkOption[] = [
+    ...reports.map((item) => ({
+      kind: 'report' as const,
+      id: value(item, 'id'),
+      label: `${date(value(item, 'report_date'))}: ${value(item, 'completed_work').slice(0, 75)}`,
+    })),
+    ...materials.map((item) => ({
+      kind: 'material' as const,
+      id: value(item, 'id'),
+      label: `${value(item, 'item')} · ${value(item, 'quantity')} ${value(item, 'unit')}`,
+    })),
+    ...media.filter((item) => value(item, 'category') !== 'agreement').map((item) => ({
+      kind: 'media' as const,
+      id: value(item, 'id'),
+      label: `${human(value(item, 'category'))}: ${value(item, 'caption') || value(item, 'filename')}`,
+    })),
+    ...checks.map((item) => ({
+      kind: 'check' as const,
+      id: value(item, 'id'),
+      label: `${value(item, 'title')} · ${human(value(item, 'status'))}`,
+    })),
+    ...gate.filter((item) => value(item, 'kind') === 'curing').map((item) => ({
+      kind: 'curing_round' as const,
+      id: value(item, 'id'),
+      label: `${date(value(item, 'created_at'))}: ${value(item, 'description').slice(0, 70)}`,
+    })),
+    ...(canSeeFinance ? stageRecords?.options ?? [] : []).map((item) => ({
+      kind: 'payment' as const,
+      id: item.id,
+      contractId: item.contract_id,
+      label: `${item.contract_number}: ${item.label} · ${item.currency} ${item.amount}`,
+    })),
+  ];
   const go = (hash: string) => (inSiteWorkspace ? hash : base + hash);
   const qualityByStage = new Map(
     (quality?.stages ?? []).map((entry) => [entry.stage_id, entry]),
@@ -235,6 +308,13 @@ export function ConstructionJourney({
               (entry) => entry.status === 'passed' && entry.current,
             ).length;
             const active = stage.id === openStage;
+            const stageMaterials = linkedRecords(stage.id, 'material', materials);
+            const stageReports = linkedRecords(stage.id, 'report', reports);
+            const stageChecks = linkedRecords(stage.id, 'check', checks);
+            const stageMedia = linkedRecords(stage.id, 'media', media);
+            const stageRounds = linkedRecords(stage.id, 'curing_round', gate);
+            const stagePayments = (stageRecords?.payments ?? [])
+              .filter((item) => item.stage_id === stage.id);
             return (
               <div className="cj-track-item" key={stage.id}>
                 <div className={`cj-node cj-node-${style}`}>
@@ -278,7 +358,11 @@ export function ConstructionJourney({
                       <div>
                         <span>Payment milestone</span>
                         <strong>
-                          {canSeeFinance ? 'Open billing record' : 'Restricted'}
+                          {canSeeFinance
+                            ? stagePayments.length
+                              ? `${stagePayments.length} linked`
+                              : 'Not linked'
+                            : 'Restricted'}
                         </strong>
                       </div>
                     </div>
@@ -345,25 +429,127 @@ export function ConstructionJourney({
                               <Link href={paymentsUrl}>View schedule →</Link>
                             )}
                           </div>
-                          <p>
-                            {canSeeFinance
-                              ? 'See linked contract milestones, requests, invoices and receipts in the canonical Billing workspace.'
-                              : 'Financial details are visible only to permitted billing roles.'}
-                          </p>
+                          {canSeeFinance && stagePayments.length ? (
+                            <ul className="cj-materials">
+                              {stagePayments.map((payment) => (
+                                <li key={payment.item_id}>
+                                  <span>
+                                    <strong>{payment.label}</strong>
+                                    <span className="cj-currency">
+                                      {payment.currency} {payment.amount}
+                                      {payment.due_date ? ` · Due ${date(payment.due_date)}` : ''}
+                                    </span>
+                                  </span>
+                                  <em>
+                                    {payment.request_number
+                                      ? `${payment.request_number} · ${human(payment.request_status ?? 'issued')}`
+                                      : 'Not requested'}
+                                  </em>
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <p>
+                              {canSeeFinance
+                                ? 'No approved payment schedule item is assigned to this stage.'
+                                : 'Financial details require Billing permission.'}
+                            </p>
+                          )}
                           <p className="cj-caption">
-                            No payment is inferred from checklist progress.
+                            Linked values come from the contract schedule. Request
+                            status is not proof of payment; invoices, allocations
+                            and receipts stay in Billing.
                           </p>
                         </div>
                       </div>
                     </div>
+                    {stageRecords && (
+                      <div className="cj-subcard cj-stage-linked">
+                        <div className="cj-subhead">
+                          <h4>Records assigned to this construction stage</h4>
+                          <span className="cj-count">
+                            {stageReports.length + stageMaterials.length +
+                              stageMedia.length + stageChecks.length + stageRounds.length} records
+                          </span>
+                        </div>
+                        {stageReports.length > 0 && (
+                          <div className="cj-linked-group">
+                            <strong>Engineer updates</strong>
+                            {stageReports.map((item) => (
+                              <p key={value(item, 'id')}>
+                                {date(value(item, 'report_date'))}: {value(item, 'completed_work')}
+                                {value(item, 'tomorrow_plan') && ` · Tomorrow: ${value(item, 'tomorrow_plan')}`}
+                              </p>
+                            ))}
+                          </div>
+                        )}
+                        {stageMaterials.length > 0 && (
+                          <div className="cj-linked-group">
+                            <strong>Materials</strong>
+                            <ul className="cj-materials">
+                              {stageMaterials.map((item) => (
+                                <li key={value(item,'id')}>
+                                  <span>{value(item,'item')} · {value(item,'quantity')} {value(item,'unit')}</span>
+                                  <em>{human(value(item,'status'))}</em>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {stageChecks.length > 0 && (
+                          <div className="cj-linked-group">
+                            <strong>Site checks (informal)</strong>
+                            {stageChecks.map((item) => (
+                              <p key={value(item,'id')}>
+                                {value(item,'title')} · {human(value(item,'status'))}
+                              </p>
+                            ))}
+                            <p className="cj-caption">
+                              Informal notes do not replace independent formal QC.
+                            </p>
+                          </div>
+                        )}
+                        {stageMedia.length > 0 && (
+                          <div className="cj-linked-group">
+                            <strong>Stage photos and evidence</strong>
+                            <div className="cj-gallery">
+                              {stageMedia.map((item) => (
+                                <EvidenceTile key={value(item,'id')} item={item} projectId={projectId} />
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {stageRounds.length > 0 && (
+                          <div className="cj-linked-group">
+                            <strong>Curing rounds</strong>
+                            {stageRounds.map((item) => (
+                              <p key={value(item,'id')}>
+                                {date(value(item,'created_at'))}: {value(item,'description')}
+                              </p>
+                            ))}
+                          </div>
+                        )}
+                        {!stageReports.length && !stageMaterials.length &&
+                          !stageMedia.length && !stageChecks.length && !stageRounds.length && (
+                            <p>No site updates, materials or photos have been assigned to this stage yet.</p>
+                          )}
+                        {canLinkRecords && (
+                          <StageRecordLinker
+                            projectId={projectId}
+                            stageId={stage.id}
+                            options={stageOptions}
+                          />
+                        )}
+                      </div>
+                    )}
                     {active && (
                       <div className="cj-activity">
                         <div className="cj-section-title">
                           <div>
                             <h4>Site records &amp; tomorrow&apos;s plan</h4>
                             <p>
-                              Project-wide site records (not individually linked
-                              to this stage).
+                              Recent project-wide activity below is for context only.
+                              Stage-specific evidence appears in the section above.
                             </p>
                           </div>
                           <Link href={go('#daily-reports')}>All updates →</Link>
