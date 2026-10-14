@@ -107,7 +107,11 @@ export function LeadMeetActions({
       </p>
       <div className="crm-lead-meet-actions">
         {canRecord && (
-          <button type="button" disabled={!valid || busy} onClick={saveMeetingLink}>
+          <button
+            type="button"
+            disabled={!valid || busy}
+            onClick={saveMeetingLink}
+          >
             {busy ? 'Saving…' : 'Save to lead'}
           </button>
         )}
@@ -138,7 +142,11 @@ export function LeadMeetActions({
           Enter a valid meet.google.com meeting URL to share or save it.
         </p>
       )}
-      {feedback && <p className="crm-lead-meet-feedback" role="status">{feedback}</p>}
+      {feedback && (
+        <p className="crm-lead-meet-feedback" role="status">
+          {feedback}
+        </p>
+      )}
     </section>
   );
 }
