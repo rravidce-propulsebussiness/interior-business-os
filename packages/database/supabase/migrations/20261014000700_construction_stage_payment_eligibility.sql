@@ -174,6 +174,11 @@ begin
  if (p_action='stage_link' and not coalesce(private.finance_access(p_org,'payment_schedule.manage'),false))
   or (p_action='request_issue' and not coalesce(private.finance_access(p_org,'payment_request.create'),false))
  then raise exception 'Commercial permission required' using errcode='42501';end if;
+ if p_action='stage_link' then
+   perform private.finance_require(p_org,'payment_schedule.manage');
+ else
+   perform private.finance_require(p_org,'payment_request.create');
+ end if;
  perform 1 from public.projects where organization_id=p_org and id=p_project
    and status='active' for update;
  if not found then raise exception 'Project unavailable' using errcode='42501';end if;
