@@ -24,6 +24,21 @@ revision for the same stage and work date. Decision history and old plans
 are retained. Restricted watchmen cannot read the full labour/material
 planner, submit work, or approve their own plans.
 
+## Scoped project-team access
+
+The existing Site Delivery page now accepts active organization members
+explicitly assigned to a field construction role for the same project.
+This allows new construction-only supervisors, engineers, structural
+reviewers, quality inspectors and watchmen to open the project workspace
+without also creating a legacy `site_team` record.
+
+Legacy Site Delivery commands still require their original, separate role
+permissions. An assigned supervisor can view approved tomorrow plans but
+does not gain authority to create the canonical daily report, read private
+media, issue payments or change the agreement. Regression tests disable
+an engineer's legacy assignment, confirm construction-only access, and
+verify restricted daily reports remain hidden.
+
 ## Integration limits and integrity
 
 - The stage ID and project/material references must belong to the same
