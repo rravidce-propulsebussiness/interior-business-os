@@ -24,8 +24,8 @@ export function ConstructionPackagesManager({
           </h2>
           <p className="mt-2 text-sm leading-6 text-slate-600">
             Create branded company packages with detailed material grades,
-            per-SFT allowances and your own PDF specifications. Every
-            package stays private to your company.
+            per-SFT allowances and your own PDF specifications. Every package
+            stays private to your company.
           </p>
         </div>
         {canManage && (
@@ -39,9 +39,7 @@ export function ConstructionPackagesManager({
         )}
       </div>
       {editing === 'new' && (
-        <PremiumPackageEditor
-          close={() => setEditing(null)}
-        />
+        <PremiumPackageEditor close={() => setEditing(null)} />
       )}
       <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {packages.map((item) => (
