@@ -97,6 +97,18 @@ export async function connectPropulseLeads(
         body: JSON.stringify({ code: pairingCode }),
       }),
     );
+    // A paid purchase belongs to one business. Do not let a connected
+    // ProPulse purchaser distribute its private feed across OS tenants.
+    const { data: otherTenant, error: ownerError } = await admin
+      .from('propulse_lead_connections')
+      .select('organization_id')
+      .eq('propulse_subject', verified.subject)
+      .neq('organization_id', s.org)
+      .limit(1);
+    if (ownerError)
+      throw new Error('Could not verify the ProPulse purchasing company.');
+    if (otherTenant?.length)
+      throw new Error('This ProPulse purchasing account is already connected to another Business OS company.');
     const { data: existing, error: priorError } = await admin
       .from('propulse_lead_connections')
       .select('access_token')
