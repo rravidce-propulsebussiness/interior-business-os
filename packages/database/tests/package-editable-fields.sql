@@ -25,6 +25,7 @@ select public.construction_package_save(
     )
   )
 ) as regression_package_id \gset
+select set_config('app.test_package_id', :'regression_package_id', true);
 
 do $assert$
 declare d jsonb;
@@ -32,7 +33,7 @@ begin
   select spec_sections into d
     from private.construction_quote_package_designs
    where organization_id='dddddddd-dddd-4ddd-8ddd-dddddddddddd'
-     and package_id=:'regression_package_id'::uuid;
+     and package_id=current_setting('app.test_package_id')::uuid;
   if d->0->'deliverables'->>0 <> 'Electrical layout'
      or d->0->'customFields'->0->>'value' <> 'PDF + DWG'
   then raise exception 'Saved drawing fields were not preserved'; end if;
