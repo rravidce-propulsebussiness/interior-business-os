@@ -1,0 +1,38 @@
+name: Format CRM PR files
+on:
+  push:
+    branches:
+      - feature/crm-lead-actions-meet
+    paths:
+      - .github/workflows/crm-pr-format.yml
+permissions:
+  contents: write
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Format changed CRM files
+        run: >-
+          pnpm exec prettier --write
+          'apps/business-app/src/app/dashboard/crm/leads/[id]/lead-detail.css'
+          'apps/business-app/src/app/dashboard/crm/leads/[id]/lead-meet-actions.tsx'
+          'apps/business-app/src/app/dashboard/crm/leads/[id]/page.tsx'
+          'apps/business-app/src/app/dashboard/crm/queue.css'
+          'apps/business-app/src/app/dashboard/crm/queue.tsx'
+      - name: Commit formatted files to this feature branch
+        run: |
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git add 'apps/business-app/src/app/dashboard/crm/leads/[id]/lead-detail.css' 'apps/business-app/src/app/dashboard/crm/leads/[id]/lead-meet-actions.tsx' 'apps/business-app/src/app/dashboard/crm/leads/[id]/page.tsx' 'apps/business-app/src/app/dashboard/crm/queue.css' 'apps/business-app/src/app/dashboard/crm/queue.tsx'
+          if ! git diff --cached --quiet; then
+            git commit -m "Format CRM lead screens"
+            git push origin HEAD:feature/crm-lead-actions-meet
+          fi
