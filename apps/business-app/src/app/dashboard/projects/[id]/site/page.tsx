@@ -230,68 +230,6 @@ const constructionGateSchema = z.object({
     }),
   ),
 });
-const constructionTomorrowSchema = z.object({
-  can_approve: z.boolean(),
-  can_submit: z.boolean(),
-  material_choices: z.array(
-    z.object({
-      id: z.uuid(),
-      item: z.string(),
-      quantity: z.number(),
-      unit: z.string(),
-      status: z.string(),
-    }),
-  ),
-  plans: z.array(
-    z.object({
-      id: z.uuid(),
-      stage_id: z.uuid(),
-      work_date: z.string(),
-      revision: z.number().int(),
-      work_summary: z.string(),
-      labor_plan: z.array(
-        z.object({
-          trade: z.string(),
-          workers: z.number().int(),
-        }),
-      ),
-      instructions: z.string(),
-      status: z.string(),
-      submitted_at: z.string(),
-      materials: z.array(
-        z.object({
-          id: z.uuid(),
-          item: z.string(),
-          quantity: z.number(),
-          unit: z.string(),
-          status: z.string(),
-          required_quantity: z.number(),
-        }),
-      ),
-    }),
-  ),
-});
-const clientProgressManagementSchema = z.object({
-  shares: z.array(
-    z.object({
-      id: z.uuid(),
-      expires_at: z.string(),
-      revoked_at: z.string().nullable(),
-      created_at: z.string(),
-      active: z.boolean(),
-    }),
-  ),
-  reports: z.array(
-    z.object({
-      id: z.uuid(),
-      report_date: z.string(),
-      completed_work: z.string(),
-      tomorrow_plan: z.string(),
-      approved: z.boolean(),
-      published: z.boolean(),
-    }),
-  ),
-});
 const constructionPaymentSchema = z.object({
   active_contract_id: z.uuid().nullable(),
   currency: z.string().nullable(),
