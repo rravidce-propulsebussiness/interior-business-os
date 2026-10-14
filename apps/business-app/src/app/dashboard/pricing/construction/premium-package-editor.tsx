@@ -322,7 +322,12 @@ export function PremiumPackageEditor({
         <input
           type="hidden"
           name="specSections"
-          value={JSON.stringify(sections)}
+          value={JSON.stringify(sections.map((section) =>
+            planSection(section)
+              ? { ...section, kind: 'plans',
+                  brand: '', grade: '', allowancePerSqft: '' }
+              : section,
+          ))}
         />
         <div className="rounded-[23px] border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
           <div className="mb-5 flex items-center gap-3">
