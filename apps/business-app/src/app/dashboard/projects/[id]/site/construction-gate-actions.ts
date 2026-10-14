@@ -75,6 +75,7 @@ export async function recordLaborGateEvent(
         .trim()
         .max(1500)
         .parse(form.get('notes') ?? ''),
+      ...(form.get('request_id') ? { request_id: uuid.parse(form.get('request_id')) } : {}),
     });
   } catch (error) {
     return {
