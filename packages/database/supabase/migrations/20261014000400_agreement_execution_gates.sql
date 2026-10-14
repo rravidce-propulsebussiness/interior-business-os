@@ -246,10 +246,10 @@ begin
          and ps.status='active'),
    'clearance_event_id',latest.id,'clearance_type',latest.event_kind,
    'clearance_media_id',latest.media_id,'clearance_recorded_at',latest.created_at,
-   'current_scope',c.id is not null and latest.scope_fingerprint=
-      private.project_agreement_scope(c.id),
-   'execution_authorized',private.project_agreement_authorized(p_organization_id,p_project_id),
-   'can_authorize_exception',private.site_owner(p_organization_id)
+   'current_scope',coalesce(c.id is not null and latest.scope_fingerprint=
+      private.project_agreement_scope(c.id),false),
+   'execution_authorized',coalesce(private.project_agreement_authorized(p_organization_id,p_project_id),false),
+   'can_authorize_exception',coalesce(private.site_owner(p_organization_id),false)
  );
 end$$;
 
