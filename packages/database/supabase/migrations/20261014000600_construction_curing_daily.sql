@@ -305,9 +305,14 @@ begin
     where organization_id=p_org and id=p_project and status='active' for update;
  if not found then raise exception 'Project not active' using errcode='42501';end if;
  if not private.project_agreement_authorized(p_org,p_project) or
-    not exists(select 1 from private.site_state site
+    not (
+      exists(select 1 from private.site_state site
        where site.organization_id=p_org and site.project_id=p_project
          and site.stage in ('execution','handover'))
+      or exists(select 1 from public.execution_plans ep
+        where ep.organization_id=p_org and ep.project_id=p_project
+          and ep.status in ('in_progress','punch_list','ready_for_handover'))
+    )
  then raise exception 'Site work is not contractually active' using errcode='23514';end if;
  if p_action='curing_plan' or p_action='report_link' then
     if not manager then raise exception 'Project manager required' using errcode='42501';end if;
