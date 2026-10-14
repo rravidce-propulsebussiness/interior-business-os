@@ -140,7 +140,17 @@ export function PremiumPackageEditor({
   const [themeColor, setThemeColor] = useState(item?.themeColor ?? '#155EEF');
   const [sections, setSections] = useState<ConstructionSpecSection[]>(
     item?.specSections?.length
-      ? item.specSections.map((section) => ({ ...section }))
+      ? item.specSections.map((section) =>
+          isPlanSection(section) ? {
+            ...section,
+            kind: 'plans' as const,
+            brand: '',
+            grade: '',
+            allowancePerSqft: '',
+            deliverables: section.deliverables ??
+              planNames.map((name) => ({ label: name, included: false })),
+          } : { ...section },
+        )
       : defaultCategories.map((record, index) =>
           makeSection(record[0], index === 0 ? 'plans' : 'material'),
         ),
