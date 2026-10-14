@@ -1,4 +1,10 @@
 import Link from 'next/link';
+import { canAccess } from '@business-os/auth';
+import { OwnerShell } from '../../../owner-shell';
+import { projectWorkspaceNavigation } from '../../project-workspace-navigation';
+import { SiteCommandOverview } from './command-overview';
+import '../../../owner-dashboard.css';
+import './site-command.css';
 import { notFound } from 'next/navigation';
 import { z } from 'zod';
 import { activeOrganization, pageServices } from '@business-os/auth/server';
@@ -70,13 +76,10 @@ function value(row: Record<string, unknown>, key: string) {
 function display(value: string) {
   return value.replaceAll('_', ' ');
 }
-const card =
-  'rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6';
-const formDetails = 'mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4';
-const green =
-  'rounded-lg bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-800';
-const gray =
-  'rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700';
+const card = 'sc-panel rounded-2xl border p-5 sm:p-6';
+const formDetails = 'sc-disclosure mt-4 rounded-xl border p-4';
+const green = 'sc-pill-positive rounded-lg px-2.5 py-1 text-xs font-semibold';
+const gray = 'sc-pill-neutral rounded-lg px-2.5 py-1 text-xs font-semibold';
 const designKinds = [
   { value: 'architectural_plan', label: 'Architectural plan' },
   { value: '3d_design', label: '3D design / elevation' },
@@ -160,14 +163,10 @@ function Heading({
   detail: string;
 }) {
   return (
-    <div className="mb-5">
-      <p className="text-xs font-bold uppercase tracking-[.18em] text-blue-700">
-        {eyebrow}
-      </p>
-      <h2 className="mt-1 text-xl font-bold tracking-tight text-slate-950">
-        {title}
-      </h2>
-      <p className="mt-1 text-sm leading-6 text-slate-600">{detail}</p>
+    <div className="sc-heading mb-5">
+      <p className="sc-eyebrow text-xs font-bold uppercase tracking-[.18em]">{eyebrow}</p>
+      <h2 className="mt-1 text-xl font-bold tracking-tight">{title}</h2>
+      <p className="mt-1 text-sm leading-6">{detail}</p>
     </div>
   );
 }
@@ -242,66 +241,64 @@ export default async function ProjectDeliveryPage({
       .sort((a, b) => Number(b.revision) - Number(a.revision))[0],
   }));
 
-  return (
-    <main
-      id="main-content"
-      tabIndex={-1}
-      className="min-h-screen bg-slate-50 px-4 py-8 text-slate-900 sm:px-7"
-    >
-      <div className="mx-auto max-w-7xl space-y-6">
-        <nav
-          aria-label="Breadcrumb"
-          className="flex flex-wrap gap-2 text-sm text-slate-600"
-        >
-          <Link className="hover:underline" href="/dashboard/projects">
-            Projects
-          </Link>
-          <span>/</span>
-          <Link className="hover:underline" href={`/dashboard/projects/${id}`}>
-            {site.project.name}
-          </Link>
-          <span>/ Site delivery</span>
-        </nav>
 
-        <header className="rounded-3xl bg-slate-950 p-6 text-white shadow-xl sm:p-9">
-          <div className="flex flex-wrap items-start justify-between gap-5">
-            <div className="max-w-3xl">
-              <p className="text-xs font-bold uppercase tracking-[.18em] text-teal-300">
-                Business OS · Project delivery
-              </p>
-              <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
-                {site.project.name}
-              </h1>
-              <p className="mt-3 text-sm leading-6 text-slate-300">
-                From approved drawings to marking, materials, daily execution
-                and quality handover. Work stays inside the company project
-                workspace.
-              </p>
-            </div>
-            <div className="rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-sm">
-              <p className="text-slate-300">Your access</p>
-              <strong className="mt-1 block capitalize">
-                {display(role ?? 'none')}
-              </strong>
-              <p className="mt-1 text-slate-300">{site.project.code}</p>
-            </div>
-          </div>
-          <div className="mt-7 grid gap-2 sm:grid-cols-4">
-            {stages.map((stage, index) => (
-              <div
-                className={`rounded-xl border p-3 ${phaseIndex >= index ? 'border-teal-400 bg-teal-400/10' : 'border-white/15 bg-white/5'}`}
-                key={stage.key}
-              >
-                <p className="text-xs text-slate-300">0{index + 1}</p>
-                <strong className="mt-1 block text-sm">{stage.title}</strong>
-                <small className="text-xs text-slate-300">{stage.sub}</small>
-              </div>
-            ))}
-          </div>
-        </header>
+  const has = (permission: string, moduleKey?: string) =>
+    canAccess(context, {
+      organizationId: context.organizationId,
+      permission,
+      ...(moduleKey ? { moduleKey } : {}),
+    });
+  const [organization, user, plans] = await Promise.all([
+    s.repository.organization(context.organizationId),
+    s.authorization.requireAuthenticatedUser(),
+    s.repository.plans().catch(() => []),
+  ]);
+  if (!organization) notFound();
+  const email = user.email ?? '';
+  const accountLabel =
+    email.split('@')[0]?.split(/[._-]/).filter(Boolean).slice(0, 2).join(' ') ||
+    'Company member';
+  const planLabel =
+    plans.find((plan) => plan.id === organization.plan_id)?.name ??
+    'Business plan';
+
+  return (
+    <OwnerShell
+      companyName={organization.name}
+      accountLabel={accountLabel}
+      accountEmail={email}
+      planLabel={planLabel}
+      navigation={projectWorkspaceNavigation(has)}
+      currentHref="/dashboard/projects"
+      notificationsEnabled={has('notification.view')}
+      search=""
+    >
+      <main id="main-content" tabIndex={-1} className="site-command-page">
+        <div className="site-command-container">
+          <SiteCommandOverview
+            projectId={id}
+            projectName={site.project.name}
+            projectCode={site.project.code}
+            stage={site.stage}
+            role={role}
+            isManager={manager}
+            isEngineer={isEngineer}
+            isQuality={isQuality}
+            isProcurement={isProcurement}
+            isWatchman={isWatchman}
+            isDesign={isDesign}
+            canSeeManagerUpdates={canSeeManagerUpdates}
+            reports={site.reports}
+            reviews={managerData.reviews}
+            managerUpdates={managerData.updates}
+            checks={site.checks}
+            materials={site.materials}
+            gate={site.gate}
+            media={site.media}
+          />
 
         {site.stage === 'not_started' && (
-          <section className={card}>
+          <section className={card} id="initialize">
             <Heading
               eyebrow="Set up"
               title="Start the project delivery workflow"
@@ -323,7 +320,7 @@ export default async function ProjectDeliveryPage({
         )}
 
         {manager && site.stage !== 'not_started' && (
-          <section className={card}>
+          <section className={card} id="team">
             <Heading
               eyebrow="Project access"
               title="Assign the right people"
@@ -405,7 +402,7 @@ export default async function ProjectDeliveryPage({
           role === 'site_engineer' ||
           role === 'quality_inspector') &&
           site.stage !== 'not_started' && (
-            <section className={card}>
+            <section className={card} id="design">
               <Heading
                 eyebrow="Stage 1"
                 title="Design and technical approval"
@@ -553,7 +550,7 @@ export default async function ProjectDeliveryPage({
           )}
 
         {site.stage === 'client_approved' && manager && (
-          <section className={card}>
+          <section className={card} id="launch">
             <Heading
               eyebrow="Stage 2"
               title="Design approved. Begin site work"
@@ -571,45 +568,8 @@ export default async function ProjectDeliveryPage({
           </section>
         )}
 
-        {(open || site.stage === 'handover') &&
-          (isEngineer || isQuality || isProcurement || isWatchman) && (
-            <section className="grid gap-4 md:grid-cols-3">
-              <article className={card}>
-                <p className="text-xs uppercase tracking-wider text-slate-500">
-                  Latest site reports
-                </p>
-                <strong className="mt-2 block text-3xl">
-                  {site.reports.length}
-                </strong>
-                <p className="mt-1 text-sm text-slate-600">Recorded entries</p>
-              </article>
-              <article className={card}>
-                <p className="text-xs uppercase tracking-wider text-slate-500">
-                  Checks required
-                </p>
-                <strong className="mt-2 block text-3xl">
-                  {pendingChecks.length}
-                </strong>
-                <p className="mt-1 text-sm text-slate-600">
-                  Pending, failed or recheck
-                </p>
-              </article>
-              <article className={card}>
-                <p className="text-xs uppercase tracking-wider text-slate-500">
-                  Material needs
-                </p>
-                <strong className="mt-2 block text-3xl">
-                  {pendingMaterials.length}
-                </strong>
-                <p className="mt-1 text-sm text-slate-600">
-                  Not yet received or rejected
-                </p>
-              </article>
-            </section>
-          )}
-
         {canSeeManagerUpdates && (open || site.stage === 'handover') && (
-          <section className={card}>
+          <section className={card} id="manager-updates">
             <Heading
               eyebrow="Manager control"
               title="Project manager's updates & tomorrow priorities"
@@ -734,7 +694,7 @@ export default async function ProjectDeliveryPage({
         )}
 
         {(isEngineer || isQuality) && (open || site.stage === 'handover') && (
-          <section className={card}>
+          <section className={card} id="daily-reports">
             <Heading
               eyebrow="Stage 3"
               title="Daily site execution"
@@ -905,7 +865,7 @@ export default async function ProjectDeliveryPage({
 
         {(isEngineer || isProcurement) &&
           (open || site.stage === 'handover') && (
-            <section className={card}>
+            <section className={card} id="materials">
               <Heading
                 eyebrow="Materials"
                 title="Quantities and purchasing"
@@ -1115,7 +1075,7 @@ export default async function ProjectDeliveryPage({
           )}
 
         {isQuality && (open || site.stage === 'handover') && (
-          <section className={card}>
+          <section className={card} id="quality">
             <Heading
               eyebrow="Quality"
               title="Checks done and checks required"
@@ -1219,7 +1179,7 @@ export default async function ProjectDeliveryPage({
         )}
 
         {isWatchman && (open || site.stage === 'handover') && (
-          <section className={card}>
+          <section className={card} id="security">
             <Heading
               eyebrow="Security &amp; curing"
               title="Gate register and site rounds"
@@ -1286,7 +1246,7 @@ export default async function ProjectDeliveryPage({
 
         {(isDesign || isEngineer || isQuality) &&
           ['design', 'execution'].includes(site.stage) && (
-            <section className={card}>
+            <section className={card} id="media">
               <Heading
                 eyebrow="Evidence"
                 title="Drawings, photos and progress clips"
@@ -1324,7 +1284,7 @@ export default async function ProjectDeliveryPage({
           )}
 
         {manager && open && (
-          <section className={card}>
+          <section className={card} id="handover">
             <Heading
               eyebrow="Stage 4"
               title="Quality clearance and handover"
@@ -1349,7 +1309,7 @@ export default async function ProjectDeliveryPage({
           </section>
         )}
 
-        <footer className="flex flex-wrap gap-3 rounded-xl border border-slate-200 bg-white p-4 text-sm">
+        <footer className="sc-footer flex flex-wrap gap-3 rounded-xl border p-4 text-sm">
           <Link
             className="font-semibold text-blue-700 underline"
             href={`/dashboard/operations?project=${id}`}
@@ -1363,7 +1323,8 @@ export default async function ProjectDeliveryPage({
             BOQ, procurement &amp; receipts →
           </Link>
         </footer>
-      </div>
-    </main>
+        </div>
+      </main>
+    </OwnerShell>
   );
 }
