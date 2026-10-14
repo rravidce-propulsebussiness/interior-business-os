@@ -232,7 +232,9 @@ export function ConstructionJourney({
   const go = (hash: string) => (inSiteWorkspace ? hash : base + hash);
   const stageOptions = canManageLinks
     ? allStageOptions
-    : allStageOptions.filter((item) => engineerOwned.has(item.kind + ':' + item.id));
+    : allStageOptions.filter((item) =>
+        engineerOwned.has(item.kind + ':' + item.id),
+      );
   const qualityByStage = new Map(
     (quality?.stages ?? []).map((entry) => [entry.stage_id, entry]),
   );
@@ -296,7 +298,9 @@ export function ConstructionJourney({
         <Link href={go('#materials')}>Materials</Link>
         <Link href={go('#security')}>Curing</Link>
         <Link href={go('#team')}>Team</Link>
-        {canSeeFinance && !isWatchman && <Link href={paymentsUrl}>Payments</Link>}
+        {canSeeFinance && !isWatchman && (
+          <Link href={paymentsUrl}>Payments</Link>
+        )}
       </nav>
       {!stages.length ? (
         isWatchman ? (
@@ -322,7 +326,8 @@ export function ConstructionJourney({
                 <strong>Recent rounds</strong>
                 {curingRounds.slice(0, 6).map((round) => (
                   <p key={value(round, 'id')}>
-                    {date(value(round, 'created_at'))}: {value(round, 'description')}
+                    {date(value(round, 'created_at'))}:{' '}
+                    {value(round, 'description')}
                   </p>
                 ))}
               </div>
