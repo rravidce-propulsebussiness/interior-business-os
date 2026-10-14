@@ -22,6 +22,7 @@ import {
 } from './lead-category';
 import '../../owner-dashboard.css';
 import './leads.css';
+import './lead-category.css';
 
 export const dynamic = 'force-dynamic';
 
