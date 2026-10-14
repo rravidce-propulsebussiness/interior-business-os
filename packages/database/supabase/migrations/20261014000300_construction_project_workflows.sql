@@ -77,7 +77,9 @@ create table private.construction_project_stages (
   activities jsonb not null check(jsonb_typeof(activities)='array' and jsonb_array_length(activities) between 1 and 80),
   inspection_topics jsonb not null check(jsonb_typeof(inspection_topics)='array' and jsonb_array_length(inspection_topics)<=50),
   status text not null default 'not_started' check(status='not_started'),
+  sequence integer not null check(sequence between 1 and 900),
   created_at timestamptz not null default now(),
+  unique (organization_id,project_id,sequence),
   unique (organization_id,project_id,instance_code),
   unique (organization_id,project_id,id),
   foreign key (organization_id,project_id,workflow_id)
@@ -207,7 +209,7 @@ begin
           and pred.id=d.predecessor_id
         where d.stage_id=s.id and d.organization_id=s.organization_id
           and d.project_id=s.project_id),'[]'::jsonb)
-      ) order by s.created_at,s.instance_code),'[]'::jsonb) into stages
+      ) order by s.sequence),'[]'::jsonb) into stages
    from private.construction_project_stages s
    where s.organization_id=p_organization_id and s.project_id=p_project_id;
  end if;
@@ -309,7 +311,9 @@ begin
   ) values(p_organization_id,p_project_id,'CONSTRUCTION_STANDARD',
       p_input->'template'->>'version',p_input->'template',
       p_input->'floors',auth.uid()) returning id into workflow_id;
+  count_items=0;
   for item in select value from jsonb_array_elements(p_input->'stages') loop
+    count_items=count_items+1;
     if jsonb_typeof(item) is distinct from 'object' or
       item- array['instanceCode','templateCode','phase','title','explanation',
         'floorCode','dependsOn','holdPoint','activities','inspectionTopics'] <> '{}'::jsonb
@@ -321,11 +325,11 @@ begin
     then raise exception 'Invalid stage definition' using errcode='22023';end if;
     insert into private.construction_project_stages (
       organization_id,project_id,workflow_id,instance_code,template_code,
-      phase,floor_code,title,explanation,hold_point,activities,inspection_topics
+      phase,floor_code,title,explanation,hold_point,activities,inspection_topics,sequence
     ) values (p_organization_id,p_project_id,workflow_id,
        item->>'instanceCode',item->>'templateCode',item->>'phase',
        nullif(item->>'floorCode',''),item->>'title',item->>'explanation',
-       nullif(item->>'holdPoint',''),item->'activities',item->'inspectionTopics');
+       nullif(item->>'holdPoint',''),item->'activities',item->'inspectionTopics',count_items);
   end loop;
   for item in select value from jsonb_array_elements(p_input->'stages') loop
    select id into id_result from private.construction_project_stages
