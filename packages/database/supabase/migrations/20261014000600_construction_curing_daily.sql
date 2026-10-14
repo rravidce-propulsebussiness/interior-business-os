@@ -355,7 +355,7 @@ begin
      p_input-array['observation_id','decision','reason']<>'{}'::jsonb
    then raise exception 'Engineer verification required' using errcode='42501';end if;
    select ob.* into observation from private.construction_curing_observations ob
-    join private.construction_curing_plans plan on plan.id=ob.plan_id
+    join private.construction_curing_plans cp on cp.id=ob.plan_id
     where ob.organization_id=p_org and ob.project_id=p_project
       and ob.id=(p_input->>'observation_id')::uuid for update of ob;
    if observation.id is null or observation.observed_by=actor
