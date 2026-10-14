@@ -132,6 +132,25 @@ returns boolean language sql stable security definer set search_path='' as $$
  ),false);
 $$;
 
+-- A construction-only assignment grants project shell access, not file bytes.
+-- Fail closed if the older site_team role is absent; IF NULL is never denial.
+create or replace function public.project_site_media_get(p_organization_id uuid,p_project_id uuid,p_id uuid)
+returns jsonb language plpgsql stable security definer set search_path='' as $$
+declare m private.site_media;role text;begin
+ if not private.site_access(p_organization_id,p_project_id) then raise exception 'Media not available' using errcode='42501';end if;
+ role=private.site_role(p_organization_id,p_project_id);
+ if not coalesce(private.site_is_manager(p_organization_id,p_project_id),false) and (role is null or role not in ('manager','architect','structural_designer','site_engineer','quality_inspector')) then raise exception 'Media not available' using errcode='42501';end if;
+ select * into m from private.site_media where organization_id=p_organization_id and project_id=p_project_id and id=p_id;
+ if m.id is null then raise exception 'Media not found' using errcode='42501';end if;
+ if m.category='agreement' and (
+    not coalesce(private.construction_can_manage(p_organization_id,p_project_id),false)
+    or not coalesce(private.finance_access(p_organization_id,'contract.view'),false)
+ ) then raise exception 'Agreement media restricted' using errcode='42501';end if;
+ if m.category='design' and role in ('watchman','procurement') and not private.site_is_manager(p_organization_id,p_project_id) then raise exception 'Media not permitted' using errcode='42501';end if;
+ if m.category<>'design' and role in ('architect','structural_designer') and not private.site_is_manager(p_organization_id,p_project_id) then raise exception 'Media not permitted' using errcode='42501';end if;
+ return jsonb_build_object('filename',m.filename,'mime',m.mime,'base64',encode(m.bytes,'base64'));
+end$$;
+
 create function private.construction_tomorrow_staff(p_org uuid,p_project uuid)
 returns boolean language sql stable security definer set search_path='' as $$
  select coalesce(private.construction_project_access(p_org,p_project)
