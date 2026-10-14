@@ -50,7 +50,8 @@ create table private.construction_stage_clearances(
  certificate_note text not null check(length(trim(certificate_note)) between 12 and 3000),
  created_by uuid not null references public.profiles(id),
  certified_at timestamptz not null default now(),
- unique(organization_id,project_id,stage_id),
+ sequence bigint generated always as identity unique,
+ unique(organization_id,project_id,id),
  foreign key(organization_id,project_id,stage_id)
    references private.construction_project_stages(organization_id,project_id,id),
  foreign key(organization_id,project_id,quality_review_id)
@@ -74,6 +75,7 @@ create trigger immutable_stage_inspections before update or delete on
  private.construction_stage_inspections for each row execute function private.ops_immutable();
 create trigger immutable_stage_reviews before update or delete on
  private.construction_stage_reviews for each row execute function private.ops_immutable();
+create index construction_stage_clearance_latest on private.construction_stage_clearances(stage_id,sequence desc);
 create trigger immutable_stage_clearances before update or delete on
  private.construction_stage_clearances for each row execute function private.ops_immutable();
 
@@ -145,6 +147,7 @@ returns boolean language sql stable security definer set search_path='' as $$
    on c.stage_id=s.id and c.project_id=s.project_id
      and c.organization_id=s.organization_id
   where s.organization_id=p_org and s.project_id=p_project and s.id=p_stage
+  order by c.sequence desc limit 1
  ),false);
 $$;
 
@@ -283,9 +286,8 @@ begin
     if length(why) not between 12 and 3000
     then raise exception 'Stage certification note required' using errcode='22023';end if;
     perform private.project_agreement_require(p_org,p_project);
-    if exists(select 1 from private.construction_stage_clearances
-       where organization_id=p_org and project_id=p_project and stage_id=stage.id)
-    then raise exception 'Certified stage exists, audit is immutable'
+    if private.construction_stage_current(p_org,p_project,stage.id)
+    then raise exception 'Stage already has a current certified clearance'
       using errcode='23505';end if;
     if not exists(select 1 from public.execution_plans p
        where p.organization_id=p_org and p.project_id=p_project
@@ -339,6 +341,20 @@ begin
        or not private.construction_inspection_valid(sr.inspection_id)
       then raise exception 'Independent structural engineer must approve' using errcode='23514';end if;
     end if;
+    -- A re-certification after new problems must cite fresh independent reviews.
+    if exists(select 1 from private.construction_stage_clearances previous
+       join private.construction_stage_reviews oldq on oldq.id=previous.quality_review_id
+       where previous.organization_id=p_org and previous.project_id=p_project
+         and previous.stage_id=stage.id and oldq.sequence>=q.sequence)
+    then raise exception 'A new quality review is required to recertify'
+       using errcode='23514';end if;
+    if stage.hold_point='structural' and exists(
+       select 1 from private.construction_stage_clearances previous
+       join private.construction_stage_reviews olds on olds.id=previous.structural_review_id
+       where previous.organization_id=p_org and previous.project_id=p_project
+        and previous.stage_id=stage.id and olds.sequence>=sr.sequence)
+    then raise exception 'A new structural review is required to recertify'
+       using errcode='23514';end if;
     insert into private.construction_stage_clearances(
      organization_id,project_id,stage_id,quality_review_id,structural_review_id,
      scope_fingerprint,certificate_note,created_by)
