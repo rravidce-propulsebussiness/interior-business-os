@@ -64,24 +64,25 @@ declare
   r jsonb;
   rejected boolean := false;
 begin
-  if not private.can_view_construction_package(
-    'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
-    current_setting('app.test_package_id')::uuid
-  ) then
-    raise exception 'Company member with pricing permission cannot see package';
-  end if;
-  if private.can_view_construction_package(
-    'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',
-    current_setting('app.test_package_id')::uuid
-  ) then
-    raise exception 'Other company can view this package';
-  end if;
+  -- The internal validator is deliberately not executable by clients.
+  -- Verify isolation only through the authenticated, permission-gated API.
   r := public.construction_package_list('dddddddd-dddd-4ddd-8ddd-dddddddddddd');
   if not exists (
     select 1 from jsonb_array_elements(r) row
     where row->>'code'='COMPANY-ONLY-ACL'
   ) then raise exception 'Package missing from company list'; end if;
 
+  rejected := false;
+  begin
+    perform public.construction_package_list(
+      'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee'
+    );
+  exception when sqlstate '42501' then rejected := true;
+  end;
+  if not rejected then
+    raise exception 'Tenant package list allowed another organization';
+  end if;
+  rejected := false;
   begin
     perform public.construction_package_save(
       'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
