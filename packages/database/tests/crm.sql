@@ -63,7 +63,7 @@ do $$declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';source uuid;stage u
  perform public.crm_save(org,'lead_sources',jsonb_build_object('id',source,'version',2,'active',false));
  perform pg_temp.crm_denied(format('select public.crm_save(%L,''leads'',%L::jsonb)',org,jsonb_build_object('name','Inactive source lead','phone','+61255550125','source_id',source,'stage_id',stage)),'inactive source cannot receive new leads');
  perform pg_temp.crm_assert((select source_id=source from public.leads where id=lead),'source deactivation preserves lead history');
- perform public.crm_save(org,'leads',jsonb_build_object('id',lead,'version',4,'source_id',source,'notes','Updated after source deactivation'));
+ perform public.crm_save(org,'leads',jsonb_build_object('id',lead,'version',3,'source_id',source,'notes','Updated after source deactivation'));
  perform pg_temp.crm_assert((select notes='Updated after source deactivation' from public.leads where id=lead),'existing inactive-source lead remains editable');
 end$$;
 reset role;
