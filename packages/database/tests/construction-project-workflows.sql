@@ -91,6 +91,8 @@ select set_config('request.jwt.claim.sub','22222222-2222-4222-8222-222222222222'
 do $$
 declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd'; project uuid=current_setting('test.construction_project')::uuid;
 begin
+ if public.construction_project_read(org,project)->>'can_manage'<>'false'
+ then raise exception 'FAIL: watchman management permission is not explicitly false';end if;
  if jsonb_array_length(public.construction_project_read(org,project)->'stages')<>0
  then raise exception 'FAIL: watchman can read engineering stages';end if;
  begin
