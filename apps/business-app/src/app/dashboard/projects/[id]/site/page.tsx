@@ -622,8 +622,8 @@ export default async function ProjectDeliveryPage({
   if (open || site.stage === 'handover') {
     if (isEngineer || isQuality) {
       mobileUpdateHref = '#daily-reports';
-    } else if (isWatchman) {
-      mobileUpdateHref = '#security';
+    } else if (isWatchman || gateLabor) {
+      mobileUpdateHref = gateLabor ? '#construction-labor-gate' : '#security';
     }
   }
 
