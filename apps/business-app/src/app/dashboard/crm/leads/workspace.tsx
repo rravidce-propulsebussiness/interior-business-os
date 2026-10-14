@@ -685,7 +685,9 @@ export function LeadsWorkspace({
                                 type="button"
                                 className="crm-lead-identity"
                                 onClick={() => open(lead)}
-                                aria-label={'Open lead details for ' + lead.name}
+                                aria-label={
+                                  'Open lead details for ' + lead.name
+                                }
                               >
                                 <span
                                   className={'crm-avatar crm-avatar-' + (i % 5)}
@@ -793,10 +795,7 @@ export function LeadsWorkspace({
                   </div>
                   <div className="crm-mobile-list">
                     {rows.map((lead, i) => (
-                      <article
-                        className="crm-mobile-card"
-                        key={lead.id}
-                      >
+                      <article className="crm-mobile-card" key={lead.id}>
                         <div className="crm-mobile-header">
                           <span className={'crm-avatar crm-avatar-' + (i % 5)}>
                             {firstLetters(lead.name)}
