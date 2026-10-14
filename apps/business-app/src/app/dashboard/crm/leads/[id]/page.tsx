@@ -360,7 +360,7 @@ export default async function LeadDetail({
           </section>
         ) : (
           s.allowed('lead.convert') &&
-          l.lifecycle === 'open' && (
+          l.lifecycle === 'won' && (
             <Link
               className="my-4 inline-block rounded border p-3"
               href={'/dashboard/crm/leads/' + id + '/convert'}
