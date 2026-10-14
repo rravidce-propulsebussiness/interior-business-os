@@ -1,3 +1,4 @@
+import { constructionSectionKind } from './construction-specifications';
 import { z } from 'zod';
 import { addressSchema, brandingSchema } from './commercial';
 import { parseSftEstimate } from './sft-quotation';
@@ -147,7 +148,9 @@ export function renderQuotationDocument(input: unknown): string {
             section.description.trim() ||
             section.brand?.trim() ||
             section.grade?.trim() ||
-            section.allowancePerSqft?.trim(),
+            section.allowancePerSqft?.trim() ||
+            section.deliverables?.length ||
+            section.extraFields?.some((field) => field.value.trim()),
           ),
         )
         .map(
@@ -157,16 +160,33 @@ export function renderQuotationDocument(input: unknown): string {
             '</div><div><h3>' +
             escape(section.title) +
             '</h3>' +
-            (section.brand
+            (constructionSectionKind({
+              brand: section.brand ?? '',
+              grade: section.grade ?? '',
+              allowancePerSqft: section.allowancePerSqft ?? '',
+              title: section.title,
+              description: section.description,
+              kind: section.kind,
+            }) === 'material' && section.brand
               ? '<p><strong>Brand:</strong> ' + escape(section.brand) + '</p>'
               : '') +
-            (section.grade
+            (section.kind !== 'plans' && section.grade
               ? '<p><strong>Grade:</strong> ' + escape(section.grade) + '</p>'
               : '') +
-            (section.allowancePerSqft
+            (section.kind !== 'plans' && section.allowancePerSqft
               ? '<p><strong>Material allowance:</strong> ₹' +
                 escape(section.allowancePerSqft) +
                 '/SFT</p>'
+              : '') +
+            (section.deliverables?.length
+              ? '<p><strong>Included drawings:</strong> ' +
+                section.deliverables.map(escape).join(' · ') + '</p>'
+              : '') +
+            (section.extraFields?.length
+              ? section.extraFields.filter((field) => field.value.trim())
+                  .map((field) =>
+                    '<p><strong>' + escape(field.label) + ':</strong> ' +
+                    escape(field.value) + '</p>').join('')
               : '') +
             (section.description
               ? '<p class="text">' + escape(section.description) + '</p>'
