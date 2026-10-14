@@ -130,3 +130,20 @@ test('Upload Leads and Google Sheets have distinct protected pages', () => {
   assert.match(importer, /report\.duplicates/);
   assert.match(importer, /report\.invalid/);
 });
+
+test('Leads listing opens the single canonical detail page without duplicate editors', () => {
+  assert.match(leads, /window\.location\.assign\(path \+ '\/'/);
+  assert.match(leads, /onOpen=\{open\}/);
+  assert.doesNotMatch(leads, /Open full lead workspace/);
+  assert.doesNotMatch(leads, /Open full lead notes and history/);
+  assert.doesNotMatch(leads, /crm-detail-pane/);
+  assert.doesNotMatch(leads, /crm-detail-editor/);
+  const detail = readFileSync(
+    fileURLToPath(new URL('[id]/page.tsx', root)),
+    'utf8',
+  );
+  assert.match(detail, /LeadMeetActions/);
+  assert.match(detail, /id="lead-followups"/);
+  assert.match(detail, /id="lead-site-visits"/);
+  assert.match(detail, /id="lead-activity"/);
+});
