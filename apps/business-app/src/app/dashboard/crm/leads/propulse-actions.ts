@@ -35,6 +35,12 @@ const lead = z.object({
   city: z.string().nullable().optional(),
   budget: z.string().nullable().optional(),
   source: z.string().nullable().optional(),
+  // Proof comes from the authenticated, account-scoped ProPulse purchases feed.
+  // Complimentary/member-granted and merely visible leads are rejected.
+  access_type: z.literal('purchased'),
+  purchase_status: z.literal('paid'),
+  purchase_id: z.number().int().positive(),
+  purchase_payment_id: z.number().int().positive(),
 });
 const feed = z.object({
   leads: z.array(lead).max(50),
@@ -91,6 +97,20 @@ export async function connectPropulseLeads(
         body: JSON.stringify({ code: pairingCode }),
       }),
     );
+    // A paid purchase belongs to one business. Do not let a connected
+    // ProPulse purchaser distribute its private feed across OS tenants.
+    const { data: otherTenant, error: ownerError } = await admin
+      .from('propulse_lead_connections')
+      .select('organization_id')
+      .eq('propulse_subject', verified.subject)
+      .neq('organization_id', s.org)
+      .limit(1);
+    if (ownerError)
+      throw new Error('Could not verify the ProPulse purchasing company.');
+    if (otherTenant?.length)
+      throw new Error(
+        'This ProPulse purchasing account is already connected to another Business OS company.',
+      );
     const { data: existing, error: priorError } = await admin
       .from('propulse_lead_connections')
       .select('access_token')
@@ -273,16 +293,9 @@ export async function syncPropulseLeads(): Promise<ActionResult> {
           skipped++;
           continue;
         }
-        const dup = z
-          .object({
-            leads: z.array(z.unknown()),
-            customers: z.array(z.unknown()),
-          })
-          .parse(await s.crm.duplicates(phone, email));
-        if (dup.leads.length || dup.customers.length) {
-          skipped++;
-          continue;
-        }
+        // Purchased leads always land in this buyer's CRM, even if another
+        // lead/client shares a phone. Conversion handles the customer match.
+        // Exact ProPulse lead ID is deduplicated by the tenant-scoped index.
         const rawBudget = String(row.budget || '').replace(/[₹,\s]/g, '');
         const amount = /^\d{1,16}(\.\d{1,2})?$/.test(rawBudget)
           ? rawBudget
@@ -297,6 +310,7 @@ export async function syncPropulseLeads(): Promise<ActionResult> {
           location: (row.city || '').slice(0, 500),
           service_type: (row.service || '').slice(0, 200),
           notes: (row.requirement || '').slice(0, 10000),
+          requirements: { propulse_purchase_id: row.purchase_id },
           site_address: {
             line1: '',
             line2: '',

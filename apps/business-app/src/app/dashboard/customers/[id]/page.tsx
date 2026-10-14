@@ -7,8 +7,10 @@ import { MasterForm } from '../../commercial/master-form';
 import { OwnerIcon, OwnerShell } from '../../owner-shell';
 import { projectWorkspaceNavigation } from '../../projects/project-workspace-navigation';
 import { CustomerReference } from './reference';
+import { leadServiceFromIndustryKey } from '../../crm/leads/lead-service-options';
 import '../../owner-dashboard.css';
 import './customer-profile.css';
+import './client-profile-light.css';
 
 export const dynamic = 'force-dynamic';
 
@@ -118,42 +120,64 @@ export default async function Customer({
       ...(moduleKey ? { moduleKey } : {}),
     });
 
-  const [organization, user, plans, contactResult, projectResult, quoteResult] =
-    await Promise.all([
-      s.repository.organization(s.org),
-      s.authorization.requireAuthenticatedUser(),
-      s.repository.plans().catch(() => []),
-      s.client
-        .from('customer_contacts')
-        .select('*')
-        .eq('organization_id', s.org)
-        .eq('customer_id', id)
-        .order('name')
-        .limit(100),
-      canSeeProjects
-        ? s.client
-            .from('projects')
-            .select('id,name,status,created_at', { count: 'exact' })
-            .eq('organization_id', s.org)
-            .eq('customer_id', id)
-            .order('created_at', { ascending: false })
-            .limit(3)
-        : Promise.resolve({ data: [], count: null }),
-      canSeeQuotes
-        ? s.client
-            .from('quotations')
-            .select('id,created_at', { count: 'exact' })
-            .eq('organization_id', s.org)
-            .eq('customer_id', id)
-            .order('created_at', { ascending: false })
-            .limit(3)
-        : Promise.resolve({ data: [], count: null }),
-    ]);
+  const [
+    organization,
+    user,
+    plans,
+    contactResult,
+    projectResult,
+    quoteResult,
+    industries,
+  ] = await Promise.all([
+    s.repository.organization(s.org),
+    s.authorization.requireAuthenticatedUser(),
+    s.repository.plans().catch(() => []),
+    s.client
+      .from('customer_contacts')
+      .select('*')
+      .eq('organization_id', s.org)
+      .eq('customer_id', id)
+      .order('name')
+      .limit(100),
+    canSeeProjects
+      ? s.client
+          .from('projects')
+          .select('id,name,status,created_at,industry_id', { count: 'exact' })
+          .eq('organization_id', s.org)
+          .eq('customer_id', id)
+          .order('created_at', { ascending: false })
+          .limit(3)
+      : Promise.resolve({ data: [], count: null }),
+    canSeeQuotes
+      ? s.client
+          .from('quotations')
+          .select('id,created_at', { count: 'exact' })
+          .eq('organization_id', s.org)
+          .eq('customer_id', id)
+          .order('created_at', { ascending: false })
+          .limit(3)
+      : Promise.resolve({ data: [], count: null }),
+    s.repository.industries(),
+  ]);
   if (!organization) throw new Error('Company workspace unavailable.');
 
   const contacts = contactResult.data ?? [];
   const projects = projectResult.data ?? [];
   const quotations = quoteResult.data ?? [];
+  const services = [
+    ...new Set(
+      projects
+        .map((project) => {
+          const industry = industries.find(
+            (item) => item.id === project.industry_id,
+          );
+          return industry ? leadServiceFromIndustryKey(industry.key) : null;
+        })
+        .filter((service): service is 'construction' | 'interior' =>
+          Boolean(service),
+        ),
+    ),
+  ];
   const accountEmail = user.email ?? '';
   const planLabel =
     plans.find((plan) => plan.id === organization.plan_id)?.name ??
@@ -193,7 +217,7 @@ export default async function Customer({
     .slice(0, 4);
 
   return (
-    <div className="customer-profile-theme">
+    <div className="customer-profile-theme client-profile-light">
       <OwnerShell
         companyName={organization.name}
         accountLabel={accountEmail.split('@')[0] || 'Team member'}
@@ -234,6 +258,18 @@ export default async function Customer({
                   : 'Inactive customer'}
               </span>
               <CustomerReference value={reference} />
+              {services.length > 0 && (
+                <div
+                  className="cp-service-tags"
+                  aria-label="Linked project services"
+                >
+                  {services.map((service) => (
+                    <span key={service} className={'cp-service-tag ' + service}>
+                      {service === 'interior' ? 'Interiors' : 'Construction'}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
           </header>
           <div className="cp-origin-leads cp-origin-near-header">

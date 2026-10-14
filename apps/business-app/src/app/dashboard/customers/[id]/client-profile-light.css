@@ -1,0 +1,355 @@
+/* Premium Client Account · visual parity with the Clients directory.
+   Only visual styles: original project/quotation/billing permission gates remain. */
+.client-profile-light,
+.client-profile-light .owner-layout {
+  background: #f5f8fd;
+  color: #1a314f;
+  color-scheme: light;
+}
+.client-profile-light .owner-workspace {
+  background: #f5f8fd;
+  min-width: 0;
+}
+.client-profile-light .owner-topbar {
+  background: white;
+  border-bottom: 1px solid #e0e8f4;
+}
+.client-profile-light .owner-menu-button,
+.client-profile-light .owner-topbar-icon {
+  color: #315272 !important;
+}
+.client-profile-light .owner-search {
+  background: #f4f8fd;
+  color: #6b84a5;
+}
+.client-profile-light .owner-search input {
+  color: #203c5f;
+}
+.client-profile-light .owner-profile-label strong,
+.client-profile-light .owner-profile summary {
+  color: #243d60;
+}
+.client-profile-light .owner-profile-label small,
+.client-profile-light .owner-profile-chevron {
+  color: #69819e;
+}
+.client-profile-light .owner-layout a:hover {
+  color: #146dde;
+}
+.client-profile-light .cp-page {
+  background: transparent;
+  color: #193452;
+  width: min(1300px, 100%);
+  padding: 24px clamp(14px, 2.5vw, 32px) 42px;
+}
+.client-profile-light .cp-breadcrumb {
+  color: #8296af;
+  font-size: 12px;
+}
+.client-profile-light .cp-breadcrumb a {
+  color: #6b89aa;
+}
+.client-profile-light .cp-breadcrumb span:last-child {
+  color: #345071;
+}
+.client-profile-light .cp-hero {
+  border: 1px solid #dce7f6;
+  background: linear-gradient(120deg, #ffffff, #f7fbff 68%, #edf5ff);
+  box-shadow: 0 7px 28px #1c487109;
+  border-radius: 18px;
+  padding: 22px 24px;
+  min-height: 144px;
+  margin-bottom: 17px;
+}
+.client-profile-light .cp-avatar {
+  width: 85px;
+  height: 85px;
+  flex-basis: 85px;
+  background: linear-gradient(145deg, #e1edff, #b7d2ff);
+  border: 2px solid #f6faff;
+  box-shadow: 0 0 0 3px #d9e9ff;
+  color: #1467d8;
+  font-size: 35px;
+}
+.client-profile-light .cp-account-eyebrow {
+  color: #6a8bae;
+  font-size: 10px;
+}
+.client-profile-light .cp-hero h1 {
+  color: #162c4c;
+  font-size: clamp(23px, 3vw, 35px);
+}
+.client-profile-light .cp-status {
+  background: #f4f6fa;
+  border-color: #dee6ef;
+  color: #62718b;
+  font-size: 11px;
+}
+.client-profile-light .cp-status-active {
+  background: #e5f9ef;
+  border-color: #bdecd2;
+  color: #15935a;
+}
+.client-profile-light .cp-status-active span {
+  color: #15935a;
+}
+.client-profile-light .cp-reference {
+  background: #f2f6fc;
+  border-color: #dfebf6;
+  color: #637f9f;
+  font-size: 11px;
+}
+.client-profile-light .cp-reference strong {
+  color: #36577a;
+}
+.client-profile-light .cp-copy {
+  background: white;
+  border-color: #d2e1f3;
+  color: #236bcc !important;
+}
+.client-profile-light .cp-service-tags {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+.client-profile-light .cp-service-tag {
+  display: inline-flex;
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 800;
+}
+.client-profile-light .cp-service-tag.construction {
+  background: #e6f1ff;
+  color: #1664cd;
+}
+.client-profile-light .cp-service-tag.interior {
+  background: #f2e9ff;
+  color: #7a44b8;
+}
+.client-profile-light .cp-origin-near-header {
+  margin-bottom: 12px;
+}
+.client-profile-light .cp-origin-near-header section {
+  background: #f0f6ff;
+  border: 1px solid #d5e5fa;
+  color: #365a87;
+}
+.client-profile-light .cp-origin-near-header section h2 {
+  color: #355c8d;
+}
+.client-profile-light .cp-origin-leads a {
+  color: #1268d5;
+}
+.client-profile-light .cp-stat,
+.client-profile-light .cp-action,
+.client-profile-light .cp-panel,
+.client-profile-light .cp-tabs {
+  border: 1px solid #e0e9f5;
+  background: #fff;
+  box-shadow: 0 5px 20px #223f6908;
+}
+.client-profile-light .cp-stat {
+  border-radius: 14px;
+  padding: 17px;
+  min-height: 88px;
+}
+.client-profile-light .cp-stat-icon {
+  background: #e6f1ff;
+  color: #2474d9;
+  border-radius: 12px;
+}
+.client-profile-light .cp-stat:nth-child(2) .cp-stat-icon {
+  background: #e8f8fa;
+  color: #1393a0;
+}
+.client-profile-light .cp-stat:nth-child(3) .cp-stat-icon {
+  background: #e6faef;
+  color: #128754;
+}
+.client-profile-light .cp-stat-content > span {
+  color: #7287a2;
+  font-size: 12px;
+}
+.client-profile-light .cp-stat-content strong {
+  color: #172e50;
+  font-size: 25px;
+}
+.client-profile-light .cp-stat-arrow {
+  color: #88a9ce;
+}
+.client-profile-light .cp-action {
+  border-radius: 10px;
+  min-height: 46px;
+  color: #2561ad;
+  font-size: 12px;
+  background: #f9fbfe;
+}
+.client-profile-light .cp-action > span {
+  color: #0b975b;
+}
+.client-profile-light .cp-action svg {
+  color: #2372d9;
+}
+.client-profile-light .cp-action:hover {
+  background: #eaf3ff;
+  border-color: #b8d8f9;
+}
+.client-profile-light .cp-tabs {
+  border-radius: 11px;
+  padding: 5px;
+}
+.client-profile-light .cp-tabs a {
+  color: #647f9d;
+}
+.client-profile-light .cp-tabs a:hover,
+.client-profile-light .cp-tabs .cp-tab-current {
+  background: #ebf3ff;
+  color: #1666cf !important;
+  box-shadow: inset 0 -3px #2576e8;
+}
+.client-profile-light .cp-panel {
+  border-radius: 14px;
+  box-shadow: 0 5px 20px #1b3a6708;
+}
+.client-profile-light .cp-section-heading h2 {
+  color: #203a5b;
+  font-size: 16px;
+}
+.client-profile-light .cp-section-heading h2 svg,
+.client-profile-light .cp-section-heading h2 > span {
+  color: #2c82e9;
+}
+.client-profile-light .cp-small-action {
+  border-color: #d5e4f5;
+  background: #f3f8ff;
+  color: #2169c8;
+}
+.client-profile-light .cp-info > div {
+  border-color: #e9eef6;
+}
+.client-profile-light .cp-info dt {
+  color: #7890ac;
+}
+.client-profile-light .cp-info dd {
+  color: #244161;
+}
+.client-profile-light .cp-info dd a {
+  color: #1269cd;
+}
+.client-profile-light .cp-muted {
+  color: #7187a0;
+}
+.client-profile-light .cp-inline-link {
+  border-color: #bfd8f6;
+  background: #e7f2ff;
+  color: #175fc1;
+}
+.client-profile-light .cp-record-list > a,
+.client-profile-light .cp-activity-list > a {
+  border: 1px solid #e2ebf6;
+  background: #f9fbfe;
+  color: #284762;
+}
+.client-profile-light .cp-record-list > a:hover,
+.client-profile-light .cp-activity-list > a:hover {
+  border-color: #bfd8f6;
+  background: #ecf5ff;
+}
+.client-profile-light .cp-record-list strong,
+.client-profile-light .cp-activity-list strong {
+  color: #23415e;
+}
+.client-profile-light .cp-record-list small,
+.client-profile-light .cp-activity-list small {
+  color: #8396b0;
+}
+.client-profile-light .cp-empty-state {
+  color: #7188a2;
+}
+.client-profile-light .cp-empty-state svg {
+  color: #3583e5;
+}
+.client-profile-light .cp-empty-state strong {
+  color: #2c496e;
+}
+.client-profile-light .cp-empty-state p {
+  color: #7a90a7;
+}
+.client-profile-light .cp-edit-panel > summary,
+.client-profile-light .cp-contact-row > summary {
+  color: #294869;
+}
+.client-profile-light .cp-edit-panel[open] > summary,
+.client-profile-light .cp-contact-row[open] > summary {
+  color: #1468ce;
+}
+.client-profile-light .cp-edit-panel form label,
+.client-profile-light .cp-contact-row form label {
+  color: #506c89;
+}
+.client-profile-light .cp-edit-panel form input,
+.client-profile-light .cp-edit-panel form select,
+.client-profile-light .cp-edit-panel form textarea,
+.client-profile-light .cp-contact-row form input,
+.client-profile-light .cp-contact-row form select {
+  border: 1px solid #d8e5f3 !important;
+  background: white;
+  color: #24435e;
+  border-radius: 9px;
+}
+.client-profile-light .cp-contact-row {
+  border-color: #e4ebf5;
+}
+.client-profile-light .cp-contact-row summary small,
+.client-profile-light .cp-contact-row > p {
+  color: #7a90a8;
+}
+.client-profile-light .cp-add-contact > summary {
+  color: #226fd6;
+}
+.client-profile-light
+  .cp-page
+  :is(a, summary, button, input, select, textarea):focus-visible {
+  outline: 2px solid #3486e7;
+  outline-offset: 3px;
+}
+@media (max-width: 760px) {
+  .client-profile-light .owner-topbar::before {
+    content: 'ProPulse Business OS';
+    color: #193b61;
+    font-size: 16px;
+  }
+  .client-profile-light .cp-page {
+    padding: 18px 13px 32px;
+  }
+  .client-profile-light .cp-hero {
+    padding: 17px 14px;
+    gap: 14px;
+    min-height: 115px;
+  }
+  .client-profile-light .cp-avatar {
+    width: 54px;
+    height: 54px;
+    flex-basis: 54px;
+    font-size: 24px;
+  }
+  .client-profile-light .cp-hero h1 {
+    font-size: 24px;
+  }
+  .client-profile-light .cp-stats {
+    gap: 8px;
+  }
+  .client-profile-light .cp-stat {
+    padding: 12px 10px;
+    min-height: 90px;
+  }
+  .client-profile-light .cp-stat-content strong {
+    font-size: 20px;
+  }
+  .client-profile-light .cp-tabs a {
+    padding: 10px 12px;
+  }
+}

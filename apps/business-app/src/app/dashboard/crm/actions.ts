@@ -90,6 +90,20 @@ export async function convertLead(
   try {
     const value = conversionSchema.parse(input);
     const s = await crmServices('lead.convert');
+    // Fast permission-filtered guard; the SQL RPC repeats this check
+    // atomically under a lock to prevent direct bypass or race conditions.
+    const lead = await s.client
+      .from('leads')
+      .select('lifecycle,converted_at')
+      .eq('organization_id', s.org)
+      .eq('id', value.id)
+      .maybeSingle();
+    if (
+      lead.error ||
+      !lead.data ||
+      (!lead.data.converted_at && lead.data.lifecycle !== 'won')
+    )
+      return { message: 'Only Closed–Won leads can be converted to Clients.' };
     const result = z
       .object({ project_id: z.uuid() })
       .parse(await s.crm.convert(value));
