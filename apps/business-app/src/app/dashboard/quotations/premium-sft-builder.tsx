@@ -256,7 +256,6 @@ export function PremiumSftBuilder({
         materialIds,
         packageId: packageId || null,
         sections: sections.filter(filledConstructionSection),
-        ),
       });
       setMessage(result.message);
       setSaved(Boolean(result.id));
