@@ -58,6 +58,40 @@ const agreementSchema = z.object({
   execution_authorized: z.boolean(),
   can_authorize_exception: z.boolean(),
 });
+const constructionQualitySchema = z.object({
+  available_inspections: z.array(z.object({
+    id: z.uuid(),
+    number: z.string(),
+    status: z.string(),
+    mandatory: z.boolean(),
+    is_final: z.boolean(),
+  })),
+  stages: z.array(z.object({
+    stage_id: z.uuid(),
+    title: z.string(),
+    instance_code: z.string(),
+    hold_point: z.string().nullable(),
+    cleared: z.boolean(),
+    inspections: z.array(z.object({
+      id: z.uuid(),
+      number: z.string(),
+      status: z.string(),
+      mandatory: z.boolean(),
+      inspector_id: z.uuid(),
+      approved_by: z.uuid().nullable(),
+      current: z.boolean(),
+    })),
+    reviews: z.array(z.object({
+      id: z.uuid(),
+      review_kind: z.enum(['quality','structural']),
+      decision: z.enum(['approved','rejected']),
+      reviewer_id: z.uuid(),
+      notes: z.string(),
+      inspections_id: z.uuid(),
+      reviewed_at: z.string(),
+    })),
+  })),
+});
 const constructionSchema = z.object({
   can_manage: z.boolean(),
   workflow: z
@@ -261,6 +295,16 @@ export default async function ProjectDeliveryPage({
     !constructionResponse.error && constructionResult.success
       ? constructionResult.data
       : null;
+  const qualityResponse = construction
+    ? await s.client.rpc('construction_quality_read', {
+        p_org: context.organizationId,
+        p_project: id,
+      })
+    : null;
+  const qualityResult = qualityResponse && !qualityResponse.error
+    ? constructionQualitySchema.safeParse(qualityResponse.data)
+    : null;
+  const constructionQuality = qualityResult?.success ? qualityResult.data : null;
   const canSeeManagerUpdates =
     site.can_manage ||
     ['site_engineer', 'quality_inspector', 'procurement'].includes(
@@ -421,6 +465,7 @@ export default async function ProjectDeliveryPage({
                 projectId={id}
                 data={construction}
                 memberOptions={site.member_options}
+                quality={constructionQuality}
               />
             )}
 
