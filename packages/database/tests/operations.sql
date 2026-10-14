@@ -262,8 +262,11 @@ do $$declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';c uuid;p uuid;r uui
  qc_clear=public.construction_quality_command(org,c,'stage_clear',jsonb_build_object(
    'stage_id',qc_stage,
    'notes','New independent stage clearance after corrected curing and reinspection'));
+ select public.construction_quality_read(org,c) into qc_data;
  perform pg_temp.execution_assert(
-   private.construction_stage_chain_current(org,c,qc_stage),
+   (select stage->>'cleared'='true'
+    from jsonb_array_elements(qc_data->'stages') stage
+    where stage->>'stage_id'=qc_stage::text),
    'reworked and independently recertified footing chain may proceed to handover');
  perform public.operations_handover(org,'approve',jsonb_build_object('id',h,'version',1,'results','[{"key":"keys","result":"pass"}]'::jsonb,'materials_review','Stock reconciled','commercial_review','Outstanding reviewed','internal_notes','Private staff note','customer_notes','Keys delivered'));
  perform pg_temp.execution_assert((select status='handed_over' from public.execution_plans where id=p),'handover transitions physical plan');
