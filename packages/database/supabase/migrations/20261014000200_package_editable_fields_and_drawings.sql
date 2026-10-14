@@ -47,21 +47,39 @@ begin
  loop
    if jsonb_typeof(v_section) is distinct from 'object'
       or (v_section-array['title','brand','grade','description','allowancePerSqft',
-          'kind','deliverables','customFields'])<>'{}'::jsonb
+          'kind','deliverables','customFields','fields'])<>'{}'::jsonb
       or length(btrim(coalesce(v_section->>'title',''))) not between 2 and 90
       or length(coalesce(v_section->>'brand',''))>120
       or length(coalesce(v_section->>'grade',''))>120
       or length(coalesce(v_section->>'description',''))>600
       or length(coalesce(v_section->>'allowancePerSqft',''))>40
       or (v_section ? 'kind' and coalesce(v_section->>'kind','')
-          not in ('plans','material','general'))
+          not in ('plans','material','general','custom'))
       or (v_section ? 'deliverables' and (
         jsonb_typeof(v_section->'deliverables') is distinct from 'array'
         or jsonb_array_length(v_section->'deliverables')>20
         or exists (
           select 1 from jsonb_array_elements(v_section->'deliverables') item
-          where jsonb_typeof(item) <> 'string'
-            or length(btrim(item #>> '{}')) not between 2 and 100
+          where not (
+            (jsonb_typeof(item)='string'
+              and length(btrim(item #>> '{}')) between 2 and 100)
+            or
+            (jsonb_typeof(item)='object'
+              and (item-array['label','included'])='{}'::jsonb
+              and length(btrim(coalesce(item->>'label',''))) between 2 and 90
+              and jsonb_typeof(item->'included')='boolean')
+          )
+        )
+      ))
+      or (v_section ? 'fields' and (
+        jsonb_typeof(v_section->'fields') is distinct from 'array'
+        or jsonb_array_length(v_section->'fields')>10
+        or exists (
+          select 1 from jsonb_array_elements(v_section->'fields') field
+          where jsonb_typeof(field) <> 'object'
+            or (field-array['label','value']) <> '{}'::jsonb
+            or length(btrim(coalesce(field->>'label',''))) not between 2 and 80
+            or length(coalesce(field->>'value',''))>250
         )
       ))
       or (v_section ? 'customFields' and (
