@@ -149,7 +149,7 @@ end $$;
 -- Public capability exposes only manager-approved and explicitly published
 -- daily report content, not private staff updates, financial data or media.
 set local role anon;
-do $
+do $$
 declare projection jsonb;
 begin
  projection=public.construction_client_view(current_setting('test.client_token'));
@@ -163,44 +163,44 @@ begin
  if jsonb_array_length(projection->'stages')<>1
  then raise exception 'FAIL: client-safe stage list missing';end if;
  raise notice 'PASS: anonymous customer projection contains only approved and published site update';
-end$;
+end$$;
 set local role authenticated;
 select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',true);
-do $
+do $$
 declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
  project uuid=current_setting('test.manager_project')::uuid;
  report uuid=current_setting('test.manager_report')::uuid;
 begin
  perform public.construction_client_manage(org,project,'report_unpublish',
    jsonb_build_object('report_id',report));
-end$;
+end$$;
 set local role anon;
-do $
+do $$
 declare projection jsonb;
 begin
  projection=public.construction_client_view(current_setting('test.client_token'));
  if jsonb_array_length(projection->'updates')<>0
  then raise exception 'FAIL: unpublished daily report still visible';end if;
  raise notice 'PASS: unpublish immediately removes daily customer report';
-end$;
+end$$;
 set local role authenticated;
 select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',true);
-do $
+do $$
 declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
  project uuid=current_setting('test.manager_project')::uuid;
 begin
  perform public.construction_client_manage(org,project,'share_revoke',
    jsonb_build_object('share_id',current_setting('test.client_share')::uuid));
-end$;
+end$$;
 set local role anon;
-do $
+do $$
 begin
  begin
   perform public.construction_client_view(current_setting('test.client_token'));
   raise exception 'FAIL: revoked customer capability still works';
  exception when insufficient_privilege then null;end;
  raise notice 'PASS: revoked project progress link no longer works';
-end$;
+end$$;
 set local role authenticated;
 
 select set_config('request.jwt.claim.sub','22222222-2222-4222-8222-222222222222',true);
