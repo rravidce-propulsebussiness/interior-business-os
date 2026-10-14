@@ -61,8 +61,8 @@ export default async function Quotations({
   const selectedResponseStatus =
     p.response_status === 'all'
       ? 'all'
-      : responseStatuses.find((status) => status === p.response_status) ??
-        'awaiting';
+      : (responseStatuses.find((status) => status === p.response_status) ??
+        'awaiting');
   const responsePage = Math.max(
     1,
     Math.min(10000, Number.parseInt(p.response_page ?? '1', 10) || 1),
@@ -76,7 +76,8 @@ export default async function Quotations({
         crmResult(
           await s.client.rpc('quotation_response_queue', {
             p_organization_id: s.org,
-            p_status: selectedResponseStatus === 'all' ? '' : selectedResponseStatus,
+            p_status:
+              selectedResponseStatus === 'all' ? '' : selectedResponseStatus,
             p_page: responsePage,
           }),
         ),
@@ -208,7 +209,8 @@ export default async function Quotations({
             <div>
               <h2>Customer responses</h2>
               <p className="qs-muted">
-                Track quotation approval, requested changes and declined proposals.
+                Track quotation approval, requested changes and declined
+                proposals.
               </p>
             </div>
             <Link className="qs-btn" href="/dashboard/quotations">
@@ -222,7 +224,10 @@ export default async function Quotations({
           >
             <label className="qs-field">
               Response status
-              <select name="response_status" defaultValue={selectedResponseStatus}>
+              <select
+                name="response_status"
+                defaultValue={selectedResponseStatus}
+              >
                 <option value="all">All responses</option>
                 {responseStatuses.map((status) => (
                   <option key={status} value={status}>
@@ -237,7 +242,8 @@ export default async function Quotations({
           </form>
           {responsesUnavailable ? (
             <p className="qs-muted" role="alert">
-              Customer responses are temporarily unavailable. Quotations remain accessible below.
+              Customer responses are temporarily unavailable. Quotations remain
+              accessible below.
             </p>
           ) : customerResponses?.rows.length ? (
             <div className="qs-quotation-list">
@@ -264,13 +270,18 @@ export default async function Quotations({
                     )}
                   </div>
                   <span className="qs-badge">
-                    {String(response.response_status || 'awaiting').replaceAll('_', ' ')}
+                    {String(response.response_status || 'awaiting').replaceAll(
+                      '_',
+                      ' ',
+                    )}
                   </span>
                 </Link>
               ))}
             </div>
           ) : (
-            <p className="qs-muted">No issued quotations match this response filter.</p>
+            <p className="qs-muted">
+              No issued quotations match this response filter.
+            </p>
           )}
           {customerResponses && (
             <div className="qs-toolbar" style={{ marginTop: 14 }}>

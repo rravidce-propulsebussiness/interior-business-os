@@ -99,7 +99,7 @@ export default async function LeadDetail({
       href: leadPath,
       icon: 'leads',
       children: [
-          { label: 'All Leads', href: leadPath },
+        { label: 'All Leads', href: leadPath },
         { label: 'Follow-ups', href: '/dashboard/crm/followups' },
         { label: 'Site Visits', href: '/dashboard/crm/site-visits' },
         ...(s.allowed('lead.create')
