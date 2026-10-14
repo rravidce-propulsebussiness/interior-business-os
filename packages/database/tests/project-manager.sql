@@ -144,6 +144,12 @@ begin
       'report_id',current_setting('test.manager_report')::uuid));
    raise exception 'FAIL: watchman can attach engineering daily report';
  exception when insufficient_privilege then null;end;
+ begin
+   perform public.construction_field_command(org,project,'curing_verify',
+     jsonb_build_object('observation_id',gen_random_uuid(),'decision','verified',
+       'reason','Watchman must not approve independent curing verification'));
+   raise exception 'FAIL: watchman authorized their own curing verification';
+ exception when insufficient_privilege then null;end;
  raise notice 'PASS: watchman cannot read engineers tomorrow plan or link it';
 end$$;
 rollback;
