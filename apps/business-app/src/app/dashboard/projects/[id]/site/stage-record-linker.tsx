@@ -89,7 +89,10 @@ export function StageRecordLinker({
           </button>
         </form>
       ) : (
-        <p>No accessible project records or active payment milestones are available yet.</p>
+        <p>
+          No accessible project records or active payment milestones are
+          available yet.
+        </p>
       )}
       {message && <p role="status">{message}</p>}
     </details>
