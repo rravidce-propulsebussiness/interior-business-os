@@ -55,6 +55,7 @@ assertionFile('project-delivery');
 assertionFile('project-manager');
 assertionFile('project-agreement');
 assertionFile('construction-project-workflows');
+assertionFile('construction-stage-record-links');
 assertionFile('quotation-studio-defaults');
 assertionFile('quotation-owner-access');
 assertionFile('quotation-signing-preflight');
