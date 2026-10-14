@@ -24,6 +24,7 @@ begin
    'application/pdf',encode(convert_to('%PDF-1.7'||chr(10)||
       'Preloaded paper agreement record for regression','UTF8'),'base64'),
    'Paper agreement reference; record as signed only after authorization');
+ perform set_config('test.agreement_media_id',agreement_media::text,true);
  if (public.project_site_read(org,project)->>'stage') is distinct from 'design' then
    raise exception 'Project initialization did not enter design stage';
  end if;
@@ -88,6 +89,24 @@ begin
  end if;
  raise notice 'PASS: project delivery gate, designs, staff-recorded approval, material transitions and site checks';
 end $$;
+
+-- An assigned architect can read design drawings, but never agreement PDF bytes.
+select set_config('request.jwt.claim.sub','33333333-3333-4333-8333-333333333333',true);
+do $
+declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
+ project uuid=current_setting('test.project_site_id')::uuid;
+ agreement_media uuid=current_setting('test.agreement_media_id')::uuid;
+begin
+ if exists(select 1 from jsonb_array_elements(
+    public.project_site_read(org,project)->'media') row
+    where row->>'category'='agreement')
+ then raise exception 'FAIL: architect can list agreement document';end if;
+ begin
+   perform public.project_site_media_get(org,project,agreement_media);
+   raise exception 'FAIL: architect can download signed agreement';
+ exception when insufficient_privilege then null;end;
+ raise notice 'PASS: commercial agreement metadata and bytes isolated from architectural role';
+end$;
 
 -- Watchman can record gate events only, not change design/client approval.
 select set_config('request.jwt.claim.sub','22222222-2222-4222-8222-222222222222',true);
