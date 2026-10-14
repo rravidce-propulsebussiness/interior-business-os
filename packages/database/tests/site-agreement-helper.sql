@@ -1,5 +1,5 @@
 -- Temp fixture function: executed only in disposable transaction by Demo owner.
-create function pg_temp.site_signed_agreement(org uuid,project uuid)
+create function pg_temp.site_signed_agreement(org uuid,project uuid,existing_media uuid default null)
 returns uuid language plpgsql as $$
 declare contract uuid;revision uuid;schedule uuid;media uuid;
 begin
@@ -8,10 +8,10 @@ begin
    where qr.organization_id=org and qr.project_id=project
      and q.quotation_number='SITE-AGREEMENT-TEST';
  contract=public.contract_create(org,revision);
- media=public.project_site_media_put(org,project,'design','signed-agreement.pdf',
+ media=coalesce(existing_media,public.project_site_media_put(org,project,'design','signed-agreement.pdf',
    'application/pdf',encode(convert_to('%PDF-1.7'||chr(10)||
        'Demo fixture only; not a verified electronic signature','UTF8'),'base64'),
-   'Staff-uploaded signed agreement fixture');
+   'Staff-uploaded signed agreement fixture'));
  perform public.project_agreement_command(org,project,contract,'record_signed_pdf',
    jsonb_build_object('media_id',media,'note',
     'Received paper agreement copy, signatures unverified by digital provider'));
