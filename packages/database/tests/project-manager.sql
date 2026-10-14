@@ -289,6 +289,9 @@ declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
  project uuid=current_setting('test.manager_project')::uuid;
 begin
 
+ if private.site_is_manager(org,project)
+    or private.site_allowed(org,project,array['manager'])
+ then raise exception 'FAIL: restricted construction role gained legacy site manager permissions';end if;
  begin
    perform public.construction_procurement_watch(org,project);
    raise exception 'FAIL: watchman accessed internal approved procurement forecast';
