@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { OwnerIcon, type OwnerIconName } from '../../owner-shell';
 import { runCrmCommand, saveCrm } from '../actions';
 import { QuickAddLead } from './quick-add-lead';
+import type { LeadServiceOption } from './lead-service-options';
 import { LeadsBoardView } from './board-view';
 import {
   ProPulseConnectPanel,
@@ -232,6 +233,7 @@ export function LeadsWorkspace({
   tabs,
   stages,
   sources,
+  services,
   assignees,
   branches,
   lostReasons,
@@ -265,6 +267,7 @@ export function LeadsWorkspace({
   tabs: LeadTab[];
   stages: LeadStage[];
   sources: LeadOption[];
+  services: LeadServiceOption[];
   assignees: LeadOption[];
   branches: LeadOption[];
   lostReasons: LeadOption[];
@@ -485,6 +488,7 @@ export function LeadsWorkspace({
         {leadTool === 'add' && canCreate && (
           <QuickAddLead
             canConfigureCrm={canConfigureCrm}
+            services={services}
             sources={sources.filter(
               (source) => !/propulse/i.test(source.label),
             )}
