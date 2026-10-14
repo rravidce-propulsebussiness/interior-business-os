@@ -137,6 +137,19 @@ do $$declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';c uuid;p uuid;r uui
     from jsonb_array_elements(qc_data->'stages') item
     where item->>'stage_id'=qc_stage::text),
    'structural footing stage clearance requires actual Operations inspection and independent approvals');
+
+ -- A subsequent inadequate curing observation takes precedence over a
+ -- previous verified round; the historical certificate is never rewritten.
+ perform set_config('request.jwt.claim.sub','33333333-3333-4333-8333-333333333333',true);
+ perform public.construction_field_command(org,c,'curing_observe',jsonb_build_object(
+   'plan_id',curing_plan,'observed_on',current_date-1,
+   'result','insufficient','note','Follow-up evidence found dry concrete requiring rework'));
+ perform set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',true);
+ select public.construction_quality_read(org,c) into qc_data;
+ perform pg_temp.execution_assert(
+   (select stage->>'cleared'='false' from jsonb_array_elements(qc_data->'stages') stage
+     where stage->>'stage_id'=qc_stage::text),
+   'new inadequate curing report automatically invalidates prior stage clearance');
  perform pg_temp.execution_denied(format(
     'select public.construction_quality_command(%L,%L,''stage_clear'',%L)',
     org,c,jsonb_build_object('stage_id',qc_stage,
