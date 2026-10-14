@@ -61,21 +61,41 @@ const agreementSchema = z.object({
 const constructionFieldSchema = z.object({
   can_manage: z.boolean(),
   can_verify: z.boolean(),
-  plans: z.array(z.object({
-    id: z.uuid(), stage_id: z.uuid(), pour_reference: z.string(),
-    pour_date: z.string(), minimum_days: z.number().int(),
-    method: z.string(), notes: z.string(), required_until: z.string(),
-    ready: z.boolean(),
-    observations: z.array(z.object({
-      id: z.uuid(), date: z.string(), result: z.enum(['wet','insufficient']),
-      note: z.string(), observed_by: z.uuid(), verified: z.boolean(),
-    })),
-  })),
-  stage_reports: z.array(z.object({
-    stage_id: z.uuid(), report_id: z.uuid(), report_date: z.string(),
-    completed_work: z.string(), tomorrow_plan: z.string(),
-    blockers: z.string(), worker_count: z.number().int(), created_by: z.uuid(),
-  })),
+  plans: z.array(
+    z.object({
+      id: z.uuid(),
+      stage_id: z.uuid(),
+      pour_reference: z.string(),
+      pour_date: z.string(),
+      minimum_days: z.number().int(),
+      method: z.string(),
+      notes: z.string(),
+      required_until: z.string(),
+      ready: z.boolean(),
+      observations: z.array(
+        z.object({
+          id: z.uuid(),
+          date: z.string(),
+          result: z.enum(['wet', 'insufficient']),
+          note: z.string(),
+          observed_by: z.uuid(),
+          verified: z.boolean(),
+        }),
+      ),
+    }),
+  ),
+  stage_reports: z.array(
+    z.object({
+      stage_id: z.uuid(),
+      report_id: z.uuid(),
+      report_date: z.string(),
+      completed_work: z.string(),
+      tomorrow_plan: z.string(),
+      blockers: z.string(),
+      worker_count: z.number().int(),
+      created_by: z.uuid(),
+    }),
+  ),
 });
 const constructionQualitySchema = z.object({
   available_inspections: z.array(
@@ -341,9 +361,10 @@ export default async function ProjectDeliveryPage({
         p_project: id,
       })
     : null;
-  const fieldParsed = fieldResponse && !fieldResponse.error
-    ? constructionFieldSchema.safeParse(fieldResponse.data)
-    : null;
+  const fieldParsed =
+    fieldResponse && !fieldResponse.error
+      ? constructionFieldSchema.safeParse(fieldResponse.data)
+      : null;
   const constructionField = fieldParsed?.success ? fieldParsed.data : null;
   const canSeeManagerUpdates =
     site.can_manage ||
@@ -508,8 +529,11 @@ export default async function ProjectDeliveryPage({
                 quality={constructionQuality}
                 field={constructionField}
                 dailyReports={site.reports
-                  .filter((report) => typeof report.id === 'string' &&
-                    typeof report.report_date === 'string')
+                  .filter(
+                    (report) =>
+                      typeof report.id === 'string' &&
+                      typeof report.report_date === 'string',
+                  )
                   .map((report) => ({
                     id: String(report.id),
                     date: String(report.report_date),

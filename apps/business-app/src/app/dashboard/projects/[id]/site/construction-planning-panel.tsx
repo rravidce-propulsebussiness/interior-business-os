@@ -6,7 +6,10 @@ import {
   ConstructionStageQuality,
   type ConstructionQualityData,
 } from './construction-stage-quality';
-import { ConstructionFieldPanel, type ConstructionFieldData } from './construction-field-panel';
+import {
+  ConstructionFieldPanel,
+  type ConstructionFieldData,
+} from './construction-field-panel';
 import {
   assignConstructionRole,
   deactivateConstructionRole,
