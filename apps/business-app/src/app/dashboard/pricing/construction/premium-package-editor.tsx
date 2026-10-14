@@ -7,6 +7,7 @@ import type {
   ConstructionSpecSection,
 } from '@business-os/database/construction-packages';
 import { saveConstructionPackage } from './package-actions';
+import { SpecSectionFields } from './spec-section-fields';
 
 const defaultCategories = [
   [
@@ -499,7 +500,10 @@ export function PremiumPackageEditor({
                           {String(index + 1).padStart(2, '0')} · {spec.title}
                         </strong>
                         <span className="block truncate text-xs text-slate-500">
-                          {[
+                          {isPlanning(spec)
+                            ? (spec.deliverables ?? []).filter((drawing) => drawing.included).length +
+                              ' drawings included'
+                            : [
                             spec.brand,
                             spec.grade,
                             spec.allowancePerSqft
@@ -528,46 +532,14 @@ export function PremiumPackageEditor({
                             }
                           />
                         </label>
-                        <label className={label}>
-                          Brand / manufacturer
-                          <input
-                            className={field}
-                            maxLength={120}
-                            value={spec.brand}
-                            placeholder="e.g. Tata, UltraTech, Kajaria"
-                            onChange={(event) =>
-                              updateSection(index, 'brand', event.target.value)
-                            }
-                          />
-                        </label>
-                        <label className={label}>
-                          Grade / material size
-                          <input
-                            className={field}
-                            maxLength={120}
-                            value={spec.grade}
-                            placeholder="e.g. Fe 550D, OPC 53, 2×2"
-                            onChange={(event) =>
-                              updateSection(index, 'grade', event.target.value)
-                            }
-                          />
-                        </label>
-                        <label className={label}>
-                          Allowance per sq ft (₹) · if applicable
-                          <input
-                            className={field}
-                            maxLength={40}
-                            value={spec.allowancePerSqft}
-                            placeholder="e.g. 85 for vitrified tiles"
-                            onChange={(event) =>
-                              updateSection(
-                                index,
-                                'allowancePerSqft',
-                                event.target.value,
-                              )
-                            }
-                          />
-                        </label>
+                        <SpecSectionFields
+                          section={spec}
+                          onChange={(next) =>
+                            setSections((all) =>
+                              all.map((entry, i) => i === index ? next : entry),
+                            )
+                          }
+                        />
                         <label className={label + ' sm:col-span-2'}>
                           Scope and inclusions
                           <textarea
@@ -585,6 +557,40 @@ export function PremiumPackageEditor({
                             }
                           />
                         </label>
+                        <div className="flex flex-wrap gap-2 sm:col-span-2">
+                          <button
+                            type="button"
+                            disabled={index === 0}
+                            onClick={() => {
+                              setSections((items) => {
+                                const moved = [...items];
+                                [moved[index - 1], moved[index]] =
+                                  [moved[index]!, moved[index - 1]!];
+                                return moved;
+                              });
+                              setActive(index - 1);
+                            }}
+                            className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold disabled:opacity-30"
+                          >
+                            Move up ↑
+                          </button>
+                          <button
+                            type="button"
+                            disabled={index === sections.length - 1}
+                            onClick={() => {
+                              setSections((items) => {
+                                const moved = [...items];
+                                [moved[index], moved[index + 1]] =
+                                  [moved[index + 1]!, moved[index]!];
+                                return moved;
+                              });
+                              setActive(index + 1);
+                            }}
+                            className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold disabled:opacity-30"
+                          >
+                            Move down ↓
+                          </button>
+                        </div>
                         <button
                           type="button"
                           onClick={() => {
