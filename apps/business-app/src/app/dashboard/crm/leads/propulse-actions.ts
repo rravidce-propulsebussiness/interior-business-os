@@ -108,7 +108,9 @@ export async function connectPropulseLeads(
     if (ownerError)
       throw new Error('Could not verify the ProPulse purchasing company.');
     if (otherTenant?.length)
-      throw new Error('This ProPulse purchasing account is already connected to another Business OS company.');
+      throw new Error(
+        'This ProPulse purchasing account is already connected to another Business OS company.',
+      );
     const { data: existing, error: priorError } = await admin
       .from('propulse_lead_connections')
       .select('access_token')

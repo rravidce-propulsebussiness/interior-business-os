@@ -120,51 +120,64 @@ export default async function Customer({
       ...(moduleKey ? { moduleKey } : {}),
     });
 
-  const [organization, user, plans, contactResult, projectResult, quoteResult, industries] =
-    await Promise.all([
-      s.repository.organization(s.org),
-      s.authorization.requireAuthenticatedUser(),
-      s.repository.plans().catch(() => []),
-      s.client
-        .from('customer_contacts')
-        .select('*')
-        .eq('organization_id', s.org)
-        .eq('customer_id', id)
-        .order('name')
-        .limit(100),
-      canSeeProjects
-        ? s.client
-            .from('projects')
-            .select('id,name,status,created_at,industry_id', { count: 'exact' })
-            .eq('organization_id', s.org)
-            .eq('customer_id', id)
-            .order('created_at', { ascending: false })
-            .limit(3)
-        : Promise.resolve({ data: [], count: null }),
-      canSeeQuotes
-        ? s.client
-            .from('quotations')
-            .select('id,created_at', { count: 'exact' })
-            .eq('organization_id', s.org)
-            .eq('customer_id', id)
-            .order('created_at', { ascending: false })
-            .limit(3)
-        : Promise.resolve({ data: [], count: null }),
-      s.repository.industries(),
-    ]);
+  const [
+    organization,
+    user,
+    plans,
+    contactResult,
+    projectResult,
+    quoteResult,
+    industries,
+  ] = await Promise.all([
+    s.repository.organization(s.org),
+    s.authorization.requireAuthenticatedUser(),
+    s.repository.plans().catch(() => []),
+    s.client
+      .from('customer_contacts')
+      .select('*')
+      .eq('organization_id', s.org)
+      .eq('customer_id', id)
+      .order('name')
+      .limit(100),
+    canSeeProjects
+      ? s.client
+          .from('projects')
+          .select('id,name,status,created_at,industry_id', { count: 'exact' })
+          .eq('organization_id', s.org)
+          .eq('customer_id', id)
+          .order('created_at', { ascending: false })
+          .limit(3)
+      : Promise.resolve({ data: [], count: null }),
+    canSeeQuotes
+      ? s.client
+          .from('quotations')
+          .select('id,created_at', { count: 'exact' })
+          .eq('organization_id', s.org)
+          .eq('customer_id', id)
+          .order('created_at', { ascending: false })
+          .limit(3)
+      : Promise.resolve({ data: [], count: null }),
+    s.repository.industries(),
+  ]);
   if (!organization) throw new Error('Company workspace unavailable.');
 
   const contacts = contactResult.data ?? [];
   const projects = projectResult.data ?? [];
   const quotations = quoteResult.data ?? [];
-  const services = [...new Set(
-    projects
-      .map((project) => {
-        const industry = industries.find((item) => item.id === project.industry_id);
-        return industry ? leadServiceFromIndustryKey(industry.key) : null;
-      })
-      .filter((service): service is 'construction' | 'interior' => Boolean(service)),
-  )];
+  const services = [
+    ...new Set(
+      projects
+        .map((project) => {
+          const industry = industries.find(
+            (item) => item.id === project.industry_id,
+          );
+          return industry ? leadServiceFromIndustryKey(industry.key) : null;
+        })
+        .filter((service): service is 'construction' | 'interior' =>
+          Boolean(service),
+        ),
+    ),
+  ];
   const accountEmail = user.email ?? '';
   const planLabel =
     plans.find((plan) => plan.id === organization.plan_id)?.name ??
@@ -246,7 +259,10 @@ export default async function Customer({
               </span>
               <CustomerReference value={reference} />
               {services.length > 0 && (
-                <div className="cp-service-tags" aria-label="Linked project services">
+                <div
+                  className="cp-service-tags"
+                  aria-label="Linked project services"
+                >
                   {services.map((service) => (
                     <span key={service} className={'cp-service-tag ' + service}>
                       {service === 'interior' ? 'Interiors' : 'Construction'}
