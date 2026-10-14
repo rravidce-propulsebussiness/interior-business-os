@@ -197,6 +197,7 @@ export function ConstructionJourney({
                             <p><strong>{date(value(latestReport, 'report_date'))}:</strong> {value(latestReport, 'completed_work')}</p>
                             <p><strong>Tomorrow:</strong> {value(latestReport, 'tomorrow_plan')}</p>
                             <p className="cj-caption">Workers recorded today: {value(latestReport, 'worker_count') || 'Not recorded'}</p>
+                            <p className="cj-labour"><strong>Tomorrow's labour requirement:</strong> {value(latestReport, 'tomorrow_workers') || 'Not planned'}{value(latestReport, 'tomorrow_workers') ? ' workers' : ''}</p>
                           </> : <p>No daily engineer report yet.</p>}
                           {latestManager && <p className="cj-note"><strong>Manager's next priorities:</strong> {value(latestManager, 'tomorrow_priorities')}</p>}
                           {!latestReport && <Link href={go('#daily-reports')}>Create first site update →</Link>}
@@ -213,7 +214,7 @@ export function ConstructionJourney({
                         </div>
                         <div className="cj-subcard">
                           <div className="cj-subhead"><h4>Watchman curing rounds</h4><Link href={go('#security')}>Log curing / photos →</Link></div>
-                          <p>{curingRounds.length} curing rounds logged for this project.</p>
+                          <p>{curingRounds.length} curing rounds logged for this project. Curing may continue in parallel with later approved work.</p>
                           {curingMedia.length ? <div className="cj-gallery">{curingMedia.map((item) => <EvidenceTile key={value(item,'id')} item={item} projectId={projectId}/>)}</div> : <p className="cj-caption">No curing photos uploaded yet.</p>}
                           {canUploadCuringPhotos && <Link href={go('#security')}>Upload curing evidence →</Link>}
                         </div>
