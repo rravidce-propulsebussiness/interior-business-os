@@ -8,7 +8,7 @@ begin
    where qr.organization_id=org and qr.project_id=project
      and q.quotation_number='SITE-AGREEMENT-TEST';
  contract=public.contract_create(org,revision);
- media=coalesce(existing_media,public.project_site_media_put(org,project,'design','signed-agreement.pdf',
+ media=coalesce(existing_media,public.project_site_media_put(org,project,'agreement','signed-agreement.pdf',
    'application/pdf',encode(convert_to('%PDF-1.7'||chr(10)||
        'Demo fixture only; not a verified electronic signature','UTF8'),'base64'),
    'Staff-uploaded signed agreement fixture'));
