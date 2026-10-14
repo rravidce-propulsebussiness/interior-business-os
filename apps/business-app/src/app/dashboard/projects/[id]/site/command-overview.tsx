@@ -122,8 +122,9 @@ export function SiteCommandOverview(props: SiteCommandOverviewProps) {
     (material) => !['received', 'rejected'].includes(field(material, 'status')),
   ).length;
   const canUploadEvidence =
-    (isDesign || isEngineer || isQuality) &&
-    (stage === 'design' || stage === 'execution');
+    ((isDesign || isEngineer || isQuality) &&
+      (stage === 'design' || stage === 'execution')) ||
+    (isWatchman && stage === 'execution');
   const canSubmitReport = isEngineer && stage === 'execution';
   const deliveryActive = stage === 'execution' || stage === 'handover';
   const reportSection = (isEngineer || isQuality) && deliveryActive;
@@ -173,7 +174,7 @@ export function SiteCommandOverview(props: SiteCommandOverviewProps) {
               <OwnerIcon name="projects" size={17} /> Project details
             </Link>
             {canUploadEvidence && (
-              <a className="sc-btn sc-btn-outline" href="#media">
+              <a className="sc-btn sc-btn-outline" href={isWatchman && !isEngineer && !isDesign ? '#security' : '#media'}>
                 <OwnerIcon name="plus" size={17} /> Upload evidence
               </a>
             )}
@@ -305,7 +306,10 @@ export function SiteCommandOverview(props: SiteCommandOverviewProps) {
       </section>
 
       <nav className="sc-tabs" aria-label="Site delivery sections">
-        <a className="sc-tab-current" href="#overview">
+        <a className="sc-tab-current" href="#construction-timeline">
+          <OwnerIcon name="calendar" size={16} /> Timeline
+        </a>
+        <a href="#overview">
           <OwnerIcon name="dashboard" size={16} /> Overview
         </a>
         {reportSection && (
