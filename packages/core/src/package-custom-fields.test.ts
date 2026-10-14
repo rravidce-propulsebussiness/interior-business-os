@@ -38,6 +38,19 @@ describe('editable drawings and extra package specification fields', () => {
     expect(result.total).toBe('1170000.00');
   });
 
+  it('loads earlier object-style drawing and named fields', () => {
+    const result = make({
+      title: 'Architectural plans', kind: 'plans', description: '',
+      deliverables: [
+        { label: 'Structural drawing', included: true },
+        { label: 'Electrical plan', included: false },
+      ],
+      fields: [{ label: 'Print format', value: 'A3' }],
+    });
+    expect(parseSftEstimate(encodeSftEstimate(result))?.sections?.[0]?.fields)
+      .toEqual([{ label: 'Print format', value: 'A3' }]);
+  });
+
   it('supports extra material fields while validating bounds', () => {
     const result = make({
       title: 'Steel / TMT',
