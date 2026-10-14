@@ -134,7 +134,7 @@ export function ConstructionProcurementWatch({
       {groups.length===0 ? (
         <p className="mt-4 rounded-xl bg-slate-50 p-4 text-sm text-slate-700">
           No materials are attached to currently approved work plans for the next 14 days.
-          Create a site material requirement and link it in tomorrow's stage plan first.
+          Create a site material requirement and link it in tomorrow&apos;s stage plan first.
         </p>
       ) : (
         <div className="mt-5 grid gap-3 lg:grid-cols-2">
