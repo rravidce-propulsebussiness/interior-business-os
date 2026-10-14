@@ -145,14 +145,15 @@ begin
     public.construction_tomorrow_read(org,project)->'plans') plan
     where plan->>'id'=current_setting('test.tomorrow_plan'))<>'approved'
  then raise exception 'FAIL: approved plan has not been published to assigned field staff';end if;
- perform pg_temp.site_denied(format(
-    'select public.construction_tomorrow_command(%L,%L,''submit'',%L)',
-    org,project,jsonb_build_object('stage_id',current_setting('test.manager_stage')::uuid,
-      'work_date',current_date+1,'work_summary','Invalid material from another company',
-      'labor',jsonb_build_array(jsonb_build_object('trade','Helpers','workers',2)),
-      'materials',jsonb_build_array(jsonb_build_object('id',gen_random_uuid(),'quantity',4)),
-      'instructions','Must reject material references outside this project')),
-    'cross-project material use should fail');
+ begin
+   perform public.construction_tomorrow_command(org,project,'submit',
+      jsonb_build_object('stage_id',current_setting('test.manager_stage')::uuid,
+        'work_date',current_date+1,'work_summary','Invalid material from another company',
+        'labor',jsonb_build_array(jsonb_build_object('trade','Helpers','workers',2)),
+        'materials',jsonb_build_array(jsonb_build_object('id',gen_random_uuid(),'quantity',4)),
+        'instructions','Must reject material references outside this project'));
+   raise exception 'FAIL: cross-project material reference accepted';
+ exception when insufficient_privilege then null;end;
  record=public.project_site_manager_command(org,project,'report_review',
   jsonb_build_object('report_id',report,'decision','changes_requested',
   'note','Add inspection photos and gridline references'));
