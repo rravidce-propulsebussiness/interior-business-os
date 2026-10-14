@@ -187,18 +187,22 @@ it('renders package theme and brand, grade, allowance as a safe company snapshot
   expect(html).toContain('&lt;script&gt;unsafe&lt;/script&gt;');
 });
 
-
 it('renders editable planning deliverables and company custom fields safely', () => {
   const document = quotationDocumentFixture();
   document.lines[0]!.description = encodeSftEstimate(
-    calculateSftEstimate(
-      {
-        rows: [{
-          kind: 'floor', name: 'Ground Floor',
-          lengthFeet: '20', widthFeet: '30', ratePerSqft: '1950',
-        }],
-        materialIds: [],
-        sections: [{
+    calculateSftEstimate({
+      rows: [
+        {
+          kind: 'floor',
+          name: 'Ground Floor',
+          lengthFeet: '20',
+          widthFeet: '30',
+          ratePerSqft: '1950',
+        },
+      ],
+      materialIds: [],
+      sections: [
+        {
           kind: 'plans',
           title: 'Planning & Drawings',
           brand: '',
@@ -214,9 +218,9 @@ it('renders editable planning deliverables and company custom fields safely', ()
             { label: 'Number of revisions', value: '2' },
             { label: 'Site visit', value: '<script>unsafe</script>' },
           ],
-        }],
-      },
-    ),
+        },
+      ],
+    }),
   );
   const html = renderQuotationDocument(document);
   expect(html).toContain('Planning &amp; Drawings');
