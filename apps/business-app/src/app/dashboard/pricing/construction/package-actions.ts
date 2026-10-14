@@ -42,11 +42,6 @@ const schema = z
       .refine((v) => Number(v) > 0),
     status: z.enum(['active', 'inactive']),
     themeColor: z.string().regex(/^#[0-9a-fA-F]{6}$/),
-    visibility: z.enum(['company', 'owner_only']),
-    ownerIds: z
-      .array(idSchema)
-      .max(30)
-      .refine((v) => new Set(v).size === v.length),
     specSections: z.array(section).max(18),
   })
   .strict();
@@ -71,7 +66,6 @@ export async function saveConstructionPackage(
     const rawSections: unknown = JSON.parse(
       String(form.get('specSections') ?? '[]'),
     );
-    const ownerIds: unknown = JSON.parse(String(form.get('ownerIds') ?? '[]'));
     const value = schema.parse({
       ...(id ? { id, version: Number(form.get('version')) } : {}),
       name: String(form.get('name') ?? ''),
@@ -80,9 +74,6 @@ export async function saveConstructionPackage(
       ratePerSqft: String(form.get('ratePerSqft') ?? ''),
       status: form.get('status') === 'inactive' ? 'inactive' : 'active',
       themeColor: String(form.get('themeColor') ?? '#155EEF'),
-      visibility:
-        form.get('visibility') === 'owner_only' ? 'owner_only' : 'company',
-      ownerIds,
       specSections: rawSections as ConstructionSpecSection[],
     });
     const packageId = await createConstructionPackagesRepository(client).save(
