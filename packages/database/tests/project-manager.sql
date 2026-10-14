@@ -274,7 +274,7 @@ set local role authenticated;
 -- still be able to open Site Delivery and read approved tomorrow plans,
 -- without gaining any legacy site-report/media access.
 select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',true);
-do $
+do $$
 declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
  project uuid=current_setting('test.manager_project')::uuid;
 begin
@@ -282,9 +282,9 @@ begin
    '{"user_id":"33333333-3333-4333-8333-333333333333","role":"supervisor"}'::jsonb);
  perform public.project_site_command(org,project,'assign',
    '{"user_id":"33333333-3333-4333-8333-333333333333","role":"site_engineer","active":false}'::jsonb);
-end$;
+end$$;
 select set_config('request.jwt.claim.sub','33333333-3333-4333-8333-333333333333',true);
-do $
+do $$
 declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
  project uuid=current_setting('test.manager_project')::uuid;
  site jsonb; work jsonb;
@@ -298,18 +298,18 @@ begin
     work->'plans'->0->>'status'<>'approved'
  then raise exception 'FAIL: supervisor-only staff cannot see approved next-day work';end if;
  raise notice 'PASS: scoped construction supervisor can open site and only see approved plan';
-end$;
+end$$;
 select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',true);
-do $
+do $$
 declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
  project uuid=current_setting('test.manager_project')::uuid;
 begin
  perform public.project_site_command(org,project,'assign',
    '{"user_id":"33333333-3333-4333-8333-333333333333","role":"site_engineer","active":true}'::jsonb);
-end$;
+end$$;
 
 select set_config('request.jwt.claim.sub','22222222-2222-4222-8222-222222222222',true);
-do $
+do $$
 declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
  project uuid=current_setting('test.manager_project')::uuid;
 begin
