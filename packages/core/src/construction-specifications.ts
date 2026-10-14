@@ -54,7 +54,7 @@ export function makeConstructionSection(
     description: '',
     allowancePerSqft: '',
     ...(kind === 'plans'
-      ? { deliverables: [...ARCHITECTURAL_PLAN_OPTIONS.slice(0, 7)] }
+      ? { deliverables: [] }
       : {}),
     extraFields: [],
   };
