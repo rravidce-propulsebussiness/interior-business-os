@@ -3,7 +3,7 @@ reset role;
 delete from public.organization_entitlements where organization_id='dddddddd-dddd-4ddd-8ddd-dddddddddddd' and not enabled and module_id in(select id from public.modules where key='billing');
 set local request.jwt.claim.sub='11111111-1111-4111-8111-111111111111';
 set local role authenticated;
-do $$declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';c uuid;p uuid;r uuid;t uuid;t2 uuid;m uuid;pkg uuid;v integer;template uuid;i uuid;i2 uuid;s uuid;h uuid;ht uuid;vendor uuid;wo uuid;wm uuid;doc jsonb;media uuid;contract uuid;schedule uuid;qc_stage uuid;qc_tpl uuid;qc_inspection uuid;qc_wf uuid;qc_review uuid;struct_review uuid;qc_clear uuid;qc_data jsonb;curing_plan uuid;curing_round uuid;begin
+do $$declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';c uuid;p uuid;r uuid;t uuid;t2 uuid;m uuid;pkg uuid;v integer;template uuid;i uuid;i2 uuid;s uuid;h uuid;ht uuid;vendor uuid;wo uuid;wm uuid;doc jsonb;media uuid;contract uuid;schedule uuid;qc_stage uuid;qc_tpl uuid;qc_inspection uuid;qc_wf uuid;qc_review uuid;struct_review uuid;qc_clear uuid;qc_data jsonb;curing_plan uuid;curing_round uuid;booking_item uuid;first_item uuid;second_item uuid;issued_request uuid;begin
  select id into c from public.contracts where revision_id in(select r.id from public.quotation_revisions r join public.quotations q on q.id=r.quotation_id where q.quotation_number='EXECUTION-TEST');
  p=public.operations_plan(org,'create',jsonb_build_object('contract_id',c));
  perform pg_temp.execution_assert(p=public.operations_plan(org,'create',jsonb_build_object('contract_id',c)),'plan creation retry returns same plan');
@@ -35,7 +35,7 @@ do $$declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';c uuid;p uuid;r uui
      'note','Signed paper agreement received for test; no electronic signature verification'));
  perform public.contract_transition(org,contract,1,'active');
  schedule=public.payment_schedule_save(org,contract,
-   '{"label":"Contractual execution schedule","items":[{"label":"Final completion","calculation_type":"remaining","value":"0"}]}'::jsonb);
+   '{"label":"Construction milestones","items":[{"label":"Booking advance","calculation_type":"percentage","value":"10"},{"label":"Footing certified","calculation_type":"percentage","value":"45","due_trigger":"construction_stage"},{"label":"Subsequent stage milestone","calculation_type":"remaining","value":"0","due_trigger":"construction_stage"}]}'::jsonb);
  perform public.payment_schedule_activate(org,schedule,1);
  perform public.operations_plan(org,'status',jsonb_build_object('id',p,'version',1,'status','in_progress'));
  perform pg_temp.execution_denied(format('select public.operations_task(%L,''task'',%L)',org,jsonb_build_object('id',t,'version',1,'status','blocked')),'blocked task requires reason');
@@ -64,6 +64,29 @@ do $$declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';c uuid;p uuid;r uui
    where stage->>'instance_code'='FOUNDATION';
  perform public.construction_project_command(org,c,'task_link',jsonb_build_object(
    'stage_id',qc_stage,'task_id',t));
+ -- Booking remains on the existing independent commercial advance path.
+ select id into booking_item from public.payment_schedule_items
+   where schedule_id=schedule and label='Booking advance';
+ select id into first_item from public.payment_schedule_items
+   where schedule_id=schedule and label='Footing certified';
+ select id into second_item from public.payment_schedule_items
+   where schedule_id=schedule and label='Subsequent stage milestone';
+ perform pg_temp.execution_denied(format('select public.payment_request_issue(%L,%L)',
+   org,first_item),'stage-triggered milestone requires stage mapping');
+ perform public.construction_payment_command(org,c,'stage_link',
+    jsonb_build_object('item_id',first_item,'stage_id',qc_stage));
+ perform public.construction_payment_command(org,c,'stage_link',
+    jsonb_build_object('item_id',second_item,'stage_id',qc_stage));
+ perform pg_temp.execution_denied(format('select public.payment_request_issue(%L,%L)',
+   org,first_item),'direct finance issue blocked while mapped stage incomplete');
+ perform pg_temp.execution_denied(format('select public.construction_payment_command(%L,%L,''request_issue'',%L)',
+   org,c,jsonb_build_object('item_id',second_item,'due_date',null,'note',
+   'Attempt payment with incomplete structural checks')),
+   'construction finance shortcut cannot issue before physical QC');
+ perform pg_temp.execution_assert(
+   public.payment_request_issue(org,booking_item) is not null,
+   'unbound advance can still use original payment-request engine');
+
  perform public.construction_project_command(org,c,'role_assign',
     jsonb_build_object('user_id',auth.uid(),'role','quality_inspector'));
  perform public.construction_project_command(org,c,'role_assign',
@@ -137,6 +160,19 @@ do $$declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';c uuid;p uuid;r uui
     from jsonb_array_elements(qc_data->'stages') item
     where item->>'stage_id'=qc_stage::text),
    'structural footing stage clearance requires actual Operations inspection and independent approvals');
+ issued_request=public.construction_payment_command(org,c,'request_issue',
+   jsonb_build_object('item_id',first_item,'due_date',null,
+   'note','Manual billing issue after footing quality and curing clearance'));
+ perform pg_temp.execution_assert(
+   issued_request=public.payment_request_issue(org,first_item)
+   and (select amount=expected_amount from public.payment_requests request
+     join public.payment_schedule_items item on item.id=request.schedule_item_id
+     where request.id=issued_request),
+   'certified mapped stage uses canonical idempotent payment request with original amount');
+ perform pg_temp.execution_denied(format('select public.construction_payment_command(%L,%L,''stage_link'',%L)',
+   org,c,jsonb_build_object('item_id',first_item,'stage_id',qc_stage)),
+   'financially issued milestone cannot be retroactively relinked');
+
 
  -- A subsequent inadequate curing observation takes precedence over a
  -- previous verified round; the historical certificate is never rewritten.
@@ -150,6 +186,13 @@ do $$declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';c uuid;p uuid;r uui
    (select stage->>'cleared'='false' from jsonb_array_elements(qc_data->'stages') stage
      where stage->>'stage_id'=qc_stage::text),
    'new inadequate curing report automatically invalidates prior stage clearance');
+ perform pg_temp.execution_denied(format('select public.payment_request_issue(%L,%L)',
+   org,second_item),'existing clearance invalidated by latest failed curing round');
+ perform pg_temp.execution_assert(
+   (select count(*) from public.payment_requests
+       where schedule_item_id=second_item and status='issued')=0,
+    'curing regression cannot manufacture second payment request');
+
  perform pg_temp.execution_denied(format(
     'select public.construction_quality_command(%L,%L,''stage_clear'',%L)',
     org,c,jsonb_build_object('stage_id',qc_stage,
