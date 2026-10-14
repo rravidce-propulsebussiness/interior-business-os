@@ -193,13 +193,17 @@ begin
  -- A watchman must not gain structural plans, site reports or financial data.
  if not v_manager and v_role not in ('site_engineer','quality_inspector','procurement')
  then return jsonb_build_object('links','[]'::jsonb,'payments','[]'::jsonb,'options','[]'::jsonb);end if;
- v_finance=private.finance_access(p_organization_id,'payment_schedule.view');
+ v_finance=coalesce(private.finance_access(p_organization_id,'payment_schedule.view'),false);
  with latest as (
    select distinct on (record_kind,coalesce(report_id,material_id,media_id,check_id,gate_id,payment_item_id))
       stage_id,record_kind,coalesce(report_id,material_id,media_id,check_id,gate_id,payment_item_id) record_id
     from private.construction_stage_record_links
     where organization_id=p_organization_id and project_id=p_project_id
       and (record_kind<>'payment' or v_finance)
+      and (v_manager
+        or (v_role='site_engineer' and record_kind in ('report','material','media','check','curing_round'))
+        or (v_role='quality_inspector' and record_kind in ('check','media'))
+        or (v_role='procurement' and record_kind='material'))
     order by record_kind,coalesce(report_id,material_id,media_id,check_id,gate_id,payment_item_id),sequence desc
  )
  select coalesce(jsonb_agg(jsonb_build_object('stage_id',l.stage_id,
@@ -226,7 +230,7 @@ begin
      left join lateral (
        select request_number,status from public.payment_requests pr
        where pr.organization_id=p_organization_id and pr.contract_id=l.contract_id
-         and pr.schedule_item_id=l.payment_item_id and pr.status<>'voided'
+         and pr.schedule_item_id=l.payment_item_id and pr.voided_at is null
        order by pr.issued_at desc,pr.id desc limit 1
      ) req on true;
    if v_manager then
