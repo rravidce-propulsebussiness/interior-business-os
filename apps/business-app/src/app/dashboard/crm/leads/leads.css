@@ -348,7 +348,7 @@ body:has(.crm-leads-root) .crm-shared-navigation {
 }
 .crm-workspace-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.62fr) minmax(325px, 0.9fr);
+  grid-template-columns: minmax(0, 1fr);
   align-items: start;
   gap: 12px;
 }
@@ -1101,7 +1101,7 @@ body:has(.crm-leads-root) .crm-shared-navigation {
     padding-inline: 16px;
   }
   .crm-workspace-grid {
-    grid-template-columns: minmax(0, 1.35fr) minmax(310px, 0.8fr);
+      grid-template-columns: minmax(0, 1fr);
   }
 }
 @media (max-width: 1150px) {
