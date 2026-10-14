@@ -52,12 +52,11 @@ export function PremiumPackageEditor({
   const [description, setDescription] = useState(item?.description ?? '');
   const [themeColor, setThemeColor] = useState(item?.themeColor ?? '#155EEF');
   const [sections, setSections] = useState<ConstructionSpecSection[]>(() => {
-    const template =
-      item?.specSections?.length
-        ? item.specSections
-        : defaultSections.length
-          ? defaultSections
-          : defaultConstructionSpecSections();
+    const template = item?.specSections?.length
+      ? item.specSections
+      : defaultSections.length
+        ? defaultSections
+        : defaultConstructionSpecSections();
     return template.map((section) => {
       const kind = constructionSectionKind(section);
       return {

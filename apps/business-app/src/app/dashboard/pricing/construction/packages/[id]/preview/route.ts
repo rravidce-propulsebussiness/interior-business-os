@@ -37,7 +37,10 @@ export async function GET(request: Request, { params }: Params) {
     }).format(Number(pkg.ratePerSqft) * 1000);
     const specs = pkg.specSections.filter((s) =>
       Boolean(
-        s.description || s.brand || s.grade || s.allowancePerSqft ||
+        s.description ||
+        s.brand ||
+        s.grade ||
+        s.allowancePerSqft ||
         s.deliverables?.length ||
         s.extraFields?.some((field) => field.value.trim()),
       ),
@@ -54,21 +57,31 @@ export async function GET(request: Request, { params }: Params) {
             ? '<p>Brand: <strong>' + escape(section.brand) + '</strong></p>'
             : '') +
           (constructionSectionKind(section) === 'material' && section.grade
-            ? '<p>Grade: ' + escape(section.grade) + '</p>' : '') +
-          (constructionSectionKind(section) === 'material' && section.allowancePerSqft
+            ? '<p>Grade: ' + escape(section.grade) + '</p>'
+            : '') +
+          (constructionSectionKind(section) === 'material' &&
+          section.allowancePerSqft
             ? '<p>Specified allowance: ₹' +
               escape(section.allowancePerSqft) +
               '/SFT</p>'
             : '') +
           (section.deliverables?.length
             ? '<p><strong>Drawing deliverables:</strong> ' +
-              section.deliverables.map(escape).join(' · ') + '</p>'
+              section.deliverables.map(escape).join(' · ') +
+              '</p>'
             : '') +
           (section.extraFields?.length
-            ? section.extraFields.filter((field) => field.value.trim())
-                .map((field) =>
-                  '<p><strong>' + escape(field.label) + ':</strong> ' +
-                  escape(field.value) + '</p>').join('')
+            ? section.extraFields
+                .filter((field) => field.value.trim())
+                .map(
+                  (field) =>
+                    '<p><strong>' +
+                    escape(field.label) +
+                    ':</strong> ' +
+                    escape(field.value) +
+                    '</p>',
+                )
+                .join('')
             : '') +
           (section.description
             ? '<p>' + escape(section.description) + '</p>'

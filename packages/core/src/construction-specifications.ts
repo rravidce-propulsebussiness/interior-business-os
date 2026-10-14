@@ -65,7 +65,9 @@ export function constructionSectionKind(
 ): ConstructionSpecKind {
   return (
     section.kind ??
-    (/architectural|drawings|plans$/i.test(section.title) ? 'plans' : 'material')
+    (/architectural|drawings|plans$/i.test(section.title)
+      ? 'plans'
+      : 'material')
   );
 }
 
@@ -73,7 +75,11 @@ export function defaultConstructionSpecSections(): ConstructionSpecSection[] {
   return categoryNames.map((name, index) =>
     makeConstructionSection(
       name,
-      index === 0 ? 'plans' : index === categoryNames.length - 1 ? 'custom' : 'material',
+      index === 0
+        ? 'plans'
+        : index === categoryNames.length - 1
+          ? 'custom'
+          : 'material',
     ),
   );
 }

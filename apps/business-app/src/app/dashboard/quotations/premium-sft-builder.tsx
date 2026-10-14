@@ -225,10 +225,12 @@ export function PremiumSftBuilder({
           description: choice.description,
         },
         ...(choice.specSections.length
-          ? choice.specSections.filter(filledConstructionSection).map((section) => ({
-              ...section,
-              kind: constructionSectionKind(section),
-            }))
+          ? choice.specSections
+              .filter(filledConstructionSection)
+              .map((section) => ({
+                ...section,
+                kind: constructionSectionKind(section),
+              }))
           : freshSections().slice(1)),
       ]);
     }

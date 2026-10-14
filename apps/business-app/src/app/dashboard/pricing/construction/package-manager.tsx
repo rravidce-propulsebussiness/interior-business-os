@@ -1,7 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import type { ConstructionPackage, ConstructionSpecSection } from '@business-os/database/construction-packages';
+import type {
+  ConstructionPackage,
+  ConstructionSpecSection,
+} from '@business-os/database/construction-packages';
 import { PremiumPackageEditor } from './premium-package-editor';
 
 export function ConstructionPackagesManager({
@@ -41,7 +44,10 @@ export function ConstructionPackagesManager({
         )}
       </div>
       {editing === 'new' && (
-        <PremiumPackageEditor defaultSections={defaultSections} close={() => setEditing(null)} />
+        <PremiumPackageEditor
+          defaultSections={defaultSections}
+          close={() => setEditing(null)}
+        />
       )}
       <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {packages.map((item) => (

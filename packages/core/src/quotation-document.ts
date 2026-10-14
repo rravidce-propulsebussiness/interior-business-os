@@ -180,13 +180,21 @@ export function renderQuotationDocument(input: unknown): string {
               : '') +
             (section.deliverables?.length
               ? '<p><strong>Included drawings:</strong> ' +
-                section.deliverables.map(escape).join(' · ') + '</p>'
+                section.deliverables.map(escape).join(' · ') +
+                '</p>'
               : '') +
             (section.extraFields?.length
-              ? section.extraFields.filter((field) => field.value.trim())
-                  .map((field) =>
-                    '<p><strong>' + escape(field.label) + ':</strong> ' +
-                    escape(field.value) + '</p>').join('')
+              ? section.extraFields
+                  .filter((field) => field.value.trim())
+                  .map(
+                    (field) =>
+                      '<p><strong>' +
+                      escape(field.label) +
+                      ':</strong> ' +
+                      escape(field.value) +
+                      '</p>',
+                  )
+                  .join('')
               : '') +
             (section.description
               ? '<p class="text">' + escape(section.description) + '</p>'

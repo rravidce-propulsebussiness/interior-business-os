@@ -12,16 +12,24 @@ export default async function PlatformConstructionSpecTemplatesPage() {
   try {
     await authorization.requirePlatformPermission('platform.access');
     await authorization.requirePlatformPermission('platform.catalog.view');
-    await authorization.requirePlatformPermission('platform.organizations.manage');
+    await authorization.requirePlatformPermission(
+      'platform.organizations.manage',
+    );
   } catch (error) {
     if (error instanceof DomainError && error.code === 'FORBIDDEN') notFound();
     throw error;
   }
-  const { data, error } = await client.rpc('construction_spec_template_get', {});
+  const { data, error } = await client.rpc(
+    'construction_spec_template_get',
+    {},
+  );
   if (error) throw new Error('Platform specification defaults unavailable');
   return (
     <main id="main-content" className="mx-auto max-w-5xl space-y-6 px-4 py-8">
-      <Link href="/admin/control/quotations" className="text-sm font-semibold text-blue-700">
+      <Link
+        href="/admin/control/quotations"
+        className="text-sm font-semibold text-blue-700"
+      >
         ← Quotation controls
       </Link>
       <div>
@@ -33,7 +41,8 @@ export default async function PlatformConstructionSpecTemplatesPage() {
         </h1>
         <p className="mt-2 text-sm leading-6 text-slate-600">
           Add or edit default categories, plan drawings, material fields, and
-          custom rows. This configuration does not edit companies' package prices.
+          custom rows. This configuration does not edit companies' package
+          prices.
         </p>
       </div>
       <PlatformConstructionTemplateEditor

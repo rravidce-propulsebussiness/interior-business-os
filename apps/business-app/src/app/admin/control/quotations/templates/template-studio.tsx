@@ -14,7 +14,9 @@ export function PlatformConstructionTemplateEditor({
   initialSections: ConstructionSpecSection[];
 }) {
   const [sections, setSections] = useState<ConstructionSpecSection[]>(
-    initialSections.length ? initialSections : defaultConstructionSpecSections(),
+    initialSections.length
+      ? initialSections
+      : defaultConstructionSpecSections(),
   );
   const [state, action, pending] = useActionState(
     saveGlobalConstructionTemplate,
@@ -24,9 +26,10 @@ export function PlatformConstructionTemplateEditor({
     <form action={action} className="space-y-5">
       <input type="hidden" name="sections" value={JSON.stringify(sections)} />
       <div className="rounded-2xl border border-blue-100 bg-blue-50 p-4 text-sm leading-6 text-blue-900">
-        Platform category defaults apply to <strong>new company packages only</strong>.
-        Companies own their pricing, can edit or remove categories for their own
-        packages, and never share package data across tenants.
+        Platform category defaults apply to{' '}
+        <strong>new company packages only</strong>. Companies own their pricing,
+        can edit or remove categories for their own packages, and never share
+        package data across tenants.
       </div>
       <SpecificationFieldsEditor
         sections={sections}
@@ -34,19 +37,26 @@ export function PlatformConstructionTemplateEditor({
         heading="Global default categories, drawings and editable fields"
       />
       <div className="flex flex-wrap gap-3">
-        <button type="submit" disabled={pending}
-          className="rounded-xl bg-blue-600 px-6 py-3 text-sm font-bold text-white disabled:opacity-40">
+        <button
+          type="submit"
+          disabled={pending}
+          className="rounded-xl bg-blue-600 px-6 py-3 text-sm font-bold text-white disabled:opacity-40"
+        >
           {pending ? 'Saving defaults…' : 'Save platform defaults'}
         </button>
-        <button type="button"
+        <button
+          type="button"
           onClick={() => setSections(defaultConstructionSpecSections())}
-          className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700">
+          className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700"
+        >
           Restore suggested categories (not saved yet)
         </button>
       </div>
       {state.message && (
-        <p role={state.saved ? 'status' : 'alert'}
-          className="rounded-xl bg-slate-100 p-4 text-sm text-slate-800">
+        <p
+          role={state.saved ? 'status' : 'alert'}
+          className="rounded-xl bg-slate-100 p-4 text-sm text-slate-800"
+        >
           {state.message}
         </p>
       )}

@@ -190,21 +190,31 @@ it('renders package theme and brand, grade, allowance as a safe company snapshot
 it('prints selected architectural plans and custom fields without material brand inputs', () => {
   const doc = quotationDocumentFixture();
   doc.lines[0]!.description = encodeSftEstimate(
-    calculateSftEstimate(
-      {
-        rows: [{
-          name: 'Ground Floor', kind: 'floor', lengthFeet: '20',
-          widthFeet: '30', ratePerSqft: '1950',
-        }],
-        materialIds: [],
-        sections: [{
-          title: 'Architectural plans', kind: 'plans',
+    calculateSftEstimate({
+      rows: [
+        {
+          name: 'Ground Floor',
+          kind: 'floor',
+          lengthFeet: '20',
+          widthFeet: '30',
+          ratePerSqft: '1950',
+        },
+      ],
+      materialIds: [],
+      sections: [
+        {
+          title: 'Architectural plans',
+          kind: 'plans',
           description: 'Architectural and MEP drawings',
-          deliverables: ['Structural drawings', 'Electrical layout', '3D elevation views'],
+          deliverables: [
+            'Structural drawings',
+            'Electrical layout',
+            '3D elevation views',
+          ],
           extraFields: [{ label: 'Drawing revisions', value: 'Two included' }],
-        }],
-      },
-    ),
+        },
+      ],
+    }),
   );
   const html = renderQuotationDocument(doc);
   expect(html).toContain('Structural drawings');
