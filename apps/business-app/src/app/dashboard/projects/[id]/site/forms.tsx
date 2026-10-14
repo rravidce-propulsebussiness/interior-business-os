@@ -152,7 +152,11 @@ export function ProjectSiteMediaForm({
     >
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="text-sm font-medium">
-          {phase === 'curing' ? 'Curing round photo (up to 8 MB)' : phase === 'execution' ? 'Work-start / progress image, PDF or short MP4 (up to 8 MB)' : 'Attachment (image, PDF or short MP4 up to 8 MB)'}
+          {phase === 'curing'
+            ? 'Curing round photo (up to 8 MB)'
+            : phase === 'execution'
+              ? 'Work-start / progress image, PDF or short MP4 (up to 8 MB)'
+              : 'Attachment (image, PDF or short MP4 up to 8 MB)'}
           <input
             className={control}
             required
@@ -191,7 +195,9 @@ export function ProjectSiteMediaForm({
             ) : (
               <>
                 <option value="daily">Daily site progress</option>
-                <option value="site">Work-start / construction site photo</option>
+                <option value="site">
+                  Work-start / construction site photo
+                </option>
                 <option value="inspection">Inspection evidence</option>
               </>
             )}
@@ -204,7 +210,11 @@ export function ProjectSiteMediaForm({
             name="caption"
             required={phase === 'curing' || phase === 'execution'}
             maxLength={500}
-            placeholder={phase === 'curing' ? 'Curing time, location and element being cured' : 'Area, date and what this image shows'}
+            placeholder={
+              phase === 'curing'
+                ? 'Curing time, location and element being cured'
+                : 'Area, date and what this image shows'
+            }
           />
         </label>
       </div>
@@ -212,7 +222,13 @@ export function ProjectSiteMediaForm({
         className="w-fit rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold hover:bg-slate-50 disabled:opacity-50"
         disabled={pending}
       >
-        {pending ? 'Uploading…' : phase === 'curing' ? 'Upload curing photo' : phase === 'execution' ? 'Upload work photo / evidence' : 'Upload private evidence'}
+        {pending
+          ? 'Uploading…'
+          : phase === 'curing'
+            ? 'Upload curing photo'
+            : phase === 'execution'
+              ? 'Upload work photo / evidence'
+              : 'Upload private evidence'}
       </button>
       {message && (
         <p role="status" className="text-sm text-slate-700">
