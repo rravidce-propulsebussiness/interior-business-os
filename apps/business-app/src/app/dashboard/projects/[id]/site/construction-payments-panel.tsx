@@ -60,13 +60,13 @@ export function ConstructionPaymentsPanel({
   );
   const formatAmount = (value: string) => {
     // Display the exact canonical decimal rather than rounding through JS Number.
-    const match = /^(\\d+)(\\.\\d+)?$/.exec(value);
+    const match = /^(\d+)(\.\d+)?$/.exec(value);
     if (!match) return value;
     const integer = match[1] ?? value;
     const fractional = match[2] ?? '';
     const head = integer.length > 3 ? integer.slice(0, -3) : '';
     const tail = integer.length > 3 ? integer.slice(-3) : integer;
-    const grouped = head.replace(/\\B(?=(\\d{2})+(?!\\d))/g, ',');
+    const grouped = head.replace(/\B(?=(\d{2})+(?!\d))/g, ',');
     return (head ? grouped + ',' : '') + tail + fractional;
   };
 
