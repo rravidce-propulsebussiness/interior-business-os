@@ -6,9 +6,16 @@ const field =
   'w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100';
 const label = 'grid gap-2 text-xs font-bold text-slate-700';
 const planOptions = [
-  'Architectural floor plan', 'Structural drawing', 'Electrical layout',
-  'Plumbing layout', 'Staircase detail', 'Elevation design', '3D views',
-  'Working drawings', 'Section drawing', 'Furniture layout',
+  'Architectural floor plan',
+  'Structural drawing',
+  'Electrical layout',
+  'Plumbing layout',
+  'Staircase detail',
+  'Elevation design',
+  '3D views',
+  'Working drawings',
+  'Section drawing',
+  'Furniture layout',
 ];
 
 export function SpecSectionFields({
@@ -18,8 +25,11 @@ export function SpecSectionFields({
   section: ConstructionSpecSection;
   onChange: (next: ConstructionSpecSection) => void;
 }) {
-  const kind = section.kind ??
-    (/architectural|planning|drawings/i.test(section.title) ? 'plans' : 'material');
+  const kind =
+    section.kind ??
+    (/architectural|planning|drawings/i.test(section.title)
+      ? 'plans'
+      : 'material');
   const change = (patch: Partial<ConstructionSpecSection>) =>
     onChange({ ...section, ...patch });
   const drawings = section.deliverables ?? [];
@@ -35,9 +45,10 @@ export function SpecSectionFields({
             const next = e.target.value as 'plans' | 'material' | 'custom';
             change({
               kind: next,
-              deliverables: next === 'plans' && drawings.length === 0
-                ? planOptions.map((name) => ({ label: name, included: true }))
-                : drawings,
+              deliverables:
+                next === 'plans' && drawings.length === 0
+                  ? planOptions.map((name) => ({ label: name, included: true }))
+                  : drawings,
               brand: next === 'material' ? section.brand : '',
               grade: next === 'material' ? section.grade : '',
               allowancePerSqft:
@@ -56,12 +67,15 @@ export function SpecSectionFields({
             Architectural & engineering deliverables
           </h5>
           <p className="mt-1 text-xs text-slate-600">
-            Select the drawings included in this package. Rename or add
-            drawings to match your company services.
+            Select the drawings included in this package. Rename or add drawings
+            to match your company services.
           </p>
           <div className="mt-4 grid gap-2 sm:grid-cols-2">
             {drawings.map((drawing, index) => (
-              <div key={index} className="flex min-w-0 items-center gap-2 rounded-xl bg-white p-2">
+              <div
+                key={index}
+                className="flex min-w-0 items-center gap-2 rounded-xl bg-white p-2"
+              >
                 <input
                   className="size-4 accent-blue-600"
                   aria-label={'Include ' + drawing.label}
@@ -70,7 +84,9 @@ export function SpecSectionFields({
                   onChange={(e) =>
                     change({
                       deliverables: drawings.map((entry, i) =>
-                        i === index ? { ...entry, included: e.target.checked } : entry,
+                        i === index
+                          ? { ...entry, included: e.target.checked }
+                          : entry,
                       ),
                     })
                   }
@@ -83,7 +99,9 @@ export function SpecSectionFields({
                   onChange={(e) =>
                     change({
                       deliverables: drawings.map((entry, i) =>
-                        i === index ? { ...entry, label: e.target.value } : entry,
+                        i === index
+                          ? { ...entry, label: e.target.value }
+                          : entry,
                       ),
                     })
                   }
@@ -92,7 +110,9 @@ export function SpecSectionFields({
                   type="button"
                   aria-label={'Remove drawing ' + drawing.label}
                   onClick={() =>
-                    change({ deliverables: drawings.filter((_, i) => i !== index) })
+                    change({
+                      deliverables: drawings.filter((_, i) => i !== index),
+                    })
                   }
                   className="rounded-lg px-2 py-2 text-xs font-bold text-rose-600"
                 >
@@ -161,7 +181,10 @@ export function SpecSectionFields({
         </p>
         <div className="space-y-2">
           {extras.map((entry, index) => (
-            <div key={index} className="grid gap-2 sm:grid-cols-[1fr_1.4fr_auto]">
+            <div
+              key={index}
+              className="grid gap-2 sm:grid-cols-[1fr_1.4fr_auto]"
+            >
               <input
                 className={field}
                 maxLength={80}
