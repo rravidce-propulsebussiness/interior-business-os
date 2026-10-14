@@ -61,7 +61,7 @@ create function public.construction_client_manage(
  p_org uuid,p_project uuid,p_action text,p_input jsonb default '{}'::jsonb
 ) returns jsonb language plpgsql security definer set search_path='' as $$
 declare token text;share_id uuid;expiry timestamptz;
- report_id uuid;decision text;record_id uuid;
+ v_report_id uuid;decision text;record_id uuid;
 begin
  if not coalesce(private.construction_can_manage(p_org,p_project),false)
  then raise exception 'Project manager required' using errcode='42501';end if;
@@ -106,25 +106,25 @@ begin
 
  if p_input-array['report_id']<>'{}'::jsonb
  then raise exception 'Unexpected report fields' using errcode='22023';end if;
- report_id=(p_input->>'report_id')::uuid;
+ v_report_id=(p_input->>'report_id')::uuid;
  if not exists(select 1 from private.site_reports r
-    where r.organization_id=p_org and r.project_id=p_project and r.id=report_id)
+    where r.organization_id=p_org and r.project_id=p_project and r.id=v_report_id)
  then raise exception 'Report does not belong to this project' using errcode='42501';end if;
  decision=case when p_action='report_publish' then 'publish' else 'unpublish' end;
  if decision='publish' and not exists(
     select 1 from private.site_report_reviews r
     where r.organization_id=p_org and r.project_id=p_project
-      and r.report_id=report_id and r.decision='approved'
+      and r.report_id=v_report_id and r.decision='approved'
       and r.id=(
         select later.id from private.site_report_reviews later
         where later.organization_id=p_org and later.project_id=p_project
-           and later.report_id=report_id
+           and later.report_id=v_report_id
         order by later.created_at desc,later.id desc limit 1)
  ) then raise exception 'Latest manager review must approve report before publication'
    using errcode='23514';end if;
  insert into private.construction_client_publications(
    organization_id,project_id,report_id,decision,published_by)
- values(p_org,p_project,report_id,decision,auth.uid()) returning id into record_id;
+ values(p_org,p_project,v_report_id,decision,auth.uid()) returning id into record_id;
  perform private.site_log(p_org,p_project,'construction.client.report_'||decision,record_id);
  return jsonb_build_object('event_id',record_id);
 end$$;
