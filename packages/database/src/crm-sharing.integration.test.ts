@@ -36,12 +36,13 @@ create temp table share_test_state(payload jsonb);grant select,insert on share_t
 set local role authenticated;
 do $$declare lead uuid;mapping jsonb;r uuid;n uuid;expired_revision uuid;link jsonb;rotated jsonb;hash text;oldhash text;payload jsonb;response jsonb;begin
  lead=public.crm_save('${org}','leads',jsonb_build_object('name','Sharing lead','phone','+49 30 123456','source_id',(select id from public.lead_sources where organization_id='${org}' and key='referral'),'stage_id',(select id from public.crm_pipeline_stages where organization_id='${org}' and key='new')));
- mapping=public.crm_convert('${org}',jsonb_build_object('id',lead,'version',1));
+ perform public.crm_command('${org}','stage',jsonb_build_object('id',lead,'version',1,'stage_id',(select id from public.crm_pipeline_stages where organization_id='${org}' and key='won'),'note','Signed approval received'));
+ mapping=public.crm_convert('${org}',jsonb_build_object('id',lead,'version',2));
  r=pg_temp.commit_quote(jsonb_build_object('action','create','project_id',mapping->>'project_id','currency','INR'));
  perform pg_temp.denied(format('select public.quotation_share_manage(%L,''create'',%L::jsonb)','${org}',jsonb_build_object('revision_id',r)),'draft cannot be shared');
  perform pg_temp.commit_quote(jsonb_build_object('action','save_line','revision_id',r,'version',1,'catalog_item_id',null,'area_id',null,'optional',false,'sort_order',0,'description','Customer description','snapshot',${literal(JSON.stringify(snapshot))}::jsonb,'cost',${literal(JSON.stringify(cost))}::jsonb));
  perform pg_temp.commit_quote(jsonb_build_object('action','issue','revision_id',r,'version',2));
- perform pg_temp.assert_value((select lifecycle='open' from public.leads where id=lead),'issue does not mark Won');
+ perform pg_temp.assert_value((select lifecycle='won' from public.leads where id=lead),'issued quotation preserves Won stage');
  link=public.quotation_share_manage('${org}','create',jsonb_build_object('revision_id',r));
  perform pg_temp.assert_value(length(link->>'token')=64,'256-bit token encoding');
  hash=link->>'token';oldhash=hash;
