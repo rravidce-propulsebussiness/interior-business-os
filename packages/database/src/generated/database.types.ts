@@ -11595,6 +11595,20 @@ export interface Database {
         Args: { p_user_id: string; p_status: string };
         Returns: undefined;
       };
+      project_agreement_command: {
+        Args: {
+          p_organization_id: string;
+          p_project_id: string;
+          p_contract_id: string;
+          p_action: string;
+          p_input?: Json;
+        };
+        Returns: string;
+      };
+      project_agreement_read: {
+        Args: { p_organization_id: string; p_project_id: string };
+        Returns: Json;
+      };
       project_site_command: {
         Args: {
           p_organization_id: string;
