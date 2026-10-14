@@ -195,22 +195,26 @@ export function ConstructionJourney({
       id: value(item, 'id'),
       label: `${value(item, 'item')} · ${value(item, 'quantity')} ${value(item, 'unit')}`,
     })),
-    ...media.filter((item) => value(item, 'category') !== 'agreement').map((item) => ({
-      kind: 'media' as const,
-      id: value(item, 'id'),
-      label: `${human(value(item, 'category'))}: ${value(item, 'caption') || value(item, 'filename')}`,
-    })),
+    ...media
+      .filter((item) => value(item, 'category') !== 'agreement')
+      .map((item) => ({
+        kind: 'media' as const,
+        id: value(item, 'id'),
+        label: `${human(value(item, 'category'))}: ${value(item, 'caption') || value(item, 'filename')}`,
+      })),
     ...checks.map((item) => ({
       kind: 'check' as const,
       id: value(item, 'id'),
       label: `${value(item, 'title')} · ${human(value(item, 'status'))}`,
     })),
-    ...gate.filter((item) => value(item, 'kind') === 'curing').map((item) => ({
-      kind: 'curing_round' as const,
-      id: value(item, 'id'),
-      label: `${date(value(item, 'created_at'))}: ${value(item, 'description').slice(0, 70)}`,
-    })),
-    ...(canSeeFinance ? stageRecords?.options ?? [] : []).map((item) => ({
+    ...gate
+      .filter((item) => value(item, 'kind') === 'curing')
+      .map((item) => ({
+        kind: 'curing_round' as const,
+        id: value(item, 'id'),
+        label: `${date(value(item, 'created_at'))}: ${value(item, 'description').slice(0, 70)}`,
+      })),
+    ...(canSeeFinance ? (stageRecords?.options ?? []) : []).map((item) => ({
       kind: 'payment' as const,
       id: item.id,
       contractId: item.contract_id,
@@ -308,13 +312,18 @@ export function ConstructionJourney({
               (entry) => entry.status === 'passed' && entry.current,
             ).length;
             const active = stage.id === openStage;
-            const stageMaterials = linkedRecords(stage.id, 'material', materials);
+            const stageMaterials = linkedRecords(
+              stage.id,
+              'material',
+              materials,
+            );
             const stageReports = linkedRecords(stage.id, 'report', reports);
             const stageChecks = linkedRecords(stage.id, 'check', checks);
             const stageMedia = linkedRecords(stage.id, 'media', media);
             const stageRounds = linkedRecords(stage.id, 'curing_round', gate);
-            const stagePayments = (stageRecords?.payments ?? [])
-              .filter((item) => item.stage_id === stage.id);
+            const stagePayments = (stageRecords?.payments ?? []).filter(
+              (item) => item.stage_id === stage.id,
+            );
             return (
               <div className="cj-track-item" key={stage.id}>
                 <div className={`cj-node cj-node-${style}`}>
@@ -437,7 +446,9 @@ export function ConstructionJourney({
                                     <strong>{payment.label}</strong>
                                     <span className="cj-currency">
                                       {payment.currency} {payment.amount}
-                                      {payment.due_date ? ` · Due ${date(payment.due_date)}` : ''}
+                                      {payment.due_date
+                                        ? ` · Due ${date(payment.due_date)}`
+                                        : ''}
                                     </span>
                                   </span>
                                   <em>
@@ -456,9 +467,9 @@ export function ConstructionJourney({
                             </p>
                           )}
                           <p className="cj-caption">
-                            Linked values come from the contract schedule. Request
-                            status is not proof of payment; invoices, allocations
-                            and receipts stay in Billing.
+                            Linked values come from the contract schedule.
+                            Request status is not proof of payment; invoices,
+                            allocations and receipts stay in Billing.
                           </p>
                         </div>
                       </div>
@@ -468,8 +479,12 @@ export function ConstructionJourney({
                         <div className="cj-subhead">
                           <h4>Records assigned to this construction stage</h4>
                           <span className="cj-count">
-                            {stageReports.length + stageMaterials.length +
-                              stageMedia.length + stageChecks.length + stageRounds.length} records
+                            {stageReports.length +
+                              stageMaterials.length +
+                              stageMedia.length +
+                              stageChecks.length +
+                              stageRounds.length}{' '}
+                            records
                           </span>
                         </div>
                         {stageReports.length > 0 && (
@@ -477,8 +492,10 @@ export function ConstructionJourney({
                             <strong>Engineer updates</strong>
                             {stageReports.map((item) => (
                               <p key={value(item, 'id')}>
-                                {date(value(item, 'report_date'))}: {value(item, 'completed_work')}
-                                {value(item, 'tomorrow_plan') && ` · Tomorrow: ${value(item, 'tomorrow_plan')}`}
+                                {date(value(item, 'report_date'))}:{' '}
+                                {value(item, 'completed_work')}
+                                {value(item, 'tomorrow_plan') &&
+                                  ` · Tomorrow: ${value(item, 'tomorrow_plan')}`}
                               </p>
                             ))}
                           </div>
@@ -488,9 +505,13 @@ export function ConstructionJourney({
                             <strong>Materials</strong>
                             <ul className="cj-materials">
                               {stageMaterials.map((item) => (
-                                <li key={value(item,'id')}>
-                                  <span>{value(item,'item')} · {value(item,'quantity')} {value(item,'unit')}</span>
-                                  <em>{human(value(item,'status'))}</em>
+                                <li key={value(item, 'id')}>
+                                  <span>
+                                    {value(item, 'item')} ·{' '}
+                                    {value(item, 'quantity')}{' '}
+                                    {value(item, 'unit')}
+                                  </span>
+                                  <em>{human(value(item, 'status'))}</em>
                                 </li>
                               ))}
                             </ul>
@@ -500,12 +521,14 @@ export function ConstructionJourney({
                           <div className="cj-linked-group">
                             <strong>Site checks (informal)</strong>
                             {stageChecks.map((item) => (
-                              <p key={value(item,'id')}>
-                                {value(item,'title')} · {human(value(item,'status'))}
+                              <p key={value(item, 'id')}>
+                                {value(item, 'title')} ·{' '}
+                                {human(value(item, 'status'))}
                               </p>
                             ))}
                             <p className="cj-caption">
-                              Informal notes do not replace independent formal QC.
+                              Informal notes do not replace independent formal
+                              QC.
                             </p>
                           </div>
                         )}
@@ -514,7 +537,11 @@ export function ConstructionJourney({
                             <strong>Stage photos and evidence</strong>
                             <div className="cj-gallery">
                               {stageMedia.map((item) => (
-                                <EvidenceTile key={value(item,'id')} item={item} projectId={projectId} />
+                                <EvidenceTile
+                                  key={value(item, 'id')}
+                                  item={item}
+                                  projectId={projectId}
+                                />
                               ))}
                             </div>
                           </div>
@@ -523,15 +550,22 @@ export function ConstructionJourney({
                           <div className="cj-linked-group">
                             <strong>Curing rounds</strong>
                             {stageRounds.map((item) => (
-                              <p key={value(item,'id')}>
-                                {date(value(item,'created_at'))}: {value(item,'description')}
+                              <p key={value(item, 'id')}>
+                                {date(value(item, 'created_at'))}:{' '}
+                                {value(item, 'description')}
                               </p>
                             ))}
                           </div>
                         )}
-                        {!stageReports.length && !stageMaterials.length &&
-                          !stageMedia.length && !stageChecks.length && !stageRounds.length && (
-                            <p>No site updates, materials or photos have been assigned to this stage yet.</p>
+                        {!stageReports.length &&
+                          !stageMaterials.length &&
+                          !stageMedia.length &&
+                          !stageChecks.length &&
+                          !stageRounds.length && (
+                            <p>
+                              No site updates, materials or photos have been
+                              assigned to this stage yet.
+                            </p>
                           )}
                         {canLinkRecords && (
                           <StageRecordLinker
@@ -548,8 +582,9 @@ export function ConstructionJourney({
                           <div>
                             <h4>Site records &amp; tomorrow&apos;s plan</h4>
                             <p>
-                              Recent project-wide activity below is for context only.
-                              Stage-specific evidence appears in the section above.
+                              Recent project-wide activity below is for context
+                              only. Stage-specific evidence appears in the
+                              section above.
                             </p>
                           </div>
                           <Link href={go('#daily-reports')}>All updates →</Link>
