@@ -2220,3 +2220,280 @@ body:has(.crm-leads-root) .crm-shared-navigation {
   background: #123e6d;
   color: #ffffff;
 }
+
+/* Company-industry-aware manual lead form. Scoped so import and CRM boards
+   retain their existing layout and control styling. */
+.crm-lead-editor {
+  padding: 0;
+  overflow: hidden;
+  border-radius: 20px;
+  border-color: #e0e8f4;
+}
+.crm-lead-hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 13px;
+  padding: 20px 24px;
+  background: linear-gradient(115deg, #f6faff 0%, #e9f2ff 74%, #f6f4ff 100%);
+  border-bottom: 1px solid #deebfa;
+}
+.crm-lead-editor .crm-lead-eyebrow {
+  font-size: 10px;
+  color: #2367b4;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  margin-bottom: 6px;
+}
+.crm-lead-editor .crm-lead-hero h2 {
+  color: #152746;
+  font-size: 23px;
+  font-weight: 850;
+  letter-spacing: -0.04em;
+}
+.crm-lead-editor .crm-lead-hero p:not(.crm-lead-eyebrow) {
+  margin-top: 5px;
+  font-size: 12px;
+  color: #566a87;
+  line-height: 1.6;
+}
+.crm-lead-form {
+  display: grid;
+  gap: 15px;
+  padding: 17px 22px 22px;
+}
+.crm-lead-service-panel,
+.crm-lead-section {
+  border: 1px solid #e2eaf5;
+  border-radius: 15px;
+  padding: 17px;
+  background: #fff;
+}
+.crm-lead-service-panel {
+  background: linear-gradient(128deg, #fafcff, #f5f9ff);
+}
+.crm-lead-section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+  color: #152746;
+}
+.crm-lead-section-title h3 {
+  font-size: 15px;
+  font-weight: 800;
+  margin: 0;
+}
+.crm-lead-section-title p {
+  margin-top: 3px;
+  font-size: 11px;
+  color: #74859b;
+}
+.crm-lead-section-icon {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  border-radius: 10px;
+  color: #1766e8;
+  background: #e7f0ff;
+  font-size: 12px;
+  font-weight: 850;
+}
+.crm-lead-interior .crm-lead-section-icon {
+  color: #7451d7;
+  background: #f0eaff;
+}
+.crm-lead-service-selector {
+  display: grid;
+  max-width: 430px;
+  gap: 7px;
+  color: #233c61;
+  font-weight: 700;
+  font-size: 12px;
+}
+.crm-leads-root .crm-lead-service-selector select {
+  min-height: 48px;
+  padding: 11px 12px;
+  border: 1px solid #adc8ef;
+  border-radius: 10px;
+  background: #fff;
+  color: #153a74;
+  font-weight: 750;
+  width: 100%;
+}
+.crm-lead-locked-service {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  max-width: 430px;
+  border: 1px solid #cde0fb;
+  border-radius: 10px;
+  background: #eaf3ff;
+}
+.crm-lead-locked-service strong {
+  color: #1257ba;
+  font-size: 13px;
+}
+.crm-lead-locked-service span {
+  font-size: 11px;
+  color: #5b7294;
+}
+.crm-lead-editor .crm-quick-add-form {
+  align-items: start;
+}
+.crm-lead-editor .crm-quick-add-form label {
+  color: #263e5e;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.crm-lead-editor .crm-quick-add-form input:focus,
+.crm-lead-editor .crm-quick-add-form select:focus,
+.crm-lead-editor .crm-quick-add-form textarea:focus,
+.crm-lead-service-selector select:focus {
+  outline: 2px solid #7badff;
+  outline-offset: 1px;
+  border-color: #408af2;
+}
+.crm-lead-editor .crm-quick-add-form input,
+.crm-lead-editor .crm-quick-add-form select,
+.crm-lead-editor .crm-quick-add-form textarea {
+  border-radius: 10px;
+  min-width: 0;
+}
+.crm-lead-fieldset {
+  border: 0;
+  padding: 0;
+  min-width: 0;
+}
+.crm-lead-fieldset legend {
+  color: #263e5e;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+.crm-lead-scope-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+.crm-leads-root .crm-lead-scope-options button {
+  padding: 12px 10px;
+  background: #f2f6fc;
+  color: #506486;
+  border: 1px solid #dfe8f4;
+  font-weight: 750;
+  border-radius: 10px;
+  font-size: 12px;
+}
+.crm-leads-root .crm-lead-scope-options button.crm-lead-selected {
+  color: #fff;
+  background: #1768e9;
+  border-color: #1768e9;
+}
+.crm-lead-work-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.crm-lead-editor .crm-lead-work-grid label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f5f8fe;
+  border: 1px solid #dde7f6;
+  color: #536985;
+  border-radius: 9px;
+  font-size: 11px;
+  padding: 9px 11px;
+  cursor: pointer;
+}
+.crm-lead-editor .crm-lead-work-grid label.crm-work-selected {
+  color: #125bc9;
+  background: #eaf2ff;
+  border-color: #7fb0f5;
+}
+.crm-lead-editor .crm-lead-work-grid input {
+  width: 14px;
+  min-height: 14px;
+  height: 14px;
+  padding: 0;
+  accent-color: #1768e9;
+}
+.crm-lead-submit-bar {
+  position: sticky;
+  bottom: 8px;
+  display: flex;
+  justify-content: flex-end;
+  padding: 11px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid #e0eafa;
+  border-radius: 13px;
+  box-shadow: 0 8px 30px rgba(21, 67, 130, 0.09);
+  z-index: 2;
+}
+.crm-lead-editor .crm-lead-submit-bar .crm-primary {
+  min-width: 210px;
+  min-height: 46px;
+  justify-content: center;
+}
+@media (max-width: 650px) {
+  .crm-lead-editor .crm-lead-hero {
+    padding: 16px;
+  }
+  .crm-lead-editor .crm-lead-form {
+    padding: 11px;
+    gap: 11px;
+  }
+  .crm-lead-editor .crm-lead-section,
+  .crm-lead-editor .crm-lead-service-panel {
+    padding: 13px;
+  }
+  .crm-lead-editor .crm-quick-add-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 11px 9px;
+  }
+  .crm-lead-editor .crm-quick-add-form label {
+    font-size: 11px;
+  }
+  .crm-lead-editor .crm-quick-add-form input,
+  .crm-lead-editor .crm-quick-add-form select {
+    font-size: 12px;
+    padding: 10px 8px;
+  }
+  .crm-lead-editor .crm-lead-submit-bar .crm-primary {
+    width: 100%;
+  }
+  .crm-lead-hero h2 {
+    font-size: 21px;
+  }
+}
+
+.crm-lead-detail-requirements dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 15px;
+  margin-top: 12px;
+}
+.crm-lead-detail-requirements dt {
+  color: #69809c;
+  font-size: 11px;
+  text-transform: capitalize;
+  margin-bottom: 3px;
+}
+.crm-lead-detail-requirements dd {
+  color: #172e52;
+  font-weight: 700;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 440px) {
+  .crm-lead-detail-requirements dl {
+    grid-template-columns: 1fr;
+  }
+}

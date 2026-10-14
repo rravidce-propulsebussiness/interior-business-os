@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { OwnerIcon, type OwnerIconName } from '../../owner-shell';
 import { runCrmCommand, saveCrm } from '../actions';
 import { QuickAddLead } from './quick-add-lead';
+import type { LeadServiceOption } from './lead-service-options';
 import { LeadsBoardView } from './board-view';
 import {
   ProPulseConnectPanel,
@@ -38,6 +39,7 @@ export type LeadView = {
   assignedName: string;
   location: string;
   requirement: string;
+  requirements: Record<string, string>;
   projectSize: string;
   budgetMin: string | null;
   budgetMax: string | null;
@@ -232,6 +234,7 @@ export function LeadsWorkspace({
   tabs,
   stages,
   sources,
+  services,
   assignees,
   branches,
   lostReasons,
@@ -265,6 +268,7 @@ export function LeadsWorkspace({
   tabs: LeadTab[];
   stages: LeadStage[];
   sources: LeadOption[];
+  services: LeadServiceOption[];
   assignees: LeadOption[];
   branches: LeadOption[];
   lostReasons: LeadOption[];
@@ -485,6 +489,7 @@ export function LeadsWorkspace({
         {leadTool === 'add' && canCreate && (
           <QuickAddLead
             canConfigureCrm={canConfigureCrm}
+            services={services}
             sources={sources.filter(
               (source) => !/propulse/i.test(source.label),
             )}
@@ -1139,6 +1144,21 @@ export function LeadsWorkspace({
                       {selected.expectedStartDate || 'Not specified'}
                     </Field>
                   </div>
+                  {Object.keys(selected.requirements).length > 0 && (
+                    <div className="crm-summary crm-lead-detail-requirements">
+                      <strong>Project details</strong>
+                      <dl>
+                        {Object.entries(selected.requirements)
+                          .filter(([key]) => key !== 'service')
+                          .map(([key, entry]) => (
+                            <div key={key}>
+                              <dt>{key.replaceAll('_', ' ')}</dt>
+                              <dd>{entry}</dd>
+                            </div>
+                          ))}
+                      </dl>
+                    </div>
+                  )}
                   {selected.notes && (
                     <div className="crm-summary">
                       <strong>Requirement summary</strong>
