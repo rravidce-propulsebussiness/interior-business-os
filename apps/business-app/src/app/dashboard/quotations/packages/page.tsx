@@ -12,21 +12,16 @@ export const dynamic = 'force-dynamic';
 export default async function QuotationPackagesPage() {
   const { org, canManagePrice } = await catalogPage(true);
   const { client, repository, authorization } = await pageServices();
-  const [
-    organization,
-    user,
-    industries,
-    construction,
-    configurable,
-  ] = await Promise.all([
-    repository.organization(org),
-    authorization.requireAuthenticatedUser(),
-    repository.industries(),
-    createConstructionPackagesRepository(client).list(org),
-    createQuotationPackagesRepository(client)
-      .list(org)
-      .catch(() => null),
-  ]);
+  const [organization, user, industries, construction, configurable] =
+    await Promise.all([
+      repository.organization(org),
+      authorization.requireAuthenticatedUser(),
+      repository.industries(),
+      createConstructionPackagesRepository(client).list(org),
+      createQuotationPackagesRepository(client)
+        .list(org)
+        .catch(() => null),
+    ]);
   if (!organization) throw new Error('Company workspace unavailable');
   return (
     <QuotationStudioFrame
