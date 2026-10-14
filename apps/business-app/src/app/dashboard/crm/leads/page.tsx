@@ -288,16 +288,22 @@ export default async function Leads({
     { label: 'Dashboard', href: '/dashboard', icon: 'dashboard' },
   ];
   nav.push({
-    label: 'Leads',
+    label: 'CRM',
     href: base,
     icon: 'leads',
     children: [
-      { label: 'Manage Leads', href: base },
+      { label: 'CRM Overview', href: '/dashboard/crm' },
+      { label: 'All Leads', href: base },
+      { label: 'Follow-ups', href: '/dashboard/crm/followups' },
+      { label: 'Site Visits', href: '/dashboard/crm/site-visits' },
       ...(s.allowed('lead.create')
         ? [
             { label: 'Upload Leads', href: base + '/upload' },
             { label: 'Google Sheets', href: base + '/google-sheets' },
           ]
+        : []),
+      ...(s.allowed('crm.pipeline.manage')
+        ? [{ label: 'CRM Settings', href: '/dashboard/crm/settings' }]
         : []),
     ],
   });
