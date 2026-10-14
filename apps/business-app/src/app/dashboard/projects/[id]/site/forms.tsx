@@ -132,7 +132,7 @@ export function ProjectSiteMediaForm({
   phase,
 }: {
   project: string;
-  phase: 'design' | 'execution';
+  phase: 'design' | 'execution' | 'agreement';
 }) {
   const [message, setMessage] = useState('');
   const [pending, start] = useTransition();
@@ -158,7 +158,7 @@ export function ProjectSiteMediaForm({
             required
             name="file"
             type="file"
-            accept="image/jpeg,image/png,image/webp,video/mp4,application/pdf"
+            accept={phase === 'agreement' ? 'application/pdf' : 'image/jpeg,image/png,image/webp,video/mp4,application/pdf'}
           />
         </label>
         <label className="text-sm font-medium">
@@ -166,9 +166,11 @@ export function ProjectSiteMediaForm({
           <select
             className={control}
             name="category"
-            defaultValue={phase === 'design' ? 'design' : 'daily'}
+            defaultValue={phase === 'agreement' ? 'agreement' : phase === 'design' ? 'design' : 'daily'}
           >
-            {phase === 'design' ? (
+            {phase === 'agreement' ? (
+              <option value="agreement">Private signed agreement PDF</option>
+            ) : phase === 'design' ? (
               <option value="design">Design evidence</option>
             ) : (
               <>
