@@ -20,7 +20,7 @@ export default async function PlatformConstructionSpecTemplatesPage() {
     throw error;
   }
   const { data, error } = await client.rpc(
-    'construction_spec_template_get',
+    'construction_package_field_template_get',
     {},
   );
   if (error) throw new Error('Platform specification defaults unavailable');
