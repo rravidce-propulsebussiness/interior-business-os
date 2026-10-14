@@ -7,6 +7,7 @@ import { SiteAccessState } from './site-access-state';
 import { SiteActivity } from './site-activity';
 import { ConstructionPlanningPanel } from './construction-planning-panel';
 import { ConstructionPaymentsPanel } from './construction-payments-panel';
+import { ConstructionClientPortalManager } from './construction-client-portal-panel';
 import { AgreementReadinessPanel } from './agreement-readiness-panel';
 import '../../../owner-dashboard.css';
 import './site-command.css';
@@ -97,6 +98,23 @@ const constructionFieldSchema = z.object({
       created_by: z.uuid(),
     }),
   ),
+});
+const clientProgressManagementSchema = z.object({
+  shares: z.array(z.object({
+    id: z.uuid(),
+    expires_at: z.string(),
+    revoked_at: z.string().nullable(),
+    created_at: z.string(),
+    active: z.boolean(),
+  })),
+  reports: z.array(z.object({
+    id: z.uuid(),
+    report_date: z.string(),
+    completed_work: z.string(),
+    tomorrow_plan: z.string(),
+    approved: z.boolean(),
+    published: z.boolean(),
+  })),
 });
 const constructionPaymentSchema = z.object({
   active_contract_id: z.uuid().nullable(),
@@ -410,6 +428,16 @@ export default async function ProjectDeliveryPage({
   const constructionPayments = paymentParsed?.success
     ? paymentParsed.data
     : null;
+  const clientPortalResponse = site.can_manage && construction
+    ? await s.client.rpc('construction_client_manage_read', {
+        p_org: context.organizationId,
+        p_project: id,
+      })
+    : null;
+  const clientPortalParsed = clientPortalResponse && !clientPortalResponse.error
+    ? clientProgressManagementSchema.safeParse(clientPortalResponse.data)
+    : null;
+  const clientPortalManager = clientPortalParsed?.success ? clientPortalParsed.data : null;
   const canSeeManagerUpdates =
     site.can_manage ||
     ['site_engineer', 'quality_inspector', 'procurement'].includes(
@@ -585,6 +613,12 @@ export default async function ProjectDeliveryPage({
               />
             )}
 
+            {clientPortalManager && (
+              <ConstructionClientPortalManager
+                projectId={id}
+                data={clientPortalManager}
+              />
+            )}
             {constructionPayments && (
               <ConstructionPaymentsPanel
                 projectId={id}
