@@ -1,0 +1,53 @@
+name: Temporary Phase 6 schema types and formatting
+on:
+  push:
+    branches:
+      - feature/construction-execution-os-phase6-payment-eligibility-20261014
+permissions:
+  contents: write
+jobs:
+  update:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: business_os_test
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/construction-execution-os-phase6-payment-eligibility-20261014
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Generate exact DB types from isolated project schema
+        env:
+          TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:5432/business_os_test
+          ALLOW_TEST_DATABASE_RESET: 'yes'
+        run: |
+          node packages/database/scripts/verify.mjs --initialize-only
+          pnpm db:types
+      - name: Apply pinned formatting
+        run: pnpm exec prettier --write "apps/business-app/src/app/dashboard/projects/[id]/site/construction-payment-actions.ts" "apps/business-app/src/app/dashboard/projects/[id]/site/construction-payments-panel.tsx" "apps/business-app/src/app/dashboard/projects/[id]/site/page.tsx" "packages/database/src/generated/database.types.ts"
+      - name: Commit types and formatting only
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/business-app/src/app/dashboard/projects packages/database/src/generated/database.types.ts
+          if ! git diff --cached --quiet; then
+            git commit -m "build(construction): regenerate payment RPC types and format stage billing interface"
+            git push origin HEAD:feature/construction-execution-os-phase6-payment-eligibility-20261014
+          fi
