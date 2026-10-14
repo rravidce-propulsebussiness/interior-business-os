@@ -169,6 +169,19 @@ begin
  perform public.construction_tomorrow_command(org,project,'review',
    jsonb_build_object('plan_id',record->>'id',
      'decision','approved','reason','Approved revised steel cover plan with five bar benders'));
+ -- Read-only queue joins ONLY current, manager-approved tomorrow plans
+ -- to existing material requests without creating a supplier PO or receipt.
+ if (select item->>'readiness' from jsonb_array_elements(
+    public.construction_procurement_watch(org,project)->'materials') item
+    where item->>'material_id'=current_setting('test.manager_material'))<>'delivery_pending'
+ then raise exception 'FAIL: ordered steel/cement was not shown awaiting actual delivery';end if;
+ if (select item->>'vendor_reference' from jsonb_array_elements(
+    public.construction_procurement_watch(org,project)->'materials') item
+    where item->>'material_id'=current_setting('test.manager_material'))<>'PO-001'
+ then raise exception 'FAIL: procurement watch invented or lost canonical PO reference';end if;
+ if (public.construction_procurement_watch(org,project)->>'can_update')<>'true'
+ then raise exception 'FAIL: authorized project owner cannot act on procurement queue';end if;
+
 
  begin
    perform public.construction_tomorrow_command(org,project,'submit',
@@ -276,6 +289,10 @@ declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
  project uuid=current_setting('test.manager_project')::uuid;
 begin
 
+ begin
+   perform public.construction_procurement_watch(org,project);
+   raise exception 'FAIL: watchman accessed internal approved procurement forecast';
+ exception when insufficient_privilege then null;end;
  begin
    perform public.construction_tomorrow_read(org,project);
    raise exception 'FAIL: watchman can read detailed labour plan';
