@@ -104,7 +104,7 @@ const makeSection = (
  * choices as { label, included }. Normalize only in the editor; saving
  * creates the new editable format without dropping selected legacy rows. */
 const normalizeSection = (section: ConstructionSpecSection): ConstructionSpecSection => {
-  const legacy = section as ConstructionSpecSection & {
+  const legacy = section as unknown as {
     fields?: { label: string; value: string }[];
     deliverables?: Array<string | { label: string; included: boolean }>;
     kind?: 'plans' | 'material' | 'general' | 'custom';
