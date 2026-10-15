@@ -274,14 +274,19 @@ begin
  v_allowed=private.construction_project_access(p_org,p_project);
  if not v_allowed then raise exception 'Project not available'
    using errcode='42501';end if;
- return coalesce((
-   select jsonb_agg(jsonb_build_object('stage_id',stage_id,
-     'title',title,'explanation',explanation,'activities',activities,
-     'display_order',display_order,'version',version)
-   order by display_order,stage_id)
-   from private.project_stage_owner_overrides
-   where organization_id=p_org and project_id=p_project
- ),'[]'::jsonb);
+ return jsonb_build_object(
+  'can_edit',private.site_owner(p_org) and private.construction_can_manage(p_org,p_project),
+  'overrides',case when
+     not private.construction_can_manage(p_org,p_project)
+     and private.site_role(p_org,p_project)='watchman' then '[]'::jsonb
+    else coalesce((
+      select jsonb_agg(jsonb_build_object('stage_id',stage_id,
+        'title',title,'explanation',explanation,'activities',activities,
+        'display_order',display_order,'version',version)
+      order by display_order,stage_id)
+      from private.project_stage_owner_overrides
+      where organization_id=p_org and project_id=p_project
+    ),'[]'::jsonb) end);
 end$$;
 revoke all on function public.project_quote_timeline_create(uuid,uuid,jsonb),
  public.project_stage_owner_edit(uuid,uuid,uuid,integer,jsonb),
