@@ -463,7 +463,8 @@ export default async function Leads({
         rows={rows}
         activityPanel={activity ? <LeadActivityPanel
           services={s} activity={activity} queue={queue} page={page}
-          canManage={s.allowed('crm.followup.manage')}/> : null}
+          canManageFollowups={s.allowed('crm.followup.manage')}
+          canManageVisits={s.allowed('crm.site_visit.manage')}/> : null}
         propulseConnection={propulseConnection}
         initialTool={
           p.panel === 'add' || p.panel === 'propulse' ? p.panel : 'none'
