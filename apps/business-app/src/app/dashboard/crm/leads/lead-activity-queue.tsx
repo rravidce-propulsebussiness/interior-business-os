@@ -19,13 +19,12 @@ export type ActivityQueueItem = {
 };
 
 export function LeadActivityQueue({
-  items, total, canManage, page, hasMore,
+  items, total, canManage, nextHref,
 }: {
   items: ActivityQueueItem[];
   total: number;
   canManage: boolean;
-  page: number;
-  hasMore: boolean;
+  nextHref: string | null;
 }) {
   const router = useRouter();
   const [editing, setEditing] = useState<string | null>(null);
@@ -97,11 +96,6 @@ export function LeadActivityQueue({
           </div>}
         </article>,
       )}</div>}
-    {hasMore && <p className="crm-activity-more">
-      <a href={typeof window === 'undefined' ? '#lead-activities' :
-        (() => { const u = new URL(window.location.href); u.searchParams.set('page', String(page + 1)); return u.pathname + u.search + '#lead-activities'; })()}>
-        Next page →
-      </a>
-    </p>}
+    {nextHref && <p className="crm-activity-more"><a href={nextHref}>Next page →</a></p>}
   </div>;
 }
