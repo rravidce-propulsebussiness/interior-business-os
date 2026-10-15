@@ -13,23 +13,36 @@ update public.profiles set full_name='Verified Homeowner One'
 update public.profiles set full_name='Verified Homeowner Two'
  where id='77777777-7777-4777-8777-777777777777';
 
--- All record setup takes place in a rollback-only transaction.
+-- Create disposable customer/project fixtures with database-owner setup,
+-- then switch to the real authenticated RPC roles. App callers NEVER update
+-- these tables directly.
+update public.customers set email='client-one@example.test'
+where organization_id='dddddddd-dddd-4ddd-8ddd-dddddddddddd'
+  and id=(select customer_id from public.projects
+          where organization_id='dddddddd-dddd-4ddd-8ddd-dddddddddddd'
+            and code='demo-3bhk');
+insert into public.customers(id,organization_id,display_name,email,created_by)
+values('99999999-9999-4999-8999-999999999999',
+       'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
+       'Second Client','client-two@example.test',
+       '11111111-1111-4111-8111-111111111111');
+insert into public.projects(id,organization_id,customer_id,name,code,created_by)
+values('88888888-8888-4888-8888-888888888888',
+       'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
+       '99999999-9999-4999-8999-999999999999',
+       'Client Two House','client-two-house',
+       '11111111-1111-4111-8111-111111111111');
+
 select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',true);
 set local role authenticated;
 do $$
 declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
- project1 uuid;customer1 uuid;project2 uuid=gen_random_uuid();customer2 uuid=gen_random_uuid();
+ project1 uuid;customer1 uuid;project2 uuid='88888888-8888-4888-8888-888888888888';
  access1 uuid;access2 uuid;grant_result jsonb;member_version integer;
 begin
  select id,customer_id into project1,customer1 from public.projects
  where organization_id=org and code='demo-3bhk';
  if project1 is null then raise exception 'Missing demo project for client regression';end if;
- update public.customers set email='client-one@example.test'
- where organization_id=org and id=customer1;
- insert into public.customers(id,organization_id,display_name,email)
- values(customer2,org,'Second Client','client-two@example.test');
- insert into public.projects(id,organization_id,customer_id,name,code)
- values(project2,org,customer2,'Client Two House','client-two-house');
  perform public.project_site_command(org,project1,'initialize','{}'::jsonb);
  perform public.project_site_command(org,project2,'initialize','{}'::jsonb);
  grant_result=public.construction_client_access_manage(org,project1,'grant',
