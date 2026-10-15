@@ -72,6 +72,13 @@ if (process.argv.includes('--check')) {
     console.error('Database type mismatch near line', index + 1);
     console.error('Committed:', currentLines.slice(Math.max(0, index - 2), index + 5).join('\n'));
     console.error('Generated:', expectedLines.slice(Math.max(0, index - 2), index + 5).join('\n'));
+    // Temporary CI diagnostics: permit exact restoration of the generated
+    // catalog snapshot when schemas gained new stored procedures.
+    const encoded = Buffer.from(out, 'utf8').toString('base64');
+    console.error('GEN_TYPES_BASE64_START');
+    for (let offset = 0; offset < encoded.length; offset += 4096)
+      console.error('GEN_TYPES_BASE64_CHUNK:' + encoded.slice(offset, offset + 4096));
+    console.error('GEN_TYPES_BASE64_END');
     throw new Error('Generated database types have drifted. Run db:types.');
   }
   console.log('Generated database types match the applied schema.');
