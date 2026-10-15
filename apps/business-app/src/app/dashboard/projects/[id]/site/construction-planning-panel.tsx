@@ -86,6 +86,9 @@ const phaseTitles: Record<string, string> = {
   finishes: '08 · Waterproofing and finishes',
   handover: '09 · Handover',
 };
+const inputStyle =
+  'block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-3 text-sm text-slate-900 focus:border-blue-600 focus:outline-blue-600';
+
 function labelForRole(role: string) {
   return (
     roles.find((item) => item[0] === role)?.[1] ?? role.replaceAll('_', ' ')
