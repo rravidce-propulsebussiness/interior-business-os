@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { idSchema } from '@business-os/shared';
 import { commercialServices } from '../../commercial/service';
 import { QuotationStudioFrame } from '../studio-frame';
 import { QuotationStudioStart } from '../studio-start';
@@ -8,9 +9,9 @@ export const dynamic = 'force-dynamic';
 export default async function NewQuotation({
   searchParams,
 }: {
-  searchParams: Promise<{ customer?: string }>;
+  searchParams: Promise<{ customer?: string; lead?: string }>;
 }) {
-  const { customer } = await searchParams;
+  const { customer, lead } = await searchParams;
   const s = await commercialServices('quotation.create', 'quotation', true);
   const [organization, user, industries] = await Promise.all([
     s.repository.organization(s.org),
@@ -29,7 +30,21 @@ export default async function NewQuotation({
         .order('created_at', { ascending: false })
         .limit(25)
     : { data: [] };
-  const leads = (rawLeads ?? []).map((lead) => ({
+  // A lead opened from CRM must remain selectable even if it is older
+  // than the 25 recent leads in the general chooser.
+  const selectedLead = lead && idSchema.safeParse(lead).success &&
+    s.allowed('lead.view', 'crm')
+    ? (await s.client.from('leads')
+        .select('id,lead_number,name,phone,email,location,project_size,service_type,industry_id')
+        .eq('organization_id', s.org)
+        .eq('id', lead)
+        .maybeSingle()).data
+    : null;
+  const leadChoices = [
+    ...(selectedLead ? [selectedLead] : []),
+    ...(rawLeads ?? []).filter((item) => item.id !== selectedLead?.id),
+  ];
+  const leads = leadChoices.map((lead) => ({
     ...lead,
     industryKey:
       industries.find((industry) => industry.id === lead.industry_id)?.key ??
@@ -112,6 +127,7 @@ export default async function NewQuotation({
             }))}
           defaultCurrency={organization.default_currency || 'INR'}
           initialCustomerId={customer ?? ''}
+          initialLeadId={selectedLead?.id ?? ''}
         />
         <aside className="qs-editor">
           <div className="qs-create-hero">
