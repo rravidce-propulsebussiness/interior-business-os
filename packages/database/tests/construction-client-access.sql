@@ -4,14 +4,14 @@ begin;
 reset role;
 insert into auth.users(id,email,email_confirmed_at)
 values
- ('44444444-4444-4444-8444-444444444444','client-one@example.test',now()),
- ('55555555-5555-4555-8555-555555555555','client-two@example.test',now());
+ ('66666666-6666-4666-8666-666666666666','client-one@example.test',now()),
+ ('77777777-7777-4777-8777-777777777777','client-two@example.test',now());
 -- The canonical Auth trigger creates the profiles; update names without
 -- manufacturing a second user record.
 update public.profiles set full_name='Verified Homeowner One'
- where id='44444444-4444-4444-8444-444444444444';
+ where id='66666666-6666-4666-8666-666666666666';
 update public.profiles set full_name='Verified Homeowner Two'
- where id='55555555-5555-4555-8555-555555555555';
+ where id='77777777-7777-4777-8777-777777777777';
 
 -- All record setup takes place in a rollback-only transaction.
 select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',true);
@@ -57,7 +57,7 @@ begin
  raise notice 'PASS: verified CRM-matched client grants are scoped and idempotent';
 end$$;
 
-select set_config('request.jwt.claim.sub','44444444-4444-4444-8444-444444444444',true);
+select set_config('request.jwt.claim.sub','66666666-6666-4666-8666-666666666666',true);
 do $$
 declare
  org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
@@ -92,7 +92,7 @@ begin
  raise notice 'PASS: client one has only own client-safe progress with no staff grants';
 end$$;
 
-select set_config('request.jwt.claim.sub','55555555-5555-4555-8555-555555555555',true);
+select set_config('request.jwt.claim.sub','77777777-7777-4777-8777-777777777777',true);
 do $$
 declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
  p1 uuid=current_setting('test.client_one_project')::uuid;
@@ -125,7 +125,7 @@ begin
  exception when serialization_failure then null;end;
  raise notice 'PASS: revocation versioned, stale replay denied';
 end$$;
-select set_config('request.jwt.claim.sub','44444444-4444-4444-8444-444444444444',true);
+select set_config('request.jwt.claim.sub','66666666-6666-4666-8666-666666666666',true);
 do $$
 declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
  p1 uuid=current_setting('test.client_one_project')::uuid;
