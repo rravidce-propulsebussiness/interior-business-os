@@ -11,6 +11,8 @@ declare
  created jsonb; again jsonb; stage uuid; quoted_scope uuid; edit jsonb;
 begin
  select id into project from public.projects where organization_id=org and code='demo-3bhk';
+ update public.projects set industry_id=(select id from public.industries where key='construction')
+   where organization_id=org and id=project;
  perform public.project_site_command(org,project,'initialize','{}'::jsonb);
  contract=pg_temp.site_signed_agreement(org,project);
  select i.key into industry from public.projects p
