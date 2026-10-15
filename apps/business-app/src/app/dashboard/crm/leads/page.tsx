@@ -230,8 +230,38 @@ export default async function Leads({
       expectedStartDate: optionalText(r.expected_start_date),
       convertedProjectId: optionalText(r.converted_project_id),
       convertedCustomerId: optionalText(r.converted_customer_id),
+      quoteRevisionId: null,
+      quoteStatus: null,
+      quoteNumber: null,
     };
   });
+
+  if (rows.length && s.allowed('quotation.view', 'quotation')) {
+    // One tenant-authorized batch query keeps table and mobile quote badges
+    // synchronized without creating 25 per-lead database requests.
+    const rpc = s.client.rpc as unknown as (
+      name: string, params: { p_organization_id: string; p_lead_ids: string[] },
+    ) => Promise<{ data: unknown; error: unknown }>;
+    const linked = await rpc('lead_quotation_summary', {
+      p_organization_id: s.org,
+      p_lead_ids: rows.map((row) => row.id),
+    });
+    if (!linked.error && Array.isArray(linked.data)) {
+      const byId = new Map(rows.map((row) => [row.id, row]));
+      for (const item of linked.data) {
+        if (!item || typeof item !== 'object') continue;
+        const quote = item as Record<string, unknown>;
+        if (typeof quote.lead_id !== 'string' ||
+            typeof quote.revision_id !== 'string') continue;
+        const row = byId.get(quote.lead_id);
+        if (!row || row.quoteRevisionId) continue;
+        row.quoteRevisionId = quote.revision_id;
+        row.quoteStatus = typeof quote.status === 'string' ? quote.status : null;
+        row.quoteNumber =
+          typeof quote.quotation_number === 'string' ? quote.quotation_number : null;
+      }
+    }
+  }
 
   const tabs: LeadTab[] = [
     {
@@ -293,24 +323,11 @@ export default async function Leads({
   const nav: OwnerNavItem[] = [
     { label: 'Dashboard', href: '/dashboard', icon: 'dashboard' },
   ];
+  nav.push({ label: 'Leads', href: base, icon: 'leads' });
   nav.push({
-    label: 'CRM',
-    href: base,
-    icon: 'leads',
-    children: [
-      { label: 'All Leads', href: base },
-      { label: 'Follow-ups', href: '/dashboard/crm/followups' },
-      { label: 'Site Visits', href: '/dashboard/crm/site-visits' },
-      ...(s.allowed('lead.create')
-        ? [
-            { label: 'Upload Leads', href: base + '/upload' },
-            { label: 'Google Sheets', href: base + '/google-sheets' },
-          ]
-        : []),
-      ...(s.allowed('crm.pipeline.manage')
-        ? [{ label: 'CRM Settings', href: '/dashboard/crm/settings' }]
-        : []),
-    ],
+    label: 'Follow-ups',
+    href: '/dashboard/crm/followups',
+    icon: 'calendar',
   });
   if (may('quotation.view', 'quotation'))
     nav.push({
