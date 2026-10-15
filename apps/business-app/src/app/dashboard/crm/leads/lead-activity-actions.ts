@@ -11,7 +11,7 @@ const scheduleSchema = z.object({
   dueAt: z.iso.datetime({ offset: true }),
   assignedTo: z.uuid().nullable(),
   location: z.string().trim().max(500),
-  notes: z.string().trim().max(3000),
+  notes: z.string().trim().max(2400),
 }).strict();
 
 type Result = { ok: boolean; message: string };
