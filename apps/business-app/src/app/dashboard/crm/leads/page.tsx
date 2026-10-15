@@ -19,6 +19,7 @@ import {
 } from './lead-service-options';
 import { leadRequirementLabel, resolveLeadCategory } from './lead-category';
 import { leadDateBounds } from './date-range';
+import { LeadActivityPanel, type ActivityView, type ActivityQueueFilter } from './lead-activity-panel';
 import '../../owner-dashboard.css';
 import './leads.css';
 import './lead-category.css';
@@ -91,6 +92,11 @@ export default async function Leads({
   if (p.panel === 'sheet') redirect('/dashboard/crm/leads/upload');
   const s = await crmServices('lead.view', true);
   const page = pageNumber(p.page);
+  const activity: ActivityView | null =
+    p.activity === 'visits' || p.activity === 'followups' ? p.activity : null;
+  const queue: ActivityQueueFilter =
+    p.queue === 'today' || p.queue === 'overdue' || p.queue === 'upcoming'
+      ? p.queue : '';
   const [choices, organization] = await Promise.all([
     lookups(s, p),
     s.repository.organization(s.org),
@@ -454,6 +460,9 @@ export default async function Leads({
     >
       <LeadsWorkspace
         rows={rows}
+        activityPanel={activity ? <LeadActivityPanel
+          services={s} activity={activity} queue={queue} page={page}
+          canManage={s.allowed('crm.followup.manage')}/> : null}
         propulseConnection={propulseConnection}
         initialTool={
           p.panel === 'add' || p.panel === 'propulse' ? p.panel : 'none'
