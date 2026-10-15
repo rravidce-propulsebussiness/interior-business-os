@@ -87,9 +87,17 @@ export function projectTimelineFromQuote(
     stages.push(stage(code, phase, title, explanation,
       prior ? [prior] : [], activities, holdPoint));
   };
-  add('QUOTED_SCOPE', 'preconstruction', 'Accepted interior scope & BOQ',
-    'The accepted room-wise items, package and specifications form the frozen agreement baseline.',
-    acceptedItems.slice(0, 80).map((x) => compact(x, 235)), 'contract');
+  // Preserve every included item, not merely the first 80 BOQ lines.
+  for (let start = 0; start < acceptedItems.length; start += 75) {
+    const page = Math.floor(start / 75) + 1;
+    add(page === 1 ? 'QUOTED_SCOPE' : 'QUOTED_SCOPE_' + page,
+      'preconstruction',
+      page === 1 ? 'Accepted interior scope & BOQ'
+        : 'Accepted interior scope & BOQ (continued ' + page + ')',
+      'The contracted room-wise items, package and specifications are frozen from the approved quotation.',
+      acceptedItems.slice(start, start + 75).map((x) => compact(x, 235)),
+      'contract');
+  }
   add('SITE_SURVEY', 'survey', 'Site survey & final measurements',
     'Measure rooms, levels and actual site conditions before approved execution drawings.',
     ['Measure the quoted rooms/areas: ' + zones.map((zone) => zone.name).join(', ').slice(0, 170),
@@ -123,7 +131,7 @@ export function projectTimelineFromQuote(
       'Fabricate quoted furniture against approved measurements and finishes.',
       ['Verify approved boards, edge-banding, laminate and hardware',
        'Inspect workshop dimensions and joinery finish'], 'quality');
-    for (const zone of zones.slice(0, 45)) {
+    for (const zone of zones) {
       const affected = scoped.filter((line) =>
         roomFromDescription(line.description) === zone.name);
       if (!affected.length && zone.code !== 'PROJECT') continue;
