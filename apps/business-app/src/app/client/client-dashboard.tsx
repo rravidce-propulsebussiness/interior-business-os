@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
+import { signOut } from '@business-os/auth/actions';
 import { ClientDesignReview } from './client-design-review';
 import { ClientProjectTimeline } from './project-timeline';
 
@@ -117,7 +118,7 @@ export function ClientDashboard({ project, timeline, timelineUnavailable, metric
   metricsUnavailable, clientEmail }: ClientDashboardData) {
   const [search, setSearch] = useState('');
   const needle = search.toLocaleLowerCase().trim();
-  const filtered = <T extends object>(items: T[]) => needle
+  const filtered = <T extends object,>(items: T[]) => needle
     ? items.filter(item => JSON.stringify(item).toLocaleLowerCase().includes(needle)) : items;
   const stageDone = timeline.filter(s => doneStates.has(s.status)).length;
   const progress = timeline.length ? Math.round((100 * stageDone) / timeline.length) : null;
@@ -164,6 +165,9 @@ export function ClientDashboard({ project, timeline, timelineUnavailable, metric
           className={i === 0 ? 'pc-side-link is-active' : 'pc-side-link'}>
           <Icon name={item.icon} size={18}/><span>{item.title}</span></a>)}
       </nav>
+      <form action={signOut} className="pc-side-logout">
+        <button type="submit"><Icon name="arrow" size={16}/> Sign out</button>
+      </form>
       <div className="pc-side-foot">
         <span className="pc-side-foot-symbol"><Icon name="shield" size={24}/></span>
         <b>Your project, clearly visible.</b>
@@ -182,7 +186,11 @@ export function ClientDashboard({ project, timeline, timelineUnavailable, metric
         </div>
         <div className="pc-top-user"><span className="pc-avatar">
           {(clientEmail || 'C').slice(0,1).toUpperCase()}</span><span className="pc-user-caption">
-          <b>Client dashboard</b><small title={clientEmail}>{clientEmail}</small></span></div>
+          <b>Client dashboard</b><small title={clientEmail}>{clientEmail}</small></span>
+          <form action={signOut} className="pc-mobile-logout">
+            <button type="submit" aria-label="Sign out" title="Sign out"><Icon name="arrow" size={16}/></button>
+          </form>
+        </div>
       </header>
       <div className="pc-dashboard">
         <div className="pc-content">
