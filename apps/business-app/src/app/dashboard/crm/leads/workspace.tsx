@@ -52,6 +52,9 @@ export type LeadView = {
   expectedStartDate: string | null;
   convertedProjectId: string | null;
   convertedCustomerId: string | null;
+  quoteRevisionId: string | null;
+  quoteStatus: string | null;
+  quoteNumber: string | null;
 };
 
 const path = '/dashboard/crm/leads';
@@ -666,6 +669,7 @@ export function LeadsWorkspace({
                           <th>Requirement</th>
                           <th>Location</th>
                           <th>Stage</th>
+                          <th>Quotation</th>
                           <th>Priority</th>
                           <th>Follow-up</th>
                           <th>Actions</th>
@@ -733,6 +737,25 @@ export function LeadsWorkspace({
                               >
                                 {lead.stageName}
                               </span>
+                            </td>
+                            <td>
+                              {lead.quoteRevisionId ? (
+                                <a className="font-semibold text-blue-700 underline"
+                                  href={'/dashboard/quotations/' + lead.quoteRevisionId}
+                                  title={'Open ' + (lead.quoteNumber ?? 'quotation')}>
+                                  {lead.quoteNumber || 'View quote'}
+                                  <small className="block font-normal text-slate-500">
+                                    {lead.quoteStatus?.replaceAll('_', ' ')}
+                                  </small>
+                                </a>
+                              ) : canQuote ? (
+                                <a className="font-semibold text-blue-700 underline"
+                                  href={'/dashboard/quotations/new?lead=' + lead.id}>
+                                  + Create quote
+                                </a>
+                              ) : (
+                                <span className="text-slate-400">—</span>
+                              )}
                             </td>
                             <td>
                               <span
@@ -848,6 +871,19 @@ export function LeadsWorkspace({
                           >
                             {lead.priority}
                           </span>
+                        </div>
+                        <div className="my-2">
+                          {lead.quoteRevisionId ? (
+                            <a className="font-semibold text-blue-700 underline"
+                              href={'/dashboard/quotations/' + lead.quoteRevisionId}>
+                              {lead.quoteNumber || 'View quotation'} · {lead.quoteStatus?.replaceAll('_', ' ')}
+                            </a>
+                          ) : canQuote ? (
+                            <a className="font-semibold text-blue-700 underline"
+                              href={'/dashboard/quotations/new?lead=' + lead.id}>
+                              + Create quotation
+                            </a>
+                          ) : null}
                         </div>
                         <small className="crm-mobile-sub">
                           {lead.location || 'Location not provided'} · Follow-up{' '}
