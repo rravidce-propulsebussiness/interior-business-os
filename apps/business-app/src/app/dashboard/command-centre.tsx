@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-html-link-for-pages -- Full-document navigation is required by the hosted workspace. */
 /* Dashboard-only presentational component: all values are supplied by the
    authenticated, tenant-scoped server page. No demonstration data. */
 import { OwnerIcon, type OwnerIconName } from './owner-shell';
@@ -128,7 +129,7 @@ export function CommandCentre({
     <header className="command-welcome">
       <div className="command-welcome-text">
         <span className="command-sun" aria-hidden="true">☀</span>
-        <span><h1>Good to see you, {accountLabel}</h1><p>Your business at a glance.</p></span>
+        <div><h1>Good to see you, {accountLabel}</h1><p>Your business at a glance.</p></div>
       </div>
       <time className="command-date"><OwnerIcon name="calendar" size={16}/>{dateLabel}</time>
     </header>
