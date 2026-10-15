@@ -64,57 +64,8 @@ out = await format(out, {
 });
 const target = file('src/generated/database.types.ts');
 if (process.argv.includes('--check')) {
-  const committed = readFileSync(target, 'utf8');
-  if (committed !== out) {
-    const currentLines = committed.split('\n');
-    const expectedLines = out.split('\n');
-    const index = expectedLines.findIndex((line, i) => line !== currentLines[i]);
-    console.error('Database type mismatch near line', index + 1);
-    console.error('Committed:', currentLines.slice(Math.max(0, index - 2), index + 5).join('\n'));
-    console.error('Generated:', expectedLines.slice(Math.max(0, index - 2), index + 5).join('\n'));
-
-    // Emit a compact patch so checked-in generated types can be reconciled
-    // with the current public schema without weakening the drift guard.
-    const left = committed.split('\n');
-    const right = out.split('\n');
-    const patches = [];
-    let leftAt = 0, rightAt = 0;
-    while (leftAt < left.length || rightAt < right.length) {
-      if (left[leftAt] === right[rightAt]) { leftAt++; rightAt++; continue; }
-      const i = leftAt, j = rightAt;
-      let leftAhead = -1, rightAhead = -1;
-      for (let offset = 1; offset <= 250; offset++) {
-        if (leftAhead < 0 && i + offset < left.length && left[i + offset] === right[j])
-          leftAhead = offset;
-        if (rightAhead < 0 && j + offset < right.length && right[j + offset] === left[i])
-          rightAhead = offset;
-        if (leftAhead >= 0 && rightAhead >= 0) break;
-      }
-      if (rightAt < right.length &&
-          (rightAhead >= 0 && (leftAhead < 0 || rightAhead <= leftAhead) || leftAt >= left.length)) {
-        const count = rightAhead >= 0 ? rightAhead : right.length - rightAt;
-        patches.push({ start: leftAt, remove: 0, insert: right.slice(rightAt, rightAt + count) });
-        rightAt += count;
-      } else if (leftAt < left.length &&
-          (leftAhead >= 0 || rightAt >= right.length)) {
-        const count = leftAhead >= 0 ? leftAhead : left.length - leftAt;
-        patches.push({ start: leftAt, remove: count, insert: [] });
-        leftAt += count;
-      } else {
-        patches.push({ start: leftAt, remove: 1, insert: [right[rightAt]] });
-        leftAt++; rightAt++;
-      }
-    }
-    const reconstructed = [...left];
-    for (const p of [...patches].reverse()) reconstructed.splice(p.start, p.remove, ...p.insert);
-    if (reconstructed.join('\n') !== out) throw new Error('Internal generated type diff reconstruction failed');
-    const serialized = JSON.stringify(patches);
-    console.error('GEN_TYPE_PATCH_START');
-    for (let offset = 0; offset < serialized.length; offset += 4000)
-      console.error('GEN_TYPE_PATCH:' + serialized.slice(offset, offset + 4000));
-    console.error('GEN_TYPE_PATCH_END');
+  if (readFileSync(target, 'utf8') !== out)
     throw new Error('Generated database types have drifted. Run db:types.');
-  }
   console.log('Generated database types match the applied schema.');
 } else {
   mkdirSync(file('src/generated'), { recursive: true });
