@@ -40,21 +40,25 @@ describe('approved quotation to construction-stage snapshot', () => {
       'FIRST_FLOOR',
       'SECOND_FLOOR',
     ]);
-    expect(plan?.stages.filter((stage) => stage.templateCode === 'RCC'))
-      .toHaveLength(3);
+    expect(
+      plan?.stages.filter((stage) => stage.templateCode === 'RCC'),
+    ).toHaveLength(3);
     const scope = plan?.stages.find(
       (stage) => stage.templateCode === 'QUOTED_SCOPE',
     );
     expect(scope?.activities.join(' ')).toContain('Compound Wall');
     expect(scope?.activities.join(' ')).toContain('Customer-selected brand');
     expect(scope?.activities.join(' ')).not.toContain('1750');
-    expect(plan?.stages.find((stage) => stage.templateCode === 'PRECONSTRUCTION')?.dependsOn)
-      .toEqual(['QUOTED_SCOPE']);
+    expect(
+      plan?.stages.find((stage) => stage.templateCode === 'PRECONSTRUCTION')
+        ?.dependsOn,
+    ).toEqual(['QUOTED_SCOPE']);
   });
 
   it('does not fabricate stages if the approved quote lacks a floor-wise schedule', () => {
-    expect(constructionPlanFromQuotedDescriptions(['Normal interior quote']))
-      .toBeNull();
+    expect(
+      constructionPlanFromQuotedDescriptions(['Normal interior quote']),
+    ).toBeNull();
     expect(constructionPlanFromQuotedDescriptions([])).toBeNull();
   });
 
@@ -63,15 +67,19 @@ describe('approved quotation to construction-stage snapshot', () => {
       { name: 'Ground Floor', kind: 'floor' },
       { name: 'Ground Floor', kind: 'floor' },
     ]);
-    expect(() => constructionPlanFromQuotedDescriptions([duplicate]))
-      .toThrow('duplicate or invalid');
+    expect(() => constructionPlanFromQuotedDescriptions([duplicate])).toThrow(
+      'duplicate or invalid',
+    );
     const description = acceptedDescription();
-    expect(() => constructionPlanFromQuotedDescriptions([description, description]))
-      .toThrow('multiple floor-wise');
+    expect(() =>
+      constructionPlanFromQuotedDescriptions([description, description]),
+    ).toThrow('multiple floor-wise');
   });
 
   it('keeps all physical stages planned and never generates financial transactions', () => {
-    const plan = constructionPlanFromQuotedDescriptions([acceptedDescription()]);
+    const plan = constructionPlanFromQuotedDescriptions([
+      acceptedDescription(),
+    ]);
     expect(plan?.stages.every((stage) => !('paid' in stage))).toBe(true);
     expect(JSON.stringify(plan?.stages)).not.toContain('payment_request_id');
   });
