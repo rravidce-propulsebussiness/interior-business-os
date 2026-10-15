@@ -10,8 +10,16 @@ update public.projects set industry_id=(
   );
 delete from public.organization_entitlements where organization_id='dddddddd-dddd-4ddd-8ddd-dddddddddddd' and not enabled and module_id in(select id from public.modules where key='billing');
 set local request.jwt.claim.sub='11111111-1111-4111-8111-111111111111';
+-- Only this disposable transaction receives a bank method for the advance.
+insert into public.payment_methods(organization_id,name,kind,created_by)
+select 'dddddddd-dddd-4ddd-8ddd-dddddddddddd'::uuid,
+       'Operations test bank transfer','bank_transfer',
+       '11111111-1111-4111-8111-111111111111'::uuid
+where not exists(select 1 from public.payment_methods
+  where organization_id='dddddddd-dddd-4ddd-8ddd-dddddddddddd'::uuid
+    and kind='bank_transfer');
 set local role authenticated;
-do $$declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';c uuid;p uuid;r uuid;t uuid;t2 uuid;m uuid;pkg uuid;v integer;template uuid;i uuid;i2 uuid;s uuid;h uuid;ht uuid;vendor uuid;wo uuid;wm uuid;doc jsonb;media uuid;contract uuid;schedule uuid;qc_stage uuid;qc_tpl uuid;qc_inspection uuid;qc_wf uuid;quote_hash text;qc_review uuid;struct_review uuid;qc_clear uuid;qc_data jsonb;begin
+do $$declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';c uuid;p uuid;r uuid;t uuid;t2 uuid;m uuid;pkg uuid;v integer;template uuid;i uuid;i2 uuid;s uuid;h uuid;ht uuid;vendor uuid;wo uuid;wm uuid;doc jsonb;media uuid;contract uuid;schedule uuid;qc_stage uuid;qc_tpl uuid;qc_inspection uuid;qc_wf uuid;quote_hash text;qc_review uuid;struct_review uuid;qc_clear uuid;qc_data jsonb;payment_method uuid;begin
  select id into c from public.contracts where revision_id in(select r.id from public.quotation_revisions r join public.quotations q on q.id=r.quotation_id where q.quotation_number='EXECUTION-TEST');
  p=public.operations_plan(org,'create',jsonb_build_object('contract_id',c));
  perform pg_temp.execution_assert(p=public.operations_plan(org,'create',jsonb_build_object('contract_id',c)),'plan creation retry returns same plan');
@@ -45,6 +53,13 @@ do $$declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';c uuid;p uuid;r uui
  schedule=public.payment_schedule_save(org,contract,
    '{"label":"Contractual execution schedule","items":[{"label":"Final completion","calculation_type":"remaining","value":"0"}]}'::jsonb);
  perform public.payment_schedule_activate(org,schedule,1);
+ if (public.project_agreement_read(org,c)->>'execution_authorized')<>'false'
+ then raise exception 'FAIL: Operations execution bypassed advance receipt'; end if;
+ select id into payment_method from public.payment_methods
+  where organization_id=org and kind='bank_transfer' limit 1;
+ perform public.payment_record(org,contract,jsonb_build_object(
+   'idempotency_key',gen_random_uuid(),'payment_date',current_date,
+   'amount','100','method_id',payment_method));
  perform public.operations_plan(org,'status',jsonb_build_object('id',p,'version',1,'status','in_progress'));
  perform pg_temp.execution_denied(format('select public.operations_task(%L,''task'',%L)',org,jsonb_build_object('id',t,'version',1,'status','blocked')),'blocked task requires reason');
  perform public.operations_task(org,'task',jsonb_build_object('id',t,'version',1,'status','blocked','reason','Waiting for materials'));

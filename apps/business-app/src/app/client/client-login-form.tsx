@@ -3,14 +3,16 @@
 import { useActionState, useEffect } from 'react';
 import Link from 'next/link';
 
-export function ClientLoginForm({ action }: {
+export function ClientLoginForm({ action, projectId }: {
   action: (state: { message: string; authenticated?: boolean }, form: FormData) =>
     Promise<{ message: string; authenticated?: boolean }>;
+  projectId?: string;
 }) {
   const [state, dispatch, busy] = useActionState(action, { message: '' });
   useEffect(() => {
-    if (state.authenticated) window.location.replace('/client');
-  }, [state.authenticated]);
+    if (state.authenticated)
+      window.location.replace(projectId ? '/client/projects/' + projectId : '/client');
+  }, [state.authenticated, projectId]);
   return (
     <form action={dispatch} className="mt-8 space-y-5">
       <label className="block text-sm font-semibold text-slate-700">
@@ -31,7 +33,7 @@ export function ClientLoginForm({ action }: {
       </button>
       <p className="text-center text-sm text-slate-600">
         First time here? <Link className="font-semibold text-blue-700 underline"
-          href="/client/register">Create client login</Link>
+          href={projectId ? '/client/register?project=' + projectId : '/client/register'}>Create client login</Link>
       </p>
       <p className="text-center text-sm">
         <Link className="text-blue-700 underline" href="/forgot-password">Forgot password?</Link>

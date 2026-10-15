@@ -59,7 +59,7 @@ export default async function ClientProject({ params }: {
   if (!z.uuid().safeParse(id).success) notFound();
   const db = await createServerDatabase();
   const { data: auth } = await db.auth.getUser();
-  if (!auth.user) redirect('/client/login');
+  if (!auth.user) redirect('/client/login?project=' + id);
   const rpc = db.rpc.bind(db) as unknown as (
     name: string, args: Record<string, string>,
   ) => Promise<{ data: unknown; error: unknown }>;

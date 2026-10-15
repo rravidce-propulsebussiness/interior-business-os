@@ -21,3 +21,17 @@ begin
  perform public.payment_schedule_activate(org,schedule,1);
  return contract;
 end$$;
+
+-- Real recorded advance fixture. Agreement evidence alone cannot open physical work.
+create function pg_temp.site_record_advance(org uuid,contract uuid)
+returns uuid language plpgsql as $$
+declare method uuid;payment uuid;
+begin
+ select id into method from public.payment_methods
+ where organization_id=org and kind='bank_transfer' limit 1;
+ if method is null then raise exception 'Demo bank transfer method missing';end if;
+ payment=public.payment_record(org,contract,jsonb_build_object(
+   'idempotency_key',gen_random_uuid(),
+   'payment_date',current_date,'amount','100','method_id',method));
+ return payment;
+end$$;

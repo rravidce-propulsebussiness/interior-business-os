@@ -113,13 +113,16 @@ test('Upload Leads and Google Sheets have distinct protected pages', () => {
   assert.match(pageShell, /const leadsPath = '\/dashboard\/crm\/leads'/);
   assert.match(pageShell, /const uploadPath = leadsPath \+ '\/upload'/);
   assert.match(pageShell, /const googlePath = leadsPath \+ '\/google-sheets'/);
-  assert.match(leadPage, /label: 'Upload Leads'/);
-  assert.match(leadPage, /label: 'Google Sheets'/);
-  // Imports belong inside the unified Leads menu rather than the global CRM bar.
+  // Upload and Google Sheets remain reachable from the Leads workspace,
+  // without restoring duplicate sidebar entries removed in the CRM cleanup.
+  assert.match(leads, /href="\/dashboard\/crm\/leads\/upload"/);
+  assert.match(leads, /href="\/dashboard\/crm\/leads\/google-sheets"/);
+  assert.doesNotMatch(leadPage, /label: 'Upload Leads'/);
+  assert.doesNotMatch(leadPage, /label: 'Google Sheets'/);
   assert.doesNotMatch(crmLayout, /\['Upload Leads',/);
   assert.doesNotMatch(crmLayout, /\['Google Sheets',/);
   assert.match(leadPage, /label: 'Follow-ups'/);
-  assert.match(leadPage, /label: 'Site Visits'/);
+  assert.doesNotMatch(leadPage, /label: 'Site Visits'/);
 
   assert.doesNotMatch(importer, /setMethod/);
   assert.doesNotMatch(importer, /crm-import-methods/);
@@ -182,4 +185,55 @@ test('legacy CRM overview and commercial response pages redirect to their canoni
   assert.match(quotationsPage, /quotation_response_queue/);
   assert.match(quotationsPage, /id="customer-responses"/);
   assert.match(quotationsPage, /p_organization_id: s\.org/);
+});
+
+
+test('invited clients can open only explicitly granted project records', () => {
+  const portalSql = readFileSync(
+    fileURLToPath(
+      new URL(
+        '../packages/database/supabase/migrations/20261015000700_client_project_portal.sql',
+        import.meta.url,
+      ),
+    ),
+    'utf8',
+  );
+  const inviteUi = readFileSync(
+    fileURLToPath(
+      new URL(
+        '../apps/business-app/src/app/dashboard/customers/[id]/client-access.tsx',
+        import.meta.url,
+      ),
+    ),
+    'utf8',
+  );
+  const projectPage = readFileSync(
+    fileURLToPath(
+      new URL('../apps/business-app/src/app/client/projects/[id]/page.tsx', import.meta.url),
+    ),
+    'utf8',
+  );
+  const loginPage = readFileSync(
+    fileURLToPath(
+      new URL('../apps/business-app/src/app/client/login/page.tsx', import.meta.url),
+    ),
+    'utf8',
+  );
+  const home = readFileSync(
+    fileURLToPath(new URL('../apps/business-app/src/app/client/page.tsx', import.meta.url)),
+    'utf8',
+  );
+
+  // The project UUID and the verified email must match on every read path;
+  // no customer-level wildcard is allowed to expose sibling projects.
+  assert.match(portalSql, /a\.project_id=p_project and a\.active/);
+  assert.match(portalSql, /a\.email=private\.client_portal_verified_email\(\)/);
+  assert.match(portalSql, /p\.customer_id=a\.customer_id/);
+  assert.match(portalSql, /if not private\.client_portal_accessible\(p_project_id\)/);
+  assert.match(portalSql, /not private\.client_portal_accessible\(m\.project_id\)/);
+  assert.match(inviteUi, /'\/client\/projects\/' \+ item\.project_id/);
+  assert.match(loginPage, /'\/client\/projects\/' \+ projectId/);
+  assert.match(projectPage, /client_portal_project/);
+  assert.match(projectPage, /'\/client\/login\?project=' \+ id/);
+  assert.match(home, /if \(projects\.length === 1\) redirect/);
 });

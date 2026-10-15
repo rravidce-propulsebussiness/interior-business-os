@@ -15,10 +15,15 @@ begin
     or public.project_agreement_read(org,project)->>'execution_authorized'<>'false'
  then raise exception 'FAIL: unprepared contract readiness must fail closed';end if;
  contract=pg_temp.site_signed_agreement(org,project);
- if (public.project_agreement_read(org,project)->>'execution_authorized')<>'true'
- then raise exception 'FAIL: genuine agreement evidence not recognized';end if;
+ if (public.project_agreement_read(org,project)->>'execution_authorized')<>'false'
+ then raise exception 'FAIL: agreement without received advance authorized site work';end if;
  if exists(select 1 from public.payment_requests where contract_id=contract)
  then raise exception 'FAIL: signing an agreement manufactured a payment request';end if;
+ if exists(select 1 from public.payments where contract_id=contract)
+ then raise exception 'FAIL: signing agreement manufactured an advance receipt';end if;
+ perform pg_temp.site_record_advance(org,contract);
+ if (public.project_agreement_read(org,project)->>'execution_authorized')<>'true'
+ then raise exception 'FAIL: signed agreement and recorded advance not recognized';end if;
  latest=(public.project_agreement_read(org,project)->>'clearance_event_id')::uuid;
  perform public.project_agreement_command(org,project,contract,'revoke',
    jsonb_build_object('previous_event_id',latest,
@@ -44,9 +49,9 @@ begin
    or (public.project_agreement_read(org,project)->>'execution_authorized')<>'true'
    or (public.project_agreement_read(org,project)->>'clearance_type')<>'owner_exception'
  then raise exception 'FAIL: recorded owner exception not applied';end if;
- if exists(select 1 from public.payments where contract_id=contract)
- then raise exception 'FAIL: clearance created artificial receipt';end if;
- raise notice 'PASS: signed-copy evidence, revoke, owner exception, no invented payment';
+ if (select count(*) from public.payments where contract_id=contract)<>1
+ then raise exception 'FAIL: clearance added an artificial receipt';end if;
+ raise notice 'PASS: signed-copy evidence, real advance, revoke, owner exception, no invented payment';
 end$$;
 
 select set_config('request.jwt.claim.sub','22222222-2222-4222-8222-222222222222',true);

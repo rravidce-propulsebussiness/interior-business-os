@@ -1,16 +1,23 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { z } from 'zod';
 import { createServerDatabase, isSupabaseConfigured } from '@business-os/database/server';
 import { signIn } from '@business-os/auth/actions';
 import { ClientLoginForm } from '../client-login-form';
 
 export const dynamic = 'force-dynamic';
 
-export default async function ClientLoginPage() {
+export default async function ClientLoginPage({ searchParams }: {
+  searchParams: Promise<{ project?: string }>;
+}) {
+  // A project ID is only a navigation hint. The database validates the
+  // signed-in email's explicit grant before revealing project data.
+  const query = await searchParams;
+  const projectId = z.uuid().safeParse(query.project).success ? query.project : undefined;
   if (isSupabaseConfigured()) {
     const db = await createServerDatabase();
     const { data } = await db.auth.getUser();
-    if (data.user) redirect('/client');
+    if (data.user) redirect(projectId ? '/client/projects/' + projectId : '/client');
   }
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-12 text-slate-900">
@@ -29,7 +36,7 @@ export default async function ClientLoginPage() {
             Use the email your construction or interior company invited.
             Client access is separate from employee accounts.
           </p>
-          <ClientLoginForm action={signIn} />
+          <ClientLoginForm action={signIn} projectId={projectId} />
           <p className="mt-5 text-center text-sm text-slate-500">
             <Link href="/" className="underline">Business OS home</Link>
           </p>
