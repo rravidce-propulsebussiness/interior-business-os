@@ -13,6 +13,7 @@ const createInput = z
     clientName: z.string().trim().min(2).max(200),
     customerId: z.uuid().nullable().optional(),
     projectId: z.uuid().nullable().optional(),
+    leadId: z.uuid().nullable().optional(),
     phone: z.string().trim().min(3).max(40),
     email: z.union([z.literal(''), z.email().max(254)]),
     projectName: z.string().trim().min(2).max(200),
@@ -50,6 +51,28 @@ export async function createStudioQuotation(input: unknown): Promise<{
       !s.allowed('project.create', 'projects')
     )
       throw new DomainError('FORBIDDEN');
+
+    // Quoting an enquiry is not the same as closing it Won. Keep its
+    // originating lead attached while commercial work proceeds independently.
+    if (values.leadId) {
+      if (!s.allowed('lead.view', 'crm'))
+        return { ok: false, message: 'Lead access is required to quote an enquiry.' };
+      const { data: lead, error: leadError } = await s.client
+        .from('leads')
+        .select('id,phone,email')
+        .eq('organization_id', s.org)
+        .eq('id', values.leadId)
+        .maybeSingle();
+      if (leadError || !lead)
+        return { ok: false, message: 'The selected lead is not available.' };
+      const normalizePhone = (value: string) => value.replace(/\D/g, '');
+      const samePhone = Boolean(lead.phone && values.phone &&
+        normalizePhone(lead.phone) === normalizePhone(values.phone));
+      const sameEmail = Boolean(lead.email && values.email &&
+        lead.email.toLowerCase() === values.email.toLowerCase());
+      if (!samePhone && !sameEmail)
+        return { ok: false, message: 'Customer contact details must match the selected lead.' };
+    }
 
     const { data: activeIndustry, error: industryError } = await s.client
       .from('industries')
@@ -266,11 +289,30 @@ export async function createStudioQuotation(input: unknown): Promise<{
       }
     }
 
+    const attachLead = async (quotationId: string) => {
+      if (!values.leadId) return '';
+      // The migration installs this permission-checked, tenant-scoped RPC.
+      // If deployment has not run the migration yet, never pretend the
+      // association was saved; the quotation itself remains accessible.
+      const rpc = s.client.rpc as unknown as (
+        fn: string, args: Record<string, string>,
+      ) => Promise<{ error: { message: string } | null }>;
+      const linked = await rpc('lead_quotation_link', {
+        p_organization_id: s.org,
+        p_lead_id: values.leadId,
+        p_quotation_id: quotationId,
+        p_project_id: projectId,
+      });
+      return linked.error
+        ? ' Quotation saved, but linking it to the lead failed. Apply the lead-quotation migration and retry from the lead.'
+        : '';
+    };
+
     // A project's existing quotation is the canonical quotation; its drafts
     // and issued amendments are revisions, not independent client records.
     const { data: existingQuotes, error: quotesError } = await s.client
       .from('quotations')
-      .select('current_revision_id,status')
+      .select('id,current_revision_id,status')
       .eq('organization_id', s.org)
       .eq('project_id', projectId)
       .neq('status', 'cancelled')
@@ -282,9 +324,11 @@ export async function createStudioQuotation(input: unknown): Promise<{
         message: 'Could not check previous quotations. Try again.',
       };
     if (existingQuotes?.[0]?.current_revision_id) {
+      const linkWarning = await attachLead(existingQuotes[0].id);
+      revalidatePath('/dashboard/crm/leads');
       return {
         ok: true,
-        message: 'Opening the existing project quotation and its revisions.',
+        message: 'Opening the existing project quotation and its revisions.' + linkWarning,
         revisionId: existingQuotes[0].current_revision_id,
       };
     }
@@ -297,10 +341,22 @@ export async function createStudioQuotation(input: unknown): Promise<{
         currency: values.currency,
       }),
     );
+    const { data: newRevision } = await s.client
+      .from('quotation_revisions')
+      .select('quotation_id')
+      .eq('organization_id', s.org)
+      .eq('id', revisionId)
+      .maybeSingle();
+    const linkWarning = values.leadId
+      ? newRevision?.quotation_id
+        ? await attachLead(newRevision.quotation_id)
+        : ' Quotation created, but its lead link could not be confirmed.'
+      : '';
     revalidatePath('/dashboard/quotations');
+    revalidatePath('/dashboard/crm/leads');
     return {
       ok: true,
-      message: 'Branded quotation draft created.',
+      message: 'Branded quotation draft created.' + linkWarning,
       revisionId,
     };
   } catch (error) {
