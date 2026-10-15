@@ -13,6 +13,7 @@ import { leadCategoryLabel, type LeadCategory } from './lead-category';
 import { LeadsBoardView } from './board-view';
 import { LeadBulkToolbar } from './lead-bulk-toolbar';
 import { LeadDetailsDrawer } from './lead-details-drawer';
+import { leadDateRangeSelection, type LeadDateRange } from './date-range';
 import {
   ProPulseConnectPanel,
   type ProPulseConnectionView,
@@ -68,6 +69,13 @@ export type LeadView = {
 };
 
 const path = '/dashboard/crm/leads';
+const dateChoices: ReadonlyArray<{ value: LeadDateRange; label: string }> = [
+  { value: '', label: 'Any time' },
+  { value: 'last_week', label: 'Last week' },
+  { value: 'last_month', label: 'Last month' },
+  { value: 'this_month', label: 'This month' },
+  { value: 'custom', label: 'Custom date' },
+];
 const number = new Intl.NumberFormat('en-IN');
 
 type ActionIcon =
@@ -258,6 +266,9 @@ export function LeadsWorkspace({
     initialTool,
   );
   const viewMode = params.view === 'board' ? 'board' : 'list';
+  const [dateRange, setDateRange] = useState<LeadDateRange>(() =>
+    leadDateRangeSelection(params),
+  );
   const viewLink = (nextView: 'list' | 'board') => {
     const query = new URLSearchParams();
     for (const [key, value] of Object.entries(params)) {
@@ -472,24 +483,42 @@ export function LeadsWorkspace({
           <details className="crm-advanced">
             <summary>
               <Icon name="filter" /> More filters
+              {dateRange && <span className="crm-date-summary">
+                {dateChoices.find((choice) => choice.value === dateRange)?.label}
+              </span>}
             </summary>
             <div className="crm-advanced-panel">
-              <label>
-                Created from
-                <input
-                  type="date"
-                  name="from"
-                  defaultValue={params.from ?? ''}
-                />
-              </label>
-              <label>
-                Created until
-                <input
-                  type="date"
-                  name="until"
-                  defaultValue={params.until ?? ''}
-                />
-              </label>
+              <div className="crm-date-filter">
+                <span className="crm-date-filter-title">Lead created date</span>
+                <div className="crm-date-options" role="radiogroup" aria-label="Lead date range">
+                  {dateChoices.map((choice) => (
+                    <label key={choice.value || 'any'} className={
+                      'crm-date-preset' + (dateRange === choice.value ? ' is-selected' : '')
+                    }>
+                      <input
+                        type="radio"
+                        name="range"
+                        value={choice.value}
+                        checked={dateRange === choice.value}
+                        onChange={() => setDateRange(choice.value)}
+                      />
+                      <span>{choice.label}</span>
+                    </label>
+                  ))}
+                </div>
+                {dateRange === 'custom' && (
+                  <div className="crm-date-custom">
+                    <label>
+                      From date
+                      <input type="date" name="from" defaultValue={params.from ?? ''} />
+                    </label>
+                    <label>
+                      To date
+                      <input type="date" name="until" defaultValue={params.until ?? ''} />
+                    </label>
+                  </div>
+                )}
+              </div>
               <label>
                 Outcome
                 <select name="lifecycle" defaultValue={params.lifecycle ?? ''}>
