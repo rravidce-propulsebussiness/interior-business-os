@@ -111,7 +111,7 @@ begin
  then raise exception 'Quote industry differs from project industry'
       using errcode='22023';end if;
  select md5(coalesce(string_agg(
-   qi.id::text||chr(31)||coalesce(qi.snapshot->>'name','')||chr(31)||qi.description,
+   qi.id::text||chr(31)||coalesce(qi.snapshot->>'name','')||chr(31)||qi.description||chr(31)||case when qi.optional then '1' else '0' end,
    chr(30) order by qi.id),'')) into v_hash
  from public.quotation_items qi
  where qi.organization_id=p_org and qi.revision_id=rev.id;
