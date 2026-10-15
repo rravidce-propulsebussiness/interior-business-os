@@ -9,7 +9,6 @@ import './studio.css';
 const links: { title: string; href: string; icon: OwnerIconName }[] = [
   { title: 'Dashboard', href: '/dashboard', icon: 'dashboard' },
   { title: 'Leads', href: '/dashboard/crm/leads', icon: 'leads' },
-  { title: 'Follow-ups', href: '/dashboard/crm/followups', icon: 'calendar' },
   { title: 'Quotations', href: '/dashboard/quotations', icon: 'quotations' },
   { title: 'Packages', href: '/dashboard/quotations/packages', icon: 'quotations' },
   { title: 'Projects', href: '/dashboard/projects', icon: 'projects' },
@@ -131,8 +130,8 @@ export function QuotationStudioFrame({
             const selected =
               entry.href === '/dashboard/quotations'
                 ? pathname.startsWith('/dashboard/quotations') &&
-                  pathname !== '/dashboard/quotations/settings' &&
-                  pathname !== '/dashboard/quotations/packages'
+                  !pathname.startsWith('/dashboard/quotations/settings') &&
+                  !pathname.startsWith('/dashboard/quotations/packages')
                 : pathname === entry.href ||
                   (entry.href !== '/dashboard' &&
                     pathname.startsWith(entry.href + '/'));
