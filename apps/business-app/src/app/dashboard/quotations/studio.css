@@ -729,7 +729,8 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
-@media (max-width: 900px) {
+/* Share the same drawer breakpoint as the primary Business OS shell. */
+@media (max-width: 1199px) {
   .qs-sidebar {
     display: flex;
     position: fixed;
