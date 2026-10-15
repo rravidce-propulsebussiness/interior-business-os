@@ -163,6 +163,7 @@ export default async function Quotations({
     const editor = '/dashboard/quotations/' + row.id + '/studio';
     return {
       row,
+      revision,
       industry: industry || 'Not specified',
       createdAt: revision?.created_at ?? null,
       preview, editor,
@@ -240,7 +241,7 @@ export default async function Quotations({
                   <th>Created</th>
                   <th>Actions</th>
                 </tr></thead>
-                <tbody>{visible.map(({ row, industry, createdAt, preview, editor }) => (
+                <tbody>{visible.map(({ row, revision, industry, createdAt, preview, editor }) => (
                   <tr key={row.id}>
                     <td className="qs-quotes-no">
                       <Link href={editor}>{row.quotation_number || 'Quotation'}</Link>
