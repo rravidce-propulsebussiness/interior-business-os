@@ -8,28 +8,14 @@ import './studio.css';
 
 const links: { title: string; href: string; icon: OwnerIconName }[] = [
   { title: 'Dashboard', href: '/dashboard', icon: 'dashboard' },
-  { title: 'CRM & Leads', href: '/dashboard/crm/leads', icon: 'leads' },
+  { title: 'Leads', href: '/dashboard/crm/leads', icon: 'leads' },
   { title: 'Quotations', href: '/dashboard/quotations', icon: 'quotations' },
-  {
-    title: 'Package Manager',
-    href: '/dashboard/quotations/packages',
-    icon: 'projects',
-  },
   { title: 'Projects', href: '/dashboard/projects', icon: 'projects' },
   { title: 'Clients', href: '/dashboard/customers', icon: 'clients' },
   { title: 'Billing', href: '/dashboard/billing', icon: 'billing' },
   { title: 'Team', href: '/dashboard/company/team', icon: 'team' },
   { title: 'Reports', href: '/dashboard/reports', icon: 'reports' },
-  {
-    title: 'Company Profile',
-    href: '/dashboard/company/settings',
-    icon: 'globe',
-  },
-  {
-    title: 'Settings',
-    href: '/dashboard/quotations/settings',
-    icon: 'settings',
-  },
+  { title: 'Company Settings', href: '/dashboard/company/settings', icon: 'settings' },
 ];
 
 export function QuotationStudioFrame({
