@@ -13,6 +13,12 @@ export function projectWorkspaceNavigation(
       href: '/dashboard/crm/leads',
       icon: 'leads',
     });
+  if (has('lead.view', 'crm'))
+    navigation.push({
+      label: 'Follow-ups',
+      href: '/dashboard/crm/followups',
+      icon: 'calendar',
+    });
   if (has('quotation.view', 'quotation'))
     navigation.push({
       label: 'Quotations',
