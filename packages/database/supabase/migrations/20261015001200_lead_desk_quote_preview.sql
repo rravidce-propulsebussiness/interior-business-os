@@ -57,7 +57,7 @@ begin
 end; $$;
 create or replace function public.lead_quotation_list(
  p_organization_id uuid, p_lead_id uuid
-) returns jsonb language plpgsql stable security definer set search_path='' as $
+) returns jsonb language plpgsql stable security definer set search_path='' as $$
 declare result jsonb;
 begin
   if not coalesce(private.has_permission(p_organization_id,'lead.view'), false)
@@ -90,7 +90,7 @@ begin
     on resp.revision_id=r.id and resp.organization_id=q.organization_id
   where l.organization_id=p_organization_id and l.lead_id=p_lead_id;
   return result;
-end; $;
+end; $$;
 create or replace function public.crm_lead_log_update(
  p_organization_id uuid,p_lead_id uuid,p_activity_type text,
  p_outcome text,p_note text,p_follow_up_at timestamptz default null
