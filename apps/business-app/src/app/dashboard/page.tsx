@@ -1,5 +1,4 @@
 /* eslint-disable @next/next/no-html-link-for-pages -- Intentional full-document navigation avoids incomplete RSC Flight streams on Hostinger. */
-import type { ReactNode } from 'react';
 import { notFound, redirect } from 'next/navigation';
 import {
   pageServices,
@@ -13,14 +12,18 @@ import { createQuotationRepository } from '@business-os/database/quotations';
 import { createGstRepository } from '@business-os/database/gst';
 import { commercialSearchResultSchema } from '@business-os/core/commercial';
 import { resultSchema } from './crm/service';
+import { OwnerShell, type OwnerIconName, type OwnerNavItem } from './owner-shell';
 import {
-  OwnerIcon,
-  OwnerShell,
-  type OwnerIconName,
-  type OwnerNavItem,
-} from './owner-shell';
+  CommandCentre,
+  type CommandAction,
+  type CommandAttention,
+  type CommandDocument,
+  type CommandMetric,
+  type CommandProject,
+} from './command-centre';
 import { leadsNavigation } from './leads-navigation';
 import './owner-dashboard.css';
+import './command-centre.css';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,18 +40,6 @@ const rupees = new Intl.NumberFormat('en-IN', {
 
 function asText(value: unknown): string {
   return typeof value === 'string' && value.trim() ? value.trim() : '';
-}
-
-function displayDate(value: unknown): string {
-  if (typeof value !== 'string' || !value) return '—';
-  const parsed = new Date(value);
-  return Number.isNaN(parsed.getTime())
-    ? '—'
-    : new Intl.DateTimeFormat('en-IN', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-      }).format(parsed);
 }
 
 function titleCase(value: string): string {
@@ -71,83 +62,6 @@ async function optional<T>(value: PromiseLike<T>): Promise<T | null> {
     // entire company dashboard. No data is represented as unavailable.
     return null;
   }
-}
-
-function DashboardStat({
-  label,
-  value,
-  note,
-  icon,
-  tone,
-  href,
-}: {
-  label: string;
-  value: string;
-  note: string;
-  icon: OwnerIconName;
-  tone: string;
-  href?: string;
-}) {
-  const content = (
-    <>
-      <span className={'owner-stat-icon owner-tone-' + tone}>
-        <OwnerIcon name={icon} size={25} />
-      </span>
-      <span className="owner-stat-text">
-        <span>{label}</span>
-        <strong>{value}</strong>
-        <small>{note}</small>
-      </span>
-    </>
-  );
-  return href ? (
-    <a href={href} className="owner-stat">
-      {content}
-    </a>
-  ) : (
-    <div className="owner-stat">{content}</div>
-  );
-}
-
-function QuickLink({
-  href,
-  icon,
-  children,
-  primary = false,
-}: {
-  href: string;
-  icon: OwnerIconName;
-  children: ReactNode;
-  primary?: boolean;
-}) {
-  return (
-    <a
-      href={href}
-      className={'owner-quick-button' + (primary ? ' owner-quick-primary' : '')}
-    >
-      <OwnerIcon name={icon} size={19} />
-      <span>{children}</span>
-    </a>
-  );
-}
-
-function AccessTile({
-  href,
-  label,
-  icon,
-  tone,
-}: {
-  href: string;
-  label: string;
-  icon: OwnerIconName;
-  tone: string;
-}) {
-  return (
-    <a className={'owner-access-tile owner-tile-' + tone} href={href}>
-      <OwnerIcon name={icon} size={27} />
-      <span>{label}</span>
-    </a>
-  );
 }
 
 export default async function Dashboard({
@@ -245,6 +159,9 @@ export default async function Dashboard({
     rawQuotes,
     rawProjects,
     rawInvoices,
+    rawBills,
+    rawDueLeads,
+    rawResponses,
     rawTeam,
     rawPlans,
     rawSites,
@@ -277,6 +194,19 @@ export default async function Dashboard({
     canBilling
       ? optional(createGstRepository(client).list(orgId, 'sales_invoice'))
       : Promise.resolve(null),
+    canBilling
+      ? optional(createGstRepository(client).list(orgId, 'purchase_bill'))
+      : Promise.resolve(null),
+    canLeads && !query
+      ? optional(createCrmRepository(client, orgId).search('leads', { due: 'today', sort: 'newest' }, 1))
+      : Promise.resolve(null),
+    canQuotes && has('quotation.customer_response.view', 'quotation') && !query
+      ? optional(client.rpc('quotation_response_queue', {
+          p_organization_id: orgId,
+          p_status: 'awaiting',
+          p_page: 1,
+        }))
+      : Promise.resolve(null),
     canTeam ? optional(repository.team(orgId)) : Promise.resolve(null),
     optional(repository.plans()),
     canSites
@@ -297,6 +227,11 @@ export default async function Dashboard({
   const quotes = quoteResult?.success ? quoteResult.data : null;
   const projects = projectResult?.success ? projectResult.data : null;
   const invoices = Array.isArray(rawInvoices) ? rawInvoices : null;
+  const bills = Array.isArray(rawBills) ? rawBills : null;
+  const dueResult = rawDueLeads ? resultSchema.safeParse(rawDueLeads) : null;
+  const dueLeads = dueResult?.success ? dueResult.data : null;
+  const responseResult = rawResponses && !rawResponses.error ? resultSchema.safeParse(rawResponses.data) : null;
+  const responseQueue = responseResult?.success ? responseResult.data : null;
   const team = Array.isArray(rawTeam) ? rawTeam : null;
   const otherMembers =
     team?.filter(
@@ -413,98 +348,200 @@ export default async function Dashboard({
       icon: 'settings',
     });
 
-  const quickActions: {
-    label: string;
-    href: string;
-    icon: OwnerIconName;
-    primary?: boolean;
-  }[] = [];
-  if (has('quotation.create', 'quotation'))
-    quickActions.push({
-      label: 'Create Quotation',
-      href: '/dashboard/quotations/new',
-      icon: 'plus',
-      primary: true,
-    });
-  if (has('lead.create', 'crm'))
-    quickActions.push({
-      label: 'Add New Lead',
-      href: '/dashboard/crm/leads/new',
-      icon: 'leads',
+  // The dashboard summarizes existing modules; it does not duplicate their
+  // creation forms or show a second set of navigation tiles.
+  const actions: CommandAction[] = [];
+  if (canTeam || canInvite || has('role.view'))
+    actions.push({
+      title: 'Team Management',
+      detail: 'Members and access',
+      href: '/dashboard/company/team',
+      icon: 'team',
     });
   if (has('invoice.create', 'billing'))
-    quickActions.push({
-      label: 'Create Invoice',
-      href: '/dashboard/billing/new?kind=sales_invoice',
-      icon: 'billing',
-    });
-  if (has('project.create', 'projects'))
-    quickActions.push({
-      label: 'Add Project',
-      href: '/dashboard/customers',
+    actions.push(
+      {
+        title: 'Expense Entry',
+        detail: 'Record company expenses',
+        href: '/dashboard/billing/new?kind=purchase_bill',
+        icon: 'expenses',
+      },
+      {
+        title: 'Invoice Creation',
+        detail: 'Create customer invoices',
+        href: '/dashboard/billing/new?kind=sales_invoice',
+        icon: 'billing',
+      },
+    );
+  if (canProjects || canSites)
+    actions.push({
+      title: 'Project Management',
+      detail: 'Track work and updates',
+      href: canProjects ? '/dashboard/projects' : '/dashboard/site-projects',
       icon: 'projects',
     });
-  if (has('invoice.create', 'billing'))
-    quickActions.push({
-      label: 'Add Expense',
-      href: '/dashboard/billing/new?kind=purchase_bill',
-      icon: 'expenses',
-    });
 
-  const tiles: {
-    label: string;
-    href: string;
-    icon: OwnerIconName;
-    tone: string;
-  }[] = [];
+  const money = (amount: number) =>
+    Number.isFinite(amount) ? rupees.format(amount) : '—';
+  const validTotal = (value: number) =>
+    Number.isFinite(value) ? value : 0;
+  const months = Array.from({ length: 7 }, (_, index) => {
+    const date = new Date();
+    date.setUTCDate(1);
+    date.setUTCMonth(date.getUTCMonth() - (6 - index));
+    return {
+      key: date.toISOString().slice(0, 7),
+      name: new Intl.DateTimeFormat('en-IN', { month: 'short', timeZone: 'UTC' }).format(date),
+    };
+  });
+  const monthTotals = months.map(({ key, name }) => ({
+    name,
+    total: invoices?.filter((document) => document.status === 'issued' && document.date.startsWith(key))
+      .reduce((sum, document) => sum + validTotal(Number(document.total)), 0) ?? 0,
+  }));
+  const recordedThisMonth = bills?.filter((document) =>
+    document.status === 'recorded' && document.date.startsWith(month),
+  );
+  const monthlyExpenses = recordedThisMonth?.reduce(
+    (sum, document) => sum + validTotal(Number(document.total)), 0,
+  );
+  const activeMembers = team?.filter((member) => member.status === 'active') ?? [];
+  const outstandingDescription = invoices === null
+    ? 'Billing unavailable'
+    : 'Check billing balances';
+  const metrics: CommandMetric[] = [];
   if (canLeads)
-    tiles.push({
-      label: 'Leads',
+    metrics.push({
+      title: query ? 'Matching Leads' : 'Total Leads',
+      value: leads ? number.format(leads.total) : '—',
+      detail: query ? 'Search results' : 'All enquiries',
       href: '/dashboard/crm/leads',
       icon: 'leads',
-      tone: 'blue',
-    });
-  if (canQuotes)
-    tiles.push({
-      label: 'Quotations',
-      href: '/dashboard/quotations',
-      icon: 'quotations',
-      tone: 'green',
-    });
-  if (canProjects)
-    tiles.push({
-      label: 'Projects',
-      href: '/dashboard/projects',
-      icon: 'projects',
-      tone: 'purple',
-    });
-  if (canBilling)
-    tiles.push({
-      label: 'Invoices',
-      href: '/dashboard/billing',
-      icon: 'billing',
       tone: 'orange',
     });
-  if (canClients)
-    tiles.push({
-      label: 'Clients',
-      href: '/dashboard/customers',
-      icon: 'clients',
-      tone: 'pink',
+  if (canQuotes)
+    metrics.push({
+      title: query ? 'Matching Quotes' : 'Quotations',
+      value: quotes ? number.format(quotes.total) : '—',
+      detail: 'Company quotations',
+      href: '/dashboard/quotations',
+      icon: 'quotations',
+      tone: 'blue',
     });
-  if (canMarketplace)
-    tiles.push({
-      label: 'Marketplace',
-      href: '/dashboard/marketplace',
-      icon: 'marketplace',
-      tone: 'cyan',
+  if (canProjects)
+    metrics.push({
+      title: 'Active Projects',
+      value: projects ? number.format(projects.total) : '—',
+      detail: 'Ongoing work',
+      href: '/dashboard/projects',
+      icon: 'projects',
+      tone: 'green',
+    });
+  if (canBilling)
+    metrics.push({
+      // A GST document register does not expose amounts collected or unpaid
+      // balances, so it must never claim that issued totals are "payments due".
+      title: 'Payments Due',
+      value: '—',
+      detail: outstandingDescription,
+      href: '/dashboard/billing',
+      icon: 'expenses',
+      tone: 'orange',
     });
 
-  const hasSearch = query.length > 0;
-  const hasRows =
-    (leads?.rows.length ?? 0) > 0 ||
-    (projects?.rows.length ?? 0) > 0 ||
-    (quotes?.rows.length ?? 0) > 0;
+  const attention: CommandAttention[] = [];
+  if (canLeads && dueLeads) {
+    if (dueLeads.total > 0) {
+      attention.push({
+        title: number.format(dueLeads.total) + ' follow-up' + (dueLeads.total === 1 ? '' : 's') + ' due today',
+        detail: 'Open the follow-up queue',
+        status: 'Due today',
+        tone: 'urgent',
+        icon: 'leads',
+        href: '/dashboard/crm/followups',
+      });
+    }
+  }
+  if (canQuotes && responseQueue && responseQueue.total > 0) {
+    attention.push({
+      title: number.format(responseQueue.total) + ' quotation' + (responseQueue.total === 1 ? '' : 's') + ' awaiting reply',
+      detail: 'Customer response pending',
+      status: 'Waiting',
+      tone: 'pending',
+      icon: 'quotations',
+      href: '/dashboard/quotations?response_status=awaiting#customer-responses',
+    });
+  }
+  if (canBilling && invoices?.some((document) => document.status === 'draft')) {
+    attention.push({
+      title: number.format(invoices.filter((document) => document.status === 'draft').length) + ' draft invoice' +
+        (invoices.filter((document) => document.status === 'draft').length === 1 ? '' : 's'),
+      detail: 'Ready for review before issue',
+      status: 'Draft',
+      tone: 'neutral',
+      icon: 'billing',
+      href: '/dashboard/billing?kind=sales_invoice',
+    });
+  }
+
+  const stageProgress: Record<string, number> = {
+    not_started: 5,
+    design: 20,
+    client_approved: 40,
+    execution: 65,
+    handover: 90,
+  };
+  const commandProjects: CommandProject[] = (projects?.rows ?? [])
+    .slice(0, 3)
+    .map((project) => {
+      const stage = siteById.get(project.id)?.stage || 'not_started';
+      return {
+        id: project.id,
+        name: project.name || 'Project',
+        stage,
+        status: project.status,
+        step: stageProgress[stage] ?? null,
+      };
+    });
+  const mapDocument = (document: {
+    id: string;
+    partyName: string;
+    number: string | null;
+    date: string;
+    total: number;
+    status: string;
+  }): CommandDocument => ({
+    id: document.id,
+    party: document.partyName || 'Company document',
+    number: document.number || '',
+    date: document.date,
+    total: money(Number(document.total)),
+    status: document.status,
+  });
+  const recentInvoices = (invoices ?? [])
+    .slice()
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .slice(0, 4)
+    .map(mapDocument);
+  const recentExpenses = (bills ?? [])
+    .slice()
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .slice(0, 4)
+    .map(mapDocument);
+  const dateLabel = new Intl.DateTimeFormat('en-IN', {
+    weekday: 'short',
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    timeZone: organization.default_timezone || 'Asia/Kolkata',
+  }).format(new Date());
+  const mobileNav = [
+    { label: 'Dashboard', href: '/dashboard', icon: 'dashboard' as const },
+    ...(canProjects ? [{ label: 'Projects', href: '/dashboard/projects', icon: 'projects' as const }] : []),
+    ...(canBilling ? [{ label: 'Invoices', href: '/dashboard/billing', icon: 'billing' as const }] : []),
+    ...(canTeam ? [{ label: 'Team', href: '/dashboard/company/team', icon: 'team' as const }] : []),
+    ...(canSettings ? [{ label: 'Settings', href: '/dashboard/company/settings', icon: 'settings' as const }] : []),
+  ];
 
   return (
     <OwnerShell
@@ -516,397 +553,25 @@ export default async function Dashboard({
       search={query}
       notificationsEnabled={has('notification.view')}
     >
-      <main id="main-content" tabIndex={-1} className="owner-dashboard">
-        <section className="owner-welcome">
-          <div>
-            <p className="owner-eyebrow">
-              {isOwner ? 'Owner workspace' : 'Company workspace'}
-            </p>
-            <h1>
-              Welcome back, {accountLabel}! <span aria-hidden="true">👋</span>
-            </h1>
-            <p>
-              Here&apos;s what&apos;s happening at {organization.name} today.
-            </p>
-          </div>
-          <div className="owner-company-card">
-            <span className="owner-company-art" aria-hidden="true">
-              <OwnerIcon name="dashboard" size={35} />
-            </span>
-            <span className="owner-company-details">
-              <strong>{organization.name}</strong>
-              <small>
-                {isOwner ? 'Your business' : 'Your company'} ·{' '}
-                {titleCase(organization.status)}
-              </small>
-            </span>
-            {canWebsite && (
-              <a className="owner-company-action" href="/dashboard/website">
-                <OwnerIcon name="globe" size={16} /> Website
-              </a>
-            )}
-          </div>
-        </section>
-
-        {hasSearch && (
-          <section className="owner-search-summary" aria-live="polite">
-            <div>
-              <strong>Search within {organization.name}</strong>
-              <p>
-                Showing matches for “{query}” across the company records you can
-                access.
-              </p>
-            </div>
-            <a href="/dashboard">Clear search</a>
-            {!hasRows && (
-              <p className="owner-search-empty">
-                No matching leads, active projects, or quotations were found.
-              </p>
-            )}
-          </section>
-        )}
-
-        <section className="owner-stats" aria-label="Company overview">
-          {canLeads && (
-            <DashboardStat
-              label={hasSearch ? 'Matching Leads' : 'Leads'}
-              value={leads ? number.format(leads.total) : '—'}
-              note={
-                leads
-                  ? hasSearch
-                    ? 'Search matches'
-                    : 'All visible leads'
-                  : 'Temporarily unavailable'
-              }
-              icon="leads"
-              tone="blue"
-              href="/dashboard/crm/leads"
-            />
-          )}
-          {canQuotes && (
-            <DashboardStat
-              label={hasSearch ? 'Matching Quotes' : 'Quotations'}
-              value={quotes ? number.format(quotes.total) : '—'}
-              note={
-                quotes
-                  ? hasSearch
-                    ? 'Search matches'
-                    : 'All quotations'
-                  : 'Temporarily unavailable'
-              }
-              icon="quotations"
-              tone="green"
-              href="/dashboard/quotations"
-            />
-          )}
-          {canProjects && (
-            <DashboardStat
-              label="Active Projects"
-              value={projects ? number.format(projects.total) : '—'}
-              note={
-                projects
-                  ? hasSearch
-                    ? 'Matching active projects'
-                    : 'Active projects'
-                  : 'Temporarily unavailable'
-              }
-              icon="projects"
-              tone="purple"
-              href="/dashboard/projects"
-            />
-          )}
-          {canBilling && (
-            <DashboardStat
-              label="Issued Invoices"
-              value={
-                invoiceTotal === undefined ? '—' : rupees.format(invoiceTotal)
-              }
-              note={
-                invoices
-                  ? 'This month · latest register'
-                  : 'Temporarily unavailable'
-              }
-              icon="billing"
-              tone="orange"
-              href="/dashboard/billing"
-            />
-          )}
-          {!canLeads && !canQuotes && !canProjects && !canBilling && (
-            <div className="owner-panel owner-no-modules">
-              <strong>Your company workspace is ready.</strong>
-              <p>
-                Modules become visible when they are included in your plan and
-                account access.
-              </p>
-            </div>
-          )}
-        </section>
-
-        {(quickActions.length > 0 || canInvite) && (
-          <section className="owner-quick-actions" aria-label="Quick actions">
-            <div className="owner-quick-scroll">
-              {quickActions.map((item) => (
-                <QuickLink
-                  key={item.label}
-                  href={item.href}
-                  icon={item.icon}
-                  primary={item.primary === true}
-                >
-                  {item.label}
-                </QuickLink>
-              ))}
-            </div>
-            {canInvite && (
-              <a className="owner-quick-invite" href="/dashboard/company/team">
-                <OwnerIcon name="team" size={19} /> Invite Team Member
-              </a>
-            )}
-          </section>
-        )}
-
-        <div className="owner-content-grid">
-          <section className="owner-panel owner-recent-panel">
-            <div className="owner-panel-heading">
-              <h2>Recent Leads</h2>
-              {canLeads && (
-                <a href="/dashboard/crm/leads">
-                  View All <OwnerIcon name="arrow" size={15} />
-                </a>
-              )}
-            </div>
-            {!canLeads ? (
-              <p className="owner-empty">
-                Lead access is not enabled for this account.
-              </p>
-            ) : !leads ? (
-              <p className="owner-empty">
-                Lead data is temporarily unavailable.
-              </p>
-            ) : leads.rows.length === 0 ? (
-              <div className="owner-empty-state">
-                <span className="owner-empty-graphic">
-                  <OwnerIcon name="leads" size={24} />
-                </span>
-                <strong>
-                  {hasSearch
-                    ? 'No matching leads'
-                    : 'Your leads will appear here'}
-                </strong>
-                <p>
-                  {hasSearch
-                    ? 'Try another search term.'
-                    : 'Capture enquiries and follow-ups in one place.'}
-                </p>
-                {has('lead.create', 'crm') && (
-                  <a href="/dashboard/crm/leads/new">Add your first lead →</a>
-                )}
-              </div>
-            ) : (
-              <div className="owner-table-wrap">
-                <table className="owner-leads-table">
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Requirement</th>
-                      <th>Location</th>
-                      <th>Date</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {leads.rows.slice(0, 5).map((lead: Lead, i) => {
-                      const leadId = asText(lead.id);
-                      return (
-                        <tr key={leadId || String(i)}>
-                          <td>
-                            {leadId ? (
-                              <a href={'/dashboard/crm/leads/' + leadId}>
-                                {asText(lead.name) || 'Lead'}
-                              </a>
-                            ) : (
-                              asText(lead.name) || 'Lead'
-                            )}
-                          </td>
-                          <td>
-                            {asText(lead.requirement) ||
-                              asText(lead.project_type) ||
-                              '—'}
-                          </td>
-                          <td>
-                            {asText(lead.city) || asText(lead.location) || '—'}
-                          </td>
-                          <td>{displayDate(lead.created_at)}</td>
-                          <td>
-                            <span
-                              className={
-                                'owner-status owner-status-' +
-                                (asText(lead.lifecycle) === 'open'
-                                  ? 'blue'
-                                  : 'neutral')
-                              }
-                            >
-                              {titleCase(
-                                asText(lead.lifecycle) ||
-                                  asText(lead.status) ||
-                                  'New',
-                              )}
-                            </span>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </section>
-
-          <section className="owner-panel owner-projects-panel">
-            <div className="owner-panel-heading">
-              <h2>Ongoing Projects</h2>
-              {canProjects && (
-                <a href="/dashboard/projects">
-                  View All <OwnerIcon name="arrow" size={15} />
-                </a>
-              )}
-            </div>
-            {!canProjects ? (
-              <div className="owner-empty-state">
-                <span className="owner-empty-graphic">
-                  <OwnerIcon name="projects" size={24} />
-                </span>
-                <p>Company project access is not enabled for this account.</p>
-                {canSites && (
-                  <a href="/dashboard/site-projects">My assigned sites →</a>
-                )}
-              </div>
-            ) : !projects ? (
-              <p className="owner-empty">
-                Project data is temporarily unavailable.
-              </p>
-            ) : projects.rows.length === 0 ? (
-              <div className="owner-empty-state">
-                <span className="owner-empty-graphic">
-                  <OwnerIcon name="projects" size={24} />
-                </span>
-                <strong>
-                  {hasSearch
-                    ? 'No matching projects'
-                    : 'Ready for your first project'}
-                </strong>
-                <p>Manage project delivery, site updates and handover.</p>
-                {has('project.create', 'projects') && (
-                  <a href="/dashboard/customers">Create from a client →</a>
-                )}
-              </div>
-            ) : (
-              <div className="owner-project-list">
-                {projects.rows.slice(0, 4).map((project) => {
-                  const site = siteById.get(project.id);
-                  return (
-                    <a
-                      className="owner-project-row"
-                      href={'/dashboard/projects/' + project.id}
-                      key={project.id}
-                    >
-                      <span
-                        className="owner-project-thumbnail"
-                        aria-hidden="true"
-                      >
-                        <OwnerIcon name="projects" size={24} />
-                      </span>
-                      <span className="owner-project-info">
-                        <strong>{project.name || 'Project'}</strong>
-                        <small>
-                          {site ? titleCase(site.stage) : 'Project workspace'} ·
-                          Open details
-                        </small>
-                      </span>
-                      <span
-                        className={
-                          'owner-status owner-status-' +
-                          (site?.stage === 'execution' ? 'green' : 'blue')
-                        }
-                      >
-                        {site
-                          ? titleCase(site.stage)
-                          : titleCase(project.status)}
-                      </span>
-                    </a>
-                  );
-                })}
-              </div>
-            )}
-          </section>
-
-          {tiles.length > 0 && (
-            <section className="owner-panel owner-access-panel">
-              <div className="owner-panel-heading">
-                <h2>Quick Access</h2>
-              </div>
-              <div className="owner-access-grid">
-                {tiles.map((tile) => (
-                  <AccessTile key={tile.label} {...tile} />
-                ))}
-              </div>
-            </section>
-          )}
-
-          {(canTeam || canInvite) && (
-            <section className="owner-panel owner-team-panel">
-              <div className="owner-panel-heading">
-                <h2>Team Members</h2>
-                <a href="/dashboard/company/team">
-                  Manage Team <OwnerIcon name="arrow" size={15} />
-                </a>
-              </div>
-              <div className="owner-team-content">
-                <span className="owner-team-illustration">
-                  <OwnerIcon name="team" size={29} />
-                </span>
-                <div>
-                  <strong>
-                    {team === null
-                      ? 'Manage your company team'
-                      : otherMembers.length === 0
-                        ? 'Working alone or with a team?'
-                        : number.format(otherMembers.length) +
-                          ' other active team member' +
-                          (otherMembers.length === 1 ? '' : 's')}
-                  </strong>
-                  <p>
-                    {otherMembers.length === 0
-                      ? 'Run the business yourself. Invite employees only when you need them.'
-                      : 'You control the access given to each team member.'}
-                  </p>
-                  <div className="owner-team-buttons">
-                    {canInvite && (
-                      <a
-                        href="/dashboard/company/team"
-                        className="owner-team-primary"
-                      >
-                        <OwnerIcon name="team" size={16} /> Invite Team Member
-                      </a>
-                    )}
-                    <a
-                      href="/dashboard/company/team"
-                      className="owner-team-secondary"
-                    >
-                      Manage Access
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </section>
-          )}
-        </div>
-        {isOwner && (
-          <p className="owner-dashboard-note">
-            You can operate your company yourself. Employee accounts are
-            optional; access to paid modules follows your company subscription.
-          </p>
-        )}
-      </main>
+      <CommandCentre
+        accountLabel={accountLabel}
+        dateLabel={dateLabel}
+        metrics={metrics}
+        actions={actions}
+        attention={attention}
+        projects={commandProjects}
+        finance={canBilling ? {
+          invoiced: invoiceTotal === undefined ? '—' : money(invoiceTotal),
+          expenses: monthlyExpenses === undefined ? '—' : money(monthlyExpenses),
+          issuedCount: issuedThisMonth ? number.format(issuedThisMonth.length) : '—',
+          recordedCount: recordedThisMonth ? number.format(recordedThisMonth.length) : '—',
+          graph: monthTotals,
+        } : null}
+        team={canTeam ? { active: team ? activeMembers.length : null, total: team?.length ?? null } : null}
+        invoices={recentInvoices}
+        expenses={recentExpenses}
+        navigation={mobileNav}
+      />
     </OwnerShell>
   );
 }
