@@ -87,8 +87,13 @@ begin
  select * into c from public.contracts where organization_id=p_org and id=p_contract;
  if c.id is null or c.status in ('cancelled','closed') then
     raise exception 'Accepted active agreement required' using errcode='42501';end if;
- if not private.construction_can_manage(p_org,c.project_id) then
-    raise exception 'Project owner/manager permission required' using errcode='42501';end if;
+ -- The creator of the approved agreement may initialize its planned
+ -- stages even when their role is Finance-only. They cannot edit or certify
+ -- those stages; owner edits use the separate owner-only RPC below.
+ if not (private.construction_can_manage(p_org,c.project_id)
+   or (c.created_by=auth.uid() and private.finance_access(p_org,'contract.create')))
+ then raise exception 'Project manager or agreement creator required'
+    using errcode='42501';end if;
  select * into p from public.projects
     where organization_id=p_org and id=c.project_id and status='active' for update;
  select * into rev from public.quotation_revisions
