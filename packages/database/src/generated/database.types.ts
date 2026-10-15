@@ -10905,6 +10905,18 @@ export interface Database {
         Returns: Json;
       };
       company_self_register: { Args: { p_input: Json }; Returns: Json };
+      construction_package_delete: {
+        Args: {
+          p_org: string;
+          p_package_id: string;
+          p_version: number;
+        };
+        Returns: boolean;
+      };
+      construction_package_install_starters: {
+        Args: { p_org: string };
+        Returns: number;
+      };
       construction_package_list: { Args: { p_org: string }; Returns: Json };
       construction_package_owner_options: {
         Args: { p_org: string };
@@ -11787,6 +11799,14 @@ export interface Database {
           p_branch_id?: string;
         };
         Returns: Json;
+      };
+      quotation_package_delete: {
+        Args: {
+          p_org: string;
+          p_package_id: string;
+          p_version: number;
+        };
+        Returns: boolean;
       };
       quotation_package_list: { Args: { p_org: string }; Returns: Json };
       quotation_package_save: {
