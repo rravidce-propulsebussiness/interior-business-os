@@ -3,6 +3,7 @@ import { revalidatePath } from 'next/cache';
 import { financeCommandSchema } from '@business-os/core/finance';
 import { safeFailure } from '@business-os/shared';
 import { financeServices } from './service';
+import { syncQuotedConstructionTimeline } from './quote-construction-handoff';
 export async function financeCommand(
   input: unknown,
 ): Promise<{ message: string; id?: string; entity?: string }> {
@@ -43,8 +44,33 @@ export async function financeCommand(
                               : 'billing.manage';
     const s = await financeServices(permission);
     const result = await s.finance.command(command);
+    let message = 'Commercial record saved.';
+    if (command.action === 'create_contract') {
+      try {
+        const sync = await syncQuotedConstructionTimeline(result.id);
+        if (sync.reason === 'created' || sync.reason === 'exists') {
+          message =
+            'Agreement created. The planned construction stages and quoted scope are available in Projects; site work still requires signed-agreement and design approvals.';
+        } else if (sync.reason === 'quote_incomplete') {
+          message =
+            'Agreement created. No structured floor-wise construction scope was in the approved quote; no stage plan was guessed.';
+        } else {
+          message =
+            'Agreement created. A project manager can synchronize its timeline from the approved quotation; no floors need to be re-entered.';
+        }
+        if (sync.projectId) {
+          revalidatePath('/dashboard/projects/' + sync.projectId);
+          revalidatePath('/dashboard/projects/' + sync.projectId + '/site');
+        }
+      } catch {
+        // The canonical contract remains the source of truth even if setup
+        // fails; never report that the agreement or timeline was rolled back.
+        message =
+          'Agreement created. Timeline setup needs attention in the project workspace; the accepted quote remains unchanged.';
+      }
+    }
     revalidatePath('/dashboard', 'layout');
-    return { message: 'Commercial record saved.', ...result };
+    return { message, ...result };
   } catch (error) {
     return { message: safeFailure(error).message };
   }
