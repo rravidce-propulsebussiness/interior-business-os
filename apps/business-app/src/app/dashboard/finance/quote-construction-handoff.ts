@@ -1,7 +1,8 @@
 import 'server-only';
 
 import { activeOrganization, serverServices } from '@business-os/auth/server';
-import { constructionPlanFromQuotedDescriptions } from '@business-os/core/quote-construction-handoff';
+import { createHash } from 'node:crypto';
+import { projectTimelineFromQuote } from '@business-os/core/quote-project-timeline';
 import { z } from 'zod';
 
 export type QuoteTimelineSync = {
@@ -14,7 +15,11 @@ const contractSchema = z.object({
   project_id: z.uuid(),
   revision_id: z.uuid(),
 });
-const descriptionSchema = z.array(z.object({ description: z.string() }));
+const quoteItemsSchema = z.array(z.object({
+  id: z.uuid(),
+  name: z.string(),
+  description: z.string(),
+}));
 
 /**
  * Idempotent handoff AFTER the canonical approved-quotation contract_create RPC.
@@ -41,18 +46,32 @@ export async function syncQuotedConstructionTimeline(
   const parsedContract = contractSchema.parse(contract);
   const projectId = parsedContract.project_id;
 
+  const { data: project, error: projectError } = await client
+    .from('projects')
+    .select('industry_id')
+    .eq('organization_id', org.organizationId)
+    .eq('id', projectId)
+    .single();
+  if (projectError || !project?.industry_id)
+    return { created: false, reason: 'quote_incomplete', projectId };
+  const { data: industry, error: industryError } = await client
+    .from('industries')
+    .select('key')
+    .eq('id', project.industry_id)
+    .single();
+  if (industryError || !industry)
+    return { created: false, reason: 'quote_incomplete', projectId };
   const { data: lines, error: linesError } = await client
     .from('quotation_items')
-    .select('description')
+    .select('id,name,description')
     .eq('organization_id', org.organizationId)
     .eq('revision_id', parsedContract.revision_id)
+    .order('id')
     .limit(250);
   if (linesError || !lines)
     throw new Error('Unable to read the frozen approved quotation');
-  const descriptions = descriptionSchema
-    .parse(lines)
-    .map((line) => line.description);
-  const plan = constructionPlanFromQuotedDescriptions(descriptions);
+  const quotedLines = quoteItemsSchema.parse(lines);
+  const plan = projectTimelineFromQuote(industry.key, quotedLines);
   if (!plan) {
     return { created: false, reason: 'quote_incomplete', projectId };
   }
@@ -71,56 +90,32 @@ export async function syncQuotedConstructionTimeline(
     return { created: false, reason: 'exists', projectId };
   }
 
-  // The quote creator may have Finance permission but not project-management
-  // access. Never elevate a financial employee to engineer/manager privileges.
-  const siteInit = await client.rpc('project_site_command', {
-    p_organization_id: org.organizationId,
-    p_project_id: projectId,
-    p_action: 'initialize',
-    p_input: {},
-  });
-  if (siteInit.error) {
-    if (siteInit.error.code === '42501')
-      return { created: false, reason: 'manager_required', projectId };
-    throw new Error(
-      'Cannot initialize site from approved quote: ' + siteInit.error.message,
-    );
-  }
-
-  const workflow = await client.rpc('construction_project_command', {
-    p_organization_id: org.organizationId,
-    p_project_id: projectId,
-    p_action: 'workflow_create',
-    p_input: JSON.parse(
-      JSON.stringify({
-        template: plan.template,
-        floors: plan.floors,
-        stages: plan.stages,
-      }),
-    ),
+  // SQL rechecks the contracted issued revision, manager authorization,
+  // industry and exact quote-line fingerprint inside one database transaction.
+  // Neither quote acceptance nor commercial agreement creates site progress.
+  const quoteHash = createHash('md5')
+    .update(quotedLines.map((line) =>
+      [line.id, line.name, line.description].join(String.fromCharCode(31)),
+    ).join(String.fromCharCode(30)))
+    .digest('hex');
+  const workflow = await client.rpc('project_quote_timeline_create', {
+    p_org: org.organizationId,
+    p_contract: id,
+    p_input: {
+      industry: plan.industry,
+      template: plan.template,
+      zones: plan.zones,
+      stages: plan.stages,
+      quote_hash: quoteHash,
+    },
   });
   if (workflow.error) {
-    // Two simultaneous approved-quote handoffs may initialize the same project.
-    // Existing snapshot wins; never overwrite it with later catalog updates.
-    if (workflow.error.code === '23505') {
-      const again = await client.rpc('construction_project_read', {
-        p_organization_id: org.organizationId,
-        p_project_id: projectId,
-      });
-      if (
-        !again.error &&
-        again.data &&
-        typeof again.data === 'object' &&
-        'workflow' in again.data &&
-        again.data.workflow
-      ) {
-        return { created: false, reason: 'exists', projectId };
-      }
-    }
     if (workflow.error.code === '42501')
       return { created: false, reason: 'manager_required', projectId };
+    if (workflow.error.code === '23505')
+      return { created: false, reason: 'exists', projectId };
     throw new Error(
-      'Agreement created, but quoted stage initialization failed: ' +
+      'Agreement created, but quote-derived stage generation failed: ' +
         workflow.error.message,
     );
   }
