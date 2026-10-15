@@ -120,6 +120,56 @@ export default async function LeadDetail({
     .filter((value): value is 'construction' | 'interior' => value !== null);
   const serviceOptions = [...new Set(categoryOptions)];
   const requirementLabel = leadRequirementLabel(l);
+  type LeadQuote = {
+    revisionId: string;
+    number: string;
+    status: string;
+    response: string;
+    projectId: string;
+  };
+  let linkedQuotes: LeadQuote[] = [];
+  if (s.allowed('quotation.view', 'quotation')) {
+    // Permission-checked RPC keeps draft quotes linked even while the lead
+    // remains open; it does not imply conversion to a paying customer.
+    const rpc = s.client.rpc as unknown as (
+      name: string, params: Record<string, string>,
+    ) => Promise<{ data: unknown; error: unknown }>;
+    const quotesResult = await rpc('lead_quotation_list', {
+      p_organization_id: s.org,
+      p_lead_id: id,
+    });
+    if (!quotesResult.error && Array.isArray(quotesResult.data)) {
+      linkedQuotes = quotesResult.data.flatMap((entry: unknown) => {
+        if (!entry || typeof entry !== 'object') return [];
+        const q = entry as Record<string, unknown>;
+        if (typeof q.revision_id !== 'string') return [];
+        return [{
+          revisionId: q.revision_id,
+          number: typeof q.quotation_number === 'string' ? q.quotation_number : 'Quotation',
+          status: typeof q.status === 'string' ? q.status : 'draft',
+          response: typeof q.response === 'string' ? q.response : 'not_responded',
+          projectId: typeof q.project_id === 'string' ? q.project_id : '',
+        }];
+      });
+    }
+    // Previously converted leads remain discoverable without the new mapping.
+    if (!linkedQuotes.length && l.converted_project_id) {
+      const existing = await s.client.from('quotations')
+        .select('quotation_number,current_revision_id,project_id')
+        .eq('organization_id', s.org)
+        .eq('project_id', l.converted_project_id)
+        .order('created_at', { ascending: false }).limit(10);
+      linkedQuotes = (existing.data ?? []).flatMap((q) =>
+        q.current_revision_id ? [{
+          revisionId: q.current_revision_id,
+          number: q.quotation_number,
+          status: 'available',
+          response: 'open_to_review',
+          projectId: q.project_id,
+        }] : [],
+      );
+    }
+  }
   const leadPath = '/dashboard/crm/leads';
   const nav: OwnerNavItem[] = [
     { label: 'Dashboard', href: '/dashboard', icon: 'dashboard' },
@@ -294,6 +344,12 @@ export default async function LeadDetail({
             <a className="crm-lead-button-light" href="#lead-followups">
               Follow-up
             </a>
+            {s.allowed('quotation.create', 'quotation') && l.lifecycle !== 'archived' && (
+              <Link className="crm-lead-button-blue"
+                href={'/dashboard/quotations/new?lead=' + id}>
+                {linkedQuotes.length ? 'Revise / prepare quote' : 'Create quotation'}
+              </Link>
+            )}
             <a className="crm-lead-button-light" href="#lead-site-visits">
               Site visit
             </a>
@@ -310,11 +366,51 @@ export default async function LeadDetail({
         <nav className="crm-lead-detail-tabs" aria-label="Lead sections">
           <a href="#lead-daily-actions">Actions</a>
           <a href="#lead-followups">Follow-ups</a>
+          <a href="#lead-quotations">Quotation</a>
           <a href="#lead-site-visits">Site visits</a>
           <a href="#lead-meeting">Google Meet</a>
           <a href="#lead-activity">Activity</a>
           <a href="#lead-details">Edit details</a>
         </nav>
+        <section id="lead-quotations" className="my-5 rounded-2xl border border-blue-100 bg-white p-5 shadow-sm" aria-label="Lead quotations">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="text-xl font-bold text-slate-900">Quotation &amp; client questions</h2>
+              <p className="mt-1 text-sm text-slate-600">
+                Review every quotation here while calls, questions and follow-ups stay on this lead.
+              </p>
+            </div>
+            {s.allowed('quotation.create', 'quotation') && l.lifecycle !== 'archived' && (
+              <Link href={'/dashboard/quotations/new?lead=' + id}
+                className="crm-lead-button-blue">+ Prepare quotation</Link>
+            )}
+          </div>
+          {linkedQuotes.length ? (
+            <div className="mt-4 grid gap-3">
+              {linkedQuotes.map((quote) => (
+                <div key={quote.revisionId} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 p-4">
+                  <div>
+                    <strong className="text-slate-900">{quote.number}</strong>
+                    <p className="text-sm text-slate-600">
+                      {quote.status.replaceAll('_', ' ')} · Client: {quote.response.replaceAll('_', ' ')}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-3">
+                    <Link className="font-semibold text-blue-700 underline"
+                      href={'/dashboard/quotations/' + quote.revisionId}>View / discuss quote</Link>
+                    <Link className="text-slate-700 underline" href="#lead-daily-actions">
+                      Record customer question
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="mt-4 text-sm text-slate-600">
+              No linked quotation yet. Prepare one without marking this lead as Won.
+            </p>
+          )}
+        </section>
         <section className="crm-lead-detail-summary" aria-label="Lead notes">
           <strong>Customer notes</strong>
           <p className="whitespace-pre-wrap">
@@ -349,9 +445,7 @@ export default async function LeadDetail({
               {s.allowed('quotation.create', 'quotation') && (
                 <Link
                   className="underline"
-                  href={
-                    '/dashboard/quotations?project=' + l.converted_project_id
-                  }
+                  href={'/dashboard/quotations/new?lead=' + id}
                 >
                   Create quotation
                 </Link>
