@@ -45,7 +45,12 @@ export async function packageAttachmentContext(
   return {
     orgId: active.organizationId,
     packageId: id,
-    admin: createOwnerProvisioningDatabase(),
+    client,
+    // Only uploads/downloads require the service credential. A normal
+    // company package preview must work without elevated storage access.
+    get admin() {
+      return createOwnerProvisioningDatabase();
+    },
     userId: user.id,
     packageItem,
   };
