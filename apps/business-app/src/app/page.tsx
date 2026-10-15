@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-html-link-for-pages -- Fresh document navigation prevents incomplete React Flight responses on Hostinger. */
 import { redirect } from 'next/navigation';
+import type { Metadata } from 'next';
 import {
   createServerDatabase,
   isSupabaseConfigured,
@@ -7,6 +8,14 @@ import {
 import './home-landing.css';
 
 export const dynamic = 'force-dynamic';
+
+// The public marketing homepage is discoverable; private app routes remain noindex.
+export const metadata: Metadata = {
+  title: 'Business OS | CRM, Quotations and Project Management',
+  description: 'Manage business leads, quotations, projects and operations in one workspace.',
+  alternates: { canonical: 'https://sghomesinterior.in/' },
+  robots: { index: true, follow: true },
+};
 
 type HomeGlyph =
   | 'home'
