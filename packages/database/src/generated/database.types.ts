@@ -10906,11 +10906,7 @@ export interface Database {
       };
       company_self_register: { Args: { p_input: Json }; Returns: Json };
       construction_package_delete: {
-        Args: {
-          p_org: string;
-          p_package_id: string;
-          p_version: number;
-        };
+        Args: { p_org: string; p_package_id: string; p_version: number };
         Returns: boolean;
       };
       construction_package_install_starters: {
@@ -11801,11 +11797,7 @@ export interface Database {
         Returns: Json;
       };
       quotation_package_delete: {
-        Args: {
-          p_org: string;
-          p_package_id: string;
-          p_version: number;
-        };
+        Args: { p_org: string; p_package_id: string; p_version: number };
         Returns: boolean;
       };
       quotation_package_list: { Args: { p_org: string }; Returns: Json };
