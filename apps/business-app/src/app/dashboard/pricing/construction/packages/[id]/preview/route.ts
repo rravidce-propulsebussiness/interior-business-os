@@ -210,7 +210,7 @@ export async function GET(request: Request, { params }: Params) {
         '<h1 style="font-size:22px">PDF preview unavailable</h1>' +
         '<p>' + (forbidden ? 'You do not have access to this package.' :
           'The PDF could not be loaded. Please try again or contact your administrator.') + '</p>' +
-        '<button onclick="location.reload()" style="padding:12px 18px;border:0;border-radius:9px;background:#1766ee;color:white">Retry</button>' +
+        '<a href="?format=pdf" style="display:inline-block;padding:12px 18px;border-radius:9px;background:#1766ee;color:white;text-decoration:none">Retry PDF</a>' +
         '</main></body></html>',
       {
         status: forbidden ? 403 : 503,
