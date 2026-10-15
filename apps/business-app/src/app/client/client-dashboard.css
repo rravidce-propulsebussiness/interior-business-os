@@ -276,3 +276,9 @@
  .pc-material-row b,.pc-material-row small {font-size:9px;}
  .pc-pill {font-size:8px;padding:4px 5px;}
 }
+
+.pc-side-logout { margin-top:22px; }
+.pc-side-logout button {width:100%;background:transparent;border:1px solid #dce8fa;border-radius:10px;color:#4d6b96;display:flex;gap:9px;align-items:center;padding:11px 14px;font-size:12px;font-weight:700;cursor:pointer;}
+.pc-side-logout button:hover {background:#eaf1ff;color:#215bcb;}
+.pc-mobile-logout {display:none;}
+@media(max-width:720px) { .pc-mobile-logout {display:block;} .pc-mobile-logout button {border:1px solid #e4ecf9;border-radius:9px;background:#f7faff;color:#5b7095;width:31px;height:31px;display:grid;place-items:center;cursor:pointer;} }
