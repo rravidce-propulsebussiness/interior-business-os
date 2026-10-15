@@ -173,25 +173,8 @@ export default async function LeadDetail({
   const leadPath = '/dashboard/crm/leads';
   const nav: OwnerNavItem[] = [
     { label: 'Dashboard', href: '/dashboard', icon: 'dashboard' },
-    {
-      label: 'CRM',
-      href: leadPath,
-      icon: 'leads',
-      children: [
-        { label: 'All Leads', href: leadPath },
-        { label: 'Follow-ups', href: '/dashboard/crm/followups' },
-        { label: 'Site Visits', href: '/dashboard/crm/site-visits' },
-        ...(s.allowed('lead.create')
-          ? [
-              { label: 'Upload Leads', href: leadPath + '/upload' },
-              { label: 'Google Sheets', href: leadPath + '/google-sheets' },
-            ]
-          : []),
-        ...(s.allowed('crm.pipeline.manage')
-          ? [{ label: 'CRM Settings', href: '/dashboard/crm/settings' }]
-          : []),
-      ],
-    },
+    { label: 'Leads', href: leadPath, icon: 'leads' },
+    { label: 'Follow-ups', href: '/dashboard/crm/followups', icon: 'calendar' },
     ...(s.allowed('quotation.view', 'quotation')
       ? [
           {
