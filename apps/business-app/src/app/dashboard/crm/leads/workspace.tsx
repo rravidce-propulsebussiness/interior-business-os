@@ -710,13 +710,19 @@ export function LeadsWorkspace({
                             </td>
                             <td>
                               {lead.quoteRevisionId ? (
-                                <LeadQuotePreview
-                                  revisionId={lead.quoteRevisionId}
-                                  number={lead.quoteNumber || 'Quotation'}
-                                  status={lead.quoteStatus}
-                                  amount={lead.quoteAmount}
-                                  shared={lead.quoteShared}
-                                />
+                                <div className="crm-quote-stack">
+                                  <LeadQuotePreview
+                                    revisionId={lead.quoteRevisionId}
+                                    number={lead.quoteNumber || 'Quotation'}
+                                    status={lead.quoteStatus}
+                                    amount={lead.quoteAmount}
+                                    shared={lead.quoteShared}
+                                  />
+                                  {canQuote && <a className="crm-quote-alternative"
+                                    href={'/dashboard/quotations/new?lead=' + encodeURIComponent(lead.id)}>
+                                    + New quote
+                                  </a>}
+                                </div>
                               ) : canQuote ? (
                                 <a className="crm-quote-create" href={'/dashboard/quotations/new?lead='+lead.id}>
                                   + Prepare quote
@@ -842,9 +848,15 @@ export function LeadsWorkspace({
                               color: '#657895', lineHeight: '1.4',
                             }}>Quotation</span>
                             {lead.quoteRevisionId ? (
-                              <LeadQuotePreview revisionId={lead.quoteRevisionId}
-                                number={lead.quoteNumber || 'Quotation'} status={lead.quoteStatus}
-                                amount={lead.quoteAmount} shared={lead.quoteShared} />
+                              <div className="crm-quote-stack">
+                                <LeadQuotePreview revisionId={lead.quoteRevisionId}
+                                  number={lead.quoteNumber || 'Quotation'} status={lead.quoteStatus}
+                                  amount={lead.quoteAmount} shared={lead.quoteShared} />
+                                {canQuote && <a className="crm-quote-alternative"
+                                  href={'/dashboard/quotations/new?lead=' + encodeURIComponent(lead.id)}>
+                                  + New quotation
+                                </a>}
+                              </div>
                             ) : canQuote ? (
                               <a
                                 className="crm-quote-create"
