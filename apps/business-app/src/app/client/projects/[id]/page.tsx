@@ -3,6 +3,7 @@ import { notFound, redirect } from 'next/navigation';
 import { z } from 'zod';
 import { createServerDatabase } from '@business-os/database/server';
 import { ClientDesignReview } from '../../client-design-review';
+import { ClientProjectTimeline } from '../../project-timeline';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,6 +38,17 @@ const schema = z.object({
     created_at: z.string(),
   })).default([]),
 });
+const timelineSchema = z.array(z.object({
+  id: z.uuid(),
+  title: z.string(),
+  description: z.string(),
+  phase: z.string(),
+  floor_code: z.string().nullable(),
+  status: z.string(),
+  completed_at: z.string().nullable(),
+  activities: z.array(z.string()),
+}));
+
 const stages = [
   { key: 'design', title: 'Design' },
   { key: 'client_approved', title: 'Approved' },
@@ -63,10 +75,17 @@ export default async function ClientProject({ params }: {
   const rpc = db.rpc.bind(db) as unknown as (
     name: string, args: Record<string, string>,
   ) => Promise<{ data: unknown; error: unknown }>;
-  const loaded = await rpc('client_portal_project',{p_project_id:id});
+  const [loaded, timelineResponse] = await Promise.all([
+    rpc('client_portal_project', { p_project_id: id }),
+    rpc('client_portal_timeline', { p_project_id: id }),
+  ]);
   const parsed = schema.safeParse(loaded.data);
   if (loaded.error || !parsed.success) notFound();
   const project = parsed.data;
+  const timelineParsed = timelineSchema.safeParse(timelineResponse.data);
+  const timeline = !timelineResponse.error && timelineParsed.success
+    ? timelineParsed.data : [];
+  const timelineUnavailable = Boolean(timelineResponse.error || !timelineParsed.success);
 
   const stageIndex = stages.findIndex(stage=>stage.key===project.stage);
   const latestDesigns = new Map<string,(typeof project.drawings)[number]>();
@@ -108,7 +127,13 @@ export default async function ClientProject({ params }: {
               Your company is preparing the agreement and initial project plan.
             </p>
           )}
+          <a href="#project-timeline"
+            className="mt-6 inline-block rounded-xl border border-blue-300 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-800">
+            View full work timeline ↓
+          </a>
         </section>
+
+        <ClientProjectTimeline stages={timeline} unavailable={timelineUnavailable} />
 
         <div className="grid gap-6 lg:grid-cols-[1.35fr_1fr]">
           <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
