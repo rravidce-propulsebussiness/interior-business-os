@@ -70,13 +70,15 @@ export default async function Login({
     recovery?: string;
     provider_error?: string;
     confirmation?: string;
+    portal?: string;
   }>;
 }) {
   const params = await searchParams;
   const recoveryComplete = params.recovery === 'complete';
   if (!recoveryComplete && isSupabaseConfigured()) {
     const { data } = await (await createServerDatabase()).auth.getUser();
-    if (data.user) redirect('/dashboard');
+    if (data.user)
+      redirect(params.portal === 'client' ? '/client/projects' : '/dashboard');
   }
 
   const configured = isSupabaseConfigured();
@@ -255,7 +257,12 @@ export default async function Login({
             <div className="pp-login-divider">
               <span /> <strong>OR</strong> <span />
             </div>
-            <PremiumLoginForm action={signIn} />
+            <PremiumLoginForm
+              action={signIn}
+              destination={
+                params.portal === 'client' ? '/client/projects' : '/dashboard'
+              }
+            />
 
             <div className="pp-login-trust">
               <span className="pp-login-trust-icon">

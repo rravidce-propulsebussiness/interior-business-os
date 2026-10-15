@@ -8,6 +8,7 @@ import { SiteActivity } from './site-activity';
 import { ConstructionPlanningPanel } from './construction-planning-panel';
 import { ConstructionPaymentsPanel } from './construction-payments-panel';
 import { ConstructionClientPortalManager } from './construction-client-portal-panel';
+import { ConstructionClientAccessPanel } from './construction-client-access-panel';
 import { ConstructionTomorrowPanel } from './construction-tomorrow-panel';
 import { ConstructionProcurementWatch } from './construction-procurement-watch';
 import { ConstructionGatePanel } from './construction-gate-panel';
@@ -173,6 +174,16 @@ const constructionTomorrowSchema = z.object({
           required_quantity: z.number(),
         }),
       ),
+    }),
+  ),
+});
+const clientAccessManagementSchema = z.object({
+  members: z.array(
+    z.object({
+      id: z.uuid(),
+      email: z.string(),
+      active: z.boolean(),
+      version: z.number().int().positive(),
     }),
   ),
 });
@@ -593,6 +604,22 @@ export default async function ProjectDeliveryPage({
   const clientPortalManager = clientPortalParsed?.success
     ? clientPortalParsed.data
     : null;
+  // Optional until the Phase 12 migration is deployed. A missing RPC must
+  // never take down the existing Site Delivery project dashboard.
+  const clientAccessResponse =
+    site.can_manage && construction
+      ? await s.client.rpc('construction_client_access_manage_read', {
+          p_org: context.organizationId,
+          p_project: id,
+        })
+      : null;
+  const clientAccessParsed =
+    clientAccessResponse && !clientAccessResponse.error
+      ? clientAccessManagementSchema.safeParse(clientAccessResponse.data)
+      : null;
+  const clientAccessManager = clientAccessParsed?.success
+    ? clientAccessParsed.data
+    : null;
   const canSeeManagerUpdates =
     site.can_manage ||
     ['site_engineer', 'quality_inspector', 'procurement'].includes(
@@ -791,6 +818,12 @@ export default async function ProjectDeliveryPage({
               <ConstructionGatePanel projectId={id} data={gateLabor} />
             )}
 
+            {clientAccessManager && (
+              <ConstructionClientAccessPanel
+                projectId={id}
+                data={clientAccessManager}
+              />
+            )}
             {clientPortalManager && (
               <ConstructionClientPortalManager
                 projectId={id}

@@ -10868,6 +10868,19 @@ export interface Database {
         Returns: Json;
       };
       company_self_register: { Args: { p_input: Json }; Returns: Json };
+      construction_client_access_manage: {
+        Args: {
+          p_org: string;
+          p_project: string;
+          p_action: string;
+          p_input?: Json;
+        };
+        Returns: Json;
+      };
+      construction_client_access_manage_read: {
+        Args: { p_org: string; p_project: string };
+        Returns: Json;
+      };
       construction_client_manage: {
         Args: {
           p_org: string;
@@ -10879,6 +10892,14 @@ export interface Database {
       };
       construction_client_manage_read: {
         Args: { p_org: string; p_project: string };
+        Returns: Json;
+      };
+      construction_client_project_view: {
+        Args: { p_org: string; p_project: string };
+        Returns: Json;
+      };
+      construction_client_projects: {
+        Args: Record<string, never>;
         Returns: Json;
       };
       construction_client_view: { Args: { p_token: string }; Returns: Json };
