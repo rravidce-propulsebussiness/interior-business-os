@@ -11,6 +11,7 @@ const allowedActions = new Set([
   'design_submit',
   'design_decide',
   'client_approve',
+  'client_changes',
   'execution_start',
   'report_add',
   'material_add',
