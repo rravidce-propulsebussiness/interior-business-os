@@ -119,7 +119,7 @@ export default async function Customers({
           .from('projects')
           .select('id', { count: 'exact', head: true })
           .eq('organization_id', s.org)
-      .eq('is_sales_prospect', false)
+          .eq('is_sales_prospect', false)
       : Promise.resolve({ count: null }),
     canQuotes
       ? s.client
@@ -143,7 +143,7 @@ export default async function Customers({
         .from('projects')
         .select('customer_id')
         .eq('organization_id', s.org)
-      .eq('is_sales_prospect', false)
+        .eq('is_sales_prospect', false)
         .in('industry_id', industryIds)
         .limit(10000);
       if (matches.error) throw new Error('Could not filter client services');
@@ -192,7 +192,7 @@ export default async function Customers({
           .from('projects')
           .select('id,customer_id,industry_id,created_at')
           .eq('organization_id', s.org)
-      .eq('is_sales_prospect', false)
+          .eq('is_sales_prospect', false)
           .in('customer_id', ids)
           .limit(5000)
       : Promise.resolve({ data: [] }),
