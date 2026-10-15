@@ -624,3 +624,36 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* Keep latest quote prominent and allow another option without replacing it. */
+.crm-leads-root .crm-quote-stack {
+  display: grid;
+  min-width: 0;
+  gap: 9px;
+  width: 100%;
+}
+.crm-leads-root .crm-quote-stack .crm-quote-summary {
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+.crm-leads-root .crm-quote-alternative {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 13px;
+  border: 1px solid #f1c5a7;
+  border-radius: 11px;
+  background: #fff6ee;
+  color: #cc5315;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 800;
+  text-decoration: none;
+}
+.crm-leads-root .crm-quote-alternative:hover {
+  background: #ffeada;
+}
