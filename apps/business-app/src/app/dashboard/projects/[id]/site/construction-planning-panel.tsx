@@ -9,7 +9,7 @@ import {
 import {
   assignConstructionRole,
   deactivateConstructionRole,
-  initializeConstructionWorkflow,
+  syncConstructionFromProjectAgreement,
 } from './construction-actions';
 
 export type ConstructionPlanningData = {
@@ -151,58 +151,45 @@ export function ConstructionPlanningPanel({
         {!data.workflow ? (
           <div className="mt-5 rounded-2xl border border-dashed border-blue-200 bg-blue-50/50 p-4 sm:p-5">
             <h3 className="text-base font-bold text-slate-900">
-              Configure the actual project floors
+              Stages come from the approved quotation
             </h3>
             <p className="mt-2 text-sm leading-6 text-slate-600">
-              List floors in structural construction order. Examples: Ground,
-              First, Second, Terrace; or Basement 2, Basement 1, Ground, First.
-              This creates a planning snapshot, not permission to start site
-              work.
+              Issue the construction quote with its actual floors, built-up
+              areas, additional works and package specifications. After customer
+              approval, create the agreement. The floor-wise construction
+              timeline is automatically generated from that frozen revision. No
+              separate floor entry or stage installation is required.
             </p>
-            {managers ? (
-              <form
-                className="mt-4 space-y-3"
-                onSubmit={(event) => {
-                  event.preventDefault();
-                  const target = event.currentTarget;
-                  const payload = new FormData(target);
-                  start(async () => {
-                    const result = await initializeConstructionWorkflow(
-                      projectId,
-                      payload,
-                    );
-                    setMessage(result.message);
-                    if (result.saved) target.reset();
-                  });
-                }}
+            <p className="mt-2 text-xs leading-5 text-slate-600">
+              The stage plan is initially planned only. Signed agreement, client
+              design approvals, independent QC and payment release controls
+              still apply before site execution.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-3">
+              <Link
+                href="/dashboard/quotations"
+                className="inline-flex rounded-xl border border-blue-300 bg-white px-4 py-2.5 text-sm font-semibold text-blue-800"
               >
-                <label
-                  className="block text-sm font-semibold text-slate-800"
-                  htmlFor="construction-floors"
-                >
-                  Floors / structural levels (comma-separated)
-                </label>
-                <input
-                  id="construction-floors"
-                  name="floors"
-                  required
-                  maxLength={1800}
-                  className={inputStyle}
-                  placeholder="Ground, First, Second, Terrace"
-                />
+                Open quotations
+              </Link>
+              {managers && (
                 <button
                   disabled={pending}
-                  className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-bold text-white hover:bg-blue-800 disabled:opacity-50"
+                  className="rounded-xl bg-blue-700 px-4 py-2.5 text-sm font-bold text-white disabled:opacity-50"
+                  onClick={() => {
+                    start(async () => {
+                      const result =
+                        await syncConstructionFromProjectAgreement(projectId);
+                      setMessage(result.message);
+                    });
+                  }}
                 >
-                  {pending ? 'Saving…' : 'Create construction stage plan'}
+                  {pending
+                    ? 'Checking agreement…'
+                    : 'Recover plan from accepted agreement'}
                 </button>
-              </form>
-            ) : (
-              <p className="mt-3 text-sm font-medium text-blue-900">
-                The project manager has not configured the construction floors
-                yet.
-              </p>
-            )}
+              )}
+            </div>
           </div>
         ) : (
           <>
