@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-html-link-for-pages -- Intentional full-document navigation avoids incomplete RSC Flight streams on Hostinger. */
 'use client';
 
-import { useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { signOut } from '@business-os/auth/actions';
 
 const iconPaths = {
@@ -90,7 +90,57 @@ export function OwnerShell({
   currentHref?: string;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const toggleRef = useRef<HTMLButtonElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const sidebarRef = useRef<HTMLElement>(null);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  useEffect(() => {
+    if (!menuOpen) return;
+    if (window.innerWidth > 1199) {
+      setMenuOpen(false);
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    closeRef.current?.focus();
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setMenuOpen(false);
+        toggleRef.current?.focus();
+        return;
+      }
+      if (event.key !== 'Tab' || !sidebarRef.current) return;
+      const focusable = Array.from(
+        sidebarRef.current.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled])',
+        ),
+      );
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (!first || !last) return;
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    const onResize = () => {
+      if (window.innerWidth > 1199) setMenuOpen(false);
+    };
+    document.addEventListener('keydown', onKeyDown);
+    window.addEventListener('resize', onResize);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('resize', onResize);
+    };
+  }, [menuOpen]);
+
   const initials =
     accountLabel
       .trim()
@@ -105,11 +155,16 @@ export function OwnerShell({
         <button
           className="owner-scrim"
           aria-label="Close navigation"
-          onClick={() => setMenuOpen(false)}
+          onClick={() => {
+            setMenuOpen(false);
+            toggleRef.current?.focus();
+          }}
           type="button"
         />
       )}
       <aside
+        ref={sidebarRef}
+        id="owner-sidebar-navigation"
         className={'owner-sidebar' + (menuOpen ? ' owner-sidebar-open' : '')}
         aria-label="Company navigation"
       >
@@ -129,9 +184,13 @@ export function OwnerShell({
         <div className="owner-mobile-heading">
           <span>Workspace menu</span>
           <button
+            ref={closeRef}
             type="button"
             aria-label="Close navigation"
-            onClick={() => setMenuOpen(false)}
+            onClick={() => {
+              setMenuOpen(false);
+              toggleRef.current?.focus();
+            }}
           >
             <OwnerIcon name="close" size={20} />
           </button>
@@ -244,9 +303,11 @@ export function OwnerShell({
       <div className="owner-workspace">
         <header className="owner-topbar">
           <button
+            ref={toggleRef}
             className="owner-menu-button"
             type="button"
             aria-label="Open navigation"
+            aria-controls="owner-sidebar-navigation"
             aria-expanded={menuOpen}
             onClick={() => setMenuOpen(true)}
           >
