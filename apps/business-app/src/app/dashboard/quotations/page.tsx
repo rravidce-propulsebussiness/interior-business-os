@@ -100,7 +100,8 @@ export default async function Quotations({
       s.repository.industries(),
       s.client.from('quotations')
         .select('id', { count: 'exact', head: true })
-        .eq('organization_id', s.org),
+        .eq('organization_id', s.org)
+        .neq('status', 'cancelled'),
       revisionIds.length
         ? sharedLookup('quotation_shared_revisions', {
             p_organization_id: s.org,
@@ -338,7 +339,7 @@ export default async function Quotations({
                     <details className="qs-quotes-mobile-more">
                       <summary>••• More</summary>
                       <div>
-                        {row.status !== 'draft' && <Link href={editor}>Open quotation</Link>}
+                        
                         <Link href={'/dashboard/quotations/' + row.id + '/pdf?view=1'}
                           target="_blank" rel="noopener noreferrer">View PDF</Link>
                         {canRemove && (row.status === 'draft' || row.status === 'issued') &&
@@ -366,7 +367,7 @@ export default async function Quotations({
           <footer className="qs-quotes-footer">
             <span>{visible.length} quotation{visible.length === 1 ? '' : 's'} on this page
               {' · '}Page {filter.page}
-              {data.total ? ' · ' + data.total.toLocaleString('en-IN') + ' matching revision records' : ''}
+
             </span>
             <div>
               {filter.page > 1 && <Link href={searchUrl(filter.status, filter.page - 1)}
