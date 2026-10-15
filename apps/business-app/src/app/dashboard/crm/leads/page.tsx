@@ -21,6 +21,7 @@ import { leadRequirementLabel, resolveLeadCategory } from './lead-category';
 import '../../owner-dashboard.css';
 import './leads.css';
 import './lead-category.css';
+import './leads-premium.css';
 
 export const dynamic = 'force-dynamic';
 
@@ -132,17 +133,9 @@ export default async function Leads({
 
   // Secondary cards are optional. A failed analytics query must not make
   // the company's lead list or existing navigation unusable.
-  const today = new Intl.DateTimeFormat('sv-SE', {
-    timeZone: organization.default_timezone || 'Asia/Kolkata',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(new Date());
-
-  const [total, newToday, dueToday, overdue, converted, lost] =
+  const [total, dueToday, overdue, converted] =
     await Promise.all([
       metric(s.crm.search('leads', {})),
-      metric(s.crm.search('leads', { from: today, until: today })),
       metric(
         s.crm.search('lead_followups', { queue: 'today', status: 'pending' }),
       ),
@@ -150,7 +143,6 @@ export default async function Leads({
         s.crm.search('lead_followups', { queue: 'overdue', status: 'pending' }),
       ),
       metric(s.crm.search('leads', { converted: true })),
-      metric(s.crm.search('leads', { lifecycle: 'lost' })),
     ]);
 
   const stages: LeadStage[] = choices.stages.rows
@@ -419,27 +411,23 @@ export default async function Leads({
     {
       label: 'Total Leads',
       value: total === null ? '—' : number.format(total),
-      note: 'All company leads',
+      note: 'All company enquiries',
       icon: 'leads' as const,
       tone: 'blue',
     },
     {
-      label: 'New Today',
-      value: newToday === null ? '—' : number.format(newToday),
-      note: 'Created today',
-      icon: 'plus' as const,
-      tone: 'purple',
+      label: 'Follow-ups Due',
+      value: dueToday === null || overdue === null ? '—' : number.format(dueToday + overdue),
+      note: overdue === null ? 'Unavailable' : number.format(overdue) + ' overdue',
+      icon: 'calendar' as const,
+      tone: 'orange',
     },
     {
-      label: 'Follow-ups Due',
-      value:
-        dueToday === null || overdue === null
-          ? '—'
-          : number.format(dueToday + overdue),
-      note:
-        overdue === null ? 'Unavailable' : 'Overdue: ' + number.format(overdue),
-      icon: 'calendar' as const,
-      tone: 'rose',
+      label: 'Quotes Shared',
+      value: number.format(rows.filter((lead) => lead.quoteShared).length),
+      note: 'On this page of leads',
+      icon: 'quotations' as const,
+      tone: 'purple',
     },
     {
       label: 'Converted',
@@ -447,13 +435,6 @@ export default async function Leads({
       note: 'Converted to projects',
       icon: 'check' as const,
       tone: 'green',
-    },
-    {
-      label: 'Lost',
-      value: lost === null ? '—' : number.format(lost),
-      note: 'Closed lost',
-      icon: 'close' as const,
-      tone: 'orange',
     },
   ];
 
@@ -467,6 +448,7 @@ export default async function Leads({
       search=""
       currentHref="/dashboard/crm/leads"
       notificationsEnabled={may('notification.view')}
+      dashboardBrand
     >
       <LeadsWorkspace
         rows={rows}
