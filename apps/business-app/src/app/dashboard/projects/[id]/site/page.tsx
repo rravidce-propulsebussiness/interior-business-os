@@ -199,10 +199,16 @@ const card = 'sc-panel rounded-2xl border p-5 sm:p-6';
 const formDetails = 'sc-disclosure mt-4 rounded-xl border p-4';
 const green = 'sc-pill-positive rounded-lg px-2.5 py-1 text-xs font-semibold';
 const gray = 'sc-pill-neutral rounded-lg px-2.5 py-1 text-xs font-semibold';
-const designKinds = [
-  { value: 'architectural_plan', label: 'Architectural plan' },
+const constructionDesignKinds = [
+  { value: 'architectural_plan', label: 'Architectural / floor plan' },
   { value: '3d_design', label: '3D design / elevation' },
   { value: 'structural_design', label: 'Structural drawings' },
+];
+const interiorDesignKinds = [
+  { value: 'interior_layout', label: 'Interior layout / room plan' },
+  { value: '3d_design', label: 'Interior 3D views' },
+  { value: 'electrical_plan', label: 'Electrical / lighting plan (optional)' },
+  { value: 'plumbing_plan', label: 'Plumbing plan (optional)' },
 ];
 const supplierOptions = [
   { value: 'marketplace', label: 'Business OS marketplace seller' },
@@ -430,7 +436,17 @@ export default async function ProjectDeliveryPage({
   const pendingMaterials = site.materials.filter(
     (m) => !['received', 'rejected'].includes(value(m, 'status')),
   );
-  const latestDesigns = designKinds.map((kind) => ({
+  const { data: projectIndustry } = await s.client
+    .from('projects').select('industry_id')
+    .eq('organization_id', context.organizationId).eq('id', id).maybeSingle();
+  const { data: industryDefinition } = projectIndustry?.industry_id
+    ? await s.client.from('industries').select('key')
+        .eq('id', projectIndustry.industry_id).maybeSingle()
+    : { data: null };
+  const isInterior = industryDefinition?.key === 'interior';
+  const availableDesignKinds = isInterior
+    ? interiorDesignKinds : constructionDesignKinds;
+  const latestDesigns = availableDesignKinds.map((kind) => ({
     ...kind,
     latest: site.designs
       .filter((d) => value(d, 'kind') === kind.value)
@@ -793,7 +809,7 @@ export default async function ProjectDeliveryPage({
                               label: 'Design deliverable',
                               input: 'select',
                               required: true,
-                              options: designKinds,
+                              options: availableDesignKinds,
                             },
                             {
                               name: 'reference',
@@ -840,6 +856,42 @@ export default async function ProjectDeliveryPage({
                           },
                         ]}
                       />
+                      {latestDesigns.some((kind) => value(kind.latest ?? {}, 'status') === 'approved') && (
+                        <div className="mt-5 border-t border-slate-200 pt-4">
+                          <p className="mb-3 text-sm text-slate-700">
+                            Did the customer ask for changes? Record their response.
+                            The designer can then upload a new revision for review.
+                          </p>
+                          <Action
+                            project={id}
+                            operation="client_changes"
+                            label="Customer requested changes"
+                            fields={[
+                              {
+                                name: 'kind',
+                                label: 'Drawing to revise',
+                                input: 'select',
+                                required: true,
+                                options: latestDesigns
+                                  .filter((kind) => value(kind.latest ?? {}, 'status') === 'approved')
+                                  .map((kind) => ({ value: kind.value, label: kind.label })),
+                              },
+                              {
+                                name: 'note',
+                                label: 'What must the designer change?',
+                                input: 'textarea',
+                                required: true,
+                              },
+                              {
+                                name: 'evidence',
+                                label: 'Customer request reference (date, email, message)',
+                                input: 'textarea',
+                                required: true,
+                              },
+                            ]}
+                          />
+                        </div>
+                      )}
                     </details>
                   )}
                 </section>
@@ -850,7 +902,7 @@ export default async function ProjectDeliveryPage({
                 <Heading
                   eyebrow="Stage 2"
                   title="Design approved. Begin site work"
-                  detail="Confirm marking readiness, assign the site team and begin execution. This step is blocked until all three designs have been approved and client approval evidence has been recorded."
+                  detail="Confirm required construction or interior drawings, signed agreement and recorded advance before releasing site execution. Quality and structural checks remain mandatory where applicable."
                 />
                 <p className="mb-4 text-sm text-slate-600">
                   Approval recorded: {site.client_approval_recorded_at ?? '—'}
