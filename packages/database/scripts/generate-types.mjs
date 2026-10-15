@@ -64,8 +64,16 @@ out = await format(out, {
 });
 const target = file('src/generated/database.types.ts');
 if (process.argv.includes('--check')) {
-  if (readFileSync(target, 'utf8') !== out)
+  const committed = readFileSync(target, 'utf8');
+  if (committed !== out) {
+    const currentLines = committed.split('\\n');
+    const expectedLines = out.split('\\n');
+    const index = expectedLines.findIndex((line, i) => line !== currentLines[i]);
+    console.error('Database type mismatch near line', index + 1);
+    console.error('Committed:', currentLines.slice(Math.max(0, index - 2), index + 5).join('\\n'));
+    console.error('Generated:', expectedLines.slice(Math.max(0, index - 2), index + 5).join('\\n'));
     throw new Error('Generated database types have drifted. Run db:types.');
+  }
   console.log('Generated database types match the applied schema.');
 } else {
   mkdirSync(file('src/generated'), { recursive: true });
