@@ -1,4 +1,4 @@
-import { PDFDocument } from 'pdf-lib';
+import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 
 export interface PdfOptions {
   brochure?: boolean;
@@ -248,4 +248,151 @@ export async function renderPdf(
   } finally {
     active--;
   }
+}
+
+
+/**
+ * Browser-independent package preview for deployments without Chromium.
+ * Generates a real A4 PDF from the saved tenant package, preserving the
+ * material/specification content without depending on a rendering service.
+ */
+export async function renderConstructionPackageSamplePdf(input: {
+  company: string;
+  name: string;
+  code: string;
+  description: string;
+  ratePerSqft: string;
+  themeColor: string;
+  sections: ReadonlyArray<{
+    title: string;
+    brand: string;
+    grade: string;
+    description: string;
+    allowancePerSqft: string;
+  }>;
+}): Promise<Buffer> {
+  const document = await PDFDocument.create();
+  const regular = await document.embedFont(StandardFonts.Helvetica);
+  const strong = await document.embedFont(StandardFonts.HelveticaBold);
+  const safe = (value: string) =>
+    value.normalize('NFKD')
+      .replace(/\u20b9/g, 'INR ')
+      .replace(/[\u2018\u2019]/g, "'")
+      .replace(/[\u2013\u2014]/g, '-')
+      .replace(/[^\x20-\x7E\n]/g, '?');
+  const [red, green, blue] = /^#[0-9a-fA-F]{6}$/.test(input.themeColor)
+    ? [1, 3, 5].map((index) => parseInt(input.themeColor.slice(index, index + 2), 16) / 255)
+    : [0.08, 0.37, 0.85];
+  const accent = rgb(red!, green!, blue!);
+  const ink = rgb(0.09, 0.15, 0.25);
+  const subdued = rgb(0.4, 0.47, 0.57);
+  const margin = 44;
+  const width = 595;
+  const height = 842;
+  const maxWidth = width - margin * 2;
+  let page = document.addPage([width, height]);
+  let y = height - 110;
+  let pageNumber = 0;
+  const header = () => {
+    pageNumber++;
+    page.drawRectangle({ x: 0, y: height - 72, width, height: 72, color: accent });
+    page.drawText(safe(input.company).slice(0, 72), {
+      x: margin, y: height - 44, font: strong, size: 15, color: rgb(1, 1, 1),
+    });
+    page.drawText('PACKAGE PREVIEW', {
+      x: width - margin - 115, y: height - 44,
+      font: regular, size: 9, color: rgb(1, 1, 1),
+    });
+    page.drawText('Sample only  |  Page ' + pageNumber, {
+      x: margin, y: 23, font: regular, size: 9, color: subdued,
+    });
+  };
+  header();
+  const nextPage = () => {
+    page = document.addPage([width, height]);
+    y = height - 110;
+    header();
+  };
+  const ensure = (needed: number) => {
+    if (y - needed < 50) nextPage();
+  };
+  const line = (content: string, size = 11, bold = false, color = ink, indent = 0) => {
+    const font = bold ? strong : regular;
+    const text = safe(content);
+    const words = text.split(/\s+/).filter(Boolean);
+    let row = '';
+    const draw = (value: string) => {
+      ensure(size * 1.55);
+      page.drawText(value, { x: margin + indent, y, font, size, color });
+      y -= size * 1.55;
+    };
+    for (const word of words) {
+      if (font.widthOfTextAtSize(word, size) > maxWidth - indent) {
+        if (row) { draw(row); row = ''; }
+        let segment = '';
+        for (const char of word) {
+          if (font.widthOfTextAtSize(segment + char, size) > maxWidth - indent) {
+            if (segment) draw(segment);
+            segment = char;
+          } else segment += char;
+        }
+        row = segment;
+      } else if (font.widthOfTextAtSize(row ? row + ' ' + word : word, size) > maxWidth - indent) {
+        draw(row);
+        row = word;
+      } else {
+        row += (row ? ' ' : '') + word;
+      }
+    }
+    if (row) draw(row);
+    if (!words.length) y -= size * 1.55;
+  };
+
+  line(input.name, 25, true);
+  y -= 4;
+  line(input.code, 11, true, accent);
+  y -= 12;
+  if (input.description) { line(input.description, 10); y -= 12; }
+  ensure(90);
+  page.drawRectangle({
+    x: margin, y: y - 67, width: maxWidth, height: 82,
+    color: rgb(0.95, 0.97, 1),
+  });
+  const rate = Number(input.ratePerSqft);
+  const formatted = Number.isFinite(rate)
+    ? rate.toLocaleString('en-IN', { maximumFractionDigits: 2 }) : input.ratePerSqft;
+  const total = Number.isFinite(rate) ? (rate * 1000).toLocaleString('en-IN', {
+    maximumFractionDigits: 2,
+  }) : '--';
+  page.drawText('Illustrative construction estimate', {
+    x: margin + 16, y: y - 8, font: strong, size: 12, color: ink,
+  });
+  page.drawText('1,000 sq ft  x  INR ' + safe(formatted) + ' / sq ft', {
+    x: margin + 16, y: y - 32, font: regular, size: 11, color: subdued,
+  });
+  page.drawText('INR ' + safe(total), {
+    x: margin + 16, y: y - 56, font: strong, size: 17, color: accent,
+  });
+  y -= 104;
+  line('The illustration does not replace a customer-specific quotation, measurement or approved scope.', 9, false, subdued);
+  y -= 24;
+  line('MATERIALS AND INCLUSIONS', 14, true, accent);
+  y -= 12;
+  const sections = input.sections.filter((section) =>
+    Boolean(section.title.trim() || section.brand.trim() || section.grade.trim() ||
+      section.description.trim() || section.allowancePerSqft.trim()));
+  if (!sections.length) line('No specifications entered for this package.', 11, false, subdued);
+  for (const [index, section] of sections.entries()) {
+    ensure(76);
+    line(String(index + 1).padStart(2, '0') + '  ' + section.title, 12, true, accent);
+    if (section.brand) line('Brand: ' + section.brand, 10, false, ink, 18);
+    if (section.grade) line('Grade: ' + section.grade, 10, false, ink, 18);
+    if (section.allowancePerSqft)
+      line('Allowance: INR ' + section.allowancePerSqft + ' / sq ft', 10, false, ink, 18);
+    if (section.description) line(section.description, 10, false, ink, 18);
+    y -= 11;
+  }
+  document.setTitle(safe(input.name) + ' - Package Preview');
+  document.setAuthor(safe(input.company));
+  return Buffer.from(await document.save());
 }
