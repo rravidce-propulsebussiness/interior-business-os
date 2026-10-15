@@ -7,6 +7,7 @@ import { SiteAccessState } from './site-access-state';
 import { SiteActivity } from './site-activity';
 import { ConstructionPlanningPanel } from './construction-planning-panel';
 import { ConstructionJourney } from './construction-journey';
+import { stageOwnerSchema, mergeStageOwnerEdits } from './stage-owner-view';
 import { AgreementReadinessPanel } from './agreement-readiness-panel';
 import '../../../owner-dashboard.css';
 import './site-command.css';
@@ -335,10 +336,25 @@ export default async function ProjectDeliveryPage({
   const constructionResult = constructionSchema.safeParse(
     constructionResponse.data,
   );
-  const construction =
+  const constructionBase =
     !constructionResponse.error && constructionResult.success
       ? constructionResult.data
       : null;
+  const ownerResponse = constructionBase
+    ? await s.client.rpc('project_stage_owner_read', {
+        p_org: context.organizationId,
+        p_project: id,
+      })
+    : null;
+  const ownerParsed = ownerResponse && !ownerResponse.error
+    ? stageOwnerSchema.safeParse(ownerResponse.data)
+    : null;
+  const ownerData = ownerParsed?.success ? ownerParsed.data : null;
+  const construction = constructionBase
+    ? { ...constructionBase,
+        stages: mergeStageOwnerEdits(constructionBase.stages, ownerData),
+      }
+    : null;
   const qualityResponse = construction
     ? await s.client.rpc('construction_quality_read', {
         p_org: context.organizationId,
@@ -546,6 +562,7 @@ export default async function ProjectDeliveryPage({
               <ConstructionPlanningPanel
                 projectId={id}
                 data={construction}
+                canOwnerEdit={Boolean(ownerData?.can_edit)}
                 memberOptions={site.member_options}
                 quality={constructionQuality}
               />
