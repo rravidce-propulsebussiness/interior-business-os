@@ -10,7 +10,7 @@ do $$
 declare
  org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
  project uuid;
- rec uuid;material uuid;record jsonb;item text;kind text;agreement_media uuid;
+ rec uuid;material uuid;record jsonb;item text;kind text;agreement_media uuid;contract uuid;
 begin
  select id into project from public.projects where organization_id=org and code='demo-3bhk';
  if project is null then raise exception 'Demo project unavailable';end if;
@@ -32,7 +32,8 @@ begin
   perform public.project_site_command(org,project,'execution_start','{}'::jsonb);
   raise exception 'FAIL: site execution without contract evidence';
  exception when check_violation then null;end;
- perform pg_temp.site_signed_agreement(org,project,agreement_media);
+ contract=pg_temp.site_signed_agreement(org,project,agreement_media);
+ perform pg_temp.site_record_advance(org,contract);
  perform public.project_site_command(org,project,'execution_start','{}'::jsonb);
  record=public.project_site_manager_command(org,project,'manager_update',jsonb_build_object(
   'report_date',current_date,'health','at_risk',
