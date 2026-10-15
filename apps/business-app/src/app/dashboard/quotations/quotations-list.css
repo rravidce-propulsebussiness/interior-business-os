@@ -285,3 +285,38 @@
   .qs-quotes-mobile-more > div a {padding:10px; color:#344058; font-size:11px; background:#fff; border:1px solid #f0e4da; border-radius:8px;}
   .qs-quotes-mobile-more .qs-btn { min-height:34px; width:100%; font-size:11px; }
 }
+
+/* Edit is a primary, visible draft action (not hidden in More). */
+.qs-quotes-actions .qs-quote-edit,
+.qs-quotes-mobile-actions .qs-quote-edit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 36px;
+  border: 1px solid #ffbf95;
+  border-radius: 9px;
+  background: #fff2e8;
+  padding: 9px 12px;
+  color: #db510e;
+  font-size: 12px;
+  font-weight: 800;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.qs-quotes-actions .qs-quote-edit:hover,
+.qs-quotes-mobile-actions .qs-quote-edit:hover {
+  background: #ffe7d5;
+  border-color: #fb923c;
+}
+.qs-state-shared { background: #e1f8eb; color: #0c9158; }
+@media (max-width: 720px) {
+  .qs-quotes-mobile-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .qs-quotes-mobile-actions > * { min-width: 0; }
+  .qs-quotes-mobile-actions .qs-quote-edit {
+    font-size: 12px;
+    min-height: 42px;
+  }
+}
