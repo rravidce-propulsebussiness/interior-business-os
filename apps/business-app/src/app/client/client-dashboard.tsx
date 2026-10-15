@@ -13,7 +13,9 @@ export type ClientStage = {
 };
 export type ClientReport = {
   report_date: string; completed_work: string; tomorrow_plan: string;
-  worker_count: number | null; tomorrow_workers?: number | null;
+  worker_count: number | null; tomorrow_workers?: number | null | undefined;
+  checks_done?: string | null | undefined;
+  checks_required?: string | null | undefined;
   created_at: string;
 };
 export type ClientDrawing = {
@@ -39,16 +41,14 @@ export type ClientUpdate = {
 export type ClientDashboardData = {
   project: {
     id: string; name: string; code: string; company_name: string;
-    stage: string; client_approved_at?: string | null;
+    stage: string; client_approved_at?: string | null | undefined;
     reports: ClientReport[]; drawings: ClientDrawing[]; photos: ClientPhoto[];
   };
   timeline: ClientStage[];
   timelineUnavailable: boolean;
   metrics: {
     materials: ClientMaterial[]; checks: ClientCheck[];
-    latest_report: (ClientReport & {
-      checks_done?: string | null; checks_required?: string | null;
-    }) | null;
+    latest_report: ClientReport | null;
     updates: ClientUpdate[];
     local_date: string;
   };
