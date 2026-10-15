@@ -1,6 +1,4 @@
--- Measurement units and allowance semantics live alongside, not on top of, the
--- whole-building construction rate. Preserve existing company-owned packages,
--- specification snapshots and source PDFs.
+-- Preserve existing tenant package data and snapshots while allowing individual units.
 begin;
 create or replace function public.construction_package_save(p_org uuid,p_input jsonb)
 returns uuid language plpgsql volatile security definer set search_path='' as $fn$
@@ -53,55 +51,11 @@ begin
       or length(coalesce(v_section->>'allowancePerSqft',''))>40
       or length(coalesce(v_section->>'allowanceValue',''))>40
       or (v_section ? 'unit' and coalesce(v_section->>'unit','') not in
-         ('none','sqft','bathroom','door','piece','kg','tonne','bag','cubic_meter',
-          'running_ft','point','lumpsum','meter','bhk'))
+           ('none','sqft','bathroom','door','piece','kg','tonne','bag','cubic_meter','running_ft','point','lumpsum','meter','bhk'))
       or (v_section ? 'pricingTreatment' and coalesce(v_section->>'pricingTreatment','') not in
-         ('included','allowance','extra','excluded'))
-      or (v_section ? 'allowanceValue' and coalesce(v_section->>'allowanceValue','') <> ''
-         and coalesce(v_section->>'allowanceValue','') !~ '^[0-9]{1,9}([.][0-9]{1,2})?
-   then raise exception 'Invalid material specifications' using errcode='22023';end if;
- end loop;
- -- Obsolete optional fields are accepted only if they represent company-wide
- -- access, allowing an older open form to save during rollout.
- v_owner_ids='{}'::uuid[];
- v_rate=(p_input->>'ratePerSqft')::numeric;
- v_id=nullif(p_input->>'id','')::uuid;
- if v_id is null then
-   insert into private.construction_quote_packages
-     (organization_id,name,code,description,rate_per_sqft,status)
-   values (p_org,v_name,v_code,v_description,v_rate,p_input->>'status')
-   returning id into v_result;
- else
-   v_version=(p_input->>'version')::integer;
-   if v_version is null or v_version<1 then
-     raise exception 'Expected version' using errcode='22023';end if;
-   if not private.can_view_construction_package(p_org,v_id) then
-     raise exception 'Package unavailable for this company' using errcode='42501';end if;
-   update private.construction_quote_packages
-      set name=v_name, code=v_code, description=v_description,
-          rate_per_sqft=v_rate, status=p_input->>'status',
-          version=version+1
-    where organization_id=p_org and id=v_id and version=v_version
-    returning id into v_result;
-   if v_result is null then
-     raise exception 'Package changed; reload' using errcode='40001';end if;
- end if;
- insert into private.construction_quote_package_designs
-   (organization_id,package_id,theme_color,visibility,spec_sections,allowed_owner_ids)
- values (p_org,v_result,v_theme,v_visibility,v_sections,v_owner_ids)
- on conflict (organization_id,package_id)
- do update set theme_color=excluded.theme_color,
-    visibility=excluded.visibility,
-     allowed_owner_ids=excluded.allowed_owner_ids,
-    spec_sections=excluded.spec_sections,
-    updated_at=now();
- insert into public.audit_logs
-   (actor_user_id,organization_id,action,entity_type,entity_id,metadata)
- values (auth.uid(),p_org,'construction.package.saved',
-   'construction_quote_package',v_result::text,
-   jsonb_build_object('code',v_code,'ratePerSqft',v_rate,'visibility',v_visibility));
- return v_result;
-end $fn$;)
+           ('included','allowance','extra','excluded'))
+      or (v_section ? 'allowanceValue' and
+           coalesce(v_section->>'allowanceValue','') !~ '^(|[0-9]{1,9}([.][0-9]{1,2})?)$')
    then raise exception 'Invalid material specifications' using errcode='22023';end if;
  end loop;
  -- Obsolete optional fields are accepted only if they represent company-wide
