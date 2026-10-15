@@ -239,6 +239,57 @@ it.skipIf(!process.env.TEST_DATABASE_URL)(
           `select id from public.execution_plan_revisions where plan_id='${plan}'`,
         );
       call('operations_plan', 'approve', { id: revision, version: 1 });
+
+      // Independently verified site-start prerequisite for this concurrency
+      // fixture. Never bypass production triggers for tests.
+      run(
+        auth(
+          `select public.project_site_command('${org}','${project}','initialize','{}'::jsonb)`,
+        ),
+      );
+      const agreementPdf = Buffer.from(
+        '%PDF-1.7\\nDisposable signed-paper agreement reference',
+      ).toString('base64');
+      const agreementMedia = run(
+        auth(
+          `select public.project_site_media_put('${org}','${project}','agreement','race-agreement.pdf','application/pdf','${agreementPdf}','Test evidence')`,
+        ),
+      );
+      run(
+        auth(
+          `select public.project_agreement_command('${org}','${project}','${contract}','record_signed_pdf',${json(
+            {
+              media_id: agreementMedia,
+              note: 'Paper agreement received for the test; digital signatures not verified',
+            },
+          )})`,
+        ),
+      );
+      run(
+        auth(
+          `select public.contract_transition('${org}','${contract}',1,'active')`,
+        ),
+      );
+      const paymentSchedule = run(
+        auth(
+          `select public.payment_schedule_save('${org}','${contract}',${json({
+            label: 'Fixture construction payment schedule',
+            items: [
+              {
+                label: 'Handover payment',
+                calculation_type: 'remaining',
+                value: '0',
+              },
+            ],
+          })})`,
+        ),
+      );
+      run(
+        auth(
+          `select public.payment_schedule_activate('${org}','${paymentSchedule}',1)`,
+        ),
+      );
+
       call('operations_plan', 'status', {
         id: plan,
         version: 1,

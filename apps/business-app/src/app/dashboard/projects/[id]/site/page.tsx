@@ -5,6 +5,9 @@ import { projectWorkspaceNavigation } from '../../project-workspace-navigation';
 import { SiteCommandOverview } from './command-overview';
 import { SiteAccessState } from './site-access-state';
 import { SiteActivity } from './site-activity';
+import { ConstructionPlanningPanel } from './construction-planning-panel';
+import { ConstructionJourney } from './construction-journey';
+import { AgreementReadinessPanel } from './agreement-readiness-panel';
 import '../../../owner-dashboard.css';
 import './site-command.css';
 import './site-premium.css';
@@ -12,6 +15,41 @@ import { notFound } from 'next/navigation';
 import { z } from 'zod';
 import { activeOrganization, pageServices } from '@business-os/auth/server';
 import { ProjectSiteForm, ProjectSiteMediaForm, type SiteField } from './forms';
+
+const stageRecordSchema = z.object({
+  owned: z.array(z.object({ kind: z.string(), id: z.uuid() })).default([]),
+  links: z.array(
+    z.object({
+      stage_id: z.uuid(),
+      kind: z.string(),
+      record_id: z.uuid(),
+    }),
+  ),
+  payments: z.array(
+    z.object({
+      stage_id: z.uuid(),
+      item_id: z.uuid(),
+      contract_id: z.uuid(),
+      label: z.string(),
+      amount: z.string(),
+      due_date: z.string().nullable(),
+      currency: z.string(),
+      contract_number: z.string(),
+      request_number: z.string().nullable(),
+      request_status: z.string().nullable(),
+    }),
+  ),
+  options: z.array(
+    z.object({
+      id: z.uuid(),
+      contract_id: z.uuid(),
+      label: z.string(),
+      amount: z.string(),
+      currency: z.string(),
+      contract_number: z.string(),
+    }),
+  ),
+});
 
 export const dynamic = 'force-dynamic';
 
@@ -40,6 +78,103 @@ const siteSchema = z.object({
   events: z.array(z.record(z.string(), z.unknown())),
 });
 type Site = z.infer<typeof siteSchema>;
+const agreementSchema = z.object({
+  contract_id: z.uuid().nullable(),
+  contract_number: z.string().nullable(),
+  contract_status: z.string().nullable(),
+  contract_value: z.string().nullable(),
+  currency: z.string().nullable(),
+  active_contract_count: z.number().int().nonnegative(),
+  active_schedule: z.boolean(),
+  clearance_event_id: z.uuid().nullable(),
+  clearance_type: z.string().nullable(),
+  clearance_media_id: z.uuid().nullable(),
+  clearance_recorded_at: z.string().nullable(),
+  current_scope: z.boolean(),
+  execution_authorized: z.boolean(),
+  can_authorize_exception: z.boolean(),
+});
+const constructionQualitySchema = z.object({
+  available_inspections: z.array(
+    z.object({
+      id: z.uuid(),
+      number: z.string(),
+      status: z.string(),
+      mandatory: z.boolean(),
+      is_final: z.boolean(),
+    }),
+  ),
+  stages: z.array(
+    z.object({
+      stage_id: z.uuid(),
+      title: z.string(),
+      instance_code: z.string(),
+      hold_point: z.string().nullable(),
+      cleared: z.boolean(),
+      inspections: z.array(
+        z.object({
+          id: z.uuid(),
+          number: z.string(),
+          status: z.string(),
+          mandatory: z.boolean(),
+          inspector_id: z.uuid(),
+          approved_by: z.uuid().nullable(),
+          current: z.boolean(),
+        }),
+      ),
+      reviews: z.array(
+        z.object({
+          id: z.uuid(),
+          review_kind: z.enum(['quality', 'structural']),
+          decision: z.enum(['approved', 'rejected']),
+          reviewer_id: z.uuid(),
+          notes: z.string(),
+          inspections_id: z.uuid(),
+          reviewed_at: z.string(),
+        }),
+      ),
+    }),
+  ),
+});
+const constructionSchema = z.object({
+  can_manage: z.boolean(),
+  workflow: z
+    .object({
+      id: z.uuid(),
+      template_code: z.string(),
+      template_version: z.string(),
+      status: z.string(),
+      version: z.number().int(),
+      floor_snapshot: z.array(z.object({ code: z.string(), name: z.string() })),
+    })
+    .nullable(),
+  roles: z.array(
+    z.object({
+      id: z.uuid(),
+      user_id: z.uuid(),
+      role: z.string(),
+      active: z.boolean(),
+      version: z.number().int(),
+    }),
+  ),
+  stages: z.array(
+    z.object({
+      id: z.uuid(),
+      instance_code: z.string(),
+      template_code: z.string(),
+      phase: z.string(),
+      floor_code: z.string().nullable(),
+      title: z.string(),
+      explanation: z.string(),
+      hold_point: z.string().nullable(),
+      activities: z.array(z.string()),
+      inspection_topics: z.array(z.string()),
+      dependencies: z.array(z.string()),
+      status: z.string(),
+      task_count: z.number().int().nonnegative(),
+    }),
+  ),
+});
 const managerDataSchema = z.object({
   updates: z.array(row),
   reviews: z.array(row),
@@ -171,6 +306,65 @@ export default async function ProjectDeliveryPage({
   const parsed = siteSchema.safeParse(result.data);
   if (!parsed.success) return <SiteAccessState projectId={id} />;
   const site: Site = parsed.data;
+  const agreementResponse = site.can_manage
+    ? await s.client.rpc('project_agreement_read', {
+        p_organization_id: context.organizationId,
+        p_project_id: id,
+      })
+    : null;
+  const agreementParsed =
+    agreementResponse && !agreementResponse.error
+      ? agreementSchema.safeParse(agreementResponse.data)
+      : null;
+  const agreement = agreementParsed?.success ? agreementParsed.data : null;
+  const agreementPdfChoices = site.media
+    .filter((media) => value(media, 'mime') === 'application/pdf')
+    .map((media) => ({
+      id: value(media, 'id'),
+      filename: value(media, 'filename'),
+      category: value(media, 'category'),
+      mime: value(media, 'mime'),
+    }));
+
+  // Staged rollout: preserve existing Site Delivery if the new RPC is not yet
+  // installed on the verified environment; never infer missing stages.
+  const constructionResponse = await s.client.rpc('construction_project_read', {
+    p_organization_id: context.organizationId,
+    p_project_id: id,
+  });
+  const constructionResult = constructionSchema.safeParse(
+    constructionResponse.data,
+  );
+  const construction =
+    !constructionResponse.error && constructionResult.success
+      ? constructionResult.data
+      : null;
+  const qualityResponse = construction
+    ? await s.client.rpc('construction_quality_read', {
+        p_org: context.organizationId,
+        p_project: id,
+      })
+    : null;
+  const qualityResult =
+    qualityResponse && !qualityResponse.error
+      ? constructionQualitySchema.safeParse(qualityResponse.data)
+      : null;
+  const constructionQuality = qualityResult?.success
+    ? qualityResult.data
+    : null;
+  const stageRecordResponse = construction
+    ? await s.client.rpc('construction_stage_record_read', {
+        p_organization_id: context.organizationId,
+        p_project_id: id,
+      })
+    : null;
+  const stageRecordParsed =
+    stageRecordResponse && !stageRecordResponse.error
+      ? stageRecordSchema.safeParse(stageRecordResponse.data)
+      : null;
+  const stageRecords = stageRecordParsed?.success
+    ? stageRecordParsed.data
+    : null;
   const canSeeManagerUpdates =
     site.can_manage ||
     ['site_engineer', 'quality_inspector', 'procurement'].includes(
@@ -289,6 +483,28 @@ export default async function ProjectDeliveryPage({
               gate={site.gate}
               media={site.media}
             />
+            {construction && (
+              <ConstructionJourney
+                projectId={id}
+                stages={construction.stages}
+                quality={constructionQuality}
+                materials={site.materials}
+                checks={site.checks}
+                media={site.media}
+                reports={site.reports}
+                gate={site.gate}
+                managerUpdates={managerData.updates}
+                canSeeFinance={has('contract.view', 'billing')}
+                inSiteWorkspace
+                canRequestMaterials={open && (isEngineer || isProcurement)}
+                canUploadWorkPhotos={open && isEngineer}
+                canUploadCuringPhotos={open && isWatchman}
+                stageRecords={stageRecords}
+                canLinkRecords={construction.can_manage || isEngineer}
+                canManageLinks={construction.can_manage}
+                isWatchman={role === 'watchman' && !manager}
+              />
+            )}
             {managerDataUnavailable && (
               <div className="sc-service-alert" role="status">
                 Manager updates are temporarily unavailable. Existing Site
@@ -318,6 +534,22 @@ export default async function ProjectDeliveryPage({
                 media={site.media}
               />
             </div>
+
+            {agreement && (
+              <AgreementReadinessPanel
+                projectId={id}
+                state={agreement}
+                files={agreementPdfChoices}
+              />
+            )}
+            {construction && (
+              <ConstructionPlanningPanel
+                projectId={id}
+                data={construction}
+                memberOptions={site.member_options}
+                quality={constructionQuality}
+              />
+            )}
 
             {site.stage === 'not_started' && (
               <section className={card} id="initialize">
@@ -749,10 +981,16 @@ export default async function ProjectDeliveryPage({
                             },
                             {
                               name: 'worker_count',
-                              label: 'Workers on site',
+                              label: 'Workers on site today (actual)',
                               input: 'number',
                               required: true,
                               initial: '0',
+                            },
+                            {
+                              name: 'tomorrow_workers',
+                              label: 'Workers required for tomorrow (planned)',
+                              input: 'number',
+                              placeholder: 'Enter expected labour count',
                             },
                             {
                               name: 'completed_work',
@@ -808,6 +1046,13 @@ export default async function ProjectDeliveryPage({
                           <strong>Tomorrow:</strong>{' '}
                           {value(report, 'tomorrow_plan')}
                         </p>
+                        {value(report, 'tomorrow_workers') && (
+                          <p className="mt-2">
+                            <strong>Labour needed tomorrow:</strong>{' '}
+                            {value(report, 'tomorrow_workers')} workers
+                            (planned)
+                          </p>
+                        )}
                         {value(report, 'blockers') && (
                           <p className="mt-2 text-amber-800">
                             <strong>Blockers:</strong>{' '}
@@ -902,7 +1147,7 @@ export default async function ProjectDeliveryPage({
                   <Heading
                     eyebrow="Materials"
                     title="Quantities and purchasing"
-                    detail="Request measured quantities for site marking and execution, approve procurement, then record whether the actual purchase is from a Business OS seller or an outside supplier. A request does not itself create a purchase order."
+                    detail="Site engineers and project managers can request the actual required quantity. Project managers review/correct requests; procurement staff approve, order and record delivery with an actual supplier reference. A request is not a purchase order."
                   />
                   <div className="flex flex-wrap gap-3 text-sm">
                     <Link
@@ -927,7 +1172,7 @@ export default async function ProjectDeliveryPage({
                   {open && (isEngineer || isProcurement) && (
                     <details className={formDetails}>
                       <summary className="cursor-pointer font-semibold">
-                        Request material / planned quantity
+                        Site engineer / project manager: request materials
                       </summary>
                       <div className="mt-4">
                         <Action
@@ -1273,6 +1518,45 @@ export default async function ProjectDeliveryPage({
                       />
                     </div>
                   </details>
+                )}
+                {open && (manager || role === 'watchman') && (
+                  <div className="mt-5 rounded-xl border border-blue-200 bg-blue-50/40 p-4">
+                    <h3 className="text-sm font-bold text-slate-900">
+                      Watchman curing photo evidence
+                    </h3>
+                    <p className="my-2 text-xs leading-5 text-slate-600">
+                      Record a curing round above first, then upload a site
+                      photo with its time and location. Photos remain private to
+                      this project. Watchmen cannot upload unrelated site or
+                      contract files.
+                    </p>
+                    <ProjectSiteMediaForm project={id} phase="curing" />
+                  </div>
+                )}
+                {site.media.some(
+                  (item) => value(item, 'category') === 'curing',
+                ) && (
+                  <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                    {site.media
+                      .filter((item) => value(item, 'category') === 'curing')
+                      .slice(0, 8)
+                      .map((item) => (
+                        <a
+                          key={item.id}
+                          href={`/dashboard/projects/${id}/site/media/${item.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="overflow-hidden rounded-xl border border-slate-200 bg-white"
+                        >
+                          <span className="block truncate p-3 text-xs font-semibold">
+                            {value(item, 'caption') || 'Curing photo'}
+                          </span>
+                          <span className="block px-3 pb-3 text-xs text-blue-700">
+                            View private photo ↗
+                          </span>
+                        </a>
+                      ))}
+                  </div>
                 )}
                 <div className="mt-4 space-y-2">
                   {site.gate.map((entry) => (

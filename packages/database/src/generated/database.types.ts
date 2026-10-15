@@ -10886,6 +10886,32 @@ export interface Database {
         Args: { p_org: string; p_input: Json };
         Returns: string;
       };
+      construction_project_command: {
+        Args: {
+          p_organization_id: string;
+          p_project_id: string;
+          p_action: string;
+          p_input?: Json;
+        };
+        Returns: Json;
+      };
+      construction_project_read: {
+        Args: { p_organization_id: string; p_project_id: string };
+        Returns: Json;
+      };
+      construction_quality_command: {
+        Args: {
+          p_org: string;
+          p_project: string;
+          p_action: string;
+          p_input?: Json;
+        };
+        Returns: string;
+      };
+      construction_quality_read: {
+        Args: { p_org: string; p_project: string };
+        Returns: Json;
+      };
       construction_rate_list: { Args: { p_org: string }; Returns: Json };
       construction_rate_quote_preview: {
         Args: { p_org: string; p_ids: string[]; p_area: number };
@@ -10894,6 +10920,19 @@ export interface Database {
       construction_rate_save: {
         Args: { p_org: string; p_input: Json };
         Returns: string;
+      };
+      construction_stage_record_command: {
+        Args: {
+          p_organization_id: string;
+          p_project_id: string;
+          p_action: string;
+          p_input?: Json;
+        };
+        Returns: Json;
+      };
+      construction_stage_record_read: {
+        Args: { p_organization_id: string; p_project_id: string };
+        Returns: Json;
       };
       contract_create: {
         Args: { p_organization_id: string; p_revision_id: string };
@@ -11581,6 +11620,20 @@ export interface Database {
       platform_user_status_set: {
         Args: { p_user_id: string; p_status: string };
         Returns: undefined;
+      };
+      project_agreement_command: {
+        Args: {
+          p_organization_id: string;
+          p_project_id: string;
+          p_contract_id: string;
+          p_action: string;
+          p_input?: Json;
+        };
+        Returns: string;
+      };
+      project_agreement_read: {
+        Args: { p_organization_id: string; p_project_id: string };
+        Returns: Json;
       };
       project_site_command: {
         Args: {

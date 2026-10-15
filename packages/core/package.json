@@ -15,6 +15,7 @@
     "./execution": "./src/execution.ts",
     "./execution-document": "./src/execution-document.ts",
     "./operations": "./src/operations.ts",
+    "./construction-workflow": "./src/construction-workflow.ts",
     "./operations-command": "./src/operations-command.ts",
     "./operations-document": "./src/operations-document.ts",
     "./automation": "./src/automation.ts",

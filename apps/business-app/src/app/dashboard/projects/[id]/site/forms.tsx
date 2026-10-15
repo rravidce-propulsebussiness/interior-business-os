@@ -132,7 +132,7 @@ export function ProjectSiteMediaForm({
   phase,
 }: {
   project: string;
-  phase: 'design' | 'execution';
+  phase: 'design' | 'execution' | 'agreement' | 'curing';
 }) {
   const [message, setMessage] = useState('');
   const [pending, start] = useTransition();
@@ -152,13 +152,23 @@ export function ProjectSiteMediaForm({
     >
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="text-sm font-medium">
-          Attachment (image, PDF or short MP4 up to 8 MB)
+          {phase === 'curing'
+            ? 'Curing round photo (up to 8 MB)'
+            : phase === 'execution'
+              ? 'Work-start / progress image, PDF or short MP4 (up to 8 MB)'
+              : 'Attachment (image, PDF or short MP4 up to 8 MB)'}
           <input
             className={control}
             required
             name="file"
             type="file"
-            accept="image/jpeg,image/png,image/webp,video/mp4,application/pdf"
+            accept={
+              phase === 'agreement'
+                ? 'application/pdf'
+                : phase === 'curing'
+                  ? 'image/jpeg,image/png,image/webp'
+                  : 'image/jpeg,image/png,image/webp,video/mp4,application/pdf'
+            }
           />
         </label>
         <label className="text-sm font-medium">
@@ -166,14 +176,28 @@ export function ProjectSiteMediaForm({
           <select
             className={control}
             name="category"
-            defaultValue={phase === 'design' ? 'design' : 'daily'}
+            defaultValue={
+              phase === 'agreement'
+                ? 'agreement'
+                : phase === 'design'
+                  ? 'design'
+                  : phase === 'curing'
+                    ? 'curing'
+                    : 'site'
+            }
           >
-            {phase === 'design' ? (
+            {phase === 'agreement' ? (
+              <option value="agreement">Private signed agreement PDF</option>
+            ) : phase === 'design' ? (
               <option value="design">Design evidence</option>
+            ) : phase === 'curing' ? (
+              <option value="curing">Watchman curing round evidence</option>
             ) : (
               <>
                 <option value="daily">Daily site progress</option>
-                <option value="site">General site photo/video</option>
+                <option value="site">
+                  Work-start / construction site photo
+                </option>
                 <option value="inspection">Inspection evidence</option>
               </>
             )}
@@ -184,8 +208,13 @@ export function ProjectSiteMediaForm({
           <input
             className={control}
             name="caption"
+            required={phase === 'curing' || phase === 'execution'}
             maxLength={500}
-            placeholder="Area, date and what this image shows"
+            placeholder={
+              phase === 'curing'
+                ? 'Curing time, location and element being cured'
+                : 'Area, date and what this image shows'
+            }
           />
         </label>
       </div>
@@ -193,7 +222,13 @@ export function ProjectSiteMediaForm({
         className="w-fit rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold hover:bg-slate-50 disabled:opacity-50"
         disabled={pending}
       >
-        {pending ? 'Uploading…' : 'Upload private evidence'}
+        {pending
+          ? 'Uploading…'
+          : phase === 'curing'
+            ? 'Upload curing photo'
+            : phase === 'execution'
+              ? 'Upload work photo / evidence'
+              : 'Upload private evidence'}
       </button>
       {message && (
         <p role="status" className="text-sm text-slate-700">
