@@ -36,7 +36,7 @@ export default async function ClientLoginPage({ searchParams }: {
             Use the email your construction or interior company invited.
             Client access is separate from employee accounts.
           </p>
-          <ClientLoginForm action={signIn} projectId={projectId} />
+          <ClientLoginForm action={signIn} {...(projectId ? { projectId } : {})} />
           <p className="mt-5 text-center text-sm text-slate-500">
             <Link href="/" className="underline">Business OS home</Link>
           </p>
