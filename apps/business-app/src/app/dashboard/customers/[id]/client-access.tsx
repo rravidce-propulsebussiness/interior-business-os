@@ -126,11 +126,24 @@ export function ClientAccess({
                 <strong className="text-sm">{item.email}</strong>
                 <p className="text-xs text-slate-500">{item.project_name} · {item.active ? 'Active' : 'Revoked'}</p>
               </div>
-              <button type="button" disabled={pending}
-                className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold disabled:opacity-50"
-                onClick={() => update(!item.active, item.project_id, item.email)}>
-                {item.active ? 'Revoke access' : 'Restore access'}
-              </button>
+              <div className="flex flex-wrap items-center gap-2">
+                {item.active && (
+                  <a className="rounded-lg border border-blue-200 px-3 py-2 text-sm font-semibold text-blue-700"
+                    href={'mailto:' + item.email + '?subject=' +
+                      encodeURIComponent('Your project updates are ready') +
+                      '&body=' + encodeURIComponent(
+                        'You have been invited to view ' + item.project_name +
+                        '. Open https://sghomesinterior.in/client/login and sign in or create an account using this same email address.',
+                      )}>
+                    Email client link
+                  </a>
+                )}
+                <button type="button" disabled={pending}
+                  className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold disabled:opacity-50"
+                  onClick={() => update(!item.active, item.project_id, item.email)}>
+                  {item.active ? 'Revoke access' : 'Restore access'}
+                </button>
+              </div>
             </div>
           ))}
         </div>
