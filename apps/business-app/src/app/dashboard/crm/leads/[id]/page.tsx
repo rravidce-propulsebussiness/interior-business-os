@@ -81,6 +81,7 @@ export default async function LeadDetail({
     .filter((v):v is 'construction'|'interior'=>v!==null))];
   const canManage=s.allowed('lead.manage');
   const canFollowUp=s.allowed('crm.followup.manage');
+  const canVisit=s.allowed('crm.site_visit.manage');
   const canNote=s.allowed('crm.activity.create');
   const canQuote=s.allowed('quotation.create','quotation');
   const canViewQuote=s.allowed('quotation.view','quotation');
@@ -191,7 +192,8 @@ export default async function LeadDetail({
             <LeadActivityScheduler leadId={id} leadName={l.name}
               assignedTo={l.assigned_to||''} assignees={team}
               defaultLocation={l.location||''}
-              canSchedule={canFollowUp&&l.lifecycle==='open'}/>
+              canFollowUp={canFollowUp&&l.lifecycle==='open'}
+              canVisit={canVisit&&l.lifecycle==='open'}/>
             {canNote&&l.lifecycle!=='archived'&&(
               <LeadUpdateComposer leadId={id} leadName={l.name} canFollowUp={canFollowUp} inline/>
             )}
