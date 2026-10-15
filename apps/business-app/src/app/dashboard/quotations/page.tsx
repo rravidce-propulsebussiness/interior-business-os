@@ -26,7 +26,7 @@ export default async function Quotations({
     parent_id: null,
   });
   const s = await commercialServices('quotation.view', 'quotation', true);
-  const [result, organization, user, quoteSettings] = await Promise.all([
+  const [result, organization, user] = await Promise.all([
     s.commercial.search(
       s.org,
       'quotations',
@@ -36,11 +36,6 @@ export default async function Quotations({
     ),
     s.repository.organization(s.org),
     s.authorization.requireAuthenticatedUser(),
-    s.client
-      .from('organization_quotation_settings')
-      .select('id')
-      .eq('organization_id', s.org)
-      .maybeSingle(),
   ]);
   if (!organization) throw new Error('Company workspace unavailable');
   const rows = commercialSearchResultSchema.parse(result).rows.filter(
