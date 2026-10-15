@@ -126,6 +126,7 @@ export async function createStudioQuotation(input: unknown): Promise<{
       country_code: 'IN',
     };
 
+    let createdCustomer = false;
     let customerId = values.customerId ?? '';
     if (customerId) {
       const { data: existing, error } = await s.client
@@ -214,8 +215,10 @@ export async function createStudioQuotation(input: unknown): Promise<{
         notes: '',
         status: 'active',
       });
+      createdCustomer = true;
     }
 
+    let createdProject = false;
     let projectId = values.projectId ?? '';
     if (projectId) {
       const { data: selectedProject, error } = await s.client
@@ -285,6 +288,7 @@ export async function createStudioQuotation(input: unknown): Promise<{
             : '',
           assigned_user_id: null,
         });
+        createdProject = true;
       }
     }
 
@@ -294,14 +298,21 @@ export async function createStudioQuotation(input: unknown): Promise<{
       // If deployment has not run the migration yet, never pretend the
       // association was saved; the quotation itself remains accessible.
       const rpc = s.client.rpc.bind(s.client) as unknown as (
-        fn: string, args: Record<string, string>,
+        fn: string, args: Record<string, string | boolean>,
       ) => Promise<{ error: { message: string } | null }>;
-      const linked = await rpc('lead_quotation_link', {
-        p_organization_id: s.org,
-        p_lead_id: values.leadId,
-        p_quotation_id: quotationId,
-        p_project_id: projectId,
-      });
+      const provisional = createdCustomer || createdProject;
+      const linked = await rpc(
+        provisional ? 'lead_quotation_link_provisional' : 'lead_quotation_link', {
+          p_organization_id: s.org,
+          p_lead_id: values.leadId,
+          p_quotation_id: quotationId,
+          p_project_id: projectId,
+          ...(provisional ? {
+            p_new_customer: createdCustomer,
+            p_new_project: createdProject,
+          } : {}),
+        },
+      );
       return linked.error
         ? ' Quotation saved, but linking it to the lead failed. Apply the lead-quotation migration and retry from the lead.'
         : '';
