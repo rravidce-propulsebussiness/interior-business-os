@@ -222,6 +222,7 @@ export function LeadsWorkspace({
   canConfigureCrm,
   canManage,
   canWin,
+  canQuote,
   organizationName,
   timeZone,
   asOf,
