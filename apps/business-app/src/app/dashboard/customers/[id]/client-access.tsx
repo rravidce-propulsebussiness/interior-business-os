@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { setClientProjectAccess } from './client-access-actions';
 
 type Access = {
@@ -28,7 +28,9 @@ export function ClientAccess({
   const [pending, start] = useTransition();
   const [message, setMessage] = useState('');
   const [access, setAccess] = useState(existing);
-  const portalUrl = '/client/login';
+  const [appOrigin, setAppOrigin] = useState('https://sghomesinterior.in');
+  useEffect(() => { setAppOrigin(window.location.origin); }, []);
+  const portalUrl = projectId ? '/client/projects/' + projectId : '/client/login';
 
   function update(active: boolean, targetProject: string, targetEmail: string) {
     setMessage('');
@@ -61,9 +63,9 @@ export function ClientAccess({
         <span className="cp-muted">Private project sharing</span>
       </div>
       <p className="mb-4 text-sm text-slate-600">
-        Add your customer's email to a specific project. After verifying that
-        email and signing in, they can follow site work, photos and design updates.
-        This does not give them access to your business dashboard.
+        Select the exact project and invite the client's verified email.
+        The invitation never unlocks any other project, even under the same customer.
+        The client cannot access your internal business dashboard.
       </p>
       {projects.length ? (
         <form
@@ -101,15 +103,15 @@ export function ClientAccess({
         </p>
       )}
       <div className="mt-4 flex flex-wrap items-center gap-3 rounded-xl bg-blue-50 p-3 text-sm">
-        <span className="font-semibold">Client App:</span>
-        <a className="break-all text-blue-800 underline" href="/client/login" target="_blank" rel="noreferrer">
+        <span className="font-semibold">Selected project link:</span>
+        <a className="break-all text-blue-800 underline" href={portalUrl} target="_blank" rel="noreferrer">
           {portalUrl}
         </a>
         <button className="rounded-lg border border-blue-200 bg-white px-3 py-1.5 font-semibold"
           type="button" onClick={async () => {
             try {
-              await navigator.clipboard.writeText(window.location.origin + '/client/login');
-              setMessage('Client sign-in link copied. Share it with your customer.');
+              await navigator.clipboard.writeText(window.location.origin + portalUrl);
+              setMessage('Selected project link copied. It works only for the invited, verified email.');
             } catch { setMessage('Copy the client link above.'); }
           }}>
           Copy link
@@ -128,12 +130,27 @@ export function ClientAccess({
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 {item.active && (
+                  <button type="button" className="rounded-lg border border-blue-200 px-3 py-2 text-sm font-semibold text-blue-700"
+                    onClick={async () => {
+                      try {
+                        await navigator.clipboard.writeText(
+                          window.location.origin + '/client/projects/' + item.project_id
+                        );
+                        setMessage('Link copied for ' + item.project_name +
+                          '. Only the invited client email can open it.');
+                      } catch { setMessage('Copy the selected project link above.'); }
+                    }}>
+                    Copy project link
+                  </button>
+                )}
+                {item.active && (
                   <a className="rounded-lg border border-blue-200 px-3 py-2 text-sm font-semibold text-blue-700"
                     href={'mailto:' + item.email + '?subject=' +
                       encodeURIComponent('Your project updates are ready') +
                       '&body=' + encodeURIComponent(
                         'You have been invited to view ' + item.project_name +
-                        '. Open https://sghomesinterior.in/client/login and sign in or create an account using this same email address.',
+                        '. Open ' + appOrigin + '/client/projects/' + item.project_id +
+                        ' and sign in or register using this invited email. This link does not grant access to any other project.',
                       )}>
                     Email client link
                   </a>
