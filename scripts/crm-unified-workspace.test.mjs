@@ -155,10 +155,19 @@ test('Leads listing opens the single canonical detail page without duplicate edi
     fileURLToPath(new URL('[id]/page.tsx', root)),
     'utf8',
   );
-  assert.match(detail, /LeadMeetActions/);
-  assert.match(detail, /id="lead-followups"/);
-  assert.match(detail, /id="lead-site-visits"/);
-  assert.match(detail, /id="lead-activity"/);
+  // Lead detail is now intentionally a focused history view. Routine
+  // follow-up, assignment, call logging and quote preview live on the list.
+  assert.match(detail, /<LeadHistoryTimeline/);
+  assert.match(detail, /<LeadUpdateComposer/);
+  assert.match(detail, /<LeadQuotePreview/);
+  assert.match(detail, /<LeadFollowUpSetter/);
+  assert.match(detail, /<LeadStageSelect/);
+  assert.doesNotMatch(detail, /<LeadMeetActions/);
+  assert.doesNotMatch(detail, /Daily actions/);
+  assert.match(leads, /<LeadQuotePreview/);
+  assert.match(leads, /<LeadStageSelect/);
+  assert.match(leads, /<LeadAssigneeSelect/);
+  assert.match(leads, /<LeadUpdateComposer/);
 });
 
 test('legacy CRM overview and commercial response pages redirect to their canonical workspaces', () => {
@@ -320,7 +329,7 @@ test('client timeline uses only the invited project’s canonical workflow', () 
     'utf8',
   );
   assert.match(project, /<ClientDashboard/);
-  assert.match(dashboardView, /<ClientProjectTimeline stages=\{timeline\}/);
+  assert.match(dashboardView, /<ClientProjectTimeline\s+stages=\{timeline\}/);
   assert.match(timeline, /Work timeline/);
   assert.match(timeline, /completed_at/);
 });
@@ -397,6 +406,6 @@ test('premium client dashboard reads only invited-project delivery data', () => 
     assert.ok(dashboard.includes(area), area + ' must be available to clients');
   }
   assert.match(dashboard, /goods_receipt|Materials delivered|client\/media/);
-  assert.match(styles, /@media\(max-width:720px\)/);
+  assert.match(styles, /@media\s*\(max-width:\s*720px\)/);
   assert.match(styles, /pc-mobile-tabs/);
 });
