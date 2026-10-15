@@ -19,11 +19,12 @@ export type ActivityQueueItem = {
 };
 
 export function LeadActivityQueue({
-  items, total, canManage, nextHref,
+  items, total, canManageFollowups, canManageVisits, nextHref,
 }: {
   items: ActivityQueueItem[];
   total: number;
-  canManage: boolean;
+  canManageFollowups: boolean;
+  canManageVisits: boolean;
   nextHref: string | null;
 }) {
   const router = useRouter();
@@ -75,12 +76,12 @@ export function LeadActivityQueue({
           <div className="crm-activity-commands">
             <a href={'/dashboard/crm/leads/' + encodeURIComponent(item.leadId)}>Open lead</a>
             {item.phone && <a href={'tel:' + item.phone.replace(/[^0-9+]/g, '')}>Call</a>}
-            {canManage && <button type="button" disabled={pending === item.id}
+            {(item.kind === 'visit' ? canManageVisits : canManageFollowups) && <button type="button" disabled={pending === item.id}
               onClick={() => { setEditing(editing === item.id ? null : item.id); setOutcome(''); setError(''); }}>
               Record outcome
             </button>}
           </div>
-          {editing === item.id && canManage && <div className="crm-activity-outcome">
+          {editing === item.id && (item.kind === 'visit' ? canManageVisits : canManageFollowups) && <div className="crm-activity-outcome">
             <label>What happened?
               <textarea rows={2} maxLength={3000} value={outcome}
                 onChange={(event) => setOutcome(event.target.value)}
