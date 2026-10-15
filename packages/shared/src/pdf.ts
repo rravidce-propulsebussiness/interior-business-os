@@ -269,9 +269,9 @@ export async function renderConstructionPackageSamplePdf(input: {
     grade: string;
     description: string;
     allowancePerSqft: string;
-    allowanceValue?: string;
-    unit?: string;
-    pricingTreatment?: 'included' | 'allowance' | 'extra' | 'excluded';
+    allowanceValue?: string | undefined;
+    unit?: string | undefined;
+    pricingTreatment?: 'included' | 'allowance' | 'extra' | 'excluded' | undefined;
   }>;
 }): Promise<Buffer> {
   const document = await PDFDocument.create();
