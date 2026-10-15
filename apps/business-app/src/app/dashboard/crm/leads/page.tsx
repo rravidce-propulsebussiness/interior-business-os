@@ -281,7 +281,7 @@ export default async function Leads({
         href: searchLink(p, {
           stage_id: stage.id,
           lifecycle: null,
-            due: null,
+          due: null,
         }),
         count: p.stage_id === stage.id ? result.total : null,
         active: p.stage_id === stage.id,
@@ -425,9 +425,9 @@ export default async function Leads({
       tone: 'purple',
     },
     {
-      label: 'Converted',
+      label: 'Projects Created',
       value: converted === null ? '—' : number.format(converted),
-      note: 'Converted to projects',
+      note: 'From won leads',
       icon: 'check' as const,
       tone: 'green',
     },
