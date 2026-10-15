@@ -1,13 +1,15 @@
 \set ON_ERROR_STOP on
 begin;
 \ir site-agreement-quotation-fixture.sql
+update public.projects set industry_id=(select id from public.industries where key='construction')
+where organization_id='dddddddd-dddd-4ddd-8ddd-dddddddddddd' and code='demo-3bhk';
 set local role authenticated;
 \ir site-agreement-helper.sql
 select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',true);
 do $setup$
 declare
  org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
- project uuid;contract uuid;stages jsonb;first_stage uuid;second_stage uuid;
+ project uuid;contract uuid;stages jsonb;first_stage uuid;second_stage uuid; quote_hash text;
 begin
  select id into project from public.projects
  where organization_id=org and code='demo-3bhk';
@@ -19,9 +21,15 @@ begin
    '{"user_id":"33333333-3333-4333-8333-333333333333","role":"site_engineer","active":true}'::jsonb);
  contract=pg_temp.site_signed_agreement(org,project);
  perform set_config('test.link_contract',contract::text,true);
- perform public.construction_project_command(org,project,'workflow_create',
-  jsonb_build_object('template',jsonb_build_object('industry','construction','version','1.0.0'),
-   'floors',jsonb_build_array(jsonb_build_object('code','GROUND','name','Ground')),
+ select md5(coalesce(string_agg(qi.id::text||chr(31)||
+   coalesce(qi.snapshot->>'name','')||chr(31)||qi.description||chr(31)||
+   case when qi.optional then '1' else '0' end,chr(30) order by qi.id),''))
+ into quote_hash from public.quotation_items qi
+ where qi.organization_id=org and qi.revision_id=(
+   select revision_id from public.contracts where id=contract);
+ perform public.project_quote_timeline_create(org,contract,
+  jsonb_build_object('industry','construction','quote_hash',quote_hash,'template',jsonb_build_object('industry','construction','version','1.0.0'),
+   'zones',jsonb_build_array(jsonb_build_object('code','GROUND','name','Ground')),
    'stages',jsonb_build_array(
      jsonb_build_object('instanceCode','FOUNDATION','templateCode','FOUNDATION',
        'phase','foundation','title','Foundation stage','explanation','Footing reinforcement work',
