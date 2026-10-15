@@ -13,9 +13,9 @@ export function PremiumLoginForm({
   action,
 }: {
   action: (
-    state: { message: string; authenticated?: boolean },
+    state: { message: string; authenticated?: boolean; clientPortal?: boolean },
     form: FormData,
-  ) => Promise<{ message: string; authenticated?: boolean }>;
+  ) => Promise<{ message: string; authenticated?: boolean; clientPortal?: boolean }>;
 }) {
   const [state, dispatch, pending] = useActionState(action, { message: '' });
   const [visible, setVisible] = useState(false);
@@ -26,10 +26,10 @@ export function PremiumLoginForm({
       // The session is already stored in the secure Supabase cookies.
       // Full-document navigation avoids the hosted RSC Flight #412 problem.
       window.location.replace(
-        new URL('/dashboard', window.location.origin).href,
+        new URL(state.clientPortal ? '/client' : '/dashboard', window.location.origin).href,
       );
     }
-  }, [state.authenticated]);
+  }, [state.authenticated, state.clientPortal]);
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
