@@ -268,3 +268,20 @@
 @media (max-width: 365px) {
   .qs-quotes-kpi-icon {display:none;}
 }
+
+@media (max-width:720px) {
+  .qs-quotes-mobile-more summary {
+    display:grid; place-items:center; height:100%; min-height:37px;
+    list-style:none; cursor:pointer;
+    border:1px solid #f0e6dd; border-radius:9px;
+    color:#ec570a; padding:10px 4px; font-size:11px; font-weight:750;
+  }
+  .qs-quotes-mobile-more summary::-webkit-details-marker {display:none;}
+  .qs-quotes-mobile-more > div {
+    display:grid; gap:5px;
+    margin-top:7px; padding:8px;
+    background:#fffaf6; border:1px solid #f4dcca; border-radius:9px;
+  }
+  .qs-quotes-mobile-more > div a {padding:10px; color:#344058; font-size:11px; background:#fff; border:1px solid #f0e4da; border-radius:8px;}
+  .qs-quotes-mobile-more .qs-btn { min-height:34px; width:100%; font-size:11px; }
+}
