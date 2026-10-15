@@ -11,6 +11,7 @@ import { OwnerShell, type OwnerNavItem } from '../../../owner-shell';
 import { leadsNavigation } from '../../../leads-navigation';
 import { LeadHistoryTimeline, type LeadHistoryItem } from '../lead-history-timeline';
 import { LeadUpdateComposer } from '../lead-update-composer';
+import { LeadActivityScheduler } from '../lead-activity-scheduler';
 import { LeadStageSelect, LeadAssigneeSelect, LeadFollowUpSetter } from '../lead-inline-controls';
 import { LeadQuotePreview } from '../lead-quote-preview';
 import { LeadCategoryEditor } from './lead-category-editor';
@@ -23,6 +24,7 @@ import '../../../owner-dashboard.css';
 import '../leads.css';
 import './lead-history.css';
 import '../lead-category.css';
+import '../leads-activity.css';
 
 export const dynamic = 'force-dynamic';
 
@@ -79,6 +81,7 @@ export default async function LeadDetail({
     .filter((v):v is 'construction'|'interior'=>v!==null))];
   const canManage=s.allowed('lead.manage');
   const canFollowUp=s.allowed('crm.followup.manage');
+  const canVisit=s.allowed('crm.site_visit.manage');
   const canNote=s.allowed('crm.activity.create');
   const canQuote=s.allowed('quotation.create','quotation');
   const canViewQuote=s.allowed('quotation.view','quotation');
@@ -186,6 +189,11 @@ export default async function LeadDetail({
 
         <div className="crm-history-main-grid">
           <div className="crm-history-main-left">
+            <LeadActivityScheduler leadId={id} leadName={l.name}
+              assignedTo={l.assigned_to||''} assignees={team}
+              defaultLocation={l.location||''}
+              canFollowUp={canFollowUp&&l.lifecycle==='open'}
+              canVisit={canVisit&&l.lifecycle==='open'}/>
             {canNote&&l.lifecycle!=='archived'&&(
               <LeadUpdateComposer leadId={id} leadName={l.name} canFollowUp={canFollowUp} inline/>
             )}
