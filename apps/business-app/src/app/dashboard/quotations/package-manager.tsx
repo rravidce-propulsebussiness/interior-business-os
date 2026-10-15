@@ -1,9 +1,9 @@
 'use client';
 
-import { useActionState, useEffect, useRef, useState } from 'react';
+import { useActionState, useEffect, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import type { QuotationPackage } from '@business-os/database/quotation-packages';
-import { saveQuotationPackage } from './package-actions';
+import { saveQuotationPackage, duplicateQuotationPackage, deleteQuotationPackage } from './package-actions';
 
 type Industry = { key: string; name: string };
 const field =
@@ -192,6 +192,22 @@ export function QuotationPackagesManager({
 }) {
   const [editing, setEditing] = useState<string | null>(null);
   const [selectedIndustry, setSelectedIndustry] = useState('all');
+  const [pending, startTransition] = useTransition();
+  const router = useRouter();
+  const [message, setMessage] = useState('');
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  function run(task: () => Promise<{ ok: boolean; message: string }>) {
+    setMessage('');
+    startTransition(async () => {
+      const result = await task();
+      setMessage(result.message);
+      if (result.ok) {
+        setConfirmDelete(null);
+        setEditing(null);
+        router.refresh();
+      }
+    });
+  }
   const visible = packages.filter(
     (item) =>
       selectedIndustry === 'all' || item.industryKey === selectedIndustry,
@@ -222,6 +238,7 @@ export function QuotationPackagesManager({
           </button>
         )}
       </div>
+      {message && <p role="status" className="mt-4 rounded-xl bg-slate-50 p-4 text-sm text-slate-700">{message}</p>}
       <div className="mt-5 flex flex-wrap items-center gap-3">
         <label
           className="text-xs font-semibold text-slate-600"
@@ -291,13 +308,33 @@ export function QuotationPackagesManager({
               {item.description || 'No scope specified yet.'}
             </p>
             {canManage && (
-              <button
-                type="button"
-                onClick={() => setEditing(editing === item.id ? null : item.id)}
-                className="mt-4 rounded-xl border border-blue-200 bg-white px-4 py-2 text-xs font-bold text-blue-700"
-              >
-                Edit package
-              </button>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <button type="button"
+                  onClick={() => setEditing(editing === item.id ? null : item.id)}
+                  className="rounded-xl bg-orange-600 px-4 py-2 text-xs font-bold text-white">
+                  Edit
+                </button>
+                <button type="button" disabled={pending}
+                  onClick={() => run(() => duplicateQuotationPackage(item.id))}
+                  className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-slate-700 disabled:opacity-50">
+                  Duplicate
+                </button>
+                <button type="button" onClick={() => setConfirmDelete(item.id)}
+                  className="rounded-xl border border-red-200 px-4 py-2 text-xs font-bold text-red-700">
+                  Delete
+                </button>
+              </div>
+            )}
+            {canManage && confirmDelete === item.id && (
+              <div className="mt-3 rounded-xl border border-red-200 bg-red-50 p-3">
+                <p className="text-xs font-bold text-red-900">Delete {item.name}? Issued quotations will remain unchanged.</p>
+                <div className="mt-3 flex gap-2">
+                  <button type="button" disabled={pending} onClick={() => run(() => deleteQuotationPackage(item.id, item.version))}
+                    className="rounded-lg bg-red-700 px-3 py-2 text-xs font-bold text-white disabled:opacity-50">Confirm delete</button>
+                  <button type="button" onClick={() => setConfirmDelete(null)}
+                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs">Cancel</button>
+                </div>
+              </div>
             )}
             {canManage && editing === item.id && (
               <Editor
