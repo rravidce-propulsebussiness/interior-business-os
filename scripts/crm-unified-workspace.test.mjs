@@ -237,3 +237,40 @@ test('invited clients can open only explicitly granted project records', () => {
   assert.match(projectPage, /'\/client\/login\?project=' \+ id/);
   assert.match(home, /if \(projects\.length === 1\) redirect/);
 });
+
+
+test('client timeline uses only the invited project’s canonical workflow', () => {
+  const migration = readFileSync(
+    fileURLToPath(new URL(
+      '../packages/database/supabase/migrations/20261015000900_client_portal_timeline.sql',
+      import.meta.url,
+    )),
+    'utf8',
+  );
+  const project = readFileSync(
+    fileURLToPath(new URL(
+      '../apps/business-app/src/app/client/projects/[id]/page.tsx',
+      import.meta.url,
+    )),
+    'utf8',
+  );
+  const timeline = readFileSync(
+    fileURLToPath(new URL(
+      '../apps/business-app/src/app/client/project-timeline.tsx',
+      import.meta.url,
+    )),
+    'utf8',
+  );
+
+  assert.match(migration, /private\.client_portal_accessible\(p_project_id\)/);
+  assert.match(migration, /where p\.id=p_project_id/);
+  assert.match(migration, /s\.organization_id=p\.organization_id and s\.project_id=p\.id/);
+  assert.match(migration, /private\.project_stage_owner_overrides/);
+  assert.match(migration, /private\.construction_stage_clearances/);
+  assert.match(migration, /revoke all on function public\.client_portal_timeline\(uuid\) from public, anon/);
+  assert.doesNotMatch(migration, /public\.payments|private\.project_advance_requirements|public\.invoices/);
+  assert.match(project, /rpc\('client_portal_timeline', \{ p_project_id: id \}\)/);
+  assert.match(project, /<ClientProjectTimeline stages=\{timeline\}/);
+  assert.match(timeline, /Work timeline/);
+  assert.match(timeline, /completed_at/);
+});
