@@ -42,9 +42,10 @@ export async function ContractHandoff({ revisionId }: { revisionId: string }) {
     <section className="my-5 rounded border p-4">
       <h2 className="text-xl">Quotation accepted — prepare agreement</h2>
       <p className="mt-2 text-sm text-slate-600">
-        Your accepted floor-wise quotation is the source for the planned
-        construction stages, floor areas and specifications. Creating the
-        agreement also prepares that timeline automatically. Work cannot begin
+        Your accepted quotation supplies the project scope. Construction
+        stages follow quoted floors; interior stages follow the room-wise
+        BOQ, included trades, materials and specifications. Creating the
+        agreement prepares the corresponding timeline automatically. Work cannot begin
         until agreement and design approvals are recorded.
       </p>
       <FinanceForm
