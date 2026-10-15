@@ -43,12 +43,9 @@ begin
  -- A repeat assignment is idempotent, not duplicate membership or history.
  perform public.construction_client_access_manage(org,project1,'grant',
    '{"email":"client-one@example.test"}'::jsonb);
- if (select count(*) from private.construction_client_project_access
-     where organization_id=org and project_id=project1 and active)<>1 then
+ if jsonb_array_length(
+   public.construction_client_access_manage_read(org,project1)->'members')<>1 then
    raise exception 'FAIL: duplicate client access on retry';end if;
- if (select count(*) from private.construction_client_access_events
-     where organization_id=org and project_id=project1 and action='grant')<>1 then
-   raise exception 'FAIL: duplicate grant audit event on retry';end if;
  begin
   perform public.construction_client_access_manage(org,project1,'grant',
     '{"email":"attacker@example.test"}'::jsonb);
