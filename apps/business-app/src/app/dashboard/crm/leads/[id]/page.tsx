@@ -189,7 +189,7 @@ export default async function LeadDetail({
             {canNote&&l.lifecycle!=='archived'&&(
               <LeadUpdateComposer leadId={id} leadName={l.name} canFollowUp={canFollowUp} inline/>
             )}
-            <section className="crm-history-quotes">
+            <section id="lead-quotations" className="crm-history-quotes">
               <div className="crm-history-quotes-head">
                 <h2>Quotations</h2>
                 {canQuote&&l.lifecycle!=='archived'&&
