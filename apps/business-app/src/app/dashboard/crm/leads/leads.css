@@ -2566,7 +2566,7 @@ body:has(.crm-leads-root) .crm-shared-navigation {
 .crm-quote-status {background:#f1f4fa;color:#5f6d85}
 .crm-quote-amount {display:block;font-size:13px;margin:6px 0;color:#162e50}
 .crm-quote-buttons {display:flex;align-items:center;gap:10px;margin-top:6px}
-.crm-quote-buttons button,.crm-quote-buttons a,.crm-quote-create {border:0;background:#edf4ff;color:#1461d5;font-size:11px;font-weight:750;padding:5px 8px;border-radius:7px;text-decoration:none}
+.crm-quote-buttons button,.crm-quote-buttons a {border:0;background:#edf4ff;color:#1461d5;font-size:11px;font-weight:750;padding:5px 8px;border-radius:7px;text-decoration:none}
 .crm-quote-buttons button:hover,.crm-quote-buttons a:hover {background:#dcecff}
 .crm-quote-dialog,.crm-update-dialog {
   box-sizing:border-box;margin:auto;border:1px solid #e4eaf5;border-radius:18px;
