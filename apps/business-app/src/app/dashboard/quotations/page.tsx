@@ -128,6 +128,7 @@ export default async function Quotations({
     viewStatus !== 'shared' || sharedIds.has(row.id),
   );
   const canCreate = s.allowed('quotation.create', 'quotation');
+  const canEdit = s.allowed('quotation.edit', 'quotation');
   const canRemove = s.allowed('quotation.delete', 'quotation');
   const values = quotes.filter((row) => sharedIds.has(row.id))
     .reduce((sum, row) => sum + (Number(row.amount) || 0), 0);
@@ -284,7 +285,7 @@ export default async function Quotations({
                         <Link href={preview} target="_blank" rel="noopener noreferrer"
                           aria-label={'Preview ' + (row.quotation_number || 'quotation')}
                           title="Preview quotation" className="qs-quote-icon-button">◉</Link>
-                        {row.status === 'draft' && <Link className="qs-quote-edit" href={editor + '?step=quote'}
+                        {row.status === 'draft' && canEdit && <Link className="qs-quote-edit" href={editor + '?step=quote'}
                           aria-label={'Edit ' + (row.quotation_number || 'quotation')}>✎ Edit</Link>}
                         <Link href={editor + '?step=preview'}
                           aria-label={'Review and share ' + (row.quotation_number || 'quotation')}
@@ -330,7 +331,7 @@ export default async function Quotations({
                   </div>
                   <div className="qs-quotes-mobile-actions">
                     <Link href={preview} target="_blank" rel="noopener noreferrer">◉ View</Link>
-                    {row.status === 'draft'
+                    {row.status === 'draft' && canEdit
                       ? <Link className="qs-quote-edit" href={editor + '?step=quote'}>✎ Edit</Link>
                       : <Link href={editor}>Open</Link>}
                     <Link href={editor + '?step=preview'}>➤ Share</Link>
