@@ -43,4 +43,27 @@ begin
 end $fn$;
 revoke all on function public.lead_quotation_summary(uuid,uuid[]) from public,anon;
 grant execute on function public.lead_quotation_summary(uuid,uuid[]) to authenticated;
+create or replace function public.quotation_shared_revisions(
+  p_organization_id uuid, p_revision_ids uuid[]
+) returns uuid[] language plpgsql stable security definer set search_path='' as $shared$
+declare ids uuid[];
+begin
+  if not private.commercial_access(p_organization_id,'quotation.view','quotation')
+     or not coalesce(private.has_permission(p_organization_id,'quotation.view'), false)
+  then raise exception 'Forbidden' using errcode='42501';end if;
+  if coalesce(array_length(p_revision_ids,1),0)>100 then
+    raise exception 'Too many quotations' using errcode='22023';
+  end if;
+  select coalesce(array_agg(distinct sh.revision_id),'{}'::uuid[]) into ids
+  from public.quotation_share_links sh
+  join public.quotation_revisions r on
+    r.id=sh.revision_id and r.organization_id=sh.organization_id
+  where sh.organization_id=p_organization_id
+    and sh.revision_id=any(p_revision_ids)
+    and sh.revoked_at is null
+    and (sh.expires_at is null or sh.expires_at>now());
+  return ids;
+end $shared$;
+revoke all on function public.quotation_shared_revisions(uuid,uuid[]) from public,anon;
+grant execute on function public.quotation_shared_revisions(uuid,uuid[]) to authenticated;
 commit;
