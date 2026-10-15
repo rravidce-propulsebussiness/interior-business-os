@@ -1,0 +1,54 @@
+name: One-time client project type regeneration
+on:
+  push:
+    branches:
+      - fix/client-single-project-invite-20261015
+    paths:
+      - .github/workflows/client-types-refresh.yml
+permissions:
+  contents: write
+jobs:
+  generate:
+    if: github.repository == 'rravidce-propulsebussiness/interior-business-os'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: business_os_test
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/client-single-project-invite-20261015
+          persist-credentials: true
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Generate from disposable canonical PostgreSQL
+        env:
+          TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:5432/business_os_test
+          ALLOW_TEST_DATABASE_RESET: 'yes'
+        run: |
+          pnpm db:verify
+          pnpm db:types
+      - name: Commit generated types only
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add packages/database/src/generated/database.types.ts
+          if ! git diff --cached --quiet; then
+            git commit -m "Regenerate canonical database types from migrated test schema"
+            git push origin HEAD:fix/client-single-project-invite-20261015
+          fi
