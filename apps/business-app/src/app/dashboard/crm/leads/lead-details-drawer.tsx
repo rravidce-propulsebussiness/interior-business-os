@@ -10,7 +10,7 @@ import { leadCategoryLabel } from './lead-category';
 
 export function LeadDetailsDrawer({
   lead, onClose, stages, lostReasons, assignees,
-  canManage, canWin, canFollowUp, canNote, canQuote,
+  canManage, canWin, canFollowUp, canVisit, canNote, canQuote,
 }: {
   lead: LeadView;
   onClose: () => void;
@@ -20,6 +20,7 @@ export function LeadDetailsDrawer({
   canManage: boolean;
   canWin: boolean;
   canFollowUp: boolean;
+  canVisit: boolean;
   canNote: boolean;
   canQuote: boolean;
 }) {
@@ -73,7 +74,8 @@ export function LeadDetailsDrawer({
           </div>
           <LeadActivityScheduler leadId={lead.id} leadName={lead.name}
             assignedTo={lead.assignedTo} assignees={assignees}
-            defaultLocation={lead.location} canSchedule={canFollowUp && lead.lifecycle === 'open'}/>
+            defaultLocation={lead.location} canFollowUp={canFollowUp && lead.lifecycle === 'open'}
+            canVisit={canVisit && lead.lifecycle === 'open'}/>
           {canNote && lead.lifecycle !== 'archived' &&
             <LeadUpdateComposer leadId={lead.id} leadName={lead.name} canFollowUp={canFollowUp}/>}
         </>}
