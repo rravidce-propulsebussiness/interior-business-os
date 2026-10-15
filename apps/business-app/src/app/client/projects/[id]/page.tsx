@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { z } from 'zod';
 import { createServerDatabase } from '@business-os/database/server';
-import { clientDesignDecision } from '../../actions';
+import { ClientDesignReview } from '../../client-design-review';
 
 export const dynamic = 'force-dynamic';
 
@@ -175,47 +175,7 @@ export default async function ClientProject({ params }: {
               )}
             </div>
             {project.stage==='design' && currentDesigns.length>0 && (
-              <div className="mt-6 space-y-4 border-t border-slate-200 pt-5">
-                <h3 className="font-bold">Review your designs</h3>
-                <p className="text-sm text-slate-600">
-                  Approve after checking the final drawings, or ask the designer for changes.
-                  Only technically checked drawings can be accepted.
-                </p>
-                <form action={clientDesignDecision} className="space-y-3">
-                  <input type="hidden" name="project" value={project.id}/>
-                  <input type="hidden" name="decision" value="approved"/>
-                  <input type="hidden" name="note" value="Approved final design revisions"/>
-                  <label className="flex items-start gap-2 text-sm">
-                    <input type="checkbox" name="acknowledged" required className="mt-1" />
-                    I have reviewed the latest drawings and agree to proceed.
-                  </label>
-                  <button className="min-h-11 w-full rounded-xl bg-blue-700 px-4 font-semibold text-white"
-                    type="submit">Approve designs</button>
-                </form>
-                {currentDesigns.some(item=>item.status==='approved') && (
-                  <form action={clientDesignDecision} className="space-y-3 rounded-xl bg-amber-50 p-4">
-                    <input type="hidden" name="project" value={project.id}/>
-                    <input type="hidden" name="decision" value="changes_requested"/>
-                    <label className="block text-sm font-semibold">
-                      Drawing to change
-                      <select name="kind" required className="mt-1 block w-full rounded-lg border border-slate-300 bg-white p-2">
-                        {currentDesigns.filter(item=>item.status==='approved').map(item=>(
-                          <option value={item.kind} key={item.kind}>{label(item.kind)}</option>
-                        ))}
-                      </select>
-                    </label>
-                    <label className="block text-sm font-semibold">
-                      What needs to change?
-                      <textarea name="note" required minLength={10} rows={3}
-                        className="mt-1 block w-full rounded-lg border border-slate-300 bg-white p-3"
-                        placeholder="Describe the changes you would like…" />
-                    </label>
-                    <button type="submit" className="min-h-11 w-full rounded-xl border border-amber-300 bg-white px-4 font-bold text-amber-900">
-                      Request design changes
-                    </button>
-                  </form>
-                )}
-              </div>
+              <ClientDesignReview projectId={project.id} drawings={currentDesigns} />
             )}
             {project.stage!=='design' && project.client_approved_at && (
               <p className="mt-5 rounded-xl bg-emerald-50 p-3 text-sm text-emerald-800">
