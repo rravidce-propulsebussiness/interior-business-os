@@ -6,7 +6,7 @@ import { randomUUID } from 'node:crypto';
 import { quotationCommandSchema } from '@business-os/core/commercial';
 import { safeFailure, DomainError } from '@business-os/shared';
 import { commercialServices } from '../commercial/service';
-import { contactMatches } from './customer-match';
+import { contactMatches, normalizedCustomerPhone } from './customer-match';
 
 const createInput = z
   .object({
@@ -65,9 +65,8 @@ export async function createStudioQuotation(input: unknown): Promise<{
         .maybeSingle();
       if (leadError || !lead)
         return { ok: false, message: 'The selected lead is not available.' };
-      const normalizePhone = (value: string) => value.replace(/\D/g, '');
       const samePhone = Boolean(lead.phone && values.phone &&
-        normalizePhone(lead.phone) === normalizePhone(values.phone));
+        normalizedCustomerPhone(lead.phone) === normalizedCustomerPhone(values.phone));
       const sameEmail = Boolean(lead.email && values.email &&
         lead.email.toLowerCase() === values.email.toLowerCase());
       if (!samePhone && !sameEmail)
