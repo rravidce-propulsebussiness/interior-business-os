@@ -207,7 +207,7 @@ begin
  select * into s from private.construction_project_stages
   where organization_id=p_org and project_id=p_project and id=p_stage for update;
  if s.id is null then raise exception 'Unknown project stage' using errcode='42501';end if;
- if s.template_code='QUOTED_SCOPE' then
+ if s.template_code like 'QUOTED_SCOPE%' then
    raise exception 'Accepted quoted scope cannot be edited; use change orders'
    using errcode='42501';end if;
  if exists(select 1 from private.construction_stage_tasks
