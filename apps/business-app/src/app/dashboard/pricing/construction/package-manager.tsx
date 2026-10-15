@@ -160,7 +160,7 @@ export function ConstructionPackagesManager({
         role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setEditing(null); }}>
         <div ref={dialogRef} tabIndex={-1} role="dialog" aria-modal="true"
           aria-label={selectedPackage ? 'Edit ' + selectedPackage.name : 'New construction package'}
-          className="mx-auto w-full max-w-5xl outline-none">
+          className="mx-auto w-full max-w-7xl outline-none">
           {editing === 'new' ? <PremiumPackageEditor key="new" close={() => setEditing(null)} /> :
             selectedPackage ? <PremiumPackageEditor key={selectedPackage.id + ':' + selectedPackage.version}
               item={selectedPackage} close={() => setEditing(null)} /> : null}
