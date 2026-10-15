@@ -3,18 +3,13 @@ import { catalogPage } from '../../catalog/access';
 import { pageServices } from '@business-os/auth/server';
 import { createConstructionRatesRepository } from '@business-os/database/construction-rates';
 import { ConstructionRatesManager } from './rates-manager';
-import { ConstructionPackagesManager } from './package-manager';
-import { createConstructionPackagesRepository } from '@business-os/database/construction-packages';
 
 export const dynamic = 'force-dynamic';
 
 export default async function ConstructionPricing() {
   const { org, canManagePrice } = await catalogPage(true);
   const { client } = await pageServices();
-  const [rates, packages] = await Promise.all([
-    createConstructionRatesRepository(client).list(org),
-    createConstructionPackagesRepository(client).list(org),
-  ]);
+  const rates = await createConstructionRatesRepository(client).list(org);
   return (
     <main
       id="main-content"
@@ -33,10 +28,16 @@ export default async function ConstructionPricing() {
           Open quotations →
         </Link>
       </nav>
-      <ConstructionPackagesManager
-        packages={packages}
-        canManage={canManagePrice}
-      />
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-orange-200 bg-orange-50 p-4">
+        <div>
+          <h2 className="text-base font-bold text-slate-900">Construction packages</h2>
+          <p className="mt-1 text-xs text-slate-600">All package editing and PDF previews now live in one Package Studio.</p>
+        </div>
+        <Link href="/dashboard/quotations/packages"
+          className="rounded-xl bg-orange-600 px-4 py-3 text-sm font-bold text-white">
+          Open Package Studio →
+        </Link>
+      </div>
       <ConstructionRatesManager rates={rates} canManage={canManagePrice} />
     </main>
   );
