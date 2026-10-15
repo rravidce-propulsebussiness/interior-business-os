@@ -24,7 +24,7 @@ function niceDate(value: string | null) {
 
 function statusName(value: string) {
   switch (value) {
-    case 'issued': return 'Issued';
+    case 'issued': return 'Shared';
     case 'draft': return 'Draft';
     case 'superseded': return 'Superseded';
     case 'cancelled': return 'Cancelled';
@@ -47,9 +47,7 @@ function currencyValue(currency: string, amount: string | null | undefined) {
 const statusTabs = [
   { label: 'All', status: '' },
   { label: 'Draft', status: 'draft' },
-  { label: 'Issued', status: 'issued' },
-  { label: 'Superseded', status: 'superseded' },
-  { label: 'Cancelled', status: 'cancelled' },
+  { label: 'Shared', status: 'shared' },
 ] as const;
 
 export default async function Quotations({
@@ -58,10 +56,11 @@ export default async function Quotations({
   searchParams: Promise<{ q?: string; page?: string; status?: string }>;
 }) {
   const p = await searchParams;
+  const viewStatus = p.status === 'draft' || p.status === 'shared' ? p.status : '';
   const filter = searchSchema.parse({
     query: p.q ?? '',
     page: Math.min(10000, Math.max(1, Number.parseInt(p.page || '1', 10) || 1)),
-    status: p.status ?? '',
+    status: viewStatus === 'shared' ? 'issued' : viewStatus,
     parent_id: null,
   });
   const s = await commercialServices('quotation.view', 'quotation', true);
@@ -72,7 +71,8 @@ export default async function Quotations({
   ]);
   if (!organization) throw new Error('Company workspace unavailable');
   const data = commercialSearchResultSchema.parse(result);
-  const rows = data.rows.filter((row) => Boolean(filter.status) || row.status !== 'cancelled');
+  // Superseded and cancelled revisions remain in history, not the everyday list.
+  const rows = data.rows.filter((row) => row.status === 'draft' || row.status === 'issued');
 
   // The commercial search returns revisions. Show a single latest revision per
   // quotation in the list, not a second customer/CRN list with repeated cards.
@@ -86,7 +86,7 @@ export default async function Quotations({
     : { data: [] };
   const revisions = new Map((revisionLinks ?? []).map((row) => [row.id, row]));
   const projectIds = [...new Set((revisionLinks ?? []).map((row) => row.project_id))];
-  const [{ data: projectIndustries }, industryList, countResponse] =
+  const [{ data: projectIndustries }, industryList, countResponse, shareResponse] =
     await Promise.all([
       projectIds.length
         ? s.client.from('projects')
@@ -98,7 +98,18 @@ export default async function Quotations({
       s.client.from('quotations')
         .select('id', { count: 'exact', head: true })
         .eq('organization_id', s.org),
+      revisionIds.length
+        ? s.client.from('quotation_share_links')
+          .select('revision_id,revoked_at,expires_at')
+          .eq('organization_id', s.org)
+          .in('revision_id', revisionIds)
+        : Promise.resolve({ data: [] }),
     ]);
+  const now = Date.now();
+  const sharedIds = new Set((shareResponse.data ?? [])
+    .filter((link) => !link.revoked_at &&
+      (!link.expires_at || Date.parse(link.expires_at) > now))
+    .map((link) => link.revision_id));
   const projectById = new Map((projectIndustries ?? []).map((row) => [row.id, row]));
   const industryById = new Map(industryList.map((industry) => [industry.id, industry.name]));
 
@@ -110,12 +121,14 @@ export default async function Quotations({
     if (!current || (row.revision_number ?? 0) > (current.revision_number ?? 0))
       latestByQuote.set(parentId, row);
   }
-  const quotes = [...latestByQuote.values()];
+  const quotes = [...latestByQuote.values()].filter((row) =>
+    viewStatus !== 'shared' || sharedIds.has(row.id),
+  );
   const canCreate = s.allowed('quotation.create', 'quotation');
   const canRemove = s.allowed('quotation.delete', 'quotation');
-  const values = quotes.filter((row) => row.status === 'issued')
+  const values = quotes.filter((row) => sharedIds.has(row.id))
     .reduce((sum, row) => sum + (Number(row.amount) || 0), 0);
-  const searchUrl = (status = filter.status, page = 1) => {
+  const searchUrl = (status = viewStatus, page = 1) => {
     const query = new URLSearchParams();
     if (filter.query) query.set('q', filter.query);
     if (status) query.set('status', status);
@@ -140,16 +153,16 @@ export default async function Quotations({
       tone: 'purple',
     },
     {
-      label: 'Issued',
-      value: quotes.filter((row) => row.status === 'issued').length.toLocaleString('en-IN'),
+      label: 'Shared',
+      value: quotes.filter((row) => sharedIds.has(row.id)).length.toLocaleString('en-IN'),
       note: 'On this page',
       icon: '➤',
       tone: 'green',
     },
     {
-      label: 'Issued Value',
+      label: 'Shared Value',
       value: currencyValue(organization.default_currency || 'INR', String(values)),
-      note: 'Issued quotations on this page',
+      note: 'Shared quotations on this page',
       icon: '₹',
       tone: 'blue',
     },
@@ -166,7 +179,7 @@ export default async function Quotations({
       revision,
       industry: industry || 'Not specified',
       createdAt: revision?.created_at ?? null,
-      preview, editor,
+      preview, editor, shared: sharedIds.has(row.id),
     };
   };
   const visible = quotes.map(quoteItem);
@@ -201,7 +214,7 @@ export default async function Quotations({
         <section className="qs-quotes-list" aria-label="Saved quotations">
           <nav className="qs-quotes-tabs" aria-label="Quotation status">
             {statusTabs.map((tab) => <Link key={tab.status}
-              className={filter.status === tab.status ? 'qs-quotes-tab qs-quotes-tab-active' : 'qs-quotes-tab'}
+              className={viewStatus === tab.status ? 'qs-quotes-tab qs-quotes-tab-active' : 'qs-quotes-tab'}
               href={searchUrl(tab.status)}>
               {tab.label}
             </Link>)}
@@ -215,16 +228,14 @@ export default async function Quotations({
             </label>
             <label className="qs-quotes-status-filter">
               <span className="sr-only">Quotation status</span>
-              <select name="status" defaultValue={filter.status}>
-                <option value="">All statuses</option>
+              <select name="status" defaultValue={viewStatus}>
+                <option value="">All quotations</option>
                 <option value="draft">Draft</option>
-                <option value="issued">Issued</option>
-                <option value="superseded">Superseded</option>
-                <option value="cancelled">Cancelled</option>
+                <option value="shared">Shared</option>
               </select>
             </label>
             <button type="submit" className="qs-quotes-apply">Filter</button>
-            {(filter.query || filter.status) && <Link className="qs-quotes-clear" href="/dashboard/quotations">
+            {(filter.query || viewStatus) && <Link className="qs-quotes-clear" href="/dashboard/quotations">
               Clear
             </Link>}
           </form>
@@ -241,7 +252,7 @@ export default async function Quotations({
                   <th>Created</th>
                   <th>Actions</th>
                 </tr></thead>
-                <tbody>{visible.map(({ row, revision, industry, createdAt, preview, editor }) => (
+                <tbody>{visible.map(({ row, revision, industry, createdAt, preview, editor, shared }) => (
                   <tr key={row.id}>
                     <td className="qs-quotes-no">
                       <Link href={editor}>{row.quotation_number || 'Quotation'}</Link>
@@ -263,13 +274,15 @@ export default async function Quotations({
                     </span></td>
                     <td className="qs-quotes-amount">{currencyValue(
                       row.currency || organization.default_currency || 'INR', row.amount)}</td>
-                    <td><span className={'qs-quotes-state qs-state-' + row.status}>{statusName(row.status)}</span></td>
+                    <td><span className={'qs-quotes-state qs-state-' + (shared ? 'shared' : row.status)}>{row.status === 'issued' && !shared ? 'Ready to share' : statusName(row.status)}</span></td>
                     <td className="qs-quotes-created">{niceDate(createdAt)}</td>
                     <td>
                       <div className="qs-quotes-actions">
                         <Link href={preview} target="_blank" rel="noopener noreferrer"
                           aria-label={'Preview ' + (row.quotation_number || 'quotation')}
                           title="Preview quotation" className="qs-quote-icon-button">◉</Link>
+                        {row.status === 'draft' && <Link className="qs-quote-edit" href={editor + '?step=items'}
+                          aria-label={'Edit ' + (row.quotation_number || 'quotation')}>✎ Edit</Link>}
                         <Link href={editor + '?step=preview'}
                           aria-label={'Review and share ' + (row.quotation_number || 'quotation')}
                           title="Review and share in Quotation Studio" className="qs-quote-icon-button">➤</Link>
@@ -295,11 +308,11 @@ export default async function Quotations({
               </table>
             </div>
             <div className="qs-quotes-mobile-list">
-              {visible.map(({ row, revision, industry, createdAt, preview, editor }) => (
+              {visible.map(({ row, revision, industry, createdAt, preview, editor, shared }) => (
                 <article className="qs-quotes-mobile-card" key={row.id}>
                   <div className="qs-quotes-mobile-top">
                     <Link href={editor}>{row.quotation_number || 'Quotation'}</Link>
-                    <span className={'qs-quotes-state qs-state-' + row.status}>{statusName(row.status)}</span>
+                    <span className={'qs-quotes-state qs-state-' + (shared ? 'shared' : row.status)}>{row.status === 'issued' && !shared ? 'Ready to share' : statusName(row.status)}</span>
                   </div>
                   <div className="qs-quotes-mobile-person">
                     <span className="qs-quotes-initials">{initials(row.customer_name || 'Customer')}</span>
@@ -314,6 +327,9 @@ export default async function Quotations({
                   </div>
                   <div className="qs-quotes-mobile-actions">
                     <Link href={preview} target="_blank" rel="noopener noreferrer">◉ View</Link>
+                    {row.status === 'draft'
+                      ? <Link className="qs-quote-edit" href={editor + '?step=items'}>✎ Edit</Link>
+                      : <Link href={editor}>Open</Link>}
                     <Link href={editor + '?step=preview'}>➤ Share</Link>
                     <details className="qs-quotes-mobile-more">
                       <summary>••• More</summary>
@@ -334,8 +350,8 @@ export default async function Quotations({
             </div>
           </> : <div className="qs-quotes-empty">
             <span aria-hidden="true">▤</span>
-            <h2>{filter.query || filter.status ? 'No matching quotations' : 'No quotations yet'}</h2>
-            <p>{filter.query || filter.status
+            <h2>{filter.query || viewStatus ? 'No matching quotations' : 'No quotations yet'}</h2>
+            <p>{filter.query || viewStatus
               ? 'Try another search or status.'
               : 'Your saved quotations will appear here after creation.'}</p>
             {canCreate && <Link className="qs-quotes-create" href="/dashboard/quotations/new">
