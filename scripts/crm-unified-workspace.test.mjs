@@ -176,6 +176,27 @@ test('Leads listing has one preview drawer and keeps canonical history, without 
   assert.match(leads, /<LeadUpdateComposer/);
 });
 
+test('mobile lead quotation is one full-width field, and Priority uses the Stage control', () => {
+  const controls = readFileSync(
+    fileURLToPath(new URL('lead-inline-controls.tsx', root)),
+    'utf8',
+  );
+  const styles = readFileSync(
+    fileURLToPath(new URL('leads-premium.css', root)),
+    'utf8',
+  );
+  assert.match(leads, /className="crm-mobile-quotation"/);
+  assert.match(leads, /gridColumn: '1 \/ -1'/);
+  assert.match(leads, /aria-label=\{'Prepare quotation for ' \+ lead\.name\}/);
+  assert.match(leads, /minHeight: 46/);
+  assert.match(leads, /width: '100%'/);
+  assert.match(styles, /\.crm-leads-root \.crm-mobile-quotation \.crm-quote-create/);
+  assert.match(controls, /export function LeadPrioritySelect/);
+  assert.match(controls, /className="crm-inline-field"/);
+  assert.doesNotMatch(controls, /className="crm-inline-priority"/);
+  assert.doesNotMatch(controls, /className=\{'crm-premium-priority-select/);
+});
+
 test('legacy CRM overview and commercial response pages redirect to their canonical workspaces', () => {
   const crmPage = readFileSync(
     fileURLToPath(new URL('../page.tsx', root)),
