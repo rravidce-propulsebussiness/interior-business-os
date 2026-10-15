@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import './client-dashboard.css';
 import type { ReactNode } from 'react';
 
 export const metadata: Metadata = {
