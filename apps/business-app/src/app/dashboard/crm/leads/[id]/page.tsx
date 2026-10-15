@@ -46,8 +46,8 @@ export default async function LeadDetail({
     await Promise.all([
       lookups(s,p),
       s.crm.search('lead_activities',{lead_id:id},pageNumber(p.page)),
-      s.crm.search('lead_followups',{lead_id:id},1),
-      s.crm.search('site_visits',{lead_id:id},1),
+      s.crm.search('lead_followups',{lead_id:id},1).catch(()=>({rows:[],total:0,page:1})),
+      s.crm.search('site_visits',{lead_id:id},1).catch(()=>({rows:[],total:0,page:1})),
       s.repository.organization(s.org),
       s.authorization.requireAuthenticatedUser(),
       s.repository.plans().catch(()=>null),
