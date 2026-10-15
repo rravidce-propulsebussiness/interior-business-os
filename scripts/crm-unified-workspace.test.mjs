@@ -453,3 +453,31 @@ test('filtered Leads bulk editing uses real company permissions and versioned co
   assert.match(toolbar, /fewest assignments among the leads on this page/);
   assert.match(toolbar, /window\.confirm/);
 });
+
+test('one lead supports multiple package quotations and previews newest, with simple staff statuses', () => {
+  const appRoot = new URL('../apps/business-app/src/app/dashboard/', import.meta.url);
+  const quoteList = readFileSync(fileURLToPath(new URL('quotations/page.tsx', appRoot)), 'utf8');
+  const createQuote = readFileSync(fileURLToPath(new URL('quotations/studio-actions.ts', appRoot)), 'utf8');
+  const leadPage = readFileSync(fileURLToPath(new URL('crm/leads/page.tsx', appRoot)), 'utf8');
+  const summarySql = readFileSync(
+    fileURLToPath(new URL('../packages/database/supabase/migrations/20261016000200_lead_latest_quote.sql', import.meta.url)),
+    'utf8',
+  );
+
+  assert.doesNotMatch(createQuote, /Opening the existing project quotation/);
+  assert.doesNotMatch(createQuote, /existingQuotes\?\.\[0\]/);
+  assert.match(createQuote, /action: 'create'/);
+  assert.match(createQuote, /await attachLead\(newRevision\.quotation_id\)/);
+  assert.match(leads, /\+ New quotation/);
+  assert.match(leads, /\+ New quote/);
+  assert.match(leadPage, /lead_quotation_summary/);
+  assert.match(summarySql, /order by l\.created_at desc,q\.created_at desc/);
+  assert.match(summarySql, /quotation_shared_revisions/);
+  assert.match(quoteList, /\{ label: 'Shared', status: 'shared' \}/);
+  assert.match(quoteList, /\{ label: 'Draft', status: 'draft' \}/);
+  assert.doesNotMatch(quoteList, /\{ label: 'Superseded', status:/);
+  assert.doesNotMatch(quoteList, /\{ label: 'Cancelled', status:/);
+  assert.match(quoteList, /qs-quote-edit/);
+  assert.match(quoteList, /\?step=quote/);
+  assert.match(quoteList, /Ready to share/);
+});
