@@ -186,7 +186,8 @@ export function ConstructionPlanningPanel({
                 </button>
               )}
             </div>
-          </div> : (
+          </div>
+        ) : (
           <>
             <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3">
               <div className="rounded-xl border border-slate-200 p-4">
