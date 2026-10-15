@@ -105,7 +105,7 @@ begin
  then raise exception 'Only an accepted issued quotation can create stages'
       using errcode='42501';end if;
  select i.key into v_industry from public.industries i where i.id=p.industry_id;
- if v_industry not in ('interior','construction')
+ if v_industry is null or v_industry not in ('interior','construction')
    or p_input->>'industry' is distinct from v_industry
    or p_input->'template'->>'industry' is distinct from v_industry
  then raise exception 'Quote industry differs from project industry'
