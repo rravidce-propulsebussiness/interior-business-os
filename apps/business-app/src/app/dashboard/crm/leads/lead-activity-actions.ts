@@ -26,7 +26,7 @@ export async function scheduleLeadActivity(input: unknown): Promise<Result> {
       return { ok: false, message: 'Choose a future date and time.' };
     if (value.kind !== 'call' && !value.location)
       return { ok: false, message: 'Enter the visit location.' };
-    const s = await crmServices('crm.followup.manage');
+    const s = await crmServices(value.kind === 'site_visit' ? 'crm.site_visit.manage' : 'crm.followup.manage');
     const { data: lead, error } = await s.client.from('leads')
       .select('id,lifecycle,assigned_to')
       .eq('organization_id', s.org).eq('id', value.leadId).maybeSingle();
@@ -89,7 +89,7 @@ export async function completeLeadActivity(input: unknown): Promise<Result> {
     const value = updateSchema.parse(input);
     if (value.status === 'completed' && !value.outcome)
       return { ok: false, message: 'Record the result before marking complete.' };
-    const s = await crmServices('crm.followup.manage');
+    const s = await crmServices(value.kind === 'visit' ? 'crm.site_visit.manage' : 'crm.followup.manage');
     if (value.kind === 'visit') {
       await s.crm.command('visit', {
         id: value.id, version: value.version, status: value.status,
