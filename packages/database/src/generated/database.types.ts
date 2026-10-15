@@ -10898,7 +10898,10 @@ export interface Database {
         Args: { p_org: string; p_project: string };
         Returns: Json;
       };
-      construction_client_projects: { Args: Record<string, never>; Returns: Json };
+      construction_client_projects: {
+        Args: Record<string, never>;
+        Returns: Json;
+      };
       construction_client_view: { Args: { p_token: string }; Returns: Json };
       construction_field_command: {
         Args: {
