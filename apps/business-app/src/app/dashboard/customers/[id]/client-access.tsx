@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useTransition } from 'react';
+import { useState, useSyncExternalStore, useTransition } from 'react';
 import { setClientProjectAccess } from './client-access-actions';
 
 type Access = {
@@ -28,8 +28,13 @@ export function ClientAccess({
   const [pending, start] = useTransition();
   const [message, setMessage] = useState('');
   const [access, setAccess] = useState(existing);
-  const [appOrigin, setAppOrigin] = useState('https://sghomesinterior.in');
-  useEffect(() => { setAppOrigin(window.location.origin); }, []);
+  // Client-side origin supports each company's future custom domain without
+  // using a browser global during server rendering or causing hydration drift.
+  const appOrigin = useSyncExternalStore(
+    () => () => {},
+    () => window.location.origin,
+    () => 'https://sghomesinterior.in',
+  );
   const portalUrl = projectId ? '/client/projects/' + projectId : '/client/login';
 
   function update(active: boolean, targetProject: string, targetEmail: string) {
