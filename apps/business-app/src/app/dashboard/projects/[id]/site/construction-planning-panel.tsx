@@ -68,12 +68,28 @@ const roles = [
   ['contractor', 'Contractor / Subcontractor'],
 ] as const;
 const constructionPhases = [
-  'preconstruction','design','site_preparation','foundation','plinth',
-  'superstructure','masonry','finishes','handover',
+  'preconstruction',
+  'design',
+  'site_preparation',
+  'foundation',
+  'plinth',
+  'superstructure',
+  'masonry',
+  'finishes',
+  'handover',
 ] as const;
 const interiorPhases = [
-  'preconstruction','survey','design','procurement','civil','services',
-  'fabrication','installation','finishes','quality','handover',
+  'preconstruction',
+  'survey',
+  'design',
+  'procurement',
+  'civil',
+  'services',
+  'fabrication',
+  'installation',
+  'finishes',
+  'quality',
+  'handover',
 ] as const;
 const phaseTitles: Record<string, string> = {
   survey: 'Site measurement & survey',
@@ -120,7 +136,8 @@ export function ConstructionPlanningPanel({
   const managers = data.can_manage;
   const phases: readonly string[] =
     data.workflow?.template_code === 'INTERIOR_QUOTE'
-      ? interiorPhases : constructionPhases;
+      ? interiorPhases
+      : constructionPhases;
   const activeRoles = data.roles.filter((role) => role.active);
   const nameById = new Map(
     memberOptions.map((member) => [member.id, member.label]),
@@ -150,9 +167,9 @@ export function ConstructionPlanningPanel({
                 : 'Construction stages from accepted quotation'}
             </h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-              Quote-derived project planning. Physical progress,
-              mandatory inspections and payments remain controlled by the
-              existing Operations, Contract and Billing systems.
+              Quote-derived project planning. Physical progress, mandatory
+              inspections and payments remain controlled by the existing
+              Operations, Contract and Billing systems.
             </p>
           </div>
           {data.workflow && (
@@ -219,7 +236,8 @@ export function ConstructionPlanningPanel({
               <div className="rounded-xl border border-slate-200 p-4">
                 <p className="text-xs font-semibold text-slate-500">
                   {data.workflow.template_code === 'INTERIOR_QUOTE'
-                    ? 'Rooms / areas' : 'Floors / levels'}
+                    ? 'Rooms / areas'
+                    : 'Floors / levels'}
                 </p>
                 <p className="mt-1 text-2xl font-bold text-slate-900">
                   {data.workflow.floor_snapshot.length}
@@ -288,7 +306,10 @@ export function ConstructionPlanningPanel({
                             </p>
                           )}
                           {canOwnerEdit && (
-                            <OwnerStageEditor projectId={projectId} stage={stage} />
+                            <OwnerStageEditor
+                              projectId={projectId}
+                              stage={stage}
+                            />
                           )}
                           <details className="mt-3 text-sm text-slate-700">
                             <summary className="cursor-pointer font-semibold text-blue-800">
