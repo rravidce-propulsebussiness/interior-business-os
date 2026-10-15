@@ -37,33 +37,7 @@ begin
         or (k='property_type' and value_text not in ('apartment','villa','independent_house','office','commercial_space'))
         or (k='interior_scope' and value_text not in ('end_to_end','selected_work'))
         or (k in ('plot_area_sq_yards','built_up_area_sq_ft')
-            and (value_text !~ '^[0-9]+([.][0-9]{1,2})?
-                 or length(value_text)>15))
-      then
-        raise exception 'Invalid requirement answer' using errcode='22023';
-      end if;
-    elsif (f.field_type='text' and (jsonb_typeof(v)<>'string' or length(v#>>'{}')>2000))
-       or (f.field_type='number' and jsonb_typeof(v)<>'number')
-       or (f.field_type='boolean' and jsonb_typeof(v)<>'boolean')
-       or (f.field_type='select' and not f.options @> jsonb_build_array(v))
-    then
-      raise exception 'Invalid requirement answer' using errcode='22023';
-    end if;
-  end loop;
-  if exists(
-    select 1 from public.crm_requirement_fields
-    where organization_id=org and active and required
-      and (industry_id is null or industry_id=industry)
-      and (not answers ? key or answers->key='null'::jsonb or answers->>key='')
-  ) then
-    raise exception 'Required answer missing' using errcode='22023';
-  end if;
-end;
-$crm_requirements$;
-revoke all on function private.crm_requirements(uuid,uuid,jsonb)
-  from public,anon,authenticated;
-commit;
-
+            and (value_text !~ '^[0-9]+([.][0-9]{1,2})?$'
                  or length(value_text)>15))
       then
         raise exception 'Invalid requirement answer' using errcode='22023';
