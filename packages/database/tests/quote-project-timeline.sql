@@ -57,10 +57,12 @@ begin
  -- must not be accepted before validation of the request's stage contents.
  if again->>'workflow_id' is null or not (again->>'already_created')::boolean
  then raise exception 'Repeated handoff did not reuse original workflow';end if;
- select id into stage from private.construction_project_stages
-  where project_id=project and template_code='INTERIOR_SAMPLE';
- select id into quoted_scope from private.construction_project_stages
-  where project_id=project and template_code='QUOTED_SCOPE';
+ select (entry->>'id')::uuid into stage
+ from jsonb_array_elements(public.construction_project_read(org,project)->'stages') entry
+ where entry->>'template_code'='INTERIOR_SAMPLE';
+ select (entry->>'id')::uuid into quoted_scope
+ from jsonb_array_elements(public.construction_project_read(org,project)->'stages') entry
+ where entry->>'template_code'='QUOTED_SCOPE';
  edit=public.project_stage_owner_edit(org,project,stage,0,jsonb_build_object(
     'title','Updated joinery site plan',
     'explanation','Edited only for execution sequencing',
@@ -69,9 +71,7 @@ begin
  if (edit->>'version')::integer<>1 then raise exception 'Owner edit not versioned';end if;
  if jsonb_array_length(public.project_stage_owner_read(org,project)->'overrides')<>1
  then raise exception 'Updated stage not projected to timeline';end if;
- if (select count(*) from private.project_stage_owner_history
-    where organization_id=org and project_id=project)<>1
- then raise exception 'Owner edit not audited';end if;
+
  begin
   perform public.project_stage_owner_edit(org,project,quoted_scope,0,jsonb_build_object(
     'title','Altered contracted price','explanation','','activities',
@@ -81,4 +81,15 @@ begin
  exception when insufficient_privilege then null;end;
  raise notice 'PASS: accepted quote yields idempotent stage plan, owner edit audited, scope frozen';
 end$quoted_plan$;
+reset role;
+do $history$
+declare
+  org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
+  project uuid;
+begin
+ select id into project from public.projects where organization_id=org and code='demo-3bhk';
+ if (select count(*) from private.project_stage_owner_history
+       where organization_id=org and project_id=project)<>1
+ then raise exception 'Owner edit not audited';end if;
+end$history$;
 rollback;
