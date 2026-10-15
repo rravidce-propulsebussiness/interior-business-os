@@ -1,4 +1,5 @@
 import type { OwnerNavItem } from '../owner-shell';
+import { leadsNavigation } from '../leads-navigation';
 
 /** Keep the Projects list and each detail page on the same permission-filtered menu. */
 export function projectWorkspaceNavigation(
@@ -8,17 +9,12 @@ export function projectWorkspaceNavigation(
     { label: 'Dashboard', href: '/dashboard', icon: 'dashboard' },
   ];
   if (has('lead.view', 'crm'))
-    navigation.push({
-      label: 'Leads',
-      href: '/dashboard/crm/leads',
-      icon: 'leads',
-    });
-  if (has('lead.view', 'crm'))
-    navigation.push({
-      label: 'Follow-ups',
-      href: '/dashboard/crm/followups',
-      icon: 'calendar',
-    });
+    navigation.push(
+      leadsNavigation({
+        canCreate: has('lead.create', 'crm'),
+        canManage: has('crm.pipeline.manage'),
+      }),
+    );
   if (has('quotation.view', 'quotation'))
     navigation.push({
       label: 'Quotations',

@@ -4,6 +4,7 @@ import { emptyAddress } from '@business-os/core/commercial';
 import { canAccess } from '@business-os/auth';
 import { OwnerIcon, OwnerShell } from '../owner-shell';
 import { projectWorkspaceNavigation } from './project-workspace-navigation';
+import { ProjectRemovalButton } from './project-removal-button';
 import { commercialServices } from '../commercial/service';
 import { MasterForm } from '../commercial/master-form';
 import '../owner-dashboard.css';
@@ -221,6 +222,7 @@ export default async function Projects({
       ...(moduleKey ? { moduleKey } : {}),
     });
   const canCreate = has('project.create', 'projects');
+  const canRemove = has('project.manage', 'projects');
   const canClients =
     has('customer.view', 'crm') || has('customer.view', 'quotation');
   const navigation = projectWorkspaceNavigation(has);
@@ -717,6 +719,13 @@ export default async function Projects({
                         >
                           Open workspace <OwnerIcon name="arrow" size={16} />
                         </Link>
+                        {canRemove && (
+                          <ProjectRemovalButton
+                            id={project.id}
+                            name={project.name}
+                            archived={project.status === 'inactive'}
+                          />
+                        )}
                       </div>
                     </div>
                   </article>

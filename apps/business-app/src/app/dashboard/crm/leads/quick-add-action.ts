@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
+import { safeFailure } from '@business-os/shared';
 import { crmSchemas } from '@business-os/core/crm';
 import { crmServices } from '../service';
 import { leadServiceFromIndustryKey } from './lead-service-options';
@@ -259,10 +260,21 @@ export async function createQuickLead(
     await s.crm.save('leads', saved.data);
     revalidatePath('/dashboard/crm/leads');
     return { ok: true, message: 'Lead added to All Leads.' };
-  } catch {
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      const issue = error.issues[0];
+      return {
+        ok: false,
+        message: issue
+          ? 'Check ' + (issue.path.join(' / ') || 'the lead details') + ': ' + issue.message
+          : 'Please check the lead details.',
+      };
+    }
+    console.error('[crm.createQuickLead] Save failed', error);
     return {
       ok: false,
-      message: 'Unable to add lead. Check the fields and company permissions.',
+      message: safeFailure(error).message ||
+        'Unable to save this lead. Check your company permissions and try again.',
     };
   }
 }

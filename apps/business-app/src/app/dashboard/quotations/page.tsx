@@ -7,6 +7,7 @@ import { commercialServices } from '../commercial/service';
 import { crmResult } from '@business-os/database/crm';
 import { resultSchema } from '../crm/service';
 import { QuotationStudioFrame } from './studio-frame';
+import { QuotationRemovalButton } from './quotation-removal-button';
 
 export const dynamic = 'force-dynamic';
 
@@ -92,7 +93,9 @@ export default async function Quotations({
     if (page > 1) query.set('response_page', String(page));
     return '/dashboard/quotations?' + query.toString() + '#customer-responses';
   };
-  const rows = commercialSearchResultSchema.parse(result).rows;
+  const rows = commercialSearchResultSchema.parse(result).rows.filter(
+    (row) => Boolean(p.status) || row.status !== 'cancelled',
+  );
   const total = commercialSearchResultSchema.parse(result).total;
   // Search results are revisions. Resolve their parent quotation/customer and
   // present one CRN workspace per customer, keeping every historical revision.
@@ -100,13 +103,17 @@ export default async function Quotations({
   const { data: revisionLinks } = revisionIds.length
     ? await s.client
         .from('quotation_revisions')
-        .select('id,quotation_id')
+        .select('id,quotation_id,version')
         .eq('organization_id', s.org)
         .in('id', revisionIds)
     : { data: [] };
   const quotationIds = [
     ...new Set((revisionLinks ?? []).map((r) => r.quotation_id)),
   ];
+  const revisionVersions = new Map(
+    (revisionLinks ?? []).map((revision) => [revision.id, revision.version]),
+  );
+  const canRemoveQuotation = s.allowed('quotation.delete', 'quotation');
   const { data: parentQuotes } = quotationIds.length
     ? await s.client
         .from('quotations')
@@ -425,29 +432,38 @@ export default async function Quotations({
                     </div>
                     <div className="qs-quotation-list">
                       {customer.rows.map((row) => (
-                        <Link
+                        <div
                           key={row.id}
-                          href={'/dashboard/quotations/' + row.id + '/studio'}
-                          className="qs-quotation-item"
+                          style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}
                         >
-                          <div>
-                            <strong>
-                              {row.quotation_number || 'Quotation'}
-                            </strong>
-                            <small>
-                              {row.project_name || 'Project'} · Revision{' '}
-                              {row.revision_number ?? 1}
-                            </small>
-                          </div>
-                          <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                            <span className="qs-badge">
-                              {row.status || 'draft'}
-                            </span>
-                            <strong style={{ marginTop: 7 }}>
-                              {row.currency} {row.amount ?? '0'}
-                            </strong>
-                          </div>
-                        </Link>
+                          <Link
+                            href={'/dashboard/quotations/' + row.id + '/studio'}
+                            className="qs-quotation-item"
+                            style={{ flex: 1, minWidth: 0 }}
+                          >
+                            <div>
+                              <strong>{row.quotation_number || 'Quotation'}</strong>
+                              <small>
+                                {row.project_name || 'Project'} · Revision{' '}
+                                {row.revision_number ?? 1}
+                              </small>
+                            </div>
+                            <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                              <span className="qs-badge">{row.status || 'draft'}</span>
+                              <strong style={{ marginTop: 7 }}>
+                                {row.currency} {row.amount ?? '0'}
+                              </strong>
+                            </div>
+                          </Link>
+                          {canRemoveQuotation && row.status === 'draft' &&
+                            revisionVersions.has(row.id) && (
+                              <QuotationRemovalButton
+                                id={row.id}
+                                number={row.quotation_number || 'Draft quotation'}
+                                version={revisionVersions.get(row.id)!}
+                              />
+                            )}
+                        </div>
                       ))}
                     </div>
                   </section>
