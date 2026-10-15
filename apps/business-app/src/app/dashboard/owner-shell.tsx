@@ -78,6 +78,7 @@ export function OwnerShell({
   search,
   notificationsEnabled,
   currentHref,
+  dashboardBrand = false,
 }: {
   children: ReactNode;
   companyName: string;
@@ -88,6 +89,7 @@ export function OwnerShell({
   search: string;
   notificationsEnabled: boolean;
   currentHref?: string;
+  dashboardBrand?: boolean;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const toggleRef = useRef<HTMLButtonElement>(null);
@@ -313,6 +315,10 @@ export function OwnerShell({
           >
             <OwnerIcon name="menu" size={22} />
           </button>
+          {dashboardBrand && <a className="owner-command-mobile-brand" href="/dashboard">
+            <span className="owner-command-mobile-mark">{companyName.trim().charAt(0).toUpperCase()}</span>
+            <strong>{companyName}</strong>
+          </a>}
           <form
             className="owner-search"
             action="/dashboard"
