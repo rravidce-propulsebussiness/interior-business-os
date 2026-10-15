@@ -6,13 +6,14 @@ export type ActivityView = 'followups' | 'visits';
 export type ActivityQueueFilter = 'today' | 'overdue' | 'upcoming' | '';
 
 export async function LeadActivityPanel({
-  services, activity, queue, page, canManage,
+  services, activity, queue, page, canManageFollowups, canManageVisits,
 }: {
   services: Services;
   activity: ActivityView;
   queue: ActivityQueueFilter;
   page: number;
-  canManage: boolean;
+  canManageFollowups: boolean;
+  canManageVisits: boolean;
 }) {
   const searches: {entity:'site_visits'|'lead_followups';filter:Record<string,string>;kind:'visit'|'followup'}[] =
     activity === 'visits' ? [
@@ -72,6 +73,7 @@ export async function LeadActivityPanel({
   const nextHref = data.some((entry)=>entry.total>page*25)
     ? '/dashboard/crm/leads?'+query.toString()+'&page='+String(page+1)+'#lead-activities'
     : null;
-  return <LeadActivityQueue items={items} total={total} canManage={canManage}
+  return <LeadActivityQueue items={items} total={total}
+    canManageFollowups={canManageFollowups} canManageVisits={canManageVisits}
     nextHref={nextHref}/>;
 }
