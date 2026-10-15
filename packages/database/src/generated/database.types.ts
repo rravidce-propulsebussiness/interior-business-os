@@ -10921,6 +10921,24 @@ export interface Database {
         Args: { p_org: string; p_input: Json };
         Returns: string;
       };
+      project_quote_timeline_create: {
+        Args: { p_org: string; p_contract: string; p_input: Json };
+        Returns: Json;
+      };
+      project_stage_owner_edit: {
+        Args: {
+          p_org: string;
+          p_project: string;
+          p_stage: string;
+          p_expected_version: number;
+          p_input: Json;
+        };
+        Returns: Json;
+      };
+      project_stage_owner_read: {
+        Args: { p_org: string; p_project: string };
+        Returns: Json;
+      };
       construction_stage_record_command: {
         Args: {
           p_organization_id: string;
