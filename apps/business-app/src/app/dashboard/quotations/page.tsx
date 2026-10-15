@@ -315,7 +315,19 @@ export default async function Quotations({
                   <div className="qs-quotes-mobile-actions">
                     <Link href={preview} target="_blank" rel="noopener noreferrer">◉ View</Link>
                     <Link href={editor + '?step=preview'}>➤ Share</Link>
-                    <Link href={editor}>Edit / Details</Link>
+                    <details className="qs-quotes-mobile-more">
+                      <summary>••• More</summary>
+                      <div>
+                        <Link href={editor}>{row.status === 'draft' ? 'Edit quotation' : 'Open quotation'}</Link>
+                        <Link href={'/dashboard/quotations/' + row.id + '/pdf?view=1'}
+                          target="_blank" rel="noopener noreferrer">View PDF</Link>
+                        {canRemove && (row.status === 'draft' || row.status === 'issued') &&
+                          revision && <QuotationRemovalButton id={row.id}
+                            number={row.quotation_number || 'Quotation'}
+                            version={revision.version}
+                            issued={row.status === 'issued'}/>}
+                      </div>
+                    </details>
                   </div>
                 </article>
               ))}
