@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import Link from 'next/link';
+import { OwnerStageEditor } from './owner-stage-editor';
 import {
   ConstructionStageQuality,
   type ConstructionQualityData,
@@ -43,6 +44,8 @@ export type ConstructionPlanningData = {
     dependencies: string[];
     status: string;
     task_count: number;
+    display_order?: number;
+    owner_version?: number;
   }[];
 };
 
@@ -64,7 +67,7 @@ const roles = [
   ['accounts_officer', 'Billing / Accounts Officer'],
   ['contractor', 'Contractor / Subcontractor'],
 ] as const;
-const phases = [
+const constructionPhases = [
   'preconstruction',
   'design',
   'site_preparation',
@@ -75,7 +78,27 @@ const phases = [
   'finishes',
   'handover',
 ] as const;
+const interiorPhases = [
+  'preconstruction',
+  'survey',
+  'design',
+  'procurement',
+  'civil',
+  'services',
+  'fabrication',
+  'installation',
+  'finishes',
+  'quality',
+  'handover',
+] as const;
 const phaseTitles: Record<string, string> = {
+  survey: 'Site measurement & survey',
+  procurement: 'Materials, samples & procurement',
+  civil: 'Interior civil preparation',
+  services: 'Electrical, plumbing & services',
+  fabrication: 'Carpentry & fabrication',
+  installation: 'Interior installation by room',
+  quality: 'Final functional checks & snagging',
   preconstruction: '01 · Agreement & preconstruction',
   design: '02 · Design and engineering',
   site_preparation: '03 · Site preparation',
@@ -100,15 +123,21 @@ export function ConstructionPlanningPanel({
   data,
   memberOptions,
   quality,
+  canOwnerEdit = false,
 }: {
   projectId: string;
   data: ConstructionPlanningData;
   memberOptions: { id: string; label: string }[];
   quality?: ConstructionQualityData | null;
+  canOwnerEdit?: boolean;
 }) {
   const [message, setMessage] = useState('');
   const [pending, start] = useTransition();
   const managers = data.can_manage;
+  const phases: readonly string[] =
+    data.workflow?.template_code === 'INTERIOR_QUOTE'
+      ? interiorPhases
+      : constructionPhases;
   const activeRoles = data.roles.filter((role) => role.active);
   const nameById = new Map(
     memberOptions.map((member) => [member.id, member.label]),
@@ -133,12 +162,14 @@ export function ConstructionPlanningPanel({
               Connected construction planning
             </p>
             <h2 className="mt-2 text-xl font-bold tracking-tight text-slate-900">
-              Project stages & dependencies
+              {data.workflow?.template_code === 'INTERIOR_QUOTE'
+                ? 'Interior stages from accepted BOQ'
+                : 'Construction stages from accepted quotation'}
             </h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-              Frozen per-project construction definitions. Physical progress,
-              mandatory inspections and payments remain controlled by the
-              existing Operations, Contract and Billing systems.
+              Quote-derived project planning. Physical progress, mandatory
+              inspections and payments remain controlled by the existing
+              Operations, Contract and Billing systems.
             </p>
           </div>
           {data.workflow && (
@@ -154,7 +185,7 @@ export function ConstructionPlanningPanel({
               Stages come from the approved quotation
             </h3>
             <p className="mt-2 text-sm leading-6 text-slate-600">
-              Issue the construction quote with its actual floors, built-up
+              Issue the quote with its actual room/area or floor scope, built-up
               areas, additional works and package specifications. After customer
               approval, create the agreement. The floor-wise construction
               timeline is automatically generated from that frozen revision. No
@@ -204,7 +235,9 @@ export function ConstructionPlanningPanel({
               </div>
               <div className="rounded-xl border border-slate-200 p-4">
                 <p className="text-xs font-semibold text-slate-500">
-                  Floors / levels
+                  {data.workflow.template_code === 'INTERIOR_QUOTE'
+                    ? 'Rooms / areas'
+                    : 'Floors / levels'}
                 </p>
                 <p className="mt-1 text-2xl font-bold text-slate-900">
                   {data.workflow.floor_snapshot.length}
@@ -271,6 +304,12 @@ export function ConstructionPlanningPanel({
                               Approval hold point:{' '}
                               {stage.hold_point.replaceAll('_', ' ')}
                             </p>
+                          )}
+                          {canOwnerEdit && (
+                            <OwnerStageEditor
+                              projectId={projectId}
+                              stage={stage}
+                            />
                           )}
                           <details className="mt-3 text-sm text-slate-700">
                             <summary className="cursor-pointer font-semibold text-blue-800">
