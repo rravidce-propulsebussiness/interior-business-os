@@ -130,6 +130,9 @@ begin
     or jsonb_array_length(record_data->'payments')<>1
     or jsonb_array_length(record_data->'options')<1
  then raise exception 'Stage record associations were not projected';end if;
+ if jsonb_typeof(record_data->'payments'->0->'amount')<>'string'
+    or jsonb_typeof(record_data->'options'->0->'amount')<>'string'
+ then raise exception 'Money values must be JSON strings to preserve financial precision';end if;
  if record_data->'payments'->0->>'request_number' is not null
  then raise exception 'An unrequested milestone showed an invented payment request';end if;
  if exists(select 1 from public.payment_requests where organization_id=org and contract_id=contract)
