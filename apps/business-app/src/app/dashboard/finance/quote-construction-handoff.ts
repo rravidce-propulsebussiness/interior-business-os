@@ -107,13 +107,13 @@ export async function syncQuotedConstructionTimeline(
   const workflow = await client.rpc('project_quote_timeline_create', {
     p_org: org.organizationId,
     p_contract: id,
-    p_input: {
+    p_input: JSON.parse(JSON.stringify({
       industry: plan.industry,
       template: plan.template,
       zones: plan.zones,
       stages: plan.stages,
       quote_hash: quoteHash,
-    },
+    })),
   });
   if (workflow.error) {
     if (workflow.error.code === '42501')
