@@ -18,6 +18,7 @@ import {
   type LeadServiceOption,
 } from './lead-service-options';
 import { leadRequirementLabel, resolveLeadCategory } from './lead-category';
+import { leadDateBounds } from './date-range';
 import '../../owner-dashboard.css';
 import './leads.css';
 import './lead-category.css';
@@ -34,6 +35,7 @@ const allowedFilters = [
   'branch_id',
   'priority',
   'due',
+  'range',
   'from',
   'until',
   'lifecycle',
@@ -89,18 +91,24 @@ export default async function Leads({
   if (p.panel === 'sheet') redirect('/dashboard/crm/leads/upload');
   const s = await crmServices('lead.view', true);
   const page = pageNumber(p.page);
-  const choices = await lookups(s, p);
+  const [choices, organization] = await Promise.all([
+    lookups(s, p),
+    s.repository.organization(s.org),
+  ]);
+  if (!organization) throw new Error('Company workspace not available');
   const filter = Object.fromEntries(
     allowedFilters
-      .filter((key) => key !== 'view' && p[key])
+      .filter((key) =>
+        key !== 'view' && key !== 'range' && key !== 'from' && key !== 'until' && p[key],
+      )
       .map((key) => [key, p[key]!]),
   );
-  const [result, organization, user, plans, companyIndustries, industries] =
+  Object.assign(filter, leadDateBounds(p, organization.default_timezone || 'Asia/Kolkata'));
+  const [result, user, plans, companyIndustries, industries] =
     await Promise.all([
       s.crm
         .search('leads', filter, page)
         .then((value) => resultSchema.parse(value)),
-      s.repository.organization(s.org),
       s.authorization.requireAuthenticatedUser(),
       s.repository.plans().catch(() => null),
       s.client
@@ -109,7 +117,6 @@ export default async function Leads({
         .eq('organization_id', s.org),
       s.repository.industries(),
     ]);
-  if (!organization) throw new Error('Company workspace not available');
   // Only active industries explicitly assigned to the current tenant may be
   // offered. If membership lookup fails, fail closed instead of offering all.
   const assignedIndustries = new Set(
