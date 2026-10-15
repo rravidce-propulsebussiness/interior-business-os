@@ -15,12 +15,17 @@ export interface QuotedConstructionPlan {
 }
 
 function namedFloorCode(name: string): string {
-  return name
+  const normalized = name
     .normalize('NFKD')
     .toUpperCase()
     .replace(/[^A-Z0-9]+/g, '_')
-    .replace(/^_+|_+$/g, '')
-    .slice(0, 50);
+    .replace(/^_+|_+$/g, '');
+  // 1st Floor / G+1 are valid customer-facing quote labels, even though
+  // internal construction stage IDs must start with a letter.
+  return (/^[A-Z]/.test(normalized) ? normalized : 'F_' + normalized).slice(
+    0,
+    50,
+  );
 }
 
 const description = (value: string) => value.trim().slice(0, 240);
