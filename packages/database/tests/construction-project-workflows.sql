@@ -46,7 +46,7 @@ begin
    select revision_id from public.contracts where id=contract);
  wf=(public.project_quote_timeline_create(org,contract,
   jsonb_build_object('industry','construction','quote_hash',quote_hash,
-  jsonb_build_object('template',jsonb_build_object('industry','construction','version','1.0.0'),
+   'template',jsonb_build_object('industry','construction','version','1.0.0'),
    'zones',jsonb_build_array(jsonb_build_object('code','GROUND','name','Ground floor')),
    'stages',jsonb_build_array(
      jsonb_build_object('instanceCode','DESIGN','templateCode','DESIGN','phase','design',
