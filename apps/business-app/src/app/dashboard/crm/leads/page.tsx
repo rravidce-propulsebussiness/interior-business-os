@@ -5,6 +5,7 @@ import type { ProPulseConnectionView } from './propulse-connect-panel';
 import { crmServices, resultSchema } from '../service';
 import { lookups, pageNumber, type Params } from '../lookups';
 import { OwnerShell, type OwnerNavItem } from '../../owner-shell';
+import { leadsNavigation } from '../../leads-navigation';
 import {
   LeadsWorkspace,
   type LeadView,
@@ -323,12 +324,12 @@ export default async function Leads({
   const nav: OwnerNavItem[] = [
     { label: 'Dashboard', href: '/dashboard', icon: 'dashboard' },
   ];
-  nav.push({ label: 'Leads', href: base, icon: 'leads' });
-  nav.push({
-    label: 'Follow-ups',
-    href: '/dashboard/crm/followups',
-    icon: 'calendar',
-  });
+  nav.push(
+    leadsNavigation({
+      canCreate: may('lead.create'),
+      canManage: may('crm.pipeline.manage'),
+    }),
+  );
   if (may('quotation.view', 'quotation'))
     nav.push({
       label: 'Quotations',

@@ -19,6 +19,7 @@ import {
   type OwnerIconName,
   type OwnerNavItem,
 } from './owner-shell';
+import { leadsNavigation } from './leads-navigation';
 import './owner-dashboard.css';
 
 export const dynamic = 'force-dynamic';
@@ -333,11 +334,12 @@ export default async function Dashboard({
     { label: 'Dashboard', href: '/dashboard', icon: 'dashboard' },
   ];
   if (canLeads)
-    navigation.push({
-      label: 'Leads',
-      href: '/dashboard/crm/leads',
-      icon: 'leads',
-    });
+    navigation.push(
+      leadsNavigation({
+        canCreate: has('lead.create', 'crm'),
+        canManage: has('crm.pipeline.manage'),
+      }),
+    );
   if (canQuotes)
     navigation.push({
       label: 'Quotations',

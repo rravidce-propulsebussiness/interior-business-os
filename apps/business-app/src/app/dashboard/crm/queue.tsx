@@ -5,6 +5,7 @@ import { Pagination } from './pagination';
 import { MasterForm } from '../commercial/master-form';
 import { runCrmCommand } from './actions';
 import { OwnerShell, type OwnerNavItem } from '../owner-shell';
+import { leadsNavigation } from '../leads-navigation';
 import '../owner-dashboard.css';
 import './queue.css';
 export async function SalesQueue({
@@ -42,25 +43,10 @@ export async function SalesQueue({
   const leadsPath = '/dashboard/crm/leads';
   const nav: OwnerNavItem[] = [
     { label: 'Dashboard', href: '/dashboard', icon: 'dashboard' },
-    {
-      label: 'CRM',
-      href: leadsPath,
-      icon: 'leads',
-      children: [
-        { label: 'All Leads', href: leadsPath },
-        { label: 'Follow-ups', href: '/dashboard/crm/followups' },
-        { label: 'Site Visits', href: '/dashboard/crm/site-visits' },
-        ...(s.allowed('lead.create')
-          ? [
-              { label: 'Upload Leads', href: leadsPath + '/upload' },
-              { label: 'Google Sheets', href: leadsPath + '/google-sheets' },
-            ]
-          : []),
-        ...(s.allowed('crm.pipeline.manage')
-          ? [{ label: 'CRM Settings', href: '/dashboard/crm/settings' }]
-          : []),
-      ],
-    },
+    leadsNavigation({
+      canCreate: s.allowed('lead.create'),
+      canManage: s.allowed('crm.pipeline.manage'),
+    }),
     ...(s.allowed('quotation.view', 'quotation')
       ? [
           {
@@ -121,7 +107,7 @@ export async function SalesQueue({
     >
       <main id="main-content" className="crm-lead-queue-root">
         <p className="crm-queue-breadcrumb">
-          <Link href={leadsPath}>CRM / Leads</Link> <span>›</span>{' '}
+          <Link href={leadsPath}>Leads</Link> <span>›</span>{' '}
           {visits ? 'Site visits' : 'Follow-ups'}
         </p>
         <div className="crm-queue-heading">
