@@ -57,18 +57,28 @@ export function constructionPlanFromQuotedDescriptions(
   const activities: string[] = [
     'Use the customer-approved, issued quotation as the construction scope',
     ...floorRows.map((row) =>
-      description(`${row.name}: ${row.areaSqft} sq ft quoted construction area`),
+      description(
+        `${row.name}: ${row.areaSqft} sq ft quoted construction area`,
+      ),
     ),
     ...quotedScope.rows
       .filter((row) => row.kind === 'additional')
       .map((row) =>
-        description(`Additional quoted work: ${row.name}, ${row.areaSqft} sq ft`),
+        description(
+          `Additional quoted work: ${row.name}, ${row.areaSqft} sq ft`,
+        ),
       ),
     ...(quotedScope.package
-      ? [description(`Accepted package: ${quotedScope.package.name} (${quotedScope.package.code})`)]
+      ? [
+          description(
+            `Accepted package: ${quotedScope.package.name} (${quotedScope.package.code})`,
+          ),
+        ]
       : []),
     ...quotedScope.materials.map((material) =>
-      description(`Quoted material — ${material.category}: ${material.name}, ${material.specification}`),
+      description(
+        `Quoted material — ${material.category}: ${material.name}, ${material.specification}`,
+      ),
     ),
     ...(quotedScope.sections ?? []).map((section) =>
       description(
