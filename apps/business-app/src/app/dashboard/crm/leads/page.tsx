@@ -239,7 +239,7 @@ export default async function Leads({
   if (rows.length && s.allowed('quotation.view', 'quotation')) {
     // One tenant-authorized batch query keeps table and mobile quote badges
     // synchronized without creating 25 per-lead database requests.
-    const rpc = s.client.rpc as unknown as (
+    const rpc = s.client.rpc.bind(s.client) as unknown as (
       name: string, params: { p_organization_id: string; p_lead_ids: string[] },
     ) => Promise<{ data: unknown; error: unknown }>;
     const linked = await rpc('lead_quotation_summary', {
