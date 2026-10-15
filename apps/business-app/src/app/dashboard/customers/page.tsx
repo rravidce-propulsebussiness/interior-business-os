@@ -106,17 +106,20 @@ export default async function Customers({
     s.client
       .from('customers')
       .select('id', { count: 'exact', head: true })
-      .eq('organization_id', s.org),
+      .eq('organization_id', s.org)
+      .eq('is_sales_prospect', false),
     s.client
       .from('customers')
       .select('id', { count: 'exact', head: true })
       .eq('organization_id', s.org)
+      .eq('is_sales_prospect', false)
       .eq('status', 'active'),
     canProjects
       ? s.client
           .from('projects')
           .select('id', { count: 'exact', head: true })
           .eq('organization_id', s.org)
+      .eq('is_sales_prospect', false)
       : Promise.resolve({ count: null }),
     canQuotes
       ? s.client
@@ -140,6 +143,7 @@ export default async function Customers({
         .from('projects')
         .select('customer_id')
         .eq('organization_id', s.org)
+      .eq('is_sales_prospect', false)
         .in('industry_id', industryIds)
         .limit(10000);
       if (matches.error) throw new Error('Could not filter client services');
@@ -157,7 +161,8 @@ export default async function Customers({
         'id,display_name,phone,email,status,created_at,updated_at,billing_address',
         { count: 'exact' },
       )
-      .eq('organization_id', s.org);
+      .eq('organization_id', s.org)
+      .eq('is_sales_prospect', false);
     if (q) {
       // Supabase/PostgREST string literals are quoted and punctuation removed
       // so a user-supplied search never introduces a new filter expression.
@@ -187,6 +192,7 @@ export default async function Customers({
           .from('projects')
           .select('id,customer_id,industry_id,created_at')
           .eq('organization_id', s.org)
+      .eq('is_sales_prospect', false)
           .in('customer_id', ids)
           .limit(5000)
       : Promise.resolve({ data: [] }),
