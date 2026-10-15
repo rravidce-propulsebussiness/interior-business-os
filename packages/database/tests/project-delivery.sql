@@ -9,7 +9,7 @@ do $$
 declare
  org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
  project uuid;
- design_id uuid;need_id uuid;check_id uuid;agreement_media uuid;
+ design_id uuid;need_id uuid;check_id uuid;agreement_media uuid;contract uuid;
  kind text;
  result jsonb;
 begin
@@ -52,7 +52,10 @@ begin
    perform public.project_site_command(org,project,'execution_start','{}');
    raise exception 'FAIL: no agreement permitted site work';
  exception when check_violation then null;end;
- perform pg_temp.site_signed_agreement(org,project,agreement_media);
+ contract=pg_temp.site_signed_agreement(org,project,agreement_media);
+ if (public.project_agreement_read(org,project)->>'execution_authorized')<>'false'
+ then raise exception 'FAIL: signed agreement bypassed recorded advance';end if;
+ perform pg_temp.site_record_advance(org,contract);
  if (public.project_agreement_read(org,project)->>'execution_authorized')<>'true'
  then raise exception 'Signed agreement and active schedule not recognized';end if;
  perform public.project_site_command(org,project,'execution_start','{}');
