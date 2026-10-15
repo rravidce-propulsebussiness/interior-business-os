@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { parseSftEstimate } from '@business-os/core/sft-quotation';
 
-type Tab = 'client' | 'quote' | 'files' | 'preview';
+type Tab = 'client' | 'quote' | 'files' | 'payments' | 'preview';
 type Mode = 'sft' | 'custom' | 'pdf';
 
 type QuotationLine = {
@@ -42,6 +42,7 @@ const steps: { id: Tab; title: string }[] = [
   { id: 'client', title: 'Client & Project' },
   { id: 'quote', title: 'Quote Builder' },
   { id: 'files', title: 'Specifications & Files' },
+  { id: 'payments', title: 'Payments' },
   { id: 'preview', title: 'Preview & Share' },
 ];
 const modes: { id: Mode; name: string; note: string; icon: string }[] = [
@@ -81,6 +82,7 @@ export function QuotationStudioEditor({
   interiorEditor,
   filesEditor,
   termsEditor,
+  paymentEditor,
   sharingEditor,
   initialMode,
   initialStep,
@@ -103,6 +105,7 @@ export function QuotationStudioEditor({
   interiorEditor: ReactNode;
   filesEditor: ReactNode;
   termsEditor: ReactNode;
+  paymentEditor: ReactNode;
   sharingEditor: ReactNode;
   initialMode: Mode;
   initialStep: Tab;
@@ -404,18 +407,20 @@ export function QuotationStudioEditor({
           {step === 'files' && (
             <>
               <section className="qs-card">
-                <h2>Specifications, inclusions &amp; payment terms</h2>
+                <h2>Specifications, inclusions &amp; files</h2>
                 <p className="qs-muted" style={{ marginBottom: 15 }}>
                   Your edited package inclusions print on their own PDF pages
                   after the floor-cost schedule. Upload any existing
                   specifications or plans below to append the original PDFs.
-                  Edit payment milestones, warranty and exclusions here.
+                  Set warranty and exclusions here. Use the Payments step for stage-wise milestones.
                 </p>
                 {termsEditor}
               </section>
               {filesEditor}
             </>
           )}
+
+          {step === 'payments' && paymentEditor}
 
           {step === 'preview' && (
             <>
