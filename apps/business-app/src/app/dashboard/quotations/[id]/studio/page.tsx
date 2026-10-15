@@ -13,6 +13,7 @@ import { ConstructionSelector } from '../../construction-selector';
 import { InteriorRoomBuilder } from '../../interior-room-builder';
 import { CommandForm } from '../../command-form';
 import { SharingSection } from '../../sharing-section';
+import { ContractHandoff } from '../../../finance/handoff';
 import { QuotationAttachments } from '../../quotation-attachments';
 
 export const dynamic = 'force-dynamic';
@@ -291,6 +292,21 @@ export default async function QuotationStudio({
           />
         }
       />
+      {revision.status === 'issued' && (
+        <section className="qs-card" style={{ marginTop: 18 }}>
+          <h2>Next: agreement and advance</h2>
+          <p className="qs-muted">
+            After the client accepts this quote, prepare their agreement from the
+            approved scope. The agreement and payment schedule lead into design
+            approvals and the existing project workspace.
+          </p>
+          <ContractHandoff revisionId={revision.id} />
+          <Link href={'/dashboard/projects/' + revision.project_id + '/site#agreement-readiness'}
+            className="qs-btn">
+            Open agreement &amp; project stages →
+          </Link>
+        </section>
+      )}
     </QuotationStudioFrame>
   );
 }
