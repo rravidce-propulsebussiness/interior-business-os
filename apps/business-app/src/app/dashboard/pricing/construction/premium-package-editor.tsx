@@ -51,7 +51,6 @@ const starter = [
   ['Exclusions & warranty', 'Clarify exclusions, workmanship and warranty', 'none', 'included'],
 ] as const;
 const brandless = /architectural|drawing|plan|design|exclusion|warranty|soil test/i;
-const rateOnly = /steel|tmt|cement|sand|aggregate|brick|block|electrical|plumbing|paint/i;
 const orange = '#F97316';
 const field = 'min-h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-900 outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100';
 const label = 'grid min-w-0 gap-1.5 text-xs font-bold text-slate-600';
