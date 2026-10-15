@@ -50,13 +50,13 @@ export async function financeCommand(
         const sync = await syncQuotedConstructionTimeline(result.id);
         if (sync.reason === 'created' || sync.reason === 'exists') {
           message =
-            'Agreement created. The planned construction stages and quoted scope are available in Projects; site work still requires signed-agreement and design approvals.';
+            'Agreement created. The quote-derived project stages and accepted scope are available in Projects; work still requires agreement and design approvals.';
         } else if (sync.reason === 'quote_incomplete') {
           message =
-            'Agreement created. No structured floor-wise construction scope was in the approved quote; no stage plan was guessed.';
+            'Agreement created. The approved quote has no usable industry-specific scope or BOQ; no stages were guessed.';
         } else {
           message =
-            'Agreement created. A project manager can synchronize its timeline from the approved quotation; no floors need to be re-entered.';
+            'Agreement created. An authorized owner or agreement creator can synchronize the timeline from the accepted quote without entering rooms or floors again.';
         }
         if (sync.projectId) {
           revalidatePath('/dashboard/projects/' + sync.projectId);

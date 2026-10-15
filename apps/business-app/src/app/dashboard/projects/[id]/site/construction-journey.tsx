@@ -57,6 +57,13 @@ type JourneyProps = {
 };
 
 const phaseNames: Record<string, string> = {
+  survey: 'Site measurement & survey',
+  procurement: 'Interior materials & approvals',
+  civil: 'Interior civil work',
+  services: 'Electrical, plumbing & MEP',
+  fabrication: 'Modular/carpentry fabrication',
+  installation: 'Room-wise installation',
+  quality: 'Interior QC & snagging',
   preconstruction: 'Agreement & preconstruction',
   design: 'Planning & structural designs',
   site_preparation: 'Site clearance & excavation',
@@ -177,6 +184,9 @@ export function ConstructionJourney({
   isWatchman = false,
 }: JourneyProps) {
   const base = `/dashboard/projects/${projectId}/site`;
+  const isInterior = stages.some((s) =>
+    ['survey', 'fabrication', 'installation', 'procurement'].includes(s.phase),
+  );
   const linkedRecords = (
     stageId: string,
     kind: string,
@@ -281,12 +291,18 @@ export function ConstructionJourney({
         <div>
           <p className="cj-eyebrow">Construction execution · Live records</p>
           <h2>
-            {isWatchman ? 'Curing & security log' : 'Construction journey'}
+            {isWatchman
+              ? 'Curing & security log'
+              : isInterior
+                ? 'Interior execution journey'
+                : 'Construction journey'}
           </h2>
           <p>
             {isWatchman
               ? 'Record curing rounds with time, location and photo evidence.'
-              : 'Stage-by-stage work, inspections, materials, photos, curing and payments in one timeline.'}
+              : isInterior
+                ? 'Accepted room-wise BOQ, fabrication, installation, photos, quality checks and payments.'
+                : 'Stage-by-stage work, inspections, materials, photos, curing and payments in one timeline.'}
           </p>
         </div>
         <span className="cj-count">

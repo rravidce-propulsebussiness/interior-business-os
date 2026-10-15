@@ -17,6 +17,7 @@
     "./operations": "./src/operations.ts",
     "./construction-workflow": "./src/construction-workflow.ts",
     "./quote-construction-handoff": "./src/quote-construction-handoff.ts",
+    "./quote-project-timeline": "./src/quote-project-timeline.ts",
     "./operations-command": "./src/operations-command.ts",
     "./operations-document": "./src/operations-document.ts",
     "./automation": "./src/automation.ts",

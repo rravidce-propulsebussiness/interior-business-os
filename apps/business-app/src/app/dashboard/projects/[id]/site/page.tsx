@@ -7,6 +7,7 @@ import { SiteAccessState } from './site-access-state';
 import { SiteActivity } from './site-activity';
 import { ConstructionPlanningPanel } from './construction-planning-panel';
 import { ConstructionJourney } from './construction-journey';
+import { stageOwnerSchema, mergeStageOwnerEdits } from './stage-owner-view';
 import { AgreementReadinessPanel } from './agreement-readiness-panel';
 import '../../../owner-dashboard.css';
 import './site-command.css';
@@ -335,10 +336,27 @@ export default async function ProjectDeliveryPage({
   const constructionResult = constructionSchema.safeParse(
     constructionResponse.data,
   );
-  const construction =
+  const constructionBase =
     !constructionResponse.error && constructionResult.success
       ? constructionResult.data
       : null;
+  const ownerResponse = constructionBase
+    ? await s.client.rpc('project_stage_owner_read', {
+        p_org: context.organizationId,
+        p_project: id,
+      })
+    : null;
+  const ownerParsed =
+    ownerResponse && !ownerResponse.error
+      ? stageOwnerSchema.safeParse(ownerResponse.data)
+      : null;
+  const ownerData = ownerParsed?.success ? ownerParsed.data : null;
+  const construction = constructionBase
+    ? {
+        ...constructionBase,
+        stages: mergeStageOwnerEdits(constructionBase.stages, ownerData),
+      }
+    : null;
   const qualityResponse = construction
     ? await s.client.rpc('construction_quality_read', {
         p_org: context.organizationId,
@@ -546,6 +564,7 @@ export default async function ProjectDeliveryPage({
               <ConstructionPlanningPanel
                 projectId={id}
                 data={construction}
+                canOwnerEdit={Boolean(ownerData?.can_edit)}
                 memberOptions={site.member_options}
                 quality={constructionQuality}
               />
@@ -554,20 +573,21 @@ export default async function ProjectDeliveryPage({
             {site.stage === 'not_started' && (
               <section className={card} id="initialize">
                 <Heading
-                  eyebrow="Set up"
-                  title="Start the project delivery workflow"
-                  detail="A company manager initiates delivery after creating the customer project. The design stage starts first."
+                  eyebrow="Quote-first project delivery"
+                  title="Awaiting the approved quotation and agreement"
+                  detail="Site Delivery and the planned stage timeline are created automatically when the approved construction or interior quote becomes an agreement."
                 />
-                {manager ? (
-                  <Action
-                    project={id}
-                    operation="initialize"
-                    label="Initialize design stage"
-                    fields={[]}
-                  />
-                ) : (
-                  <p className="text-sm text-amber-800">
-                    Ask your project manager to initialize the delivery process.
+                <Link
+                  href="/dashboard/quotations"
+                  className="inline-flex rounded-lg border border-blue-200 bg-white px-4 py-2 text-sm font-semibold text-blue-800"
+                >
+                  View quotation and agreement
+                </Link>
+                {manager && (
+                  <p className="mt-2 text-xs text-slate-600">
+                    If the agreement was created earlier, use the quote recovery
+                    action in the stage panel. Do not enter floors or stages
+                    twice.
                   </p>
                 )}
               </section>
