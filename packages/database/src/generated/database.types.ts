@@ -1624,6 +1624,7 @@ export interface Database {
           tax_identifier: string;
           billing_address: Json;
           notes: string;
+          is_sales_prospect: boolean;
         };
         Insert: {
           id?: string;
@@ -1642,6 +1643,7 @@ export interface Database {
           tax_identifier?: string;
           billing_address?: Json;
           notes?: string;
+          is_sales_prospect?: boolean;
         };
         Update: {
           id?: string;
@@ -1660,6 +1662,7 @@ export interface Database {
           tax_identifier?: string;
           billing_address?: Json;
           notes?: string;
+          is_sales_prospect?: boolean;
         };
         Relationships: [
           {
@@ -7185,6 +7188,7 @@ export interface Database {
           status: string;
           notes: string;
           assigned_user_id: string | null;
+          is_sales_prospect: boolean;
         };
         Insert: {
           id?: string;
@@ -7203,6 +7207,7 @@ export interface Database {
           status?: string;
           notes?: string;
           assigned_user_id?: string | null;
+          is_sales_prospect?: boolean;
         };
         Update: {
           id?: string;
@@ -7221,6 +7226,7 @@ export interface Database {
           status?: string;
           notes?: string;
           assigned_user_id?: string | null;
+          is_sales_prospect?: boolean;
         };
         Relationships: [
           {
@@ -10837,6 +10843,32 @@ export interface Database {
         Args: { p_message: string; p_signature: string };
         Returns: Json;
       };
+      client_portal_access_list: {
+        Args: { p_organization_id: string; p_customer_id: string };
+        Returns: Json;
+      };
+      client_portal_design_decide: {
+        Args: {
+          p_project_id: string;
+          p_decision: string;
+          p_kind?: string;
+          p_note?: string;
+        };
+        Returns: undefined;
+      };
+      client_portal_manage: {
+        Args: {
+          p_organization_id: string;
+          p_customer_id: string;
+          p_project_id: string;
+          p_email: string;
+          p_active?: boolean;
+        };
+        Returns: undefined;
+      };
+      client_portal_media_get: { Args: { p_media_id: string }; Returns: Json };
+      client_portal_project: { Args: { p_project_id: string }; Returns: Json };
+      client_portal_projects: { Args: Record<string, never>; Returns: Json };
       commercial_search: {
         Args: {
           p_organization_id: string;
@@ -11274,6 +11306,34 @@ export interface Database {
       invoice_void: {
         Args: { p_organization_id: string; p_id: string; p_reason: string };
         Returns: string;
+      };
+      lead_quotation_link: {
+        Args: {
+          p_organization_id: string;
+          p_lead_id: string;
+          p_quotation_id: string;
+          p_project_id: string;
+        };
+        Returns: undefined;
+      };
+      lead_quotation_link_provisional: {
+        Args: {
+          p_organization_id: string;
+          p_lead_id: string;
+          p_quotation_id: string;
+          p_project_id: string;
+          p_new_customer: boolean;
+          p_new_project: boolean;
+        };
+        Returns: undefined;
+      };
+      lead_quotation_list: {
+        Args: { p_organization_id: string; p_lead_id: string };
+        Returns: Json;
+      };
+      lead_quotation_summary: {
+        Args: { p_organization_id: string; p_lead_ids: string[] };
+        Returns: Json;
       };
       management_dashboard: {
         Args: { p_organization_id: string; p_filters: Json };
