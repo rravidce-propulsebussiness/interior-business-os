@@ -64,7 +64,7 @@ export function QuotationStudioFrame({
       }
     };
     const onResize = () => {
-      if (window.innerWidth > 900) setMenuOpen(false);
+      if (window.innerWidth > 1199) setMenuOpen(false);
     };
     document.addEventListener('keydown', onKeyDown);
     window.addEventListener('resize', onResize);
