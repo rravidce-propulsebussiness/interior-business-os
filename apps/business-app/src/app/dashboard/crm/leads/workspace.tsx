@@ -6,6 +6,9 @@ import { useRouter } from 'next/navigation';
 import { OwnerIcon, type OwnerIconName } from '../../owner-shell';
 import { QuickAddLead } from './quick-add-lead';
 import { LeadRemovalButton } from './lead-removal-button';
+import { LeadStageSelect, LeadAssigneeSelect, LeadFollowUpSetter } from './lead-inline-controls';
+import { LeadQuotePreview } from './lead-quote-preview';
+import { LeadUpdateComposer } from './lead-update-composer';
 import type { LeadServiceOption } from './lead-service-options';
 import { leadCategoryLabel, type LeadCategory } from './lead-category';
 import { LeadsBoardView } from './board-view';
@@ -56,6 +59,11 @@ export type LeadView = {
   quoteRevisionId: string | null;
   quoteStatus: string | null;
   quoteNumber: string | null;
+  quoteAmount: string | null;
+  quoteShared: boolean;
+  latestUpdate: string;
+  latestUpdateAt: string | null;
+  latestUpdateSubject: string;
 };
 
 const path = '/dashboard/crm/leads';
@@ -224,6 +232,10 @@ export function LeadsWorkspace({
   canManage,
   canWin,
   canQuote,
+  canAssign,
+  canNote,
+  canFollowUp,
+  lostReasons,
   organizationName,
   timeZone,
   asOf,
@@ -256,6 +268,7 @@ export function LeadsWorkspace({
   canAssign: boolean;
   canWin: boolean;
   canNote: boolean;
+  canFollowUp: boolean;
   canConvert: boolean;
   canQuote: boolean;
   organizationName: string;
@@ -282,7 +295,7 @@ export function LeadsWorkspace({
   const [checked, setChecked] = useState<string[]>([]);
   const allSelected = rows.length > 0 && checked.length === rows.length;
   const open = (lead: LeadView) => {
-    // The Leads list is for discovery; the detail route owns all lead actions.
+    // Detail is a focused history view; common daily actions remain on this list.
     router.push(path + '/' + encodeURIComponent(lead.id));
   };
   const toggle = (id: string) =>
@@ -671,9 +684,10 @@ export function LeadsWorkspace({
                           <th>Requirement</th>
                           <th>Location</th>
                           <th>Stage</th>
+                          <th>Latest update</th>
+                          <th>Assigned to</th>
+                          <th>Next follow-up</th>
                           <th>Quotation</th>
-                          <th>Priority</th>
-                          <th>Follow-up</th>
                           <th>Actions</th>
                         </tr>
                       </thead>
@@ -732,64 +746,43 @@ export function LeadsWorkspace({
                               </span>
                             </td>
                             <td>
-                              <span
-                                className={
-                                  'crm-chip crm-chip-' + statusTone(lead)
-                                }
-                              >
-                                {lead.stageName}
-                              </span>
+                              <LeadStageSelect
+                                lead={lead}
+                                stages={stages}
+                                lostReasons={lostReasons}
+                                canManage={canManage}
+                                canWin={canWin}
+                              />
+                            </td>
+                            <td className="crm-last-update">
+                              {lead.latestUpdate ? (
+                                <>
+                                  <strong>{lead.latestUpdateSubject || 'Latest contact'}</strong>
+                                  <span>{lead.latestUpdate}</span>
+                                  {lead.latestUpdateAt && <small>{date(lead.latestUpdateAt, true, timeZone)}</small>}
+                                </>
+                              ) : <span className="crm-muted">No contact logged yet</span>}
+                            </td>
+                            <td>
+                              <LeadAssigneeSelect lead={lead} assignees={assignees} canAssign={canAssign} />
+                            </td>
+                            <td>
+                              <LeadFollowUpSetter lead={lead} canFollowUp={canFollowUp} />
                             </td>
                             <td>
                               {lead.quoteRevisionId ? (
-                                <a
-                                  className="font-semibold text-blue-700 underline"
-                                  href={
-                                    '/dashboard/quotations/' +
-                                    lead.quoteRevisionId
-                                  }
-                                  title={
-                                    'Open ' + (lead.quoteNumber ?? 'quotation')
-                                  }
-                                >
-                                  {lead.quoteNumber || 'View quote'}
-                                  <small className="block font-normal text-slate-500">
-                                    {lead.quoteStatus?.replaceAll('_', ' ')}
-                                  </small>
-                                </a>
+                                <LeadQuotePreview
+                                  revisionId={lead.quoteRevisionId}
+                                  number={lead.quoteNumber || 'Quotation'}
+                                  status={lead.quoteStatus}
+                                  amount={lead.quoteAmount}
+                                  shared={lead.quoteShared}
+                                />
                               ) : canQuote ? (
-                                <a
-                                  className="font-semibold text-blue-700 underline"
-                                  href={
-                                    '/dashboard/quotations/new?lead=' + lead.id
-                                  }
-                                >
-                                  + Create quote
+                                <a className="crm-quote-create" href={'/dashboard/quotations/new?lead='+lead.id}>
+                                  + Prepare quote
                                 </a>
-                              ) : (
-                                <span className="text-slate-400">—</span>
-                              )}
-                            </td>
-                            <td>
-                              <span
-                                className={
-                                  'crm-priority crm-priority-' + lead.priority
-                                }
-                              >
-                                {lead.priority}
-                              </span>
-                            </td>
-                            <td>
-                              <span
-                                className={
-                                  'crm-due crm-due-' + due(lead, asOf, timeZone)
-                                }
-                              >
-                                <Icon name="clock" size={15} />
-                                {lead.nextFollowUpAt
-                                  ? date(lead.nextFollowUpAt, true, timeZone)
-                                  : 'Not set'}
-                              </span>
+                              ) : <span className="crm-muted">No quotation</span>}
                             </td>
                             <td>
                               <div className="crm-row-actions">
@@ -832,6 +825,9 @@ export function LeadsWorkspace({
                                 >
                                   <Icon name="more" size={18} />
                                 </button>
+                                {canNote && lead.lifecycle !== 'archived' && (
+                                  <LeadUpdateComposer leadId={lead.id} leadName={lead.name} canFollowUp={canFollowUp}/>
+                                )}
                                 {canManage && lead.lifecycle !== 'archived' && (
                                   <LeadRemovalButton
                                     id={lead.id}
@@ -878,44 +874,41 @@ export function LeadsWorkspace({
                             lead.projectSize ||
                             'No requirement specified'}
                         </p>
-                        <div className="crm-mobile-chips">
-                          <span
-                            className={'crm-chip crm-chip-' + statusTone(lead)}
-                          >
-                            {lead.stageName}
-                          </span>
-                          <span
-                            className={
-                              'crm-priority crm-priority-' + lead.priority
-                            }
-                          >
-                            {lead.priority}
-                          </span>
+                        <div className="crm-mobile-summary">
+                          <span>{lead.location || 'Location not set'} · {lead.phone}</span>
+                          <div className="crm-mobile-latest">
+                            <strong>Latest update</strong>
+                            <p>{lead.latestUpdate || 'No conversations recorded yet'}</p>
+                            {lead.latestUpdateAt && <small>{date(lead.latestUpdateAt,true,timeZone)}</small>}
+                          </div>
                         </div>
-                        <div className="my-2">
-                          {lead.quoteRevisionId ? (
-                            <a
-                              className="font-semibold text-blue-700 underline"
-                              href={
-                                '/dashboard/quotations/' + lead.quoteRevisionId
-                              }
-                            >
-                              {lead.quoteNumber || 'View quotation'} ·{' '}
-                              {lead.quoteStatus?.replaceAll('_', ' ')}
-                            </a>
-                          ) : canQuote ? (
-                            <a
-                              className="font-semibold text-blue-700 underline"
-                              href={'/dashboard/quotations/new?lead=' + lead.id}
-                            >
-                              + Create quotation
-                            </a>
-                          ) : null}
+                        <div className="crm-mobile-inline-grid">
+                          <label>Stage
+                            <LeadStageSelect lead={lead} stages={stages} lostReasons={lostReasons}
+                              canManage={canManage} canWin={canWin}/>
+                          </label>
+                          <label>Assigned to
+                            <LeadAssigneeSelect lead={lead} assignees={assignees} canAssign={canAssign}/>
+                          </label>
+                          <label className="crm-mobile-followup">Next follow-up
+                            <LeadFollowUpSetter lead={lead} canFollowUp={canFollowUp}/>
+                          </label>
                         </div>
-                        <small className="crm-mobile-sub">
-                          {lead.location || 'Location not provided'} · Follow-up{' '}
-                          {date(lead.nextFollowUpAt, false, timeZone)}
-                        </small>
+                        {lead.quoteRevisionId ? (
+                          <LeadQuotePreview revisionId={lead.quoteRevisionId}
+                            number={lead.quoteNumber || 'Quotation'} status={lead.quoteStatus}
+                            amount={lead.quoteAmount} shared={lead.quoteShared} />
+                        ) : canQuote ? (
+                          <a className="crm-quote-create" href={'/dashboard/quotations/new?lead='+lead.id}>
+                            + Prepare quotation
+                          </a>
+                        ) : null}
+                        {canNote && lead.lifecycle !== 'archived' && (
+                          <div className="crm-mobile-log">
+                            <LeadUpdateComposer leadId={lead.id} leadName={lead.name} canFollowUp={canFollowUp}/>
+                            <button type="button" onClick={()=>open(lead)}>View history →</button>
+                          </div>
+                        )}
                         {canManage && lead.lifecycle !== 'archived' && (
                           <div className="crm-mobile-delete">
                             <LeadRemovalButton

@@ -234,6 +234,11 @@ export default async function Leads({
       quoteRevisionId: null,
       quoteStatus: null,
       quoteNumber: null,
+      quoteAmount: null,
+      quoteShared: false,
+      latestUpdate: label(r.latest_activity),
+      latestUpdateAt: optionalText(r.latest_activity_at),
+      latestUpdateSubject: label(r.latest_activity_subject),
     };
   });
 
@@ -258,6 +263,8 @@ export default async function Leads({
         if (!row || row.quoteRevisionId) continue;
         row.quoteRevisionId = quote.revision_id;
         row.quoteStatus = typeof quote.status === 'string' ? quote.status : null;
+        row.quoteAmount = typeof quote.amount === 'string' ? quote.amount : null;
+        row.quoteShared = quote.shared === true;
         row.quoteNumber =
           typeof quote.quotation_number === 'string' ? quote.quotation_number : null;
       }
@@ -492,6 +499,7 @@ export default async function Leads({
         canAssign={s.allowed('lead.assign')}
         canWin={s.allowed('lead.win')}
         canNote={s.allowed('crm.activity.create')}
+        canFollowUp={s.allowed('crm.followup.manage')}
         canConvert={s.allowed('lead.convert')}
         canQuote={s.allowed('quotation.create', 'quotation')}
         organizationName={organization.name}
