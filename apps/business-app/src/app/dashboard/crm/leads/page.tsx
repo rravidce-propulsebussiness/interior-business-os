@@ -494,6 +494,7 @@ export default async function Leads({
         canWin={s.allowed('lead.win')}
         canNote={s.allowed('crm.activity.create')}
         canFollowUp={s.allowed('crm.followup.manage')}
+        canVisit={s.allowed('crm.site_visit.manage')}
         canConvert={s.allowed('lead.convert')}
         canQuote={s.allowed('quotation.create', 'quotation')}
         organizationName={organization.name}
