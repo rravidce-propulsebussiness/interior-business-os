@@ -1,6 +1,11 @@
 \set ON_ERROR_STOP on
 begin;
 \ir site-agreement-quotation-fixture.sql
+-- Fixture setup is deliberately privileged, before the authenticated role.
+update public.projects set industry_id=(
+  select id from public.industries where key='construction')
+where organization_id='dddddddd-dddd-4ddd-8ddd-dddddddddddd'
+  and code='demo-3bhk';
 set local role authenticated;
 \ir site-agreement-helper.sql
 select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',true);
@@ -11,8 +16,6 @@ declare
  created jsonb; again jsonb; stage uuid; quoted_scope uuid; edit jsonb;
 begin
  select id into project from public.projects where organization_id=org and code='demo-3bhk';
- update public.projects set industry_id=(select id from public.industries where key='construction')
-   where organization_id=org and id=project;
  perform public.project_site_command(org,project,'initialize','{}'::jsonb);
  contract=pg_temp.site_signed_agreement(org,project);
  select i.key into industry from public.projects p
