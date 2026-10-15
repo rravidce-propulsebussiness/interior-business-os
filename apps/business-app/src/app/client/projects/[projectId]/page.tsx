@@ -38,7 +38,7 @@ export default async function ClientProject({
     notFound();
   const client = await createServerDatabase();
   const { data: identity } = await client.auth.getUser();
-  if (!identity.user) redirect('/login');
+  if (!identity.user) redirect('/login?portal=client');
   const { data, error } = await client.rpc('construction_client_project_view', {
     p_org: org!,
     p_project: projectId,
