@@ -41,6 +41,66 @@ export default async function Convert({
       </main>
     );
   }
+  // A quotation already created a canonical customer and planning project.
+  // Reuse them; do not force the salesperson to perform duplicate searches
+  // or create a second CRN when this lead has been won.
+  const quoteRpc = s.client.rpc.bind(s.client) as unknown as (
+    name: string, args: Record<string, string>,
+  ) => Promise<{ data: unknown; error: unknown }>;
+  const leadQuoteResult = await quoteRpc('lead_quotation_list', {
+    p_organization_id: s.org,
+    p_lead_id: id,
+  });
+  const linkedQuote = !leadQuoteResult.error && Array.isArray(leadQuoteResult.data)
+    ? leadQuoteResult.data.find((item: unknown) =>
+        !!item && typeof item === 'object' &&
+        typeof (item as Record<string, unknown>).project_id === 'string')
+    : null;
+  const linkedProjectId = linkedQuote && typeof linkedQuote.project_id === 'string'
+    ? linkedQuote.project_id : '';
+  const linkedProjectResponse = linkedProjectId
+    ? await s.client.from('projects')
+        .select('id,name,customer_id')
+        .eq('organization_id', s.org).eq('id', linkedProjectId).maybeSingle()
+    : null;
+  const quoteProject = linkedProjectResponse?.data;
+  const quoteCustomerResponse = quoteProject
+    ? await s.client.from('customers').select('id,display_name')
+        .eq('organization_id', s.org).eq('id', quoteProject.customer_id).maybeSingle()
+    : null;
+  if (!l.converted_at && quoteProject && quoteCustomerResponse?.data) {
+    return (
+      <main id="main-content" className="mx-auto max-w-3xl space-y-5 p-6">
+        <Link href={'/dashboard/crm/leads/' + id} className="text-blue-700 underline">
+          ← Back to lead
+        </Link>
+        <h1 className="text-2xl font-bold">Convert Closed-Won lead</h1>
+        <p className="text-slate-600">
+          This enquiry already has a quotation-linked customer and project.
+          We will reuse both records and retain the quotation history.
+        </p>
+        <div className="rounded-2xl border border-slate-200 bg-white p-5">
+          <p><strong>Client:</strong> {quoteCustomerResponse.data.display_name}</p>
+          <p><strong>Project:</strong> {quoteProject.name}</p>
+          <p><strong>Quotation:</strong> {String(linkedQuote.quotation_number || 'Existing quotation')}</p>
+        </div>
+        <MasterForm
+          title="Confirm conversion — no duplicate records"
+          submitAction={convertLead}
+          successPath="/dashboard/projects/:id"
+          initial={{
+            id,
+            version: l.version,
+            customer_id: quoteCustomerResponse.data.id,
+            project_id: quoteProject.id,
+            project_name: quoteProject.name,
+            acknowledge_duplicate: false,
+          }}
+          fields={[]}
+        />
+      </main>
+    );
+  }
   const commercial = createQuotationRepository(s.client);
   const matches = z
     .object({
