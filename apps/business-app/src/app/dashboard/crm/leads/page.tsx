@@ -133,7 +133,7 @@ export default async function Leads({
 
   // Secondary cards are optional. A failed analytics query must not make
   // the company's lead list or existing navigation unusable.
-  const [total, dueToday, overdue, converted] =
+  const [total, dueToday, overdue, converted, lost] =
     await Promise.all([
       metric(s.crm.search('leads', {})),
       metric(
@@ -143,6 +143,7 @@ export default async function Leads({
         s.crm.search('lead_followups', { queue: 'overdue', status: 'pending' }),
       ),
       metric(s.crm.search('leads', { converted: true })),
+      metric(s.crm.search('leads', { lifecycle: 'lost' })),
     ]);
 
   const stages: LeadStage[] = choices.stages.rows
