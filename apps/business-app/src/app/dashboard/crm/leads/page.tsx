@@ -30,17 +30,14 @@ const number = new Intl.NumberFormat('en-IN');
 const allowedFilters = [
   'q',
   'stage_id',
-  'assigned_to',
   'source_id',
   'branch_id',
   'priority',
   'due',
   'from',
   'until',
-  'converted',
   'lifecycle',
   'sort',
-  'unassigned',
   'view',
 ] as const;
 
@@ -133,7 +130,7 @@ export default async function Leads({
 
   // Secondary cards are optional. A failed analytics query must not make
   // the company's lead list or existing navigation unusable.
-  const [total, dueToday, overdue, converted, lost] =
+  const [total, dueToday, overdue, converted, won, lost] =
     await Promise.all([
       metric(s.crm.search('leads', {})),
       metric(
@@ -143,6 +140,7 @@ export default async function Leads({
         s.crm.search('lead_followups', { queue: 'overdue', status: 'pending' }),
       ),
       metric(s.crm.search('leads', { converted: true })),
+      metric(s.crm.search('leads', { lifecycle: 'won' })),
       metric(s.crm.search('leads', { lifecycle: 'lost' })),
     ]);
 
@@ -270,11 +268,10 @@ export default async function Leads({
       href: searchLink(p, {
         lifecycle: null,
         stage_id: null,
-        converted: null,
         due: null,
       }),
       count: total,
-      active: !p.lifecycle && !p.stage_id && !p.converted && !p.due,
+      active: !p.lifecycle && !p.stage_id && !p.due,
     },
     ...stages
       .filter((stage) => stage.outcome === 'open')
@@ -284,28 +281,25 @@ export default async function Leads({
         href: searchLink(p, {
           stage_id: stage.id,
           lifecycle: null,
-          converted: null,
-          due: null,
+            due: null,
         }),
         count: p.stage_id === stage.id ? result.total : null,
         active: p.stage_id === stage.id,
       })),
     {
-      label: 'Converted',
+      label: 'Won',
       href: searchLink(p, {
-        converted: 'true',
-        lifecycle: null,
+        lifecycle: 'won',
         stage_id: null,
         due: null,
       }),
-      count: converted,
-      active: p.converted === 'true',
+      count: won,
+      active: p.lifecycle === 'won',
     },
     {
       label: 'Lost',
       href: searchLink(p, {
         lifecycle: 'lost',
-        converted: null,
         stage_id: null,
         due: null,
       }),
