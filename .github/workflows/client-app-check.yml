@@ -6,6 +6,9 @@ on:
       - 'apps/business-app/src/app/dashboard/crm/**'
       - 'apps/business-app/src/app/dashboard/leads-navigation.ts'
       - 'apps/business-app/src/app/dashboard/quotations/**'
+      - 'apps/business-app/next.config.ts'
+      - 'scripts/hostinger-build.mjs'
+      - 'server.js'
       - '.github/workflows/client-app-check.yml'
   pull_request:
     paths:
@@ -13,6 +16,9 @@ on:
       - 'apps/business-app/src/app/dashboard/crm/**'
       - 'apps/business-app/src/app/dashboard/leads-navigation.ts'
       - 'apps/business-app/src/app/dashboard/quotations/**'
+      - 'apps/business-app/next.config.ts'
+      - 'scripts/hostinger-build.mjs'
+      - 'server.js'
       - '.github/workflows/client-app-check.yml'
 permissions:
   contents: read
