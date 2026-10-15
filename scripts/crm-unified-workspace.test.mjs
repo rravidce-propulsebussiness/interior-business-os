@@ -274,3 +274,52 @@ test('client timeline uses only the invited project’s canonical workflow', () 
   assert.match(timeline, /Work timeline/);
   assert.match(timeline, /completed_at/);
 });
+
+
+test('premium client dashboard reads only invited-project delivery data', () => {
+  const sql = readFileSync(
+    fileURLToPath(new URL(
+      '../packages/database/supabase/migrations/20261015001000_client_dashboard_read.sql',
+      import.meta.url,
+    )), 'utf8',
+  );
+  const project = readFileSync(
+    fileURLToPath(new URL(
+      '../apps/business-app/src/app/client/projects/[id]/page.tsx',
+      import.meta.url,
+    )), 'utf8',
+  );
+  const dashboard = readFileSync(
+    fileURLToPath(new URL(
+      '../apps/business-app/src/app/client/client-dashboard.tsx',
+      import.meta.url,
+    )), 'utf8',
+  );
+  const styles = readFileSync(
+    fileURLToPath(new URL(
+      '../apps/business-app/src/app/client/client-dashboard.css',
+      import.meta.url,
+    )), 'utf8',
+  );
+  assert.match(sql, /not private\.client_portal_accessible\(p_project_id\)/);
+  assert.match(sql, /project_id=p_project_id/);
+  assert.match(sql, /gr\.project_id=p_project_id/);
+  assert.match(sql, /ri\.po_item_id=item\.id/);
+  assert.match(sql, /private\.finance_decimal\(ri\.received_quantity,false\)/);
+  assert.match(sql, /'status','requested'/);
+  assert.match(sql, /public\.project_inspections/);
+  assert.match(sql, /private\.site_reports/);
+  assert.match(sql, /revoke all on function public\.client_portal_dashboard\(uuid\) from public,anon/);
+  assert.doesNotMatch(sql, /public\.invoices|public\.payments|vendor_name|unit_price/);
+  assert.match(project, /rpc\('client_portal_dashboard', \{ p_project_id: id \}\)/);
+  assert.match(project, /<ClientDashboard/);
+  for (const area of ['Project timeline', 'Materials delivery status',
+    "Tomorrow's work plan", "Today's site progress", 'Quality checks',
+    'Site photos & updates', 'Designs & documents', 'Client approvals',
+    'Recent updates']) {
+    assert.ok(dashboard.includes(area), area + ' must be available to clients');
+  }
+  assert.match(dashboard, /goods_receipt|Materials delivered|client\/media/);
+  assert.match(styles, /@media\(max-width:720px\)/);
+  assert.match(styles, /pc-mobile-tabs/);
+});
