@@ -18,7 +18,10 @@ export async function logLeadUpdate(input: unknown): Promise<{ok: boolean; messa
   try {
     const value = logSchema.parse(input);
     const s = await crmServices('crm.activity.create');
-    const { error } = await s.client.rpc('crm_lead_log_update', {
+    const rpc = s.client.rpc.bind(s.client) as unknown as (
+      name: string, args: Record<string, unknown>,
+    ) => Promise<{error: {code?: string; message: string} | null}>;
+    const { error } = await rpc('crm_lead_log_update', {
       p_organization_id: s.org,
       p_lead_id: value.leadId,
       p_activity_type: value.activityType,

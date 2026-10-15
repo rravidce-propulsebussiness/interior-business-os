@@ -20,6 +20,7 @@ import {
 import { leadServiceFromIndustryKey } from '../lead-service-options';
 import type { LeadOption, LeadStage, LeadView } from '../workspace';
 import '../../../owner-dashboard.css';
+import '../leads.css';
 import './lead-history.css';
 import '../lead-category.css';
 

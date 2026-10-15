@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useRef, useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { logLeadUpdate } from './lead-update-actions';
 
@@ -30,7 +30,7 @@ export function LeadUpdateComposer({
   const [next,setNext]=useState('');
   const [busy,setBusy]=useState(false);
   const [feedback,setFeedback]=useState('');
-  const save=async(e:React.FormEvent<HTMLFormElement>)=>{
+  const save=async(e:FormEvent<HTMLFormElement>)=>{
     e.preventDefault();
     if (!outcome.trim()) return;
     setBusy(true);setFeedback('');
