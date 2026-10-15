@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { runCrmCommand } from '../actions';
+import { LeadRemovalButton } from './lead-removal-button';
 import type { LeadStage, LeadView } from './workspace';
 import { leadCategoryLabel } from './lead-category';
 
@@ -224,6 +225,13 @@ export function LeadsBoardView({
                         <button type="button" onClick={() => onOpen(lead)}>
                           Details
                         </button>
+                        {canManage && lead.lifecycle !== 'archived' && (
+                          <LeadRemovalButton
+                            id={lead.id}
+                            name={lead.name}
+                            version={lead.version}
+                          />
+                        )}
                       </div>
                       {canManage && lead.lifecycle !== 'archived' && (
                         <label className="crm-board-stage-control">

@@ -4,8 +4,8 @@ import { useRouter } from 'next/navigation';
 import { quotationCommand } from './actions';
 
 export function QuotationRemovalButton({
-  id, number, version,
-}: { id: string; number: string; version: number }) {
+  id, number, version, issued,
+}: { id: string; number: string; version: number; issued: boolean }) {
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState('');
   const router = useRouter();
@@ -16,9 +16,14 @@ export function QuotationRemovalButton({
         disabled={pending}
         className="qs-btn"
         style={{ color: '#b42318', cursor: 'pointer', whiteSpace: 'nowrap' }}
-        title="Cancel this draft quotation; keep its revision history"
+        title={issued
+          ? 'Cancel issued quotation while retaining the customer and audit history'
+          : 'Remove draft quotation from the active list while keeping history'}
         onClick={async () => {
-          if (!window.confirm('Delete draft ' + number + '? The draft will be cancelled, not permanently erased. Issued quotes, projects and client history are preserved.')) return;
+          if (!window.confirm(
+            (issued ? 'Cancel issued ' : 'Delete draft ') + number +
+              '? This removes the quotation from the active list but keeps the document history, related projects and customer records.',
+          )) return;
           setPending(true);
           setMessage('');
           try {
@@ -36,7 +41,7 @@ export function QuotationRemovalButton({
           }
         }}
       >
-        {pending ? 'Removing…' : 'Delete'}
+        {pending ? 'Saving…' : issued ? 'Cancel' : 'Delete'}
       </button>
       {message && <small role="alert" style={{ color: '#b42318', maxWidth: 160 }}>{message}</small>}
     </span>

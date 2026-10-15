@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { OwnerIcon, type OwnerIconName } from '../../owner-shell';
 import { QuickAddLead } from './quick-add-lead';
+import { LeadRemovalButton } from './lead-removal-button';
 import type { LeadServiceOption } from './lead-service-options';
 import { leadCategoryLabel, type LeadCategory } from './lead-category';
 import { LeadsBoardView } from './board-view';
@@ -831,6 +832,13 @@ export function LeadsWorkspace({
                                 >
                                   <Icon name="more" size={18} />
                                 </button>
+                                {canManage && lead.lifecycle !== 'archived' && (
+                                  <LeadRemovalButton
+                                    id={lead.id}
+                                    name={lead.name}
+                                    version={lead.version}
+                                  />
+                                )}
                               </div>
                             </td>
                           </tr>
@@ -908,6 +916,15 @@ export function LeadsWorkspace({
                           {lead.location || 'Location not provided'} · Follow-up{' '}
                           {date(lead.nextFollowUpAt, false, timeZone)}
                         </small>
+                        {canManage && lead.lifecycle !== 'archived' && (
+                          <div className="crm-mobile-delete">
+                            <LeadRemovalButton
+                              id={lead.id}
+                              name={lead.name}
+                              version={lead.version}
+                            />
+                          </div>
+                        )}
                       </article>
                     ))}
                   </div>

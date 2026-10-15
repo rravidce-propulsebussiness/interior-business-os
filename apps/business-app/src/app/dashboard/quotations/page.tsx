@@ -455,12 +455,14 @@ export default async function Quotations({
                               </strong>
                             </div>
                           </Link>
-                          {canRemoveQuotation && row.status === 'draft' &&
+                          {canRemoveQuotation &&
+                            (row.status === 'draft' || row.status === 'issued') &&
                             revisionVersions.has(row.id) && (
                               <QuotationRemovalButton
                                 id={row.id}
-                                number={row.quotation_number || 'Draft quotation'}
+                                number={row.quotation_number || 'Quotation'}
                                 version={revisionVersions.get(row.id)!}
+                                issued={row.status === 'issued'}
                               />
                             )}
                         </div>
