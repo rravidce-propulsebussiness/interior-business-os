@@ -148,30 +148,6 @@ function firstLetters(value: string) {
       .join('') || 'LD'
   );
 }
-function statusTone(lead: LeadView) {
-  if (lead.lifecycle === 'won' || lead.convertedProjectId) return 'green';
-  if (lead.lifecycle === 'lost') return 'red';
-  if (lead.lifecycle === 'archived') return 'neutral';
-  if (/quot/i.test(lead.stageName)) return 'purple';
-  if (/follow|contact/i.test(lead.stageName)) return 'amber';
-  return 'blue';
-}
-function due(lead: LeadView, asOf: string, timeZone: string) {
-  if (!lead.nextFollowUpAt) return 'none';
-  const d = new Date(lead.nextFollowUpAt).getTime();
-  if (!Number.isFinite(d)) return 'none';
-  if (d < new Date(asOf).getTime()) return 'late';
-  const day = new Intl.DateTimeFormat('sv-SE', {
-    timeZone,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  });
-  return day.format(new Date(lead.nextFollowUpAt)) ===
-    day.format(new Date(asOf))
-    ? 'today'
-    : 'future';
-}
 function csvValue(value: string) {
   const escaped = /^[=+\-@\t\r]/.test(value.trimStart()) ? "'" + value : value;
   return '"' + escaped.replaceAll('"', '""') + '"';
@@ -238,7 +214,6 @@ export function LeadsWorkspace({
   lostReasons,
   organizationName,
   timeZone,
-  asOf,
   propulseConnection,
   initialTool,
 }: {
