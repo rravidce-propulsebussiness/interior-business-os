@@ -83,11 +83,13 @@ export async function syncQuotedConstructionTimeline(
     p_organization_id: org.organizationId,
     p_project_id: projectId,
     p_action: 'workflow_create',
-    p_input: {
-      template: plan.template,
-      floors: plan.floors,
-      stages: plan.stages,
-    },
+    p_input: JSON.parse(
+      JSON.stringify({
+        template: plan.template,
+        floors: plan.floors,
+        stages: plan.stages,
+      }),
+    ),
   });
   if (workflow.error) {
     // Two simultaneous approved-quote handoffs may initialize the same project.
