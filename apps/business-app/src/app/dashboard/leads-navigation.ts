@@ -18,8 +18,6 @@ export function leadsNavigation({
     icon: 'leads',
     children: [
       { label: 'All Leads', href: leadsPath },
-      { label: 'Follow-ups', href: '/dashboard/crm/followups' },
-      { label: 'Site Visits', href: '/dashboard/crm/site-visits' },
       ...(canManage
         ? [{ label: 'Lead Settings', href: '/dashboard/crm/settings' }]
         : []),
