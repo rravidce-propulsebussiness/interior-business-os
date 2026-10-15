@@ -66,8 +66,11 @@ describe('approved quotation to construction-stage snapshot', () => {
       'G_1',
       'F_1ST_FLOOR',
     ]);
-    expect(result?.stages.find((stage) => stage.instanceCode === 'RCC/F_1ST_FLOOR'))
-      .toBeDefined();
+    expect(
+      result?.stages.find(
+        (stage) => stage.instanceCode === 'RCC/F_1ST_FLOOR',
+      ),
+    ).toBeDefined();
   });
 
   it('does not fabricate stages if the approved quote lacks a floor-wise schedule', () => {
