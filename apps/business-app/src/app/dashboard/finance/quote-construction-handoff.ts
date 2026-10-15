@@ -19,6 +19,7 @@ const quoteItemsSchema = z.array(z.object({
   id: z.uuid(),
   snapshot: z.object({ name: z.string() }),
   description: z.string(),
+  optional: z.boolean(),
 }));
 
 /**
@@ -63,7 +64,7 @@ export async function syncQuotedConstructionTimeline(
     return { created: false, reason: 'quote_incomplete', projectId };
   const { data: lines, error: linesError } = await client
     .from('quotation_items')
-    .select('id,snapshot,description')
+    .select('id,snapshot,description,optional')
     .eq('organization_id', org.organizationId)
     .eq('revision_id', parsedContract.revision_id)
     .order('id')
@@ -74,8 +75,9 @@ export async function syncQuotedConstructionTimeline(
     id: line.id,
     name: line.snapshot.name,
     description: line.description,
+    optional: line.optional,
   }));
-  const plan = projectTimelineFromQuote(industry.key, quotedLines);
+  const plan = projectTimelineFromQuote(industry.key, quotedLines.filter((line) => !line.optional));
   if (!plan) {
     return { created: false, reason: 'quote_incomplete', projectId };
   }
@@ -99,7 +101,7 @@ export async function syncQuotedConstructionTimeline(
   // Neither quote acceptance nor commercial agreement creates site progress.
   const quoteHash = createHash('md5')
     .update(quotedLines.map((line) =>
-      [line.id, line.name, line.description].join(String.fromCharCode(31)),
+      [line.id, line.name, line.description, line.optional ? '1' : '0'].join(String.fromCharCode(31)),
     ).join(String.fromCharCode(30)))
     .digest('hex');
   const workflow = await client.rpc('project_quote_timeline_create', {
