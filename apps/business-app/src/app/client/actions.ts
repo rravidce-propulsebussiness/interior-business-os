@@ -19,6 +19,8 @@ export async function clientDesignDecision(form: FormData): Promise<void> {
     note: String(form.get('note') ?? ''),
   });
   if (!fields.success) throw new Error('Invalid design response.');
+  if (fields.data.decision === 'approved' && form.get('acknowledged') !== 'on')
+    throw new Error('Confirm that you have reviewed the final drawings.');
   const db = await createServerDatabase();
   const { data } = await db.auth.getUser();
   if (!data.user) throw new Error('Please sign in as the invited client.');
