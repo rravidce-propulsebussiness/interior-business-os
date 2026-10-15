@@ -55,6 +55,21 @@ describe('approved quotation to construction-stage snapshot', () => {
     ).toEqual(['QUOTED_SCOPE']);
   });
 
+  it('accepts common numeric floor labels from the issued quotation', () => {
+    const result = constructionPlanFromQuotedDescriptions([
+      acceptedDescription([
+        { name: 'G+1', kind: 'floor' },
+        { name: '1st Floor', kind: 'floor' },
+      ]),
+    ]);
+    expect(result?.floors.map((floor) => floor.code)).toEqual([
+      'G_1',
+      'F_1ST_FLOOR',
+    ]);
+    expect(result?.stages.find((stage) => stage.instanceCode === 'RCC/F_1ST_FLOOR'))
+      .toBeDefined();
+  });
+
   it('does not fabricate stages if the approved quote lacks a floor-wise schedule', () => {
     expect(
       constructionPlanFromQuotedDescriptions(['Normal interior quote']),
