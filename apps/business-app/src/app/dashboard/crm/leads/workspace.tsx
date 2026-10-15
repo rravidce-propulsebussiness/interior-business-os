@@ -826,16 +826,22 @@ export function LeadsWorkspace({
                           <label className="crm-mobile-followup">Next follow-up
                             <LeadFollowUpSetter lead={lead} canFollowUp={canFollowUp}/>
                           </label>
+                          <div className="crm-mobile-quotation">
+                            <span className="crm-mobile-field-label">Quotation</span>
+                            {lead.quoteRevisionId ? (
+                              <LeadQuotePreview revisionId={lead.quoteRevisionId}
+                                number={lead.quoteNumber || 'Quotation'} status={lead.quoteStatus}
+                                amount={lead.quoteAmount} shared={lead.quoteShared} />
+                            ) : canQuote ? (
+                              <a className="crm-quote-create" href={'/dashboard/quotations/new?lead='+lead.id}>
+                                <span>+ Prepare quotation</span>
+                                <span aria-hidden="true">↗</span>
+                              </a>
+                            ) : (
+                              <span className="crm-muted">No quotation yet</span>
+                            )}
+                          </div>
                         </div>
-                        {lead.quoteRevisionId ? (
-                          <LeadQuotePreview revisionId={lead.quoteRevisionId}
-                            number={lead.quoteNumber || 'Quotation'} status={lead.quoteStatus}
-                            amount={lead.quoteAmount} shared={lead.quoteShared} />
-                        ) : canQuote ? (
-                          <a className="crm-quote-create" href={'/dashboard/quotations/new?lead='+lead.id}>
-                            + Prepare quotation
-                          </a>
-                        ) : null}
                         <div className="crm-premium-mobile-actions">
                           {lead.phoneNormalized && <a href={'tel:' + safePhone(lead.phoneNormalized)}
                             aria-label={'Call ' + lead.name}><Icon name="phone"/> Call</a>}
