@@ -35,7 +35,10 @@ export async function GET(request: Request) {
     if (!error) {
       // A verified invited client has no company membership. Their portal is
       // selected by permission-checked RPC, not a caller-controlled redirect.
-      const { data: projects, error: portalError } = await client.rpc(
+      const rpc = client.rpc.bind(client) as unknown as (
+        name: string,
+      ) => Promise<{ data: unknown; error: unknown }>;
+      const { data: projects, error: portalError } = await rpc(
         'client_portal_projects',
       );
       if (!portalError && Array.isArray(projects) && projects.length > 0)
