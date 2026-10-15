@@ -131,8 +131,8 @@ test('Upload Leads and Google Sheets have distinct protected pages', () => {
     'utf8',
   );
   assert.match(leadPage, /leadsNavigation/);
-  assert.match(unifiedNav, /label: 'Follow-ups'/);
-  assert.match(unifiedNav, /label: 'Site Visits'/);
+  assert.doesNotMatch(unifiedNav, /label: 'Follow-ups'/);
+  assert.doesNotMatch(unifiedNav, /label: 'Site Visits'/);
 
   assert.doesNotMatch(importer, /setMethod/);
   assert.doesNotMatch(importer, /crm-import-methods/);
@@ -480,4 +480,30 @@ test('one lead supports multiple package quotations and previews newest, with si
   assert.match(quoteList, /qs-quote-edit/);
   assert.match(quoteList, /\?step=quote/);
   assert.match(quoteList, /Ready to share/);
+});
+
+test('Follow-ups and Visits are handled inside Leads and legacy links redirect', () => {
+  const activity = readFileSync(fileURLToPath(new URL('lead-activity-scheduler.tsx', root)), 'utf8');
+  const actions = readFileSync(fileURLToPath(new URL('lead-activity-actions.ts', root)), 'utf8');
+  const panel = readFileSync(fileURLToPath(new URL('lead-activity-panel.tsx', root)), 'utf8');
+  const drawer = readFileSync(fileURLToPath(new URL('lead-details-drawer.tsx', root)), 'utf8');
+  const detail = readFileSync(fileURLToPath(new URL('[id]/page.tsx', root)), 'utf8');
+  const followups = readFileSync(fileURLToPath(new URL('../followups/page.tsx', root)), 'utf8');
+  const visits = readFileSync(fileURLToPath(new URL('../site-visits/page.tsx', root)), 'utf8');
+  assert.match(leads, /crm-activity-filters/);
+  assert.match(leads, /Upcoming Visits/);
+  assert.match(leads, /Due Today/);
+  assert.match(leads, /Overdue/);
+  assert.match(activity, /value="office_visit"/);
+  assert.match(activity, /value="site_visit"/);
+  assert.match(activity, /value="call"/);
+  assert.match(drawer, /<LeadActivityScheduler/);
+  assert.match(detail, /<LeadActivityScheduler/);
+  assert.match(actions, /crm\.followup\.manage/);
+  assert.match(actions, /crm\.site_visit\.manage/);
+  assert.match(actions, /s\.crm\.save\('site_visits'/);
+  assert.match(actions, /s\.crm\.save\('lead_followups'/);
+  assert.match(panel, /services\.crm\.search/);
+  assert.match(followups, /redirect\('\/dashboard\/crm\/leads\?'/);
+  assert.match(visits, /redirect\('\/dashboard\/crm\/leads\?'/);
 });
