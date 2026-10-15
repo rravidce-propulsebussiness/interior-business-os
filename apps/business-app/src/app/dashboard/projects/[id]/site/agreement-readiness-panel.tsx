@@ -16,6 +16,9 @@ export type ProjectAgreementState = {
   currency: string | null;
   active_contract_count: number;
   active_schedule: boolean;
+  advance_required: boolean;
+  advance_received: boolean;
+  advance_total: string;
   clearance_event_id: string | null;
   clearance_type: string | null;
   clearance_media_id: string | null;
@@ -159,6 +162,22 @@ export function AgreementReadinessPanel({
         upload the signed PDF below and record its receipt. Online e-signing
         needs the separate authenticated client signing flow.
       </p>
+      <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm">
+        <strong>Advance payment</strong>
+        <p className="mt-1 text-slate-700">
+          {state.advance_required
+            ? state.advance_received
+              ? 'Initial payment recorded'
+              : 'Awaiting actual advance receipt'
+            : 'No additional advance gate on this existing contract'}
+          {' · '}{state.currency ?? 'INR'} {state.advance_total}
+        </p>
+        {state.advance_required && !state.advance_received && (
+          <p className="mt-1 text-amber-800">
+            An issued request is not a receipt. Record the received advance in Billing before starting site work.
+          </p>
+        )}
+      </div>
       {state.active_contract_count > 1 && (
         <p className="mt-4 text-sm font-medium text-amber-800">
           Multiple active contracts exist for this project. Resolve the
