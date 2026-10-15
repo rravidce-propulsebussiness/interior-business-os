@@ -383,15 +383,29 @@ export async function renderConstructionPackageSamplePdf(input: {
   y -= 12;
   const sections = input.sections.filter((section) =>
     Boolean(section.title.trim() || section.brand.trim() || section.grade.trim() ||
-      section.description.trim() || section.allowancePerSqft.trim()));
+      section.description.trim() || section.allowancePerSqft.trim() ||
+      Boolean(section.allowanceValue?.trim())));
   if (!sections.length) line('No specifications entered for this package.', 11, false, subdued);
   for (const [index, section] of sections.entries()) {
     ensure(76);
     line(String(index + 1).padStart(2, '0') + '  ' + section.title, 12, true, accent);
     if (section.brand) line('Brand: ' + section.brand, 10, false, ink, 18);
     if (section.grade) line('Grade: ' + section.grade, 10, false, ink, 18);
-    if (section.allowancePerSqft)
-      line('Allowance: INR ' + section.allowancePerSqft + ' / sq ft', 10, false, ink, 18);
+    const treatment = section.pricingTreatment ?? (section.allowancePerSqft ? 'allowance' : 'included');
+    const unit = section.unit ?? (section.allowancePerSqft ? 'sqft' : 'none');
+    const amount = section.allowanceValue ?? section.allowancePerSqft;
+    const units: Record<string, string> = {
+      none: 'as specified', sqft: 'sq ft', bathroom: 'bathroom', door: 'door',
+      piece: 'piece', kg: 'kg', tonne: 'tonne', bag: 'bag',
+      cubic_meter: 'cubic metre', running_ft: 'running ft', point: 'point',
+      lumpsum: 'lump sum', meter: 'metre', bhk: 'BHK',
+    };
+    if (treatment === 'excluded')
+      line('Excluded', 10, false, ink, 18);
+    else if ((treatment === 'allowance' || treatment === 'extra') && amount && unit !== 'none')
+      line((treatment === 'extra' ? 'Chargeable extra' : 'Included allowance') +
+        ': INR ' + amount + ' / ' + (units[unit] ?? unit), 10, false, ink, 18);
+    else line('Included in base package price', 10, false, subdued, 18);
     if (section.description) line(section.description, 10, false, ink, 18);
     y -= 11;
   }
