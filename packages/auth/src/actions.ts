@@ -26,12 +26,29 @@ export async function signIn(_state: { message: string }, form: FormData) {
       return {
         message: 'Sign-in failed. Check your credentials or contact support.',
       };
+    // A client-only account should never land in the staff organization
+    // dashboard. Database authorization still controls which projects appear.
+    const { data: authUser } = await client.auth.getUser();
+    let clientPortal = false;
+    if (authUser.user) {
+      const [member, accessible] = await Promise.all([
+        client.from('organization_memberships')
+          .select('id')
+          .eq('user_id', authUser.user.id)
+          .eq('status', 'active')
+          .limit(1),
+        (client.rpc.bind(client) as unknown as (
+          name: string,
+        ) => Promise<{ data: unknown; error: unknown }>)('client_portal_projects'),
+      ]);
+      clientPortal = !(member.data?.length) &&
+        !accessible.error && Array.isArray(accessible.data) &&
+        accessible.data.length > 0;
+    }
+    return { message: '', authenticated: true, clientPortal };
   } catch (error) {
     return { message: safeFailure(error).message };
   }
-  // The browser performs a fresh navigation after the session cookie has
-  // been committed; a server-action redirect would navigate via RSC Flight.
-  return { message: '', authenticated: true };
 }
 export async function signUp(_state: { message: string }, form: FormData) {
   try {
