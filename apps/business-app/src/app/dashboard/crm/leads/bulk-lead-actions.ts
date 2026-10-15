@@ -44,8 +44,8 @@ export async function bulkUpdateLeads(input: unknown): Promise<BulkLeadResult> {
       : value.action === 'stage' ? 'lead.manage' : 'crm.followup.manage';
     const s = await crmServices(permission);
     if (value.action === 'assign' && value.assignedTo) {
-      const members = await s.repository.team(s.org);
-      if (!members.some((person) => person.user_id === value.assignedTo && person.status === 'active'))
+      const members = await s.crm.assignees('', 1);
+      if (!members.some((person) => person.user_id === value.assignedTo))
         return { ok: false, updated: 0, failed: value.leads.length,
           message: 'Choose an active employee in this company.' };
     }
