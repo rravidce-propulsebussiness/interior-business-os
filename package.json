@@ -29,7 +29,7 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "format": "prettier --write .",
-    "format:check": "prettier --check .",
+    "format:check": "node scripts/construction-format-dump.mjs && prettier --check .",
     "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm security:client && pnpm security:secrets && pnpm test:e2e",
     "db:verify": "node packages/database/scripts/verify.mjs",
     "db:test": "node packages/database/scripts/test.mjs",
