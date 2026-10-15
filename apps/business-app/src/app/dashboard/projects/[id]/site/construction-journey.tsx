@@ -367,10 +367,10 @@ export function ConstructionJourney({
           <div className="cj-empty">
             <h3>Awaiting approved quotation handoff</h3>
             <p>
-              Construction stages are prepared automatically from the approved floor-wise
-              quotation when its agreement is created. If you cannot see the
-              scope, ask an authorized project manager to check the accepted
-              agreement. No stage progress or payments are guessed.
+              Construction stages are prepared automatically from the approved
+              floor-wise quotation when its agreement is created. If you cannot
+              see the scope, ask an authorized project manager to check the
+              accepted agreement. No stage progress or payments are guessed.
             </p>
             {canManageLinks && (
               <Link href={go('#construction-planning')}>
