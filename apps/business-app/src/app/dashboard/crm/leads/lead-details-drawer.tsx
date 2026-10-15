@@ -79,7 +79,13 @@ export function LeadDetailsDrawer({
               number={lead.quoteNumber || 'Quotation'} amount={lead.quoteAmount}
               status={lead.quoteStatus} shared={lead.quoteShared}/>
             : <p className="crm-drawer-update">No quotation linked to this lead yet.</p>}
-          {!lead.quoteRevisionId && canQuote && <a className="crm-drawer-link" href={quoteHref}>Prepare quotation</a>}
+          {canQuote && lead.lifecycle !== 'archived' &&
+            <a className="crm-drawer-link" href={quoteHref}>
+              {lead.quoteRevisionId ? '+ New quotation (another package)' : '+ Prepare quotation'}
+            </a>}
+          {lead.quoteRevisionId && <a className="crm-drawer-link" href={detailHref + '#lead-quotations'}>
+            View all quotations →
+          </a>}
           <p className="crm-drawer-hint">Use Preview to review the exact saved quotation and specifications while speaking with the customer.</p>
         </>}
         {tab === 'history' && <>
