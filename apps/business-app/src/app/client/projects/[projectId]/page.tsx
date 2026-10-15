@@ -129,7 +129,7 @@ export default async function ClientProject({
                   {update.completed}
                 </p>
                 <h3 className="mt-4 text-xs font-bold uppercase text-slate-500">
-                  Tomorrow's work
+                  Tomorrow&apos;s work
                 </h3>
                 <p className="mt-1 whitespace-pre-wrap text-sm">
                   {update.tomorrow}
