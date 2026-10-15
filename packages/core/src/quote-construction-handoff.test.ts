@@ -67,9 +67,7 @@ describe('approved quotation to construction-stage snapshot', () => {
       'F_1ST_FLOOR',
     ]);
     expect(
-      result?.stages.find(
-        (stage) => stage.instanceCode === 'RCC/F_1ST_FLOOR',
-      ),
+      result?.stages.find((stage) => stage.instanceCode === 'RCC/F_1ST_FLOOR'),
     ).toBeDefined();
   });
 
