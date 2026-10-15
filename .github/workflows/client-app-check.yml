@@ -1,17 +1,23 @@
-name: Client app typecheck and build
+name: Business app typecheck and build
 on:
   push:
     paths:
       - 'apps/business-app/src/app/client/**'
+      - 'apps/business-app/src/app/dashboard/crm/**'
+      - 'apps/business-app/src/app/dashboard/leads-navigation.ts'
+      - 'apps/business-app/src/app/dashboard/quotations/**'
       - '.github/workflows/client-app-check.yml'
   pull_request:
     paths:
       - 'apps/business-app/src/app/client/**'
+      - 'apps/business-app/src/app/dashboard/crm/**'
+      - 'apps/business-app/src/app/dashboard/leads-navigation.ts'
+      - 'apps/business-app/src/app/dashboard/quotations/**'
       - '.github/workflows/client-app-check.yml'
 permissions:
   contents: read
 jobs:
-  client-app:
+  business-app:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
