@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-html-link-for-pages -- Use fresh document navigations on Hostinger to avoid interrupted RSC Flight responses. */
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { OwnerIcon, type OwnerIconName } from '../../owner-shell';
 import { QuickAddLead } from './quick-add-lead';
 import { LeadRemovalButton } from './lead-removal-button';
@@ -220,10 +220,12 @@ export function LeadsWorkspace({
   canAssign,
   canNote,
   canFollowUp,
+  canVisit,
   lostReasons,
   organizationName,
   timeZone,
   propulseConnection,
+  activityPanel,
   initialTool,
 }: {
   rows: LeadView[];
@@ -253,12 +255,14 @@ export function LeadsWorkspace({
   canWin: boolean;
   canNote: boolean;
   canFollowUp: boolean;
+  canVisit: boolean;
   canConvert: boolean;
   canQuote: boolean;
   organizationName: string;
   timeZone: string;
   asOf: string;
   propulseConnection: ProPulseConnectionView;
+  activityPanel: ReactNode;
   initialTool: 'none' | 'add' | 'propulse';
 }) {
   const [openedId, setOpenedId] = useState<string | null>(null);
@@ -415,6 +419,26 @@ export function LeadsWorkspace({
         ))}
       </div>
 
+      <nav className="crm-activity-filters" aria-label="Lead and activity filters">
+        <a aria-current={!params.activity ? 'page' : undefined} href="/dashboard/crm/leads">All Leads</a>
+        <a aria-current={params.activity === 'followups' && params.queue === 'today' ? 'page' : undefined}
+          href="/dashboard/crm/leads?activity=followups&queue=today#lead-activities">Due Today</a>
+        <a aria-current={params.activity === 'visits' && params.queue === 'upcoming' ? 'page' : undefined}
+          href="/dashboard/crm/leads?activity=visits&queue=upcoming#lead-activities">Upcoming Visits</a>
+        <a aria-current={params.activity === 'followups' && params.queue === 'overdue' ? 'page' : undefined}
+          href="/dashboard/crm/leads?activity=followups&queue=overdue#lead-activities">Overdue</a>
+        <a aria-current={params.activity === 'followups' && !params.queue ? 'page' : undefined}
+          href="/dashboard/crm/leads?activity=followups#lead-activities">All Follow-ups</a>
+      </nav>
+      {params.activity && <section className="crm-activity-embedded" id="lead-activities">
+        <div className="crm-activity-heading">
+          <div><h2>{params.activity === 'visits' ? 'Scheduled visits' : 'Scheduled follow-ups'}</h2>
+            <p>Manage calls and visits without leaving Leads. Open a lead to schedule more.</p></div>
+          <a href="/dashboard/crm/leads">← All Leads</a>
+        </div>
+        {activityPanel}
+      </section>}
+      {!params.activity && <>
       <section className="crm-filter-panel" aria-label="Lead filters">
         <form action={path} method="get" className="crm-filters">
           {viewMode === 'board' && (
@@ -971,11 +995,12 @@ export function LeadsWorkspace({
           </footer>
         </div>
       </section>
+      </>}
       {openedLead && <LeadDetailsDrawer
         lead={openedLead} onClose={() => setOpenedId(null)}
-        stages={stages} lostReasons={lostReasons}
+        stages={stages} lostReasons={lostReasons} assignees={assignees}
         canManage={canManage} canWin={canWin}
-        canFollowUp={canFollowUp} canNote={canNote} canQuote={canQuote}
+        canFollowUp={canFollowUp} canVisit={canVisit} canNote={canNote} canQuote={canQuote}
       />}
       <p className="crm-leads-scope">
         Showing authorized leads for {organizationName}. CSV export includes
