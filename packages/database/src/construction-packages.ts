@@ -11,9 +11,9 @@ export type ConstructionSpecSection = {
   /** Legacy per-sq-ft allowance, preserved for existing saved brochures. */
   allowancePerSqft: string;
   /** Units are per specification, not the overall construction rate. */
-  unit?: 'none' | 'sqft' | 'bathroom' | 'door' | 'piece' | 'kg' | 'tonne' | 'bag' | 'cubic_meter' | 'running_ft' | 'point' | 'lumpsum' | 'meter' | 'bhk';
-  pricingTreatment?: 'included' | 'allowance' | 'extra' | 'excluded';
-  allowanceValue?: string;
+  unit?: undefined | 'none' | 'sqft' | 'bathroom' | 'door' | 'piece' | 'kg' | 'tonne' | 'bag' | 'cubic_meter' | 'running_ft' | 'point' | 'lumpsum' | 'meter' | 'bhk';
+  pricingTreatment?: undefined | 'included' | 'allowance' | 'extra' | 'excluded';
+  allowanceValue?: string | undefined;
 };
 export type ConstructionPackage = {
   themeColor: string;
