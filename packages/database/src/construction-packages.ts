@@ -8,7 +8,12 @@ export type ConstructionSpecSection = {
   brand: string;
   grade: string;
   description: string;
+  /** Legacy per-sq-ft allowance, preserved for existing saved brochures. */
   allowancePerSqft: string;
+  /** Units are per specification, not the overall construction rate. */
+  unit?: 'none' | 'sqft' | 'bathroom' | 'door' | 'piece' | 'kg' | 'tonne' | 'bag' | 'cubic_meter' | 'running_ft' | 'point' | 'lumpsum' | 'meter' | 'bhk';
+  pricingTreatment?: 'included' | 'allowance' | 'extra' | 'excluded';
+  allowanceValue?: string;
 };
 export type ConstructionPackage = {
   themeColor: string;
