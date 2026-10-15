@@ -732,17 +732,25 @@
     padding: 19px 15px;
   }
 }
-@media (max-width: 760px) {
+/* The sidebar is a drawer on narrow laptops, tablets and phones. */
+@media (max-width: 1199px) {
   .os-sidebar {
     position: fixed;
-    transform: translateX(-104%);
-    transition: transform 0.2s;
-    width: 265px;
-    max-width: 88vw;
+    transform: translateX(-105%);
+    visibility: hidden;
+    pointer-events: none;
+    transition: transform 0.2s ease, visibility 0.2s ease;
+    width: min(300px, 86vw);
+    max-width: 86vw;
     box-shadow: 10px 0 35px #0b183328;
   }
   .os-sidebar-open {
     transform: translateX(0);
+    visibility: visible;
+    pointer-events: auto;
+  }
+  .os-workspace {
+    width: 100%;
   }
   .os-overlay {
     display: block;
