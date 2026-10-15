@@ -33,15 +33,33 @@ export async function GET(request: Request, { params }: Params) {
       .single();
     const theme = /^#[A-Fa-f0-9]{6}$/.test(pkg.themeColor)
       ? pkg.themeColor
-      : '#155EEF';
+      : '#F97316';
     const total = new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency: 'INR',
       maximumFractionDigits: 0,
     }).format(Number(pkg.ratePerSqft) * 1000);
+    const unitLabel: Record<string, string> = {
+      none: 'as specified', sqft: 'sq ft', bathroom: 'bathroom',
+      door: 'door', piece: 'piece', kg: 'kg', tonne: 'tonne',
+      bag: 'bag', cubic_meter: 'm³', running_ft: 'running ft',
+      point: 'point', lumpsum: 'lump sum', meter: 'metre', bhk: 'BHK',
+    };
     const specs = pkg.specSections.filter((s) =>
-      Boolean(s.description || s.brand || s.grade || s.allowancePerSqft),
+      Boolean(s.description || s.brand || s.grade || s.allowanceValue || s.allowancePerSqft),
     );
+    const pricingHtml = (section: (typeof specs)[number]) => {
+      const treatment = section.pricingTreatment ??
+        (section.allowancePerSqft ? 'allowance' : 'included');
+      const unit = section.unit ?? (section.allowancePerSqft ? 'sqft' : 'none');
+      const value = section.allowanceValue ?? section.allowancePerSqft;
+      if (treatment === 'excluded') return '<p>Excluded from package</p>';
+      if (treatment === 'included' || !value || unit === 'none') {
+        return '<p>Included in package rate</p>';
+      }
+      return '<p>' + (treatment === 'extra' ? 'Chargeable extra' : 'Included allowance') +
+        ': ₹' + escape(value) + ' / ' + escape(unitLabel[unit] ?? unit) + '</p>';
+    };
     const specHtml = specs
       .map(
         (section, index) =>
@@ -54,11 +72,7 @@ export async function GET(request: Request, { params }: Params) {
             ? '<p>Brand: <strong>' + escape(section.brand) + '</strong></p>'
             : '') +
           (section.grade ? '<p>Grade: ' + escape(section.grade) + '</p>' : '') +
-          (section.allowancePerSqft
-            ? '<p>Specified allowance: ₹' +
-              escape(section.allowancePerSqft) +
-              '/SFT</p>'
-            : '') +
+          pricingHtml(section) +
           (section.description
             ? '<p>' + escape(section.description) + '</p>'
             : '') +
@@ -133,7 +147,7 @@ export async function GET(request: Request, { params }: Params) {
       '<h2>Materials, brands &amp; inclusions</h2>',
       '<p class="muted">Company-defined inclusions; subject to approved customer quotation.</p>',
       specHtml || '<p class="muted">No manual specifications entered.</p>',
-      '<p class="muted">Material allowances describe inclusions, not additional charges.</p>',
+      '<p class="muted">Included allowances are part of the base per-sq-ft rate; chargeable extras require a separate customer-approved quote line and quantity.</p>',
       '</section></main></body></html>',
     ].join('');
     if (new URL(request.url).searchParams.get('format') === 'html') {
