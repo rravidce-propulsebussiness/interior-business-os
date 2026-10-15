@@ -11,6 +11,7 @@ import { OwnerShell, type OwnerNavItem } from '../../../owner-shell';
 import { leadsNavigation } from '../../../leads-navigation';
 import { LeadHistoryTimeline, type LeadHistoryItem } from '../lead-history-timeline';
 import { LeadUpdateComposer } from '../lead-update-composer';
+import { LeadActivityScheduler } from '../lead-activity-scheduler';
 import { LeadStageSelect, LeadAssigneeSelect, LeadFollowUpSetter } from '../lead-inline-controls';
 import { LeadQuotePreview } from '../lead-quote-preview';
 import { LeadCategoryEditor } from './lead-category-editor';
@@ -40,10 +41,12 @@ export default async function LeadDetail({
     .eq('organization_id',s.org).eq('id',id).maybeSingle();
   if(error||!l)notFound();
 
-  const [choices, activity, organization, user, plans, memberships, industries] =
+  const [choices, activity, scheduledCalls, scheduledVisits, organization, user, plans, memberships, industries] =
     await Promise.all([
       lookups(s,p),
       s.crm.search('lead_activities',{lead_id:id},pageNumber(p.page)),
+      s.crm.search('lead_followups',{lead_id:id},1),
+      s.crm.search('site_visits',{lead_id:id},1),
       s.repository.organization(s.org),
       s.authorization.requireAuthenticatedUser(),
       s.repository.plans().catch(()=>null),
@@ -60,6 +63,29 @@ export default async function LeadDetail({
     at:String(item.occurred_at||''),
     system:item.system_generated===true,
   }));
+  // Scheduled records are shown in this single history even when no separate
+  // conversation entry was logged. Existing CRM appointment data is retained.
+  for (const row of resultSchema.parse(scheduledCalls).rows) {
+    if(typeof row.due_at!=='string')continue;
+    history.push({
+      id:'followup-'+String(row.id),
+      type:'follow_up',
+      title:row.followup_type==='meeting'?'Office visit / meeting':'Follow-up call',
+      body:String(row.status||'pending')+' · '+String(row.note||''),
+      at:row.due_at,system:true,
+    });
+  }
+  for (const row of resultSchema.parse(scheduledVisits).rows) {
+    if(typeof row.scheduled_at!=='string')continue;
+    history.push({
+      id:'visit-'+String(row.id),
+      type:'site_visit',
+      title:'Site visit',
+      body:String(row.status||'scheduled')+' · '+String(row.notes||''),
+      at:row.scheduled_at,system:true,
+    });
+  }
+  history.sort((a,b)=>b.at.localeCompare(a.at));
   const latest=history.find((entry)=>!entry.system);
   const stages:LeadStage[]=choices.stages.rows.map((row)=>({
     id:String(row.id),name:String(row.name),
@@ -186,6 +212,10 @@ export default async function LeadDetail({
 
         <div className="crm-history-main-grid">
           <div className="crm-history-main-left">
+            <LeadActivityScheduler leadId={id} leadName={l.name}
+              assignedTo={l.assigned_to||''} assignees={team}
+              defaultLocation={l.location||''}
+              canSchedule={canFollowUp&&l.lifecycle==='open'}/>
             {canNote&&l.lifecycle!=='archived'&&(
               <LeadUpdateComposer leadId={id} leadName={l.name} canFollowUp={canFollowUp} inline/>
             )}
