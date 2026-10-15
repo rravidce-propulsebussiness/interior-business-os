@@ -11,7 +11,9 @@ import {
 
 export function PremiumLoginForm({
   action,
+  destination = '/dashboard',
 }: {
+  destination?: '/dashboard' | '/client/projects';
   action: (
     state: { message: string; authenticated?: boolean },
     form: FormData,
@@ -26,10 +28,10 @@ export function PremiumLoginForm({
       // The session is already stored in the secure Supabase cookies.
       // Full-document navigation avoids the hosted RSC Flight #412 problem.
       window.location.replace(
-        new URL('/dashboard', window.location.origin).href,
+        new URL(destination, window.location.origin).href,
       );
     }
-  }, [state.authenticated]);
+  }, [state.authenticated, destination]);
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
