@@ -571,20 +571,20 @@ export default async function ProjectDeliveryPage({
             {site.stage === 'not_started' && (
               <section className={card} id="initialize">
                 <Heading
-                  eyebrow="Set up"
-                  title="Start the project delivery workflow"
-                  detail="A company manager initiates delivery after creating the customer project. The design stage starts first."
+                  eyebrow="Quote-first project delivery"
+                  title="Awaiting the approved quotation and agreement"
+                  detail="Site Delivery and the planned stage timeline are created automatically when the approved construction or interior quote becomes an agreement."
                 />
-                {manager ? (
-                  <Action
-                    project={id}
-                    operation="initialize"
-                    label="Initialize design stage"
-                    fields={[]}
-                  />
-                ) : (
-                  <p className="text-sm text-amber-800">
-                    Ask your project manager to initialize the delivery process.
+                <Link
+                  href="/dashboard/quotations"
+                  className="inline-flex rounded-lg border border-blue-200 bg-white px-4 py-2 text-sm font-semibold text-blue-800"
+                >
+                  View quotation and agreement
+                </Link>
+                {manager && (
+                  <p className="mt-2 text-xs text-slate-600">
+                    If the agreement was created earlier, use the quote recovery
+                    action in the stage panel. Do not enter floors or stages twice.
                   </p>
                 )}
               </section>
