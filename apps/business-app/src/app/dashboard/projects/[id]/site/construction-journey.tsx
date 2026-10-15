@@ -280,7 +280,9 @@ export function ConstructionJourney({
       <div className="cj-header">
         <div>
           <p className="cj-eyebrow">Construction execution · Live records</p>
-          <h2>{isWatchman ? 'Curing & security log' : 'Construction journey'}</h2>
+          <h2>
+            {isWatchman ? 'Curing & security log' : 'Construction journey'}
+          </h2>
           <p>
             {isWatchman
               ? 'Record curing rounds with time, location and photo evidence.'
