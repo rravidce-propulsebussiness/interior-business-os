@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import type { ConstructionPackage } from '@business-os/database/construction-packages';
@@ -21,6 +21,8 @@ export function ConstructionPackagesManager({
 }: { packages: ConstructionPackage[]; canManage: boolean }) {
   const router = useRouter();
   const [editing, setEditing] = useState<string | null>(null);
+  const [moreFor, setMoreFor] = useState<string | null>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
   const [filter, setFilter] = useState<'all' | 'active' | 'custom' | 'inactive'>('all');
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [message, setMessage] = useState('');
@@ -30,6 +32,21 @@ export function ConstructionPackagesManager({
     const ia = order.indexOf(a.code), ib = order.indexOf(b.code);
     return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib) || a.name.localeCompare(b.name);
   });
+  const selectedPackage = sorted.find((pkg) => pkg.id === editing);
+  useEffect(() => {
+    if (!editing) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    dialogRef.current?.focus();
+    const escape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setEditing(null);
+    };
+    document.addEventListener('keydown', escape);
+    return () => {
+      document.body.style.overflow = previous;
+      document.removeEventListener('keydown', escape);
+    };
+  }, [editing]);
   const visible = sorted.filter((pkg) =>
     filter === 'all' || (filter === 'custom' ? !brochureCodes.has(pkg.code) : pkg.status === filter)
   );
@@ -46,18 +63,13 @@ export function ConstructionPackagesManager({
     <section className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-7">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-orange-600">Quotation studio / construction</p>
-          <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-slate-950">Construction packages</h2>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-            Build company-specific packages with detailed brands, material grades, allowances,
-            warranties and PDF specifications. Other companies cannot see or edit these packages.
-          </p>
+          <h2 className="text-xl font-extrabold tracking-tight text-slate-950">Construction <span className="text-slate-500">({packages.length})</span></h2>
         </div>
         {canManage && <div className="flex flex-wrap gap-2">
-          <button type="button" disabled={pending} onClick={() => run(installConstructionBrochurePackages)}
+          {!['STANDARD', 'PREMIUM', 'LUXURY', 'ROYAL'].every((code) => packages.some((pkg) => pkg.code === code)) && <button type="button" disabled={pending} onClick={() => run(installConstructionBrochurePackages)}
             className="rounded-xl border border-orange-200 bg-orange-50 px-4 py-3 text-xs font-bold text-orange-700 hover:bg-orange-100 disabled:opacity-50">
-            Import 4 brochure packages
-          </button>
+            Add starter packages
+          </button>}
           <button type="button" onClick={() => setEditing(editing === 'new' ? null : 'new')}
             className="rounded-xl bg-orange-600 px-5 py-3 text-xs font-bold text-white hover:bg-orange-700">
             + New package
@@ -84,7 +96,6 @@ export function ConstructionPackagesManager({
       </div>
 
       {message && <p role="status" className="mt-4 rounded-xl bg-slate-50 px-4 py-3 text-sm text-slate-700">{message}</p>}
-      {editing === 'new' && canManage && <div className="mt-5"><PremiumPackageEditor close={() => setEditing(null)} /></div>}
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {visible.map((item) => (
@@ -101,35 +112,33 @@ export function ConstructionPackagesManager({
               <p className="mt-1 text-2xl font-extrabold tabular-nums" style={{ color: item.themeColor }}>
                 {cash(item.ratePerSqft)}<span className="ml-1 text-xs font-semibold text-slate-500">/ sq ft</span>
               </p>
-              <p className="mt-3 line-clamp-3 min-h-14 text-xs leading-5 text-slate-600">
-                {item.description || 'Create a detailed construction package with your company specifications.'}
-              </p>
-              <div className="my-4 rounded-xl bg-slate-50 p-3 text-xs leading-6 text-slate-700">
-                <p>✓ {item.specSections?.length ?? 0} editable specification categories</p>
-                <p>✓ {item.attachmentFilename ? 'Original specification PDF attached' : 'Company-branded generated PDF'}</p>
-                <p>✓ {brochureCodes.has(item.code) ? 'Brochure starter · fully editable' : 'Custom company package'}</p>
-              </div>
+              <p className="mt-2 line-clamp-2 text-xs leading-5 text-slate-500">{item.description}</p>
+              <p className="mt-3 text-xs text-slate-500">{item.specSections?.length ?? 0} specifications{item.attachmentFilename ? ' · PDF attached' : ''}</p>
             </div>
-            <div className="mt-auto flex flex-wrap items-center gap-2 border-t border-slate-100 px-4 py-4">
-              <Link href={'/dashboard/pricing/construction/packages/' + item.id + '/preview'}
-                target="_blank" className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold text-slate-700">
+            <div className="mt-auto grid grid-cols-2 gap-2 border-t border-slate-100 px-4 py-4">
+              {canManage && <button type="button" aria-label={'Edit ' + item.name} onClick={() => { setEditing(item.id); setMoreFor(null); }}
+                className="min-h-11 rounded-xl bg-orange-600 px-3 py-2 text-sm font-bold text-white">
+                Edit
+              </button>}
+              <Link href={'/dashboard/pricing/construction/packages/' + item.id + '/preview?format=pdf'}
+                target="_blank" rel="noopener noreferrer" aria-label={'Preview PDF for ' + item.name}
+                className="flex min-h-11 items-center justify-center rounded-xl border border-slate-200 px-3 py-2 text-center text-sm font-bold text-slate-700">
                 Preview PDF
               </Link>
-              {canManage && <>
-                <button type="button" onClick={() => setEditing(editing === item.id ? null : item.id)}
-                  className="rounded-lg bg-orange-600 px-3 py-2 text-xs font-bold text-white">
-                  Edit
+              {canManage && <div className="relative col-span-2">
+                <button type="button" aria-expanded={moreFor === item.id}
+                  onClick={() => setMoreFor(moreFor === item.id ? null : item.id)}
+                  className="w-full min-h-10 rounded-lg px-3 py-2 text-xs font-semibold text-slate-500 hover:bg-slate-50">
+                  {moreFor === item.id ? 'Hide options ↑' : 'More options ···'}
                 </button>
-                <button type="button" disabled={pending}
-                  onClick={() => run(() => duplicateConstructionPackage(item.id))}
-                  className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold text-slate-700 disabled:opacity-50">
-                  Duplicate
-                </button>
-                <button type="button" onClick={() => setConfirmDelete(item.id)}
-                  className="rounded-lg border border-red-200 px-3 py-2 text-xs font-bold text-red-700">
-                  Delete
-                </button>
-              </>}
+                {moreFor === item.id && <div className="grid grid-cols-2 gap-2 rounded-xl bg-slate-50 p-2">
+                  <button type="button" disabled={pending}
+                    onClick={() => { setMoreFor(null); run(() => duplicateConstructionPackage(item.id)); }}
+                    className="min-h-10 rounded-lg bg-white px-3 py-2 text-xs font-bold text-slate-700 disabled:opacity-50">Duplicate</button>
+                  <button type="button" onClick={() => { setConfirmDelete(item.id); setMoreFor(null); }}
+                    className="min-h-10 rounded-lg bg-white px-3 py-2 text-xs font-bold text-red-700">Delete</button>
+                </div>}
+              </div>}
             </div>
             {canManage && confirmDelete === item.id && <div className="border-t border-red-100 bg-red-50 p-4 text-sm text-red-900">
               <p className="font-bold">Delete {item.name}?</p>
@@ -147,16 +156,19 @@ export function ConstructionPackagesManager({
         ))}
       </div>
 
-      {canManage && editing !== null && editing !== 'new' && packages
-        .filter((item) => item.id === editing)
-        .map((item) => (
-          <div key={item.id + ':' + item.version} className="mt-6 scroll-mt-20" id="construction-package-editor">
-            <PremiumPackageEditor item={item} close={() => setEditing(null)} />
-          </div>
-        ))}
+      {canManage && editing && <div className="fixed inset-0 z-[100] overflow-y-auto bg-slate-950/65 p-2 sm:p-6"
+        role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setEditing(null); }}>
+        <div ref={dialogRef} tabIndex={-1} role="dialog" aria-modal="true"
+          aria-label={selectedPackage ? 'Edit ' + selectedPackage.name : 'New construction package'}
+          className="mx-auto w-full max-w-5xl outline-none">
+          {editing === 'new' ? <PremiumPackageEditor key="new" close={() => setEditing(null)} /> :
+            selectedPackage ? <PremiumPackageEditor key={selectedPackage.id + ':' + selectedPackage.version}
+              item={selectedPackage} close={() => setEditing(null)} /> : null}
+        </div>
+      </div>}
 
       {visible.length === 0 && <p className="mt-6 rounded-xl border border-dashed border-slate-200 bg-slate-50 p-5 text-sm text-slate-600">
-        No matching packages. Choose New package, or import the four editable brochure starters.
+        No matching packages.
       </p>}
     </section>
   );
