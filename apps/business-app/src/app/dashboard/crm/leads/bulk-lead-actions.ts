@@ -50,7 +50,7 @@ export async function bulkUpdateLeads(input: unknown): Promise<BulkLeadResult> {
           message: 'Choose an active employee in this company.' };
     }
     if (value.action === 'stage') {
-      const stages = await s.crm.search('lead_stages', {}, 1);
+      const stages = await s.crm.search('crm_pipeline_stages', { active: true }, 1);
       const stage = z.object({
         rows: z.array(z.object({ id: z.string(), outcome: z.string().optional() }).passthrough()),
       }).passthrough().parse(stages).rows.find((row) => row.id === value.stageId);
