@@ -86,6 +86,9 @@ export default async function Quotations({
     : { data: [] };
   const revisions = new Map((revisionLinks ?? []).map((row) => [row.id, row]));
   const projectIds = [...new Set((revisionLinks ?? []).map((row) => row.project_id))];
+  const sharedLookup = s.client.rpc.bind(s.client) as unknown as (
+    name: string, args: { p_organization_id: string; p_revision_ids: string[] },
+  ) => Promise<{ data: unknown; error: unknown }>;
   const [{ data: projectIndustries }, industryList, countResponse, shareResponse] =
     await Promise.all([
       projectIds.length
@@ -99,17 +102,17 @@ export default async function Quotations({
         .select('id', { count: 'exact', head: true })
         .eq('organization_id', s.org),
       revisionIds.length
-        ? s.client.from('quotation_share_links')
-          .select('revision_id,revoked_at,expires_at')
-          .eq('organization_id', s.org)
-          .in('revision_id', revisionIds)
-        : Promise.resolve({ data: [] }),
+        ? sharedLookup('quotation_shared_revisions', {
+            p_organization_id: s.org,
+            p_revision_ids: revisionIds,
+          })
+        : Promise.resolve({ data: [], error: null }),
     ]);
-  const now = Date.now();
-  const sharedIds = new Set((shareResponse.data ?? [])
-    .filter((link) => !link.revoked_at &&
-      (!link.expires_at || Date.parse(link.expires_at) > now))
-    .map((link) => link.revision_id));
+  const sharedIds = new Set<string>(
+    Array.isArray(shareResponse.data)
+      ? shareResponse.data.filter((id): id is string => typeof id === 'string')
+      : [],
+  );
   const projectById = new Map((projectIndustries ?? []).map((row) => [row.id, row]));
   const industryById = new Map(industryList.map((industry) => [industry.id, industry.name]));
 
