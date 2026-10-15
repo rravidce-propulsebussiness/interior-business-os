@@ -25,6 +25,9 @@ export default async function ClientHome() {
   const result = await rpc('client_portal_projects');
   const parsed = projectsSchema.safeParse(result.data);
   const projects = !result.error && parsed.success ? parsed.data : [];
+  // Most clients are invited to exactly one job; take them straight to it.
+  // Multiple jobs appear only when individually shared with this email.
+  if (projects.length === 1) redirect('/client/projects/' + projects[0]!.id);
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900">
