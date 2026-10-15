@@ -265,7 +265,8 @@ export default async function Projects({
       'id,name,code,project_type,industry_id,customer_id,site_address,status,created_at',
       { count: 'exact' },
     )
-    .eq('organization_id', s.org);
+    .eq('organization_id', s.org)
+      .eq('is_sales_prospect', false);
   if (q) query = query.ilike('name', locationQuery(q));
   if (status) query = query.eq('status', status);
   if (selectedIndustry) query = query.eq('industry_id', selectedIndustry);
@@ -280,16 +281,19 @@ export default async function Projects({
       s.client
         .from('projects')
         .select('id', { head: true, count: 'exact' })
-        .eq('organization_id', s.org),
+        .eq('organization_id', s.org)
+      .eq('is_sales_prospect', false),
       s.client
         .from('projects')
         .select('id', { head: true, count: 'exact' })
         .eq('organization_id', s.org)
+      .eq('is_sales_prospect', false)
         .eq('status', 'active'),
       s.client
         .from('projects')
         .select('id', { head: true, count: 'exact' })
         .eq('organization_id', s.org)
+      .eq('is_sales_prospect', false)
         .eq('status', 'inactive'),
     ]);
   if (projectsResult.error) throw new Error('Projects could not be loaded.');
@@ -307,6 +311,7 @@ export default async function Projects({
       .from('customers')
       .select('id,display_name')
       .eq('organization_id', s.org)
+      .eq('is_sales_prospect', false)
       .in('id', customerIds);
     for (const item of customers ?? [])
       customerNames.set(item.id, item.display_name);
@@ -323,6 +328,7 @@ export default async function Projects({
       .from('customers')
       .select('id,display_name')
       .eq('organization_id', s.org)
+      .eq('is_sales_prospect', false)
       .eq('status', 'active')
       .order('display_name')
       .limit(100);
