@@ -17,7 +17,7 @@ test('login form renders in Chromium without hydration errors or horizontal over
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth))
     .toBe(true);
   await page.getByRole('button', { name: 'Sign in', exact: true }).click();
-  await expect(page.getByRole('alert')).toContainText('Complete all fields');
+  await expect(page.locator('.pp-login-form-feedback[role="alert"]')).toContainText('Complete all fields');
   expect(errors).toEqual([]);
 });
 
