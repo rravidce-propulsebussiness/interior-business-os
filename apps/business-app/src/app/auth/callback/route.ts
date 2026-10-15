@@ -32,7 +32,16 @@ export async function GET(request: Request) {
       token_hash: hash,
       type: 'email',
     });
-    if (!error) return NextResponse.redirect(new URL('/dashboard', url.origin));
+    if (!error) {
+      // A verified invited client has no company membership. Their portal is
+      // selected by permission-checked RPC, not a caller-controlled redirect.
+      const { data: projects, error: portalError } = await client.rpc(
+        'client_portal_projects',
+      );
+      if (!portalError && Array.isArray(projects) && projects.length > 0)
+        return NextResponse.redirect(new URL('/client', url.origin));
+      return NextResponse.redirect(new URL('/dashboard', url.origin));
+    }
   }
   return NextResponse.redirect(
     new URL('/login?confirmation=failed', url.origin),
