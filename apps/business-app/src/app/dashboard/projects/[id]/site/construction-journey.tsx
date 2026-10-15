@@ -365,15 +365,16 @@ export function ConstructionJourney({
           </div>
         ) : (
           <div className="cj-empty">
-            <h3>Construction stages not available</h3>
+            <h3>Awaiting approved quotation handoff</h3>
             <p>
-              The project manager may need to configure the stage plan, or your
-              current role may not have access to construction stages. No
-              progress, check or payment figures have been guessed.
+              Construction stages are prepared automatically from the approved floor-wise
+              quotation when its agreement is created. If you cannot see the
+              scope, ask an authorized project manager to check the accepted
+              agreement. No stage progress or payments are guessed.
             </p>
             {canManageLinks && (
               <Link href={go('#construction-planning')}>
-                Manage construction stages →
+                Open quote-derived project plan →
               </Link>
             )}
           </div>
