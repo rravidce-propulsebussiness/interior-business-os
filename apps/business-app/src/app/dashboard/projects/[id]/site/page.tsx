@@ -346,12 +346,14 @@ export default async function ProjectDeliveryPage({
         p_project: id,
       })
     : null;
-  const ownerParsed = ownerResponse && !ownerResponse.error
-    ? stageOwnerSchema.safeParse(ownerResponse.data)
-    : null;
+  const ownerParsed =
+    ownerResponse && !ownerResponse.error
+      ? stageOwnerSchema.safeParse(ownerResponse.data)
+      : null;
   const ownerData = ownerParsed?.success ? ownerParsed.data : null;
   const construction = constructionBase
-    ? { ...constructionBase,
+    ? {
+        ...constructionBase,
         stages: mergeStageOwnerEdits(constructionBase.stages, ownerData),
       }
     : null;
@@ -584,7 +586,8 @@ export default async function ProjectDeliveryPage({
                 {manager && (
                   <p className="mt-2 text-xs text-slate-600">
                     If the agreement was created earlier, use the quote recovery
-                    action in the stage panel. Do not enter floors or stages twice.
+                    action in the stage panel. Do not enter floors or stages
+                    twice.
                   </p>
                 )}
               </section>
