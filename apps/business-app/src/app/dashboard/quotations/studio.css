@@ -315,7 +315,7 @@
 }
 .qs-stepper {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 7px;
   border-radius: 14px;
   background: #fff;
@@ -956,4 +956,31 @@
   .qs-quote-filters {
     grid-template-columns: minmax(0, 1fr);
   }
+}
+
+/* Five-step quotation wizard and quote-time payment editor on phones. */
+@media (max-width: 620px) {
+  .qs-stepper {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-inline: contain;
+    padding: 10px;
+    gap: 8px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .qs-step {
+    flex: 0 0 95px;
+    scroll-snap-align: start;
+    min-height: 65px;
+    padding: 6px 3px;
+    border-radius: 10px;
+  }
+  .qs-step.selected { background: #fff3eb; }
+  .qs-step b { width: 29px; height: 29px; flex-basis: 29px; }
+  .qs-studio-grid, .qs-create-grid { min-width: 0; }
+  .qs-card { padding: 13px; overflow-wrap: anywhere; }
+  .qs-preview-pane { max-width: 100%; }
+  .qs-preview-frame { min-height: 370px; height: 62vh; }
+  .qs-line-table { max-width: calc(100vw - 36px); }
 }
