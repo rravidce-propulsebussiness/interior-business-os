@@ -17,7 +17,7 @@ const contractSchema = z.object({
 });
 const quoteItemsSchema = z.array(z.object({
   id: z.uuid(),
-  name: z.string(),
+  snapshot: z.object({ name: z.string() }),
   description: z.string(),
 }));
 
@@ -63,14 +63,18 @@ export async function syncQuotedConstructionTimeline(
     return { created: false, reason: 'quote_incomplete', projectId };
   const { data: lines, error: linesError } = await client
     .from('quotation_items')
-    .select('id,name,description')
+    .select('id,snapshot,description')
     .eq('organization_id', org.organizationId)
     .eq('revision_id', parsedContract.revision_id)
     .order('id')
     .limit(250);
   if (linesError || !lines)
     throw new Error('Unable to read the frozen approved quotation');
-  const quotedLines = quoteItemsSchema.parse(lines);
+  const quotedLines = quoteItemsSchema.parse(lines).map((line) => ({
+    id: line.id,
+    name: line.snapshot.name,
+    description: line.description,
+  }));
   const plan = projectTimelineFromQuote(industry.key, quotedLines);
   if (!plan) {
     return { created: false, reason: 'quote_incomplete', projectId };
