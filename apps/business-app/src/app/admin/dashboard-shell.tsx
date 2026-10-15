@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { signOut } from '@business-os/auth/actions';
 import { usePathname } from 'next/navigation';
-import { useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 
 type IconName =
   | 'dashboard'
@@ -141,6 +141,56 @@ const secondary: { title: string; icon: IconName; href: string }[] = [
 export function DashboardShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const toggleRef = useRef<HTMLButtonElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const sidebarRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    if (window.innerWidth > 1199) {
+      setOpen(false);
+      return;
+    }
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    closeRef.current?.focus();
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setOpen(false);
+        toggleRef.current?.focus();
+        return;
+      }
+      if (event.key !== 'Tab' || !sidebarRef.current) return;
+      const focusable = Array.from(
+        sidebarRef.current.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled])',
+        ),
+      );
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (!first || !last) return;
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    const onResize = () => {
+      if (window.innerWidth > 1199) setOpen(false);
+    };
+    document.addEventListener('keydown', onKeyDown);
+    window.addEventListener('resize', onResize);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('resize', onResize);
+    };
+  }, [open]);
+
   const menu = (items: typeof primary) =>
     items.map((item) => {
       const selected =
@@ -167,10 +217,15 @@ export function DashboardShell({ children }: { children: ReactNode }) {
           type="button"
           className="os-overlay"
           aria-label="Close navigation"
-          onClick={() => setOpen(false)}
+          onClick={() => {
+            setOpen(false);
+            toggleRef.current?.focus();
+          }}
         />
       )}
       <aside
+        ref={sidebarRef}
+        id="os-sidebar-navigation"
         className={`os-sidebar ${open ? 'os-sidebar-open' : ''}`}
         aria-label="Super Admin navigation"
       >
@@ -183,6 +238,20 @@ export function DashboardShell({ children }: { children: ReactNode }) {
             <small>Business OS</small>
           </span>
         </Link>
+        <div className="os-mobile-heading">
+          <span>Workspace menu</span>
+          <button
+            ref={closeRef}
+            type="button"
+            aria-label="Close navigation"
+            onClick={() => {
+              setOpen(false);
+              toggleRef.current?.focus();
+            }}
+          >
+            <OsIcon name="close" size={20} />
+          </button>
+        </div>
         <nav className="os-navigation" aria-label="Platform">
           {menu(primary)}
           <div className="os-nav-divider" />
@@ -201,9 +270,11 @@ export function DashboardShell({ children }: { children: ReactNode }) {
       <div className="os-workspace">
         <header className="os-topbar">
           <button
+            ref={toggleRef}
             className="os-mobile-toggle"
             type="button"
             aria-label="Open navigation"
+            aria-controls="os-sidebar-navigation"
             aria-expanded={open}
             onClick={() => setOpen(true)}
           >
