@@ -33,6 +33,7 @@ export function QuotationStudioStart({
   industries,
   defaultCurrency,
   initialCustomerId = '',
+  initialLeadId = '',
 }: {
   leads: QuoteLead[];
   existingCustomers: ExistingCustomer[];
@@ -40,17 +41,31 @@ export function QuotationStudioStart({
   industries: Industry[];
   defaultCurrency: string;
   initialCustomerId?: string;
+  initialLeadId?: string;
 }) {
   const router = useRouter();
+  const initialLead = leads.find((lead) => lead.id === initialLeadId);
+  const matchedLeadCustomer = initialLead
+    ? existingCustomers.find((customer) =>
+        contactMatches(customer, {
+          clientName: initialLead.name,
+          phone: initialLead.phone,
+          email: initialLead.email,
+        }),
+      )
+    : undefined;
   const initialCustomer = existingCustomers.find(
     (customer) => customer.id === initialCustomerId,
-  );
+  ) ?? matchedLeadCustomer;
+  const [leadId, setLeadId] = useState(initialLead?.id ?? '');
   const [industry, setIndustry] = useState(
-    industries.find((item) => item.key === 'construction')?.key ??
+    (initialLead && industries.some((item) => item.key === initialLead.industryKey)
+      ? initialLead.industryKey
+      : industries.find((item) => item.key === 'construction')?.key) ??
       industries[0]?.key ??
       '',
   );
-  const [mode, setMode] = useState<'sft' | 'custom' | 'upload'>('sft');
+  const [mode, setMode] = useState<'sft' | 'custom' | 'upload'>(initialLead?.industryKey === 'interior' ? 'custom' : 'sft');
   const [pending, start] = useTransition();
   const [feedback, setFeedback] = useState('');
   const [customerId, setCustomerId] = useState(initialCustomer?.id ?? '');
@@ -68,12 +83,12 @@ export function QuotationStudioStart({
     ? 'CRN-' + customerId.replaceAll('-', '').slice(0, 12).toUpperCase()
     : '';
   const [data, setData] = useState({
-    clientName: initialCustomer?.display_name ?? '',
-    phone: initialCustomer?.phone ?? '',
-    email: initialCustomer?.email ?? '',
-    projectName: '',
-    location: '',
-    plotSize: '',
+    clientName: initialCustomer?.display_name ?? initialLead?.name ?? '',
+    phone: initialCustomer?.phone ?? initialLead?.phone ?? '',
+    email: initialCustomer?.email ?? initialLead?.email ?? '',
+    projectName: initialLead ? (initialLead.service_type || 'Client') + ' project' : '',
+    location: initialLead?.location ?? '',
+    plotSize: initialLead?.project_size ?? '',
     projectType: 'Residential',
   });
   const matchingCustomers = !customerId
@@ -201,6 +216,7 @@ export function QuotationStudioStart({
               ...data,
               customerId: customerId || null,
               projectId: projectId || null,
+              leadId: leadId || null,
               industryKey: industry,
               currency: defaultCurrency,
             });
@@ -232,8 +248,9 @@ export function QuotationStudioStart({
           <label className="qs-field" style={{ marginBottom: 15 }}>
             Choose from Leads (optional)
             <select
-              defaultValue=""
+              value={leadId}
               onChange={(event) => {
+                setLeadId(event.target.value);
                 const lead = leads.find(
                   (item) => item.id === event.target.value,
                 );
