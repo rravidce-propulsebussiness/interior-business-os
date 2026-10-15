@@ -185,7 +185,8 @@ export function ConstructionJourney({
 }: JourneyProps) {
   const base = `/dashboard/projects/${projectId}/site`;
   const isInterior = stages.some((s) =>
-    ['survey', 'fabrication', 'installation', 'procurement'].includes(s.phase));
+    ['survey', 'fabrication', 'installation', 'procurement'].includes(s.phase),
+  );
   const linkedRecords = (
     stageId: string,
     kind: string,
@@ -292,7 +293,9 @@ export function ConstructionJourney({
           <h2>
             {isWatchman
               ? 'Curing & security log'
-              : isInterior ? 'Interior execution journey' : 'Construction journey'}
+              : isInterior
+                ? 'Interior execution journey'
+                : 'Construction journey'}
           </h2>
           <p>
             {isWatchman
