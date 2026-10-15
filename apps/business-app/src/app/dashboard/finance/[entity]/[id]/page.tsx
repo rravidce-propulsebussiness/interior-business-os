@@ -112,12 +112,22 @@ export default async function FinanceDetail({
             Original accepted value: {text(r, 'currency')}{' '}
             {text(r, 'original_contract_value')}
           </p>
-          <Link
-            className="underline"
-            href={`/dashboard/quotations/${text(r, 'revision_id')}`}
-          >
-            Accepted quotation
-          </Link>
+          <div className="my-3 flex flex-wrap gap-4">
+            <Link
+              className="underline"
+              href={`/dashboard/quotations/${text(r, 'revision_id')}`}
+            >
+              Accepted quotation
+            </Link>
+            {text(r, 'project_id') && (
+              <Link
+                className="font-semibold text-blue-700 underline"
+                href={`/dashboard/projects/${text(r, 'project_id')}/site#construction-timeline`}
+              >
+                View quote-derived construction timeline →
+              </Link>
+            )}
+          </div>
           {s.allowed('financial_report.view') && (
             <Metrics data={await s.finance.summary(id)} />
           )}
