@@ -6,9 +6,12 @@ insert into auth.users(id,email,email_confirmed_at)
 values
  ('44444444-4444-4444-8444-444444444444','client-one@example.test',now()),
  ('55555555-5555-4555-8555-555555555555','client-two@example.test',now());
-insert into public.profiles(id,full_name) values
- ('44444444-4444-4444-8444-444444444444','Verified Homeowner One'),
- ('55555555-5555-4555-8555-555555555555','Verified Homeowner Two');
+-- The canonical Auth trigger creates the profiles; update names without
+-- manufacturing a second user record.
+update public.profiles set full_name='Verified Homeowner One'
+ where id='44444444-4444-4444-8444-444444444444';
+update public.profiles set full_name='Verified Homeowner Two'
+ where id='55555555-5555-4555-8555-555555555555';
 
 -- All record setup takes place in a rollback-only transaction.
 select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',true);
