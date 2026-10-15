@@ -318,31 +318,10 @@ export async function createStudioQuotation(input: unknown): Promise<{
         : '';
     };
 
-    // A project's existing quotation is the canonical quotation; its drafts
-    // and issued amendments are revisions, not independent client records.
-    const { data: existingQuotes, error: quotesError } = await s.client
-      .from('quotations')
-      .select('id,current_revision_id,status')
-      .eq('organization_id', s.org)
-      .eq('project_id', projectId)
-      .neq('status', 'cancelled')
-      .order('created_at', { ascending: false })
-      .limit(1);
-    if (quotesError)
-      return {
-        ok: false,
-        message: 'Could not check previous quotations. Try again.',
-      };
-    if (existingQuotes?.[0]?.current_revision_id) {
-      const linkWarning = await attachLead(existingQuotes[0].id);
-      revalidatePath('/dashboard/crm/leads');
-      return {
-        ok: true,
-        message: 'Opening the existing project quotation and its revisions.' + linkWarning,
-        revisionId: existingQuotes[0].current_revision_id,
-      };
-    }
-
+    // Each commercial alternative is a distinct quotation under the SAME
+    // customer/CRN and planning project: Standard, Premium, and later options
+    // must not silently reopen a previous customer's quotation. A revision
+    // remains a version of a single option and issued snapshots remain frozen.
     const revisionId = await s.commercial.commit(
       s.org,
       quotationCommandSchema.parse({
