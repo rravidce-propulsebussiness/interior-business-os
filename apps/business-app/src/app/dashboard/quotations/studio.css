@@ -1,6 +1,6 @@
 /* Quotation Studio — company-first, responsive, isolated styles. */
 .qs-layout {
-  --qs-blue: #1766ee;
+  --qs-blue: #f97316;
   --qs-navy: #0d1b34;
   --qs-text: #132441;
   --qs-border: #e5eaf3;
@@ -73,7 +73,7 @@
   display: grid;
   place-items: center;
   border-radius: 11px;
-  background: linear-gradient(135deg, #59d1ef, #246bf0);
+  background: linear-gradient(135deg, #fb923c, #ea580c);
   font-weight: 900;
   color: white;
   font-size: 16px;
@@ -115,7 +115,7 @@
   color: white;
 }
 .qs-nav-item.qs-active {
-  background: #1766ee;
+  background: #e96a22;
   color: white;
   box-shadow: 0 7px 20px #001f7360;
 }
@@ -232,7 +232,7 @@
   display: grid;
   place-items: center;
   color: white;
-  background: linear-gradient(135deg, #4b95ff, #205eef);
+  background: linear-gradient(135deg, #fb923c, #ea580c);
   box-shadow: 0 5px 14px #2160ec20;
 }
 .qs-heading h1 {
@@ -274,13 +274,13 @@
   background: #f7faff;
 }
 .qs-btn.primary {
-  background: #1567f3;
+  background: #f97316;
   color: #fff;
-  border-color: #1567f3;
-  box-shadow: 0 5px 10px #2665ed20;
+  border-color: #f97316;
+  box-shadow: 0 5px 10px #f9731620;
 }
 .qs-btn.primary:hover {
-  background: #0d55ce;
+  background: #ea580c;
 }
 .qs-btn:disabled {
   opacity: 0.55;
