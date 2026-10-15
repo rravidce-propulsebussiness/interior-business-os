@@ -1,24 +1,22 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { LeadStageSelect, LeadAssigneeSelect, LeadFollowUpSetter } from './lead-inline-controls';
+import { LeadStageSelect, LeadPrioritySelect, LeadFollowUpSetter } from './lead-inline-controls';
 import { LeadQuotePreview } from './lead-quote-preview';
 import { LeadUpdateComposer } from './lead-update-composer';
 import type { LeadOption, LeadStage, LeadView } from './workspace';
 import { leadCategoryLabel } from './lead-category';
 
 export function LeadDetailsDrawer({
-  lead, onClose, stages, lostReasons, assignees,
-  canManage, canWin, canAssign, canFollowUp, canNote, canQuote,
+  lead, onClose, stages, lostReasons,
+  canManage, canWin, canFollowUp, canNote, canQuote,
 }: {
   lead: LeadView;
   onClose: () => void;
   stages: LeadStage[];
   lostReasons: LeadOption[];
-  assignees: LeadOption[];
   canManage: boolean;
   canWin: boolean;
-  canAssign: boolean;
   canFollowUp: boolean;
   canNote: boolean;
   canQuote: boolean;
@@ -61,9 +59,8 @@ export function LeadDetailsDrawer({
           <dl className="crm-drawer-info">
             <div><dt>Service type</dt><dd>{leadCategoryLabel(lead.category)}</dd></div>
             <div><dt>Requirement</dt><dd>{lead.requirement || 'Not provided'}</dd></div>
-            <div><dt>Priority</dt><dd><span className={'crm-premium-priority crm-premium-priority-' + lead.priority}>{lead.priority}</span></dd></div>
+            <div><dt>Priority</dt><dd><LeadPrioritySelect lead={lead} canManage={canManage}/></dd></div>
             <div><dt>Status</dt><dd><LeadStageSelect lead={lead} stages={stages} lostReasons={lostReasons} canManage={canManage} canWin={canWin}/></dd></div>
-            <div><dt>Assigned to</dt><dd><LeadAssigneeSelect lead={lead} assignees={assignees} canAssign={canAssign}/></dd></div>
             <div><dt>Next follow-up</dt><dd><LeadFollowUpSetter lead={lead} canFollowUp={canFollowUp}/></dd></div>
           </dl>
           <h3>Latest update</h3>
