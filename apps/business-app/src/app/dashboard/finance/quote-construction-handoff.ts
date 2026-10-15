@@ -49,7 +49,9 @@ export async function syncQuotedConstructionTimeline(
     .limit(250);
   if (linesError || !lines)
     throw new Error('Unable to read the frozen approved quotation');
-  const descriptions = descriptionSchema.parse(lines).map((line) => line.description);
+  const descriptions = descriptionSchema
+    .parse(lines)
+    .map((line) => line.description);
   const plan = constructionPlanFromQuotedDescriptions(descriptions);
   if (!plan) {
     return { created: false, reason: 'quote_incomplete', projectId };
@@ -59,9 +61,13 @@ export async function syncQuotedConstructionTimeline(
     p_organization_id: org.organizationId,
     p_project_id: projectId,
   });
-  if (!existing.error && existing.data &&
-      typeof existing.data === 'object' &&
-      'workflow' in existing.data && existing.data.workflow) {
+  if (
+    !existing.error &&
+    existing.data &&
+    typeof existing.data === 'object' &&
+    'workflow' in existing.data &&
+    existing.data.workflow
+  ) {
     return { created: false, reason: 'exists', projectId };
   }
 
@@ -76,7 +82,9 @@ export async function syncQuotedConstructionTimeline(
   if (siteInit.error) {
     if (siteInit.error.code === '42501')
       return { created: false, reason: 'manager_required', projectId };
-    throw new Error('Cannot initialize site from approved quote: ' + siteInit.error.message);
+    throw new Error(
+      'Cannot initialize site from approved quote: ' + siteInit.error.message,
+    );
   }
 
   const workflow = await client.rpc('construction_project_command', {
@@ -99,15 +107,22 @@ export async function syncQuotedConstructionTimeline(
         p_organization_id: org.organizationId,
         p_project_id: projectId,
       });
-      if (!again.error && again.data &&
-          typeof again.data === 'object' &&
-          'workflow' in again.data && again.data.workflow) {
+      if (
+        !again.error &&
+        again.data &&
+        typeof again.data === 'object' &&
+        'workflow' in again.data &&
+        again.data.workflow
+      ) {
         return { created: false, reason: 'exists', projectId };
       }
     }
     if (workflow.error.code === '42501')
       return { created: false, reason: 'manager_required', projectId };
-    throw new Error('Agreement created, but quoted stage initialization failed: ' + workflow.error.message);
+    throw new Error(
+      'Agreement created, but quoted stage initialization failed: ' +
+        workflow.error.message,
+    );
   }
   return { created: true, reason: 'created', projectId };
 }
