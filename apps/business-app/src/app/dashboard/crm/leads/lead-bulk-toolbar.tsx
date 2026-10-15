@@ -20,7 +20,7 @@ export function LeadBulkToolbar({
   onClear: () => void;
 }) {
   const router = useRouter();
-  const [action, setAction] = useState<'assign' | 'stage' | 'followup'>('assign');
+  const [action, setAction] = useState<'assign' | 'stage' | 'followup'>(() => canAssign ? 'assign' : canManage ? 'stage' : 'followup');
   const [assignee, setAssignee] = useState('');
   const [stage, setStage] = useState('');
   const [due, setDue] = useState('');
