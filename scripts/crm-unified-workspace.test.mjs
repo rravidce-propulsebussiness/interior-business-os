@@ -158,8 +158,8 @@ test('Leads listing has one preview drawer and keeps canonical history, without 
     fileURLToPath(new URL('[id]/page.tsx', root)),
     'utf8',
   );
-  // Lead detail is now intentionally a focused history view. Routine
-  // follow-up, assignment, call logging and quote preview live on the list.
+  // Lead detail remains a focused history view. Follow-ups, priority,
+  // call logging and quote previews are accessible from the listing.
   assert.match(detail, /<LeadHistoryTimeline/);
   assert.match(detail, /<LeadUpdateComposer/);
   assert.match(detail, /<LeadQuotePreview/);
@@ -169,7 +169,10 @@ test('Leads listing has one preview drawer and keeps canonical history, without 
   assert.doesNotMatch(detail, /Daily actions/);
   assert.match(leads, /<LeadQuotePreview/);
   assert.match(leads, /<LeadStageSelect/);
-  assert.match(leads, /<LeadAssigneeSelect/);
+  assert.doesNotMatch(leads, /<LeadAssigneeSelect/);
+  assert.match(leads, /<LeadPrioritySelect/);
+  assert.doesNotMatch(leads, /name="converted"/);
+  assert.doesNotMatch(leads, /name="assigned_to"/);
   assert.match(leads, /<LeadUpdateComposer/);
 });
 
