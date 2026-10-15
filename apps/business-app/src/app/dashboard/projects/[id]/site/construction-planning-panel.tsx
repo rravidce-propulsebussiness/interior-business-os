@@ -134,6 +134,7 @@ export function ConstructionPlanningPanel({
   const [message, setMessage] = useState('');
   const [pending, start] = useTransition();
   const managers = data.can_manage;
+  const isInterior = data.workflow?.template_code === 'INTERIOR_QUOTE';
   const phases: readonly string[] =
     data.workflow?.template_code === 'INTERIOR_QUOTE'
       ? interiorPhases
@@ -153,13 +154,13 @@ export function ConstructionPlanningPanel({
     <section
       id="construction-planning"
       className="space-y-5"
-      aria-label="Construction execution planning"
+      aria-label={isInterior ? 'Interior execution planning' : 'Construction execution planning'}
     >
       <div className="sc-panel rounded-2xl border p-5 sm:p-7">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <p className="text-xs font-bold uppercase tracking-[.18em] text-blue-700">
-              Connected construction planning
+              {isInterior ? 'Connected interior project delivery' : 'Connected construction planning'}
             </p>
             <h2 className="mt-2 text-xl font-bold tracking-tight text-slate-900">
               {data.workflow?.template_code === 'INTERIOR_QUOTE'
@@ -185,11 +186,12 @@ export function ConstructionPlanningPanel({
               Stages come from the approved quotation
             </h3>
             <p className="mt-2 text-sm leading-6 text-slate-600">
-              Issue the quote with its actual room/area or floor scope, built-up
-              areas, additional works and package specifications. After customer
-              approval, create the agreement. The floor-wise construction
-              timeline is automatically generated from that frozen revision. No
-              separate floor entry or stage installation is required.
+              Issue the quotation with the applicable room-wise BOQ or
+              floor-wise construction scope, included areas, additional works
+              and company-specific package specifications. After customer
+              approval, create the agreement. The relevant interior or
+              construction project timeline is generated from that accepted
+              revision; no duplicate floor, room or stage setup is required.
             </p>
             <p className="mt-2 text-xs leading-5 text-slate-600">
               The stage plan is initially planned only. Signed agreement, client
@@ -375,7 +377,7 @@ export function ConstructionPlanningPanel({
               Project-specific access
             </p>
             <h2 className="mt-2 text-xl font-bold text-slate-900">
-              Construction team & roles
+              {isInterior ? 'Interior delivery team & roles' : 'Construction team & roles'}
             </h2>
             <p className="mt-2 text-sm leading-6 text-slate-600">
               One team member can hold several scoped roles. Only active company
