@@ -44,6 +44,10 @@ export async function LeadActivityPanel({
         typeof row.due_at==='string'?row.due_at:'';
       const note=typeof row.notes==='string'?row.notes:
         typeof row.note==='string'?row.note:'';
+      const address = kind==='visit' && row.site_address &&
+        typeof row.site_address === 'object' && !Array.isArray(row.site_address) &&
+        'line1' in row.site_address && typeof row.site_address.line1 === 'string'
+        ? row.site_address.line1 : '';
       const label=kind==='visit'?'Site visit':
         (typeof row.followup_type==='string'&&row.followup_type==='meeting')?
           'Office visit / meeting':'Follow-up call';
@@ -58,7 +62,7 @@ export async function LeadActivityPanel({
         label,
         status:typeof row.status==='string'?row.status:'',
         date:appointment,
-        notes:note,
+        notes:address ? address + (note ? ' · ' + note : '') : note,
       } satisfies ActivityQueueItem];
     }),
   ).sort((a,b)=>a.date.localeCompare(b.date));
