@@ -113,9 +113,9 @@ begin
   return result;
 end; $$;
 
-revoke all on function public.lead_quotation_link(uuid,uuid,uuid,uuid) from public;
-revoke all on function public.lead_quotation_list(uuid,uuid) from public;
-revoke all on function public.lead_quotation_summary(uuid,uuid[]) from public;
+revoke all on function public.lead_quotation_link(uuid,uuid,uuid,uuid) from public, anon;
+revoke all on function public.lead_quotation_list(uuid,uuid) from public, anon;
+revoke all on function public.lead_quotation_summary(uuid,uuid[]) from public, anon;
 grant execute on function public.lead_quotation_link(uuid,uuid,uuid,uuid),
  public.lead_quotation_list(uuid,uuid),public.lead_quotation_summary(uuid,uuid[])
  to authenticated;
