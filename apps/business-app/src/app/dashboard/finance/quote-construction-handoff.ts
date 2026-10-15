@@ -15,12 +15,14 @@ const contractSchema = z.object({
   project_id: z.uuid(),
   revision_id: z.uuid(),
 });
-const quoteItemsSchema = z.array(z.object({
-  id: z.uuid(),
-  snapshot: z.object({ name: z.string() }),
-  description: z.string(),
-  optional: z.boolean(),
-}));
+const quoteItemsSchema = z.array(
+  z.object({
+    id: z.uuid(),
+    snapshot: z.object({ name: z.string() }),
+    description: z.string(),
+    optional: z.boolean(),
+  }),
+);
 
 /**
  * Idempotent handoff AFTER the canonical approved-quotation contract_create RPC.
@@ -77,7 +79,10 @@ export async function syncQuotedConstructionTimeline(
     description: line.description,
     optional: line.optional,
   }));
-  const plan = projectTimelineFromQuote(industry.key, quotedLines.filter((line) => !line.optional));
+  const plan = projectTimelineFromQuote(
+    industry.key,
+    quotedLines.filter((line) => !line.optional),
+  );
   if (!plan) {
     return { created: false, reason: 'quote_incomplete', projectId };
   }
@@ -100,20 +105,31 @@ export async function syncQuotedConstructionTimeline(
   // industry and exact quote-line fingerprint inside one database transaction.
   // Neither quote acceptance nor commercial agreement creates site progress.
   const quoteHash = createHash('md5')
-    .update(quotedLines.map((line) =>
-      [line.id, line.name, line.description, line.optional ? '1' : '0'].join(String.fromCharCode(31)),
-    ).join(String.fromCharCode(30)))
+    .update(
+      quotedLines
+        .map((line) =>
+          [
+            line.id,
+            line.name,
+            line.description,
+            line.optional ? '1' : '0',
+          ].join(String.fromCharCode(31)),
+        )
+        .join(String.fromCharCode(30)),
+    )
     .digest('hex');
   const workflow = await client.rpc('project_quote_timeline_create', {
     p_org: org.organizationId,
     p_contract: id,
-    p_input: JSON.parse(JSON.stringify({
-      industry: plan.industry,
-      template: plan.template,
-      zones: plan.zones,
-      stages: plan.stages,
-      quote_hash: quoteHash,
-    })),
+    p_input: JSON.parse(
+      JSON.stringify({
+        industry: plan.industry,
+        template: plan.template,
+        zones: plan.zones,
+        stages: plan.stages,
+        quote_hash: quoteHash,
+      }),
+    ),
   });
   if (workflow.error) {
     if (workflow.error.code === '42501')
