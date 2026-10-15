@@ -472,7 +472,8 @@ test('Follow-ups and Visits are handled inside Leads and legacy links redirect',
   assert.match(activity, /value="call"/);
   assert.match(drawer, /<LeadActivityScheduler/);
   assert.match(detail, /<LeadActivityScheduler/);
-  assert.match(actions, /crmServices\('crm.followup.manage'\)/);
+  assert.match(actions, /crm\.followup\.manage/);
+  assert.match(actions, /crm\.site_visit\.manage/);
   assert.match(actions, /s\.crm\.save\('site_visits'/);
   assert.match(actions, /s\.crm\.save\('lead_followups'/);
   assert.match(panel, /services\.crm\.search/);
