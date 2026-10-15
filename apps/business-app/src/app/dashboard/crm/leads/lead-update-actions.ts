@@ -42,6 +42,45 @@ export async function logLeadUpdate(input: unknown): Promise<{ok: boolean; messa
   }
 }
 
+const prioritySchema = z.object({
+  leadId: z.uuid(),
+  version: z.number().int().positive(),
+  priority: z.enum(['low', 'normal', 'high', 'urgent']),
+}).strict();
+
+/** Update just the lead priority; the tenant RPC enforces lead.manage,
+ * optimistic version checks, and records an audit/history event.
+ */
+export async function changeLeadPriority(input: unknown): Promise<{ok: boolean; message: string}> {
+  try {
+    const value = prioritySchema.parse(input);
+    const s = await crmServices('lead.manage');
+    const rpc = s.client.rpc.bind(s.client) as unknown as (
+      name: string,
+      args: Record<string, unknown>,
+    ) => Promise<{ data: string | null; error: {code?: string; message: string} | null }>;
+    const { data, error } = await rpc('crm_save', {
+      p_organization_id: s.org,
+      p_entity: 'leads',
+      p_input: {
+        id: value.leadId,
+        version: value.version,
+        priority: value.priority,
+      },
+    });
+    if (error || !data) {
+      if (error?.code === '40001')
+        return { ok: false, message: 'This lead was updated elsewhere. Refresh and try again.' };
+      return { ok: false, message: 'Could not update priority. Check permissions or retry.' };
+    }
+    revalidatePath('/dashboard/crm/leads');
+    revalidatePath('/dashboard/crm/leads/' + value.leadId);
+    return { ok: true, message: 'Lead priority updated.' };
+  } catch (error) {
+    return { ok: false, message: safeFailure(error).message };
+  }
+}
+
 const scheduleSchema = z.object({
   leadId: z.uuid(),
   dueAt: z.iso.datetime({ offset: true }),
