@@ -1,6 +1,8 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { randomUUID } from 'node:crypto';
+import { createOwnerProvisioningDatabase } from '@business-os/database/server';
 import { z } from 'zod';
 import { serverServices, activeOrganization } from '@business-os/auth/server';
 import {
@@ -92,4 +94,84 @@ export async function saveConstructionPackage(
   } catch (error) {
     return { message: safeFailure(error).message };
   }
+}
+
+export async function installConstructionBrochurePackages(): Promise<{ ok: boolean; message: string }> {
+  try {
+    const org = await activeOrganization();
+    if (!org) throw new DomainError('FORBIDDEN');
+    const { authorization, client } = await serverServices();
+    await authorization.requirePermission(org.organizationId, 'pricing.manage', { moduleKey: 'pricing' });
+    await authorization.requirePermission(org.organizationId, 'pricing.view', { moduleKey: 'pricing' });
+    const rpc = client.rpc.bind(client) as unknown as (
+      name: string, args: Record<string, unknown>
+    ) => Promise<{ data: number | null; error: { message?: string } | null }>;
+    const { data, error } = await rpc('construction_package_install_starters', { p_org: org.organizationId });
+    if (error) throw new Error(error.message || 'Import unavailable. Apply the latest database migration.');
+    revalidatePath('/dashboard/quotations/packages');
+    revalidatePath('/dashboard/pricing/construction');
+    revalidatePath('/dashboard/quotations', 'layout');
+    return { ok: true, message: data
+      ? String(data) + ' construction brochure package(s) added to your company.'
+      : 'All four brochure package codes already exist. Your custom packages were not changed.' };
+  } catch (error) { return { ok: false, message: safeFailure(error).message }; }
+}
+
+export async function duplicateConstructionPackage(id: string): Promise<{ ok: boolean; message: string }> {
+  try {
+    const parsed = idSchema.parse(id);
+    const org = await activeOrganization();
+    if (!org) throw new DomainError('FORBIDDEN');
+    const { authorization, client } = await serverServices();
+    await authorization.requirePermission(org.organizationId, 'pricing.manage', { moduleKey: 'pricing' });
+    await authorization.requirePermission(org.organizationId, 'pricing.view', { moduleKey: 'pricing' });
+    const item = (await createConstructionPackagesRepository(client).list(org.organizationId))
+      .find((pkg) => pkg.id === parsed);
+    if (!item) throw new DomainError('NOT_FOUND');
+    const code = (item.code.slice(0, 13) + '-C' + randomUUID().slice(0, 4)).toUpperCase();
+    await createConstructionPackagesRepository(client).save(org.organizationId, {
+      name: (item.name.slice(0, 110) + ' (Copy)').slice(0, 120),
+      code,
+      description: item.description,
+      ratePerSqft: item.ratePerSqft,
+      status: 'inactive',
+      themeColor: item.themeColor,
+      specSections: item.specSections.map((section) => ({ ...section })),
+    });
+    revalidatePath('/dashboard/quotations/packages');
+    revalidatePath('/dashboard/pricing/construction');
+    return { ok: true, message: 'Package duplicated as inactive. Review it before activating. Source PDF files are not duplicated.' };
+  } catch (error) { return { ok: false, message: safeFailure(error).message }; }
+}
+
+export async function deleteConstructionPackage(id: string, version: number): Promise<{ ok: boolean; message: string }> {
+  try {
+    const parsed = idSchema.parse(id);
+    if (!Number.isInteger(version) || version <= 0) throw new DomainError('VALIDATION_FAILED');
+    const org = await activeOrganization();
+    if (!org) throw new DomainError('FORBIDDEN');
+    const { authorization, client } = await serverServices();
+    await authorization.requirePermission(org.organizationId, 'pricing.manage', { moduleKey: 'pricing' });
+    await authorization.requirePermission(org.organizationId, 'pricing.view', { moduleKey: 'pricing' });
+    const admin = createOwnerProvisioningDatabase();
+    const { data: attachment } = await admin
+      .from('construction_package_spec_attachments').select('storage_path')
+      .eq('organization_id', org.organizationId).eq('package_id', parsed).maybeSingle();
+    const rpc = client.rpc.bind(client) as unknown as (
+      name: string, args: Record<string, unknown>
+    ) => Promise<{ data: boolean | null; error: { message?: string } | null }>;
+    const { error } = await rpc('construction_package_delete', {
+      p_org: org.organizationId, p_package_id: parsed, p_version: version,
+    });
+    if (error) throw new Error(error.message || 'Unable to delete package');
+    if (attachment?.storage_path) {
+      // Source PDF has been detached from the deleted package. Existing
+      // quotation annexure snapshots remain independent and untouched.
+      await admin.storage.from('quotation-private-annexures').remove([attachment.storage_path]);
+    }
+    revalidatePath('/dashboard/quotations/packages');
+    revalidatePath('/dashboard/pricing/construction');
+    revalidatePath('/dashboard/quotations', 'layout');
+    return { ok: true, message: 'Package deleted. Previously issued quotations and PDF snapshots remain unchanged.' };
+  } catch (error) { return { ok: false, message: safeFailure(error).message }; }
 }
