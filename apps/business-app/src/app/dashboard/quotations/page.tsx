@@ -85,16 +85,9 @@ export default async function Quotations({
       .in('id', revisionIds)
     : { data: [] };
   const revisions = new Map((revisionLinks ?? []).map((row) => [row.id, row]));
-  const quoteIds = [...new Set((revisionLinks ?? []).map((row) => row.quotation_id))];
   const projectIds = [...new Set((revisionLinks ?? []).map((row) => row.project_id))];
-  const [{ data: rootQuotes }, { data: projectIndustries }, industryList, countResponse] =
+  const [{ data: projectIndustries }, industryList, countResponse] =
     await Promise.all([
-      quoteIds.length
-        ? s.client.from('quotations')
-          .select('id,customer_id')
-          .eq('organization_id', s.org)
-          .in('id', quoteIds)
-        : Promise.resolve({ data: [] }),
       projectIds.length
         ? s.client.from('projects')
           .select('id,industry_id')
@@ -106,7 +99,6 @@ export default async function Quotations({
         .select('id', { count: 'exact', head: true })
         .eq('organization_id', s.org),
     ]);
-  const rootById = new Map((rootQuotes ?? []).map((row) => [row.id, row]));
   const projectById = new Map((projectIndustries ?? []).map((row) => [row.id, row]));
   const industryById = new Map(industryList.map((industry) => [industry.id, industry.name]));
 
@@ -130,7 +122,6 @@ export default async function Quotations({
     if (page > 1) query.set('page', String(page));
     return '/dashboard/quotations' + (query.size ? '?' + query.toString() : '');
   };
-  const showFirst = (filter.page - 1) * 25 + 1;
   const hasMore = filter.page * 25 < data.total;
   const cards = [
     {
@@ -168,12 +159,10 @@ export default async function Quotations({
     const revision = revisions.get(row.id);
     const project = revision ? projectById.get(revision.project_id) : undefined;
     const industry = project?.industry_id ? industryById.get(project.industry_id) : null;
-    const customerId = revision ? rootById.get(revision.quotation_id)?.customer_id : undefined;
     const preview = '/dashboard/quotations/' + row.id + '/preview';
     const editor = '/dashboard/quotations/' + row.id + '/studio';
     return {
       row,
-      customerId,
       industry: industry || 'Not specified',
       createdAt: revision?.created_at ?? null,
       preview, editor,
