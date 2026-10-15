@@ -295,7 +295,7 @@ export default async function Quotations({
               </table>
             </div>
             <div className="qs-quotes-mobile-list">
-              {visible.map(({ row, industry, createdAt, preview, editor }) => (
+              {visible.map(({ row, revision, industry, createdAt, preview, editor }) => (
                 <article className="qs-quotes-mobile-card" key={row.id}>
                   <div className="qs-quotes-mobile-top">
                     <Link href={editor}>{row.quotation_number || 'Quotation'}</Link>
