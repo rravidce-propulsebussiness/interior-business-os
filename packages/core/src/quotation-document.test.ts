@@ -186,3 +186,20 @@ it('renders package theme and brand, grade, allowance as a safe company snapshot
   expect(html).not.toContain('<script>unsafe</script>');
   expect(html).toContain('&lt;script&gt;unsafe&lt;/script&gt;');
 });
+
+
+it('shows editable proposed payment milestones in the customer PDF without leaking metadata', () => {
+  const d = quotationDocumentFixture();
+  d.totals.final_amount = '100000.00';
+  d.terms = 'Workmanship warranty applies.\n\n[STAGE_PAYMENT_PLAN]\nAgreement & advance|10.00\nRCC frame|60.00\nHandover|30.00\n[/STAGE_PAYMENT_PLAN]';
+  const html = renderQuotationDocument(d);
+  expect(html).toContain('Proposed stage-wise payment schedule');
+  expect(html).toContain('Agreement &amp; advance');
+  expect(html).toContain('RCC frame');
+  expect(html).toContain('10000.00');
+  expect(html).toContain('60000.00');
+  expect(html).toContain('30000.00');
+  expect(html).toContain('Workmanship warranty applies.');
+  expect(html).not.toContain('[STAGE_PAYMENT_PLAN]');
+  expect(html).not.toContain('[/STAGE_PAYMENT_PLAN]');
+});
