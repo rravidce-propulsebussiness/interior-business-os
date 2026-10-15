@@ -18,7 +18,7 @@ const projectsSchema = z.object({
 export default async function ClientProjects() {
   const client = await createServerDatabase();
   const { data: user } = await client.auth.getUser();
-  if (!user.user) redirect('/login');
+  if (!user.user) redirect('/login?portal=client');
   const { data, error } = await client.rpc('construction_client_projects');
   const parsed = !error ? projectsSchema.safeParse(data) : null;
   const projects = parsed?.success ? parsed.data.projects : [];
