@@ -10,6 +10,10 @@ export function LeadQuotePreview({
 }) {
   const dialog=useRef<HTMLDialogElement>(null);
   const base='/dashboard/quotations/'+encodeURIComponent(revisionId);
+  const visibleStatus = shared ? 'Shared' :
+    status === 'issued' ? 'Ready to share' :
+    status === 'superseded' ? 'Previous version' :
+    status === 'cancelled' ? 'Archived' : 'Draft';
   const formatted = amount!==null && Number.isFinite(Number(amount))
     ? '₹'+Number(amount).toLocaleString('en-IN',{maximumFractionDigits:0})
     : null;
@@ -18,7 +22,7 @@ export function LeadQuotePreview({
       <div className="crm-quote-summary-top">
         <strong title={number}>{number}</strong>
         <span className={shared?'crm-quote-shared':'crm-quote-status'}>
-          {shared?'Shared':(status||'Draft').replaceAll('_',' ')}
+          {visibleStatus}
         </span>
       </div>
       {formatted && <strong className="crm-quote-amount">{formatted}</strong>}
