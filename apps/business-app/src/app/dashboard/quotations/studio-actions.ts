@@ -294,7 +294,7 @@ export async function createStudioQuotation(input: unknown): Promise<{
       // The migration installs this permission-checked, tenant-scoped RPC.
       // If deployment has not run the migration yet, never pretend the
       // association was saved; the quotation itself remains accessible.
-      const rpc = s.client.rpc as unknown as (
+      const rpc = s.client.rpc.bind(s.client) as unknown as (
         fn: string, args: Record<string, string>,
       ) => Promise<{ error: { message: string } | null }>;
       const linked = await rpc('lead_quotation_link', {
