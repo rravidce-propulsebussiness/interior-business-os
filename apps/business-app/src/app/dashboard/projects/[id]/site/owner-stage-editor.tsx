@@ -20,7 +20,7 @@ export function OwnerStageEditor({
 }) {
   const [busy, start] = useTransition();
   const [message, setMessage] = useState('');
-  if (stage.template_code === 'QUOTED_SCOPE') {
+  if (stage.template_code.startsWith('QUOTED_SCOPE')) {
     return (
       <p className="mt-3 text-xs text-slate-600">
         Accepted quotation scope is locked. Use an approved change order for changes
