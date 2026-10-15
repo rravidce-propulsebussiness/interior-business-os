@@ -1,4 +1,9 @@
-import { renderPdf, appendQuotationAnnexures } from '@business-os/shared/pdf';
+import {
+  renderPdf,
+  renderConstructionPackageSamplePdf,
+  appendQuotationAnnexures,
+} from '@business-os/shared/pdf';
+import { DomainError } from '@business-os/shared';
 import {
   packageAttachmentContext,
   QUOTATION_PDF_BUCKET,
@@ -21,7 +26,7 @@ export async function GET(request: Request, { params }: Params) {
     const { id } = await params;
     const ctx = await packageAttachmentContext(id);
     const pkg = ctx.packageItem;
-    const { data: company } = await ctx.admin
+    const { data: company } = await ctx.client
       .from('organizations')
       .select('name')
       .eq('id', ctx.orgId)
@@ -131,7 +136,7 @@ export async function GET(request: Request, { params }: Params) {
       '<p class="muted">Material allowances describe inclusions, not additional charges.</p>',
       '</section></main></body></html>',
     ].join('');
-    if (new URL(request.url).searchParams.get('format') !== 'pdf') {
+    if (new URL(request.url).searchParams.get('format') === 'html') {
       return new Response(html, {
         headers: {
           'Content-Type': 'text/html; charset=utf-8',
@@ -145,33 +150,73 @@ export async function GET(request: Request, { params }: Params) {
     // The HTML screen has an internal preview link; PDF preflight deliberately
     // disallows relative href values and any active content.
     const printable = html.replace(/<nav class="actions">[\s\S]*?<\/nav>/, '');
-    const base = await renderPdf(printable);
-    const { data: attachment, error } = await ctx.admin
-      .from('construction_package_spec_attachments')
-      .select('storage_path,byte_size')
-      .eq('organization_id', ctx.orgId)
-      .eq('package_id', ctx.packageId)
-      .maybeSingle();
-    if (error) throw Error('Source PDF unavailable');
+    // Chromium is optional on many managed deployments. When the configured
+    // PDF renderer is unavailable, generate a branded A4 PDF with pdf-lib.
+    // Both paths create a real PDF, not an HTML-only pseudo-preview.
+    let base: Uint8Array;
+    try {
+      base = await renderPdf(printable);
+    } catch {
+      base = await renderConstructionPackageSamplePdf({
+        company: company?.name ?? 'Your company',
+        name: pkg.name,
+        code: pkg.code,
+        description: pkg.description,
+        ratePerSqft: pkg.ratePerSqft,
+        themeColor: theme,
+        sections: pkg.specSections,
+      });
+    }
     const pdfs: Uint8Array[] = [];
-    if (attachment) {
+    // Do not require an elevated storage key for packages without an
+    // attached source document. Only fetch within the authorized tenant.
+    if (pkg.attachmentFilename) {
+      const { data: attachment, error } = await ctx.admin
+        .from('construction_package_spec_attachments')
+        .select('storage_path,byte_size')
+        .eq('organization_id', ctx.orgId)
+        .eq('package_id', ctx.packageId)
+        .maybeSingle();
+      if (error || !attachment) throw new Error('Package source PDF metadata unavailable');
       const { data: file, error: fileError } = await ctx.admin.storage
         .from(QUOTATION_PDF_BUCKET)
         .download(attachment.storage_path);
       if (fileError || !file || file.size !== attachment.byte_size)
-        throw Error('Attached source PDF unavailable');
+        throw new Error('Attached source PDF unavailable');
       pdfs.push(new Uint8Array(await file.arrayBuffer()));
     }
     const result = await appendQuotationAnnexures(base, pdfs);
     return new Response(new Uint8Array(result), {
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': 'attachment; filename="Package-Preview.pdf"',
+        'Content-Disposition':
+          new URL(request.url).searchParams.get('download') === '1'
+            ? 'attachment; filename="Package-Preview.pdf"'
+            : 'inline; filename="Package-Preview.pdf"',
         'Cache-Control': 'private, no-store',
         'X-Content-Type-Options': 'nosniff',
       },
     });
-  } catch {
-    return new Response('Package preview unavailable', { status: 403 });
+  } catch (error) {
+    const forbidden = error instanceof DomainError &&
+      (error.code === 'FORBIDDEN' || error.code === 'NOT_FOUND');
+    // Keep implementation details server-side, but do not misreport every
+    // storage or rendering failure as an authorization error.
+    console.error('Construction package PDF preview failed', error);
+    return new Response(
+      '<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1">' +
+        '<title>PDF preview unavailable</title></head><body style="margin:0;background:#f7f9fc;font:16px Arial,sans-serif;color:#14243e">' +
+        '<main style="max-width:460px;margin:12vh auto;padding:28px;border:1px solid #e2e8f0;border-radius:16px;background:white">' +
+        '<h1 style="font-size:22px">PDF preview unavailable</h1>' +
+        '<p>' + (forbidden ? 'You do not have access to this package.' :
+          'The PDF could not be loaded. Please try again or contact your administrator.') + '</p>' +
+        '<button onclick="location.reload()" style="padding:12px 18px;border:0;border-radius:9px;background:#1766ee;color:white">Retry</button>' +
+        '</main></body></html>',
+      {
+        status: forbidden ? 403 : 503,
+        headers: { 'Content-Type': 'text/html; charset=utf-8',
+          'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' },
+      },
+    );
   }
 }
