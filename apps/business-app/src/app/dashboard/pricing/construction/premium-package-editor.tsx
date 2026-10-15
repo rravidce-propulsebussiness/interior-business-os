@@ -8,95 +8,85 @@ import type {
 } from '@business-os/database/construction-packages';
 import { saveConstructionPackage } from './package-actions';
 
-const defaultCategories = [
-  [
-    'Architectural plans',
-    '',
-    '',
-    '2D plans, structural plans, 3D elevation and surveys',
-  ],
-  [
-    'Steel / TMT',
-    '',
-    '',
-    'Specify manufacturer, Fe grade, steel usage standard',
-  ],
-  ['Cement', '', '', 'Specify manufacturer and OPC/PPC grade'],
-  [
-    'Sand & aggregates',
-    '',
-    '',
-    'River/M sand, aggregate size and approved source',
-  ],
-  ['Bricks / blocks', '', '', 'Specify brick/AAC grade and wall thickness'],
-  [
-    'Tiles / flooring',
-    '',
-    '',
-    'Specify tile brand, dimensions and allowance in ₹/sft',
-  ],
-  [
-    'Kitchen & granite',
-    '',
-    '',
-    'Kitchen counter, sink, backsplash and granite allowance',
-  ],
-  [
-    'Doors & windows',
-    '',
-    '',
-    'Main door, internal frames, UPVC/aluminium, fittings',
-  ],
-  [
-    'Bathrooms & plumbing',
-    '',
-    '',
-    'CPVC/PVC lines, fittings, waterproofing, sanitary brands',
-  ],
-  [
-    'Electrical',
-    '',
-    '',
-    'Wiring brand, conduits, switches and circuit provision',
-  ],
-  ['Painting', '', '', 'Interior/exterior putty, primer and finish coats'],
-  [
-    'Elevation & metal works',
-    '',
-    '',
-    'Facade, railing, staircase, grills and finishes',
-  ],
-  [
-    'Exclusions & warranty',
-    '',
-    '',
-    'Exclusions, defect liability and handover terms',
-  ],
+type Unit = NonNullable<ConstructionSpecSection['unit']>;
+type Treatment = NonNullable<ConstructionSpecSection['pricingTreatment']>;
+const unitLabels: Record<Unit, string> = {
+  none: 'As specified',
+  sqft: 'per sq ft',
+  bathroom: 'per bathroom',
+  door: 'per door',
+  piece: 'per piece',
+  kg: 'per kg',
+  tonne: 'per tonne',
+  bag: 'per bag',
+  cubic_meter: 'per m³',
+  running_ft: 'per running ft',
+  point: 'per point',
+  lumpsum: 'lump sum',
+  meter: 'per metre',
+  bhk: 'per BHK',
+};
+const treatments: Record<Treatment, string> = {
+  included: 'Included in package',
+  allowance: 'Allowance included',
+  extra: 'Chargeable extra',
+  excluded: 'Excluded',
+};
+const starter = [
+  ['Architectural plans', '2D floor plans, structural drawings, 3D elevation, soil test', 'none', 'included'],
+  ['Steel / TMT', 'As per approved structural engineer design', 'none', 'included'],
+  ['Cement', 'Structural and masonry grades as specified', 'none', 'included'],
+  ['Sand & aggregates', 'Approved quarry and applicable aggregate sizes', 'none', 'included'],
+  ['Bricks / blocks', 'Wall thickness and material specifications', 'none', 'included'],
+  ['Flooring tiles', 'Tiles for living, dining and bedrooms', 'sqft', 'allowance'],
+  ['Bathroom fittings', 'Sanitary ware, taps, showers and CP fittings', 'bathroom', 'allowance'],
+  ['Main door', 'Main entrance door, frame, hardware and finish', 'door', 'allowance'],
+  ['Internal doors', 'Door shutter, frame, fittings and polish', 'door', 'allowance'],
+  ['Windows', 'UPVC / aluminium windows including hardware', 'sqft', 'allowance'],
+  ['Kitchen & countertop', 'Kitchen platform, sink and backsplash', 'sqft', 'allowance'],
+  ['Electrical', 'Copper wiring, conduits and switches', 'none', 'included'],
+  ['Plumbing', 'Water supply and drainage, pipe brand and grade', 'none', 'included'],
+  ['Painting', 'Putty, primer and interior / exterior finish coats', 'none', 'included'],
+  ['Railings & metal works', 'Staircase railings, gates and grills', 'running_ft', 'allowance'],
+  ['Exclusions & warranty', 'Clarify exclusions, workmanship and warranty', 'none', 'included'],
 ] as const;
-const makeSection = (title: string): ConstructionSpecSection => ({
-  title,
+const brandless = /architectural|drawing|plan|design|exclusion|warranty|soil test/i;
+const rateOnly = /steel|tmt|cement|sand|aggregate|brick|block|electrical|plumbing|paint/i;
+const orange = '#F97316';
+const field = 'min-h-11 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-900 outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100';
+const label = 'grid min-w-0 gap-1.5 text-xs font-bold text-slate-600';
+const currency = (n: string | number) => '₹' + (Number(n) || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 });
+const safeUnit = (title: string): Unit => {
+  if (/architectural|design|drawing|warranty|exclusion|steel|tmt/i.test(title)) return 'none';
+  if (/bathroom(?! door)|sanitary|toilet|fixture/i.test(title)) return 'bathroom';
+  if (/door/i.test(title)) return 'door';
+  if (/window|tile|floor|granite|countertop|wallpaper|ceiling|painting|cladding/i.test(title)) return 'sqft';
+  if (/railing|skirting/i.test(title)) return 'running_ft';
+  if (/light|switch|socket/i.test(title)) return 'point';
+  if (/sink|tank|gate/i.test(title)) return 'piece';
+  return 'none';
+};
+const initialSpec = (record: readonly string[]): ConstructionSpecSection => ({
+  title: record[0] ?? 'Custom specification',
+  description: record[1] ?? '',
   brand: '',
   grade: '',
-  description: '',
   allowancePerSqft: '',
+  unit: record[2] as Unit || 'none',
+  pricingTreatment: record[3] as Treatment || 'included',
+  allowanceValue: '',
 });
-const palettes = [
-  '#155EEF',
-  '#089E9C',
-  '#7945E8',
-  '#F18B31',
-  '#E94D69',
-  '#334155',
-];
-const field =
-  'w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100';
-const label = 'grid min-w-0 gap-2 text-xs font-bold text-slate-700';
-const money = (v: number) =>
-  new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    maximumFractionDigits: 0,
-  }).format(v);
+const prepare = (s: ConstructionSpecSection): ConstructionSpecSection => {
+  const unit = s.unit || safeUnit(s.title);
+  const value = s.allowanceValue ?? (s.allowancePerSqft || '');
+  return {
+    ...s,
+    unit,
+    pricingTreatment: s.pricingTreatment || (value ? 'allowance' : 'included'),
+    allowanceValue: value,
+    allowancePerSqft: s.allowancePerSqft || '',
+  };
+};
 
 export function PremiumPackageEditor({
   item,
@@ -106,706 +96,324 @@ export function PremiumPackageEditor({
   close: () => void;
 }) {
   const router = useRouter();
-  const [state, action, pending] = useActionState(saveConstructionPackage, {
-    message: '',
-  });
+  const [result, submit, pending] = useActionState(saveConstructionPackage, { message: '' });
   const [name, setName] = useState(item?.name ?? '');
   const [code, setCode] = useState(item?.code ?? '');
   const [rate, setRate] = useState(item?.ratePerSqft ?? '');
-  const [status, setStatus] = useState(item?.status ?? 'active');
   const [description, setDescription] = useState(item?.description ?? '');
-  const [themeColor, setThemeColor] = useState(item?.themeColor ?? '#155EEF');
+  const [status, setStatus] = useState(item?.status ?? 'active');
+  const [themeColor, setThemeColor] = useState(item?.themeColor ?? orange);
   const [sections, setSections] = useState<ConstructionSpecSection[]>(
-    item?.specSections?.length
-      ? item.specSections.map((section) => ({ ...section }))
-      : defaultCategories.map((record) => makeSection(record[0])),
+    item?.specSections?.length ? item.specSections.map(prepare) :
+      starter.map((record) => initialSpec(record)),
   );
-  const [mode, setMode] = useState<'manual' | 'pdf'>('manual');
   const [active, setActive] = useState(0);
-  const [attachmentName, setAttachmentName] = useState<string | null>(
-    item?.attachmentFilename ?? null,
-  );
+  const [mode, setMode] = useState<'manual' | 'pdf'>('manual');
+  const [attachmentName, setAttachmentName] = useState<string | null>(item?.attachmentFilename ?? null);
   const [fileMessage, setFileMessage] = useState('');
   const [uploading, setUploading] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
-  const currentId = state.packageId ?? item?.id;
-  const currentVersion = state.version ?? item?.version;
-  const fileUrl = currentId
-    ? '/dashboard/pricing/construction/packages/' + currentId + '/attachment'
-    : null;
-
+  const currentId = result.packageId ?? item?.id;
+  const fileUrl = currentId ? '/dashboard/pricing/construction/packages/' + currentId + '/attachment' : null;
+  const previewUrl = currentId ? '/dashboard/pricing/construction/packages/' + currentId + '/preview?format=pdf' : null;
+  const specified = sections.filter((s) => Boolean(s.description || s.brand || s.grade || s.allowanceValue));
+  const update = (index: number, patch: Partial<ConstructionSpecSection>) =>
+    setSections((previous) => previous.map((s, i) => i === index ? { ...s, ...patch } : s));
   useEffect(() => {
-    if (state.saved) router.refresh();
-  }, [state.saved, state.packageId, router]);
-
+    if (result.saved) router.refresh();
+  }, [result.saved, router]);
   useEffect(() => {
     if (!fileUrl) return;
     let alive = true;
     void fetch(fileUrl, { credentials: 'same-origin', cache: 'no-store' })
-      .then(async (response) => {
-        if (!response.ok) throw Error('Could not load PDF');
-        return response.json() as Promise<{
-          attachment: { filename: string } | null;
-        }>;
-      })
-      .then((data) => {
+      .then((response) => { if (!response.ok) throw Error('Not available'); return response.json(); })
+      .then((data: { attachment?: { filename: string } | null }) => {
         if (alive) setAttachmentName(data.attachment?.filename ?? null);
-      })
-      .catch(() => {
-        if (alive) setFileMessage('Could not refresh attached PDF');
-      });
-    return () => {
-      alive = false;
-    };
+      }).catch(() => { if (alive) setFileMessage('Could not load attached PDF'); });
+    return () => { alive = false; };
   }, [fileUrl]);
-
-  const updateSection = (
-    index: number,
-    key: keyof ConstructionSpecSection,
-    value: string,
-  ) =>
-    setSections((all) =>
-      all.map((entry, i) => (i === index ? { ...entry, [key]: value } : entry)),
-    );
 
   async function upload(file: File) {
     if (!fileUrl || uploading) return;
-    if (
-      !/\.pdf$/i.test(file.name) ||
-      file.type !== 'application/pdf' ||
-      file.size > 15 * 1024 * 1024 ||
-      file.size < 10
-    ) {
-      setFileMessage('Choose a genuine PDF under 15 MB.');
-      return;
+    if (!/\.pdf$/i.test(file.name) || file.type !== 'application/pdf' ||
+        file.size > 15 * 1024 * 1024 || file.size < 10) {
+      setFileMessage('Choose a PDF smaller than 15 MB.'); return;
     }
     setUploading(true);
     setFileMessage('');
     try {
-      const data = new FormData();
-      data.append('file', file);
-      const response = await fetch(fileUrl, {
-        method: 'POST',
-        credentials: 'same-origin',
-        body: data,
-      });
-      const result = (await response.json()) as { message?: string };
-      if (!response.ok) throw Error(result.message ?? 'Upload failed');
+      const body = new FormData(); body.append('file', file);
+      const response = await fetch(fileUrl, { method: 'POST', body, credentials: 'same-origin' });
+      const data = await response.json() as { message?: string };
+      if (!response.ok) throw Error(data.message ?? 'Upload failed');
       setAttachmentName(file.name);
-      setFileMessage(result.message ?? 'Specification PDF attached.');
+      setFileMessage('Source PDF attached to this package.');
       router.refresh();
     } catch (error) {
-      setFileMessage(
-        error instanceof Error ? error.message : 'PDF upload failed',
-      );
+      setFileMessage(error instanceof Error ? error.message : 'Upload failed');
     } finally {
       setUploading(false);
       if (fileInput.current) fileInput.current.value = '';
     }
   }
-
   async function removePdf() {
     if (!fileUrl || uploading) return;
     setUploading(true);
     try {
-      const response = await fetch(fileUrl, {
-        method: 'DELETE',
-        credentials: 'same-origin',
-      });
-      const result = (await response.json()) as { message?: string };
-      if (!response.ok) throw Error(result.message ?? 'Could not remove PDF');
+      const response = await fetch(fileUrl, { method: 'DELETE', credentials: 'same-origin' });
+      if (!response.ok) throw Error('Cannot remove attachment');
       setAttachmentName(null);
-      setFileMessage('Package PDF removed.');
+      setFileMessage('Attachment removed.');
       router.refresh();
     } catch (error) {
-      setFileMessage(
-        error instanceof Error ? error.message : 'Unable to remove PDF',
-      );
-    } finally {
-      setUploading(false);
-    }
+      setFileMessage(error instanceof Error ? error.message : 'Remove failed');
+    } finally { setUploading(false); }
   }
-
-  const specified = sections.filter((entry) =>
-    Boolean(
-      entry.description.trim() ||
-      entry.brand.trim() ||
-      entry.grade.trim() ||
-      entry.allowancePerSqft.trim(),
-    ),
-  );
-  const previewName = name.trim() || 'Your construction package';
-  const exampleAmount = Number(rate) > 0 ? Number(rate) * 1000 : 0;
+  const isBrandless = (title: string) => brandless.test(title);
+  const moneyPreview = (Number(rate) || 0) * 1000;
 
   return (
-    <div className="mt-5 overflow-hidden rounded-[28px] border border-blue-100 bg-[#F7FBFF] shadow-[0_12px_45px_rgba(17,62,131,.08)]">
-      <div className="bg-gradient-to-r from-[#E4F7FF] via-[#F7FAFF] to-white px-5 py-6 sm:px-7">
-        <p className="text-[11px] font-extrabold uppercase tracking-[.18em] text-blue-600">
-          Package design studio
-        </p>
-        <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h3 className="text-2xl font-black tracking-tight text-[#0A214B]">
-              Construction Package Builder
-            </h3>
-            <p className="mt-1 text-sm text-slate-500">
-              Create your package, define specifications and generate a branded
-              PDF.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={close}
-            className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-600"
-          >
-            Close
-          </button>
-        </div>
-        <div className="mt-6 flex items-center justify-between gap-1 text-center text-xs font-bold">
-          {['01 Package', '02 Specifications', '03 PDF Output'].map(
-            (step, i) => (
-              <div key={step} className="flex flex-1 items-center gap-2">
-                <span
-                  className={
-                    'grid min-h-11 flex-1 place-items-center rounded-xl px-1 ' +
-                    (i === 0
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-white text-slate-500')
-                  }
-                >
-                  {step}
-                </span>
-                {i < 2 && <span className="h-px w-3 shrink-0 bg-blue-200" />}
-              </div>
-            ),
-          )}
-        </div>
-      </div>
-      <form action={action} className="space-y-5 p-4 sm:p-7">
-        {currentId && (
-          <>
-            <input type="hidden" name="id" value={currentId} />
-            <input type="hidden" name="version" value={currentVersion ?? 1} />
-          </>
-        )}
+    <div className="min-w-0 overflow-hidden rounded-[24px] border border-slate-200 bg-[#F8FAFD] shadow-2xl sm:rounded-[30px]">
+      <form action={submit}>
+        {currentId && <>
+          <input type="hidden" name="id" value={currentId} />
+          <input type="hidden" name="version" value={result.version ?? item?.version ?? 1} />
+        </>}
         <input type="hidden" name="themeColor" value={themeColor} />
-        <input
-          type="hidden"
-          name="specSections"
-          value={JSON.stringify(sections)}
-        />
-        <div className="rounded-[23px] border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
-          <div className="mb-5 flex items-center gap-3">
-            <span className="grid size-11 place-items-center rounded-2xl bg-blue-100 text-2xl text-blue-700">
-              ▤
-            </span>
+        <input type="hidden" name="specSections" value={JSON.stringify(sections)} />
+        <div className="border-b border-slate-200 bg-white px-4 py-5 sm:px-7">
+          <div className="mb-4 flex items-center justify-between gap-3">
             <div>
-              <h4 className="text-lg font-extrabold text-[#0C2149]">
-                Package Details
-              </h4>
-              <p className="text-xs text-slate-500">
-                Pricing, specifications, theme and company branding.
-              </p>
+              <p className="text-[10px] font-extrabold uppercase tracking-[.2em] text-orange-600">Quotations / Packages</p>
+              <h2 className="mt-1 text-xl font-black tracking-tight text-[#122341] sm:text-2xl">Construction Package Studio</h2>
+              <p className="mt-1 text-xs text-slate-500">Create company-specific packages with detailed, correctly measured specifications.</p>
             </div>
+            <button type="button" onClick={close} aria-label="Close package editor"
+              className="grid size-11 shrink-0 place-items-center rounded-xl border border-slate-200 bg-white text-xl text-slate-700">×</button>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <label className={label}>
-              Package name *
-              <input
-                name="name"
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-                maxLength={120}
-                minLength={2}
-                required
-                className={field}
-                placeholder="Royal Premium Construction"
-              />
+          <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_180px_125px]">
+            <label className={label}>Package name
+              <input name="name" required minLength={2} maxLength={120} className={field}
+                value={name} onChange={(e) => setName(e.target.value)} placeholder="Premium Construction" />
             </label>
-            <label className={label}>
-              Package code *
-              <input
-                name="code"
-                value={code}
-                onChange={(event) => setCode(event.target.value.toUpperCase())}
-                maxLength={20}
-                pattern="[A-Z][A-Z0-9-]{1,19}"
-                required
-                className={field}
-                placeholder="ROYAL-1950"
-              />
+            <label className={label}>Package price (₹/built-up sq ft)
+              <input name="ratePerSqft" required type="number" min="1" max="999999.99" step=".01" className={field}
+                value={rate} onChange={(e) => setRate(e.target.value)} placeholder="1750" />
             </label>
-            <label className={label}>
-              Rate per built-up sq ft (₹) *
-              <input
-                name="ratePerSqft"
-                type="number"
-                min=".01"
-                max="999999.99"
-                step=".01"
-                value={rate}
-                onChange={(event) => setRate(event.target.value)}
-                required
-                className={field}
-                placeholder="e.g. 1950"
-              />
-            </label>
-            <label className={label}>
-              Status
-              <select
-                name="status"
-                value={status}
-                onChange={(event) =>
-                  setStatus(
-                    event.target.value === 'inactive' ? 'inactive' : 'active',
-                  )
-                }
-                className={field}
-              >
-                <option value="active">● Available</option>
-                <option value="inactive">Inactive</option>
+            <label className={label}>Status
+              <select name="status" className={field} value={status}
+                onChange={(e) => setStatus(e.target.value === 'inactive' ? 'inactive' : 'active')}>
+                <option value="active">● Active</option><option value="inactive">Inactive</option>
               </select>
             </label>
-            <div className="sm:col-span-2 rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-50 to-teal-50 p-4">
-              <div className="flex items-center gap-2 text-sm font-extrabold text-slate-900">
-                <span className="grid size-9 place-items-center rounded-xl bg-white text-lg text-blue-700">
-                  ▣
-                </span>
-                Private to your company
-              </div>
-              <p className="mt-2 text-xs leading-6 text-slate-600">
-                All packages are owned by your company. Authorized team members
-                can use your saved rates and specifications. Other companies
-                cannot view or reuse your packages.
-              </p>
-            </div>
-            <div className="sm:col-span-2 lg:col-span-1">
-              <span className="text-xs font-bold text-slate-700">
-                Quotation theme color
-              </span>
-              <div className="mt-4 flex flex-wrap items-center gap-2">
-                {palettes.map((color) => (
-                  <button
-                    type="button"
-                    key={color}
-                    aria-label={'Use PDF theme ' + color}
-                    aria-pressed={themeColor === color}
-                    onClick={() => setThemeColor(color)}
-                    className={
-                      'size-10 rounded-full border-[3px] transition ' +
-                      (themeColor === color
-                        ? 'border-white outline outline-2 outline-blue-600'
-                        : 'border-white outline outline-1 outline-slate-200')
-                    }
-                    style={{ backgroundColor: color }}
-                  />
-                ))}
-                <label className="flex items-center gap-1 text-xs text-slate-600">
-                  Custom
-                  <input
-                    type="color"
-                    className="h-9 w-10 cursor-pointer rounded-lg border-0"
-                    value={themeColor}
-                    onChange={(event) => setThemeColor(event.target.value)}
-                    aria-label="Custom PDF accent color"
-                  />
-                </label>
-              </div>
-            </div>
-            <label className={label + ' sm:col-span-2'}>
-              Package inclusions & exclusions
-              <textarea
-                name="description"
-                rows={4}
-                maxLength={600}
-                value={description}
-                onChange={(event) => setDescription(event.target.value)}
-                placeholder="Describe construction work, labour, project exclusions, GST and warranty."
-                className={field + ' resize-y leading-6'}
-              />
-              <span className="text-right text-[11px] font-medium text-slate-400">
-                {description.length}/600
-              </span>
+          </div>
+          <div className="mt-4 grid gap-3 sm:grid-cols-[180px_minmax(0,1fr)]">
+            <label className={label}>Package code
+              <input required className={field} name="code" maxLength={20} pattern="[A-Z][A-Z0-9-]{1,19}"
+                value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} placeholder="PREMIUM" />
+            </label>
+            <label className={label}>Description, inclusions & exclusions
+              <input className={field} maxLength={600} name="description" value={description}
+                onChange={(e) => setDescription(e.target.value)} placeholder="Scope, warranties and exclusions" />
             </label>
           </div>
+          <div className="mt-5 flex flex-wrap gap-2 text-[11px] font-bold">
+            <span className="rounded-lg bg-slate-100 px-3 py-2 text-slate-500">01 &nbsp; Package details</span>
+            <span className="rounded-lg bg-orange-600 px-3 py-2 text-white">02 &nbsp; Specifications</span>
+            <span className="rounded-lg bg-slate-100 px-3 py-2 text-slate-500">03 &nbsp; PDF & branding</span>
+          </div>
         </div>
-
-        <div className="rounded-[23px] border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
-          <div className="mb-4">
-            <h4 className="text-lg font-extrabold text-[#0C2149]">
-              Detailed Specifications
-            </h4>
-            <p className="mt-1 text-xs text-slate-500">
-              Edit manufacturer, material grade, price allowance per sq ft and
-              inclusions separately. Allowances are descriptive, not extra
-              charges.
-            </p>
-          </div>
-          <div className="grid grid-cols-2 gap-2 rounded-xl bg-[#EDF3FB] p-1">
-            <button
-              type="button"
-              onClick={() => setMode('manual')}
-              aria-pressed={mode === 'manual'}
-              className={
-                'rounded-lg px-3 py-3 text-xs font-extrabold ' +
-                (mode === 'manual'
-                  ? 'bg-blue-600 text-white'
-                  : 'text-slate-600')
-              }
-            >
-              ✎ Manual Entry
-            </button>
-            <button
-              type="button"
-              onClick={() => setMode('pdf')}
-              aria-pressed={mode === 'pdf'}
-              className={
-                'rounded-lg px-3 py-3 text-xs font-extrabold ' +
-                (mode === 'pdf' ? 'bg-blue-600 text-white' : 'text-slate-600')
-              }
-            >
-              ▤ Attach PDF
-            </button>
-          </div>
-          {mode === 'manual' && (
-            <>
-              <div className="mt-4 space-y-2">
-                {sections.map((spec, index) => (
-                  <div
-                    key={index}
-                    className="overflow-hidden rounded-xl border border-slate-200 bg-[#F9FBFF]"
-                  >
-                    <button
-                      type="button"
-                      onClick={() => setActive(active === index ? -1 : index)}
-                      aria-expanded={active === index}
-                      className="flex w-full items-center justify-between gap-2 px-4 py-3.5 text-left"
-                    >
-                      <div className="min-w-0">
-                        <strong className="block truncate text-sm text-slate-900">
-                          {String(index + 1).padStart(2, '0')} · {spec.title}
-                        </strong>
-                        <span className="block truncate text-xs text-slate-500">
-                          {[
-                            spec.brand,
-                            spec.grade,
-                            spec.allowancePerSqft
-                              ? 'Up to ₹' + spec.allowancePerSqft + '/sft'
-                              : '',
-                          ]
-                            .filter(Boolean)
-                            .join(' · ') ||
-                            'Set brand, grade and material specification'}
-                        </span>
-                      </div>
-                      <span className="text-lg text-blue-600">
-                        {active === index ? '−' : '›'}
-                      </span>
-                    </button>
-                    {active === index && (
-                      <div className="grid gap-3 border-t border-slate-200 bg-white p-4 sm:grid-cols-2">
-                        <label className={label + ' sm:col-span-2'}>
-                          Category name
-                          <input
-                            className={field}
-                            value={spec.title}
-                            maxLength={90}
-                            onChange={(event) =>
-                              updateSection(index, 'title', event.target.value)
-                            }
-                          />
-                        </label>
-                        <label className={label}>
-                          Brand / manufacturer
-                          <input
-                            className={field}
-                            maxLength={120}
-                            value={spec.brand}
-                            placeholder="e.g. Tata, UltraTech, Kajaria"
-                            onChange={(event) =>
-                              updateSection(index, 'brand', event.target.value)
-                            }
-                          />
-                        </label>
-                        <label className={label}>
-                          Grade / material size
-                          <input
-                            className={field}
-                            maxLength={120}
-                            value={spec.grade}
-                            placeholder="e.g. Fe 550D, OPC 53, 2×2"
-                            onChange={(event) =>
-                              updateSection(index, 'grade', event.target.value)
-                            }
-                          />
-                        </label>
-                        <label className={label}>
-                          Allowance per sq ft (₹) · if applicable
-                          <input
-                            className={field}
-                            maxLength={40}
-                            value={spec.allowancePerSqft}
-                            placeholder="e.g. 85 for vitrified tiles"
-                            onChange={(event) =>
-                              updateSection(
-                                index,
-                                'allowancePerSqft',
-                                event.target.value,
-                              )
-                            }
-                          />
-                        </label>
-                        <label className={label + ' sm:col-span-2'}>
-                          Scope and inclusions
-                          <textarea
-                            className={field + ' min-h-28 resize-y'}
-                            rows={4}
-                            maxLength={600}
-                            value={spec.description}
-                            placeholder="Material usage, finish, exclusions, warranty and additional specification details."
-                            onChange={(event) =>
-                              updateSection(
-                                index,
-                                'description',
-                                event.target.value,
-                              )
-                            }
-                          />
-                        </label>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setSections((items) =>
-                              items.filter((_, i) => i !== index),
-                            );
-                            setActive(-1);
-                          }}
-                          className="justify-self-start text-xs font-bold text-rose-600"
-                        >
-                          Remove category
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                ))}
+        <div className="grid min-w-0 gap-4 p-3 sm:p-5 lg:grid-cols-[minmax(0,1.55fr)_minmax(280px,1fr)]">
+          <section className="min-w-0 space-y-3" aria-label="Package specifications">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h3 className="text-lg font-black text-[#172845]">Package specifications</h3>
+                <p className="mt-1 text-xs text-slate-500">Set the unit and treatment separately for every item.</p>
               </div>
-              <button
-                type="button"
-                disabled={sections.length >= 18}
-                onClick={() => {
-                  setSections((items) => [
-                    ...items,
-                    makeSection('Custom category'),
-                  ]);
-                  setActive(sections.length);
-                }}
-                className="mt-4 w-full rounded-xl border border-dashed border-blue-300 bg-blue-50 px-4 py-3 text-sm font-bold text-blue-700 disabled:opacity-50"
-              >
-                + Add specification category
-              </button>
-            </>
-          )}
-          {mode === 'pdf' && (
-            <div className="mt-4 rounded-xl border border-dashed border-blue-200 bg-blue-50/50 p-5">
-              <strong className="text-sm text-slate-900">
-                Upload your existing material specification PDF
-              </strong>
-              <p className="mt-2 text-xs leading-6 text-slate-600">
-                One private PDF per package, up to 15 MB and 60 pages. It will
-                be snapshotted into the quotation when the client quote is
-                saved, then appended after the pricing and manual specification
-                pages.
-              </p>
-              {!currentId && (
-                <p className="mt-2 text-xs font-bold text-amber-700">
-                  Save the package first to enable PDF uploads.
-                </p>
-              )}
-              <input
-                type="file"
-                ref={fileInput}
-                accept="application/pdf,.pdf"
-                disabled={!currentId || uploading}
-                aria-label="Upload package specification PDF"
-                className="mt-4 w-full text-xs text-slate-600 file:mr-3 file:rounded-xl file:border-0 file:bg-blue-600 file:px-4 file:py-3 file:font-bold file:text-white disabled:opacity-40"
-                onChange={(event) => {
-                  const file = event.target.files?.[0];
-                  if (file) void upload(file);
-                }}
-              />
+              <span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-slate-500">{sections.length} items</span>
             </div>
-          )}
-        </div>
-
-        <div className="grid gap-4 lg:grid-cols-2">
-          <section className="rounded-[23px] border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
-            <h4 className="text-base font-extrabold text-slate-900">
-              ▤ Attached specification PDF
-            </h4>
-            {attachmentName ? (
-              <div className="mt-4 rounded-xl border border-blue-200 bg-blue-50 p-4">
-                <p className="break-all text-sm font-bold text-blue-800">
-                  📄 {attachmentName}
-                </p>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {fileUrl && (
-                    <a
-                      href={fileUrl + '?download=1'}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="rounded-lg border border-blue-200 bg-white px-3 py-2 text-xs font-bold text-blue-700"
-                    >
-                      View PDF ↗
-                    </a>
-                  )}
-                  <button
-                    type="button"
-                    disabled={!fileUrl || uploading}
-                    onClick={() => void removePdf()}
-                    className="rounded-lg border border-rose-200 bg-white px-3 py-2 text-xs font-bold text-rose-600"
-                  >
-                    Remove
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <p className="mt-4 rounded-xl border border-dashed border-slate-200 p-5 text-xs text-slate-500">
-                No PDF attached. Manual specifications still generate a branded
-                proposal, or select Attach PDF above.
-              </p>
-            )}
-            <p className="mt-4 rounded-lg bg-[#EBF5FF] px-3 py-3 text-xs leading-5 text-[#34629A]">
-              The price calculation and company-brand pages always come first.
-              Attached PDFs are added afterwards, in customer download order.
-            </p>
-            {fileMessage && (
-              <p role="status" className="mt-3 text-xs text-slate-700">
-                {uploading ? 'Uploading… ' : ''}
-                {fileMessage}
-              </p>
-            )}
-          </section>
-          <section className="rounded-[23px] border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
-            <h4 className="text-base font-extrabold text-slate-900">
-              ◉ Quotation PDF Preview
-            </h4>
-            <p className="mt-1 text-xs text-slate-500">
-              Illustrative 1,000 SFT template — client totals are calculated
-              separately from actual floor measurements.
-            </p>
-            <div className="mt-4 grid grid-cols-2 gap-3">
-              <div className="min-h-48 rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
-                <div
-                  className="rounded-lg px-2 py-2 text-xs font-black text-white"
-                  style={{ backgroundColor: themeColor }}
-                >
-                  CONSTRUCTION QUOTE
-                </div>
-                <h5 className="mt-3 break-words text-xs font-extrabold text-slate-900">
-                  {previewName}
-                </h5>
-                <p className="mt-2 text-[10px] text-slate-500">
-                  Sample pricing · 1,000 SFT
-                </p>
-                <div className="mt-3 border-t border-slate-100 pt-3">
-                  <div className="flex justify-between gap-1 text-[10px]">
-                    <span>Built-up floor area</span>
-                    <span>1,000 SFT</span>
-                  </div>
-                  <div className="mt-2 flex justify-between gap-1 border-t border-slate-100 pt-2 text-[10px] font-bold">
-                    <span>Indicative total</span>
-                    <span>{exampleAmount ? money(exampleAmount) : '—'}</span>
-                  </div>
-                </div>
-                <p className="mt-6 text-center text-[10px] text-slate-400">
-                  Page 1 · Cost calculation
-                </p>
-              </div>
-              <div className="min-h-48 rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
-                <div
-                  className="rounded-lg px-2 py-2 text-xs font-black text-white"
-                  style={{ backgroundColor: themeColor }}
-                >
-                  PACKAGE SPECS
-                </div>
-                <h5 className="mt-3 text-xs font-extrabold text-slate-900">
-                  Material & finishes
-                </h5>
-                {specified.slice(0, 5).map((spec, index) => (
-                  <div
-                    key={index}
-                    className="mt-2 border-b border-slate-100 pb-1"
-                  >
-                    <strong className="block truncate text-[10px]">
-                      {spec.title}
-                    </strong>
-                    <span className="block truncate text-[9px] text-slate-500">
-                      {spec.brand ||
-                        spec.grade ||
-                        spec.description ||
-                        'Included'}
+            {sections.map((spec, index) => {
+              const opened = active === index;
+              const unit = spec.unit || 'none';
+              const treatment = spec.pricingTreatment || 'included';
+              const amount = spec.allowanceValue || '';
+              return (
+                <article key={index} className={'min-w-0 overflow-hidden rounded-2xl border bg-white shadow-sm ' +
+                  (opened ? 'border-orange-400 ring-1 ring-orange-100' : 'border-slate-200')}>
+                  <button type="button" className="flex w-full min-w-0 items-center gap-3 px-3 py-4 text-left sm:px-4"
+                    aria-expanded={opened} onClick={() => setActive(opened ? -1 : index)}>
+                    <span className={'grid size-10 shrink-0 place-items-center rounded-xl text-sm font-black ' +
+                      (opened ? 'bg-orange-100 text-orange-600' : 'bg-slate-100 text-slate-700')}>
+                      {String(index + 1).padStart(2, '0')}
                     </span>
-                  </div>
-                ))}
-                {specified.length === 0 && (
-                  <p className="mt-3 text-[10px] text-slate-400">
-                    Enter specifications to preview them.
-                  </p>
-                )}
-                <p className="mt-4 text-center text-[10px] text-slate-400">
-                  Page 2 · Specifications
-                </p>
-              </div>
-            </div>
-            <p className="mt-4 rounded-xl bg-teal-50 p-3 text-xs leading-5 text-teal-800">
-              ✦ Manual specifications become branded A4 PDF pages using this
-              theme. Uploaded PDF pages retain their own original design.
-            </p>
-          </section>
-        </div>
-        {state.message && (
-          <p
-            role={state.saved ? 'status' : 'alert'}
-            className={
-              'rounded-xl p-3 text-sm ' +
-              (state.saved
-                ? 'bg-emerald-50 text-emerald-800'
-                : 'bg-amber-50 text-amber-900')
-            }
-          >
-            {state.message}
-          </p>
-        )}
-        <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-blue-100 bg-white p-4">
-          <button
-            disabled={pending}
-            type="submit"
-            className="min-h-12 flex-1 rounded-xl bg-blue-600 px-6 py-3 text-sm font-extrabold text-white shadow-lg shadow-blue-100 disabled:opacity-40"
-          >
-            {pending ? 'Saving package…' : '▣ Save package'}
-          </button>
-          {currentId ? (
-            <a
-              className="min-h-12 flex-1 rounded-xl border border-blue-200 bg-blue-50 px-6 py-3 text-center text-sm font-extrabold text-blue-700"
-              href={
-                '/dashboard/pricing/construction/packages/' +
-                currentId +
-                '/preview'
-              }
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Preview branded PDF ↗
-            </a>
-          ) : (
-            <button
-              type="button"
-              disabled
-              className="min-h-12 flex-1 rounded-xl border border-slate-200 px-6 py-3 text-sm font-bold text-slate-400"
-            >
-              Save before PDF preview
+                    <span className="min-w-0 flex-1">
+                      <strong className="block truncate text-sm text-[#172845]">{spec.title}</strong>
+                      <span className="mt-1 block truncate text-xs text-slate-500">
+                        {[spec.brand, spec.grade, amount && unit !== 'none' ? currency(amount) + ' / ' + unitLabels[unit] : '',
+                          !amount ? treatments[treatment] : ''].filter(Boolean).join(' · ') ||
+                          spec.description || 'Add specifications'}
+                      </span>
+                    </span>
+                    <span className={'text-xs font-extrabold ' + (opened ? 'text-orange-600' : 'text-slate-500')}>{opened ? '⌃' : '⌄'}</span>
+                  </button>
+                  {opened && <div className="grid min-w-0 gap-3 border-t border-slate-100 bg-[#FFFCF9] p-3 sm:grid-cols-2 sm:p-4">
+                    <label className={label + ' sm:col-span-2'}>Item / category
+                      <input className={field} maxLength={90} value={spec.title}
+                        onChange={(e) => update(index, { title: e.target.value })} />
+                    </label>
+                    {!isBrandless(spec.title) && <label className={label}>Brand / manufacturer
+                      <input className={field} maxLength={120} value={spec.brand}
+                        onChange={(e) => update(index, { brand: e.target.value })} placeholder="Brand or equivalent" />
+                    </label>}
+                    {!isBrandless(spec.title) && <label className={label}>Grade / size / finish
+                      <input className={field} maxLength={120} value={spec.grade}
+                        onChange={(e) => update(index, { grade: e.target.value })} placeholder="Fe 550D, 2×2, etc." />
+                    </label>}
+                    <label className={label}>Pricing treatment
+                      <select className={field} value={treatment}
+                        onChange={(e) => update(index, {
+                          pricingTreatment: e.target.value as Treatment,
+                          ...(e.target.value === 'excluded' || e.target.value === 'included' ? { allowanceValue: '', allowancePerSqft: '' } : {}),
+                        })}>
+                        {Object.entries(treatments).map(([key, value]) =>
+                          <option key={key} value={key}>{value}</option>)}
+                      </select>
+                    </label>
+                    <label className={label}>Measurement unit
+                      <select className={field} value={unit} onChange={(e) => update(index, {
+                        unit: e.target.value as Unit,
+                        ...(e.target.value === 'none' ? { allowanceValue: '', allowancePerSqft: '' } : {}),
+                      })}>
+                        {Object.entries(unitLabels).map(([key, value]) =>
+                          <option key={key} value={key}>{value}</option>)}
+                      </select>
+                    </label>
+                    {unit !== 'none' && (treatment === 'allowance' || treatment === 'extra') &&
+                      <label className={label + ' sm:col-span-2'}>{treatment === 'extra' ? 'Extra rate' : 'Included allowance'} (₹ / {unitLabels[unit]})
+                        <input className={field} type="number" min="0" max="999999999" step=".01"
+                          value={amount} placeholder="Enter price, e.g. 70"
+                          onChange={(e) => update(index, {
+                            allowanceValue: e.target.value,
+                            allowancePerSqft: unit === 'sqft' ? e.target.value : '',
+                          })} />
+                      </label>}
+                    <label className={label + ' sm:col-span-2'}>
+                      {isBrandless(spec.title) ? 'Drawings / deliverables / inclusions' : 'Scope and inclusions'}
+                      <textarea className={field + ' min-h-24 resize-y'} maxLength={600} rows={3}
+                        value={spec.description} onChange={(e) => update(index, { description: e.target.value })}
+                        placeholder="What is included, quantity limits, exclusions and technical details" />
+                    </label>
+                    <p className="text-[11px] leading-5 text-slate-500 sm:col-span-2">
+                      {treatment === 'allowance' ? 'Allowance is included in the base package rate. Do not add it twice.' :
+                       treatment === 'extra' ? 'Extras are priced separately only when the customer quote adds the actual quantity.' :
+                       treatment === 'included' ? 'Included in the base construction rate; no additional material charge.' :
+                       'Not included in this package.'}
+                    </p>
+                    <button type="button" className="justify-self-start rounded-lg px-2 py-2 text-xs font-bold text-red-600"
+                      onClick={() => { setSections((prev) => prev.filter((_, i) => i !== index)); setActive(-1); }}>
+                      Remove item
+                    </button>
+                  </div>}
+                </article>
+              );
+            })}
+            <button type="button" disabled={sections.length >= 18} onClick={() => {
+              setSections((prev) => [...prev, initialSpec(['Custom item', '', 'none', 'included'])]); setActive(sections.length);
+            }} className="min-h-12 w-full rounded-2xl border border-dashed border-orange-300 bg-white px-4 text-sm font-extrabold text-orange-600 disabled:opacity-40">
+              + Add item or category
             </button>
-          )}
+          </section>
+
+          <aside className="min-w-0 space-y-4" aria-label="PDF branding and preview">
+            <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <h3 className="text-sm font-extrabold text-[#172845]">Live PDF summary</h3>
+                {previewUrl && <a href={previewUrl} target="_blank" rel="noopener noreferrer"
+                  className="text-xs font-bold text-orange-600">View full PDF ↗</a>}
+              </div>
+              <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+                <div className="border-t-[5px] px-4 pb-5 pt-4" style={{ borderTopColor: themeColor }}>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Company-branded package</p>
+                  <h4 className="mt-2 text-lg font-black text-[#172845]">{name || 'Premium Construction'}</h4>
+                  <p className="mt-2 text-2xl font-black" style={{ color: themeColor }}>{currency(rate)}<span className="ml-1 text-xs text-slate-500">/ sq ft</span></p>
+                  <p className="mt-2 text-[10px] text-slate-400">Built-up area basis · specification allowances included</p>
+                </div>
+                <div className="bg-orange-50 px-3 py-2 text-center text-[10px] font-bold text-orange-700">Allowances included — no double counting</div>
+                <div className="divide-y divide-slate-100 px-3">
+                  {specified.slice(0, 7).map((spec, index) => (
+                    <div key={index} className="grid grid-cols-[minmax(0,1fr)_auto] gap-2 py-3 text-[11px]">
+                      <span className="min-w-0 truncate font-semibold text-slate-700">{spec.title}</span>
+                      <span className="max-w-[140px] truncate text-right text-slate-500">
+                        {spec.pricingTreatment === 'excluded' ? 'Excluded' :
+                         spec.allowanceValue && spec.unit !== 'none'
+                           ? currency(spec.allowanceValue) + ' / ' + unitLabels[spec.unit || 'none']
+                           : spec.pricingTreatment === 'extra' ? 'Extra' : 'Included'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                <p className="px-3 pb-4 pt-3 text-[10px] text-slate-500">Sample: 1,000 sq ft × {currency(rate)} = {currency(moneyPreview)}. Final quantities use the customer's approved quote.</p>
+              </div>
+            </section>
+            <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              <h3 className="text-sm font-extrabold text-[#172845]">PDF & branding</h3>
+              <p className="mt-1 text-xs text-slate-500">Choose a colour for this company's quotation.</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {['#F97316','#EA580C','#155EEF','#089E9C','#334155'].map((color) => (
+                  <button type="button" key={color} aria-label={'Select PDF colour ' + color}
+                    aria-pressed={themeColor === color} onClick={() => setThemeColor(color)}
+                    className={'size-10 rounded-full border-[3px] border-white shadow-sm ' +
+                      (themeColor === color ? 'outline outline-2 outline-orange-500' : '')}
+                    style={{ backgroundColor: color }} />
+                ))}
+                <input type="color" aria-label="Choose custom PDF colour" className="size-10" value={themeColor}
+                  onChange={(e) => setThemeColor(e.target.value)} />
+              </div>
+              <div className="mt-4 grid grid-cols-2 gap-2 rounded-xl bg-slate-100 p-1">
+                <button type="button" onClick={() => setMode('manual')} aria-pressed={mode === 'manual'}
+                  className={'rounded-lg px-2 py-3 text-xs font-bold ' +
+                    (mode === 'manual' ? 'bg-orange-600 text-white' : 'bg-white text-slate-600')}>Manual specs</button>
+                <button type="button" onClick={() => setMode('pdf')} aria-pressed={mode === 'pdf'}
+                  className={'rounded-lg px-2 py-3 text-xs font-bold ' +
+                    (mode === 'pdf' ? 'bg-orange-600 text-white' : 'bg-white text-slate-600')}>Attach existing PDF</button>
+              </div>
+              {mode === 'manual'
+                ? <p className="mt-3 text-xs leading-5 text-slate-500">The specifications on the left become editable, branded PDF pages.</p>
+                : <div className="mt-3">
+                    <label className={label}>Existing specification PDF (up to 15 MB)
+                      <input type="file" ref={fileInput} accept=".pdf,application/pdf"
+                        disabled={!fileUrl || uploading} className="w-full py-3 text-xs text-slate-600 disabled:opacity-50"
+                        onChange={(e) => { const file = e.target.files?.[0]; if (file) void upload(file); }} />
+                    </label>
+                    {!fileUrl && <p className="text-xs text-amber-700">Save the package first to attach a PDF.</p>}
+                  </div>}
+              {attachmentName && <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-lg bg-slate-50 p-3 text-xs">
+                <a href={fileUrl + '?download=1'} target="_blank" rel="noopener noreferrer"
+                  className="max-w-[180px] truncate font-bold text-slate-700">📄 {attachmentName}</a>
+                <button type="button" disabled={uploading} onClick={() => void removePdf()}
+                  className="font-bold text-red-600">Remove PDF</button>
+              </div>}
+              {fileMessage && <p role="status" className="mt-3 text-xs text-slate-600">{fileMessage}</p>}
+              <p className="mt-4 text-[11px] leading-5 text-slate-500">
+                Existing PDFs appear after the branded price summary. Previously issued quotations keep their saved snapshot.
+              </p>
+            </section>
+          </aside>
+        </div>
+        {result.message && <p role={result.saved ? 'status' : 'alert'}
+          className={'mx-3 mb-2 rounded-xl p-3 text-sm sm:mx-5 ' +
+            (result.saved ? 'bg-emerald-50 text-emerald-800' : 'bg-red-50 text-red-700')}>
+          {result.message}
+        </p>}
+        <div className="sticky bottom-0 z-10 flex flex-wrap items-center gap-2 border-t border-slate-200 bg-white/95 p-3 shadow-[0_-8px_20px_rgba(16,24,40,.06)] backdrop-blur sm:justify-end sm:p-5">
+          <button disabled={pending} type="submit"
+            className="min-h-12 min-w-0 flex-1 rounded-xl bg-orange-600 px-4 py-3 text-sm font-extrabold text-white disabled:opacity-50 sm:flex-none sm:px-7">
+            {pending ? 'Saving…' : '▣ Save changes'}
+          </button>
+          {previewUrl
+            ? <a href={previewUrl} target="_blank" rel="noopener noreferrer"
+                className="flex min-h-12 min-w-0 flex-1 items-center justify-center rounded-xl border border-orange-300 bg-white px-3 py-3 text-center text-sm font-extrabold text-orange-700 sm:flex-none sm:px-7">Preview PDF ↗</a>
+            : <button type="button" disabled className="min-h-12 min-w-0 flex-1 rounded-xl border border-slate-200 px-3 text-sm font-bold text-slate-400 sm:flex-none">Preview after saving</button>}
         </div>
       </form>
     </div>
