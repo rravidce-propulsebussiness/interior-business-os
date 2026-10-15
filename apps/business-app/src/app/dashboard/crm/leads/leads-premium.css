@@ -138,15 +138,7 @@
 .crm-last-update { min-width: 145px; max-width: 230px; }
 .crm-last-update strong { color:#25314b; }
 /* One control system for Stage, Priority, Follow-up and Quotation. */
-.crm-inline-priority {
-  position: relative;
-  min-width: 130px;
-  max-width: 220px;
-  display: grid;
-  gap: 4px;
-}
 .crm-leads-root .crm-inline-field select,
-.crm-leads-root .crm-premium-priority-select,
 .crm-leads-root .crm-inline-followup input {
   box-sizing: border-box;
   display: block;
@@ -162,15 +154,12 @@
   font-size: 13px;
   font-weight: 700;
 }
-.crm-leads-root .crm-inline-field select,
-.crm-leads-root .crm-premium-priority-select {
+.crm-leads-root .crm-inline-field select {
   padding-right: 28px;
   cursor: pointer;
 }
 .crm-leads-root .crm-inline-field select:focus,
 .crm-leads-root .crm-inline-field select:focus-visible,
-.crm-leads-root .crm-premium-priority-select:focus,
-.crm-leads-root .crm-premium-priority-select:focus-visible,
 .crm-leads-root .crm-inline-followup input:focus,
 .crm-leads-root .crm-inline-followup input:focus-visible,
 .crm-leads-root .crm-quote-create:focus-visible {
@@ -178,10 +167,6 @@
   outline-offset: 2px;
   border-color: #fb923c;
   box-shadow: none;
-}
-.crm-leads-root .crm-premium-priority-select:disabled {
-  opacity: .65;
-  cursor: wait;
 }
 .crm-leads-root .crm-inline-followup button {
   box-sizing: border-box;
@@ -216,13 +201,11 @@
   border-color: #fb923c;
   color: #ca5418;
 }
-.crm-mobile-inline-grid .crm-inline-priority,
 .crm-mobile-inline-grid .crm-inline-field {
   width: 100%;
   min-width: 0;
   max-width: none;
 }
-.crm-mobile-inline-grid .crm-inline-priority select { width: 100%; }
 .crm-mobile-inline-grid .crm-inline-followup { min-width: 0; }
 .crm-mobile-quotation {
   grid-column: 1 / -1;
