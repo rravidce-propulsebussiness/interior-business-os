@@ -9,6 +9,7 @@ import './studio.css';
 const links: { title: string; href: string; icon: OwnerIconName }[] = [
   { title: 'Dashboard', href: '/dashboard', icon: 'dashboard' },
   { title: 'Leads', href: '/dashboard/crm/leads', icon: 'leads' },
+  { title: 'Follow-ups', href: '/dashboard/crm/followups', icon: 'calendar' },
   { title: 'Quotations', href: '/dashboard/quotations', icon: 'quotations' },
   { title: 'Projects', href: '/dashboard/projects', icon: 'projects' },
   { title: 'Clients', href: '/dashboard/customers', icon: 'clients' },
