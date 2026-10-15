@@ -220,6 +220,7 @@ export function LeadsWorkspace({
   canAssign,
   canNote,
   canFollowUp,
+  canVisit,
   lostReasons,
   organizationName,
   timeZone,
@@ -254,6 +255,7 @@ export function LeadsWorkspace({
   canWin: boolean;
   canNote: boolean;
   canFollowUp: boolean;
+  canVisit: boolean;
   canConvert: boolean;
   canQuote: boolean;
   organizationName: string;
@@ -987,7 +989,7 @@ export function LeadsWorkspace({
         lead={openedLead} onClose={() => setOpenedId(null)}
         stages={stages} lostReasons={lostReasons} assignees={assignees}
         canManage={canManage} canWin={canWin}
-        canFollowUp={canFollowUp} canNote={canNote} canQuote={canQuote}
+        canFollowUp={canFollowUp} canVisit={canVisit} canNote={canNote} canQuote={canQuote}
       />}
       <p className="crm-leads-scope">
         Showing authorized leads for {organizationName}. CSV export includes
