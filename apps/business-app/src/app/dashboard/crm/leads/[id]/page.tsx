@@ -24,6 +24,7 @@ import '../../../owner-dashboard.css';
 import '../leads.css';
 import './lead-history.css';
 import '../lead-category.css';
+import '../leads-activity.css';
 
 export const dynamic = 'force-dynamic';
 
