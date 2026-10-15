@@ -259,7 +259,9 @@ export default async function Login({
             </div>
             <PremiumLoginForm
               action={signIn}
-              destination={params.portal === 'client' ? '/client/projects' : '/dashboard'}
+              destination={
+                params.portal === 'client' ? '/client/projects' : '/dashboard'
+              }
             />
 
             <div className="pp-login-trust">
