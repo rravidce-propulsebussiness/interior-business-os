@@ -826,16 +826,52 @@ export function LeadsWorkspace({
                           <label className="crm-mobile-followup">Next follow-up
                             <LeadFollowUpSetter lead={lead} canFollowUp={canFollowUp}/>
                           </label>
-                          <div className="crm-mobile-quotation">
-                            <span className="crm-mobile-field-label">Quotation</span>
+                          <div
+                            className="crm-mobile-quotation"
+                            style={{
+                              gridColumn: '1 / -1',
+                              display: 'grid',
+                              gridTemplateColumns: 'minmax(0, 1fr)',
+                              gap: 6,
+                              width: '100%',
+                              minWidth: 0,
+                            }}
+                          >
+                            <span className="crm-mobile-field-label" style={{
+                              display: 'block', fontSize: 11, fontWeight: 700,
+                              color: '#657895', lineHeight: '1.4',
+                            }}>Quotation</span>
                             {lead.quoteRevisionId ? (
                               <LeadQuotePreview revisionId={lead.quoteRevisionId}
                                 number={lead.quoteNumber || 'Quotation'} status={lead.quoteStatus}
                                 amount={lead.quoteAmount} shared={lead.quoteShared} />
                             ) : canQuote ? (
-                              <a className="crm-quote-create" href={'/dashboard/quotations/new?lead='+lead.id}>
+                              <a
+                                className="crm-quote-create"
+                                aria-label={'Prepare quotation for ' + lead.name}
+                                href={'/dashboard/quotations/new?lead=' + encodeURIComponent(lead.id)}
+                                style={{
+                                  boxSizing: 'border-box',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'space-between',
+                                  gap: 12,
+                                  width: '100%',
+                                  minWidth: 0,
+                                  minHeight: 46,
+                                  padding: '10px 12px',
+                                  border: '1px solid #e2e6ed',
+                                  borderRadius: 12,
+                                  background: '#f7f8fb',
+                                  color: '#233653',
+                                  fontSize: 13,
+                                  fontWeight: 700,
+                                  textDecoration: 'none',
+                                  textAlign: 'left',
+                                }}
+                              >
                                 <span>+ Prepare quotation</span>
-                                <span aria-hidden="true">↗</span>
+                                <span aria-hidden="true" style={{ flexShrink: 0 }}>↗</span>
                               </a>
                             ) : (
                               <span className="crm-muted">No quotation yet</span>
