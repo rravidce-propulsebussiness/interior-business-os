@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { runCrmCommand } from '../actions';
 import { LeadUpdateComposer } from './lead-update-composer';
+import { LeadPrioritySelect } from './lead-inline-controls';
 import { LeadQuotePreview } from './lead-quote-preview';
 import { LeadRemovalButton } from './lead-removal-button';
 import type { LeadStage, LeadView } from './workspace';
@@ -172,14 +173,7 @@ export function LeadsBoardView({
                         >
                           {lead.name}
                         </button>
-                        <span
-                          className={
-                            'crm-board-priority crm-board-priority-' +
-                            lead.priority
-                          }
-                        >
-                          {lead.priority}
-                        </span>
+                        <LeadPrioritySelect lead={lead} canManage={canManage} />
                       </div>
                       <span
                         className={
