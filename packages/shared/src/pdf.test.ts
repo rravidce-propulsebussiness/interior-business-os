@@ -5,6 +5,7 @@ import {
   configuredPdfProvider,
   PdfServiceError,
   renderPdf,
+  renderConstructionPackageSamplePdf,
   validatePrintHtml,
 } from './pdf';
 
@@ -105,4 +106,28 @@ test('embedded media and links are safe but active content and remote fetches fa
   ]) {
     expect(() => validatePrintHtml(unsafe)).toThrow();
   }
+});
+
+
+test('package PDF preview is a valid multi-page A4 document without Chromium', async () => {
+  const document = await renderConstructionPackageSamplePdf({
+    company: 'SG Homes',
+    name: 'Royal Construction',
+    code: 'ROYAL',
+    description: 'Construction estimate with all standard inclusions.',
+    ratePerSqft: '1950',
+    themeColor: '#155EEF',
+    sections: Array.from({ length: 17 }, (_, index) => ({
+      title: 'Material specification ' + (index + 1),
+      brand: 'Sample brand',
+      grade: 'Grade A',
+      description: 'Approved specifications and installation terms. '.repeat(15),
+      allowancePerSqft: '85',
+    })),
+  });
+  expect(document.toString('ascii', 0, 5)).toBe('%PDF-');
+  const pdf = await PDFDocument.load(document);
+  expect(pdf.getPageCount()).toBeGreaterThan(1);
+  expect(pdf.getPages()[0]?.getSize()).toMatchObject({ width: 595, height: 842 });
+  expect(pdf.getTitle()).toContain('Royal Construction');
 });
