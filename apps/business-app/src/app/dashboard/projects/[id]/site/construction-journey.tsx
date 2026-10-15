@@ -271,7 +271,8 @@ export function ConstructionJourney({
   );
   // Interiors need room-installation and snagging milestones, not mandatory
   // concrete-curing panels. Keep any recorded curing evidence visible.
-  const showCuring = !isInterior || curingRounds.length > 0 || curingMedia.length > 0;
+  const showCuring =
+    !isInterior || curingRounds.length > 0 || curingMedia.length > 0;
   const recentReports = reports.slice(0, 2);
   const latestReport = recentReports[0];
   const latestManager = managerUpdates[0];
@@ -288,12 +289,19 @@ export function ConstructionJourney({
     <section
       className="cj-root"
       id="construction-timeline"
-      aria-label={isInterior ? 'Interior execution timeline' : 'Construction execution timeline'}
+      aria-label={
+        isInterior
+          ? 'Interior execution timeline'
+          : 'Construction execution timeline'
+      }
     >
       <div className="cj-header">
         <div>
           <p className="cj-eyebrow">
-            {isInterior ? 'Interior project delivery' : 'Construction execution'} · Live records
+            {isInterior
+              ? 'Interior project delivery'
+              : 'Construction execution'}{' '}
+            · Live records
           </p>
           <h2>
             {isWatchman
@@ -438,7 +446,7 @@ export function ConstructionJourney({
                       <span className="cj-stage-phase">
                         {isInterior && stage.phase === 'design'
                           ? 'Interior drawings & client approvals'
-                          : phaseNames[stage.phase] ?? human(stage.phase)}
+                          : (phaseNames[stage.phase] ?? human(stage.phase))}
                         {stage.floor_code
                           ? ` · ${human(stage.floor_code)}`
                           : ''}
@@ -582,7 +590,10 @@ export function ConstructionJourney({
                     {stageRecords && (
                       <div className="cj-subcard cj-stage-linked">
                         <div className="cj-subhead">
-                          <h4>Records assigned to this {isInterior ? 'interior' : 'construction'} stage</h4>
+                          <h4>
+                            Records assigned to this{' '}
+                            {isInterior ? 'interior' : 'construction'} stage
+                          </h4>
                           <span className="cj-count">
                             {stageReports.length +
                               stageMaterials.length +
@@ -806,42 +817,43 @@ export function ConstructionJourney({
                             <div className="cj-subcard">
                               <div className="cj-subhead">
                                 <h4>Watchman curing rounds</h4>
-                              <Link href={go('#security')}>
-                                Log curing / photos →
-                              </Link>
-                            </div>
-                            <p>
-                              {curingRounds.length} curing rounds logged for
-                              this project. Curing may continue in parallel with
-                              later approved work.
-                            </p>
-                            {curingMedia.length ? (
-                              <div className="cj-gallery">
-                                {curingMedia.map((item) => (
-                                  <EvidenceTile
-                                    key={value(item, 'id')}
-                                    item={item}
-                                    projectId={projectId}
-                                  />
-                                ))}
+                                <Link href={go('#security')}>
+                                  Log curing / photos →
+                                </Link>
                               </div>
-                            ) : (
-                              <p className="cj-caption">
-                                No curing photos uploaded yet.
+                              <p>
+                                {curingRounds.length} curing rounds logged for
+                                this project. Curing may continue in parallel
+                                with later approved work.
                               </p>
-                            )}
-                            {canUploadCuringPhotos && (
-                              <Link href={go('#security')}>
-                                Upload curing evidence →
-                              </Link>
-                            )}
+                              {curingMedia.length ? (
+                                <div className="cj-gallery">
+                                  {curingMedia.map((item) => (
+                                    <EvidenceTile
+                                      key={value(item, 'id')}
+                                      item={item}
+                                      projectId={projectId}
+                                    />
+                                  ))}
+                                </div>
+                              ) : (
+                                <p className="cj-caption">
+                                  No curing photos uploaded yet.
+                                </p>
+                              )}
+                              {canUploadCuringPhotos && (
+                                <Link href={go('#security')}>
+                                  Upload curing evidence →
+                                </Link>
+                              )}
                             </div>
                           )}
                         </div>
                         <p className="cj-footer-note">
                           Open quality checks across the project:{' '}
                           {pendingChecks.length}. The Operations plan, approved
-                          contract and inspections determine actual {isInterior ? 'interior project' : 'construction'}
+                          contract and inspections determine actual{' '}
+                          {isInterior ? 'interior project' : 'construction'}
                           clearance.
                         </p>
                       </div>
