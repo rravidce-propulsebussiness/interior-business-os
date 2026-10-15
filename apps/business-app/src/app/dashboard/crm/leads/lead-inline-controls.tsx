@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { runCrmCommand } from '../actions';
-import { scheduleLeadFollowUp } from './lead-update-actions';
+import { scheduleLeadFollowUp, changeLeadPriority } from './lead-update-actions';
 import type { LeadOption, LeadStage, LeadView } from './workspace';
 
 type Row = Pick<LeadView, 'id' | 'version' | 'lifecycle' | 'stageId' | 'stageName' | 'assignedTo' | 'nextFollowUpAt'>;
@@ -101,6 +101,63 @@ export function LeadStageSelect({
           </div>
         </div>
       )}
+      {error && <small role="alert" className="crm-inline-error">{error}</small>}
+    </div>
+  );
+}
+
+export function LeadPrioritySelect({
+  lead, canManage,
+}: {
+  lead: Pick<LeadView, 'id' | 'version' | 'name' | 'priority' | 'lifecycle'>;
+  canManage: boolean;
+}) {
+  const router = useRouter();
+  const [pending, setPending] = useState(false);
+  const [pendingPriority, setPendingPriority] = useState<string | null>(null);
+  const [error, setError] = useState('');
+  if (!canManage || lead.lifecycle === 'archived') {
+    return <span className={'crm-premium-priority crm-premium-priority-' + lead.priority}>
+      {lead.priority}
+    </span>;
+  }
+  return (
+    <div className="crm-inline-priority">
+      <select
+        aria-label={'Priority for ' + lead.name}
+        className={'crm-premium-priority-select crm-premium-priority-' + (pendingPriority || lead.priority)}
+        value={pendingPriority || lead.priority}
+        disabled={pending}
+        onChange={async (event) => {
+          const next = event.target.value as 'low' | 'normal' | 'high' | 'urgent';
+          if (next === lead.priority) return;
+          setPending(true);
+          setPendingPriority(next);
+          setError('');
+          try {
+            const result = await changeLeadPriority({
+              leadId: lead.id,
+              version: lead.version,
+              priority: next,
+            });
+            if (result.ok) router.refresh();
+            else {
+              setPendingPriority(null);
+              setError(result.message);
+            }
+          } catch {
+            setPendingPriority(null);
+            setError('Could not update priority. Retry.');
+          } finally {
+            setPending(false);
+          }
+        }}
+      >
+        <option value="low">Low</option>
+        <option value="normal">Normal</option>
+        <option value="high">High</option>
+        <option value="urgent">Urgent</option>
+      </select>
       {error && <small role="alert" className="crm-inline-error">{error}</small>}
     </div>
   );
