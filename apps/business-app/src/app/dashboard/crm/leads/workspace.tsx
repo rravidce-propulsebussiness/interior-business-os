@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { OwnerIcon, type OwnerIconName } from '../../owner-shell';
 import { QuickAddLead } from './quick-add-lead';
 import { LeadRemovalButton } from './lead-removal-button';
-import { LeadStageSelect, LeadAssigneeSelect, LeadFollowUpSetter } from './lead-inline-controls';
+import { LeadStageSelect, LeadPrioritySelect, LeadFollowUpSetter } from './lead-inline-controls';
 import { LeadQuotePreview } from './lead-quote-preview';
 import { LeadUpdateComposer } from './lead-update-composer';
 import type { LeadServiceOption } from './lead-service-options';
@@ -261,7 +261,7 @@ export function LeadsWorkspace({
   const viewLink = (nextView: 'list' | 'board') => {
     const query = new URLSearchParams();
     for (const [key, value] of Object.entries(params)) {
-      if (value && !['panel', 'view'].includes(key)) query.set(key, value);
+      if (value && !['panel', 'view', 'converted', 'assigned_to', 'unassigned'].includes(key)) query.set(key, value);
     }
     if (nextView === 'board') query.set('view', 'board');
     const string = query.toString();
@@ -443,17 +443,6 @@ export function LeadsWorkspace({
             </select>
           </label>
           <label className="crm-filter-select">
-            <span className="sr-only">Assignee</span>
-            <select name="assigned_to" defaultValue={params.assigned_to ?? ''}>
-              <option value="">All assignees</option>
-              {assignees.map((person) => (
-                <option key={person.value} value={person.value}>
-                  {person.label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="crm-filter-select">
             <span className="sr-only">Priority</span>
             <select name="priority" defaultValue={params.priority ?? ''}>
               <option value="">All priorities</option>
@@ -523,14 +512,6 @@ export function LeadsWorkspace({
                   ))}
                 </select>
               </label>
-              <label>
-                Conversion
-                <select name="converted" defaultValue={params.converted ?? ''}>
-                  <option value="">Any</option>
-                  <option value="true">Converted</option>
-                  <option value="false">Not converted</option>
-                </select>
-              </label>
               <label className="crm-check-option">
                 <input
                   type="checkbox"
@@ -539,15 +520,6 @@ export function LeadsWorkspace({
                   defaultChecked={params.due === 'true'}
                 />{' '}
                 Follow-up due
-              </label>
-              <label className="crm-check-option">
-                <input
-                  type="checkbox"
-                  name="unassigned"
-                  value="true"
-                  defaultChecked={params.unassigned === 'true'}
-                />{' '}
-                Unassigned only
               </label>
             </div>
           </details>
@@ -628,7 +600,6 @@ export function LeadsWorkspace({
                           <th>Latest update</th>
                           <th>Status</th>
                           <th>Priority</th>
-                          <th>Assigned to</th>
                           <th>Next follow-up</th>
                           <th>Quotation</th>
                           <th>Actions</th>
@@ -702,11 +673,8 @@ export function LeadsWorkspace({
                                 canWin={canWin}
                               />
                             </td>
-                            <td><span className={'crm-premium-priority crm-premium-priority-' + lead.priority}>
-                              {lead.priority === 'high' || lead.priority === 'urgent' ? '⚑ ' : ''}{lead.priority}
-                            </span></td>
                             <td>
-                              <LeadAssigneeSelect lead={lead} assignees={assignees} canAssign={canAssign} />
+                              <LeadPrioritySelect lead={lead} canManage={canManage} />
                             </td>
                             <td>
                               <LeadFollowUpSetter lead={lead} canFollowUp={canFollowUp} />
@@ -796,7 +764,6 @@ export function LeadsWorkspace({
                             >
                               {leadCategoryLabel(lead.category)}
                             </span>
-                            <span className={'crm-premium-priority crm-premium-priority-' + lead.priority}>{lead.priority} priority</span>
                           </div>
                           <button
                             type="button"
@@ -824,8 +791,8 @@ export function LeadsWorkspace({
                             <LeadStageSelect lead={lead} stages={stages} lostReasons={lostReasons}
                               canManage={canManage} canWin={canWin}/>
                           </label>
-                          <label>Assigned to
-                            <LeadAssigneeSelect lead={lead} assignees={assignees} canAssign={canAssign}/>
+                          <label>Priority
+                            <LeadPrioritySelect lead={lead} canManage={canManage}/>
                           </label>
                           <label className="crm-mobile-followup">Next follow-up
                             <LeadFollowUpSetter lead={lead} canFollowUp={canFollowUp}/>
@@ -923,8 +890,8 @@ export function LeadsWorkspace({
       </section>
       {openedLead && <LeadDetailsDrawer
         lead={openedLead} onClose={() => setOpenedId(null)}
-        stages={stages} lostReasons={lostReasons} assignees={assignees}
-        canManage={canManage} canWin={canWin} canAssign={canAssign}
+        stages={stages} lostReasons={lostReasons}
+        canManage={canManage} canWin={canWin}
         canFollowUp={canFollowUp} canNote={canNote} canQuote={canQuote}
       />}
       <p className="crm-leads-scope">
