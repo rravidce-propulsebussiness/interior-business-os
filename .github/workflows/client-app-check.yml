@@ -26,28 +26,3 @@ jobs:
       - run: pnpm --filter @business-os/business-app build
 
 
-  format-client-once:
-    if: github.event_name == 'pull_request' && github.head_ref == 'feature/premium-client-command-dashboard-20261015'
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: feature/premium-client-command-dashboard-20261015
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: .node-version
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm exec prettier --write 'apps/business-app/src/app/client/**/*.{ts,tsx,css}' 'apps/business-app/src/app/dashboard/crm/leads/workspace.tsx' 'apps/business-app/src/app/dashboard/quotations/studio-start.tsx' 'scripts/crm-unified-workspace.test.mjs' '.github/workflows/client-app-check.yml'
-      - run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add apps/business-app/src/app/client apps/business-app/src/app/dashboard/crm/leads/workspace.tsx apps/business-app/src/app/dashboard/quotations/studio-start.tsx scripts/crm-unified-workspace.test.mjs
-          if ! git diff --cached --quiet; then
-            git commit -m "Format client dashboard and touched integration files"
-            git push origin HEAD:feature/premium-client-command-dashboard-20261015
-          fi
