@@ -3,10 +3,6 @@
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { activeOrganization, serverServices } from '@business-os/auth/server';
-import {
-  defaultConstructionWorkflow,
-  expandConstructionStages,
-} from '@business-os/core/construction-workflow';
 
 type Result = { saved: boolean; message: string };
 const uuid = z.uuid();
@@ -49,58 +45,55 @@ function response(error: unknown): Result {
       error instanceof Error ? error.message.slice(0, 240) : 'Unable to save.',
   };
 }
-function validateFloors(form: FormData) {
-  const raw = z.string().trim().min(1).max(1800).parse(form.get('floors'));
-  const names = raw
-    .split(',')
-    .map((name) => name.trim())
-    .filter(Boolean);
-  if (names.length < 1 || names.length > 64)
-    throw new Error('Enter 1 to 64 floors in the intended construction order.');
-  const floors = names.map((name) => ({
-    name: z.string().min(1).max(100).parse(name),
-    code: name
-      .normalize('NFKD')
-      .toUpperCase()
-      .replace(/[^A-Z0-9]+/g, '_')
-      .replace(/^_+|_+$/g, ''),
-  }));
-  if (floors.some((floor) => !/^[A-Z][A-Z0-9_]*$/.test(floor.code)))
-    throw new Error('Each floor needs a name starting with a letter.');
-  if (new Set(floors.map((floor) => floor.code)).size !== floors.length)
-    throw new Error('Each floor or zone must have a different name.');
-  return floors;
-}
-
-export async function initializeConstructionWorkflow(
+/**
+ * Recovery only: normal construction timelines are generated when an
+ * approved quotation is handed off to its canonical agreement.
+ */
+export async function syncConstructionFromProjectAgreement(
   projectId: string,
-  form: FormData,
 ): Promise<Result> {
   try {
-    const floors = validateFloors(form);
-    const stages = expandConstructionStages(
-      defaultConstructionWorkflow,
-      floors,
-    );
     const { client, organizationId } = await caller(projectId);
-    const { error } = await client.rpc('construction_project_command', {
-      p_organization_id: organizationId,
-      p_project_id: projectId,
-      p_action: 'workflow_create',
-      p_input: JSON.parse(
-        JSON.stringify({
-          template: defaultConstructionWorkflow,
-          floors,
-          stages,
-        }),
-      ),
-    });
-    if (error) throw new Error(error.message);
+    const { data, error } = await client
+      .from('contracts')
+      .select('id')
+      .eq('organization_id', organizationId)
+      .eq('project_id', projectId)
+      .in('status', ['pending', 'active', 'on_hold', 'completed'])
+      .order('created_at', { ascending: false })
+      .limit(2);
+    if (error) throw new Error('Agreement records are not available to this user');
+    if (!data?.length)
+      return {
+        saved: false,
+        message: 'An approved quotation and agreement are required before the timeline can be created.',
+      };
+    if (data.length > 1)
+      return {
+        saved: false,
+        message: 'This project has multiple agreements. Open the correct agreement to synchronize its quoted scope.',
+      };
+    const { syncQuotedConstructionTimeline } = await import(
+      '../../../finance/quote-construction-handoff'
+    );
+    const outcome = await syncQuotedConstructionTimeline(data[0]!.id);
+    if (outcome.reason === 'quote_incomplete')
+      return {
+        saved: false,
+        message: 'The approved quotation does not contain floor-wise construction scope. Correct and approve the quotation first.',
+      };
+    if (outcome.reason === 'manager_required')
+      return {
+        saved: false,
+        message: 'Only an authorized project manager or company owner can initialize the project stage snapshot.',
+      };
     revalidatePath(pathFor(projectId));
+    revalidatePath('/dashboard/projects/' + projectId);
     return {
       saved: true,
-      message:
-        'Construction planning stages created. Work and certifications are not automatically approved.',
+      message: outcome.reason === 'created'
+        ? 'Construction stages and quoted work have been imported from the accepted quotation.'
+        : 'This project already has its frozen construction stage plan.',
     };
   } catch (error) {
     return response(error);
