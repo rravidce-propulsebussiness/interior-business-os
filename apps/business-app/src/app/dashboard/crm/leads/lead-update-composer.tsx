@@ -11,7 +11,15 @@ const types = [
   {value:'email_note',label:'Email'},
   {value:'note',label:'Other update'},
 ] as const;
+const defaultOutcome: Record<(typeof types)[number]['value'], string> = {
+  phone_call: 'Call not picked',
+  whatsapp_note: 'WhatsApp message sent',
+  meeting: 'Meeting completed',
+  email_note: 'Email sent',
+  note: 'General update',
+};
 const outcomes = [
+  'WhatsApp message sent','Meeting completed','Email sent','General update',
   'Call not picked','Spoke with customer','Callback requested',
   'Interested','Needs quotation','Customer requested changes',
   'Not interested','Follow-up scheduled','Other',
@@ -61,7 +69,7 @@ export function LeadUpdateComposer({
         {types.map(t=><button type="button" key={t.value}
           aria-pressed={type===t.value}
           className={type===t.value?'active':''}
-          onClick={()=>setType(t.value)}>{t.label}</button>)}
+          onClick={()=>{setType(t.value);setOutcome(defaultOutcome[t.value]);}}>{t.label}</button>)}
       </div>
       <label>Outcome
         <select value={outcome} onChange={(e)=>setOutcome(e.target.value)}>
