@@ -292,7 +292,7 @@ export default async function Quotations({
                         <details className="qs-quotes-more">
                           <summary aria-label={'More options for ' + (row.quotation_number || 'quotation')}>•••</summary>
                           <div>
-                            <Link href={editor}>{row.status === 'draft' ? 'Edit quotation' : 'Open quotation'}</Link>
+                            {row.status !== 'draft' && <Link href={editor}>Open quotation</Link>}
                             <Link href={'/dashboard/quotations/' + row.id + '/pdf?view=1'}
                               target="_blank" rel="noopener noreferrer">View PDF</Link>
                             {canRemove && (row.status === 'draft' || row.status === 'issued') &&
@@ -337,7 +337,7 @@ export default async function Quotations({
                     <details className="qs-quotes-mobile-more">
                       <summary>••• More</summary>
                       <div>
-                        <Link href={editor}>{row.status === 'draft' ? 'Edit quotation' : 'Open quotation'}</Link>
+                        {row.status !== 'draft' && <Link href={editor}>Open quotation</Link>}
                         <Link href={'/dashboard/quotations/' + row.id + '/pdf?view=1'}
                           target="_blank" rel="noopener noreferrer">View PDF</Link>
                         {canRemove && (row.status === 'draft' || row.status === 'issued') &&
