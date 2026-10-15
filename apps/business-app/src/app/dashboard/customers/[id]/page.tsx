@@ -169,13 +169,14 @@ export default async function Customer({
   }[] = [];
   if (canManage && canSeeProjects && customer.status === 'active') {
     const [activeProjects, existingAccess] = await Promise.all([
-      s.client.from('projects')
-        .select('id,name')
-        .eq('organization_id', s.org)
-        .eq('customer_id', id)
-        .eq('is_sales_prospect', false)
-        .eq('status', 'active')
-        .order('name').limit(100),
+      (s.client.rpc.bind(s.client) as unknown as (
+        name: string, args: Record<string, string>,
+      ) => Promise<{ data: unknown; error: { message: string } | null }>)(
+        'client_portal_grantable_projects', {
+          p_organization_id: s.org,
+          p_customer_id: id,
+        },
+      ),
       (s.client.rpc.bind(s.client) as unknown as (
         name: string, args: Record<string, string>,
       ) => Promise<{ data: unknown; error: { message: string } | null }>)(
@@ -185,7 +186,16 @@ export default async function Customer({
         },
       ),
     ]);
-    portalProjects = activeProjects.data ?? [];
+    // Even an active project is not shareable until its agreement and
+    // applicable advance-payment gates are satisfied.
+    portalProjects = !activeProjects.error && Array.isArray(activeProjects.data)
+      ? activeProjects.data.flatMap((value: unknown) => {
+          if (!value || typeof value !== 'object') return [];
+          const item = value as Record<string, unknown>;
+          return typeof item.id === 'string' && typeof item.name === 'string'
+            ? [{ id: item.id, name: item.name }] : [];
+        })
+      : [];
     if (!existingAccess.error && Array.isArray(existingAccess.data)) {
       portalAccess = existingAccess.data.flatMap((value: unknown) => {
         if (!value || typeof value !== 'object') return [];
@@ -445,7 +455,7 @@ export default async function Customer({
             </section>
           </div>
 
-          {canManage && (
+          {canManage && (portalProjects.length > 0 || portalAccess.length > 0) && (
             <ClientAccess
               customerId={id}
               customerEmail={customer.email ?? ''}
