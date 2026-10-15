@@ -91,7 +91,7 @@ export function LeadActivityScheduler({
           onChange={(event) => setLocation(event.target.value)}/>
       </label>}
       <label>Notes / purpose (optional)
-        <textarea value={notes} maxLength={3000} rows={2}
+        <textarea value={notes} maxLength={2400} rows={2}
           placeholder="What should the assigned employee discuss?"
           onChange={(event) => setNotes(event.target.value)}/>
       </label>
