@@ -149,6 +149,48 @@
   color:#e74c1c; background:#fff0e8;
 }
 .crm-premium-priority-low { color:#148854; background:#e7f9ed; }
+
+.crm-inline-priority {
+  min-width: 100px;
+  max-width: 165px;
+  display: grid;
+  gap: 4px;
+}
+.crm-leads-root .crm-premium-priority-select {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid #f4c3a2;
+  border-radius: 10px;
+  padding: 8px 24px 8px 10px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 750;
+  text-transform: capitalize;
+  color: #4c5c70;
+  background-color: #fff7f1;
+  cursor: pointer;
+}
+.crm-leads-root .crm-premium-priority-select.crm-premium-priority-high,
+.crm-leads-root .crm-premium-priority-select.crm-premium-priority-urgent {
+  background-color: #fff0e8;
+  color: #c7491e;
+}
+.crm-leads-root .crm-premium-priority-select.crm-premium-priority-low {
+  background-color: #e7f9ed;
+  color: #148854;
+  border-color: #bdebd0;
+}
+.crm-leads-root .crm-premium-priority-select:focus-visible {
+  outline: 3px solid #f9731650;
+  outline-offset: 2px;
+}
+.crm-leads-root .crm-premium-priority-select:disabled {
+  opacity: .65;
+  cursor: wait;
+}
+.crm-mobile-inline-grid .crm-inline-priority { max-width: none; }
+.crm-mobile-inline-grid .crm-inline-priority select { width: 100%; }
+
 .crm-quote-shared { background:#defbed; color:#07824a; }
 .crm-quote-buttons button { border-color:#ffc2a4; color:#ea510a; }
 .crm-quote-buttons button:hover { background:#fff0e5; }
