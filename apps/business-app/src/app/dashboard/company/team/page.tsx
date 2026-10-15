@@ -44,7 +44,8 @@ function isInvitationRow(item: unknown): item is InvitationRow {
 }
 
 export default async function CompanyTeamPage() {
-  const { client, repository } = await pageServices();
+  const { client, repository, authorization } = await pageServices();
+  const currentUser = await authorization.requireAuthenticatedUser();
   const context = await activeOrganization();
   if (!context) notFound();
   const organizationId = context.organizationId;
@@ -109,7 +110,17 @@ export default async function CompanyTeamPage() {
   const invitations = Array.isArray(invitationResult)
     ? invitationResult.filter(isInvitationRow)
     : [];
-  const canChangeStatus = has('team.manage') || has('team.remove');
+  const canChangeStatus = has('team.manage');
+  const ownerRoleIds = new Set(
+    roles.filter((role) => role.is_owner).map((role) => role.id),
+  );
+  const isProtectedMember = (member: (typeof members)[number]) =>
+    member.user_id === currentUser.id ||
+    assignments.some(
+      (assignment) =>
+        assignment.membership_id === member.id &&
+        ownerRoleIds.has(assignment.role_id),
+    );
 
   return (
     <main
@@ -144,8 +155,8 @@ export default async function CompanyTeamPage() {
               </p>
             </div>
             <p className="mt-2 text-sm text-slate-600">
-              Registered user identifiers are shown until a verified,
-              email-based invitation and profile directory are available.
+              Manage employee access and roles. Owner accounts and your own
+              membership are protected from changes here.
             </p>
             {members.length ? (
               <div className="mt-5 grid gap-4">
@@ -189,7 +200,18 @@ export default async function CompanyTeamPage() {
                           </span>
                         ))}
                     </div>
-                    {canChangeStatus && (
+                    {isProtectedMember(member) && (
+                      <p className="mt-4 rounded-xl border border-sky-200 bg-sky-50 p-3 text-sm text-sky-900">
+                        {assignments.some(
+                          (assignment) =>
+                            assignment.membership_id === member.id &&
+                            ownerRoleIds.has(assignment.role_id),
+                        )
+                          ? 'Protected owner account. Membership status and roles cannot be changed here.'
+                          : 'This is your own account. Another authorized administrator must manage its access.'}
+                      </p>
+                    )}
+                    {canChangeStatus && !isProtectedMember(member) && (
                       <ActionForm
                         action={changeMembershipStatus}
                         label="Update access"
@@ -233,7 +255,7 @@ export default async function CompanyTeamPage() {
                         </label>
                       </ActionForm>
                     )}
-                    {canAssign && roles.length > 0 && (
+                    {canAssign && !isProtectedMember(member) && roles.length > 0 && (
                       <ActionForm
                         action={changeMembershipRole}
                         label="Apply role change"
