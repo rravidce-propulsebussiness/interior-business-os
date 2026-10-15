@@ -7,6 +7,7 @@ import { MasterForm } from '../../commercial/master-form';
 import { OwnerIcon, OwnerShell } from '../../owner-shell';
 import { projectWorkspaceNavigation } from '../../projects/project-workspace-navigation';
 import { CustomerReference } from './reference';
+import { ClientAccess } from './client-access';
 import { leadServiceFromIndustryKey } from '../../crm/leads/lead-service-options';
 import '../../owner-dashboard.css';
 import './customer-profile.css';
@@ -160,6 +161,47 @@ export default async function Customer({
     s.repository.industries(),
   ]);
   if (!organization) throw new Error('Company workspace unavailable.');
+
+  let portalProjects: { id: string; name: string }[] = [];
+  let portalAccess: {
+    project_id: string; project_name: string;
+    email: string; active: boolean; created_at: string;
+  }[] = [];
+  if (canManage && canSeeProjects && customer.status === 'active') {
+    const [activeProjects, existingAccess] = await Promise.all([
+      s.client.from('projects')
+        .select('id,name')
+        .eq('organization_id', s.org)
+        .eq('customer_id', id)
+        .eq('is_sales_prospect', false)
+        .eq('status', 'active')
+        .order('name').limit(100),
+      (s.client.rpc.bind(s.client) as unknown as (
+        name: string, args: Record<string, string>,
+      ) => Promise<{ data: unknown; error: { message: string } | null }>)(
+        'client_portal_access_list', {
+          p_organization_id: s.org,
+          p_customer_id: id,
+        },
+      ),
+    ]);
+    portalProjects = activeProjects.data ?? [];
+    if (!existingAccess.error && Array.isArray(existingAccess.data)) {
+      portalAccess = existingAccess.data.flatMap((value: unknown) => {
+        if (!value || typeof value !== 'object') return [];
+        const item = value as Record<string, unknown>;
+        if (typeof item.project_id !== 'string' ||
+            typeof item.email !== 'string') return [];
+        return [{
+          project_id: item.project_id,
+          project_name: String(item.project_name ?? 'Project'),
+          email: item.email,
+          active: item.active === true,
+          created_at: String(item.created_at ?? ''),
+        }];
+      });
+    }
+  }
 
   const contacts = contactResult.data ?? [];
   const projects = projectResult.data ?? [];
@@ -403,6 +445,14 @@ export default async function Customer({
             </section>
           </div>
 
+          {canManage && (
+            <ClientAccess
+              customerId={id}
+              customerEmail={customer.email ?? ''}
+              projects={portalProjects}
+              existing={portalAccess}
+            />
+          )}
           <div className="cp-record-grid">
             {canSeeProjects && (
               <section className="cp-panel" id="projects">
