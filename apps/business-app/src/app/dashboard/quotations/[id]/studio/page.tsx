@@ -15,6 +15,7 @@ import { CommandForm } from '../../command-form';
 import { SharingSection } from '../../sharing-section';
 import { ContractHandoff } from '../../../finance/handoff';
 import { QuotationAttachments } from '../../quotation-attachments';
+import { PaymentScheduleEditor } from '../../payment-schedule-editor';
 
 export const dynamic = 'force-dynamic';
 
@@ -82,6 +83,7 @@ export default async function QuotationStudio({
   const step =
     query.step === 'client' ||
     query.step === 'files' ||
+    query.step === 'payments' ||
     query.step === 'preview'
       ? query.step
       : 'quote';
@@ -281,6 +283,24 @@ export default async function QuotationStudio({
               <p className="whitespace-pre-wrap">{revision.customer_notes}</p>
             </div>
           )
+        }
+        paymentEditor={
+          <PaymentScheduleEditor
+            key={revision.id + ':' + revision.version}
+            industry={industryKey}
+            total={total}
+            currency={revision.currency}
+            editable={editable}
+            initial={{
+              revision_id: revision.id,
+              version: revision.version,
+              terms: revision.terms,
+              valid_until: revision.valid_until,
+              customer_notes: revision.customer_notes,
+              internal_notes: revision.internal_notes,
+              discount: revision.discount,
+            }}
+          />
         }
         sharingEditor={
           <SharingSection revisionId={revision.id} status={revision.status} />
