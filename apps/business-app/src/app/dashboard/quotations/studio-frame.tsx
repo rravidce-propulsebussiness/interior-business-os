@@ -11,6 +11,7 @@ const links: { title: string; href: string; icon: OwnerIconName }[] = [
   { title: 'Leads', href: '/dashboard/crm/leads', icon: 'leads' },
   { title: 'Follow-ups', href: '/dashboard/crm/followups', icon: 'calendar' },
   { title: 'Quotations', href: '/dashboard/quotations', icon: 'quotations' },
+  { title: 'Packages', href: '/dashboard/quotations/packages', icon: 'quotations' },
   { title: 'Projects', href: '/dashboard/projects', icon: 'projects' },
   { title: 'Clients', href: '/dashboard/customers', icon: 'clients' },
   { title: 'Billing', href: '/dashboard/billing', icon: 'billing' },
