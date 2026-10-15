@@ -1,0 +1,58 @@
+name: Chromium Business OS Smoke
+on:
+  push:
+    paths:
+      - 'apps/business-app/**'
+      - 'packages/**'
+      - 'tests/chromium/**'
+      - '.github/workflows/chromium-business-smoke.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  local-chromium:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @business-os/business-app typecheck
+      - run: pnpm --filter @business-os/business-app build
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Test Chromium desktop and mobile
+        run: pnpm exec playwright test --config tests/chromium/playwright.config.ts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: chromium-local-report
+          path: |
+            playwright-report/chromium-local
+            test-results
+          if-no-files-found: ignore
+  live-diagnostic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Check Hostinger public Next.js renderer and health
+        run: pnpm exec playwright test --config tests/chromium/live.config.ts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: chromium-live-diagnostic
+          path: |
+            playwright-report/chromium-live
+            test-results
+          if-no-files-found: ignore
