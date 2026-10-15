@@ -11010,6 +11010,17 @@ export interface Database {
         Args: { p_organization_id: string; p_phone: string; p_email: string };
         Returns: Json;
       };
+      crm_lead_log_update: {
+        Args: {
+          p_organization_id: string;
+          p_lead_id: string;
+          p_activity_type: string;
+          p_outcome: string;
+          p_note: string;
+          p_follow_up_at?: string;
+        };
+        Returns: string;
+      };
       crm_save: {
         Args: { p_organization_id: string; p_entity: string; p_input: Json };
         Returns: string;
