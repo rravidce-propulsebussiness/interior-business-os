@@ -12,7 +12,7 @@ import { createQuotationRepository } from '@business-os/database/quotations';
 import { createGstRepository } from '@business-os/database/gst';
 import { commercialSearchResultSchema } from '@business-os/core/commercial';
 import { resultSchema } from './crm/service';
-import { OwnerShell, type OwnerIconName, type OwnerNavItem } from './owner-shell';
+import { OwnerShell, type OwnerNavItem } from './owner-shell';
 import {
   CommandCentre,
   type CommandAction,
@@ -37,10 +37,6 @@ const rupees = new Intl.NumberFormat('en-IN', {
   currency: 'INR',
   maximumFractionDigits: 0,
 });
-
-function asText(value: unknown): string {
-  return typeof value === 'string' && value.trim() ? value.trim() : '';
-}
 
 function titleCase(value: string): string {
   return value
@@ -148,9 +144,6 @@ export default async function Dashboard({
   const canWebsite = has('website.view', 'website');
   const canSettings = has('organization.view');
   const canSites = context.entitlements.includes('projects');
-  const isOwner = context.roles.some(
-    (role) => role.name.toLowerCase() === 'owner',
-  );
   const query = (await searchParams).q?.trim().slice(0, 80) ?? '';
 
   // Fetch only the active company's data, with its existing server/RLS guards.
@@ -233,10 +226,6 @@ export default async function Dashboard({
   const responseResult = rawResponses && !rawResponses.error ? resultSchema.safeParse(rawResponses.data) : null;
   const responseQueue = responseResult?.success ? responseResult.data : null;
   const team = Array.isArray(rawTeam) ? rawTeam : null;
-  const otherMembers =
-    team?.filter(
-      (member) => member.user_id !== user.id && member.status === 'active',
-    ) ?? [];
   const sites: SiteProject[] =
     rawSites && !rawSites.error && Array.isArray(rawSites.data)
       ? rawSites.data.filter(
