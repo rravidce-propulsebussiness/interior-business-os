@@ -186,3 +186,54 @@ test('legacy CRM overview and commercial response pages redirect to their canoni
   assert.match(quotationsPage, /id="customer-responses"/);
   assert.match(quotationsPage, /p_organization_id: s\.org/);
 });
+
+
+test('invited clients can open only explicitly granted project records', () => {
+  const portalSql = readFileSync(
+    fileURLToPath(
+      new URL(
+        '../packages/database/supabase/migrations/20261015000700_client_project_portal.sql',
+        import.meta.url,
+      ),
+    ),
+    'utf8',
+  );
+  const inviteUi = readFileSync(
+    fileURLToPath(
+      new URL(
+        '../apps/business-app/src/app/dashboard/customers/[id]/client-access.tsx',
+        import.meta.url,
+      ),
+    ),
+    'utf8',
+  );
+  const projectPage = readFileSync(
+    fileURLToPath(
+      new URL('../apps/business-app/src/app/client/projects/[id]/page.tsx', import.meta.url),
+    ),
+    'utf8',
+  );
+  const loginPage = readFileSync(
+    fileURLToPath(
+      new URL('../apps/business-app/src/app/client/login/page.tsx', import.meta.url),
+    ),
+    'utf8',
+  );
+  const home = readFileSync(
+    fileURLToPath(new URL('../apps/business-app/src/app/client/page.tsx', import.meta.url)),
+    'utf8',
+  );
+
+  // The project UUID and the verified email must match on every read path;
+  // no customer-level wildcard is allowed to expose sibling projects.
+  assert.match(portalSql, /a\.project_id=p_project and a\.active/);
+  assert.match(portalSql, /a\.email=private\.client_portal_verified_email\(\)/);
+  assert.match(portalSql, /p\.customer_id=a\.customer_id/);
+  assert.match(portalSql, /if not private\.client_portal_accessible\(p_project_id\)/);
+  assert.match(portalSql, /not private\.client_portal_accessible\(m\.project_id\)/);
+  assert.match(inviteUi, /'\/client\/projects\/' \+ item\.project_id/);
+  assert.match(loginPage, /'\/client\/projects\/' \+ projectId/);
+  assert.match(projectPage, /client_portal_project/);
+  assert.match(projectPage, /'\/client\/login\?project=' \+ id/);
+  assert.match(home, /if \(projects\.length === 1\) redirect/);
+});
