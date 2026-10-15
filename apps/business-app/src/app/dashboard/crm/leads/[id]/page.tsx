@@ -131,7 +131,7 @@ export default async function LeadDetail({
   if (s.allowed('quotation.view', 'quotation')) {
     // Permission-checked RPC keeps draft quotes linked even while the lead
     // remains open; it does not imply conversion to a paying customer.
-    const rpc = s.client.rpc as unknown as (
+    const rpc = s.client.rpc.bind(s.client) as unknown as (
       name: string, params: Record<string, string>,
     ) => Promise<{ data: unknown; error: unknown }>;
     const quotesResult = await rpc('lead_quotation_list', {
