@@ -5,6 +5,16 @@
 select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',true);
 insert into private.quotation_signing_keys(singleton,secret_hex)
 values(true,repeat('a',64)) on conflict(singleton) do nothing;
+-- This regression fixture must record an actual advance under the new
+-- agreement gate. Add a disposable bank method; the surrounding test rolls back.
+insert into public.payment_methods(organization_id,name,kind,created_by)
+select 'dddddddd-dddd-4ddd-8ddd-dddddddddddd'::uuid,
+       'Demo bank transfer','bank_transfer',
+       '11111111-1111-4111-8111-111111111111'::uuid
+where not exists(
+ select 1 from public.payment_methods where organization_id=
+ 'dddddddd-dddd-4ddd-8ddd-dddddddddddd'::uuid and kind='bank_transfer'
+);
 do $$
 declare
  org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
