@@ -1,9 +1,13 @@
 -- Runs in the execution.sql fixture transaction, before its final rollback.
 reset role;
+update public.projects set industry_id=(
+  select id from public.industries where key='construction'
+) where organization_id='dddddddd-dddd-4ddd-8ddd-dddddddddddd'
+  and code='demo-3bhk';
 delete from public.organization_entitlements where organization_id='dddddddd-dddd-4ddd-8ddd-dddddddddddd' and not enabled and module_id in(select id from public.modules where key='billing');
 set local request.jwt.claim.sub='11111111-1111-4111-8111-111111111111';
 set local role authenticated;
-do $$declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';c uuid;p uuid;r uuid;t uuid;t2 uuid;m uuid;pkg uuid;v integer;template uuid;i uuid;i2 uuid;s uuid;h uuid;ht uuid;vendor uuid;wo uuid;wm uuid;doc jsonb;media uuid;contract uuid;schedule uuid;qc_stage uuid;qc_tpl uuid;qc_inspection uuid;qc_wf uuid;qc_review uuid;struct_review uuid;qc_clear uuid;qc_data jsonb;begin
+do $$declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';c uuid;p uuid;r uuid;t uuid;t2 uuid;m uuid;pkg uuid;v integer;template uuid;i uuid;i2 uuid;s uuid;h uuid;ht uuid;vendor uuid;wo uuid;wm uuid;doc jsonb;media uuid;contract uuid;schedule uuid;qc_stage uuid;qc_tpl uuid;qc_inspection uuid;qc_wf uuid;quote_hash text;qc_review uuid;struct_review uuid;qc_clear uuid;qc_data jsonb;begin
  select id into c from public.contracts where revision_id in(select r.id from public.quotation_revisions r join public.quotations q on q.id=r.quotation_id where q.quotation_number='EXECUTION-TEST');
  p=public.operations_plan(org,'create',jsonb_build_object('contract_id',c));
  perform pg_temp.execution_assert(p=public.operations_plan(org,'create',jsonb_build_object('contract_id',c)),'plan creation retry returns same plan');
@@ -49,16 +53,23 @@ do $$declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';c uuid;p uuid;r uui
 
  -- New construction stage certification binds ACTUAL canonical Operations
  -- task completion and passed mandatory inspection; it cannot invent progress.
- qc_wf=(public.construction_project_command(org,c,'workflow_create',jsonb_build_object(
+ select md5(coalesce(string_agg(qi.id::text||chr(31)||
+   coalesce(qi.snapshot->>'name','')||chr(31)||qi.description||chr(31)||
+   case when qi.optional then '1' else '0' end,chr(30) order by qi.id),''))
+ into quote_hash from public.quotation_items qi
+ where qi.organization_id=org and qi.revision_id=(
+   select revision_id from public.contracts where id=contract);
+ qc_wf=(public.project_quote_timeline_create(org,contract,
+  jsonb_build_object('industry','construction','quote_hash',quote_hash,
    'template',jsonb_build_object('industry','construction','version','1.0.0'),
-   'floors',jsonb_build_array(jsonb_build_object('code','GROUND','name','Ground')),
+   'zones',jsonb_build_array(jsonb_build_object('code','GROUND','name','Ground')),
    'stages',jsonb_build_array(jsonb_build_object(
      'instanceCode','FOUNDATION','templateCode','FOUNDATION',
      'phase','foundation','floorCode',null,'title','Footing bar and concrete QC',
      'explanation','Independent steel and pre-pour clearance required',
      'holdPoint','structural','dependsOn',jsonb_build_array(),
      'activities',jsonb_build_array('Footing reinforcement inspection'),
-     'inspectionTopics',jsonb_build_array('Bar spacing and cover check'))))))->>'id';
+     'inspectionTopics',jsonb_build_array('Bar spacing and cover check'))))))->>'workflow_id';
  select (stage->>'id')::uuid into qc_stage
    from jsonb_array_elements(public.construction_project_read(org,c)->'stages') stage
    where stage->>'instance_code'='FOUNDATION';
