@@ -7,25 +7,26 @@ import type { LeadOption } from './workspace';
 
 /** Reused by the lead drawer and lead history, rather than a second visits page. */
 export function LeadActivityScheduler({
-  leadId, leadName, assignedTo, assignees, defaultLocation = '', canSchedule,
+  leadId, leadName, assignedTo, assignees, defaultLocation = '', canFollowUp, canVisit,
 }: {
   leadId: string;
   leadName: string;
   assignedTo: string;
   assignees: LeadOption[];
   defaultLocation?: string;
-  canSchedule: boolean;
+  canFollowUp: boolean;
+  canVisit: boolean;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [kind, setKind] = useState<'call' | 'site_visit' | 'office_visit'>('call');
+  const [kind, setKind] = useState<'call' | 'site_visit' | 'office_visit'>(canFollowUp ? 'call' : 'site_visit');
   const [when, setWhen] = useState('');
   const [assignee, setAssignee] = useState(assignedTo);
   const [location, setLocation] = useState(defaultLocation);
   const [notes, setNotes] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  if (!canSchedule) return null;
+  if (!canFollowUp && !canVisit) return null;
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -70,9 +71,9 @@ export function LeadActivityScheduler({
           setKind(event.target.value as typeof kind);
           setError('');
         }}>
-          <option value="call">Follow-up call</option>
-          <option value="site_visit">Site visit</option>
-          <option value="office_visit">Office visit</option>
+          {canFollowUp && <option value="call">Follow-up call</option>}
+          {canVisit && <option value="site_visit">Site visit</option>}
+          {canFollowUp && <option value="office_visit">Office visit</option>}
         </select>
       </label>
       <label>Date & time
