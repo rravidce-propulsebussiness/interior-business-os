@@ -67,23 +67,13 @@ const roles = [
   ['accounts_officer', 'Billing / Accounts Officer'],
   ['contractor', 'Contractor / Subcontractor'],
 ] as const;
-const phases = [
-  'survey',
-  'procurement',
-  'civil',
-  'services',
-  'fabrication',
-  'installation',
-  'quality',
-  'preconstruction',
-  'design',
-  'site_preparation',
-  'foundation',
-  'plinth',
-  'superstructure',
-  'masonry',
-  'finishes',
-  'handover',
+const constructionPhases = [
+  'preconstruction','design','site_preparation','foundation','plinth',
+  'superstructure','masonry','finishes','handover',
+] as const;
+const interiorPhases = [
+  'preconstruction','survey','design','procurement','civil','services',
+  'fabrication','installation','finishes','quality','handover',
 ] as const;
 const phaseTitles: Record<string, string> = {
   survey: 'Site measurement & survey',
@@ -128,6 +118,9 @@ export function ConstructionPlanningPanel({
   const [message, setMessage] = useState('');
   const [pending, start] = useTransition();
   const managers = data.can_manage;
+  const phases: readonly string[] =
+    data.workflow?.template_code === 'INTERIOR_QUOTE'
+      ? interiorPhases : constructionPhases;
   const activeRoles = data.roles.filter((role) => role.active);
   const nameById = new Map(
     memberOptions.map((member) => [member.id, member.label]),
