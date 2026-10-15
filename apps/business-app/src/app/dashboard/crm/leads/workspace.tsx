@@ -2,7 +2,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { OwnerIcon, type OwnerIconName } from '../../owner-shell';
 import { QuickAddLead } from './quick-add-lead';
 import { LeadRemovalButton } from './lead-removal-button';
@@ -13,6 +12,7 @@ import type { LeadServiceOption } from './lead-service-options';
 import { leadCategoryLabel, type LeadCategory } from './lead-category';
 import { LeadsBoardView } from './board-view';
 import { LeadBulkToolbar } from './lead-bulk-toolbar';
+import { LeadDetailsDrawer } from './lead-details-drawer';
 import {
   ProPulseConnectPanel,
   type ProPulseConnectionView,
@@ -253,7 +253,7 @@ export function LeadsWorkspace({
   propulseConnection: ProPulseConnectionView;
   initialTool: 'none' | 'add' | 'propulse';
 }) {
-  const router = useRouter();
+  const [openedId, setOpenedId] = useState<string | null>(null);
   const [leadTool, setLeadTool] = useState<'none' | 'add' | 'propulse'>(
     initialTool,
   );
@@ -278,10 +278,8 @@ export function LeadsWorkspace({
   }
   if (params.priority !== 'high') activePriorityQuery.set('priority', 'high');
   const highPriorityHref = path + (activePriorityQuery.toString() ? '?' + activePriorityQuery.toString() : '');
-  const open = (lead: LeadView) => {
-    // Detail is a focused history view; common daily actions remain on this list.
-    router.push(path + '/' + encodeURIComponent(lead.id));
-  };
+  const open = (lead: LeadView) => setOpenedId(lead.id);
+  const openedLead = rows.find((lead) => lead.id === openedId) ?? null;
   const toggle = (id: string) =>
     setChecked((old) =>
       old.includes(id) ? old.filter((value) => value !== id) : [...old, id],
@@ -762,7 +760,7 @@ export function LeadsWorkspace({
                                 <details className="crm-premium-row-more">
                                   <summary aria-label={'More actions for ' + lead.name} title="More">•••</summary>
                                   <div className="crm-premium-row-menu">
-                                    <button type="button" onClick={() => open(lead)}>View history</button>
+                                    <a href={path + '/' + encodeURIComponent(lead.id)}>View history</a>
                                     {canNote && lead.lifecycle !== 'archived' &&
                                       <LeadUpdateComposer leadId={lead.id} leadName={lead.name} canFollowUp={canFollowUp}/>}
                                     {canManage && lead.lifecycle !== 'archived' &&
@@ -849,7 +847,7 @@ export function LeadsWorkspace({
                             href={'https://wa.me/' + whatsapp(lead.phoneNormalized || lead.phone)}
                             target="_blank" rel="noopener noreferrer" aria-label={'WhatsApp ' + lead.name}>
                             <Icon name="whatsapp"/> WhatsApp</a>}
-                          <button type="button" onClick={() => open(lead)}>History</button>
+                          <a href={path + '/' + encodeURIComponent(lead.id)}>History</a>
                           {canNote && lead.lifecycle !== 'archived' &&
                             <LeadUpdateComposer leadId={lead.id} leadName={lead.name} canFollowUp={canFollowUp}/>}
                         </div>
@@ -923,6 +921,12 @@ export function LeadsWorkspace({
           </footer>
         </div>
       </section>
+      {openedLead && <LeadDetailsDrawer
+        lead={openedLead} onClose={() => setOpenedId(null)}
+        stages={stages} lostReasons={lostReasons} assignees={assignees}
+        canManage={canManage} canWin={canWin} canAssign={canAssign}
+        canFollowUp={canFollowUp} canNote={canNote} canQuote={canQuote}
+      />}
       <p className="crm-leads-scope">
         Showing authorized leads for {organizationName}. CSV export includes
         only records visible on this page.
