@@ -269,6 +269,10 @@ export function ConstructionJourney({
   const curingRounds = gate.filter(
     (record) => value(record, 'kind') === 'curing',
   );
+  // Interiors need room-installation and snagging milestones, not mandatory
+  // concrete-curing panels. Keep any recorded curing evidence visible.
+  const showCuring =
+    !isInterior || curingRounds.length > 0 || curingMedia.length > 0;
   const recentReports = reports.slice(0, 2);
   const latestReport = recentReports[0];
   const latestManager = managerUpdates[0];
@@ -285,11 +289,20 @@ export function ConstructionJourney({
     <section
       className="cj-root"
       id="construction-timeline"
-      aria-label="Construction execution timeline"
+      aria-label={
+        isInterior
+          ? 'Interior execution timeline'
+          : 'Construction execution timeline'
+      }
     >
       <div className="cj-header">
         <div>
-          <p className="cj-eyebrow">Construction execution · Live records</p>
+          <p className="cj-eyebrow">
+            {isInterior
+              ? 'Interior project delivery'
+              : 'Construction execution'}{' '}
+            · Live records
+          </p>
           <h2>
             {isWatchman
               ? 'Curing & security log'
@@ -321,7 +334,7 @@ export function ConstructionJourney({
           <>
             <Link href={go('#daily-reports')}>Site updates</Link>
             <Link href={go('#materials')}>Materials</Link>
-            <Link href={go('#security')}>Curing</Link>
+            {showCuring && <Link href={go('#security')}>Curing</Link>}
             <Link href={go('#team')}>Team</Link>
             {canSeeFinance && <Link href={paymentsUrl}>Payments</Link>}
           </>
@@ -431,7 +444,9 @@ export function ConstructionJourney({
                       <span className="cj-stage-name">{stage.title}</span>
                       <span className="cj-stage-desc">{stage.explanation}</span>
                       <span className="cj-stage-phase">
-                        {phaseNames[stage.phase] ?? human(stage.phase)}
+                        {isInterior && stage.phase === 'design'
+                          ? 'Interior drawings & client approvals'
+                          : (phaseNames[stage.phase] ?? human(stage.phase))}
                         {stage.floor_code
                           ? ` · ${human(stage.floor_code)}`
                           : ''}
@@ -518,7 +533,9 @@ export function ConstructionJourney({
                           <p className="cj-caption">
                             {cleared
                               ? 'Current certificate recorded'
-                              : 'Independent QC and structural approval where required'}
+                              : isInterior
+                                ? 'Interior quality checks and client design approval where required'
+                                : 'Independent QC and structural approval where required'}
                           </p>
                           {stage.inspection_topics.length > 0 && (
                             <p className="cj-note">
@@ -573,7 +590,10 @@ export function ConstructionJourney({
                     {stageRecords && (
                       <div className="cj-subcard cj-stage-linked">
                         <div className="cj-subhead">
-                          <h4>Records assigned to this construction stage</h4>
+                          <h4>
+                            Records assigned to this{' '}
+                            {isInterior ? 'interior' : 'construction'} stage
+                          </h4>
                           <span className="cj-count">
                             {stageReports.length +
                               stageMaterials.length +
@@ -793,44 +813,47 @@ export function ConstructionJourney({
                               </p>
                             )}
                           </div>
-                          <div className="cj-subcard">
-                            <div className="cj-subhead">
-                              <h4>Watchman curing rounds</h4>
-                              <Link href={go('#security')}>
-                                Log curing / photos →
-                              </Link>
-                            </div>
-                            <p>
-                              {curingRounds.length} curing rounds logged for
-                              this project. Curing may continue in parallel with
-                              later approved work.
-                            </p>
-                            {curingMedia.length ? (
-                              <div className="cj-gallery">
-                                {curingMedia.map((item) => (
-                                  <EvidenceTile
-                                    key={value(item, 'id')}
-                                    item={item}
-                                    projectId={projectId}
-                                  />
-                                ))}
+                          {showCuring && (
+                            <div className="cj-subcard">
+                              <div className="cj-subhead">
+                                <h4>Watchman curing rounds</h4>
+                                <Link href={go('#security')}>
+                                  Log curing / photos →
+                                </Link>
                               </div>
-                            ) : (
-                              <p className="cj-caption">
-                                No curing photos uploaded yet.
+                              <p>
+                                {curingRounds.length} curing rounds logged for
+                                this project. Curing may continue in parallel
+                                with later approved work.
                               </p>
-                            )}
-                            {canUploadCuringPhotos && (
-                              <Link href={go('#security')}>
-                                Upload curing evidence →
-                              </Link>
-                            )}
-                          </div>
+                              {curingMedia.length ? (
+                                <div className="cj-gallery">
+                                  {curingMedia.map((item) => (
+                                    <EvidenceTile
+                                      key={value(item, 'id')}
+                                      item={item}
+                                      projectId={projectId}
+                                    />
+                                  ))}
+                                </div>
+                              ) : (
+                                <p className="cj-caption">
+                                  No curing photos uploaded yet.
+                                </p>
+                              )}
+                              {canUploadCuringPhotos && (
+                                <Link href={go('#security')}>
+                                  Upload curing evidence →
+                                </Link>
+                              )}
+                            </div>
+                          )}
                         </div>
                         <p className="cj-footer-note">
                           Open quality checks across the project:{' '}
                           {pendingChecks.length}. The Operations plan, approved
-                          contract and inspections determine actual construction
+                          contract and inspections determine actual{' '}
+                          {isInterior ? 'interior project' : 'construction'}
                           clearance.
                         </p>
                       </div>
@@ -849,7 +872,7 @@ export function ConstructionJourney({
         {canRequestMaterials && (
           <Link href={go('#materials')}>＋ Material request</Link>
         )}
-        {canUploadCuringPhotos && (
+        {canUploadCuringPhotos && showCuring && (
           <Link href={go('#security')}>＋ Curing photo</Link>
         )}
       </div>
