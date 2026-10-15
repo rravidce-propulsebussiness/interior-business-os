@@ -266,7 +266,7 @@ export default async function Projects({
       { count: 'exact' },
     )
     .eq('organization_id', s.org)
-      .eq('is_sales_prospect', false);
+    .eq('is_sales_prospect', false);
   if (q) query = query.ilike('name', locationQuery(q));
   if (status) query = query.eq('status', status);
   if (selectedIndustry) query = query.eq('industry_id', selectedIndustry);
@@ -282,18 +282,18 @@ export default async function Projects({
         .from('projects')
         .select('id', { head: true, count: 'exact' })
         .eq('organization_id', s.org)
-      .eq('is_sales_prospect', false),
+        .eq('is_sales_prospect', false),
       s.client
         .from('projects')
         .select('id', { head: true, count: 'exact' })
         .eq('organization_id', s.org)
-      .eq('is_sales_prospect', false)
+        .eq('is_sales_prospect', false)
         .eq('status', 'active'),
       s.client
         .from('projects')
         .select('id', { head: true, count: 'exact' })
         .eq('organization_id', s.org)
-      .eq('is_sales_prospect', false)
+        .eq('is_sales_prospect', false)
         .eq('status', 'inactive'),
     ]);
   if (projectsResult.error) throw new Error('Projects could not be loaded.');
