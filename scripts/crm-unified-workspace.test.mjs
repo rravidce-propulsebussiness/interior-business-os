@@ -121,8 +121,18 @@ test('Upload Leads and Google Sheets have distinct protected pages', () => {
   assert.doesNotMatch(leadPage, /label: 'Google Sheets'/);
   assert.doesNotMatch(crmLayout, /\['Upload Leads',/);
   assert.doesNotMatch(crmLayout, /\['Google Sheets',/);
-  assert.match(leadPage, /label: 'Follow-ups'/);
-  assert.doesNotMatch(leadPage, /label: 'Site Visits'/);
+  const unifiedNav = readFileSync(
+    fileURLToPath(
+      new URL(
+        '../apps/business-app/src/app/dashboard/leads-navigation.ts',
+        import.meta.url,
+      ),
+    ),
+    'utf8',
+  );
+  assert.match(leadPage, /leadsNavigation/);
+  assert.match(unifiedNav, /label: 'Follow-ups'/);
+  assert.match(unifiedNav, /label: 'Site Visits'/);
 
   assert.doesNotMatch(importer, /setMethod/);
   assert.doesNotMatch(importer, /crm-import-methods/);
@@ -187,7 +197,6 @@ test('legacy CRM overview and commercial response pages redirect to their canoni
   assert.match(quotationsPage, /p_organization_id: s\.org/);
 });
 
-
 test('invited clients can open only explicitly granted project records', () => {
   const portalSql = readFileSync(
     fileURLToPath(
@@ -209,18 +218,26 @@ test('invited clients can open only explicitly granted project records', () => {
   );
   const projectPage = readFileSync(
     fileURLToPath(
-      new URL('../apps/business-app/src/app/client/projects/[id]/page.tsx', import.meta.url),
+      new URL(
+        '../apps/business-app/src/app/client/projects/[id]/page.tsx',
+        import.meta.url,
+      ),
     ),
     'utf8',
   );
   const loginPage = readFileSync(
     fileURLToPath(
-      new URL('../apps/business-app/src/app/client/login/page.tsx', import.meta.url),
+      new URL(
+        '../apps/business-app/src/app/client/login/page.tsx',
+        import.meta.url,
+      ),
     ),
     'utf8',
   );
   const home = readFileSync(
-    fileURLToPath(new URL('../apps/business-app/src/app/client/page.tsx', import.meta.url)),
+    fileURLToPath(
+      new URL('../apps/business-app/src/app/client/page.tsx', import.meta.url),
+    ),
     'utf8',
   );
 
@@ -229,8 +246,14 @@ test('invited clients can open only explicitly granted project records', () => {
   assert.match(portalSql, /a\.project_id=p_project and a\.active/);
   assert.match(portalSql, /a\.email=private\.client_portal_verified_email\(\)/);
   assert.match(portalSql, /p\.customer_id=a\.customer_id/);
-  assert.match(portalSql, /if not private\.client_portal_accessible\(p_project_id\)/);
-  assert.match(portalSql, /not private\.client_portal_accessible\(m\.project_id\)/);
+  assert.match(
+    portalSql,
+    /if not private\.client_portal_accessible\(p_project_id\)/,
+  );
+  assert.match(
+    portalSql,
+    /not private\.client_portal_accessible\(m\.project_id\)/,
+  );
   assert.match(inviteUi, /'\/client\/projects\/' \+ item\.project_id/);
   assert.match(loginPage, /'\/client\/projects\/' \+ projectId/);
   assert.match(projectPage, /client_portal_project/);
@@ -238,39 +261,142 @@ test('invited clients can open only explicitly granted project records', () => {
   assert.match(home, /if \(projects\.length === 1\) redirect/);
 });
 
-
 test('client timeline uses only the invited project’s canonical workflow', () => {
   const migration = readFileSync(
-    fileURLToPath(new URL(
-      '../packages/database/supabase/migrations/20261015000900_client_portal_timeline.sql',
-      import.meta.url,
-    )),
+    fileURLToPath(
+      new URL(
+        '../packages/database/supabase/migrations/20261015000900_client_portal_timeline.sql',
+        import.meta.url,
+      ),
+    ),
     'utf8',
   );
   const project = readFileSync(
-    fileURLToPath(new URL(
-      '../apps/business-app/src/app/client/projects/[id]/page.tsx',
-      import.meta.url,
-    )),
+    fileURLToPath(
+      new URL(
+        '../apps/business-app/src/app/client/projects/[id]/page.tsx',
+        import.meta.url,
+      ),
+    ),
     'utf8',
   );
   const timeline = readFileSync(
-    fileURLToPath(new URL(
-      '../apps/business-app/src/app/client/project-timeline.tsx',
-      import.meta.url,
-    )),
+    fileURLToPath(
+      new URL(
+        '../apps/business-app/src/app/client/project-timeline.tsx',
+        import.meta.url,
+      ),
+    ),
     'utf8',
   );
 
   assert.match(migration, /private\.client_portal_accessible\(p_project_id\)/);
   assert.match(migration, /where p\.id=p_project_id/);
-  assert.match(migration, /s\.organization_id=p\.organization_id and s\.project_id=p\.id/);
+  assert.match(
+    migration,
+    /s\.organization_id=p\.organization_id and s\.project_id=p\.id/,
+  );
   assert.match(migration, /private\.project_stage_owner_overrides/);
   assert.match(migration, /private\.construction_stage_clearances/);
-  assert.match(migration, /revoke all on function public\.client_portal_timeline\(uuid\) from public, anon/);
-  assert.doesNotMatch(migration, /public\.payments|private\.project_advance_requirements|public\.invoices/);
-  assert.match(project, /rpc\('client_portal_timeline', \{ p_project_id: id \}\)/);
-  assert.match(project, /<ClientProjectTimeline stages=\{timeline\}/);
+  assert.match(
+    migration,
+    /revoke all on function public\.client_portal_timeline\(uuid\) from public, anon/,
+  );
+  assert.doesNotMatch(
+    migration,
+    /public\.payments|private\.project_advance_requirements|public\.invoices/,
+  );
+  assert.match(
+    project,
+    /rpc\('client_portal_timeline', \{ p_project_id: id \}\)/,
+  );
+  const dashboardView = readFileSync(
+    fileURLToPath(
+      new URL(
+        '../apps/business-app/src/app/client/client-dashboard.tsx',
+        import.meta.url,
+      ),
+    ),
+    'utf8',
+  );
+  assert.match(project, /<ClientDashboard/);
+  assert.match(dashboardView, /<ClientProjectTimeline stages=\{timeline\}/);
   assert.match(timeline, /Work timeline/);
   assert.match(timeline, /completed_at/);
+});
+
+test('premium client dashboard reads only invited-project delivery data', () => {
+  const sql = readFileSync(
+    fileURLToPath(
+      new URL(
+        '../packages/database/supabase/migrations/20261015001000_client_dashboard_read.sql',
+        import.meta.url,
+      ),
+    ),
+    'utf8',
+  );
+  const project = readFileSync(
+    fileURLToPath(
+      new URL(
+        '../apps/business-app/src/app/client/projects/[id]/page.tsx',
+        import.meta.url,
+      ),
+    ),
+    'utf8',
+  );
+  const dashboard = readFileSync(
+    fileURLToPath(
+      new URL(
+        '../apps/business-app/src/app/client/client-dashboard.tsx',
+        import.meta.url,
+      ),
+    ),
+    'utf8',
+  );
+  const styles = readFileSync(
+    fileURLToPath(
+      new URL(
+        '../apps/business-app/src/app/client/client-dashboard.css',
+        import.meta.url,
+      ),
+    ),
+    'utf8',
+  );
+  assert.match(sql, /not private\.client_portal_accessible\(p_project_id\)/);
+  assert.match(sql, /project_id=p_project_id/);
+  assert.match(sql, /gr\.project_id=p_project_id/);
+  assert.match(sql, /ri\.po_item_id=item\.id/);
+  assert.match(sql, /private\.finance_decimal\(ri\.received_quantity,false\)/);
+  assert.match(sql, /'status','requested'/);
+  assert.match(sql, /public\.project_inspections/);
+  assert.match(sql, /private\.site_reports/);
+  assert.match(
+    sql,
+    /revoke all on function public\.client_portal_dashboard\(uuid\) from public,anon/,
+  );
+  assert.doesNotMatch(
+    sql,
+    /public\.invoices|public\.payments|vendor_name|unit_price/,
+  );
+  assert.match(
+    project,
+    /rpc\('client_portal_dashboard', \{ p_project_id: id \}\)/,
+  );
+  assert.match(project, /<ClientDashboard/);
+  for (const area of [
+    'Project timeline',
+    'Materials delivery status',
+    "Tomorrow's work plan",
+    "Today's site progress",
+    'Quality checks',
+    'Site photos & updates',
+    'Designs & documents',
+    'Client approvals',
+    'Recent updates',
+  ]) {
+    assert.ok(dashboard.includes(area), area + ' must be available to clients');
+  }
+  assert.match(dashboard, /goods_receipt|Materials delivered|client\/media/);
+  assert.match(styles, /@media\(max-width:720px\)/);
+  assert.match(styles, /pc-mobile-tabs/);
 });

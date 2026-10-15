@@ -1,0 +1,28 @@
+name: Client app typecheck and build
+on:
+  push:
+    paths:
+      - 'apps/business-app/src/app/client/**'
+      - '.github/workflows/client-app-check.yml'
+  pull_request:
+    paths:
+      - 'apps/business-app/src/app/client/**'
+      - '.github/workflows/client-app-check.yml'
+permissions:
+  contents: read
+jobs:
+  client-app:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @business-os/business-app typecheck
+      - run: pnpm --filter @business-os/business-app build
+
+

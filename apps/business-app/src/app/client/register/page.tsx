@@ -6,8 +6,12 @@ export default function ClientRegistration() {
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-12">
       <div className="mx-auto max-w-lg rounded-3xl border border-slate-200 bg-white p-7 shadow-lg">
-        <p className="text-sm font-bold tracking-widest text-blue-700">CLIENT APP</p>
-        <h1 className="mt-3 text-2xl font-bold">Activate your client account</h1>
+        <p className="text-sm font-bold tracking-widest text-blue-700">
+          CLIENT APP
+        </p>
+        <h1 className="mt-3 text-2xl font-bold">
+          Activate your client account
+        </h1>
         <p className="my-5 text-sm leading-6 text-slate-600">
           Create an account using the exact email your project owner added.
           Confirm the verification email, then sign in to view your projects.

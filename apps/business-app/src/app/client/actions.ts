@@ -12,7 +12,8 @@ const schema = z.object({
 });
 
 export async function clientDesignDecision(form: FormData): Promise<{
-  ok: boolean; message: string;
+  ok: boolean;
+  message: string;
 }> {
   try {
     const fields = schema.parse({
@@ -22,15 +23,23 @@ export async function clientDesignDecision(form: FormData): Promise<{
       note: String(form.get('note') ?? ''),
     });
     if (fields.decision === 'approved' && form.get('acknowledged') !== 'on')
-      return { ok: false, message: 'Confirm that you have reviewed the final drawings.' };
+      return {
+        ok: false,
+        message: 'Confirm that you have reviewed the final drawings.',
+      };
     if (fields.decision === 'changes_requested' && fields.note.length < 10)
-      return { ok: false, message: 'Describe what you would like the designer to change.' };
+      return {
+        ok: false,
+        message: 'Describe what you would like the designer to change.',
+      };
 
     const db = await createServerDatabase();
     const { data } = await db.auth.getUser();
-    if (!data.user) return { ok: false, message: 'Please sign in as the invited client.' };
+    if (!data.user)
+      return { ok: false, message: 'Please sign in as the invited client.' };
     const rpc = db.rpc.bind(db) as unknown as (
-      name: string, args: Record<string, string>,
+      name: string,
+      args: Record<string, string>,
     ) => Promise<{ error: { message: string } | null }>;
     const { error } = await rpc('client_portal_design_decide', {
       p_project_id: fields.project,
@@ -43,11 +52,16 @@ export async function clientDesignDecision(form: FormData): Promise<{
     revalidatePath('/client/projects/' + fields.project);
     return {
       ok: true,
-      message: fields.decision === 'approved'
-        ? 'Your approval has been recorded and shared with the project team.'
-        : 'Your requested changes have been recorded for the designer.',
+      message:
+        fields.decision === 'approved'
+          ? 'Your approval has been recorded and shared with the project team.'
+          : 'Your requested changes have been recorded for the designer.',
     };
   } catch {
-    return { ok: false, message: 'Could not record your response. Check your details and try again.' };
+    return {
+      ok: false,
+      message:
+        'Could not record your response. Check your details and try again.',
+    };
   }
 }
