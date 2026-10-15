@@ -10,7 +10,10 @@ import { MasterForm } from '../../commercial/master-form';
 import { OwnerIcon, OwnerShell } from '../../owner-shell';
 import { projectWorkspaceNavigation } from '../project-workspace-navigation';
 import { ConstructionJourney } from './site/construction-journey';
-import { stageOwnerSchema, mergeStageOwnerEdits } from './site/stage-owner-view';
+import {
+  stageOwnerSchema,
+  mergeStageOwnerEdits,
+} from './site/stage-owner-view';
 import '../../owner-dashboard.css';
 import './project-detail.css';
 
@@ -257,16 +260,19 @@ export default async function Project({
     stageResponse && !stageResponse.error
       ? timelineStagesSchema.safeParse(stageResponse.data)
       : null;
-  const baseTimelineStages = stageParsed?.success ? stageParsed.data.stages : [];
+  const baseTimelineStages = stageParsed?.success
+    ? stageParsed.data.stages
+    : [];
   const ownerResponse = baseTimelineStages.length
     ? await s.client.rpc('project_stage_owner_read', {
         p_org: s.org,
         p_project: id,
       })
     : null;
-  const ownerParsed = ownerResponse && !ownerResponse.error
-    ? stageOwnerSchema.safeParse(ownerResponse.data)
-    : null;
+  const ownerParsed =
+    ownerResponse && !ownerResponse.error
+      ? stageOwnerSchema.safeParse(ownerResponse.data)
+      : null;
   const ownerData = ownerParsed?.success ? ownerParsed.data : null;
   const timelineStages = mergeStageOwnerEdits(baseTimelineStages, ownerData);
   const qcResponse = timelineStages.length
