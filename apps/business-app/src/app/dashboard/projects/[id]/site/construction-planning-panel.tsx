@@ -154,13 +154,19 @@ export function ConstructionPlanningPanel({
     <section
       id="construction-planning"
       className="space-y-5"
-      aria-label={isInterior ? 'Interior execution planning' : 'Construction execution planning'}
+      aria-label={
+        isInterior
+          ? 'Interior execution planning'
+          : 'Construction execution planning'
+      }
     >
       <div className="sc-panel rounded-2xl border p-5 sm:p-7">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <p className="text-xs font-bold uppercase tracking-[.18em] text-blue-700">
-              {isInterior ? 'Connected interior project delivery' : 'Connected construction planning'}
+              {isInterior
+                ? 'Connected interior project delivery'
+                : 'Connected construction planning'}
             </p>
             <h2 className="mt-2 text-xl font-bold tracking-tight text-slate-900">
               {data.workflow?.template_code === 'INTERIOR_QUOTE'
@@ -377,7 +383,9 @@ export function ConstructionPlanningPanel({
               Project-specific access
             </p>
             <h2 className="mt-2 text-xl font-bold text-slate-900">
-              {isInterior ? 'Interior delivery team & roles' : 'Construction team & roles'}
+              {isInterior
+                ? 'Interior delivery team & roles'
+                : 'Construction team & roles'}
             </h2>
             <p className="mt-2 text-sm leading-6 text-slate-600">
               One team member can hold several scoped roles. Only active company
