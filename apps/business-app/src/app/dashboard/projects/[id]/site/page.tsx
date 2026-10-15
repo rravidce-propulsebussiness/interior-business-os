@@ -178,12 +178,14 @@ const constructionTomorrowSchema = z.object({
   ),
 });
 const clientAccessManagementSchema = z.object({
-  members: z.array(z.object({
-    id: z.uuid(),
-    email: z.string(),
-    active: z.boolean(),
-    version: z.number().int().positive(),
-  })),
+  members: z.array(
+    z.object({
+      id: z.uuid(),
+      email: z.string(),
+      active: z.boolean(),
+      version: z.number().int().positive(),
+    }),
+  ),
 });
 const clientProgressManagementSchema = z.object({
   shares: z.array(
@@ -817,7 +819,10 @@ export default async function ProjectDeliveryPage({
             )}
 
             {clientAccessManager && (
-              <ConstructionClientAccessPanel projectId={id} data={clientAccessManager} />
+              <ConstructionClientAccessPanel
+                projectId={id}
+                data={clientAccessManager}
+              />
             )}
             {clientPortalManager && (
               <ConstructionClientPortalManager
