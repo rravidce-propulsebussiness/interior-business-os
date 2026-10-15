@@ -12,6 +12,7 @@ import { LeadUpdateComposer } from './lead-update-composer';
 import type { LeadServiceOption } from './lead-service-options';
 import { leadCategoryLabel, type LeadCategory } from './lead-category';
 import { LeadsBoardView } from './board-view';
+import { LeadBulkToolbar } from './lead-bulk-toolbar';
 import {
   ProPulseConnectPanel,
   type ProPulseConnectionView,
@@ -268,7 +269,15 @@ export function LeadsWorkspace({
   };
   const [syncFeedback, setSyncFeedback] = useState('');
   const [checked, setChecked] = useState<string[]>([]);
-  const allSelected = rows.length > 0 && checked.length === rows.length;
+  const eligibleRows = rows.filter((lead) => lead.lifecycle === 'open');
+  const selectedRows = eligibleRows.filter((lead) => checked.includes(lead.id));
+  const allSelected = eligibleRows.length > 0 && selectedRows.length === eligibleRows.length;
+  const activePriorityQuery = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value && key !== 'page' && key !== 'priority' && key !== 'panel') activePriorityQuery.set(key, value);
+  }
+  if (params.priority !== 'high') activePriorityQuery.set('priority', 'high');
+  const highPriorityHref = path + (activePriorityQuery.toString() ? '?' + activePriorityQuery.toString() : '');
   const open = (lead: LeadView) => {
     // Detail is a focused history view; common daily actions remain on this list.
     router.push(path + '/' + encodeURIComponent(lead.id));
@@ -318,15 +327,11 @@ export function LeadsWorkspace({
 
   return (
     <main id="main-content" tabIndex={-1} className="crm-leads-root">
-      <div className="crm-leads-breadcrumb">
-        <a href="/dashboard">Workspace</a>
-        <Icon name="chevron" size={13} />
-        <strong>CRM / Leads</strong>
-      </div>
       <div className="crm-leads-heading">
-        <div>
-          <h1>Leads</h1>
-          <p>Track enquiries, assign follow-ups, and convert faster.</p>
+        <div className="crm-premium-heading-title">
+          <span className="crm-premium-heading-icon"><OwnerIcon name="leads" size={24} /></span>
+          <div><h1>Leads</h1>
+            <p>Manage construction, interior and renovation enquiries.</p></div>
         </div>
         <div className="crm-leads-header-actions">
           {canCreate && (
@@ -339,62 +344,23 @@ export function LeadsWorkspace({
               <OwnerIcon name="plus" size={17} /> Add Lead
             </button>
           )}
-          {canCreate && (
-            <>
-              <a className="crm-outline" href="/dashboard/crm/leads/upload">
-                <Icon name="download" /> Upload Leads
+          <details className="crm-premium-menu">
+            <summary className="crm-outline">More <Icon name="more" /></summary>
+            <div className="crm-premium-menu-list">
+              {canCreate && <a href="/dashboard/crm/leads/upload">Import leads</a>}
+              {canCreate && <a href="/dashboard/crm/leads/google-sheets">Google Sheets</a>}
+              <button type="button" onClick={() => setLeadTool(leadTool === 'propulse' ? 'none' : 'propulse')}>
+                {propulseConnection.connected ? 'ProPulse connection' : 'Connect ProPulse'}
+              </button>
+              <a href={viewLink(viewMode === 'list' ? 'board' : 'list')}>
+                {viewMode === 'list' ? 'Board view' : 'List view'}
               </a>
-              <a
-                className="crm-outline"
-                href="/dashboard/crm/leads/google-sheets"
-              >
-                Google Sheets
-              </a>
-            </>
-          )}
-          <button
-            type="button"
-            className="crm-outline"
-            aria-expanded={leadTool === 'propulse'}
-            onClick={() =>
-              setLeadTool(leadTool === 'propulse' ? 'none' : 'propulse')
-            }
-          >
-            {propulseConnection.connected
-              ? 'ProPulse Connected'
-              : 'Connect ProPulse'}
-          </button>
-          <nav className="crm-view-toggle" aria-label="Lead display">
-            <a
-              href={viewLink('list')}
-              aria-current={viewMode === 'list' ? 'page' : undefined}
-              className={viewMode === 'list' ? 'crm-view-active' : ''}
-            >
-              List View
-            </a>
-            <a
-              href={viewLink('board')}
-              aria-current={viewMode === 'board' ? 'page' : undefined}
-              className={viewMode === 'board' ? 'crm-view-active' : ''}
-            >
-              Board View
-            </a>
-          </nav>
-          <button
-            type="button"
-            className="crm-outline"
-            disabled={!rows.length}
-            onClick={() =>
-              downloadCsv(
-                checked.length
-                  ? rows.filter((row) => checked.includes(row.id))
-                  : rows,
-              )
-            }
-          >
-            <Icon name="download" /> Export{' '}
-            {checked.length ? 'selected' : 'page'}
-          </button>
+              <button type="button" disabled={!rows.length}
+                onClick={() => downloadCsv(checked.length ? rows.filter((row) => checked.includes(row.id)) : rows)}>
+                Export visible leads
+              </button>
+            </div>
+          </details>
         </div>
       </div>
 
@@ -611,22 +577,25 @@ export function LeadsWorkspace({
               </a>
             ))}
           </nav>
-          {checked.length > 0 && (
-            <div className="crm-bulk-bar" role="status">
-              <strong>{checked.length} selected</strong>
-              <button
-                type="button"
-                onClick={() =>
-                  downloadCsv(rows.filter((row) => checked.includes(row.id)))
-                }
-              >
-                <Icon name="download" /> Export selected
-              </button>
-              <button type="button" onClick={() => setChecked([])}>
-                Clear selection
-              </button>
+          <div className="crm-premium-selection">
+            <div className="crm-premium-select-actions">
+              <label><input type="checkbox" checked={allSelected}
+                disabled={!eligibleRows.length}
+                onChange={() => setChecked(allSelected ? [] : eligibleRows.map((row) => row.id))}/>
+                Select filtered page ({eligibleRows.length})
+              </label>
+              <a className={params.priority === 'high' ? 'crm-priority-active' : ''} href={highPriorityHref}>
+                {params.priority === 'high' ? '✓ High priority' : '⚑ High priority'}
+              </a>
             </div>
-          )}
+            <small>Bulk actions apply only to selected open leads on this page.</small>
+          </div>
+          <LeadBulkToolbar
+            selected={selectedRows} visible={eligibleRows}
+            assignees={assignees} stages={stages}
+            canAssign={canAssign} canManage={canManage}
+            canFollowUp={canFollowUp} onClear={() => setChecked([])}
+          />
           {rows.length ? (
             <>
               {viewMode === 'board' ? (
@@ -650,18 +619,17 @@ export function LeadsWorkspace({
                               aria-label="Select all visible leads"
                               type="checkbox"
                               checked={allSelected}
+                              disabled={!eligibleRows.length}
                               onChange={() =>
-                                setChecked(
-                                  allSelected ? [] : rows.map((row) => row.id),
-                                )
+                                setChecked(allSelected ? [] : eligibleRows.map((row) => row.id))
                               }
                             />
                           </th>
                           <th>Lead</th>
                           <th>Requirement</th>
-                          <th>Location</th>
-                          <th>Stage</th>
                           <th>Latest update</th>
+                          <th>Status</th>
+                          <th>Priority</th>
                           <th>Assigned to</th>
                           <th>Next follow-up</th>
                           <th>Quotation</th>
@@ -676,6 +644,7 @@ export function LeadsWorkspace({
                                 aria-label={'Select ' + lead.name}
                                 type="checkbox"
                                 checked={checked.includes(lead.id)}
+                                disabled={lead.lifecycle !== 'open'}
                                 onChange={() => toggle(lead.id)}
                               />
                             </td>
@@ -706,6 +675,7 @@ export function LeadsWorkspace({
                                   <small>
                                     {lead.phone || lead.number || 'No number'}
                                   </small>
+                                  {lead.location && <small className="crm-premium-location">{lead.location}</small>}
                                 </span>
                               </button>
                             </td>
@@ -716,11 +686,14 @@ export function LeadsWorkspace({
                                   'Not specified'}
                               </span>
                             </td>
-                            <td>
-                              <span className="crm-location">
-                                <Icon name="pin" size={15} />
-                                {lead.location || '—'}
-                              </span>
+                            <td className="crm-last-update">
+                              {lead.latestUpdate ? (
+                                <>
+                                  <strong>{lead.latestUpdateSubject || 'Latest contact'}</strong>
+                                  <span>{lead.latestUpdate}</span>
+                                  {lead.latestUpdateAt && <small>{date(lead.latestUpdateAt, true, timeZone)}</small>}
+                                </>
+                              ) : <span className="crm-muted">No contact logged yet</span>}
                             </td>
                             <td>
                               <LeadStageSelect
@@ -731,15 +704,9 @@ export function LeadsWorkspace({
                                 canWin={canWin}
                               />
                             </td>
-                            <td className="crm-last-update">
-                              {lead.latestUpdate ? (
-                                <>
-                                  <strong>{lead.latestUpdateSubject || 'Latest contact'}</strong>
-                                  <span>{lead.latestUpdate}</span>
-                                  {lead.latestUpdateAt && <small>{date(lead.latestUpdateAt, true, timeZone)}</small>}
-                                </>
-                              ) : <span className="crm-muted">No contact logged yet</span>}
-                            </td>
+                            <td><span className={'crm-premium-priority crm-premium-priority-' + lead.priority}>
+                              {lead.priority === 'high' || lead.priority === 'urgent' ? '⚑ ' : ''}{lead.priority}
+                            </span></td>
                             <td>
                               <LeadAssigneeSelect lead={lead} assignees={assignees} canAssign={canAssign} />
                             </td>
@@ -792,26 +759,16 @@ export function LeadsWorkspace({
                                     <Icon name="whatsapp" size={17} />
                                   </a>
                                 )}
-                                <button
-                                  type="button"
-                                  title="Open lead details"
-                                  aria-label={
-                                    'Open lead details for ' + lead.name
-                                  }
-                                  onClick={() => open(lead)}
-                                >
-                                  <Icon name="more" size={18} />
-                                </button>
-                                {canNote && lead.lifecycle !== 'archived' && (
-                                  <LeadUpdateComposer leadId={lead.id} leadName={lead.name} canFollowUp={canFollowUp}/>
-                                )}
-                                {canManage && lead.lifecycle !== 'archived' && (
-                                  <LeadRemovalButton
-                                    id={lead.id}
-                                    name={lead.name}
-                                    version={lead.version}
-                                  />
-                                )}
+                                <details className="crm-premium-row-more">
+                                  <summary aria-label={'More actions for ' + lead.name} title="More">•••</summary>
+                                  <div className="crm-premium-row-menu">
+                                    <button type="button" onClick={() => open(lead)}>View history</button>
+                                    {canNote && lead.lifecycle !== 'archived' &&
+                                      <LeadUpdateComposer leadId={lead.id} leadName={lead.name} canFollowUp={canFollowUp}/>}
+                                    {canManage && lead.lifecycle !== 'archived' &&
+                                      <LeadRemovalButton id={lead.id} name={lead.name} version={lead.version}/>}
+                                  </div>
+                                </details>
                               </div>
                             </td>
                           </tr>
@@ -823,6 +780,10 @@ export function LeadsWorkspace({
                     {rows.map((lead, i) => (
                       <article className="crm-mobile-card" key={lead.id}>
                         <div className="crm-mobile-header">
+                          <input type="checkbox" aria-label={'Select ' + lead.name}
+                            checked={checked.includes(lead.id)}
+                            disabled={lead.lifecycle !== 'open'}
+                            onChange={() => toggle(lead.id)}/>
                           <span className={'crm-avatar crm-avatar-' + (i % 5)}>
                             {firstLetters(lead.name)}
                           </span>
@@ -837,6 +798,7 @@ export function LeadsWorkspace({
                             >
                               {leadCategoryLabel(lead.category)}
                             </span>
+                            <span className={'crm-premium-priority crm-premium-priority-' + lead.priority}>{lead.priority} priority</span>
                           </div>
                           <button
                             type="button"
@@ -880,12 +842,17 @@ export function LeadsWorkspace({
                             + Prepare quotation
                           </a>
                         ) : null}
-                        {canNote && lead.lifecycle !== 'archived' && (
-                          <div className="crm-mobile-log">
-                            <LeadUpdateComposer leadId={lead.id} leadName={lead.name} canFollowUp={canFollowUp}/>
-                            <button type="button" onClick={()=>open(lead)}>View history →</button>
-                          </div>
-                        )}
+                        <div className="crm-premium-mobile-actions">
+                          {lead.phoneNormalized && <a href={'tel:' + safePhone(lead.phoneNormalized)}
+                            aria-label={'Call ' + lead.name}><Icon name="phone"/> Call</a>}
+                          {whatsapp(lead.phoneNormalized || lead.phone) && <a
+                            href={'https://wa.me/' + whatsapp(lead.phoneNormalized || lead.phone)}
+                            target="_blank" rel="noopener noreferrer" aria-label={'WhatsApp ' + lead.name}>
+                            <Icon name="whatsapp"/> WhatsApp</a>}
+                          <button type="button" onClick={() => open(lead)}>History</button>
+                          {canNote && lead.lifecycle !== 'archived' &&
+                            <LeadUpdateComposer leadId={lead.id} leadName={lead.name} canFollowUp={canFollowUp}/>}
+                        </div>
                         {canManage && lead.lifecycle !== 'archived' && (
                           <div className="crm-mobile-delete">
                             <LeadRemovalButton
