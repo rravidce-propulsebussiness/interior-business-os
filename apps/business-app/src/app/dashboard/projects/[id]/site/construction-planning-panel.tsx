@@ -154,16 +154,16 @@ export function ConstructionPlanningPanel({
               Stages come from the approved quotation
             </h3>
             <p className="mt-2 text-sm leading-6 text-slate-600">
-              Issue the construction quote with its actual floors, built-up areas,
-              additional works and package specifications. After customer approval,
-              create the agreement. The floor-wise construction timeline is
-              automatically generated from that frozen revision.
-              No separate floor entry or stage installation is required.
+              Issue the construction quote with its actual floors, built-up
+              areas, additional works and package specifications. After customer
+              approval, create the agreement. The floor-wise construction
+              timeline is automatically generated from that frozen revision. No
+              separate floor entry or stage installation is required.
             </p>
             <p className="mt-2 text-xs leading-5 text-slate-600">
-              The stage plan is initially planned only. Signed agreement,
-              client design approvals, independent QC and payment release
-              controls still apply before site execution.
+              The stage plan is initially planned only. Signed agreement, client
+              design approvals, independent QC and payment release controls
+              still apply before site execution.
             </p>
             <div className="mt-4 flex flex-wrap gap-3">
               <Link
@@ -178,14 +178,15 @@ export function ConstructionPlanningPanel({
                   className="rounded-xl bg-blue-700 px-4 py-2.5 text-sm font-bold text-white disabled:opacity-50"
                   onClick={() => {
                     start(async () => {
-                      const result = await syncConstructionFromProjectAgreement(
-                        projectId,
-                      );
+                      const result =
+                        await syncConstructionFromProjectAgreement(projectId);
                       setMessage(result.message);
                     });
                   }}
                 >
-                  {pending ? 'Checking agreement…' : 'Recover plan from accepted agreement'}
+                  {pending
+                    ? 'Checking agreement…'
+                    : 'Recover plan from accepted agreement'}
                 </button>
               )}
             </div>
