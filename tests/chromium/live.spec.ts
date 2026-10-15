@@ -13,6 +13,17 @@ test('public site serves real Next.js pages rather than a 503', async ({ page })
     .toBeVisible();
 });
 
+test('public homepage and login both render without 503', async ({ page }) => {
+  for (const path of ['/', '/login']) {
+    const response = await page.goto(origin + path, {
+      waitUntil: 'domcontentloaded',
+      timeout: 20000,
+    });
+    console.log('LIVE_PAGE_STATUS ' + path + '=' + (response?.status() ?? 'NO_RESPONSE'));
+    expect(response?.status(), 'Expected working page: ' + path).toBe(200);
+  }
+});
+
 test('production health endpoint responds', async ({ request }) => {
   const response = await request.get(origin + '/api/health', { timeout: 20000 });
   console.log('LIVE_HEALTH_STATUS=' + response.status());
