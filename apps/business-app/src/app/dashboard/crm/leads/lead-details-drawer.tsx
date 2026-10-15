@@ -4,17 +4,19 @@ import { useEffect, useState } from 'react';
 import { LeadStageSelect, LeadPrioritySelect, LeadFollowUpSetter } from './lead-inline-controls';
 import { LeadQuotePreview } from './lead-quote-preview';
 import { LeadUpdateComposer } from './lead-update-composer';
+import { LeadActivityScheduler } from './lead-activity-scheduler';
 import type { LeadOption, LeadStage, LeadView } from './workspace';
 import { leadCategoryLabel } from './lead-category';
 
 export function LeadDetailsDrawer({
-  lead, onClose, stages, lostReasons,
+  lead, onClose, stages, lostReasons, assignees,
   canManage, canWin, canFollowUp, canNote, canQuote,
 }: {
   lead: LeadView;
   onClose: () => void;
   stages: LeadStage[];
   lostReasons: LeadOption[];
+  assignees: LeadOption[];
   canManage: boolean;
   canWin: boolean;
   canFollowUp: boolean;
@@ -69,6 +71,9 @@ export function LeadDetailsDrawer({
             <p>{lead.latestUpdate || 'No contact recorded yet.'}</p>
             {lead.latestUpdateAt && <small>{new Date(lead.latestUpdateAt).toLocaleString('en-IN', {dateStyle:'medium',timeStyle:'short'})}</small>}
           </div>
+          <LeadActivityScheduler leadId={lead.id} leadName={lead.name}
+            assignedTo={lead.assignedTo} assignees={assignees}
+            defaultLocation={lead.location} canSchedule={canFollowUp && lead.lifecycle === 'open'}/>
           {canNote && lead.lifecycle !== 'archived' &&
             <LeadUpdateComposer leadId={lead.id} leadName={lead.name} canFollowUp={canFollowUp}/>}
         </>}
