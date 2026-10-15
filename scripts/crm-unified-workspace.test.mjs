@@ -121,8 +121,10 @@ test('Upload Leads and Google Sheets have distinct protected pages', () => {
   assert.doesNotMatch(leadPage, /label: 'Google Sheets'/);
   assert.doesNotMatch(crmLayout, /\['Upload Leads',/);
   assert.doesNotMatch(crmLayout, /\['Google Sheets',/);
-  assert.match(leadPage, /label: 'Follow-ups'/);
-  assert.doesNotMatch(leadPage, /label: 'Site Visits'/);
+  const unifiedNav = readFileSync(fileURLToPath(new URL('../apps/business-app/src/app/dashboard/leads-navigation.ts', import.meta.url)), 'utf8');
+  assert.match(leadPage, /leadsNavigation/);
+  assert.match(unifiedNav, /label: 'Follow-ups'/);
+  assert.match(unifiedNav, /label: 'Site Visits'/);
 
   assert.doesNotMatch(importer, /setMethod/);
   assert.doesNotMatch(importer, /crm-import-methods/);
@@ -270,7 +272,12 @@ test('client timeline uses only the invited project’s canonical workflow', () 
   assert.match(migration, /revoke all on function public\.client_portal_timeline\(uuid\) from public, anon/);
   assert.doesNotMatch(migration, /public\.payments|private\.project_advance_requirements|public\.invoices/);
   assert.match(project, /rpc\('client_portal_timeline', \{ p_project_id: id \}\)/);
-  assert.match(project, /<ClientProjectTimeline stages=\{timeline\}/);
+  const dashboardView = readFileSync(
+    fileURLToPath(new URL('../apps/business-app/src/app/client/client-dashboard.tsx', import.meta.url)),
+    'utf8',
+  );
+  assert.match(project, /<ClientDashboard/);
+  assert.match(dashboardView, /<ClientProjectTimeline stages=\{timeline\}/);
   assert.match(timeline, /Work timeline/);
   assert.match(timeline, /completed_at/);
 });
