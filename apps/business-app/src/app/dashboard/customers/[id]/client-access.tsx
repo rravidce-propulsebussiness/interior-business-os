@@ -28,8 +28,7 @@ export function ClientAccess({
   const [pending, start] = useTransition();
   const [message, setMessage] = useState('');
   const [access, setAccess] = useState(existing);
-  const portalUrl = typeof window === 'undefined'
-    ? '/client/login' : window.location.origin + '/client/login';
+  const portalUrl = '/client/login';
 
   function update(active: boolean, targetProject: string, targetEmail: string) {
     setMessage('');
