@@ -48,7 +48,6 @@ export function QuotationStudioStart({
   const matchedLeadCustomer = initialLead
     ? existingCustomers.find((customer) =>
         contactMatches(customer, {
-          clientName: initialLead.name,
           phone: initialLead.phone,
           email: initialLead.email,
         }),
