@@ -133,6 +133,32 @@ export function AgreementReadinessPanel({
           </p>
         </div>
       </div>
+      <div className="mt-4 flex flex-wrap items-center gap-3">
+        {state.contract_id ? (
+          <a
+            className="rounded-xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white"
+            href={'/dashboard/finance/contracts/' + state.contract_id}
+          >
+            Open agreement, payment schedule &amp; advance
+          </a>
+        ) : (
+          <a
+            className="rounded-xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white"
+            href="/dashboard/quotations"
+          >
+            Open quotation to prepare agreement
+          </a>
+        )}
+        <a className="rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700" href="#design">
+          Next: upload designs →
+        </a>
+      </div>
+      <p className="mt-3 text-sm text-slate-600">
+        Record an actual received advance in Billing; a payment request alone
+        does not mean money has been received. For an offline agreement,
+        upload the signed PDF below and record its receipt. Online e-signing
+        needs the separate authenticated client signing flow.
+      </p>
       {state.active_contract_count > 1 && (
         <p className="mt-4 text-sm font-medium text-amber-800">
           Multiple active contracts exist for this project. Resolve the
