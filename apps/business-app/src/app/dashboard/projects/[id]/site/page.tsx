@@ -501,6 +501,30 @@ export default async function ProjectDeliveryPage({
               gate={site.gate}
               media={site.media}
             />
+            <nav aria-label="Project steps" className="mb-5 grid gap-2 rounded-2xl border border-slate-200 bg-white p-4 text-sm font-semibold shadow-sm sm:grid-cols-2 xl:grid-cols-5">
+              <a className="rounded-xl bg-blue-50 p-3 text-blue-900" href="/dashboard/quotations">
+                1 · Quotation
+              </a>
+              <a className="rounded-xl bg-slate-50 p-3 text-slate-800" href="#agreement-readiness">
+                2 · Agreement &amp; advance
+              </a>
+              <a className="rounded-xl bg-slate-50 p-3 text-slate-800" href="#design">
+                3 · Design revisions
+              </a>
+              <a className="rounded-xl bg-slate-50 p-3 text-slate-800" href="#design">
+                4 · Client design approval
+              </a>
+              <a className="rounded-xl bg-slate-50 p-3 text-slate-800" href="#overview">
+                5 · Site work &amp; handover
+              </a>
+            </nav>
+            {agreement && (
+              <AgreementReadinessPanel
+                projectId={id}
+                state={agreement}
+                files={agreementPdfChoices}
+              />
+            )}
             {construction && (
               <ConstructionJourney
                 projectId={id}
@@ -553,13 +577,6 @@ export default async function ProjectDeliveryPage({
               />
             </div>
 
-            {agreement && (
-              <AgreementReadinessPanel
-                projectId={id}
-                state={agreement}
-                files={agreementPdfChoices}
-              />
-            )}
             {construction && (
               <ConstructionPlanningPanel
                 projectId={id}
@@ -681,7 +698,7 @@ export default async function ProjectDeliveryPage({
                   <Heading
                     eyebrow="Stage 1"
                     title="Design and technical approval"
-                    detail="Latest architectural plan, 3D design and structural revision must each be reviewed before client approval can be recorded."
+                    detail="Designer uploads drawings and revisions. Internal technical checks do not replace client consent. Record the client's explicit approval or requested changes before site work proceeds."
                   />
                   <div className="grid gap-4 md:grid-cols-3">
                     {latestDesigns.map((kind) => {
