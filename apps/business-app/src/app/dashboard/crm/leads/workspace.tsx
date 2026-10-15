@@ -741,17 +741,28 @@ export function LeadsWorkspace({
                             </td>
                             <td>
                               {lead.quoteRevisionId ? (
-                                <a className="font-semibold text-blue-700 underline"
-                                  href={'/dashboard/quotations/' + lead.quoteRevisionId}
-                                  title={'Open ' + (lead.quoteNumber ?? 'quotation')}>
+                                <a
+                                  className="font-semibold text-blue-700 underline"
+                                  href={
+                                    '/dashboard/quotations/' +
+                                    lead.quoteRevisionId
+                                  }
+                                  title={
+                                    'Open ' + (lead.quoteNumber ?? 'quotation')
+                                  }
+                                >
                                   {lead.quoteNumber || 'View quote'}
                                   <small className="block font-normal text-slate-500">
                                     {lead.quoteStatus?.replaceAll('_', ' ')}
                                   </small>
                                 </a>
                               ) : canQuote ? (
-                                <a className="font-semibold text-blue-700 underline"
-                                  href={'/dashboard/quotations/new?lead=' + lead.id}>
+                                <a
+                                  className="font-semibold text-blue-700 underline"
+                                  href={
+                                    '/dashboard/quotations/new?lead=' + lead.id
+                                  }
+                                >
                                   + Create quote
                                 </a>
                               ) : (
@@ -875,13 +886,20 @@ export function LeadsWorkspace({
                         </div>
                         <div className="my-2">
                           {lead.quoteRevisionId ? (
-                            <a className="font-semibold text-blue-700 underline"
-                              href={'/dashboard/quotations/' + lead.quoteRevisionId}>
-                              {lead.quoteNumber || 'View quotation'} · {lead.quoteStatus?.replaceAll('_', ' ')}
+                            <a
+                              className="font-semibold text-blue-700 underline"
+                              href={
+                                '/dashboard/quotations/' + lead.quoteRevisionId
+                              }
+                            >
+                              {lead.quoteNumber || 'View quotation'} ·{' '}
+                              {lead.quoteStatus?.replaceAll('_', ' ')}
                             </a>
                           ) : canQuote ? (
-                            <a className="font-semibold text-blue-700 underline"
-                              href={'/dashboard/quotations/new?lead=' + lead.id}>
+                            <a
+                              className="font-semibold text-blue-700 underline"
+                              href={'/dashboard/quotations/new?lead=' + lead.id}
+                            >
                               + Create quotation
                             </a>
                           ) : null}

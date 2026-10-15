@@ -53,18 +53,21 @@ export function QuotationStudioStart({
         }),
       )
     : undefined;
-  const initialCustomer = existingCustomers.find(
-    (customer) => customer.id === initialCustomerId,
-  ) ?? matchedLeadCustomer;
+  const initialCustomer =
+    existingCustomers.find((customer) => customer.id === initialCustomerId) ??
+    matchedLeadCustomer;
   const [leadId, setLeadId] = useState(initialLead?.id ?? '');
   const [industry, setIndustry] = useState(
-    (initialLead && industries.some((item) => item.key === initialLead.industryKey)
+    (initialLead &&
+    industries.some((item) => item.key === initialLead.industryKey)
       ? initialLead.industryKey
       : industries.find((item) => item.key === 'construction')?.key) ??
       industries[0]?.key ??
       '',
   );
-  const [mode, setMode] = useState<'sft' | 'custom' | 'upload'>(initialLead?.industryKey === 'interior' ? 'custom' : 'sft');
+  const [mode, setMode] = useState<'sft' | 'custom' | 'upload'>(
+    initialLead?.industryKey === 'interior' ? 'custom' : 'sft',
+  );
   const [pending, start] = useTransition();
   const [feedback, setFeedback] = useState('');
   const [customerId, setCustomerId] = useState(initialCustomer?.id ?? '');
@@ -85,7 +88,9 @@ export function QuotationStudioStart({
     clientName: initialCustomer?.display_name ?? initialLead?.name ?? '',
     phone: initialCustomer?.phone ?? initialLead?.phone ?? '',
     email: initialCustomer?.email ?? initialLead?.email ?? '',
-    projectName: initialLead ? (initialLead.service_type || 'Client') + ' project' : '',
+    projectName: initialLead
+      ? (initialLead.service_type || 'Client') + ' project'
+      : '',
     location: initialLead?.location ?? '',
     plotSize: initialLead?.project_size ?? '',
     projectType: 'Residential',

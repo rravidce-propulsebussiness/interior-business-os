@@ -21,46 +21,92 @@ const projectSchema = z.object({
   stage: z.string(),
   client_approved_at: z.string().nullable().optional(),
   reports: z.array(report).default([]),
-  drawings: z.array(z.object({
-    kind: z.string(), revision: z.number(), reference: z.string(),
-    status: z.string(), created_at: z.string(),
-  })).default([]),
-  photos: z.array(z.object({
-    id: z.uuid(), filename: z.string(), category: z.string(),
-    mime: z.string(), caption: z.string(), created_at: z.string(),
-  })).default([]),
+  drawings: z
+    .array(
+      z.object({
+        kind: z.string(),
+        revision: z.number(),
+        reference: z.string(),
+        status: z.string(),
+        created_at: z.string(),
+      }),
+    )
+    .default([]),
+  photos: z
+    .array(
+      z.object({
+        id: z.uuid(),
+        filename: z.string(),
+        category: z.string(),
+        mime: z.string(),
+        caption: z.string(),
+        created_at: z.string(),
+      }),
+    )
+    .default([]),
 });
-const timelineSchema = z.array(z.object({
-  id: z.uuid(), title: z.string(), description: z.string(),
-  phase: z.string(), floor_code: z.string().nullable(),
-  status: z.string(), completed_at: z.string().nullable(),
-  activities: z.array(z.string()),
-}));
+const timelineSchema = z.array(
+  z.object({
+    id: z.uuid(),
+    title: z.string(),
+    description: z.string(),
+    phase: z.string(),
+    floor_code: z.string().nullable(),
+    status: z.string(),
+    completed_at: z.string().nullable(),
+    activities: z.array(z.string()),
+  }),
+);
 const dashboardSchema = z.object({
-  materials: z.array(z.object({
-    description: z.string(), unit: z.string().nullable(),
-    ordered_quantity: z.string().nullable(),
-    po_number: z.string().nullable(),
-    expected_date: z.string().nullable(), status: z.string(),
-    received_date: z.string().nullable(), sort_time: z.string().nullable(),
-  })).default([]),
-  checks: z.array(z.object({
-    name: z.string(), status: z.string(), due_date: z.string().nullable(),
-    completed_at: z.string().nullable(), sort_time: z.string(), source: z.string(),
-  })).default([]),
-  latest_report: report.extend({
-    checks_done: z.string().nullable().optional(),
-    checks_required: z.string().nullable().optional(),
-  }).nullable(),
-  updates: z.array(z.object({
-    category: z.string(), summary: z.string(), created_at: z.string(),
-  })).default([]),
+  materials: z
+    .array(
+      z.object({
+        description: z.string(),
+        unit: z.string().nullable(),
+        ordered_quantity: z.string().nullable(),
+        po_number: z.string().nullable(),
+        expected_date: z.string().nullable(),
+        status: z.string(),
+        received_date: z.string().nullable(),
+        sort_time: z.string().nullable(),
+      }),
+    )
+    .default([]),
+  checks: z
+    .array(
+      z.object({
+        name: z.string(),
+        status: z.string(),
+        due_date: z.string().nullable(),
+        completed_at: z.string().nullable(),
+        sort_time: z.string(),
+        source: z.string(),
+      }),
+    )
+    .default([]),
+  latest_report: report
+    .extend({
+      checks_done: z.string().nullable().optional(),
+      checks_required: z.string().nullable().optional(),
+    })
+    .nullable(),
+  updates: z
+    .array(
+      z.object({
+        category: z.string(),
+        summary: z.string(),
+        created_at: z.string(),
+      }),
+    )
+    .default([]),
   local_date: z.string(),
 });
 
 export default async function ClientProjectPage({
   params,
-}: { params: Promise<{ id: string }> }) {
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
   if (!z.uuid().safeParse(id).success) notFound();
 
@@ -71,7 +117,8 @@ export default async function ClientProjectPage({
   // Every client-facing RPC independently checks the same verified email,
   // exact project ID, active invitation and customer/project relationship.
   const rpc = db.rpc.bind(db) as unknown as (
-    name: string, args: Record<string, string>,
+    name: string,
+    args: Record<string, string>,
   ) => Promise<{ data: unknown; error: { message: string } | null }>;
   const [projectResult, timelineResult, dashboardResult] = await Promise.all([
     rpc('client_portal_project', { p_project_id: id }),
@@ -85,15 +132,32 @@ export default async function ClientProjectPage({
   const parsedDashboard = dashboardSchema.safeParse(dashboardResult.data);
   const latest = parsedDashboard.success ? parsedDashboard.data : null;
 
-  return <ClientDashboard
-    project={project.data}
-    timeline={parsedTimeline.success && !timelineResult.error ? parsedTimeline.data : []}
-    timelineUnavailable={Boolean(timelineResult.error || !parsedTimeline.success)}
-    metrics={latest && !dashboardResult.error ? latest : {
-      materials: [], checks: [], updates: [], latest_report: null,
-      local_date: '1970-01-01',
-    }}
-    metricsUnavailable={Boolean(dashboardResult.error || !parsedDashboard.success)}
-    clientEmail={auth.user.email ?? ''}
-  />;
+  return (
+    <ClientDashboard
+      project={project.data}
+      timeline={
+        parsedTimeline.success && !timelineResult.error
+          ? parsedTimeline.data
+          : []
+      }
+      timelineUnavailable={Boolean(
+        timelineResult.error || !parsedTimeline.success,
+      )}
+      metrics={
+        latest && !dashboardResult.error
+          ? latest
+          : {
+              materials: [],
+              checks: [],
+              updates: [],
+              latest_report: null,
+              local_date: '1970-01-01',
+            }
+      }
+      metricsUnavailable={Boolean(
+        dashboardResult.error || !parsedDashboard.success,
+      )}
+      clientEmail={auth.user.email ?? ''}
+    />
+  );
 }
