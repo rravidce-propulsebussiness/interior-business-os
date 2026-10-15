@@ -167,13 +167,17 @@
   padding-right: 28px;
   cursor: pointer;
 }
+.crm-leads-root .crm-inline-field select:focus,
 .crm-leads-root .crm-inline-field select:focus-visible,
+.crm-leads-root .crm-premium-priority-select:focus,
 .crm-leads-root .crm-premium-priority-select:focus-visible,
+.crm-leads-root .crm-inline-followup input:focus,
 .crm-leads-root .crm-inline-followup input:focus-visible,
 .crm-leads-root .crm-quote-create:focus-visible {
-  outline: 3px solid #fb923c60;
-  outline-offset: 1px;
+  outline: 2px solid #fb923c;
+  outline-offset: 2px;
   border-color: #fb923c;
+  box-shadow: none;
 }
 .crm-leads-root .crm-premium-priority-select:disabled {
   opacity: .65;
