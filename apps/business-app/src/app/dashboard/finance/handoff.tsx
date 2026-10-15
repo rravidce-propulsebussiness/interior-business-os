@@ -40,9 +40,15 @@ export async function ContractHandoff({ revisionId }: { revisionId: string }) {
   if (data?.action !== 'approved') return null;
   return (
     <section className="my-5 rounded border p-4">
-      <h2 className="text-xl">Quotation accepted</h2>
+      <h2 className="text-xl">Quotation accepted — prepare agreement</h2>
+      <p className="mt-2 text-sm text-slate-600">
+        Your accepted floor-wise quotation is the source for the planned
+        construction stages, floor areas and specifications. Creating
+        the agreement also prepares that timeline automatically.
+        Work cannot begin until agreement and design approvals are recorded.
+      </p>
       <FinanceForm
-        title="Create Contract / Start Job"
+        title="Create agreement and prepare timeline"
         initial={{ action: 'create_contract', revision_id: revisionId }}
       />
     </section>
