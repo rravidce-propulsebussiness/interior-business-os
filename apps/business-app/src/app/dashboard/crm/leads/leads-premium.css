@@ -198,18 +198,19 @@
   gap: 10px;
   min-height: 46px;
   padding: 10px 14px;
-  border: 1px solid #f3d0bd;
+  border: 1px solid #e2e6ed;
   border-radius: 12px;
-  background: #fff7f0;
-  color: #ca5418;
+  background: #f7f8fb;
+  color: #233653;
   font-size: 13px;
   font-weight: 750;
   text-decoration: none;
   text-align: left;
 }
 .crm-leads-root .crm-quote-create:hover {
-  background: #ffefe3;
+  background: #fff4ec;
   border-color: #fb923c;
+  color: #ca5418;
 }
 .crm-mobile-inline-grid .crm-inline-priority,
 .crm-mobile-inline-grid .crm-inline-field {
