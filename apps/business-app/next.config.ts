@@ -49,6 +49,15 @@ const config: NextConfig = {
         source: '/q/:path*',
         headers: [{ key: 'Referrer-Policy', value: 'no-referrer' }],
       },
+      // Authenticated quotation preview is deliberately framed only by this
+      // same-origin CRM workspace. Other routes retain DENY.
+      {
+        source: '/dashboard/quotations/:id/preview',
+        headers: [
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+          { key: 'Content-Security-Policy', value: "frame-ancestors 'self'" },
+        ],
+      },
       {
         source: '/auth/recovery',
         headers: [{ key: 'Referrer-Policy', value: 'no-referrer' }],
