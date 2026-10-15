@@ -28,7 +28,6 @@ import './command-centre.css';
 export const dynamic = 'force-dynamic';
 
 type SearchParams = { q?: string };
-type Lead = Record<string, unknown>;
 type SiteProject = { id: string; stage: string; role: string };
 
 const number = new Intl.NumberFormat('en-IN');
