@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { runCrmCommand } from '../actions';
+import { LeadUpdateComposer } from './lead-update-composer';
+import { LeadQuotePreview } from './lead-quote-preview';
 import { LeadRemovalButton } from './lead-removal-button';
 import type { LeadStage, LeadView } from './workspace';
 import { leadCategoryLabel } from './lead-category';
@@ -31,12 +33,16 @@ export function LeadsBoardView({
   stages,
   canManage,
   canWin,
+  canNote,
+  canFollowUp,
   onOpen,
 }: {
   rows: LeadView[];
   stages: LeadStage[];
   canManage: boolean;
   canWin: boolean;
+  canNote: boolean;
+  canFollowUp: boolean;
   onOpen: (lead: LeadView) => void;
 }) {
   const [saving, setSaving] = useState(false);
@@ -194,6 +200,15 @@ export function LeadsBoardView({
                           ? ' · ' + currency.format(Number(lead.budgetMin))
                           : ''}
                       </p>
+                      <div className="crm-board-latest">
+                        <strong>Latest update</strong>
+                        <p>{lead.latestUpdate || 'No contact recorded yet'}</p>
+                      </div>
+                      {lead.quoteRevisionId && (
+                        <LeadQuotePreview revisionId={lead.quoteRevisionId}
+                          number={lead.quoteNumber || 'Quotation'} status={lead.quoteStatus}
+                          amount={lead.quoteAmount} shared={lead.quoteShared}/>
+                      )}
                       <div className="crm-board-contact">
                         {phoneLink(lead.phoneNormalized || lead.phone) && (
                           <a
@@ -223,8 +238,12 @@ export function LeadsBoardView({
                           </a>
                         )}
                         <button type="button" onClick={() => onOpen(lead)}>
-                          Details
+                          History
                         </button>
+                        {canNote && lead.lifecycle !== 'archived' && (
+                          <LeadUpdateComposer leadId={lead.id} leadName={lead.name}
+                            canFollowUp={canFollowUp}/>
+                        )}
                         {canManage && lead.lifecycle !== 'archived' && (
                           <LeadRemovalButton
                             id={lead.id}

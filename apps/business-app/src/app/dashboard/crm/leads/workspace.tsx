@@ -660,6 +660,8 @@ export function LeadsWorkspace({
                   stages={stages}
                   canManage={canManage}
                   canWin={canWin}
+                  canNote={canNote}
+                  canFollowUp={canFollowUp}
                   onOpen={open}
                 />
               ) : (

@@ -2624,3 +2624,9 @@ body:has(.crm-leads-root) .crm-shared-navigation {
   .crm-inline-followup {grid-template-columns:minmax(0,1fr) auto}
   .crm-quote-summary {max-width:none;width:100%}
 }
+
+.crm-board-latest {margin:10px 0;padding:11px;border-radius:10px;background:#f0f6ff;color:#415b7d}
+.crm-board-latest strong {display:block;font-size:11px;color:#1f4f89;margin-bottom:4px}
+.crm-board-latest p {font-size:12px;line-height:1.45;overflow-wrap:anywhere;margin:0}
+.crm-board-card > .crm-quote-summary {margin:10px 0;max-width:none;min-width:0}
+.crm-board-contact .crm-update-open {min-height:34px}
