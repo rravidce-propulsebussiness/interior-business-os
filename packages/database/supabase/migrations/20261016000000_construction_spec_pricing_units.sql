@@ -58,7 +58,7 @@ begin
       or (v_section ? 'pricingTreatment' and coalesce(v_section->>'pricingTreatment','') not in
          ('included','allowance','extra','excluded'))
       or (v_section ? 'allowanceValue' and coalesce(v_section->>'allowanceValue','') <> ''
-         and coalesce(v_section->>'allowanceValue','') !~ '^[0-9]{1,9}(\\.[0-9]{1,2})?
+         and coalesce(v_section->>'allowanceValue','') !~ '^[0-9]{1,9}([.][0-9]{1,2})?
    then raise exception 'Invalid material specifications' using errcode='22023';end if;
  end loop;
  -- Obsolete optional fields are accepted only if they represent company-wide
