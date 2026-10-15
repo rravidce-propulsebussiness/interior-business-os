@@ -122,10 +122,9 @@ export function LeadPrioritySelect({
     </span>;
   }
   return (
-    <div className="crm-inline-priority">
+    <div className="crm-inline-field">
       <select
         aria-label={'Priority for ' + lead.name}
-        className={'crm-premium-priority-select crm-premium-priority-' + (pendingPriority || lead.priority)}
         value={pendingPriority || lead.priority}
         disabled={pending}
         onChange={async (event) => {
