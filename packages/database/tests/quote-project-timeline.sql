@@ -22,7 +22,7 @@ begin
   join public.industries i on i.id=p.industry_id
   where p.id=project;
  if industry<>'construction' then raise exception 'Fixture industry incorrect';end if;
- select md5(coalesce(string_agg(qi.id::text||chr(31)||coalesce(qi.snapshot->>'name','')||chr(31)||qi.description,
+ select md5(coalesce(string_agg(qi.id::text||chr(31)||coalesce(qi.snapshot->>'name','')||chr(31)||qi.description||chr(31)||case when qi.optional then '1' else '0' end,
     chr(30) order by qi.id),'')) into hash from public.quotation_items qi
     join public.contracts c on c.revision_id=qi.revision_id
     where c.id=contract and qi.organization_id=org;
