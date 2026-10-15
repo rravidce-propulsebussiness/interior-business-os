@@ -99,6 +99,7 @@ export default async function NewQuotation({
           'Client & Project',
           'Quote Builder',
           'Specifications & Files',
+          'Stage Payments',
           'Preview & Share',
         ].map((title, index) => (
           <div
