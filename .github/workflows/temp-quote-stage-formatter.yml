@@ -1,0 +1,28 @@
+name: Temporary quote stage formatter
+on:
+  push:
+    branches: [feature/quote-driven-construction-handoff-20261015]
+  pull_request:
+permissions: {contents: read}
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Apply formatting and emit exact fragments
+        run: |
+          pnpm exec prettier --write 'apps/business-app/src/app/dashboard/finance/handoff.tsx' 'apps/business-app/src/app/dashboard/finance/quote-construction-handoff.ts' 'apps/business-app/src/app/dashboard/projects/[id]/page.tsx' 'apps/business-app/src/app/dashboard/projects/[id]/site/construction-journey.tsx' 'apps/business-app/src/app/dashboard/projects/[id]/site/construction-planning-panel.tsx' 'apps/business-app/src/app/dashboard/projects/[id]/site/owner-stage-editor.tsx' 'apps/business-app/src/app/dashboard/projects/[id]/site/page.tsx' 'apps/business-app/src/app/dashboard/projects/[id]/site/stage-owner-actions.ts' 'apps/business-app/src/app/dashboard/projects/[id]/site/stage-owner-view.ts' 'docs/QUOTE-DRIVEN-PROJECT-TIMELINE.md' 'packages/core/src/quote-project-timeline.test.ts' 'packages/core/src/quote-project-timeline.ts'
+          node <<'NODE'
+          const fs=require('node:fs');
+          for (const path of ["apps/business-app/src/app/dashboard/finance/handoff.tsx","apps/business-app/src/app/dashboard/finance/quote-construction-handoff.ts","apps/business-app/src/app/dashboard/projects/[id]/page.tsx","apps/business-app/src/app/dashboard/projects/[id]/site/construction-journey.tsx","apps/business-app/src/app/dashboard/projects/[id]/site/construction-planning-panel.tsx","apps/business-app/src/app/dashboard/projects/[id]/site/owner-stage-editor.tsx","apps/business-app/src/app/dashboard/projects/[id]/site/page.tsx","apps/business-app/src/app/dashboard/projects/[id]/site/stage-owner-actions.ts","apps/business-app/src/app/dashboard/projects/[id]/site/stage-owner-view.ts","docs/QUOTE-DRIVEN-PROJECT-TIMELINE.md","packages/core/src/quote-project-timeline.test.ts","packages/core/src/quote-project-timeline.ts"]) {
+             const chunks=fs.readFileSync(path,'utf8').match(/[\s\S]{1,650}/g)||[''];
+             for(let i=0;i<chunks.length;i++)
+               process.stdout.write('FMTCHUNK|'+path+'|'+i+'|'+chunks.length+'|'+JSON.stringify(chunks[i])+'\n');
+          }
+          NODE
