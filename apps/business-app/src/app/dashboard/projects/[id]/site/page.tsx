@@ -738,7 +738,7 @@ export default async function ProjectDeliveryPage({
                                     <Action
                                       project={id}
                                       operation="design_decide"
-                                      label="Approve drawing"
+                                      label="Technical check passed"
                                       hidden={{
                                         id: String(current.id),
                                         decision: 'approved',
@@ -749,7 +749,7 @@ export default async function ProjectDeliveryPage({
                                     <Action
                                       project={id}
                                       operation="design_decide"
-                                      label="Request changes"
+                                      label="Request technical corrections"
                                       hidden={{
                                         id: String(current.id),
                                         decision: 'changes_requested',
@@ -813,17 +813,18 @@ export default async function ProjectDeliveryPage({
                   {site.stage === 'design' && manager && (
                     <details className={formDetails}>
                       <summary className="cursor-pointer font-semibold">
-                        Record client approval and release drawings
+                        Record the client's design decision
                       </summary>
                       <p className="my-3 text-sm text-slate-600">
-                        Record how the client approved the final revisions,
-                        including date and evidence. This is a staff-recorded
-                        acknowledgement, not a client digital signature.
+                        Record the customer's acceptance of the final revisions,
+                        including the date and evidence. The customer should approve
+                        or request changes; this staff entry only records their
+                        decision, and is not an online customer signature.
                       </p>
                       <Action
                         project={id}
                         operation="client_approve"
-                        label="Record client's design approval"
+                        label="Record client-approved revisions"
                         fields={[
                           {
                             name: 'evidence',
