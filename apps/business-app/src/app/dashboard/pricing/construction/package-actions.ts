@@ -25,6 +25,12 @@ const section = z
     grade: z.string().trim().max(120),
     description: z.string().trim().max(600),
     allowancePerSqft: z.string().trim().max(40),
+    unit: z.enum(['none','sqft','bathroom','door','piece','kg','tonne','bag','cubic_meter','running_ft','point','lumpsum','meter','bhk']).optional(),
+    pricingTreatment: z.enum(['included','allowance','extra','excluded']).optional(),
+    allowanceValue: z.string().trim().max(40).optional().refine(
+      (value) => !value || /^\d{1,9}(?:\.\d{1,2})?$/.test(value),
+      'Enter a valid non-negative item amount',
+    ),
   })
   .strict();
 const schema = z
