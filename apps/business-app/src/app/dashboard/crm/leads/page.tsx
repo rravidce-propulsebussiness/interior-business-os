@@ -260,7 +260,7 @@ export default async function Leads({
         if (typeof quote.lead_id !== 'string' ||
             typeof quote.revision_id !== 'string') continue;
         const row = byId.get(quote.lead_id);
-        if (!row || row.quoteRevisionId) continue;
+        if (!row || row.quoteRevisionId || quote.status === 'cancelled') continue;
         row.quoteRevisionId = quote.revision_id;
         row.quoteStatus = typeof quote.status === 'string' ? quote.status : null;
         row.quoteAmount = typeof quote.amount === 'string' ? quote.amount : null;
