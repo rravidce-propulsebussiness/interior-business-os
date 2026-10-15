@@ -386,13 +386,6 @@ export default async function Project({
             </div>
           </div>
           <div className="pd-hero-actions">
-            {canManage && project.customer_id &&
-              (has('customer.manage', 'crm') || has('customer.manage', 'quotation')) && (
-              <Link className="pd-button pd-button-outline"
-                href={'/dashboard/customers/' + project.customer_id + '#client-portal-access'}>
-                <OwnerIcon name="clients" size={16} /> Invite client
-              </Link>
-            )}
             {canManage && (
               <a href="#settings" className="pd-button pd-button-outline">
                 <OwnerIcon name="settings" size={16} /> Edit Project
