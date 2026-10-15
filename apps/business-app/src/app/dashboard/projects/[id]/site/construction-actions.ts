@@ -62,38 +62,43 @@ export async function syncConstructionFromProjectAgreement(
       .in('status', ['pending', 'active', 'on_hold', 'completed'])
       .order('created_at', { ascending: false })
       .limit(2);
-    if (error) throw new Error('Agreement records are not available to this user');
+    if (error)
+      throw new Error('Agreement records are not available to this user');
     if (!data?.length)
       return {
         saved: false,
-        message: 'An approved quotation and agreement are required before the timeline can be created.',
+        message:
+          'An approved quotation and agreement are required before the timeline can be created.',
       };
     if (data.length > 1)
       return {
         saved: false,
-        message: 'This project has multiple agreements. Open the correct agreement to synchronize its quoted scope.',
+        message:
+          'This project has multiple agreements. Open the correct agreement to synchronize its quoted scope.',
       };
-    const { syncQuotedConstructionTimeline } = await import(
-      '../../../finance/quote-construction-handoff'
-    );
+    const { syncQuotedConstructionTimeline } =
+      await import('../../../finance/quote-construction-handoff');
     const outcome = await syncQuotedConstructionTimeline(data[0]!.id);
     if (outcome.reason === 'quote_incomplete')
       return {
         saved: false,
-        message: 'The approved quotation does not contain floor-wise construction scope. Correct and approve the quotation first.',
+        message:
+          'The approved quotation does not contain floor-wise construction scope. Correct and approve the quotation first.',
       };
     if (outcome.reason === 'manager_required')
       return {
         saved: false,
-        message: 'Only an authorized project manager or company owner can initialize the project stage snapshot.',
+        message:
+          'Only an authorized project manager or company owner can initialize the project stage snapshot.',
       };
     revalidatePath(pathFor(projectId));
     revalidatePath('/dashboard/projects/' + projectId);
     return {
       saved: true,
-      message: outcome.reason === 'created'
-        ? 'Construction stages and quoted work have been imported from the accepted quotation.'
-        : 'This project already has its frozen construction stage plan.',
+      message:
+        outcome.reason === 'created'
+          ? 'Construction stages and quoted work have been imported from the accepted quotation.'
+          : 'This project already has its frozen construction stage plan.',
     };
   } catch (error) {
     return response(error);
