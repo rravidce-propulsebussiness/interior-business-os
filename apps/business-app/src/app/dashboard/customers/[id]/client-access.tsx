@@ -68,9 +68,9 @@ export function ClientAccess({
         <span className="cp-muted">Private project sharing</span>
       </div>
       <p className="mb-4 text-sm text-slate-600">
-        Select the exact project and invite the client's verified email.
-        The invitation never unlocks any other project, even under the same customer.
-        The client cannot access your internal business dashboard.
+        Only confirmed projects with a signed agreement and recorded advance
+        can be shared. Invite the verified client email to that specific project;
+        access never extends to the internal business dashboard.
       </p>
       {projects.length ? (
         <form
@@ -104,10 +104,10 @@ export function ClientAccess({
         </form>
       ) : (
         <p className="text-sm text-slate-600">
-          Client access becomes available when this customer has an active project.
+          Complete the project agreement and record the required advance before granting client app access.
         </p>
       )}
-      <div className="mt-4 flex flex-wrap items-center gap-3 rounded-xl bg-blue-50 p-3 text-sm">
+      {projects.length > 0 && <div className="mt-4 flex flex-wrap items-center gap-3 rounded-xl bg-orange-50 p-3 text-sm">
         <span className="font-semibold">Selected project link:</span>
         <a className="break-all text-blue-800 underline" href={portalUrl} target="_blank" rel="noreferrer">
           {portalUrl}
@@ -121,7 +121,7 @@ export function ClientAccess({
           }}>
           Copy link
         </button>
-      </div>
+      </div>}
       {message && <p className="mt-3 text-sm font-medium text-slate-700" role="status">{message}</p>}
       {access.length > 0 && (
         <div className="mt-5 space-y-2">
