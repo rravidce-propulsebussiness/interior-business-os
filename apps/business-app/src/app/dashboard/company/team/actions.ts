@@ -22,6 +22,46 @@ function refreshTeam() {
   revalidatePath('/dashboard');
 }
 
+/** Never let a team-management action disable the caller or modify an owner.
+ * The database RPC has the same protection; this check also covers projects
+ * that have not yet applied the latest migration.
+ */
+async function requireEditableEmployee(
+  organizationId: string,
+  membershipId: string,
+) {
+  const { client, authorization } = await serverServices();
+  const actor = await authorization.requireAuthenticatedUser();
+  const { data: member, error: membershipError } = await client
+    .from('organization_memberships')
+    .select('user_id')
+    .eq('organization_id', organizationId)
+    .eq('id', membershipId)
+    .maybeSingle();
+  if (membershipError || !member || member.user_id === actor.id)
+    throw new DomainError('FORBIDDEN');
+
+  const { data: ownerRoles, error: rolesError } = await client
+    .from('roles')
+    .select('id')
+    .eq('organization_id', organizationId)
+    .eq('is_owner', true);
+  if (rolesError) throw new DomainError('FORBIDDEN');
+  const ownerRoleIds = (ownerRoles ?? []).map((role) => role.id);
+  if (ownerRoleIds.length > 0) {
+    const { data: existingOwnerAssignment, error: assignmentError } =
+      await client
+        .from('membership_roles')
+        .select('role_id')
+        .eq('organization_id', organizationId)
+        .eq('membership_id', membershipId)
+        .in('role_id', ownerRoleIds)
+        .limit(1);
+    if (assignmentError || (existingOwnerAssignment?.length ?? 0) > 0)
+      throw new DomainError('FORBIDDEN');
+  }
+}
+
 export async function inviteRegisteredMember(
   _state: FormState,
   form: FormData,
@@ -57,8 +97,10 @@ export async function changeMembershipStatus(
       organizationId,
       status === 'revoked' ? 'team.remove' : 'team.manage',
     );
+    const membershipId = String(form.get('membershipId') ?? '');
+    await requireEditableEmployee(organizationId, membershipId);
     await repository.setMembershipStatus(organizationId, {
-      membershipId: String(form.get('membershipId') ?? ''),
+      membershipId,
       status,
     });
     refreshTeam();
@@ -75,8 +117,10 @@ export async function changeMembershipRole(_state: FormState, form: FormData) {
     const repository = await authorizedWorkspace(organizationId, 'team.manage');
     await authorizedWorkspace(organizationId, 'role.manage');
     const branchId = String(form.get('branchId') ?? '').trim();
+    const membershipId = String(form.get('membershipId') ?? '');
+    await requireEditableEmployee(organizationId, membershipId);
     await repository.setMemberRole(organizationId, {
-      membershipId: String(form.get('membershipId') ?? ''),
+      membershipId,
       roleId: String(form.get('roleId') ?? ''),
       ...(branchId ? { branchId } : {}),
       remove: String(form.get('remove') ?? '') === 'true',
