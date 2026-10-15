@@ -462,3 +462,111 @@
     border-radius:20px 20px 0 0;
   }
 }
+
+
+/* Single date-range picker: presets first, date inputs only for Custom. */
+.crm-leads-root .crm-date-filter {
+  grid-column: 1 / -1;
+  min-width: 0;
+  display: grid;
+  gap: 9px;
+}
+.crm-leads-root .crm-date-filter-title {
+  color: #475569;
+  font-size: 12px;
+  font-weight: 800;
+}
+.crm-leads-root .crm-date-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.crm-leads-root .crm-advanced-panel .crm-date-preset {
+  position: relative;
+  display: inline-flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 8px 11px;
+  color: #506078;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 750;
+  line-height: 1.3;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .15s ease, border-color .15s ease;
+}
+.crm-leads-root .crm-date-preset input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
+.crm-leads-root .crm-advanced-panel .crm-date-preset.is-selected {
+  color: #fff;
+  border-color: #f97316;
+  background: linear-gradient(120deg, #fb923c, #f45d08);
+}
+.crm-leads-root .crm-date-preset:focus-within {
+  outline: 2px solid #fb923c;
+  outline-offset: 2px;
+}
+.crm-leads-root .crm-date-custom {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.crm-leads-root .crm-date-custom > label { min-width: 0; }
+.crm-leads-root .crm-date-custom input[type="date"] {
+  box-sizing: border-box;
+  min-width: 0;
+  width: 100%;
+}
+.crm-leads-root .crm-date-summary {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 99px;
+  padding: 4px 7px;
+  color: #c74d14;
+  background: #fff1e8;
+  font-size: 10px;
+}
+
+/* Expanded filters remain INSIDE the mobile viewport and push the page down.
+   Never position the popup partially off-screen as a desktop floating panel. */
+@media (max-width: 720px) {
+  .crm-leads-root .crm-advanced {
+    position: static;
+    flex: 1 1 100%;
+    width: 100%;
+    min-width: 0;
+  }
+  .crm-leads-root .crm-advanced > summary {
+    justify-content: center;
+    min-height: 43px;
+    width: 100%;
+  }
+  .crm-leads-root .crm-advanced-panel {
+    position: static;
+    inset: auto;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    margin-top: 9px;
+    padding: 12px;
+    box-shadow: none;
+    border-color: #f0ddd2;
+    overflow: visible;
+  }
+}
+@media (max-width: 440px) {
+  .crm-leads-root .crm-date-custom {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
