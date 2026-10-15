@@ -294,12 +294,16 @@ export function ConstructionJourney({
         <Link href={go('#construction-timeline')} className="cj-nav-active">
           Timeline
         </Link>
-        <Link href={go('#daily-reports')}>Site updates</Link>
-        <Link href={go('#materials')}>Materials</Link>
-        <Link href={go('#security')}>Curing</Link>
-        <Link href={go('#team')}>Team</Link>
-        {canSeeFinance && !isWatchman && (
-          <Link href={paymentsUrl}>Payments</Link>
+        {isWatchman ? (
+          <Link href={go('#security')}>Curing &amp; security</Link>
+        ) : (
+          <>
+            <Link href={go('#daily-reports')}>Site updates</Link>
+            <Link href={go('#materials')}>Materials</Link>
+            <Link href={go('#security')}>Curing</Link>
+            <Link href={go('#team')}>Team</Link>
+            {canSeeFinance && <Link href={paymentsUrl}>Payments</Link>}
+          </>
         )}
       </nav>
       {!stages.length ? (
@@ -817,7 +821,9 @@ export function ConstructionJourney({
         </div>
       )}
       <div className="cj-bottom">
-        <Link href={go('#daily-reports')}>＋ Add site update</Link>
+        {!isWatchman && (
+          <Link href={go('#daily-reports')}>＋ Add site update</Link>
+        )}
         {canRequestMaterials && (
           <Link href={go('#materials')}>＋ Material request</Link>
         )}
