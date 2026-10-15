@@ -6,6 +6,7 @@ import { createQuotationPackagesRepository } from '@business-os/database/quotati
 import { ConstructionPackagesManager } from '../../pricing/construction/package-manager';
 import { QuotationPackagesManager } from '../package-manager';
 import { QuotationStudioFrame } from '../studio-frame';
+import { QuotationPackageTabs } from './package-tabs';
 
 export const dynamic = 'force-dynamic';
 
@@ -36,6 +37,7 @@ export default async function QuotationPackagesPage() {
             <p>Manage construction, interior and future-industry packages.</p>
           </div>
         </div>
+        <Link href="/dashboard/quotations/new" className="qs-btn primary">+ Create quotation</Link>
         <Link href="/dashboard/quotations" className="qs-btn">
           ← Quotations
         </Link>
@@ -47,12 +49,14 @@ export default async function QuotationPackagesPage() {
         Changing package rates affects future quotation calculations only.
         Existing issued PDFs, amounts and revisions remain unchanged.
       </div>
-      <div className="space-y-6">
-        <ConstructionPackagesManager
+      <QuotationPackageTabs
+        constructionCount={construction.length}
+        otherCount={configurable?.length ?? 0}
+        construction={<ConstructionPackagesManager
           packages={construction}
           canManage={canManagePrice}
-        />
-        {configurable === null ? (
+        />}
+        other={configurable === null ? (
           <div className="qs-warning">
             The new industry package storage is not yet available in this
             database. Apply migration 20261013000900_quotation_packages.sql to
@@ -72,7 +76,7 @@ export default async function QuotationPackagesPage() {
             currency={organization.default_currency || 'INR'}
           />
         )}
-      </div>
+      />
     </QuotationStudioFrame>
   );
 }
