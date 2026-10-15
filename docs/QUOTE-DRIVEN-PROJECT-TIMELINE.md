@@ -6,7 +6,7 @@ contract ID triggers the industry-aware timeline generator in the same
 authenticated user flow. `project_quote_timeline_create` checks the canonical
 contract, accepted revision, project industry, exact quotation-item fingerprint
 and permitted contract creator/manager. It writes a planning-only snapshot and
-initializes the *same* project's existing Site Delivery workspace.
+initializes the _same_ project's existing Site Delivery workspace.
 
 ## Construction
 
@@ -27,6 +27,7 @@ process controls. A cabinetry-only quote must not grow foundations, RCC,
 plumbing or false-ceiling tasks by default.
 
 Sources reviewed for industry sequencing:
+
 - https://www.chamundaconstructions.in/blog/interior-fit-out-sequence-after-possession-mumbai
 - https://www.theinteriorstories.com/services/turnkey-execution
 - https://www.impulsebranding.in/services/general-contracting/interior-fit-outs
