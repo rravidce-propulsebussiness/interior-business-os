@@ -943,20 +943,31 @@ a.owner-stat:hover {
     font-size: 12px;
   }
 }
-@media (max-width: 760px) {
+/* Keep navigation off-canvas on phones, tablets and narrow browser windows. */
+@media (max-width: 1199px) {
   .owner-sidebar {
     position: fixed;
     left: 0;
     top: 0;
     height: 100dvh;
-    width: 270px;
-    flex-basis: 270px;
-    transform: translateX(-104%);
-    transition: transform 0.2s ease;
+    width: min(300px, 86vw);
+    max-width: 86vw;
+    flex-basis: auto;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    transform: translateX(-105%);
+    visibility: hidden;
+    pointer-events: none;
+    transition: transform 0.2s ease, visibility 0.2s ease;
     box-shadow: 8px 0 40px #07111f33;
   }
   .owner-sidebar-open {
     transform: translateX(0);
+    visibility: visible;
+    pointer-events: auto;
+  }
+  .owner-workspace {
+    width: 100%;
   }
   .owner-mobile-heading {
     display: flex;
