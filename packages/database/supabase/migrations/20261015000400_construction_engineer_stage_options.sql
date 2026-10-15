@@ -56,7 +56,7 @@ begin
    )
    select coalesce(jsonb_agg(jsonb_build_object(
      'stage_id',l.stage_id,'item_id',i.id,'contract_id',c.id,
-     'label',i.label,'amount',i.expected_amount,'due_date',i.due_date,
+     'label',i.label,'amount',i.expected_amount::text,'due_date',i.due_date,
      'currency',c.currency,'contract_number',c.contract_number,
      'request_number',req.request_number,'request_status',req.status
    ) order by l.stage_id,i.sort_order),'[]'::jsonb)
@@ -73,7 +73,7 @@ begin
      ) req on true;
    if v_manager then
     select coalesce(jsonb_agg(jsonb_build_object(
-     'id',i.id,'contract_id',c.id,'label',i.label,'amount',i.expected_amount,
+     'id',i.id,'contract_id',c.id,'label',i.label,'amount',i.expected_amount::text,
      'currency',c.currency,'contract_number',c.contract_number
     ) order by c.contract_number,i.sort_order),'[]'::jsonb) into v_options
     from public.payment_schedule_items i
