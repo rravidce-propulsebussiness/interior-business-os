@@ -3,7 +3,11 @@ reset role;
 update public.projects set industry_id=(
   select id from public.industries where key='construction'
 ) where organization_id='dddddddd-dddd-4ddd-8ddd-dddddddddddd'
-  and code='demo-3bhk';
+  and id in (
+    select project_id from public.quotations
+    where quotation_number='EXECUTION-TEST'
+      and organization_id='dddddddd-dddd-4ddd-8ddd-dddddddddddd'
+  );
 delete from public.organization_entitlements where organization_id='dddddddd-dddd-4ddd-8ddd-dddddddddddd' and not enabled and module_id in(select id from public.modules where key='billing');
 set local request.jwt.claim.sub='11111111-1111-4111-8111-111111111111';
 set local role authenticated;
