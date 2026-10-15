@@ -541,6 +541,7 @@ export default async function Dashboard({
       navigation={navigation}
       search={query}
       notificationsEnabled={has('notification.view')}
+      dashboardBrand
     >
       <CommandCentre
         accountLabel={accountLabel}
