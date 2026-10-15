@@ -280,19 +280,22 @@ export function ConstructionJourney({
       <div className="cj-header">
         <div>
           <p className="cj-eyebrow">Construction execution · Live records</p>
-          <h2>Construction journey</h2>
+          <h2>{isWatchman ? 'Curing &amp; security log' : 'Construction journey'}</h2>
           <p>
-            Stage-by-stage work, inspections, materials, photos, curing and
-            payments in one timeline.
+            {isWatchman
+              ? 'Record curing rounds with time, location and photo evidence.'
+              : 'Stage-by-stage work, inspections, materials, photos, curing and payments in one timeline.'}
           </p>
         </div>
         <span className="cj-count">
-          {certified} / {stages.length} certified
+          {isWatchman
+            ? `${curingRounds.length} curing rounds`
+            : `${certified} / ${stages.length} certified`}
         </span>
       </div>
       <nav className="cj-nav" aria-label="Project workspace shortcuts">
         <Link href={go('#construction-timeline')} className="cj-nav-active">
-          Timeline
+          {isWatchman ? 'Curing timeline' : 'Timeline'}
         </Link>
         {isWatchman ? (
           <Link href={go('#security')}>Curing &amp; security</Link>
