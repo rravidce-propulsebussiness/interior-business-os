@@ -237,9 +237,9 @@
   color:#53617a; background:#fff;
 }
 .crm-premium-row-more summary::-webkit-details-marker {display:none;}
-.crm-premium-row-menu {
-  position:absolute; top:32px; right:0;
-  z-index:15; min-width:180px;
+ .crm-premium-row-menu {
+  position:static;
+  z-index:15; min-width:160px;
   background:#fff;
   border:1px solid #f1e1d8;
   border-radius:11px;
