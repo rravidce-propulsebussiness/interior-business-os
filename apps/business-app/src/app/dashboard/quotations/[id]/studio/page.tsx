@@ -191,7 +191,7 @@ export default async function QuotationStudio({
               version={revision.version}
               initialSchedule={existingSft}
               initialMode={mode === 'custom' ? 'custom' : 'sft'}
-               initialPackageId={query.package}
+               initialPackageId={query.package ?? ''}
               canSharePdf={s.allowed('quotation.share', 'quotation')}
               quoteNumber={root.quotation_number}
             />
@@ -214,7 +214,7 @@ export default async function QuotationStudio({
               revisionId={revision.id}
               version={revision.version}
               currency={revision.currency}
-              initialPackageId={query.package}
+              initialPackageId={query.package ?? ''}
                packages={industryPackages.filter(
                 (pkg) =>
                   pkg.status === 'active' &&
