@@ -41,7 +41,7 @@ export default async function Convert({
       </main>
     );
   }
-  // A quotation already created a canonical customer and planning project.
+  // A quotation already has a canonical customer and hidden sales reference.
   // Reuse them; do not force the salesperson to perform duplicate searches
   // or create a second CRN when this lead has been won.
   const quoteRpc = s.client.rpc.bind(s.client) as unknown as (
@@ -60,7 +60,7 @@ export default async function Convert({
     ? linkedQuote.project_id : '';
   const linkedProjectResponse = linkedProjectId
     ? await s.client.from('projects')
-        .select('id,name,customer_id')
+        .select('id,name,customer_id,is_sales_prospect')
         .eq('organization_id', s.org).eq('id', linkedProjectId).maybeSingle()
     : null;
   const quoteProject = linkedProjectResponse?.data;
@@ -76,12 +76,12 @@ export default async function Convert({
         </Link>
         <h1 className="text-2xl font-bold">Convert Closed-Won lead</h1>
         <p className="text-slate-600">
-          This enquiry already has a quotation-linked customer and project.
-          We will reuse both records and retain the quotation history.
+          This enquiry already has a quotation-linked customer and sales reference.
+          Give the project a name now that the lead is Won. We will retain the quotation history.
         </p>
         <div className="rounded-2xl border border-slate-200 bg-white p-5">
           <p><strong>Client:</strong> {quoteCustomerResponse.data.display_name}</p>
-          <p><strong>Project:</strong> {quoteProject.name}</p>
+          <p><strong>Quotation scope:</strong> {quoteProject.name}</p>
           <p><strong>Quotation:</strong> {String(linkedQuote.quotation_number || 'Existing quotation')}</p>
         </div>
         <MasterForm
@@ -93,10 +93,14 @@ export default async function Convert({
             version: l.version,
             customer_id: quoteCustomerResponse.data.id,
             project_id: quoteProject.id,
-            project_name: quoteProject.name,
+            project_name: quoteProject.is_sales_prospect ? '' : quoteProject.name,
             acknowledge_duplicate: false,
           }}
-          fields={[]}
+          fields={quoteProject.is_sales_prospect ? [{
+            key: 'project_name',
+            label: 'Project name',
+            required: true,
+          }] : []}
         />
       </main>
     );

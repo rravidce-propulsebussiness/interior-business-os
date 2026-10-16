@@ -85,6 +85,19 @@ describe('lead-driven quotation creation', () => {
     expect(form).toContain("industry === 'construction' ? 'sft' : 'custom'");
   });
 
+  it('does not require a project name before the lead is Won', () => {
+    const convert = file('../crm/leads/[id]/convert/page.tsx');
+    expect(form).toContain('Client &amp; Quotation Details');
+    expect(form).not.toContain('Enter project name');
+    expect(form).not.toContain('data.projectName');
+    expect(action).not.toContain('projectName: z.string()');
+    expect(action).toContain('leadQuotationProjectIds');
+    expect(action).toContain("'is_sales_prospect', true");
+    expect(action).toContain("p_name: prospectName");
+    expect(convert).toContain("project_name: quoteProject.is_sales_prospect ? ''");
+    expect(convert).toContain("label: 'Project name'");
+  });
+
   it('derives category from the tenant lead and rejects unknown classifications', () => {
     expect(page).toContain('resolveLeadCategory(entry, enabledIndustries)');
     expect(action).toContain('leadId: z.uuid()');

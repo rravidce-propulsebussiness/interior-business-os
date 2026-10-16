@@ -298,9 +298,10 @@ export function renderQuotationDocument(input: unknown): string {
     '<h3>' + escape(h.customer.name) + '</h3><p>' + address(h.customer.billing_address) + '</p>' +
     (h.customer.phone ? '<p>Tel: ' + escape(h.customer.phone) + '</p>' : '') +
     (h.customer.email ? '<p>' + escape(h.customer.email) + '</p>' : '') + '</section>' +
-    '<section class="pb-intro-card project"><div class="pb-mini-head"><span class="pb-intro-icon">⌂</span>Project</div>' +
+    '<section class="pb-intro-card project"><div class="pb-mini-head"><span class="pb-intro-icon">⌂</span>' +
+    (h.project.code?.startsWith('Q') ? 'Quotation scope' : 'Project') + '</div>' +
     '<h3>' + escape(h.project.name) + '</h3>' +
-    (h.project.code ? '<p>Ref: ' + escape(h.project.code) + '</p>' : '') +
+    (h.project.code && !h.project.code.startsWith('Q') ? '<p>Ref: ' + escape(h.project.code) + '</p>' : '') +
     '<p>' + address(h.project.site_address) + '</p></section></div>';
   const specificationPage = hasSpecs ?
     '<section class="pb-page pb-specs-page">' +

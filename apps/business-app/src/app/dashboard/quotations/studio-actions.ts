@@ -15,7 +15,6 @@ const createInput = z
     leadId: z.uuid(),
     phone: z.string().trim().min(3).max(40),
     email: z.union([z.literal(''), z.email().max(254)]),
-    projectName: z.string().trim().min(2).max(200),
     location: z.string().trim().max(200),
     projectType: z.string().trim().min(2).max(100),
     plotSize: z.string().trim().max(40),
@@ -28,7 +27,7 @@ const createInput = z
   .strict();
 
 /**
- * Real quote creation from entered client and project data.
+ * Real quote creation from client and quotation details.
  *
  * Saves a pre-sale customer and a signed versioned quotation draft.
  * Until the CRM conversion, the database's mandatory project FK is only an
@@ -55,7 +54,7 @@ export async function createStudioQuotation(input: unknown): Promise<{
       return { ok: false, message: 'Lead access is required to quote an enquiry.' };
     const { data: lead, error: leadError } = await s.client
       .from('leads')
-      .select('id,phone,email,industry_id,service_type,requirements')
+      .select('id,lead_number,phone,email,industry_id,service_type,requirements')
       .eq('organization_id', s.org)
       .eq('id', values.leadId)
       .maybeSingle();
@@ -129,7 +128,7 @@ export async function createStudioQuotation(input: unknown): Promise<{
       };
 
     // Reuse a contact by CRN. A quote is not yet a project; it retains the
-    // chosen name, industry and site details as a sales proposal snapshot.
+    // industry and site details as a sales proposal snapshot.
     const baseAddress = {
       line1: '',
       line2: '',
@@ -198,16 +197,18 @@ export async function createStudioQuotation(input: unknown): Promise<{
     // oldest confirmed match. Existing historical duplicates need a separate
     // audited merge that preserves their linked quotations and projects.
     let leadCustomerId = '';
+    const leadQuotationProjectIds: string[] = [];
     const linked = await s.client.rpc('lead_quotation_list', {
       p_organization_id: s.org,
       p_lead_id: values.leadId,
     });
     if (!linked.error && Array.isArray(linked.data)) {
-      const firstProjectId = linked.data.flatMap((item: unknown) =>
+      leadQuotationProjectIds.push(...linked.data.flatMap((item: unknown) =>
         item !== null && typeof item === 'object' && !Array.isArray(item) &&
         'project_id' in item && typeof item.project_id === 'string'
           ? [item.project_id]
-          : [])[0];
+          : []));
+      const firstProjectId = leadQuotationProjectIds[0];
       if (firstProjectId) {
         const { data: previousProject } = await s.client.from('projects')
           .select('customer_id')
@@ -244,30 +245,29 @@ export async function createStudioQuotation(input: unknown): Promise<{
 
     let createdProspect = false;
     let projectId = '';
-    // Only reuse a pre-sale reference for the same customer and requirement.
-    // An existing signed/execution project is NEVER auto-selected here.
-    const { data: projectMatches, error: matchesError } = await s.client
-      .from('projects')
-      .select('id')
-      .eq('organization_id', s.org)
-      .eq('customer_id', customerId)
-      .eq('name', values.projectName)
-      .eq('industry_id', activeIndustry.id)
-      .eq('is_sales_prospect', true)
-      .eq('status', 'active')
-      .limit(2);
-    if (matchesError)
-      return {
-        ok: false, message: 'Could not check existing quotation requirements. Try again.',
-      };
-    if ((projectMatches?.length ?? 0) > 1)
-      return {
-        ok: false, message: 'Multiple quotation requirements share this name. ' +
-          'Please use a distinct requirement name.',
-      };
-    if (projectMatches?.length) {
-      projectId = projectMatches[0]!.id;
-    } else {
+    // The customer supplies no project name at quotation time. Use a stable,
+    // lead-based internal reference to satisfy the existing quotation FK.
+    const prospectName = ['Quotation', activeIndustry.name,
+      lead.lead_number || lead.id.slice(0, 8)].join(' · ').slice(0, 200);
+    // Quote alternatives for the same lead share one hidden pre-sale reference.
+    // Never pick an unrelated customer project or a confirmed execution job.
+    if (leadQuotationProjectIds.length) {
+      const { data: existing, error } = await s.client
+        .from('projects')
+        .select('id')
+        .eq('organization_id', s.org)
+        .eq('customer_id', customerId)
+        .eq('industry_id', activeIndustry.id)
+        .eq('is_sales_prospect', true)
+        .eq('status', 'active')
+        .in('id', [...new Set(leadQuotationProjectIds)])
+        .order('created_at', { ascending: true })
+        .limit(1);
+      if (error)
+        return { ok: false, message: 'Could not check existing quotation requirements. Try again.' };
+      projectId = existing?.[0]?.id ?? '';
+    }
+    if (!projectId) {
       // SQL inserts with is_sales_prospect=true atomically. It stays hidden
       // from Projects/Clients until conversion to a won execution project.
       const createProspect = s.client.rpc.bind(s.client) as unknown as (
@@ -279,7 +279,7 @@ export async function createStudioQuotation(input: unknown): Promise<{
           p_organization_id: s.org,
           p_customer_id: customerId,
           p_industry_id: activeIndustry.id,
-          p_name: values.projectName,
+          p_name: prospectName,
           p_project_type: values.projectType,
           p_site_city: values.location,
           p_notes: [

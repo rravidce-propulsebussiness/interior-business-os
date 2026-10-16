@@ -245,14 +245,16 @@ export default async function Quotation({
           </div>
           <div>
             <p className="text-xs font-bold uppercase tracking-widest text-blue-700">
-              Project
+              {clientHeader.data.project.code?.startsWith('Q') ? 'Quotation scope' : 'Project'}
             </p>
             <h2 className="mt-2 text-lg font-extrabold text-slate-950">
               {clientHeader.data.project.name}
             </h2>
-            <p className="mt-1 text-sm text-slate-600">
-              Project code: {clientHeader.data.project.code}
-            </p>
+            {!clientHeader.data.project.code?.startsWith('Q') && (
+              <p className="mt-1 text-sm text-slate-600">
+                Project code: {clientHeader.data.project.code}
+              </p>
+            )}
           </div>
         </section>
       )}

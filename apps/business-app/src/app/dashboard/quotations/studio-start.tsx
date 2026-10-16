@@ -35,7 +35,6 @@ export function QuotationStudioStart({
     clientName: initialLead?.name ?? '',
     phone: initialLead?.phone ?? '',
     email: initialLead?.email ?? '',
-    projectName: initialLead ? (initialLead.service_type || 'Client') + ' project' : '',
     location: initialLead?.location ?? '',
     plotSize: initialLead?.project_size ?? '',
     projectType: 'Residential',
@@ -53,7 +52,6 @@ export function QuotationStudioStart({
       clientName: lead?.name ?? '',
       phone: lead?.phone ?? '',
       email: lead?.email ?? '',
-      projectName: lead ? (lead.service_type || 'Client') + ' project' : '',
       location: lead?.location ?? '',
       plotSize: lead?.project_size ?? '',
     }));
@@ -79,7 +77,7 @@ export function QuotationStudioStart({
     }}>
       <div className="qs-clean-form-title">
         <span className="qs-clean-form-icon" aria-hidden="true">♙</span>
-        <h2>Client &amp; Project Details</h2>
+        <h2>Client &amp; Quotation Details</h2>
       </div>
 
       <div className="qs-source-lead">
@@ -108,7 +106,7 @@ export function QuotationStudioStart({
             {' '}<Link href={'/dashboard/crm/leads/' + selectedLead.id}>Classify the lead</Link> to prepare its quote.
           </p>
         ) : leads.length > 0 ? (
-          <p className="qs-source-guidance">Client and project details fill automatically from the selected lead.</p>
+          <p className="qs-source-guidance">Client and quotation details fill automatically from the selected lead.</p>
         ) : null}
       </div>
 
@@ -127,10 +125,6 @@ export function QuotationStudioStart({
           <input type="email" maxLength={254} autoComplete="email"
             placeholder="Enter email address"
             value={data.email} onChange={(event) => update('email', event.target.value)}/>
-        </label>
-        <label className="qs-clean-field">Project Name <span>*</span>
-          <input required maxLength={200} placeholder="Enter project name"
-            value={data.projectName} onChange={(event) => update('projectName', event.target.value)}/>
         </label>
         <label className="qs-clean-field">Project Location
           <input maxLength={200} placeholder="Enter project location"
