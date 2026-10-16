@@ -210,7 +210,7 @@ it('renders a branded brochure cover, readable pricing and closing page', () => 
   const html = renderQuotationDocument(d);
   expect(html).toContain('pb-cover');
   expect(html).toContain('pb-cover-amount');
-  expect(html).toContain('pb-closing');
+  expect(html).toContain('pb-close');
   expect(html).toContain('Prepared for Ravi Residence');
   expect(html).toContain('133280');
   expect(html).toContain('Quotation Q-2026-000001');
