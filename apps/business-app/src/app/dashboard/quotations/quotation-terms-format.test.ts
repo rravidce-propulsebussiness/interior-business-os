@@ -46,3 +46,17 @@ describe('premium quotation terms sections', () => {
     })).toThrow(/10,000/);
   });
 });
+
+
+it('retains legacy introductory text, identifies warranty, and preserves stage markers during edits',()=>{
+  const input='Previously agreed site access.\n\nWarranty:\nStructure for ten years\n\n'+
+    '[STAGE_PAYMENT_PLAN]\nAdvance|10.00\nRCC|60.00\nHandover|30.00\n[/STAGE_PAYMENT_PLAN]';
+  const parts=splitQuotationTerms(input);
+  expect(parts.additional).toContain('Previously agreed site access.');
+  expect(parts.warranty).toBe('Structure for ten years');
+  const persisted=joinQuotationTerms({...parts,exclusions:'External electrical works'});
+  const again=splitQuotationTerms(persisted);
+  expect(again.paymentPlan).toContain('RCC|60.00');
+  expect(again.warranty).toBe('Structure for ten years');
+  expect(again.exclusions).toBe('External electrical works');
+});
