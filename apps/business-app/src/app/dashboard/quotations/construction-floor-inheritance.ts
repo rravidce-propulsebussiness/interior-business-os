@@ -8,7 +8,6 @@ export type FloorWork = {
   widthFeet: string;
   ratePerSqft: string;
   inheritFromPrevious?: boolean | undefined;
-  [key: string]: unknown;
 };
 export const LEVEL_NAMES = [
   'Ground Floor', 'First Floor', 'Second Floor', 'Third Floor',
