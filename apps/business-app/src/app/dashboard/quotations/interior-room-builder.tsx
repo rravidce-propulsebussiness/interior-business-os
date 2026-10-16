@@ -39,16 +39,22 @@ export function InteriorRoomBuilder({
   version,
   packages,
   currency,
+  initialPackageId,
 }: {
   revisionId: string;
   version: number;
   packages: QuotationPackage[];
   currency: string;
+  initialPackageId?: string;
 }) {
   const router = useRouter();
   const [pending, start] = useTransition();
   const [message, setMessage] = useState('');
-  const [packageId, setPackageId] = useState(packages.length ? '' : 'custom');
+  const [packageId, setPackageId] = useState(
+    initialPackageId === 'custom' ? 'custom' :
+      packages.find((item) => item.id === initialPackageId)?.id ??
+        (packages.length ? '' : 'custom'),
+  );
   const [packageQuantity, setPackageQuantity] = useState('1');
   const selectedPackage = packages.find((item) => item.id === packageId);
   const packageTotal = selectedPackage
