@@ -190,6 +190,7 @@ export function ConstructionSelector({
   revisionId,
   version,
   initialMode = 'sft',
+  initialPackageId,
   quoteNumber,
   canSharePdf = false,
 }: {
@@ -199,6 +200,7 @@ export function ConstructionSelector({
   revisionId: string;
   version: number;
   initialMode?: 'sft' | 'custom';
+  initialPackageId?: string;
   quoteNumber?: string;
   canSharePdf?: boolean;
 }) {
@@ -209,7 +211,9 @@ export function ConstructionSelector({
   );
   const [selected, setSelected] = useState(
     previous?.id ??
-    (initialMode === 'custom' || activePackages.length === 0 ? 'custom' : ''),
+    (initialMode === 'custom' || initialPackageId === 'custom' ? 'custom'
+      : activePackages.find((pkg) => pkg.id === initialPackageId)?.id ??
+        (activePackages.length === 0 ? 'custom' : '')),
   );
   const chosen = activePackages.find((pkg) => pkg.id === selected);
   return (
