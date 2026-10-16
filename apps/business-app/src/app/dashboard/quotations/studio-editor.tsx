@@ -3,7 +3,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { parseSftEstimate } from '@business-os/core/sft-quotation';
 
-type Tab = 'client' | 'quote' | 'files' | 'payments' | 'preview';
+type Tab = 'quote' | 'files' | 'payments' | 'preview';
 
 type QuotationLine = {
   id: string;
@@ -39,7 +39,6 @@ const steps: { id: Tab; title: string }[] = [
   { id: 'quote', title: 'Estimate & Specifications' },
   { id: 'files', title: 'Terms & Inclusions' },
   { id: 'payments', title: 'Payment Schedule' },
-  { id: 'client', title: 'Client Details' },
 ];
 
 export function QuotationStudioEditor({
@@ -56,7 +55,6 @@ export function QuotationStudioEditor({
   total,
   hasSavedPaymentPlan,
   previewHtml,
-  brandingEditor,
   constructionEditor,
   interiorEditor,
   termsEditor,
@@ -81,7 +79,6 @@ export function QuotationStudioEditor({
   total: string;
   hasSavedPaymentPlan: boolean;
   previewHtml?: string | undefined;
-  brandingEditor: ReactNode;
   constructionEditor: ReactNode;
   interiorEditor: ReactNode;
   termsEditor: ReactNode;
@@ -103,13 +100,9 @@ export function QuotationStudioEditor({
       setMessage('This shared quotation is protected. Start a new revision to edit it.');
       return;
     }
-    const saveButton = step === 'files'
-      ? document.querySelector<HTMLButtonElement>(
-          '[data-studio-save-section="files"] form button[type="submit"]',
-        )
-      : document.querySelector<HTMLButtonElement>(
-          '[data-studio-save="' + step + '"]',
-        );
+    const saveButton = document.querySelector<HTMLButtonElement>(
+      '[data-studio-save="' + step + '"]',
+    );
     if (!saveButton) {
       setMessage('No pending changes in this section. Your quotation is saved.');
       return;
@@ -141,7 +134,7 @@ export function QuotationStudioEditor({
   const showMethod = canEdit;
   return (
     <>
-      {!(isConstruction && canEdit && step === 'quote') && <div className="qs-heading qs-studio-hero">
+      {!(isConstruction && canEdit && step === 'quote') && <div className="qs-heading qs-studio-hero qs-studio-clean-header">
         <div className="qs-heading-label">
           <span className="qs-heading-icon">▤</span>
           <div>
@@ -150,7 +143,7 @@ export function QuotationStudioEditor({
               {quoteNumber} · Revision {revisionNumber} ·{' '}
               <span className="qs-saved-pill">{status === 'issued' ? 'Shared' : 'Saved'}</span>
             </p>
-            <p className="qs-hero-client">Prepared for {header.customer.name}</p>
+            <p className="qs-hero-client">Prepared for <strong>{header.customer.name}</strong></p>
             <div className="qs-hero-total"><small>Total project cost</small><strong>{price}</strong></div>
           </div>
         </div>
@@ -181,29 +174,6 @@ export function QuotationStudioEditor({
       )}
       <div className="qs-studio-grid">
         <div className="qs-editor">
-          {!(isConstruction && canEdit && step === 'quote') && <section className="qs-client-strip" aria-label="Saved customer and project">
-            <div className="qs-client-identity">
-              <span className="qs-client-avatar" aria-hidden="true">♙</span>
-              <span><strong>{header.customer.name}</strong><small>{header.project.name}</small></span>
-            </div>
-            {header.project.site_address.city && <span>{header.project.site_address.city}</span>}
-            {header.customer.phone && <span>{header.customer.phone}</span>}
-            <button type="button" className="qs-client-edit"
-              onClick={() => { setStep('client'); setMessage(''); }}>View details</button>
-          </section>}
-
-          {step === 'client' && (
-            <>
-              <section className="qs-card">
-                <h2>Client &amp; Project Details</h2>
-                <p className="qs-muted">{header.customer.name} · {header.customer.phone} · {header.customer.email}</p>
-                <p className="qs-muted">{header.project.name} · {header.project.site_address.city}</p>
-                <p className="qs-note">Details are inherited from the saved client and quotation record.</p>
-              </section>
-              {brandingEditor}
-            </>
-          )}
-
           {step === 'quote' && (
             <>
               {showMethod && isConstruction && constructionEditor}
@@ -274,19 +244,7 @@ export function QuotationStudioEditor({
             </>
           )}
 
-          {step === 'files' && (
-            <>
-              <section className="qs-card">
-                <h2>Quotation Terms &amp; Inclusions</h2>
-                <p className="qs-muted" style={{ marginBottom: 15 }}>
-                  Your selected package's specifications are already included.
-                  Update warranty, exclusions and any additional terms here.
-                  Set payment stages in the Payments section.
-                </p>
-                {termsEditor}
-              </section>
-            </>
-          )}
+          {step === 'files' && termsEditor}
 
           {step === 'payments' && paymentEditor}
 
