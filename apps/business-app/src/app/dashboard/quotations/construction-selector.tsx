@@ -190,6 +190,7 @@ export function ConstructionSelector({
   revisionId,
   version,
   initialMode = 'sft',
+  previewHtml,
 }: {
   rates: ConstructionRate[];
   packages: ConstructionPackage[];
@@ -197,6 +198,7 @@ export function ConstructionSelector({
   revisionId: string;
   version: number;
   initialMode?: 'sft' | 'custom';
+  previewHtml?: string;
 }) {
   const activePackages = packages.filter((pkg) => pkg.status === 'active');
   const previous = activePackages.find((pkg) =>
@@ -250,7 +252,7 @@ export function ConstructionSelector({
         <PremiumSftBuilder key={selected}
           selectedPackageId={chosen.id}
           rates={rates} packages={packages} initialSchedule={initialSchedule}
-          revisionId={revisionId} version={version} />
+          revisionId={revisionId} version={version} previewHtml={previewHtml} />
       ) : (
         <p className="qs-build-empty">Choose a package above to enter floor areas, optional works and material brands.</p>
       )}
