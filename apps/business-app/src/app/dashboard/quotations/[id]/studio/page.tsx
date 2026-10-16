@@ -16,7 +16,7 @@ import { CommandForm } from '../../command-form';
 import { SharingSection } from '../../sharing-section';
 import { ContractHandoff } from '../../../finance/handoff';
 import { PaymentScheduleEditor } from '../../payment-schedule-editor';
-import { DraftBrandingControl } from '../../draft-branding-control';
+import { QuotationTermsEditor } from '../../quotation-terms-editor';
 import { CreateRevisionControl } from '../../create-revision-control';
 import { hasSavedStagePaymentPlan } from '@business-os/core/quotation-payment-plan';
 
@@ -84,7 +84,6 @@ export default async function QuotationStudio({
         ? 'sft'
         : 'custom';
   const step =
-    query.step === 'client' ||
     query.step === 'files' ||
     query.step === 'payments' ||
     query.step === 'preview'
@@ -177,7 +176,6 @@ export default async function QuotationStudio({
         header={header.data}
         hasSavedPaymentPlan={hasSavedStagePaymentPlan(revision.terms)}
         previewHtml={previewHtml}
-        brandingEditor={<DraftBrandingControl revisionId={revision.id} version={revision.version} editable={editable} />}
         lines={saved}
         total={total}
         initialStep={step}
@@ -230,67 +228,20 @@ export default async function QuotationStudio({
           )
         }
         termsEditor={
-          editable ? (
-            <div data-studio-save-section="files">
-            <CommandForm
-              title="Save quotation specifications & terms"
-              initial={{
-                ...command,
-                action: 'edit_revision',
-                terms: revision.terms,
-                customer_notes: revision.customer_notes,
-                internal_notes: revision.internal_notes,
-                valid_until: revision.valid_until,
-                discount: revision.discount,
-              }}
-              fields={[
-                {
-                  key: 'valid_until',
-                  label: 'Valid until (YYYY-MM-DD)',
-                  required: true,
-                },
-                {
-                  key: 'terms',
-                  label:
-                    'Materials, warranty, inclusions, exclusions, payment schedule and terms',
-                  type: 'textarea',
-                },
-                {
-                  key: 'customer_notes',
-                  label: 'Customer notes, discounts or Price Guard details',
-                  type: 'textarea',
-                },
-                {
-                  key: 'internal_notes',
-                  label: 'Internal notes (not in customer PDF)',
-                  type: 'textarea',
-                },
-                ...(canDiscount
-                  ? [
-                      {
-                        key: 'discount.kind',
-                        label: 'Revision discount',
-                        options: [
-                          { value: 'none', label: 'None' },
-                          { value: 'fixed', label: 'Fixed amount' },
-                          { value: 'percentage', label: 'Percentage' },
-                        ],
-                      },
-                      { key: 'discount.value', label: 'Discount value' },
-                    ]
-                  : []),
-              ]}
-            />
-            </div>
-          ) : (
-            <div className="qs-info-box">
-              <strong>Customer terms</strong>
-              <p className="whitespace-pre-wrap">
-                {revision.terms || 'No additional terms.'}
-              </p>
-              <p className="whitespace-pre-wrap">{revision.customer_notes}</p>
-            </div>
-          )
+          <QuotationTermsEditor
+            key={revision.id + ':' + revision.version}
+            initial={{
+              revision_id: revision.id,
+              version: revision.version,
+              terms: revision.terms,
+              valid_until: revision.valid_until,
+              customer_notes: revision.customer_notes,
+              internal_notes: revision.internal_notes,
+              discount: revision.discount,
+            }}
+            editable={editable}
+            canDiscount={canDiscount}
+          />
         }
         paymentEditor={
           <PaymentScheduleEditor
