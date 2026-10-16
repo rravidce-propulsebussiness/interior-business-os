@@ -161,3 +161,39 @@ describe('floor-wise per-SFT construction estimates', () => {
     ).toThrow();
   });
 });
+
+describe('work-wise dimensions and mixed pricing units', () => {
+  it('prices walls by length×height, shelves by L×W, quantities by piece, and keeps floor area separate', () => {
+    const result = calculateSftEstimate({
+      rows: [
+        { kind:'floor', name:'Ground Floor', unit:'sqft', lengthFeet:'40',
+          widthFeet:'25', heightFeet:'10', ratePerSqft:'1850' },
+        { kind:'additional', name:'Shelves & Sajjas', unit:'sqft',
+          lengthFeet:'12', widthFeet:'2', heightFeet:'', ratePerSqft:'1200' },
+        { kind:'additional', name:'Compound Wall', unit:'wall_sqft',
+          lengthFeet:'100', widthFeet:'1', heightFeet:'6', ratePerSqft:'750' },
+        { kind:'additional', name:'Lift', unit:'piece', quantity:'2',
+          lengthFeet:'1', widthFeet:'1', heightFeet:'', ratePerSqft:'250000' },
+        { kind:'additional', name:'Handrail', unit:'running_ft',
+          lengthFeet:'30', widthFeet:'1', heightFeet:'', ratePerSqft:'600' },
+      ],
+      materialIds:[],
+      sections:[{title:'Steel',brand:'JSW',description:'Client-specific material selection'}],
+    });
+    expect(result.rows.map(r=>r.areaSqft)).toEqual([
+      '1000.00','24.00','600.00','2.00','30.00',
+    ]);
+    expect(result.totalAreaSqft).toBe('1000.00');
+    expect(result.additionalAreaSqft).toBe('624.00');
+    expect(result.total).toBe('2846800.00');
+    expect(parseSftEstimate(encodeSftEstimate(result))).toEqual(result);
+  });
+
+  it('does not multiply a floor rate by its informational height', () => {
+    const a=calculateSftEstimate({
+      rows:[{name:'Ground Floor',lengthFeet:'20',widthFeet:'25',ratePerSqft:'1500',heightFeet:'12'}],
+      materialIds:[],
+    });
+    expect(a.total).toBe('750000.00');
+  });
+});
