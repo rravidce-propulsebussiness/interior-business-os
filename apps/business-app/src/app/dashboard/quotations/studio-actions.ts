@@ -7,12 +7,13 @@ import { quotationCommandSchema } from '@business-os/core/commercial';
 import { safeFailure, DomainError } from '@business-os/shared';
 import { commercialServices } from '../commercial/service';
 import { contactMatches, normalizedCustomerPhone } from './customer-match';
+import { resolveLeadCategory } from '../crm/leads/lead-category';
 
 const createInput = z
   .object({
     clientName: z.string().trim().min(2).max(200),
     customerId: z.uuid().nullable().optional(),
-    leadId: z.uuid().nullable().optional(),
+    leadId: z.uuid(),
     phone: z.string().trim().min(3).max(40),
     email: z.union([z.literal(''), z.email().max(254)]),
     projectName: z.string().trim().min(2).max(200),
@@ -20,7 +21,6 @@ const createInput = z
     projectType: z.string().trim().min(2).max(100),
     plotSize: z.string().trim().max(40),
     notes: z.string().trim().max(1000).optional().default(''),
-    industryKey: z.string().regex(/^[a-z][a-z0-9_]{0,63}$/),
     currency: z
       .string()
       .regex(/^[A-Z]{3}$/)
@@ -50,35 +50,37 @@ export async function createStudioQuotation(input: unknown): Promise<{
           s.allowed('customer.create', 'quotation')))
       throw new DomainError('FORBIDDEN');
 
-    // Quoting an enquiry is not the same as closing it Won. Keep its
-    // originating lead attached while commercial work proceeds independently.
-    if (values.leadId) {
-      if (!s.allowed('lead.view', 'crm'))
-        return { ok: false, message: 'Lead access is required to quote an enquiry.' };
-      const { data: lead, error: leadError } = await s.client
-        .from('leads')
-        .select('id,phone,email')
-        .eq('organization_id', s.org)
-        .eq('id', values.leadId)
-        .maybeSingle();
-      if (leadError || !lead)
-        return { ok: false, message: 'The selected lead is not available.' };
-      const samePhone = Boolean(lead.phone && values.phone &&
-        normalizedCustomerPhone(lead.phone) === normalizedCustomerPhone(values.phone));
-      const sameEmail = Boolean(lead.email && values.email &&
-        lead.email.toLowerCase() === values.email.toLowerCase());
-      if (!samePhone && !sameEmail)
-        return { ok: false, message: 'Customer contact details must match the selected lead.' };
-    }
-
-    const { data: activeIndustry, error: industryError } = await s.client
-      .from('industries')
-      .select('id,key')
-      .eq('key', values.industryKey)
-      .eq('status', 'active')
+    // The stored CRM lead is the sole source of quotation industry.
+    // Never trust a browser-supplied industry or choose construction by default.
+    if (!s.allowed('lead.view', 'crm'))
+      return { ok: false, message: 'Lead access is required to quote an enquiry.' };
+    const { data: lead, error: leadError } = await s.client
+      .from('leads')
+      .select('id,phone,email,industry_id,service_type,requirements')
+      .eq('organization_id', s.org)
+      .eq('id', values.leadId)
       .maybeSingle();
-    if (industryError || !activeIndustry)
-      return { ok: false, message: 'Select an active company industry.' };
+    if (leadError || !lead)
+      return { ok: false, message: 'The selected lead is not available.' };
+    const samePhone = Boolean(lead.phone && values.phone &&
+      normalizedCustomerPhone(lead.phone) === normalizedCustomerPhone(values.phone));
+    const sameEmail = Boolean(lead.email && values.email &&
+      lead.email.toLowerCase() === values.email.toLowerCase());
+    if (!samePhone && !sameEmail)
+      return { ok: false, message: 'Customer contact details must match the selected lead.' };
+
+    const industries = await s.repository.industries();
+    const assignedIndustry = industries.find((entry) =>
+      entry.id === lead.industry_id && entry.status === 'active');
+    // Older leads without industry_id may still have an explicit service saved.
+    // Ambiguous or conflicting legacy labels must be corrected in CRM.
+    const legacyCategory = !lead.industry_id
+      ? resolveLeadCategory(lead, industries)
+      : null;
+    const activeIndustry = assignedIndustry ?? industries.find((entry) =>
+      entry.status === 'active' && entry.key === legacyCategory);
+    if (!activeIndustry)
+      return { ok: false, message: 'Classify this lead in CRM before creating its quotation.' };
 
     const {
       data: { user },
