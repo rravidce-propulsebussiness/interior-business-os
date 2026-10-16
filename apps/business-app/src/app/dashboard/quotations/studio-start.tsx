@@ -6,516 +6,262 @@ import { createStudioQuotation } from './studio-actions';
 import { contactMatches } from './customer-match';
 
 type Industry = { key: string; name: string };
-type ExistingCustomer = {
-  id: string;
-  display_name: string;
-  phone: string;
-  email: string;
-};
-type ExistingProject = { id: string; customer_id: string; name: string };
-
+type Customer = { id: string; display_name: string; phone: string; email: string };
+type Project = { id: string; customer_id: string; name: string };
 type QuoteLead = {
-  id: string;
-  lead_number: string;
-  name: string;
-  phone: string;
-  email: string;
-  location: string;
-  project_size: string;
-  service_type: string;
-  industryKey: string;
+  id: string; lead_number: string; name: string; phone: string; email: string;
+  location: string; project_size: string; service_type: string; industryKey: string;
 };
+type QuoteStyle = 'construction' | 'interior' | 'custom';
 
 export function QuotationStudioStart({
-  leads,
-  existingCustomers,
-  existingProjects,
-  industries,
-  defaultCurrency,
-  initialCustomerId = '',
-  initialLeadId = '',
+  leads, existingCustomers, existingProjects, industries, defaultCurrency,
+  initialCustomerId = '', initialLeadId = '',
 }: {
   leads: QuoteLead[];
-  existingCustomers: ExistingCustomer[];
-  existingProjects: ExistingProject[];
+  existingCustomers: Customer[];
+  existingProjects: Project[];
   industries: Industry[];
   defaultCurrency: string;
   initialCustomerId?: string;
   initialLeadId?: string;
 }) {
   const router = useRouter();
-  const initialLead = leads.find((lead) => lead.id === initialLeadId);
-  const matchedLeadCustomer = initialLead
-    ? existingCustomers.find((customer) =>
-        contactMatches(customer, {
-          phone: initialLead.phone,
-          email: initialLead.email,
-        }),
-      )
-    : undefined;
-  const initialCustomer =
-    existingCustomers.find((customer) => customer.id === initialCustomerId) ??
-    matchedLeadCustomer;
+  const initialLead = leads.find((entry) => entry.id === initialLeadId);
+  const initialCustomer = existingCustomers.find((c) => c.id === initialCustomerId) ??
+    (initialLead
+      ? existingCustomers.find((c) => contactMatches(c, { phone: initialLead.phone, email: initialLead.email }))
+      : undefined);
   const [leadId, setLeadId] = useState(initialLead?.id ?? '');
-  const [industry, setIndustry] = useState(
-    (initialLead &&
-    industries.some((item) => item.key === initialLead.industryKey)
-      ? initialLead.industryKey
-      : industries.find((item) => item.key === 'construction')?.key) ??
-      industries[0]?.key ??
-      '',
-  );
-  const [mode, setMode] = useState<'sft' | 'custom' | 'upload'>(
-    initialLead?.industryKey === 'interior' ? 'custom' : 'sft',
-  );
-  const [pending, start] = useTransition();
-  const [feedback, setFeedback] = useState('');
   const [customerId, setCustomerId] = useState(initialCustomer?.id ?? '');
   const [projectId, setProjectId] = useState('');
-  const currentCustomer = existingCustomers.find(
-    (customer) => customer.id === customerId,
-  );
-  const customerProjects = existingProjects.filter(
-    (project) => project.customer_id === customerId,
-  );
-  const selectedProject = customerProjects.find(
-    (project) => project.id === projectId,
-  );
-  const customerCrn = customerId
-    ? 'CRN-' + customerId.replaceAll('-', '').slice(0, 12).toUpperCase()
-    : '';
+  const [industry, setIndustry] = useState(initialLead?.industryKey &&
+    industries.some((i) => i.key === initialLead.industryKey)
+      ? initialLead.industryKey
+      : (industries.find((i) => i.key === 'construction')?.key ?? industries[0]?.key ?? ''));
+  const [style, setStyle] = useState<QuoteStyle>(initialLead?.industryKey === 'interior' ? 'interior' : 'construction');
+  const [advancedOpen, setAdvancedOpen] = useState(Boolean(initialLead || initialCustomer));
+  const [pending, start] = useTransition();
+  const [feedback, setFeedback] = useState('');
   const [data, setData] = useState({
     clientName: initialCustomer?.display_name ?? initialLead?.name ?? '',
     phone: initialCustomer?.phone ?? initialLead?.phone ?? '',
     email: initialCustomer?.email ?? initialLead?.email ?? '',
-    projectName: initialLead
-      ? (initialLead.service_type || 'Client') + ' project'
-      : '',
+    projectName: initialLead ? (initialLead.service_type || 'Client') + ' project' : '',
     location: initialLead?.location ?? '',
     plotSize: initialLead?.project_size ?? '',
     projectType: 'Residential',
+    notes: '',
   });
-  const matchingCustomers = !customerId
-    ? existingCustomers.filter((customer) => contactMatches(customer, data))
-    : [];
-  const selectCustomer = (customer: ExistingCustomer) => {
-    setCustomerId(customer.id);
+  const currentCustomer = existingCustomers.find((c) => c.id === customerId);
+  const customerProjects = existingProjects.filter((p) => p.customer_id === customerId);
+  const selectedProject = customerProjects.find((p) => p.id === projectId);
+  const matchingCustomers = !customerId ? existingCustomers.filter((c) => contactMatches(c, data)) : [];
+  const hasConstruction = industries.some((i) => i.key === 'construction');
+  const hasInterior = industries.some((i) => i.key === 'interior');
+  const otherIndustries = industries.filter((i) => i.key !== 'construction' && i.key !== 'interior');
+
+  const update = (name: keyof typeof data, value: string) => {
+    setData((current) => ({ ...current, [name]: value }));
+    setFeedback('');
+  };
+  const chooseCustomer = (customer: Customer | undefined) => {
+    setCustomerId(customer?.id ?? '');
     setProjectId('');
-    setData((previous) => ({
-      ...previous,
-      clientName: customer.display_name,
-      phone: customer.phone,
-      email: customer.email,
+    setData((current) => ({
+      ...current,
+      clientName: customer?.display_name ?? '',
+      phone: customer?.phone ?? '',
+      email: customer?.email ?? '',
     }));
     setFeedback('');
   };
-  const update = (key: keyof typeof data, value: string) => {
-    setData((prev) => ({ ...prev, [key]: value }));
+  const chooseStyle = (next: QuoteStyle) => {
+    setStyle(next);
+    if (next === 'construction') setIndustry(hasConstruction ? 'construction' : industry);
+    else if (next === 'interior') setIndustry(hasInterior ? 'interior' : industry);
+    else setIndustry(otherIndustries[0]?.key ?? (hasConstruction ? 'construction' : industry));
     setFeedback('');
   };
-  const methods = [
-    {
-      key: 'sft',
-      title: 'Per sq ft (SFT)',
-      helper: 'Floor-wise area × rate',
-      icon: '▦',
-    },
-    {
-      key: 'custom',
-      title: 'Custom BOQ / Materials',
-      helper: 'Item-wise dimensions and finishes',
-      icon: '▤',
-    },
-    {
-      key: 'upload',
-      title: 'Upload existing PDF',
-      helper: 'Attach supporting quotation files',
-      icon: '⇧',
-    },
-  ] as const;
 
-  return (
-    <div className="qs-editor">
-      <section className="qs-card">
-        <h2>Choose quotation type</h2>
-        <div className="qs-sector-tabs">
-          {industries.slice(0, 2).map((item) => (
-            <button
-              type="button"
-              key={item.key}
-              className={
-                'qs-sector' + (industry === item.key ? ' current' : '')
-              }
-              aria-pressed={industry === item.key}
-              onClick={() => {
-                setIndustry(item.key);
-                if (item.key === 'interior' && mode === 'sft')
-                  setMode('custom');
-              }}
-            >
-              {item.key === 'construction' ? '▦' : '▱'} {item.name}
-            </button>
-          ))}
-          {industries.length > 2 ? (
-            <select
-              className="qs-sector"
-              aria-label="Other industry"
-              value={
-                industries.slice(2).some((item) => item.key === industry)
-                  ? industry
-                  : ''
-              }
-              onChange={(event) => {
-                setIndustry(event.target.value);
-                setMode('custom');
-              }}
-            >
-              <option value="">Other industries</option>
-              {industries.slice(2).map((item) => (
-                <option value={item.key} key={item.key}>
-                  {item.name}
-                </option>
-              ))}
-            </select>
-          ) : (
-            <span
-              className="qs-sector"
-              style={{ cursor: 'default', opacity: 0.6 }}
-            >
-              ◈ Other industries · Soon
-            </span>
-          )}
-        </div>
-        <div className="qs-divider" />
-        <div className="qs-method-tabs">
-          {methods.map((item) => (
-            <button
-              key={item.key}
-              type="button"
-              onClick={() => setMode(item.key)}
-              aria-pressed={mode === item.key}
-              className={'qs-method' + (mode === item.key ? ' current' : '')}
-            >
-              <span className="qs-icon-chip">{item.icon}</span>
-              <span>
-                <strong>{item.title}</strong>
-                <small>{item.helper}</small>
-              </span>
-            </button>
-          ))}
-        </div>
-      </section>
-
-      <form
-        className="qs-card"
-        onSubmit={(event) => {
-          event.preventDefault();
-          setFeedback('');
-          if (!industry) {
-            setFeedback('Select an available industry.');
-            return;
-          }
-          start(async () => {
-            const result = await createStudioQuotation({
-              ...data,
-              customerId: customerId || null,
-              projectId: projectId || null,
-              leadId: leadId || null,
-              industryKey: industry,
-              currency: defaultCurrency,
-            });
-            if (!result.ok || !result.revisionId) {
-              setFeedback(result.message);
-              return;
-            }
-            const next = new URLSearchParams({
-              mode: mode === 'upload' ? 'pdf' : mode,
-              ...(mode === 'upload' ? { step: 'files' } : {}),
-            });
-            router.push(
-              '/dashboard/quotations/' + result.revisionId + '/studio?' + next,
-            );
-          });
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          }}
-        >
-          <h2>Client &amp; Project Details</h2>
-          <span className="qs-selected-pill">Step 01 · Details</span>
-        </div>
-        {leads.length > 0 && (
-          <label className="qs-field" style={{ marginBottom: 15 }}>
-            Choose from Leads (optional)
-            <select
-              value={leadId}
-              onChange={(event) => {
-                setLeadId(event.target.value);
-                const lead = leads.find(
-                  (item) => item.id === event.target.value,
-                );
-                if (!lead) return;
-                const match = existingCustomers.find(
-                  (customer) =>
-                    customer.display_name.trim().toLowerCase() ===
-                      lead.name.trim().toLowerCase() &&
-                    ((lead.email &&
-                      customer.email.toLowerCase() ===
-                        lead.email.toLowerCase()) ||
-                      (lead.phone &&
-                        customer.phone.replace(/\D/g, '') ===
-                          lead.phone.replace(/\D/g, ''))),
-                );
-                setCustomerId(match?.id ?? '');
-                setProjectId('');
-                setData({
-                  clientName: match?.display_name || lead.name || '',
-                  phone: match?.phone || lead.phone || '',
-                  email: match?.email || lead.email || '',
-                  projectName: (lead.service_type || 'Client') + ' project',
-                  location: lead.location || '',
-                  plotSize: lead.project_size || '',
-                  projectType: 'Residential',
-                });
-                if (industries.some((item) => item.key === lead.industryKey)) {
-                  setIndustry(lead.industryKey);
-                  if (lead.industryKey === 'interior') setMode('custom');
-                }
-                setFeedback(
-                  'Lead details loaded. Review before creating the quotation.',
-                );
-              }}
-            >
-              <option value="">Enter client details manually</option>
-              {leads.map((lead) => (
-                <option key={lead.id} value={lead.id}>
-                  {lead.name || 'Unnamed lead'} · {lead.lead_number}
-                </option>
-              ))}
-            </select>
-          </label>
-        )}
-        <div className="qs-note" style={{ marginBottom: 16 }}>
-          Each customer has one permanent Customer Reference Number (CRN).
-          Choose an existing customer to keep their quotation history under the
-          same CRN. Creating a new quotation for an existing project opens its
-          current quotation rather than making a duplicate.
-        </div>
-        <div className="qs-fields" style={{ marginBottom: 16 }}>
-          <label className="qs-field qs-field-full">
-            Existing customer / CRN
-            <select
-              value={customerId}
-              onChange={(event) => {
-                const id = event.target.value;
-                const selected = existingCustomers.find(
-                  (customer) => customer.id === id,
-                );
-                setCustomerId(id);
-                setProjectId('');
-                setData((prev) => ({
-                  ...prev,
-                  clientName: selected?.display_name ?? '',
-                  phone: selected?.phone ?? '',
-                  email: selected?.email ?? '',
-                }));
-                setFeedback('');
-              }}
-            >
-              <option value="">
-                + New customer (only if not registered already)
-              </option>
-              {existingCustomers.map((customer) => (
-                <option value={customer.id} key={customer.id}>
-                  {'CRN-' +
-                    customer.id
-                      .replaceAll('-', '')
-                      .slice(0, 12)
-                      .toUpperCase()}{' '}
-                  · {customer.display_name} · {customer.phone}
-                </option>
-              ))}
-            </select>
-          </label>
-          {matchingCustomers.length > 0 && (
-            <div
-              className="qs-warning"
-              role="alert"
-              style={{ marginBottom: 15 }}
-            >
-              <strong>
-                Existing client{' '}
-                {matchingCustomers.length > 1
-                  ? 'accounts found'
-                  : 'account found'}
-                .
-              </strong>
-              <p>
-                These contact details already have a CRN. Choose the correct
-                existing account instead of creating another customer.
-              </p>
-              <div
-                className="qs-toolbar"
-                style={{ flexWrap: 'wrap', marginTop: 10 }}
-              >
-                {matchingCustomers.map((customer) => (
-                  <button
-                    type="button"
-                    className="qs-btn"
-                    key={customer.id}
-                    onClick={() => selectCustomer(customer)}
-                  >
-                    {'CRN-' +
-                      customer.id
-                        .replaceAll('-', '')
-                        .slice(0, 12)
-                        .toUpperCase()}
-                    {' · '}
-                    {customer.display_name}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-          {currentCustomer && (
-            <label className="qs-field qs-field-full">
-              Project under {customerCrn}
-              <select
-                value={projectId}
-                onChange={(event) => {
-                  const id = event.target.value;
-                  const project = customerProjects.find(
-                    (item) => item.id === id,
-                  );
-                  setProjectId(id);
-                  if (project) update('projectName', project.name);
-                  setFeedback('');
-                }}
-              >
-                <option value="">+ Create new project for this customer</option>
-                {customerProjects.map((project) => (
-                  <option key={project.id} value={project.id}>
-                    {project.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
-        </div>
-        <div className="qs-fields">
-          <label className="qs-field">
-            Client name *
-            <input
-              required
-              maxLength={200}
-              value={data.clientName}
-              readOnly={Boolean(currentCustomer)}
-              placeholder="Client full name"
-              onChange={(e) => update('clientName', e.target.value)}
-            />
-          </label>
-          <label className="qs-field">
-            Phone *
-            <input
-              required
-              type="tel"
-              minLength={3}
-              maxLength={40}
-              value={data.phone}
-              readOnly={Boolean(currentCustomer)}
-              placeholder="+91 98765 43210"
-              onChange={(e) => update('phone', e.target.value)}
-            />
-          </label>
-          <label className="qs-field">
-            Email
-            <input
-              type="email"
-              maxLength={254}
-              value={data.email}
-              readOnly={Boolean(currentCustomer)}
-              placeholder="client@example.com"
-              onChange={(e) => update('email', e.target.value)}
-            />
-          </label>
-          <label className="qs-field">
-            Project name *
-            <input
-              required
-              maxLength={200}
-              value={data.projectName}
-              readOnly={Boolean(selectedProject)}
-              placeholder="Residential construction"
-              onChange={(e) => update('projectName', e.target.value)}
-            />
-          </label>
-          <label className="qs-field">
-            Project location
-            <input
-              maxLength={200}
-              value={data.location}
-              placeholder="Hyderabad, Telangana"
-              onChange={(e) => update('location', e.target.value)}
-            />
-          </label>
-          <label className="qs-field">
-            Project type *
-            <select
-              required
-              value={data.projectType}
-              onChange={(e) => update('projectType', e.target.value)}
-            >
-              <option>Residential</option>
-              <option>Commercial</option>
-              <option>Renovation</option>
-              <option>Extension</option>
-            </select>
-          </label>
-          <label className="qs-field qs-field-full">
-            Plot size or property configuration (optional)
-            <input
-              maxLength={40}
-              value={data.plotSize}
-              placeholder="200 sq yards / 3BHK"
-              onChange={(e) => update('plotSize', e.target.value)}
-            />
-          </label>
-        </div>
-        <div className="qs-divider" />
-        <div className="qs-note">
-          {customerCrn
-            ? customerCrn + ' · '
-            : matchingCustomers.length
-              ? 'Select a matching existing CRN first. '
-              : 'A new CRN will be assigned. '}
-          Your quotation will use this company&apos;s saved name, logo, contact
-          details, quotation prefix and terms. You can change pricing,
-          materials, payment terms and PDF attachments after creating the draft.
-        </div>
-        {feedback && (
-          <p role="alert" className="qs-warning" style={{ marginTop: 13 }}>
-            {feedback}
-          </p>
-        )}
-        <div
-          className="qs-toolbar"
-          style={{ justifyContent: 'flex-end', marginTop: 15 }}
-        >
-          <button
-            className="qs-btn primary"
-            disabled={pending || !industry || matchingCustomers.length > 0}
-            type="submit"
-          >
-            {pending
-              ? 'Creating quotation…'
-              : 'Create quotation and continue →'}
-          </button>
-        </div>
-      </form>
+  return <div className="qs-create-start">
+    <div className="qs-create-types" role="group" aria-label="Quotation category">
+      <button type="button" className={'qs-create-type' + (style === 'construction' ? ' current' : '')}
+        disabled={!hasConstruction} aria-pressed={style === 'construction'}
+        onClick={() => chooseStyle('construction')}>
+        <span className="qs-create-type-icon">▥</span>
+        <strong>Construction</strong>
+        <small>Residential, Commercial<br/>Renovation, Extension</small>
+      </button>
+      <button type="button" className={'qs-create-type' + (style === 'interior' ? ' current' : '')}
+        disabled={!hasInterior} aria-pressed={style === 'interior'}
+        onClick={() => chooseStyle('interior')}>
+        <span className="qs-create-type-icon">▱</span>
+        <strong>Interior Design</strong>
+        <small>Homes, Apartments<br/>Villas, Offices</small>
+      </button>
+      <button type="button" className={'qs-create-type' + (style === 'custom' ? ' current' : '')}
+        aria-pressed={style === 'custom'} onClick={() => chooseStyle('custom')}>
+        <span className="qs-create-type-icon">▦</span>
+        <strong>Custom / Others</strong>
+        <small>Item-wise BOQ<br/>Custom quotation</small>
+      </button>
     </div>
-  );
+
+    {style === 'custom' && otherIndustries.length > 0 && <label className="qs-clean-field qs-industry-picker">
+      Industry
+      <select value={industry} onChange={(event) => setIndustry(event.target.value)}>
+        {otherIndustries.map((item) => <option key={item.key} value={item.key}>{item.name}</option>)}
+        {hasConstruction && <option value="construction">Construction BOQ</option>}
+        {hasInterior && <option value="interior">Interior BOQ</option>}
+      </select>
+    </label>}
+
+    <form className="qs-create-form" onSubmit={(event) => {
+      event.preventDefault();
+      if (!industry) { setFeedback('Select an available quotation type.'); return; }
+      if (matchingCustomers.length > 0) {
+        setFeedback('An existing client has these contact details. Select that client before continuing.');
+        setAdvancedOpen(true);
+        return;
+      }
+      setFeedback('');
+      start(async () => {
+        const result = await createStudioQuotation({
+          ...data, customerId: customerId || null, projectId: projectId || null,
+          leadId: leadId || null, industryKey: industry, currency: defaultCurrency,
+        });
+        if (!result.ok || !result.revisionId) {
+          setFeedback(result.message);
+          return;
+        }
+        const mode = style === 'construction' ? 'sft' : 'custom';
+        router.push('/dashboard/quotations/' + result.revisionId + '/studio?mode=' + mode + '&step=quote');
+      });
+    }}>
+      <div className="qs-clean-form-title">
+        <span className="qs-clean-form-icon" aria-hidden="true">♙</span>
+        <h2>Client &amp; Project Details</h2>
+      </div>
+
+      {(leads.length > 0 || existingCustomers.length > 0) &&
+        <details className="qs-create-existing" open={advancedOpen}
+          onToggle={(event) => setAdvancedOpen(event.currentTarget.open)}>
+          <summary>Use existing client or lead <span aria-hidden="true">⌄</span></summary>
+          <div className="qs-create-existing-body">
+            {leads.length > 0 && <label className="qs-clean-field">Select a lead
+              <select value={leadId} onChange={(event) => {
+                const value = event.target.value;
+                setLeadId(value);
+                const lead = leads.find((l) => l.id === value);
+                if (!lead) return;
+                const customer = existingCustomers.find((c) =>
+                  contactMatches(c, { phone: lead.phone, email: lead.email }));
+                setCustomerId(customer?.id ?? '');
+                setProjectId('');
+                setData((current) => ({
+                  ...current,
+                  clientName: customer?.display_name || lead.name,
+                  phone: customer?.phone || lead.phone,
+                  email: customer?.email || lead.email,
+                  projectName: (lead.service_type || 'Client') + ' project',
+                  location: lead.location || '', plotSize: lead.project_size || '',
+                }));
+                if (industries.some((i) => i.key === lead.industryKey)) {
+                  setIndustry(lead.industryKey);
+                  setStyle(lead.industryKey === 'interior' ? 'interior' :
+                    lead.industryKey === 'construction' ? 'construction' : 'custom');
+                }
+                setFeedback('');
+              }}>
+                <option value="">No lead selected</option>
+                {leads.map((lead) => <option key={lead.id} value={lead.id}>
+                  {lead.name} · {lead.lead_number}
+                </option>)}
+              </select>
+            </label>}
+            {existingCustomers.length > 0 && <label className="qs-clean-field">Existing customer / CRN
+              <select value={customerId} onChange={(event) => {
+                const selected = existingCustomers.find((c) => c.id === event.target.value);
+                chooseCustomer(selected);
+              }}>
+                <option value="">New customer</option>
+                {existingCustomers.map((customer) => <option key={customer.id} value={customer.id}>
+                  {customer.display_name} · CRN-{customer.id.replaceAll('-', '').slice(0, 12).toUpperCase()}
+                </option>)}
+              </select>
+            </label>}
+            {currentCustomer && <label className="qs-clean-field">Existing project (optional)
+              <select value={projectId} onChange={(event) => {
+                const project = customerProjects.find((p) => p.id === event.target.value);
+                setProjectId(project?.id ?? '');
+                if (project) update('projectName', project.name);
+              }}>
+                <option value="">Create new project</option>
+                {customerProjects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+              </select>
+            </label>}
+          </div>
+        </details>}
+
+      {matchingCustomers.length > 0 && <div className="qs-clean-matches" role="alert">
+        <strong>Existing client found.</strong> Choose the matching account to keep one CRN.
+        <div>
+          {matchingCustomers.slice(0, 5).map((c) => <button type="button" key={c.id}
+            onClick={() => { chooseCustomer(c); setAdvancedOpen(true); }}>
+            {c.display_name} · {c.phone || c.email}
+          </button>)}
+        </div>
+      </div>}
+
+      <div className="qs-create-field-grid">
+        <label className="qs-clean-field">Client Name <span>*</span>
+          <input required maxLength={200} placeholder="Enter client name"
+            autoComplete="name" readOnly={Boolean(currentCustomer)}
+            value={data.clientName} onChange={(event) => update('clientName', event.target.value)}/>
+        </label>
+        <label className="qs-clean-field">Phone Number <span>*</span>
+          <input type="tel" required minLength={3} maxLength={40} autoComplete="tel"
+            placeholder="Enter phone number" readOnly={Boolean(currentCustomer)}
+            value={data.phone} onChange={(event) => update('phone', event.target.value)}/>
+        </label>
+        <label className="qs-clean-field">Email Address
+          <input type="email" maxLength={254} autoComplete="email"
+            placeholder="Enter email address" readOnly={Boolean(currentCustomer)}
+            value={data.email} onChange={(event) => update('email', event.target.value)}/>
+        </label>
+        <label className="qs-clean-field">Project Name <span>*</span>
+          <input required maxLength={200} placeholder="Enter project name"
+            readOnly={Boolean(selectedProject)}
+            value={data.projectName} onChange={(event) => update('projectName', event.target.value)}/>
+        </label>
+        <label className="qs-clean-field">Project Location
+          <input maxLength={200} placeholder="Enter project location"
+            value={data.location} onChange={(event) => update('location', event.target.value)}/>
+        </label>
+        <label className="qs-clean-field">Plot Area / Property Configuration
+          <input maxLength={40} placeholder={industry === 'interior' ? '3BHK' : 'e.g. 200 sq yards'}
+            value={data.plotSize} onChange={(event) => update('plotSize', event.target.value)}/>
+        </label>
+        <label className="qs-clean-field">Project Type
+          <select value={data.projectType} onChange={(event) => update('projectType', event.target.value)}>
+            <option>Residential</option><option>Commercial</option>
+            <option>Renovation</option><option>Extension</option>
+          </select>
+        </label>
+        <label className="qs-clean-field qs-clean-notes">Additional Notes (optional)
+          <textarea rows={3} maxLength={1000}
+            placeholder="Any special requirements, site details or notes…"
+            value={data.notes} onChange={(event) => update('notes', event.target.value)}/>
+        </label>
+      </div>
+      {feedback && <p role="alert" className="qs-clean-feedback">{feedback}</p>}
+      <div className="qs-clean-form-actions">
+        <button className="qs-clean-next" type="submit"
+          disabled={pending || !industry || matchingCustomers.length > 0}>
+          {pending ? 'Creating quotation…' : 'Next →'}
+        </button>
+      </div>
+    </form>
+  </div>;
 }
