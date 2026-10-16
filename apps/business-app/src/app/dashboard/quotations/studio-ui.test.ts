@@ -15,10 +15,10 @@ describe('minimal quotation studio navigation', () => {
   const page = file('./[id]/studio/page.tsx');
 
   it('shows only Save and Preview & Share in the primary action toolbar', () => {
-    const actions = studio.match(/<div className="qs-toolbar qs-studio-compact-buttons"[\s\S]*?<\/div>/)?.[0] ?? '';
-    expect(actions).toContain('▣ Save');
-    expect(actions).toContain('◉ Preview &amp; Share');
-    expect((actions.match(/<button/g) ?? [])).toHaveLength(2);
+    expect(studio).not.toContain('qs-studio-compact-bar');
+    expect(studio).not.toContain('qs-studio-hero');
+    expect(studio).toContain('Preview &amp; Share saved PDF');
+    expect(sft).toContain('▣ Save quotation →');
     expect(studio).not.toContain('Save Draft');
     expect(studio).not.toContain('Issue & Share');
     expect(studio).not.toContain('qs-stepper" aria-label="Quotation steps"');
@@ -27,7 +27,7 @@ describe('minimal quotation studio navigation', () => {
   });
 
   it('Save delegates to real persisted child actions, not a refresh fake', () => {
-    expect(studio).toContain('saveButton.click()');
+    expect(studio).not.toContain('saveButton.click()');
     expect(studio).not.toContain('router.refresh();');
     expect(sft).toContain('data-studio-save="quote"');
     expect(construction).toContain('data-studio-save="quote"');
@@ -270,9 +270,9 @@ describe('compact single-screen construction quotation editor', () => {
   const css = file('./studio.css');
 
   it('uses company orange hero and one package selector instead of a navy multi-step wizard', () => {
-    expect(selector).toContain('qs-build-overview');
-    expect(selector).toContain('quoteNumber ||');
-    expect(selector).toContain('savedTotal ||');
+    expect(selector).not.toContain('qs-build-overview');
+    expect(selector).not.toContain('Saved estimate');
+    expect(selector).not.toContain('clientName');
     expect(selector).toContain('Select construction quotation package');
     expect(selector).toContain('qs-build-package-rate');
     expect(css).toContain('.qs-build-overview');
@@ -504,10 +504,11 @@ describe('streamlined quote, terms and payment Studio', () => {
     expect(terms).toContain('Customer notes');
     expect(terms).toContain('Internal notes');
     expect(terms).toContain('data-studio-save="files"');
-    expect(terms).toContain("action: 'edit_revision'");
+    expect(terms).toContain("kind:'terms'");
+    expect(terms).toContain("'/dashboard/quotations/'+initial.revision_id+'/conditions'");
     expect(terms).toContain('paymentPlan: fields.paymentPlan');
     expect(studio).toContain("{step === 'files' && termsEditor}");
-    expect(studio).toContain('qs-studio-compact-bar');
+    expect(studio).not.toContain('qs-studio-compact-bar');
     expect(studio).not.toContain('<h1>{industryName} Quote</h1>');
     expect(studio).not.toContain('qs-studio-hero');
     expect(css).toContain('.qs-terms-grid');
@@ -516,7 +517,7 @@ describe('streamlined quote, terms and payment Studio', () => {
   
   it('shows only milestone payment details on the Payment Schedule tab', () => {
     const payments = file('./payment-schedule-editor.tsx');
-    expect(studio).toContain("step !== 'payments' &&");
+    expect(studio).toContain("step !== 'preview' &&");
     expect(studio).toContain("step === 'payments' ? ' qs-studio-grid-full'");
     expect(studio).toContain("step !== 'payments' && <aside");
     expect(payments).toContain('Save Payment Schedule');
