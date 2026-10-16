@@ -785,6 +785,7 @@ export function PremiumSftBuilder({
             <button
               type="button"
               onClick={save}
+              data-studio-save="quote"
               disabled={!canSave}
               className="rounded-xl bg-blue-600 px-6 py-3 text-sm font-extrabold text-white shadow-lg shadow-blue-200 disabled:cursor-not-allowed disabled:opacity-40"
             >
