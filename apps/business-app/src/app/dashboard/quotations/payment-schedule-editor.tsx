@@ -48,6 +48,11 @@ function moveStage(rows: Milestone[], from: number, to: number): Milestone[] {
   return next;
 }
 
+function formatPercent(value: number): string {
+  if (!Number.isFinite(value)) return '—';
+  return value.toFixed(2).replace(/\.00$/, '').replace(/(\.\d)0$/, '$1') + '%';
+}
+
 export function PaymentScheduleEditor({
   industry, total, currency, editable, initial,
 }: {
@@ -143,7 +148,7 @@ export function PaymentScheduleEditor({
   }
 
   const remaining = Math.abs(100 - percentTotal) < 0.001 ? 0 : 100 - percentTotal;
-  const remainingLabel = Number.isFinite(remaining) ? remaining.toFixed(2).replace(/\.?0+$/, '') + '%' : '—';
+  const remainingLabel = formatPercent(remaining);
 
   return (
     <section className="qs-payment-panel" aria-label="Quotation payment schedule">
@@ -200,7 +205,8 @@ export function PaymentScheduleEditor({
                 onDrop={(event) => {
                   event.preventDefault();
                   if (dragging.current !== null) {
-                    setRows((all) => moveStage(all, dragging.current!, index));
+                    const from = dragging.current;
+                    setRows((all) => moveStage(all, from, index));
                     setFeedback(null);
                   }
                   dragging.current = null;
@@ -249,7 +255,7 @@ export function PaymentScheduleEditor({
       </div>
 
       <div className="qs-payment-summary">
-        <div><span>Total Percentage</span><strong className={valid ? 'qs-payment-summary-highlight' : 'qs-payment-summary-warning'}>{Number.isFinite(percentTotal) ? percentTotal.toFixed(2).replace(/\.?0+$/, '') : '0'}%</strong></div>
+        <div><span>Total Percentage</span><strong className={valid ? 'qs-payment-summary-highlight' : 'qs-payment-summary-warning'}>{formatPercent(percentTotal)}</strong></div>
         <div><span>Estimated Amount</span><strong>{money(amount)}</strong></div>
         <div><span>Balance</span><strong className={remaining === 0 ? 'qs-payment-summary-ok' : 'qs-payment-summary-warning'}>{remainingLabel}</strong><small>{remaining === 0 ? 'All stages covered' : remaining > 0 ? 'Still to allocate' : 'Over allocated'}</small></div>
       </div>
