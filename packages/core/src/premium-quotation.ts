@@ -1,211 +1,327 @@
 import type { CustomerDocument } from './quotation-document';
 
-const esc = (v: string) => v.replaceAll('&','&amp;').replaceAll('<','&lt;')
-  .replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');
+const escape = (value: string) => value.replaceAll('&', '&amp;')
+  .replaceAll('<', '&lt;').replaceAll('>', '&gt;')
+  .replaceAll('"', '&quot;').replaceAll("'", '&#39;');
+
+// Curated architectural concept photos, not representations of a tenant's past
+// work. Companies override all of these from their saved quotation branding.
+// Every illustration is explicitly marked as a concept in the customer PDF.
+// https://unsplash.com/license (free photographs).
+const conceptVilla = 'https://images.unsplash.com/photo-1756435292384-1bf32eff7baf?auto=format&fit=crop&w=1500&q=80';
+const conceptInterior = 'https://images.unsplash.com/photo-1751945965597-71171ec7a458?auto=format&fit=crop&w=1400&q=80';
+
+const friendlyDate = (value: string): string => {
+  const date = new Date(value + 'T12:00:00Z');
+  return Number.isNaN(date.getTime()) ? value :
+    new Intl.DateTimeFormat('en-IN', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' }).format(date);
+};
 
 export const premiumCss = `<style>
-@page{size:A4;margin:13mm 13mm 16mm}
-*{box-sizing:border-box}body{font:11px/1.55 Arial,sans-serif;color:#1b2b44;margin:0;background:#fff}
-main{width:100%;max-width:185mm;margin:auto}h1,h2,h3{color:#14233f;line-height:1.2;break-after:avoid}
-h1{font-size:27px;letter-spacing:-.04em;margin:0 0 10px}h2{font-size:19px;margin:21px 0 12px}h3{font-size:13px;margin:6px 0}
-p{margin:5px 0}.muted{color:#67758a}.text{white-space:pre-wrap;overflow-wrap:anywhere}
-img{max-width:100%;object-fit:contain}
-header{border-bottom:3px solid __ACCENT__;padding:7px 0 13px;margin-bottom:18px}
-header img{max-width:140px;max-height:55px}header h1{font-size:18px;margin:3px 0}header p{color:#68768b}
-.pb-cover{height:257mm;max-height:257mm;display:flex;flex-direction:column;position:relative;isolation:isolate;overflow:hidden;padding:17mm 14mm 13mm;background:linear-gradient(130deg,#102038,#213d62);color:#fff;break-after:page;page-break-after:always;break-inside:avoid}
-.pb-cover::before{content:"";position:absolute;inset:0;z-index:-1;background:repeating-linear-gradient(135deg,transparent 0 35px,#ffffff15 36px,transparent 37px)}
-.pb-cover-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
-.pb-cover-shade{position:absolute;inset:0;background:linear-gradient(90deg,#0b1e33f5,#0b1e33c4 60%,#0b1e3388);z-index:-1}
-.pb-top{display:flex;justify-content:space-between;align-items:center;gap:16px;min-height:68px}
-.pb-top img,.pb-close img{background:#fff;border-radius:8px;padding:7px;max-width:145px;max-height:68px}
-.pb-company{font-weight:900;font-size:22px;letter-spacing:-.04em;color:#fff}
-.pb-tag{border:1px solid #ffffff88;border-radius:30px;padding:7px 12px;font-size:9px;letter-spacing:2px;text-transform:uppercase}
-.pb-cover-body{flex:1;display:flex;align-items:center}
-.pb-eyebrow{font-size:10px;font-weight:800;color:#ffb77f;text-transform:uppercase;letter-spacing:2px}
-.pb-cover h2{font-size:48px;line-height:1.08;letter-spacing:-.07em;margin:18px 0;color:white}
-.pb-cover h3{font-size:20px;color:#ffc091;overflow-wrap:anywhere;max-width:145mm}
-.pb-cover-amount{font-size:26px;color:white;font-weight:900;margin-top:28px}
-.pb-cover-amount small{display:block;color:#ffd0ae;font-size:10px;letter-spacing:1px;text-transform:uppercase}
-.pb-bottom{display:flex;justify-content:space-between;gap:20px;padding-top:15px;border-top:1px solid #ffffff55;font-size:11px;color:#dbe7f3;overflow-wrap:anywhere}
-.pb-building{position:absolute;bottom:22mm;right:-15mm;width:116mm;height:83mm;border:3px solid white;opacity:.18;transform:skew(-12deg)}
-.pb-building::before{content:"";position:absolute;left:-9%;top:-53%;height:50%;width:118%;background:linear-gradient(145deg,transparent 48%,white 49%,white 51%,transparent 52%),linear-gradient(215deg,transparent 48%,white 49%,white 51%,transparent 52%)}
-.pb-building::after{content:"";position:absolute;inset:10%;border:2px solid white;background:repeating-linear-gradient(90deg,transparent 0 24%,white 24.6% 25.5%,transparent 26% 49%)}
-.pb-title{padding:16px 19px;margin:16px 0;border:1px solid #f3e0cf;border-radius:13px;background:linear-gradient(105deg,#fff1e6,#fff)}
-.pb-title h1{font-size:27px;overflow-wrap:anywhere}.pb-title p{color:#62748b}
-.status{color:#a25213;font-weight:800;letter-spacing:1px}
-.parties{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin:20px 0}
-.parties section{padding:15px;background:#f7f9fc;border:1px solid #e3eaf1;border-radius:12px;break-inside:avoid;overflow-wrap:anywhere}
-.parties h2{font-size:11px;text-transform:uppercase;color:__ACCENT__;letter-spacing:1px;margin:0 0 8px}
-.parties h3{font-size:15px}.parties p{font-size:10px}
-main>h2{border-left:4px solid __ACCENT__;padding:8px 11px}
-table{border-collapse:collapse;width:100%;table-layout:fixed;font-size:10px;margin:12px 0}
-thead{display:table-header-group}tr{break-inside:avoid;page-break-inside:avoid}
-td,th{border-bottom:1px solid #e2e8ef;padding:9px 7px;text-align:left;vertical-align:top;overflow-wrap:anywhere}
-th{background:#f4efe9;color:#243751;font-weight:800}
-.amount{text-align:right;font-variant-numeric:tabular-nums}.line{width:43%}
-tr.total{background:#fff0e1;font-weight:900;font-size:13px}
-.totals{margin:20px 0 18px auto;width:75%;break-inside:avoid}
-.totals .total td{color:#b54c0d;border-top:2px solid __ACCENT__}
-section.terms{margin:20px 0;break-inside:auto}
-section.terms h2{border-left:4px solid __ACCENT__;padding-left:10px}
-section.spec-pages{break-before:page;page-break-before:always;padding-top:10px}
-.spec-eyebrow{color:__ACCENT__;letter-spacing:2px;text-transform:uppercase;font-weight:850;font-size:10px}
-.spec-pages h2{font-size:23px;color:#14233f}
-.package-banner{margin:16px 0;padding:16px;background:linear-gradient(105deg,#fff0e5,#fffaf7);border-left:5px solid __ACCENT__;break-inside:avoid}
-.package-banner span{font-size:10px;text-transform:uppercase;color:#9a5925}.package-banner h3{font-size:17px}
-.spec-item{display:flex;gap:13px;padding:13px;margin:8px 0;border:1px solid #e4e9ef;border-left:3px solid __ACCENT__;border-radius:10px;background:#fff;break-inside:avoid}
-.spec-item h3{font-size:14px;color:#172745}.spec-item p{font-size:11px;color:#4a5970}
-.spec-number{min-width:30px;height:30px;display:grid;place-items:center;color:__ACCENT__;background:#fff1e5;border-radius:8px;font-weight:900}
-.material-choices{padding:15px;background:#fff9f3;border:1px solid #f2ddcc;margin:18px 0}
-.additional-work{font-size:9px;text-transform:uppercase;color:__ACCENT__}
-.pb-photo{margin:18px 0;border-radius:12px;overflow:hidden;border:1px solid #e2e8ef;break-inside:avoid}
-.pb-photo img{width:100%;height:68mm;object-fit:cover;display:block}
-.pb-photo figcaption{padding:8px 12px;background:#f4f6f9;color:#52617b;font-size:10px}
-.pb-close{break-before:page;page-break-before:always;min-height:242mm;display:flex;flex-direction:column;justify-content:space-between;padding:20mm 15mm;background:linear-gradient(145deg,#10213b,#1d395d);border-bottom:6px solid __ACCENT__;color:#fff;break-inside:avoid}
-.pb-close h2{color:#fff;font-size:38px;letter-spacing:-.06em;margin:35mm 0 17px}
-.pb-close p{color:#e4edf8;font-size:14px}
-.pb-contact{border-top:1px solid #ffffff66;padding-top:15px;display:grid;grid-template-columns:1fr 1fr;gap:15px;font-size:11px;overflow-wrap:anywhere}
-.pb-contact strong{display:block;color:#ffbc8b;font-size:10px;text-transform:uppercase;letter-spacing:1px}
-.pb-fine{font-size:10px!important;color:#cbd7e7!important}
-@media screen{body{background:#f0f3f7;padding:20px;overflow-x:auto}main{width:185mm;min-width:185mm;max-width:none;padding:15px;background:#fff;box-shadow:0 10px 32px #15264022}.pb-cover{height:760px;max-height:none}.pb-close{min-height:700px}}
-@media print{body,main{margin:0;padding:0;max-width:none;box-shadow:none}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
-
-/* Printed pages and compact, true-page mobile previews share one layout. */
-.pb-page { background:#fff; position:relative; break-inside:auto; }
-.pb-page-header {display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid #e8e0d9;padding:9px 0 12px;margin-bottom:14px}
-.pb-page-header .pb-brand-small {font-size:19px;font-weight:900;color:#17263f;letter-spacing:-.05em}
-.pb-page-header .pb-brand-small::first-letter {color:__ACCENT__}
-.pb-page-header small {font-size:9px;letter-spacing:1.3px;text-transform:uppercase;color:#586983;font-weight:800}
-.pb-page-label{font-size:10px;color:__ACCENT__;font-weight:850;text-transform:uppercase;letter-spacing:1.3px}
-.pb-page-footer {font-size:9px;color:#65768e;border-top:1px solid #ecdfd5;padding:9px 2px;display:flex;justify-content:space-between;gap:10px;margin-top:18px}
-.pb-project-banner{display:flex;align-items:center;min-height:58mm;position:relative;overflow:hidden;border-radius:13px;margin:8px 0 14px;
-  background:linear-gradient(100deg,#182b45,#394d64);color:#fff}
-.pb-project-banner img {width:100%;height:58mm;object-fit:cover;position:absolute;inset:0}
-.pb-project-banner:after {content:"";position:absolute;inset:0;background:linear-gradient(90deg,#102239ed 0%,#102239ab 48%,#10223920 100%)}
-.pb-project-banner .pb-banner-title {position:relative;z-index:1;padding:17px;max-width:58%;font-size:19px;color:#fff;font-weight:850;line-height:1.2}
-.pb-project-banner .pb-banner-title small {display:block;font-size:9px;font-weight:800;letter-spacing:1.3px;margin-bottom:8px;color:#ffbc8d;text-transform:uppercase}
-.pb-pricing .parties{margin:10px 0 15px}
-.pb-summary-title{margin:17px 0 12px;font-size:18px;font-weight:850;color:#17283f;border-left:4px solid __ACCENT__;padding-left:11px}
-.pb-fact-strip{display:flex;gap:8px;flex-wrap:wrap;background:#fff5ee;border:1px solid #f5ddcb;padding:12px;margin:12px 0;border-radius:10px}
-.pb-fact-strip span{font-size:10px;color:#455470;font-weight:750;flex:1 1 120px;white-space:normal}
-.pb-fact-strip b{display:block;font-size:16px;color:__ACCENT__}
-.pb-specs-page{break-before:page;page-break-before:always}
-.pb-material-image{width:100%;height:55mm;border-radius:11px;object-fit:cover;margin:8px 0 12px;display:block}
-.pb-specs-page .spec-pages{break-before:auto;page-break-before:auto}
-.pb-specs-page .spec-item{display:inline-flex;vertical-align:top;width:calc(50% - 8px);min-height:115px;margin:5px 3px 5px 0;background:#fff;border:1px solid #e8e1dc;border-left:3px solid __ACCENT__;box-shadow:0 4px 10px #1520380a}
-.pb-specs-page .spec-item h3{font-size:12px}.pb-specs-page .spec-item p{font-size:10px}
-.pb-specs-page .spec-number{border-radius:50%;width:28px;min-width:28px;height:28px}
-.pb-spec-intro {font-size:11px;color:#596880;margin-bottom:10px}
-.pb-payment-page{break-before:page;page-break-before:always}
-.pb-payment-page h2 {border-left:4px solid __ACCENT__;padding-left:11px;font-size:19px}
-.pb-payment-page .terms{break-inside:auto}
-.pb-payment-page .payment-plan tr td:nth-child(2){white-space:nowrap}
-.pb-payment-page .payment-plan tr:nth-child(2n){background:#fff9f3}
-.pb-payment-page .payment-plan tr.total {background:#fff0e6}
-.pb-terms-panel{padding:14px 16px;border:1px solid #eaded5;border-radius:11px;background:#faf9f7;margin-top:16px}
-.pb-terms-panel .text{font-size:10px}
-.pb-color-band{background:linear-gradient(100deg,__ACCENT__,#162943);height:8px;border-radius:7px;margin:15px 0}
-.pb-cover .pb-cover-amount{word-break:break-word}
-.pb-photo figcaption{font-weight:700}
+@page { size:A4; margin:12mm 13mm 14mm; }
+* { box-sizing:border-box; }
+html { color-scheme:light; }
+body { margin:0; color:#17253e; background:#fff; font:11px/1.55 Arial,Helvetica,sans-serif; }
+main { width:100%; max-width:184mm; margin:0 auto; }
+h1,h2,h3 { color:#112440; line-height:1.16; break-after:avoid; }
+p { margin:5px 0; }
+img { max-width:100%; display:block; }
+.text { white-space:pre-wrap; overflow-wrap:anywhere; }
+.muted { color:#66758c; }
+.amount { text-align:right; font-variant-numeric:tabular-nums; }
+.pb-cover {
+  height:260mm; min-height:260mm; max-height:260mm; overflow:hidden;
+  page-break-after:always; break-after:page; break-inside:avoid;
+  position:relative; isolation:isolate; padding:17mm 13mm 12mm;
+  background:linear-gradient(125deg,#08182e,#122a4a 68%,#1a3b5b);
+  display:flex; flex-direction:column; color:#fff;
+}
+.pb-cover-photo {
+  position:absolute; z-index:-3; inset:0; width:100%; height:100%;
+  object-fit:cover; object-position:63% center;
+}
+.pb-cover-shade {
+  position:absolute; z-index:-2; inset:0;
+  background:linear-gradient(90deg,rgba(5,17,34,.98) 0%,rgba(8,22,41,.93) 38%,rgba(10,23,40,.40) 80%,rgba(5,14,27,.20));
+}
+.pb-cover-photo-fallback {
+  z-index:-4; position:absolute; inset:0; pointer-events:none;
+  background:radial-gradient(circle at 86% 45%,#b66d3760,transparent 43%),
+   linear-gradient(140deg,#08182e,#183b5b);
+}
+.pb-cover-top {
+  display:flex; align-items:flex-start; justify-content:space-between; gap:12px;
+}
+.pb-company-name { font-size:26px; font-weight:900; letter-spacing:-1.4px; color:#fff; }
+.pb-company-name b { color:#ff872d; }
+.pb-cover-logo { max-height:65px; max-width:155px; background:#fff; padding:7px; border-radius:8px; }
+.pb-subbrand { display:block; color:#d8e3f3; letter-spacing:3px; text-transform:uppercase; font-size:9px; font-weight:700; margin-top:5px; }
+.pb-proposal-tag { display:block; font-size:10px; border:1px solid #dce9f6ab; padding:7px 13px; border-radius:24px; letter-spacing:1.8px; white-space:nowrap; color:#ecf4ff; text-transform:uppercase; }
+.pb-cover-main { display:flex; align-items:center; flex:1; min-height:0; }
+.pb-cover-copy { max-width:84%; }
+.pb-cover-kicker { font-size:10px; letter-spacing:3px; color:#ffaa70; font-weight:850; text-transform:uppercase; }
+.pb-cover h1 { color:#fff; font:bold 47px/1.05 Georgia,'Times New Roman',serif; letter-spacing:-2px; margin:19px 0 17px; }
+.pb-cover h1 em { font-style:normal; color:#ff984f; }
+.pb-cover-project { font-size:19px; color:#fff; font-weight:750; margin:5px 0 7px; }
+.pb-cover-number { color:#e4eff8; font-size:12px; margin-top:5px; }
+.pb-investment {
+  margin-top:23px; padding:13px 18px;
+  border:1px solid #d9e7f654; border-left:4px solid #ff7420;
+  border-radius:13px; background:#112944bd; width:max-content; max-width:100%;
+}
+.pb-investment small { display:block; font-size:10px; letter-spacing:2px; font-weight:850; color:#e2ecf7; text-transform:uppercase; margin-bottom:4px; }
+.pb-investment strong { font-size:26px; font-weight:900; color:#ff9a53; overflow-wrap:anywhere; }
+.pb-cover-bottom {
+  border-top:1px solid #ffffff80; padding-top:16px;
+  display:flex; align-items:center; justify-content:space-between; gap:18px;
+  font-size:11px; color:#e6edf7;
+}
+.pb-cover-bottom strong { color:#fff; display:block; font-size:12px; }
+.pb-cover-bottom .pb-cover-client { max-width:55%; }
+.pb-cover-bottom .pb-cover-status { text-align:right; }
+.pb-cover-photo-note { font-size:9px; color:#ffdfc7; padding-top:8px; }
+.pb-cover-steps {
+  display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+  font-size:10px; color:#e3eefa; font-weight:700; margin-top:19px;
+}
+.pb-cover-steps span { border-radius:18px; border:1px solid #ffffff55; padding:6px 9px; }
+.pb-page {
+  position:relative; background:white;
+  break-before:page; page-break-before:always;
+  padding:5mm 0 8mm; min-height:0;
+}
+.pb-page-header {
+  display:flex; justify-content:space-between; align-items:center; gap:13px;
+  padding:0 0 12px; border-bottom:1px solid #e1e7ef; margin-bottom:16px;
+}
+.pb-brand-name { font-size:19px; font-weight:900; color:#122542; letter-spacing:-.7px; }
+.pb-brand-name b { color:#ed6114; }
+.pb-page-header small { text-transform:uppercase; letter-spacing:1.6px; font-size:9px; color:#586a83; font-weight:800; }
+.pb-page-footer { margin-top:15px; padding:12px 0 0; display:flex; justify-content:space-between; gap:12px; border-top:1px solid #dfe5ed; color:#75839a; font-size:9px; }
+.pb-section-title { display:flex; align-items:center; gap:10px; margin:19px 0 9px; }
+.pb-section-title h2 { font:bold 24px/1.15 Georgia,'Times New Roman',serif; margin:0; color:#15263f; }
+.pb-section-title::before { content:""; width:5px; height:28px; background:__ACCENT__; border-radius:4px; flex:0 0 5px; }
+.pb-section-subtitle { font-size:10px; color:#697991; margin:3px 0 13px; }
+.pb-intro-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:15px 0 19px; }
+.pb-intro-card { border-radius:13px; padding:15px; border:1px solid #e8e7e4; min-width:0; break-inside:avoid; background:#fff8f2; }
+.pb-intro-card.project { background:#f1f6ff; border-color:#dee8fc; }
+.pb-intro-card .pb-mini-head { display:flex; align-items:center; gap:9px; color:#a44d16; margin-bottom:9px; font-size:9px; font-weight:850; text-transform:uppercase; letter-spacing:1.4px; }
+.pb-intro-card.project .pb-mini-head { color:#2b65b6; }
+.pb-intro-icon { display:grid; place-items:center; background:#ffdfca; color:#e15a11; border-radius:50%; width:32px; height:32px; flex:0 0 32px; font-size:18px; }
+.pb-intro-card.project .pb-intro-icon { background:#dae7fc; color:#3973c6; }
+.pb-intro-card h3 { font-size:14px; font-weight:850; margin:5px 0 10px; overflow-wrap:anywhere; }
+.pb-intro-card p { color:#52627a; font-size:10px; overflow-wrap:anywhere; }
+.pb-project-photo { height:52mm; margin:0 0 14px; position:relative; overflow:hidden; border-radius:13px; background:linear-gradient(120deg,#142845,#415a70); break-inside:avoid; }
+.pb-project-photo img { width:100%; height:100%; object-fit:cover; }
+.pb-project-photo .pb-project-photo-shade { position:absolute; inset:0; background:linear-gradient(90deg,#0b203bed 0%,#0b203b66 70%,transparent 100%); }
+.pb-project-photo .pb-project-photo-text { position:absolute; top:50%; left:15px; transform:translateY(-50%); max-width:70%; font-size:20px; font-weight:850; color:#fff; }
+.pb-project-photo .pb-project-photo-text small { display:block; font-size:9px; letter-spacing:1.8px; text-transform:uppercase; color:#ffb887; margin-bottom:9px; }
+.pb-project-photo .pb-photo-illustrative { position:absolute; right:8px; bottom:7px; padding:3px 6px; border-radius:5px; color:#fff; background:#0008; font-size:8px; }
+.pb-quote-meta { font-size:10px; color:#7b8698; margin:8px 0; }
+.pb-estimate table { border-collapse:collapse; width:100%; table-layout:fixed; margin:11px 0; border:1px solid #e8edf3; }
+table { width:100%; border-collapse:collapse; table-layout:fixed; margin:10px 0; }
+thead { display:table-header-group; }
+tr { break-inside:avoid; page-break-inside:avoid; }
+th,td { padding:10px 7px; vertical-align:top; text-align:left; border-bottom:1px solid #e4eaf0; font-size:10px; overflow-wrap:anywhere; }
+th { color:#253957; background:#edf2f8; font-weight:850; }
+tr.total { background:#fff0e5; color:#c3450a; font-weight:850; }
+tr.total td { border-top:1px solid #ffc7aa; }
+.pb-estimate .total td { font-weight:850; font-size:11px; }
+.pb-estimate .total td:last-child { color:#e45710; }
+.pb-estimate .line { width:30%; }
+.pb-estimate .amount, .pb-estimate .amount:last-child { white-space:normal; }
+.pb-final-total { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px; background:#fff0e6; border:1px solid #ffd2b4; border-radius:12px; margin:15px 0; break-inside:avoid; }
+.pb-final-total span { font-size:12px; font-weight:850; color:#4b5a70; }
+.pb-final-total strong { font-size:21px; font-weight:900; color:#c34a0c; text-align:right; }
+.pb-adjustments { background:#faf8f5; border:1px solid #ece4dc; border-radius:10px; padding:10px 13px; margin:15px 0; }
+.pb-adjustments p { display:flex; justify-content:space-between; gap:10px; font-size:10px; color:#57667e; }
+.pb-adjustments strong { color:#243750; }
+.pb-pricing-caption { color:#7b8596; font-size:9px; line-height:1.5; }
+.pb-specs-page { break-before:page; page-break-before:always; }
+.pb-material-hero { display:flex; align-items:center; justify-content:space-between; gap:12px; overflow:hidden; border-radius:12px; background:linear-gradient(110deg,#0c1c35,#233e5a); color:#fff; position:relative; min-height:50mm; padding:16px; margin-bottom:16px; break-inside:avoid; }
+.pb-material-hero > img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+.pb-material-hero:before { content:""; position:absolute; inset:0; background:linear-gradient(90deg,#0c1c35f8,#0c1c35cd 52%,#0c1c3566 100%); }
+.pb-material-hero-content { position:relative; z-index:1; width:72%; }
+.pb-material-hero h2 { font:bold 24px/1.13 Georgia,'Times New Roman',serif; margin:0 0 11px; color:#fff; }
+.pb-material-hero p { color:#e1eaf6; font-size:10px; max-width:80%; }
+.pb-material-hero small { display:block; text-transform:uppercase; letter-spacing:2px; font-size:9px; color:#ffab72; font-weight:850; margin-bottom:11px; }
+.pb-illustrative-label { position:absolute; bottom:8px; right:10px; background:#0b1c2fc7; color:#fff; font-size:8px; padding:4px 6px; border-radius:5px; z-index:1; }
+.pb-spec-card-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin:13px 0 18px; }
+.spec-item { display:block; break-inside:avoid; border-radius:12px; border:1px solid #e7ebf0; background:#fff; padding:13px; box-shadow:0 2px 8px #0d22360a; min-width:0; }
+.spec-item h3 { font-size:13px; font-weight:850; color:#162841; margin:10px 0 7px; }
+.spec-item p { color:#586982; font-size:10px; line-height:1.5; }
+.spec-number { display:grid; place-items:center; width:33px; height:33px; border-radius:9px; color:#ee6217; background:#fff0e6; font-weight:850; font-size:11px; }
+.pb-specs-page .spec-item { border-left:3px solid #ff7e35; }
+.pb-specs-page .spec-item:nth-child(3n + 1) { background:linear-gradient(140deg,#fff6ee,#fff); }
+.pb-specs-page .spec-item:nth-child(3n + 2) { background:linear-gradient(140deg,#f3f8ff,#fff); }
+.pb-specs-page .spec-item:nth-child(3n + 3) { background:linear-gradient(140deg,#f5faf8,#fff); }
+.pb-specs-page .spec-item .spec-number::before { content:"◆"; margin-right:2px; }
+.pb-specs-page .spec-item h3 { overflow-wrap:anywhere; }
+.pb-specs-page .spec-item p strong { color:#172d49; }
+.pb-spec-package { padding:14px 16px; border-radius:11px; background:#fff1e6; border-left:4px solid __ACCENT__; margin:12px 0; }
+.pb-spec-package h3 { margin:3px 0 6px; font-size:15px; }
+.pb-spec-package p { color:#586a83; font-size:11px; }
+.material-choices { margin:16px 0; border-radius:10px; background:#f7f9fc; padding:14px; border:1px solid #e4eaf0; }
+.material-choices h3 { font-size:13px; margin:0 0 10px; }
+.material-choices p { font-size:10px; padding:7px 0; border-bottom:1px solid #e8edf3; }
+.pb-material-footnote { font-size:9px; color:#6c798a; margin:10px 0; }
+.pb-payment-page h2, section.terms h2 { color:#1c2d47; font-size:19px; border-left:4px solid __ACCENT__; padding-left:11px; margin:14px 0; }
+.pb-payment-page table { border:1px solid #e7ebf1; }
+.pb-payment-page tbody tr:nth-child(even) { background:#fffaf6; }
+.pb-payment-page tr.total { background:#ffe6d5!important; }
+.pb-payment-page .text { white-space:pre-wrap; }
+.pb-terms-panel { background:#faf8f5; border:1px solid #e7e0d7; padding:14px; border-radius:10px; margin:16px 0; }
+.pb-terms-panel h2 { font-size:14px; }
+.pb-end {
+  break-before:page; page-break-before:always; break-inside:avoid;
+  min-height:255mm; padding:20mm 13mm 13mm; position:relative; overflow:hidden;
+  display:flex; flex-direction:column; justify-content:space-between;
+  background:linear-gradient(130deg,#101e36,#213d60); color:#fff;
+}
+.pb-end-photo { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+.pb-end-shade { position:absolute; inset:0; background:linear-gradient(90deg,#091b34fa,#0e2947ca 65%,#0f284258); }
+.pb-end-content { position:relative; z-index:1; }
+.pb-end h2 { color:#fff; font:bold 41px/1.1 Georgia,'Times New Roman',serif; max-width:140mm; margin:35mm 0 15px; }
+.pb-end h2 em { color:#ff9147; font-style:normal; }
+.pb-end p { font-size:13px; color:#dce9f8; }
+.pb-end-bottom { position:relative; z-index:1; border-radius:14px; background:#ffffffee; padding:18px; color:#192b47; overflow-wrap:anywhere; }
+.pb-end-bottom .pb-company-name { color:#162844; font-size:21px; }
+.pb-end-bottom p { color:#3c4e69; font-size:10px; }
+.pb-end-bottom strong { color:#d35510; font-size:10px; text-transform:uppercase; letter-spacing:1px; }
+.pb-end-contact { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:12px; }
+.pb-end-disclaimer { margin-top:16px; font-size:9px!important; }
 @media screen {
- body{padding:20px;background:#eef2f6;overflow-x:hidden}
- main{width:100%;max-width:185mm;min-width:0;padding:0;background:transparent;box-shadow:none}
- .pb-cover,.pb-page,.pb-close {width:100%;max-width:100%;margin:0 auto 16px;box-shadow:0 8px 28px #20334b24}
- .pb-page{padding:15px 18px;min-height:260mm;border:1px solid #e6e8eb}
- .pb-cover{height:260mm;max-height:none}
- .pb-close{min-height:255mm}
+ body { padding:16px; background:#edf2f8; overflow-x:hidden; }
+ main { max-width:184mm; width:100%; }
+ .pb-cover,.pb-page,.pb-end { width:100%; margin:0 auto 16px; border-radius:13px; box-shadow:0 9px 30px #132a4b20; }
+ .pb-page { padding:20px; min-height:250mm; }
+ .pb-cover { height:255mm; min-height:255mm; max-height:none; }
+ .pb-end { min-height:245mm; }
 }
-@media screen and (max-width:720px){
- body{padding:8px!important;margin:0;background:#edf1f6;overflow-x:hidden!important}
- main{display:block!important;min-width:0!important;width:100%!important;max-width:none!important;padding:0!important;box-shadow:none!important}
- .pb-cover,.pb-page,.pb-close{display:flex;flex-direction:column;box-sizing:border-box;width:100%!important;max-width:100%!important;min-width:0;min-height:calc((100vw - 16px)*1.414);height:auto;max-height:none;overflow:hidden;margin:0 0 12px!important;border-radius:9px;box-shadow:0 3px 13px #1627401a}
- .pb-page{padding:13px 12px;border:0;overflow:visible}
- .pb-cover{padding:23px 19px 20px}
- .pb-cover h2{font-size:clamp(27px,7vw,46px);margin:15px 0}
- .pb-cover h3{font-size:clamp(15px,4.3vw,20px)}
- .pb-cover-body{min-height:310px}
- .pb-cover-amount{font-size:clamp(18px,5vw,26px);margin-top:22px}
- .pb-top{min-height:40px}.pb-company{font-size:clamp(16px,4.8vw,21px)}
- .pb-tag{font-size:7px;letter-spacing:1px;padding:5px 7px}
- .pb-bottom{font-size:9px;flex-wrap:wrap;gap:7px}
- .pb-page-header .pb-brand-small{font-size:16px}
- .pb-page-header small{font-size:8px}
- .pb-page-label{font-size:8px}
- .pb-project-banner{min-height:145px;margin:7px 0 11px}
- .pb-project-banner img{height:145px}
- .pb-project-banner .pb-banner-title{font-size:15px;padding:12px;max-width:70%}
- .pb-quote-heading,.pb-title{padding:9px 10px;margin:10px 0}
- .pb-title h1{font-size:clamp(16px,4.5vw,25px)}
- .parties{gap:7px!important;margin:8px 0!important}
- .parties section{min-height:0;padding:9px 8px;border-radius:9px}
- .parties h2{font-size:9px}.parties h3{font-size:11px}
- .parties p{font-size:8px;overflow-wrap:anywhere;line-height:1.4}
- .pb-summary-title{font-size:15px;margin:11px 0}
- table{font-size:8px;table-layout:fixed;margin:8px 0}
- th,td{font-size:8px;padding:7px 4px;overflow-wrap:anywhere}
- th{font-size:8px}.line{width:38%}.amount{word-break:break-word}
- .totals{width:100%;margin:12px 0}
- .totals .total td{font-size:12px}
- .pb-fact-strip{gap:6px;padding:9px}.pb-fact-strip span{font-size:9px;flex:1 1 70px}.pb-fact-strip b{font-size:13px}
- .pb-specs-page .spec-item{min-height:0;padding:9px 7px;gap:6px;width:calc(50% - 6px);margin:3px 2px 3px 0;display:inline-flex}
- .pb-specs-page .spec-item h3{font-size:10px}.pb-specs-page .spec-item p{font-size:8px;line-height:1.45}
- .pb-specs-page .spec-number{min-width:20px;width:20px;height:20px;font-size:9px}
- .pb-material-image{height:130px;object-fit:cover}
- .pb-specs-page h2,.pb-payment-page h2{font-size:16px}
- .pb-payment-page .terms h2{font-size:16px}
- .pb-terms-panel{padding:10px 12px}
- .pb-terms-panel .text{font-size:9px}
- .pb-close{padding:20px}.pb-close h2{font-size:clamp(23px,7vw,36px);margin:45px 0 12px}
- .pb-close p{font-size:11px}.pb-contact{font-size:9px}
- .pb-page-footer{font-size:8px;margin-top:auto;padding-top:12px}
+@media screen and (max-width:720px) {
+ body { padding:8px; margin:0; }
+ main { width:100%; max-width:none; min-width:0; }
+ .pb-cover,.pb-page,.pb-end { width:100%; min-width:0; max-width:100%; margin:0 auto 12px; border-radius:11px; }
+ .pb-page { padding:14px 12px; min-height:0; }
+ .pb-cover { min-height:calc((100vw - 16px) * 1.414); height:auto; max-height:none; padding:25px 19px 21px; }
+ .pb-cover h1 { font-size:clamp(31px,9vw,45px); }
+ .pb-company-name { font-size:22px; }
+ .pb-proposal-tag { font-size:8px; letter-spacing:1px; padding:6px 8px; }
+ .pb-cover-copy { max-width:94%; }
+ .pb-investment { margin-top:19px; padding:11px; }
+ .pb-investment strong { font-size:clamp(19px,6vw,27px); }
+ .pb-cover-bottom { gap:7px; font-size:9px; }
+ .pb-cover-steps { gap:5px; font-size:9px; }
+ .pb-cover-steps span { padding:4px 7px; }
+ .pb-page-header { margin-bottom:12px; }
+ .pb-brand-name { font-size:16px; }
+ .pb-page-header small { font-size:8px; }
+ .pb-section-title h2 { font-size:21px; }
+ .pb-intro-grid { gap:8px; }
+ .pb-intro-card { padding:10px; }
+ .pb-intro-card h3 { font-size:11px; }
+ .pb-intro-card p { font-size:9px; }
+ .pb-intro-icon { width:25px; height:25px; flex-basis:25px; font-size:13px; }
+ .pb-project-photo { height:140px; }
+ .pb-project-photo .pb-project-photo-text { font-size:15px; }
+ th,td { font-size:9px; padding:8px 4px; }
+ .pb-estimate .total td { font-size:10px; }
+ .pb-estimate .line { width:27%; }
+ .pb-final-total strong { font-size:18px; }
+ .pb-material-hero { min-height:170px; }
+ .pb-material-hero h2 { font-size:24px; }
+ .pb-material-hero-content { width:87%; }
+ .pb-spec-card-grid { gap:7px; }
+ .spec-item { padding:10px; }
+ .spec-item h3 { font-size:11px; }
+ .spec-item p { font-size:9px; }
+ .pb-end { min-height:calc((100vw - 16px) * 1.414); padding:24px 19px 18px; }
+ .pb-end h2 { font-size:30px; margin:30px 0 15px; }
+ .pb-end-bottom { padding:12px; }
+ .pb-end-contact { gap:10px; }
 }
-@media print{
- main{width:auto!important;max-width:none!important;padding:0!important;margin:0!important}
- .pb-cover,.pb-page,.pb-close{box-shadow:none!important;border:0!important;border-radius:0!important}
- .pb-page{min-height:0}
- .pb-page-header{margin-top:0}
- .pb-page-footer{margin-top:14px}
- .pb-specs-page .spec-item{display:inline-flex}
+@media print {
+ body,main { max-width:none; padding:0; margin:0; background:#fff; }
+ .pb-cover,.pb-page,.pb-end { border-radius:0; box-shadow:none; }
+ .pb-page { min-height:0; padding:0; }
+ .pb-cover { height:260mm; min-height:260mm; max-height:260mm; }
+ .pb-end { min-height:255mm; }
+ * { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
 }
-
 </style>`;
 
-export function premiumSections(d: CustomerDocument) {
-  const brand = d.header.branding;
-  const company = esc(brand.name);
-  const logo = brand.logo_data_uri;
-  const site = esc([brand.address.line1,brand.address.city,brand.address.region,brand.address.country_code].filter(Boolean).join(', '));
-  const coverImage = brand.cover_image_data_uri ?? '';
-  const detailImage = brand.detail_image_data_uri ?? '';
-  const materialImage = brand.materials_image_data_uri ?? '';
-  const logoTag = logo ? '<img alt="Company logo" src="'+esc(logo)+'">' : '<span class="pb-company">'+company+'</span>';
-  const value = new Intl.NumberFormat('en-IN',{style:'currency',currency:d.currency,maximumFractionDigits:2}).format(Number(d.totals.final_amount));
-  const cover = '<section class="pb-cover">'+
-    (coverImage ? '<img class="pb-cover-photo" alt="Company-supplied building photograph" src="'+esc(coverImage)+'"><div class="pb-cover-shade"></div>' : '<div class="pb-building" aria-hidden="true"></div>')+
-    '<div class="pb-top">'+logoTag+'<span class="pb-tag">Quotation proposal</span></div>'+
-    '<div class="pb-cover-body"><div><span class="pb-eyebrow">Prepared for '+esc(d.header.customer.name)+'</span>'+
-    '<h2>Building your<br>next chapter.</h2><h3>'+esc(d.header.project.name)+'</h3>'+
-    '<p>'+esc(d.number)+' · Revision '+d.revision+'</p>'+
-    '<div class="pb-cover-amount"><small>Proposed project investment</small>'+esc(value)+'</div></div></div>'+
-    '<div class="pb-bottom"><div><strong>'+company+'</strong>'+site+'</div>'+
-    '<div>Valid until '+esc(d.valid_until)+'<p>'+esc(d.status.toUpperCase())+'</p></div></div></section>';
-  const photo = detailImage ? '<figure class="pb-photo"><img alt="Company-supplied project photo" src="'+esc(detailImage)+'">'+
-    '<figcaption>Project inspiration · supplied by '+company+'</figcaption></figure>' : '';
-  const end = '<section class="pb-close"><div>'+logoTag+
-    '<h2>Thank you for<br>considering '+company+'.</h2>'+
-    '<p>We look forward to discussing your plans together.</p></div>'+
-    '<div><div class="pb-contact"><div><strong>Contact</strong>'+esc(brand.phone)+'<br>'+esc(brand.email)+'</div>'+
-    '<div><strong>Location</strong>'+site+'</div></div>'+
-    '<p class="pb-fine">Quotation '+esc(d.number)+' · Revision '+d.revision+
-    '. This proposal is not a signed contract. Scope and prices are governed by the written quotation and terms.</p></div></section>';
-  const materialBanner = materialImage ? '<img class="pb-material-image" src="'+esc(materialImage)+'" alt="Company-provided materials and finishes">' : '';
-  const projectBanner = '<div class="pb-project-banner">'+
-    (detailImage ? '<img src="'+esc(detailImage)+'" alt="Company-provided project photograph">' : '')+
-    '<div class="pb-banner-title"><small>Project proposal</small>'+
-    esc(d.header.project.name)+'</div></div>';
-  const pageHeader = (section: string) => '<div class="pb-page-header"><span class="pb-brand-small">'+company+
-    '</span><small>'+esc(section)+'</small></div>';
-  const pageFooter = (section: string) => '<div class="pb-page-footer"><span>'+esc(d.number)+' · R'+d.revision+
-    '</span><strong>'+esc(section)+'</strong></div>';
-  return {cover,photo,end,materialBanner,projectBanner,pageHeader,pageFooter};
+export function premiumSections(document: CustomerDocument) {
+  const brand = document.header.branding;
+  const rawCompany = brand.name.trim();
+  const firstSpace = rawCompany.indexOf(' ');
+  const prefix = firstSpace >= 0 ? rawCompany.slice(0, firstSpace) : rawCompany;
+  const suffix = firstSpace >= 0 ? rawCompany.slice(firstSpace) : '';
+  const companyName = '<span class="pb-company-name"><b>'+escape(prefix)+'</b>'+escape(suffix)+'</span>';
+  const miniBrand = '<span class="pb-brand-name"><b>'+escape(prefix)+'</b>'+escape(suffix)+'</span>';
+  const contact = [brand.address.line1,brand.address.line2,brand.address.city,
+    brand.address.region,brand.address.postal_code].filter(Boolean).map(escape).join(', ');
+  const siteAddress = document.header.project.site_address;
+  const location = [siteAddress.city, siteAddress.region].filter(Boolean).map(escape).join(', ');
+  const projectImage = brand.detail_image_data_uri || conceptInterior;
+  const houseImage = brand.cover_image_data_uri || conceptVilla;
+  const materialImage = brand.materials_image_data_uri || projectImage;
+  const conceptCover = !brand.cover_image_data_uri;
+  const conceptDetail = !brand.detail_image_data_uri;
+  const conceptMaterial = !brand.materials_image_data_uri;
+  const logo = brand.logo_data_uri ? '<img class="pb-cover-logo" alt="Company logo" src="'+escape(brand.logo_data_uri)+'">' : companyName;
+  const number = escape(document.number);
+  const displayMoney = new Intl.NumberFormat('en-IN',{style:'currency',currency:document.currency,
+    maximumFractionDigits:2,minimumFractionDigits:2}).format(Number(document.totals.final_amount));
+  const valid = friendlyDate(document.valid_until);
+  const proposalImage = '<img class="pb-cover-photo" src="'+escape(houseImage)+'" alt="'+
+    (conceptCover ? 'Illustrative architectural concept' : 'Company-provided project photograph')+'">';
+  const cover = '<section class="pb-cover"><div class="pb-cover-photo-fallback"></div>'+proposalImage+
+    '<div class="pb-cover-shade"></div><div class="pb-cover-top"><div>'+logo+
+    '<span class="pb-subbrand">Quotation proposal</span></div>'+
+    '<span class="pb-proposal-tag">Project proposal</span></div>'+
+    '<div class="pb-cover-main"><div class="pb-cover-copy">'+
+    '<div class="pb-cover-kicker">Prepared for '+escape(document.header.customer.name)+'</div>'+
+    '<h1>Building your<br>next <em>chapter.</em></h1>'+
+    '<p class="pb-cover-project">'+escape(document.header.project.name)+'</p>'+
+    '<p class="pb-cover-number">'+number+' · Revision '+document.revision+'</p>'+
+    '<div class="pb-investment"><small>Proposed project investment</small>'+
+    '<strong>'+escape(displayMoney)+'</strong></div>'+
+    '<div class="pb-cover-steps"><span>Detailed estimate</span><span>Material specifications</span>'+
+    '<span>Payment milestones</span></div></div></div>'+
+    '<div class="pb-cover-bottom"><div class="pb-cover-client"><strong>Prepared for '+escape(document.header.customer.name)+'</strong>'+
+    (location || contact)+'</div><div class="pb-cover-status"><strong>Valid until '+escape(valid)+'</strong>'+
+    escape(document.status.toUpperCase())+'</div></div>'+
+    (conceptCover ? '<div class="pb-cover-photo-note">Illustrative architectural concept; not an image of the proposed project.</div>' : '')+
+    '</section>';
+  const photoPage = '<div class="pb-project-photo"><img alt="'+
+    (conceptDetail ? 'Illustrative interior concept image' : 'Company-supplied project photograph')+
+    '" src="'+escape(projectImage)+'"><div class="pb-project-photo-shade"></div>'+
+    '<div class="pb-project-photo-text"><small>Project proposal</small>'+
+    escape(document.header.project.name)+'</div>'+
+    (conceptDetail ? '<div class="pb-photo-illustrative">Illustrative concept</div>' : '')+
+    '</div>';
+  const specHero = '<div class="pb-material-hero"><img alt="'+
+    (conceptMaterial ? 'Illustrative interior and finishes' : 'Company-supplied materials photograph')+
+    '" src="'+escape(materialImage)+'"><div class="pb-material-hero-content">'+
+    '<small>Project specifications</small><h2>Materials &amp;<br>Specifications</h2>'+
+    '<p>Only the brands, grades, allowances and inclusions saved in this quotation are specified below.</p></div>'+
+    (conceptMaterial ? '<span class="pb-illustrative-label">Illustrative concept</span>' : '')+'</div>';
+  const close = '<section class="pb-end"><img class="pb-end-photo" src="'+escape(houseImage)+'" alt="Architectural background">'+
+    '<div class="pb-end-shade"></div><div class="pb-end-content">'+logo+
+    '<h2>Thank you for<br>considering <em>'+escape(rawCompany)+'.</em></h2>'+
+    '<p>We look forward to discussing your project and its next steps together.</p></div>'+
+    '<div class="pb-end-bottom">'+companyName+
+    '<div class="pb-end-contact"><div><strong>Contact</strong><p>'+escape(brand.phone)+
+    '<br>'+escape(brand.email)+'</p></div><div><strong>Office</strong><p>'+
+    (contact || 'Address available on request')+'</p></div></div>'+
+    '<p class="pb-end-disclaimer">Quotation '+number+' · Revision '+document.revision+
+    '. This proposal is not a signed construction contract. The saved specifications and written terms govern its scope.</p>'+
+    (conceptCover ? '<p class="pb-end-disclaimer">Background is an illustrative architecture image.</p>' : '')+
+    '</div></section>';
+  const pageHeader = (label: string) =>
+    '<div class="pb-page-header">'+miniBrand+'<small>'+escape(label)+'</small></div>';
+  const pageFooter = (label: string) =>
+    '<div class="pb-page-footer"><span>'+number+' · Revision '+document.revision+
+    '</span><strong>'+escape(label)+'</strong></div>';
+  return { cover, photoPage, specHero, close, pageHeader, pageFooter };
 }
