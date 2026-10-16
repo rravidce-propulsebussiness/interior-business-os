@@ -133,6 +133,7 @@ export function InteriorRoomBuilder({
                 <option value="custom">Custom Quote</option>
               </select>
             </label>
+            {selectedPackage && (
             <label className="qs-field">
               Quantity ({priceUnit})
               <input
@@ -161,6 +162,7 @@ export function InteriorRoomBuilder({
                 onChange={(event) => setPackageQuantity(event.target.value)}
               />
             </label>
+            )}
             {selectedPackage && (
               <div className="sm:col-span-2 rounded-xl border border-blue-100 bg-white p-4">
                 <p className="text-xs font-semibold text-slate-700">
