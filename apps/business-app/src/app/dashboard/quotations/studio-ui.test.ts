@@ -66,3 +66,31 @@ describe('single package choice in the saved quotation editor', () => {
     expect(interior).toContain('data-studio-save={!selectedPackage');
   });
 });
+
+describe('lead-driven quotation creation', () => {
+  const form = file('./studio-start.tsx');
+  const page = file('./new/page.tsx');
+  const action = file('./studio-actions.ts');
+  const css = file('./clean-create.css');
+
+  it('shows one lead selector instead of construction, interior and custom cards', () => {
+    expect(form).not.toContain('qs-create-types');
+    expect(form).not.toContain('Custom / Others');
+    expect(form).not.toContain('chooseStyle');
+    expect(css).not.toContain('.qs-create-type');
+    expect(form).toContain('onChange={(event) => chooseLead(event.target.value)}');
+    expect(form).toContain('const industry = selectedLead?.industryKey');
+    expect(form).toContain('Auto-detected from lead');
+    expect(form).toContain('disabled={pending || !leadId || !industry');
+    expect(form).toContain("industry === 'construction' ? 'sft' : 'custom'");
+  });
+
+  it('derives category from the tenant lead and rejects unknown classifications', () => {
+    expect(page).toContain('resolveLeadCategory(entry, enabledIndustries)');
+    expect(action).toContain('leadId: z.uuid()');
+    expect(action).not.toContain('industryKey: z.string()');
+    expect(action).toContain('entry.id === lead.industry_id');
+    expect(action).toContain('resolveLeadCategory(lead, industries)');
+    expect(action).toContain('Classify this lead in CRM');
+  });
+});
