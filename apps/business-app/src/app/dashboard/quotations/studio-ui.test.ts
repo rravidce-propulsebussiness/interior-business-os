@@ -121,3 +121,32 @@ describe('automatic CRN reuse from selected lead', () => {
     expect(action).toContain('if (!customerId) {');
   });
 });
+
+describe('customer-grouped quotation list without Draft presentation', () => {
+  const list = file('./page.tsx');
+  const css = file('./quotations-list.css');
+
+  it('removes draft tabs, filters, badges and metrics while retaining editing permissions', () => {
+    expect(list).not.toContain("label: 'Draft'");
+    expect(list).not.toContain("label: 'Drafts'");
+    expect(list).not.toContain('<option value="draft">');
+    expect(list).not.toContain('statusName(row.status)');
+    expect(list).not.toContain('qs-state-draft');
+    expect(list).toContain("row.status === 'draft' && canEdit");
+    expect(list).toContain('Not shared');
+    expect(list).toContain('Shared');
+  });
+
+  it('shows one mobile customer card containing all quote options for their customer ID', () => {
+    expect(list).toContain(".select('id,industry_id,customer_id')");
+    expect(list).toContain('const customerGroups = new Map<string');
+    expect(list).toContain('customerGroups.get(quote.customerId)');
+    expect(list).toContain('group.quotes.push(quote)');
+    expect(list).toContain('mobileCustomers.map((group)');
+    expect(list).toContain('group.quotes.map(');
+    expect(list).toContain('qs-quotes-customer-card');
+    expect(list).toContain('qs-quotes-mobile-quote');
+    expect(list).toContain('<QuotationReviseButton');
+    expect(css).toContain('.qs-quotes-customer-header');
+  });
+});
