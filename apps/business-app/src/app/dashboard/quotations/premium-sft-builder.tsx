@@ -81,7 +81,7 @@ const measured = (row:Work) => {
 const nonempty=(s:string|undefined)=>Boolean(s?.trim());
 
 export function PremiumSftBuilder({
-  rates,packages,initialSchedule,revisionId,version,selectedPackageId,previewHtml,
+  rates,packages,initialSchedule,revisionId,version,selectedPackageId,
 }:{
   rates:ConstructionRate[];
   packages:ConstructionPackage[];
