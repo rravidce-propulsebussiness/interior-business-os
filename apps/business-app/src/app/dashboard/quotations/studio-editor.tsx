@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { parseSftEstimate } from '@business-os/core/sft-quotation';
 
 type Tab = 'client' | 'quote' | 'files' | 'payments' | 'preview';
-type Mode = 'sft' | 'custom' | 'pdf';
 
 type QuotationLine = {
   id: string;
@@ -52,7 +51,6 @@ export function QuotationStudioEditor({
   status,
   industryKey,
   industryName,
-  otherIndustries,
   header,
   lines,
   total,
@@ -64,7 +62,6 @@ export function QuotationStudioEditor({
   termsEditor,
   paymentEditor,
   sharingEditor,
-  initialMode,
   initialStep,
   canEdit,
   canIssue,
@@ -77,7 +74,6 @@ export function QuotationStudioEditor({
   status: string;
   industryKey: string;
   industryName: string;
-  otherIndustries: { key: string; name: string }[];
   header: DocumentHeader;
   lines: QuotationLine[];
   total: string;
@@ -89,7 +85,6 @@ export function QuotationStudioEditor({
   termsEditor: ReactNode;
   paymentEditor: ReactNode;
   sharingEditor: ReactNode;
-  initialMode: Mode;
   initialStep: Tab;
   canEdit: boolean;
   canIssue: boolean;
@@ -102,9 +97,13 @@ export function QuotationStudioEditor({
       setMessage('This shared quotation is protected. Start a new revision to edit it.');
       return;
     }
-    const saveButton = document.querySelector<HTMLButtonElement>(
-      '[data-studio-save="' + step + '"]',
-    );
+    const saveButton = step === 'files'
+      ? document.querySelector<HTMLButtonElement>(
+          '[data-studio-save-section="files"] form button[type="submit"]',
+        )
+      : document.querySelector<HTMLButtonElement>(
+          '[data-studio-save="' + step + '"]',
+        );
     if (!saveButton) {
       setMessage('No pending changes in this section. Your quotation is saved.');
       return;
