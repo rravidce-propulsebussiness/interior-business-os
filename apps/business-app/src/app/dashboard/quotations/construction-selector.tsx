@@ -191,9 +191,6 @@ export function ConstructionSelector({
   version,
   initialMode = 'sft',
   quoteNumber,
-  clientName,
-  location,
-  savedTotal,
   canSharePdf = false,
 }: {
   rates: ConstructionRate[];
@@ -203,9 +200,6 @@ export function ConstructionSelector({
   version: number;
   initialMode?: 'sft' | 'custom';
   quoteNumber?: string;
-  clientName?: string;
-  location?: string;
-  savedTotal?: string;
   canSharePdf?: boolean;
 }) {
   const activePackages = packages.filter((pkg) => pkg.status === 'active');
@@ -220,23 +214,6 @@ export function ConstructionSelector({
   const chosen = activePackages.find((pkg) => pkg.id === selected);
   return (
     <div className="qs-build-workspace">
-      <header className="qs-build-overview" aria-label="Quotation overview">
-        <div className="qs-build-overview-client">
-          <small>Quote # {quoteNumber || 'New quotation'}</small>
-          <strong>{clientName || 'Client quotation'}</strong>
-          <span>Construction{location ? ' · ' + location : ''}</span>
-        </div>
-        <div>
-          <small>Selected package</small>
-          <strong>{chosen?.name || 'Choose package'}</strong>
-          <span>Company specifications</span>
-        </div>
-        <div className="qs-build-overview-price">
-          <small>Saved estimate</small>
-          <strong>{money(Number(savedTotal || '0'))}</strong>
-          <span>Edit work details below</span>
-        </div>
-      </header>
       <section className="qs-build-panel qs-build-package">
         <div className="qs-build-title">
           <span className="qs-build-number">01</span>
