@@ -195,6 +195,7 @@ export function ConstructionSelector({
   clientName,
   location,
   savedTotal,
+  canSharePdf = false,
 }: {
   rates: ConstructionRate[];
   packages: ConstructionPackage[];
@@ -207,6 +208,7 @@ export function ConstructionSelector({
   clientName?: string;
   location?: string;
   savedTotal?: string;
+  canSharePdf?: boolean;
 }) {
   const activePackages = packages.filter((pkg) => pkg.status === 'active');
   const previous = activePackages.find((pkg) =>
@@ -272,7 +274,8 @@ export function ConstructionSelector({
         <PremiumSftBuilder key={selected}
           selectedPackageId={chosen.id}
           rates={rates} packages={packages} initialSchedule={initialSchedule}
-          revisionId={revisionId} version={version} previewHtml={previewHtml} />
+          revisionId={revisionId} version={version}
+          quoteNumber={quoteNumber || 'Quotation'} canSharePdf={canSharePdf} />
       ) : (
         <p className="qs-build-empty">Choose a package above to enter floor areas, optional works and material brands.</p>
       )}
