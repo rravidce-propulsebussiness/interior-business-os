@@ -148,6 +148,7 @@ export function PremiumSftBuilder({
   const total=floors.reduce((sum,r)=>sum+measured(r)*Number(r.ratePerSqft||0),0)+
     extras.reduce((sum,r)=>sum+measured(r)*Number(r.ratePerSqft||0),0);
   const area=floors.reduce((sum,r)=>sum+measured(r),0);
+  const displayedTotal=estimate?Number(estimate.total):total;
   const valid=Boolean(estimate)&&!pending&&stale.length===0&&
     (activePackages.length===0||Boolean(selectedPackage));
   const touch=()=>{setSaved(false);setMessage('');};
@@ -267,7 +268,7 @@ export function PremiumSftBuilder({
       <div className="qs-work-add">
         <label><span className="qs-work-plus">＋</span>
           <span>Add work item</span>
-          <select aria-label="Add construction work item" defaultValue="" value=""
+          <select aria-label="Add construction work item" value=""
             disabled={rows.length>=18}
             onChange={e=>addExtra(e.target.value)}>
             <option value="">Choose item…</option>
@@ -329,7 +330,7 @@ export function PremiumSftBuilder({
     <div className="qs-work-summary" aria-label="Construction quotation total">
       <div className="qs-work-summary-info">
         <small>Total estimate · {floors.length} floors · {area.toLocaleString('en-IN',{maximumFractionDigits:2})} SFT</small>
-        <strong>{total>0?fmt(total):'Enter dimensions'}</strong>
+        <strong>{displayedTotal>0?fmt(displayedTotal):'Enter dimensions'}</strong>
       </div>
       <a href={url+'/studio?step=preview'} className="qs-work-summary-share">◉ Preview &amp; Share</a>
       <button data-studio-save="quote" type="button" className="qs-work-summary-save"
