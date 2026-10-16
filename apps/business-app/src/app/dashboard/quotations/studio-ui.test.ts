@@ -220,3 +220,41 @@ describe('latest quote per customer with expandable prior history', () => {
     expect(page).toContain('QuotationRemovalButton');
   });
 });
+
+describe('compact single-screen construction quotation editor', () => {
+  const selector = file('./construction-selector.tsx');
+  const editor = file('./premium-sft-builder.tsx');
+  const actions = file('./construction-actions.ts');
+  const css = file('./studio.css');
+
+  it('uses company orange hero and one package selector instead of a navy multi-step wizard', () => {
+    expect(selector).toContain('qs-build-hero');
+    expect(selector).toContain('Select construction quotation package');
+    expect(selector).toContain('qs-build-package-rate');
+    expect(css).toContain('#fff6ed');
+    expect(css).toContain('#f16a22');
+    expect(editor).not.toContain('01 · Package & floor costing');
+    expect(editor).not.toContain('02 · Package specifications');
+    expect(editor).not.toContain('Build your quotation, floor by floor.');
+  });
+
+  it('offers floor count and optional shelves with direct area inputs', () => {
+    expect(editor).toContain('setFloorCount(count)');
+    expect(editor).toContain("'Ground Floor', 'First Floor', 'Second Floor'");
+    expect(editor).toContain('Shelves & Sajjas');
+    expect(editor).toContain('toggleShelves(event.target.checked)');
+    expect(editor).toContain('Shelves rate per square foot');
+    expect(editor).toContain('data-studio-save="quote"');
+  });
+
+  it('stores brand edits in a quotation specification snapshot, not a package template', () => {
+    expect(editor).toContain('Edit material brands');
+    expect(editor).toContain('Apply to this quote');
+    expect(editor).toContain('quotation brand override');
+    expect(editor).toContain('setSections(nextSections)');
+    expect(editor).toContain('saveFloorwiseSftEstimate(revisionId, version,');
+    expect(editor).not.toContain('construction_package_save');
+    expect(actions).toContain('const calculated = calculateSftEstimate(');
+    expect(actions).toContain('const description = encodeSftEstimate(calculated)');
+  });
+});
