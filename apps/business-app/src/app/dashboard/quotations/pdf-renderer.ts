@@ -1,4 +1,4 @@
-import { renderPdf, PdfServiceError, renderQuotationFallbackPdf } from '@business-os/shared/pdf';
+import { renderPdf, renderQuotationFallbackPdf } from '@business-os/shared/pdf';
 import type { CustomerDocument } from '@business-os/core/quotation-document';
 import { parseSftEstimate } from '@business-os/core/sft-quotation';
 
@@ -15,6 +15,23 @@ const number = (value: string) => {
 };
 
 /**
+ * The browser preview can use explicitly labelled public concept photography,
+ * but the secure PDF renderer MUST NOT fetch external URLs.
+ * Swap only the two known static Unsplash concept-image sources for a tiny
+ * embedded raster. Tenant-uploaded base64 images remain in the branded PDF.
+ * The underlying gradients remain visible if a concept photo was not uploaded.
+ */
+const transparentPng =
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScL/nwAAAABJRU5ErkJggg==';
+
+export function safeQuotationPrintHtml(html: string): string {
+  return html.replace(
+    /src=(["'])https:\/\/images\.unsplash\.com\/photo-(?:1756435292384-1bf32eff7baf|1751945965597-71171ec7a458)[^"']*\1/gi,
+    'src="' + transparentPng + '"',
+  );
+}
+
+/**
  * Prefer the full brochure PDF. Hostinger instances without an installed
  * Chromium browser use a real PDF-Lib A4 fallback rather than returning 503.
  * It includes the saved tenant identity, full work breakdown, all recorded
@@ -22,9 +39,16 @@ const number = (value: string) => {
  */
 export async function renderQuotationPdf(html: string, document?: CustomerDocument) {
   try {
-    return await renderPdf(html);
-  } catch (error) {
-    if (!(error instanceof PdfServiceError) || !document) throw error;
+    // This is trusted, server-authored quotation HTML. The printer preflight
+    // rejects any remote image source, including curated public concept photos.
+    // Sanitize those before the preflight or the printer would always fail.
+    return await renderPdf(safeQuotationPrintHtml(html));
+  } catch {
+    // Preflight errors occur BEFORE renderPdf's internal try/catch and are not
+    // PdfServiceError. All printer failures must reach the local renderer.
+    // Never render raw user-supplied HTML: the fallback takes the validated
+    // customer document, not HTML, URLs or arbitrary file sources.
+    if (!document) throw new Error('PDF renderer unavailable without a saved quotation');
     const h = document.header;
     const items = document.lines.flatMap((line) => {
       const sft = parseSftEstimate(line.description);
