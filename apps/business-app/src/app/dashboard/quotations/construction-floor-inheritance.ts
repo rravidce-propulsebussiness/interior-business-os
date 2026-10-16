@@ -60,7 +60,22 @@ export function propagateFloorChanges<T extends FloorWork>(
   for (let level = start + 1; level < LEVEL_NAMES.length; level++) {
     updated = followPreviousFloor(updated, level);
   }
-  return updated;
+  if (floorZone(originalRow.name) !== 'construction') return updated;
+  // Penthouse is constructed area: when it still uses the construction
+  // rate, carry a changed construction rate through to the same-level
+  // penthouse. Never overwrite a separately customized penthouse rate.
+  return updated.map(row => {
+    if (row.kind !== 'floor' || floorZone(row.name) !== 'penthouse')
+      return row;
+    const level = floorLevel(row.name);
+    const before = original.find(x =>
+      isFloor(x, level) && floorZone(x.name) === 'construction');
+    const after = updated.find(x =>
+      isFloor(x, level) && floorZone(x.name) === 'construction');
+    if (!before || !after || row.ratePerSqft !== before.ratePerSqft ||
+      after.ratePerSqft === before.ratePerSqft) return row;
+    return { ...row, ratePerSqft: after.ratePerSqft };
+  });
 }
 export function restoreFloorFollowing<T extends FloorWork>(rows: readonly T[], level: number): T[] {
   const reset = rows.map(row => isFloor(row, level) && floorZone(row.name) === 'construction'
