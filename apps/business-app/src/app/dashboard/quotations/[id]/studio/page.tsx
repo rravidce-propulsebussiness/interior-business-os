@@ -164,6 +164,7 @@ export default async function QuotationStudio({
         revisionId={revision.id}
         quoteNumber={root.quotation_number}
         revisionNumber={revision.revision_number}
+        revisionVersion={revision.version}
         currency={revision.currency}
         status={revision.status}
         industryKey={industryKey}
