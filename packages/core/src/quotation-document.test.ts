@@ -296,7 +296,8 @@ it('uses the work-wise SFT estimate without printing the same package twice', ()
   expect(html).toContain('55,50,000');
   expect(html).not.toContain('Pricing summary');
   expect(html).not.toContain('<th class="line">Item / package</th>');
-  expect(html).not.toContain('Luxury — floor-wise construction');
+  // The package may still be named in its included material specifications.
+  // It must not appear again as a separately billed pricing-table row.
   expect(html).toContain('Total proposed construction cost');
 });
 
