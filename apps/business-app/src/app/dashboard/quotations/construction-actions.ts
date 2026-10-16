@@ -355,22 +355,11 @@ export async function saveFloorwiseSftEstimate(
       .limit(2);
     if (error || !existing || existing.length > 1)
       throw new DomainError('VALIDATION_FAILED');
-    // If a package has an attached source PDF, snapshot it independently;
-    // saving a price line must not require privileged storage when there are
-    // no package attachments (the common case).
-    const [sourcePdf, oldPdf] = await Promise.all([
-      selectedPackage
-        ? s.client.from('construction_package_spec_attachments')
-            .select('id').eq('organization_id', s.org)
-            .eq('package_id', selectedPackage.id).limit(1)
-        : Promise.resolve({ data: [], error: null }),
-      s.client.from('quotation_studio_attachments')
-        .select('id').eq('organization_id', s.org)
-        .eq('revision_id', rid).not('source_package_id', 'is', null).limit(1),
-    ]);
-    if (sourcePdf.error || oldPdf.error)
-      throw new DomainError('VALIDATION_FAILED');
-
+    // These two document tables are private by design. Their SELECT grants
+    // are not available to the normal authenticated client; querying them
+    // here makes Save fail before committing a perfectly valid quotation.
+    // Document snapshots are handled only with the privileged server
+    // connection AFTER the quote line has been saved.
     const id = await s.commercial.saveManualLine(s.org, rid, version, {
       ...(existing[0] ? { id: existing[0].id } : {}),
       area_id: null,
@@ -389,7 +378,10 @@ export async function saveFloorwiseSftEstimate(
       estimated_cost_rate: null,
     });
     let attachmentWarning = false;
-    if ((sourcePdf.data?.length ?? 0) > 0 || (oldPdf.data?.length ?? 0) > 0) {
+    const privilegedStorageConfigured = Boolean(
+      process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY,
+    );
+    if (privilegedStorageConfigured) {
       try {
         const user = await s.authorization.requireAuthenticatedUser();
         await snapshotConstructionPackagePdf(
@@ -404,6 +396,11 @@ export async function saveFloorwiseSftEstimate(
           revisionId: rid, organizationId: s.org,
         });
       }
+    } else {
+      // The line is saved; without server credentials this environment cannot
+      // verify or copy optional private package PDFs. Do not silently claim
+      // that a package annexure is attached.
+      attachmentWarning = true;
     }
     const { data: updatedRevision } = await s.client
       .from('quotation_revisions')
@@ -417,7 +414,7 @@ export async function saveFloorwiseSftEstimate(
       total: calculated.total,
       ...(updatedRevision?.version ? { version: updatedRevision.version } : {}),
       message: attachmentWarning
-        ? 'Quotation saved. Package PDF attachment needs attention before sharing.'
+        ? 'Quotation saved. Private package PDF attachments are not yet available on this server; contact the administrator before sharing.'
         : existing.length
           ? 'Floor-wise estimate updated. Review your revision before issuing.'
           : 'Floor-wise estimate saved with the itemized area/rate schedule. Review your PDF before issuing.',
