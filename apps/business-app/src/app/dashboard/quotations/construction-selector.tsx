@@ -161,6 +161,7 @@ function CustomizedQuote({
           <button
             type="button"
             disabled={!selected || !Number(area) || pending}
+            data-studio-save="quote"
             onClick={() => submit(true)}
             className="rounded-xl bg-blue-600 px-5 py-3 text-xs font-bold text-white disabled:opacity-40"
           >
