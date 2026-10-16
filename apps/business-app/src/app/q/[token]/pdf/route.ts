@@ -17,7 +17,7 @@ export async function GET(
   try {
     const { token } = await params,
       q = await publicQuotation(token, 'pdf');
-    const base = await renderQuotationPdf(renderQuotationDocument(q.document));
+    const base = await renderQuotationPdf(renderQuotationDocument(q.document), q.document);
     // publicQuotation validates token, expiry, revocation and PDF permission.
     // Revalidate server-side before retrieving private company annexures.
     const admin = createOwnerProvisioningDatabase();
