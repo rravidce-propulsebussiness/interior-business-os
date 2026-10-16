@@ -36,7 +36,7 @@ type DocumentHeader = {
 };
 
 const steps: { id: Tab; title: string }[] = [
-  { id: 'quote', title: 'Estimate & Specifications' },
+  { id: 'quote', title: 'Scope' },
   { id: 'files', title: 'Terms & Inclusions' },
   { id: 'payments', title: 'Payment Schedule' },
 ];
@@ -134,7 +134,7 @@ export function QuotationStudioEditor({
   const showMethod = canEdit;
   return (
     <>
-      {!(isConstruction && canEdit && step === 'quote') && <div className="qs-heading qs-studio-hero qs-studio-clean-header">
+      {step !== 'payments' && !(isConstruction && canEdit && step === 'quote') && <div className="qs-heading qs-studio-hero qs-studio-clean-header">
         <div className="qs-heading-label">
           <span className="qs-heading-icon">▤</span>
           <div>
@@ -172,7 +172,7 @@ export function QuotationStudioEditor({
           {message}
         </div>
       )}
-      <div className="qs-studio-grid">
+      <div className={'qs-studio-grid' + (step === 'payments' ? ' qs-studio-grid-full' : '')}>
         <div className="qs-editor">
           {step === 'quote' && (
             <>
@@ -324,7 +324,7 @@ export function QuotationStudioEditor({
           )}
         </div>
 
-        {!isConstruction && <aside className="qs-preview-pane">
+        {!isConstruction && step !== 'payments' && <aside className="qs-preview-pane">
           <div className="qs-preview-top">
             <span>
               ▤ PDF Preview <span className="qs-badge">A4 · Portrait</span>
