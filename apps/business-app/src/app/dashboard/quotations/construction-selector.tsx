@@ -202,7 +202,6 @@ export function ConstructionSelector({
   revisionId: string;
   version: number;
   initialMode?: 'sft' | 'custom';
-  previewHtml?: string | undefined;
   quoteNumber?: string;
   clientName?: string;
   location?: string;
