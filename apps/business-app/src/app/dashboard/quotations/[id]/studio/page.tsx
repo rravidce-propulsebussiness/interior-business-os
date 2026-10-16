@@ -27,7 +27,7 @@ export default async function QuotationStudio({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ mode?: string; step?: string }>;
+  searchParams: Promise<{ mode?: string; step?: string; package?: string }>;
 }) {
   const [{ id }, query] = await Promise.all([params, searchParams]);
   const s = await commercialServices('quotation.view', 'quotation', true);
@@ -191,6 +191,7 @@ export default async function QuotationStudio({
               version={revision.version}
               initialSchedule={existingSft}
               initialMode={mode === 'custom' ? 'custom' : 'sft'}
+               initialPackageId={query.package}
               canSharePdf={s.allowed('quotation.share', 'quotation')}
               quoteNumber={root.quotation_number}
             />
@@ -213,7 +214,8 @@ export default async function QuotationStudio({
               revisionId={revision.id}
               version={revision.version}
               currency={revision.currency}
-              packages={industryPackages.filter(
+              initialPackageId={query.package}
+               packages={industryPackages.filter(
                 (pkg) =>
                   pkg.status === 'active' &&
                   pkg.industryKey === industryKey &&
