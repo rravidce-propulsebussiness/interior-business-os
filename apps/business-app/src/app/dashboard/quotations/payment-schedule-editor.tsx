@@ -128,7 +128,7 @@ export function PaymentScheduleEditor({
       </div>
       {editable && <div className="mt-4 flex flex-wrap items-center gap-3">
         <button type="button" className="qs-btn" disabled={rows.length >= 40} onClick={() => setRows((all) => [...all, { name: 'New milestone', percent: '0' }])}>+ Add stage</button>
-        <button type="button" className="qs-btn primary" disabled={!valid || pending} onClick={save}>{pending ? 'Saving…' : savedPlan ? 'Save Updated Payment Schedule' : 'Save Stage-wise Payments to PDF'}</button>
+        <button type="button" className="qs-btn primary" data-studio-save="payments" disabled={!valid || pending} onClick={save}>{pending ? 'Saving…' : savedPlan ? 'Save Updated Payment Schedule' : 'Save Stage-wise Payments to PDF'}</button>
         {!valid && <span className="text-sm font-semibold text-amber-700">Set positive percentages totaling exactly 100%.</span>}
       </div>}
       {message && <p className="mt-3 text-sm" role="status">{message}</p>}
