@@ -10,6 +10,7 @@ import { QuotationPdfControls } from './quotation-pdf-controls';
 import { FLOOR_RATE_TITLE, readFloorRateDefaults } from '../pricing/construction/floor-rate-rules';
 import { propagateFloorChanges, followPreviousFloor, restoreFloorFollowing } from './construction-floor-inheritance';
 import { sftEstimateInputSchema } from '@business-os/core/sft-quotation';
+import { normalizePenthouseFloors, selectPenthouseFloor, selectNormalFloor } from './penthouse-floor-selection';
 
 type Unit = 'sqft' | 'wall_sqft' | 'running_ft' | 'cubic_ft' | 'piece' | 'lumpsum';
 type Work = {
@@ -114,7 +115,7 @@ export function PremiumSftBuilder({
   const [rows,setRows]=useState<Work[]>(()=>{
     const initial=initialSchedule ? editableSftRows(initialSchedule) : undefined;
     if(!initial?.length)return [floor('Ground Floor',packageRate)];
-    return initial.map((item, index)=>({
+    return normalizePenthouseFloors(initial.map((item, index)=>({
       // Existing legacy floor rows remain editable; special zone names are
       // persisted inside the existing signed floor-wise quotation schedule.
       ...item,
@@ -132,7 +133,7 @@ export function PremiumSftBuilder({
           ? (floorRateDefaults.parking || packageRate)
           : packageRate)
         :item.ratePerSqft,
-    }));
+    })));
   });
   const [sections,setSections]=useState<Material[]>(()=>{
     if(selectedPackage&&(changedPackage||!initialSchedule?.sections?.length)){
@@ -167,6 +168,8 @@ export function PremiumSftBuilder({
   const extras=rows.filter(r=>r.kind==='additional');
   const levels=names.map((name,level)=>({
     level, name, portions:floors.filter(r=>floorLevel(r.name)===level),
+    isPenthouse:floors.some(r=>r.kind==='floor'&&
+      r.name===floorZoneName(level,'penthouse')),
   })).filter(g=>g.portions.length>0);
   const floorCount=levels.length;
   const usedMaterials=activeRates.filter(r=>materialIds.includes(r.id))
@@ -246,6 +249,11 @@ export function PremiumSftBuilder({
     touch();
   };
   const addFloorZone=(level:number,zone:FloorZone)=>{
+    if(zone==='penthouse'){
+      setRows(current=>selectPenthouseFloor(current,level));
+      touch();
+      return;
+    }
     if(rows.length>=18)return;
     if(floors.some(r=>r.name===floorZoneName(level,zone)))return;
     const defaultRate=zone==='parking'
@@ -326,10 +334,12 @@ export function PremiumSftBuilder({
       <div className="qs-work-floor-splits">
         {levels.map(group=><div className="qs-work-split" key={group.level}>
           <div>
-            <strong>{group.name}</strong>
+            <strong>{group.isPenthouse?'Penthouse ('+group.name+')':group.name}</strong>
             <small>{group.portions.reduce((sum,r)=>sum+measured(r),0).toLocaleString('en-IN',{
               maximumFractionDigits:2,
-            })} SFT · construction / parking / penthouse separately priced</small>
+            })} SFT · {group.isPenthouse
+              ? 'Penthouse construction at standard rate'
+              : 'Construction / parking priced separately'}</small>
           </div>
           <div className="qs-work-split-buttons">
             {group.level>0&&group.portions.some(r=>floorZone(r.name)==='construction')&&
@@ -348,21 +358,28 @@ export function PremiumSftBuilder({
                   }}/>
                 Follow lower floor
               </label>}
-            {!group.portions.some(r=>floorZone(r.name)==='construction') &&
-              <button type="button" disabled={rows.length>=18}
-                onClick={()=>addFloorZone(group.level,'construction')}>＋ Construction</button>}
-            {!group.portions.some(r=>floorZone(r.name)==='parking') &&
-              <button type="button" disabled={rows.length>=18}
-                onClick={()=>addFloorZone(group.level,'parking')}>＋ Parking</button>}
-            {!group.portions.some(r=>floorZone(r.name)==='penthouse') &&
-              <button type="button" disabled={rows.length>=18}
-                onClick={()=>addFloorZone(group.level,'penthouse')}>＋ Penthouse</button>}
+            {group.isPenthouse ? (
+              <button type="button" onClick={()=>{
+                setRows(current=>selectNormalFloor(current,group.level));
+                touch();
+              }}>↩ Normal floor</button>
+            ) : <>
+              {!group.portions.some(r=>floorZone(r.name)==='construction') &&
+                <button type="button" disabled={rows.length>=18}
+                  onClick={()=>addFloorZone(group.level,'construction')}>＋ Construction</button>}
+              {!group.portions.some(r=>floorZone(r.name)==='parking') &&
+                <button type="button" disabled={rows.length>=18}
+                  onClick={()=>addFloorZone(group.level,'parking')}>＋ Parking</button>}
+              <button type="button" onClick={()=>addFloorZone(group.level,'penthouse')}>
+                Make penthouse
+              </button>
+            </>}
           </div>
         </div>)}
       </div>
       <p className="qs-work-copy-hint">
-        Upper floors follow changes to the floor below until you untick Follow lower floor or
-        edit that upper floor yourself. Parking and penthouse rates stay independent.
+        Upper floors follow the floor below unless customized. Choosing Make penthouse
+        replaces that level's normal floor, preserving its area and price once.
       </p>
       <div className="qs-work-table-scroll" role="region" aria-label="Work quantities and rates" tabIndex={0}>
         <table className="qs-work-table">
