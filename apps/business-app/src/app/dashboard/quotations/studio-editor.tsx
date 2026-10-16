@@ -78,6 +78,8 @@ export function QuotationStudioEditor({
   header,
   lines,
   total,
+  hasSavedPaymentPlan,
+  brandingEditor,
   constructionEditor,
   interiorEditor,
   filesEditor,
@@ -101,6 +103,8 @@ export function QuotationStudioEditor({
   header: DocumentHeader;
   lines: QuotationLine[];
   total: string;
+  hasSavedPaymentPlan: boolean;
+  brandingEditor: ReactNode;
   constructionEditor: ReactNode;
   interiorEditor: ReactNode;
   filesEditor: ReactNode;
@@ -330,6 +334,8 @@ export function QuotationStudioEditor({
             )}
           </section>
 
+          {step === 'client' && brandingEditor}
+
           {step === 'quote' && (
             <>
               {showMethod && isConstruction && constructionEditor}
@@ -431,6 +437,14 @@ export function QuotationStudioEditor({
                   <strong>{header.branding.name || industryName}</strong>{' '}
                   branding and saved quotation values.
                 </p>
+                <div className="mb-4 flex flex-wrap items-center gap-3">
+                  <Link href="/dashboard/quotations/settings" className="qs-btn">
+                    Edit company logo &amp; address ↗
+                  </Link>
+                  <button className="qs-btn" type="button" onClick={() => setStep('client')}>
+                    Update branding for this draft ↗
+                  </button>
+                </div>
                 <div className="qs-toolbar">
                   <button
                     type="button"
@@ -458,17 +472,31 @@ export function QuotationStudioEditor({
                     View complete PDF + attachments ↗
                   </a>
                 </div>
-                {status === 'draft' && canIssue && lines.length > 0 && (
+                {!hasSavedPaymentPlan && (
                   <div className="qs-warning" style={{ marginTop: 16 }}>
-                    Check the final amounts and attached annexures before
-                    issuing. The issued revision is an immutable customer-facing
-                    snapshot.
+                    <strong>Stage-wise payments are missing from this quotation.</strong>
+                    <p className="mt-2 text-sm">
+                      The Payments tab has editable suggestions, but they are
+                      not included in the customer PDF until saved. Confirm the
+                      exact stages and percentages before issuing or sharing.
+                    </p>
+                    {status === 'draft' && canEdit && (
+                      <button type="button" className="qs-btn primary mt-3"
+                        onClick={() => setStep('payments')}>
+                        Set &amp; Save Stage-wise Payments
+                      </button>
+                    )}
                   </div>
                 )}
-                {status === 'draft' &&
-                  canIssue &&
-                  lines.length > 0 &&
-                  issueEditor}
+                {status === 'draft' && canIssue && lines.length > 0 &&
+                  hasSavedPaymentPlan && (
+                  <div className="qs-warning" style={{ marginTop: 16 }}>
+                    Check final amounts and attached annexures before issuing.
+                    The issued revision is an immutable customer-facing snapshot.
+                  </div>
+                )}
+                {status === 'draft' && canIssue && lines.length > 0 &&
+                  hasSavedPaymentPlan && issueEditor}
                 {status === 'draft' && lines.length === 0 && (
                   <p className="qs-note" style={{ marginTop: 13 }}>
                     Add at least one priced line before issuing.
