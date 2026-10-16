@@ -368,7 +368,8 @@ describe('PDF attachment sharing and reliable file operations', () => {
 
   it('uses authenticated PDF bytes with renderer-independent fallback', () => {
     expect(controls).toContain("credentials: 'same-origin'");
-    expect(controls).toContain("'/pdf?view=1'");
+    expect(controls).toContain("'?view=1&version=' + version");
+    expect(controls).toContain('downloadRoute');
     expect(renderer).toContain('renderQuotationFallbackPdf');
     expect(renderer).toContain('parseSftEstimate');
     expect(secureRoute).toContain('renderQuotationPdf(html, document)');
