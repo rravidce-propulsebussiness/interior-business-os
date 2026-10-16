@@ -58,7 +58,7 @@ export function PaymentScheduleEditor({
   const [pending, start] = useTransition();
   const router = useRouter();
   const percentTotal = useMemo(() => rows.reduce((sum, row) => sum + (Number(row.percent) || 0), 0), [rows]);
-  const valid = rows.length > 0 && rows.length <= 12
+  const valid = rows.length > 0 && rows.length <= 40
     && rows.every((row) => row.name.trim().length >= 2 && row.name.trim().length <= 100
       && Number.isFinite(Number(row.percent)) && Number(row.percent) > 0
       && Number(row.percent) <= 100 && /^\d+(?:\.\d{1,2})?$/.test(row.percent))
@@ -118,7 +118,7 @@ export function PaymentScheduleEditor({
         </table>
       </div>
       {editable && <div className="mt-4 flex flex-wrap items-center gap-3">
-        <button type="button" className="qs-btn" disabled={rows.length >= 12} onClick={() => setRows((all) => [...all, { name: 'New milestone', percent: '0' }])}>+ Add stage</button>
+        <button type="button" className="qs-btn" disabled={rows.length >= 40} onClick={() => setRows((all) => [...all, { name: 'New milestone', percent: '0' }])}>+ Add stage</button>
         <button type="button" className="qs-btn primary" disabled={!valid || pending} onClick={save}>{pending ? 'Saving…' : 'Save payment schedule'}</button>
         {!valid && <span className="text-sm font-semibold text-amber-700">Set positive percentages totaling exactly 100%.</span>}
       </div>}

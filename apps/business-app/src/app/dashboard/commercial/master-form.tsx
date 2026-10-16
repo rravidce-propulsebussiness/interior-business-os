@@ -20,6 +20,7 @@ export interface Field {
     | 'datetime-local'
     | 'tel';
   nullable?: boolean;
+  fileMaxBytes?: number;
   required?: boolean;
   options?: { value: string; label: string }[];
 }
@@ -54,6 +55,12 @@ export function MasterForm({
       className="my-5 grid max-w-2xl gap-4"
       onSubmit={handleSubmit(async (values) => {
         setMessage('');
+        if (entity === 'organization_quotation_settings' &&
+          values.branding && typeof values.branding === 'object' &&
+          JSON.stringify(values.branding).length > 190000) {
+          setMessage('Logo and quotation photos exceed the 190 KB combined branding limit. Compress an image or replace the logo with a smaller file.');
+          return;
+        }
         try {
           const result = submitAction
             ? await submitAction({ ...initial, ...values })
@@ -102,10 +109,10 @@ export function MasterForm({
                 const file = event.target.files?.[0];
                 if (!file) return;
                 if (
-                  file.size > 130000 ||
+                  file.size > (field.fileMaxBytes ?? 130000) ||
                   !['image/png', 'image/jpeg'].includes(file.type)
                 ) {
-                  setMessage('Choose a PNG or JPEG logo smaller than 130 KB.');
+                  setMessage('Choose a PNG or JPEG smaller than ' + Math.round((field.fileMaxBytes ?? 130000) / 1000) + ' KB.');
                   return;
                 }
                 const reader = new FileReader();

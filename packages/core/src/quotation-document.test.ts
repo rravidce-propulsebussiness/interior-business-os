@@ -203,3 +203,48 @@ it('shows editable proposed payment milestones in the customer PDF without leaki
   expect(html).not.toContain('[STAGE_PAYMENT_PLAN]');
   expect(html).not.toContain('[/STAGE_PAYMENT_PLAN]');
 });
+
+
+it('renders a branded brochure cover, readable pricing and closing page', () => {
+  const d = quotationDocumentFixture();
+  const html = renderQuotationDocument(d);
+  expect(html).toContain('pb-cover');
+  expect(html).toContain('pb-cover-amount');
+  expect(html).toContain('pb-close');
+  expect(html).toContain('Prepared for Ravi Residence');
+  expect(html).toContain('133280');
+  expect(html).toContain('Quotation Q-2026-000001');
+  expect(html).toContain('break-after:page');
+  expect(html).not.toContain('Building Better Tomorrows'); // not hardcoded SG Homes claims
+  expect(renderQuotationDocument(structuredClone(d))).toBe(html);
+});
+
+it('embeds only saved company-owned photo data, never remote images or other company data', () => {
+  const d = quotationDocumentFixture();
+  d.header.branding.cover_image_data_uri = 'data:image/jpeg;base64,' + 'AA==';
+  d.header.branding.detail_image_data_uri = 'data:image/png;base64,' + 'AA==';
+  const html = renderQuotationDocument(d);
+  expect(html).toContain('Company-supplied building photograph');
+  expect(html).toContain('Company-supplied project photo');
+  expect(html).toContain('src="data:image/jpeg;base64,AA=="');
+  expect(html).toContain('src="data:image/png;base64,AA=="');
+  d.header.branding.cover_image_data_uri = 'https://example.test/photo.jpg';
+  expect(() => renderQuotationDocument(d)).toThrow();
+  d.header.branding.cover_image_data_uri = '';
+  d.header.branding.detail_image_data_uri = '<script>alert(1)</script>';
+  expect(() => renderQuotationDocument(d)).toThrow();
+});
+
+it('prints a 33-stage construction payment plan without amount or percentage drift', () => {
+  const d = quotationDocumentFixture();
+  d.totals.final_amount = '24035000.00';
+  const amounts = Array.from({ length: 33 }, (_, i) =>
+    'Stage ' + (i + 1) + '|' + (i === 32 ? '4.00' : '3.00'),
+  );
+  d.terms = '[STAGE_PAYMENT_PLAN]\n' + amounts.join('\n') + '\n[/STAGE_PAYMENT_PLAN]';
+  const html = renderQuotationDocument(d);
+  expect(html).toContain('Stage 33');
+  expect(html).toContain('<td>100%</td>');
+  expect(html).toContain('24035000.00');
+  expect(html).not.toContain('[STAGE_PAYMENT_PLAN]');
+});
