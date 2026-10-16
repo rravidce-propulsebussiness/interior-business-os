@@ -191,6 +191,10 @@ export function ConstructionSelector({
   version,
   initialMode = 'sft',
   previewHtml,
+  quoteNumber,
+  clientName,
+  location,
+  savedTotal,
 }: {
   rates: ConstructionRate[];
   packages: ConstructionPackage[];
@@ -199,6 +203,10 @@ export function ConstructionSelector({
   version: number;
   initialMode?: 'sft' | 'custom';
   previewHtml?: string | undefined;
+  quoteNumber?: string;
+  clientName?: string;
+  location?: string;
+  savedTotal?: string;
 }) {
   const activePackages = packages.filter((pkg) => pkg.status === 'active');
   const previous = activePackages.find((pkg) =>
@@ -212,10 +220,22 @@ export function ConstructionSelector({
   const chosen = activePackages.find((pkg) => pkg.id === selected);
   return (
     <div className="qs-build-workspace">
-      <header className="qs-build-hero">
-        <span className="qs-build-eyebrow">CONSTRUCTION QUOTATION</span>
-        <h2>Create your quotation</h2>
-        <p>One package. Your floors. Only the changes your client needs.</p>
+      <header className="qs-build-overview" aria-label="Quotation overview">
+        <div className="qs-build-overview-client">
+          <small>Quote # {quoteNumber || 'New quotation'}</small>
+          <strong>{clientName || 'Client quotation'}</strong>
+          <span>Construction{location ? ' · ' + location : ''}</span>
+        </div>
+        <div>
+          <small>Selected package</small>
+          <strong>{chosen?.name || 'Choose package'}</strong>
+          <span>Company specifications</span>
+        </div>
+        <div className="qs-build-overview-price">
+          <small>Saved estimate</small>
+          <strong>{money(Number(savedTotal || '0'))}</strong>
+          <span>Edit work details below</span>
+        </div>
       </header>
       <section className="qs-build-panel qs-build-package">
         <div className="qs-build-title">
