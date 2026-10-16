@@ -212,7 +212,7 @@ it('renders a branded brochure cover, readable pricing and closing page', () => 
   expect(html).toContain('pb-cover-amount');
   expect(html).toContain('pb-close');
   expect(html).toContain('Prepared for Ravi Residence');
-  expect(html).toContain('133280');
+  expect(html).toContain('1,33,280');
   expect(html).toContain('Quotation Q-2026-000001');
   expect(html).toContain('break-after:page');
   expect(html).not.toContain('Building Better Tomorrows'); // not hardcoded SG Homes claims
