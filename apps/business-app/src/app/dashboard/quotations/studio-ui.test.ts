@@ -207,10 +207,14 @@ describe('latest quote per customer with expandable prior history', () => {
   it('only renders the newest quote initially on desktop and mobile', () => {
     expect(page).toContain('renderTableRow(group.quotes[0]!)');
     expect(page).toContain('renderMobileQuote(group.quotes[0]!)');
-    expect(page).toContain('group.quotes.length > 1 && <details');
+    expect(page).toContain('<QuotationMobileFooter count={group.quotes.length}');
     expect(page).toContain('View all quotations ({group.quotes.length})');
     expect(page).toContain('group.quotes.slice(1).map(');
     expect(css).toContain('.qs-quotes-history[open]');
+    expect(page).toContain('<QuotationMobileMore>');
+    expect(page).toContain("pdfHref={'/dashboard/quotations/'");
+    expect(css).toContain('.qs-quotes-mobile-card-footer');
+    expect(css).toContain('.qs-quotes-mobile-more-panel');
   });
 
   it('keeps other quote options available with independent edit and sharing', () => {
@@ -218,6 +222,44 @@ describe('latest quote per customer with expandable prior history', () => {
     expect(page).toContain('QuotationReviseButton');
     expect(page).toContain("editor + '?step=preview'");
     expect(page).toContain('QuotationRemovalButton');
+  });
+});
+
+describe('premium mobile quotation actions and matching workspace navigation', () => {
+  const page = file('./page.tsx');
+  const mobile = file('./quotation-mobile-disclosures.tsx');
+  const css = file('./quotations-list.css');
+  const frame = file('./studio-frame.tsx');
+
+  it('has exactly one visible set of compact controls and a separate PDF footer', () => {
+    expect(page).toContain('<QuotationMobileMore>');
+    expect(page).toContain('<QuotationMobileFooter count={group.quotes.length}');
+    expect(page).not.toContain('qs-quotes-mobile-more"');
+    expect(page).not.toContain('<summary>••• More</summary>');
+    expect(page).toContain("row.status === 'draft' && canEdit");
+    expect(page).toContain('QuotationReviseButton');
+    expect(page).toContain('QuotationRemovalButton');
+    expect(mobile).toContain('aria-expanded={open}');
+    expect(mobile).toContain('setOpen((value) => !value)');
+    expect(mobile).toContain('qs-quotes-mobile-more-panel');
+    expect(mobile).toContain('qs-quotes-mobile-expanded');
+  });
+
+  it('cannot stretch Share or overlap previous quotations and animates safely', () => {
+    expect(css).toContain('grid-template-columns:repeat(2,minmax(0,1fr))');
+    expect(css).toContain('.qs-quotes-mobile-actions > .qs-quotes-mobile-more-panel');
+    expect(css).toContain('grid-column:1/-1');
+    expect(css).toContain('width:100%;height:49px;min-height:49px');
+    expect(css).toContain('@keyframes qs-quote-expand');
+    expect(css).toContain('@media (prefers-reduced-motion: reduce)');
+  });
+
+  it('keeps a visible hamburger with Leads-style accessible drawer on scroll', () => {
+    expect(frame).toContain('qs-mobile-menu-button');
+    expect(frame).toContain('aria-controls="qs-sidebar-navigation"');
+    expect(frame).toContain("setMenuOpen(true)");
+    expect(css).toContain('position: sticky;');
+    expect(css).toContain('.qs-layout:has(.qs-quotes-page) .qs-mobile-menu-button');
   });
 });
 
