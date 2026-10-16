@@ -261,9 +261,9 @@ describe('compact single-screen construction quotation editor', () => {
     expect(editor).toContain('setDraftSections(curr=>curr.map(');
     expect(editor).toContain('setSections(draftSections.map(');
     expect(editor).toContain('cancelMaterials');
-    expect(editor).toContain('saveFloorwiseSftEstimate(revisionId,savedVersion,savePayload)');
+    expect(editor).toContain("'/dashboard/quotations/'+revisionId+'/sft-save'");
     expect(editor).toContain('if(validationMessage)');
-    expect(editor).toContain('setSavedVersion(response.version??savedVersion+1)');
+    expect(editor).toContain('setSavedVersion(data.version??savedVersion+1)');
     expect(editor).toContain('propagateFloorChanges(current,index,patch)');
     expect(editor).not.toContain('construction_package_save');
     expect(actions).toContain('const calculated = calculateSftEstimate(');
@@ -350,7 +350,7 @@ describe('split-floor construction area editing and resilient PDF routes', () =>
     expect(builder).toContain("type FloorZone = 'construction' | 'parking' | 'penthouse'");
     expect(builder).toContain("floorZoneName(level,zone)");
     expect(builder).toContain("zone==='parking'");
-    expect(builder).toContain('addFloorZone(group.level');
+    expect(builder).toContain('selectPenthouseFloor(current,level)');
     expect(builder).toContain('combinedArea');
     expect(builder).toContain('floorRateDefaults.parking');
     expect(builder).toContain('editableSftRows(initialSchedule)');
@@ -407,5 +407,24 @@ describe('regression for Ground Floor Save and penthouse default rate', () => {
     expect(pkg).toContain('penthouse:');
     expect(pkg).toContain("penthouse: ''");
     expect(pkg).toContain('Same as construction package');
+  });
+});
+
+describe('exclusive penthouse + actual HTTP save route', () => {
+  const builder = file('./premium-sft-builder.tsx');
+  const route = file('./[id]/sft-save/route.ts');
+  it('replaces the top floor with penthouse and retains normal floor area only once',()=>{
+    expect(builder).toContain('normalizePenthouseFloors(initial.map(');
+    expect(builder).toContain('selectPenthouseFloor(current,level)');
+    expect(builder).toContain('selectNormalFloor(current,group.level)');
+    expect(builder).toContain("group.isPenthouse?'Penthouse ('+group.name+')':group.name");
+  });
+  it('saves through authenticated tenant-aware HTTP rather than stale hosted action IDs',()=>{
+    expect(builder).toContain("method:'POST',credentials:'same-origin'");
+    expect(builder).toContain("body:JSON.stringify({version:savedVersion,input:savePayload})");
+    expect(route).toContain('saveFloorwiseSftEstimate(id,data.data.version,data.data.input)');
+    expect(route).toContain('Cross-site quotation save denied.');
+    expect(route).toContain("Cache-Control': 'private, no-store'");
+    expect(builder).toContain('setMessage(detail');
   });
 });
