@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import { quotationDocument } from '../../document';
 import Link from 'next/link';
 import { commercialServices } from '../../../commercial/service';
 import { documentHeaderSchema } from '@business-os/core/quotation-document';
@@ -144,6 +145,11 @@ export default async function QuotationStudio({
         .catch(() => [])
     : [];
 
+  // Render once with the authenticated server context. The inline preview
+  // uses srcDoc instead of an iframe request that may fail with HTTP 403.
+  const previewHtml = await quotationDocument(revision.id)
+    .then(({ html }) => html)
+    .catch(() => undefined);
   const command = { revision_id: revision.id, version: revision.version };
   const totals = revision.totals;
   const total =
@@ -170,6 +176,7 @@ export default async function QuotationStudio({
         industryName={industry?.name ?? 'Project'}
         header={header.data}
         hasSavedPaymentPlan={hasSavedStagePaymentPlan(revision.terms)}
+        previewHtml={previewHtml}
         brandingEditor={<DraftBrandingControl revisionId={revision.id} version={revision.version} editable={editable} />}
         lines={saved}
         total={total}
@@ -186,6 +193,7 @@ export default async function QuotationStudio({
               version={revision.version}
               initialSchedule={existingSft}
               initialMode={mode === 'custom' ? 'custom' : 'sft'}
+              previewHtml={previewHtml}
             />
           ) : (
             <div className="qs-note">
