@@ -39,7 +39,11 @@ export function QuotationStudioStart({
     industries.some((i) => i.key === initialLead.industryKey)
       ? initialLead.industryKey
       : (industries.find((i) => i.key === 'construction')?.key ?? industries[0]?.key ?? ''));
-  const [style, setStyle] = useState<QuoteStyle>(initialLead?.industryKey === 'interior' ? 'interior' : 'construction');
+  const [style, setStyle] = useState<QuoteStyle>(
+    initialLead?.industryKey === 'interior' ? 'interior' :
+    initialLead?.industryKey && initialLead.industryKey !== 'construction' ? 'custom' :
+    !industries.some((i) => i.key === 'construction') ? 'custom' : 'construction',
+  );
   const [advancedOpen, setAdvancedOpen] = useState(Boolean(initialLead || initialCustomer));
   const [pending, start] = useTransition();
   const [feedback, setFeedback] = useState('');
@@ -67,6 +71,9 @@ export function QuotationStudioStart({
   };
   const chooseCustomer = (customer: Customer | undefined) => {
     setCustomerId(customer?.id ?? '');
+    if (leadId && customer && !contactMatches(customer, leads.find((l) => l.id === leadId) ?? {})) {
+      setLeadId('');
+    }
     setProjectId('');
     setData((current) => ({
       ...current,
@@ -250,8 +257,10 @@ export function QuotationStudioStart({
           </select>
         </label>
         <label className="qs-clean-field qs-clean-notes">Additional Notes (optional)
-          <textarea rows={3} maxLength={1000}
-            placeholder="Any special requirements, site details or notes…"
+          <textarea rows={3} maxLength={1000} disabled={Boolean(selectedProject)}
+            placeholder={selectedProject
+              ? 'Use Projects to edit notes on an existing project'
+              : 'Any special requirements, site details or notes…'}
             value={data.notes} onChange={(event) => update('notes', event.target.value)}/>
         </label>
       </div>
