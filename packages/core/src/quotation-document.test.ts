@@ -416,7 +416,7 @@ it('shows both structured saved warranty and stage payment schedule after legacy
   d.terms=[
     'Site access subject to confirmation.','','Warranty:','Structural warranty ten years','',
     '[STAGE_PAYMENT_PLAN]','Advance|10.00','RCC|60.00','Handover|30.00','[/STAGE_PAYMENT_PLAN]',
-  ].join('\\n');
+  ].join('\n');
   const html=renderQuotationDocument(d);
   expect(html).toContain('<h3>Warranty</h3>');
   expect(html).toContain('Structural warranty ten years');
