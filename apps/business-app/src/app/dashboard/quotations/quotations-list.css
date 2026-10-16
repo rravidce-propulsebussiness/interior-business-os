@@ -320,3 +320,31 @@
     min-height: 42px;
   }
 }
+
+/* The issued PDF is immutable; Edit safely creates a new draft revision. */
+.qs-quote-revise-wrap {
+  display: inline-flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+.qs-quote-revise-wrap .qs-quote-edit {
+  cursor: pointer;
+  font-family: inherit;
+}
+.qs-quote-revise-wrap .qs-quote-edit:disabled {
+  cursor: wait;
+  opacity: .6;
+}
+.qs-quote-revise-error {
+  color: #b42318;
+  font-size: 11px;
+  max-width: 200px;
+  line-height: 1.3;
+}
+@media (max-width: 720px) {
+  .qs-quotes-mobile-actions .qs-quote-revise-wrap,
+  .qs-quotes-mobile-actions .qs-quote-revise-wrap .qs-quote-edit {
+    width: 100%;
+  }
+}
