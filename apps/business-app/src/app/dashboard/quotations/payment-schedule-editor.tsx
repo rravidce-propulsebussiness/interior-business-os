@@ -3,6 +3,7 @@
 import { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { quotationCommand } from './actions';
+import { savedStagePaymentPlan } from '@business-os/core/quotation-payment-plan';
 
 type Milestone = { name: string; percent: string };
 const START = '[STAGE_PAYMENT_PLAN]';
@@ -26,14 +27,12 @@ const templates: Record<string, Milestone[]> = {
   ],
 };
 
-function readPlan(terms: string, industry: string): Milestone[] {
-  const body = terms.match(/\[STAGE_PAYMENT_PLAN\]([\s\S]*?)\[\/STAGE_PAYMENT_PLAN\]/)?.[1];
-  if (!body) return (templates[industry] ?? templates.interior)!.map((x) => ({ ...x }));
-  const rows = body.split(/\r?\n/).map((row) => {
-    const at = row.lastIndexOf('|');
-    return { name: row.slice(0, at).trim(), percent: row.slice(at + 1).trim() };
-  }).filter((row) => row.name && Number.isFinite(Number(row.percent)));
-  return rows.length ? rows : (templates[industry] ?? templates.interior)!.map((x) => ({ ...x }));
+function readPlan(terms: string, industry: string, editable: boolean): Milestone[] {
+  const saved = savedStagePaymentPlan(terms);
+  if (saved) return saved.map((row) => ({name: row.name, percent: String(row.percent)}));
+  // Suggestions are NOT silently saved. Read-only / issued revisions with no
+  // confirmed schedule must not display suggested terms as agreed payments.
+  return editable ? (templates[industry] ?? templates.interior)!.map((x) => ({ ...x })) : [];
 }
 
 export function PaymentScheduleEditor({
@@ -53,10 +52,11 @@ export function PaymentScheduleEditor({
     discount: unknown;
   };
 }) {
-  const [rows, setRows] = useState<Milestone[]>(() => readPlan(initial.terms, industry));
+  const [rows, setRows] = useState<Milestone[]>(() => readPlan(initial.terms, industry, editable));
   const [message, setMessage] = useState('');
   const [pending, start] = useTransition();
   const router = useRouter();
+  const savedPlan = savedStagePaymentPlan(initial.terms) !== null;
   const percentTotal = useMemo(() => rows.reduce((sum, row) => sum + (Number(row.percent) || 0), 0), [rows]);
   const valid = rows.length > 0 && rows.length <= 40
     && rows.every((row) => row.name.trim().length >= 2 && row.name.trim().length <= 100
@@ -93,7 +93,16 @@ export function PaymentScheduleEditor({
         <div>
           <p className="text-xs font-extrabold uppercase tracking-wider text-orange-600">Proposed customer payment schedule</p>
           <h2 className="mt-1 text-xl font-extrabold text-slate-950">Stage-wise payments</h2>
-          <p className="mt-2 text-sm text-slate-600">Set milestones while creating the quote. The schedule will print in the quotation PDF and remain a proposal until agreement.</p>
+          <p className="mt-2 text-sm text-slate-600">
+            These proposed milestones print in the customer PDF only after you save them.
+          </p>
+          <p role="status" className={'mt-3 rounded-xl border px-3 py-2 text-sm font-bold ' +
+            (savedPlan ? 'border-emerald-200 bg-emerald-50 text-emerald-800' :
+              'border-amber-200 bg-amber-50 text-amber-800')}>
+            {savedPlan ? '✓ Stage-wise payment schedule saved in this quotation.' :
+              editable ? 'Not saved yet — the percentages below are suggestions. Save to include them in the PDF.' :
+              'No stage-wise payment schedule was saved in this issued quotation.'}
+          </p>
         </div>
         {editable && <button type="button" className="qs-btn" onClick={() => {
           setRows((templates[industry] ?? templates.interior)!.map((x) => ({ ...x })));
@@ -119,7 +128,7 @@ export function PaymentScheduleEditor({
       </div>
       {editable && <div className="mt-4 flex flex-wrap items-center gap-3">
         <button type="button" className="qs-btn" disabled={rows.length >= 40} onClick={() => setRows((all) => [...all, { name: 'New milestone', percent: '0' }])}>+ Add stage</button>
-        <button type="button" className="qs-btn primary" disabled={!valid || pending} onClick={save}>{pending ? 'Saving…' : 'Save payment schedule'}</button>
+        <button type="button" className="qs-btn primary" disabled={!valid || pending} onClick={save}>{pending ? 'Saving…' : savedPlan ? 'Save Updated Payment Schedule' : 'Save Stage-wise Payments to PDF'}</button>
         {!valid && <span className="text-sm font-semibold text-amber-700">Set positive percentages totaling exactly 100%.</span>}
       </div>}
       {message && <p className="mt-3 text-sm" role="status">{message}</p>}
