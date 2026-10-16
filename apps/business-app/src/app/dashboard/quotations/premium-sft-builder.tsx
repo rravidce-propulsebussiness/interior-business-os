@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { calculateSftEstimate, type SftEstimateDetails } from '@business-os/core/sft-quotation';
+import { calculateSftEstimate, editableSftRows, type SftEstimateDetails } from '@business-os/core/sft-quotation';
 import type { ConstructionRate } from '@business-os/database/construction-rates';
 import type { ConstructionPackage } from '@business-os/database/construction-packages';
 import { saveFloorwiseSftEstimate } from './construction-actions';
@@ -112,7 +112,7 @@ export function PremiumSftBuilder({
   const floorRateDefaults=readFloorRateDefaults(selectedPackage?.specSections??[]);
   const activeRates=rates.filter(r=>r.status==='active');
   const [rows,setRows]=useState<Work[]>(()=>{
-    const initial=initialSchedule?.rows;
+    const initial=initialSchedule ? editableSftRows(initialSchedule) : undefined;
     if(!initial?.length)return [floor('Ground Floor',packageRate)];
     return initial.map((item, index)=>({
       // Existing legacy floor rows remain editable; special zone names are
@@ -128,8 +128,9 @@ export function PremiumSftBuilder({
         floorLevel(item.name)>0 && floorZone(item.name)==='construction'
         ? item.inheritFromPrevious!==false : item.inheritFromPrevious,
       ratePerSqft:changedPackage&&(item.kind??'floor')==='floor'
-        ?(floorZone(item.name)==='parking' ? floorRateDefaults.parking :
-          floorZone(item.name)==='penthouse' ? floorRateDefaults.penthouse : packageRate)
+        ?(floorZone(item.name)==='parking'
+          ? (floorRateDefaults.parking || packageRate)
+          : packageRate)
         :item.ratePerSqft,
     }));
   });
@@ -247,8 +248,10 @@ export function PremiumSftBuilder({
   const addFloorZone=(level:number,zone:FloorZone)=>{
     if(rows.length>=18)return;
     if(floors.some(r=>r.name===floorZoneName(level,zone)))return;
-    const defaultRate=zone==='parking' ? floorRateDefaults.parking :
-      zone==='penthouse' ? floorRateDefaults.penthouse : packageRate;
+    const defaultRate=zone==='parking'
+      ? (floorRateDefaults.parking || packageRate)
+      : (floors.find(r=>floorLevel(r.name)===level&&floorZone(r.name)==='construction')
+          ?.ratePerSqft || packageRate);
     const item={...floor(floorZoneName(level,zone),defaultRate)};
     const where=rows.reduce((index,r,i)=>
       r.kind==='floor'&&floorLevel(r.name)===level ? i:index,-1);
