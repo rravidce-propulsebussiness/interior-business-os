@@ -13,6 +13,7 @@ export default defineConfig({
       'apps/business-app/src/app/dashboard/website/cloudflare-domains.test.ts',
       'apps/business-app/src/app/dashboard/quotations/studio-ui.test.ts',
       'apps/business-app/src/app/dashboard/quotations/construction-floor-inheritance.test.ts',
+      'apps/business-app/src/app/dashboard/quotations/penthouse-floor-selection.test.ts',
       'apps/business-app/src/app/dashboard/quotations/pdf-renderer.test.ts',
       'apps/business-app/src/app/dashboard/pricing/construction/floor-rate-rules.test.ts',
       'apps/business-app/src/workspace-paths.test.ts',
