@@ -1540,3 +1540,29 @@
   @keyframes qs-work-slide{from{transform:translateY(95%)}to{transform:translateY(0)}}
 }
 @media(prefers-reduced-motion:reduce){.qs-workflow *{animation:none!important;transition:none!important}}
+
+
+/* Approved white quotation identity summary replaces the oversized hero. */
+.qs-build-overview{
+  display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,1fr) minmax(0,1fr);
+  gap:0;min-width:0;align-items:center;
+  border:1px solid #f2e4d8;border-radius:18px;background:#fff;
+  box-shadow:0 10px 30px #c2672710;padding:16px 10px;
+}
+.qs-build-overview>div{min-width:0;padding:4px 17px;display:grid;gap:5px}
+.qs-build-overview>div+div{border-left:1px solid #e8ebf2}
+.qs-build-overview small{display:block;color:#7a8a9e;font-size:10px;font-weight:700}
+.qs-build-overview-client small{color:#c75b1a}
+.qs-build-overview strong{display:block;font-size:15px;font-weight:850;overflow-wrap:anywhere;
+  color:#1a2d49;line-height:1.25}
+.qs-build-overview span{display:block;font-size:10px;color:#91a0af}
+.qs-build-overview-price strong{color:#f36a19;font-size:21px;letter-spacing:-.5px}
+@media(max-width:650px){
+  .qs-build-overview{grid-template-columns:1fr 1fr;padding:10px 5px}
+  .qs-build-overview>div{padding:7px 11px}
+  .qs-build-overview>div:first-child{grid-column:1/-1;border-bottom:1px solid #edf0f5;padding-bottom:11px}
+  .qs-build-overview>div:nth-child(2){border-left:0}
+  .qs-build-overview>div:nth-child(3){border-left:1px solid #e8ebf2}
+  .qs-build-overview strong{font-size:13px}
+  .qs-build-overview-price strong{font-size:18px}
+}
