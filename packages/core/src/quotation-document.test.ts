@@ -408,3 +408,19 @@ it('safely prints legacy free-text terms without inventing milestone payments', 
   expect(html).toContain('Stage-wise payments not specified');
   expect(html).not.toContain('Advance|10.00');
 });
+
+
+it('shows both structured saved warranty and stage payment schedule after legacy preface',()=>{
+  const d=quotationDocumentFixture();
+  d.totals.final_amount='5550000.00';
+  d.terms=[
+    'Site access subject to confirmation.','','Warranty:','Structural warranty ten years','',
+    '[STAGE_PAYMENT_PLAN]','Advance|10.00','RCC|60.00','Handover|30.00','[/STAGE_PAYMENT_PLAN]',
+  ].join('\\n');
+  const html=renderQuotationDocument(d);
+  expect(html).toContain('<h3>Warranty</h3>');
+  expect(html).toContain('Structural warranty ten years');
+  expect(html).toContain('Site access subject to confirmation.');
+  expect(html).toContain('Proposed stage-wise payment schedule');
+  expect(html).toContain('33,30,000');
+});
