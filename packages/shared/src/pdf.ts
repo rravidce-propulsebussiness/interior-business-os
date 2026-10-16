@@ -413,3 +413,5 @@ export async function renderConstructionPackageSamplePdf(input: {
   document.setAuthor(safe(input.company));
   return Buffer.from(await document.save());
 }
+\nexport { renderQuotationFallbackPdf } from './quotation-pdf-fallback';
+export type { QuotationPdfFallbackInput } from './quotation-pdf-fallback';
