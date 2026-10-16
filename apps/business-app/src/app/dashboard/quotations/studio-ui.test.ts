@@ -428,3 +428,45 @@ describe('exclusive penthouse + actual HTTP save route', () => {
     expect(builder).toContain('setMessage(detail');
   });
 });
+
+
+describe('streamlined quote, terms and payment Studio', () => {
+  const studio = file('./studio-editor.tsx');
+  const page = file('./[id]/studio/page.tsx');
+  const terms = file('./quotation-terms-editor.tsx');
+  const settings = file('./settings/page.tsx');
+  const css = file('./studio.css');
+
+  it('keeps only three editing tabs and removes duplicate client and branding panels', () => {
+    expect(studio).toContain("{ id: 'quote', title: 'Estimate & Specifications' }");
+    expect(studio).toContain("{ id: 'files', title: 'Terms & Inclusions' }");
+    expect(studio).toContain("{ id: 'payments', title: 'Payment Schedule' }");
+    expect(studio).not.toContain("id: 'client'");
+    expect(studio).not.toContain("step === 'client'");
+    expect(studio).not.toContain('qs-client-strip');
+    expect(studio).not.toContain('Client &amp; Project Details');
+    expect(studio).not.toContain('View details');
+    expect(studio).not.toContain('brandingEditor');
+    expect(page).not.toContain('DraftBrandingControl');
+    expect(page).toContain('<QuotationTermsEditor');
+    expect(settings).toContain('branding.logo_data_uri');
+    expect(settings).toContain('branding.cover_image_data_uri');
+  });
+
+  it('provides quote-specific cards and one working Save for terms', () => {
+    expect(terms).toContain('Quotation validity');
+    expect(terms).toContain('Inclusions');
+    expect(terms).toContain('Exclusions');
+    expect(terms).toContain('Warranty');
+    expect(terms).toContain('Additional terms');
+    expect(terms).toContain('Customer notes');
+    expect(terms).toContain('Internal notes');
+    expect(terms).toContain('data-studio-save="files"');
+    expect(terms).toContain("action: 'edit_revision'");
+    expect(terms).toContain('paymentPlan: fields.paymentPlan');
+    expect(studio).toContain("{step === 'files' && termsEditor}");
+    expect(studio).toContain('qs-studio-clean-header');
+    expect(css).toContain('.qs-terms-grid');
+    expect(css).toContain('grid-template-columns:repeat(3,minmax(0,1fr))');
+  });
+});
