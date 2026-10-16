@@ -167,19 +167,11 @@ export default async function QuotationStudio({
         status={revision.status}
         industryKey={industryKey}
         industryName={industry?.name ?? 'Project'}
-        otherIndustries={allIndustries
-          .filter(
-            (row) =>
-              row.status === 'active' &&
-              !['construction', 'interior'].includes(row.key),
-          )
-          .map((row) => ({ key: row.key, name: row.name }))}
         header={header.data}
         hasSavedPaymentPlan={hasSavedStagePaymentPlan(revision.terms)}
         brandingEditor={<DraftBrandingControl revisionId={revision.id} version={revision.version} editable={editable} />}
         lines={saved}
         total={total}
-        initialMode={mode}
         initialStep={step}
         canEdit={editable}
         canIssue={canIssue}
@@ -229,6 +221,7 @@ export default async function QuotationStudio({
         }
         termsEditor={
           editable ? (
+            <div data-studio-save-section="files">
             <CommandForm
               title="Save quotation specifications & terms"
               initial={{
@@ -278,6 +271,7 @@ export default async function QuotationStudio({
                   : []),
               ]}
             />
+            </div>
           ) : (
             <div className="qs-info-box">
               <strong>Customer terms</strong>
@@ -311,7 +305,7 @@ export default async function QuotationStudio({
         }
         issueEditor={
           <CommandForm
-            title="Issue and freeze this quotation"
+            title="Confirm & Enable Customer Sharing"
             initial={{ ...command, action: 'issue' }}
           />
         }
