@@ -15,10 +15,11 @@ export default async function Settings() {
       <Link href="/dashboard/quotations">Quotations</Link>
       <h1 className="my-6 text-3xl">Company quotation design &amp; code</h1>
       <p>
-        Company owners control the quotation number prefix, logo, colors,
-        columns, default terms and client-facing layout. The platform Super
-        Admin does not create quotations. Changes apply to new quotations only;
-        issued document snapshots remain unchanged.
+        Set your company logo, brand colour and optional building/interior photos
+        for the premium multipage quotation brochure. Add your own images only.
+        All embedded images and the logo must fit within the existing 190 KB
+        branding budget combined; compress a large logo before adding photos.
+        Saved quotation revisions keep their existing branding and amounts.
       </p>
       <MasterForm
         entity="organization_quotation_settings"
@@ -42,6 +43,8 @@ export default async function Settings() {
               tax_identifier: '',
               accent: '#18181b',
               logo_data_uri: '',
+              cover_image_data_uri: '',
+              detail_image_data_uri: '',
             },
           }
         }
@@ -72,6 +75,18 @@ export default async function Settings() {
             key: 'branding.logo_data_uri',
             label: 'Logo (PNG/JPEG, up to 130 KB)',
             type: 'file',
+          },
+          {
+            key: 'branding.cover_image_data_uri',
+            label: 'Premium PDF cover photograph (PNG/JPEG, up to 62 KB)',
+            type: 'file',
+            fileMaxBytes: 62000,
+          },
+          {
+            key: 'branding.detail_image_data_uri',
+            label: 'Specifications / project photograph (PNG/JPEG, up to 39 KB)',
+            type: 'file',
+            fileMaxBytes: 39000,
           },
           {
             key: 'show_quantity',
