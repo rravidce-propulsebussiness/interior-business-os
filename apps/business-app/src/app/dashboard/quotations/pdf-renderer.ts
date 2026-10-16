@@ -132,6 +132,8 @@ export async function renderQuotationPdf(html: string, document?: CustomerDocume
       validUntil: document.valid_until,
       currency: document.currency,
       accent: h.branding.accent,
+      logoDataUri: h.branding.logo_data_uri,
+      coverImageDataUri: h.branding.cover_image_data_uri,
       total: number(document.totals.final_amount),
       items,
       // Terms and stage payments are saved on the revision; never invent
