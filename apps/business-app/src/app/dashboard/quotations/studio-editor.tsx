@@ -141,7 +141,7 @@ export function QuotationStudioEditor({
   const showMethod = canEdit;
   return (
     <>
-      <div className="qs-heading qs-studio-hero">
+      {!(isConstruction && canEdit && step === 'quote') && <div className="qs-heading qs-studio-hero">
         <div className="qs-heading-label">
           <span className="qs-heading-icon">▤</span>
           <div>
@@ -163,7 +163,7 @@ export function QuotationStudioEditor({
             ◉ Preview &amp; Share
           </button>
         </div>
-      </div>
+      </div>}
       <nav className="qs-simple-tabs" aria-label="Quotation sections">
         {steps.map(({ id, title }) => (
           <button type="button" key={id}
@@ -181,7 +181,7 @@ export function QuotationStudioEditor({
       )}
       <div className="qs-studio-grid">
         <div className="qs-editor">
-          <section className="qs-client-strip" aria-label="Saved customer and project">
+          {!(isConstruction && canEdit && step === 'quote') && <section className="qs-client-strip" aria-label="Saved customer and project">
             <div className="qs-client-identity">
               <span className="qs-client-avatar" aria-hidden="true">♙</span>
               <span><strong>{header.customer.name}</strong><small>{header.project.name}</small></span>
@@ -190,7 +190,7 @@ export function QuotationStudioEditor({
             {header.customer.phone && <span>{header.customer.phone}</span>}
             <button type="button" className="qs-client-edit"
               onClick={() => { setStep('client'); setMessage(''); }}>View details</button>
-          </section>
+          </section>}
 
           {step === 'client' && (
             <>
