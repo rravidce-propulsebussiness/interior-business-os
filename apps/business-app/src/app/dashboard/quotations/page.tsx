@@ -8,6 +8,7 @@ import { commercialServices } from '../commercial/service';
 import { QuotationStudioFrame } from './studio-frame';
 import { QuotationRemovalButton } from './quotation-removal-button';
 import { QuotationReviseButton } from './quotation-revise-button';
+import { QuotationMobileMore, QuotationMobileFooter } from './quotation-mobile-disclosures';
 import './quotations-list.css';
 
 export const dynamic = 'force-dynamic';
@@ -243,25 +244,44 @@ export default async function Quotations({
         <span>{niceDate(createdAt)} · R{row.revision_number ?? 1}</span>
       </div>
       <div className="qs-quotes-mobile-actions">
-        <Link href={preview} target="_blank" rel="noopener noreferrer">◉ View</Link>
+        <Link className="qs-quotes-action qs-quotes-action-view"
+          href={preview} target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor"
+            strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12Z"/>
+            <circle cx="12" cy="12" r="2.8"/>
+          </svg>
+          View
+        </Link>
         {row.status === 'draft' && canEdit
-          ? <Link className="qs-quote-edit" href={editor + '?step=quote'}>✎ Edit</Link>
+          ? <Link className="qs-quotes-action qs-quote-edit" href={editor + '?step=quote'}>
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor"
+                strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m4 17-.8 3.8L7 20l12.5-12.5-3-3L4 17Zm10.7-10.7 3 3"/>
+              </svg>
+              Edit
+            </Link>
           : row.status === 'issued' && canCreate && revision
             ? <QuotationReviseButton revisionId={row.id} version={revision.version}
                 number={row.quotation_number || 'Quotation'} />
-            : <Link href={editor}>Open</Link>}
-        <Link href={editor + '?step=preview'}>➤ Share</Link>
-        <details className="qs-quotes-mobile-more">
-          <summary>••• More</summary>
-          <div>
-            <Link href={'/dashboard/quotations/' + row.id + '/pdf?view=1'}
-              target="_blank" rel="noopener noreferrer">View PDF</Link>
-            {canRemove && row.status === 'draft' && revision &&
-              <QuotationRemovalButton id={row.id}
-                number={row.quotation_number || 'Quotation'}
-                version={revision.version} issued={false} />}
-          </div>
-        </details>
+            : <Link className="qs-quotes-action" href={editor}>Open</Link>}
+        <Link className="qs-quotes-action qs-quotes-action-share" href={editor + '?step=preview'}>
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor"
+            strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/>
+            <path d="m8.3 10.8 7.4-4.3M8.3 13.2l7.4 4.3"/>
+          </svg>
+          Share
+        </Link>
+        <QuotationMobileMore>
+          <Link href={'/dashboard/quotations/' + row.id + '/pdf'}>
+            Download PDF
+          </Link>
+          {canRemove && row.status === 'draft' && revision &&
+            <QuotationRemovalButton id={row.id}
+              number={row.quotation_number || 'Quotation'}
+              version={revision.version} issued={false} />}
+        </QuotationMobileMore>
       </div>
     </article>
   );
@@ -420,14 +440,10 @@ export default async function Quotations({
                     </div>
                   </header>
                   {renderMobileQuote(group.quotes[0]!)}
-                  {group.quotes.length > 1 && <details className="qs-quotes-history">
-                    <summary>View all quotations ({group.quotes.length})
-                      <span aria-hidden="true">⌄</span>
-                    </summary>
-                    <div className="qs-quotes-past-list">
-                      {group.quotes.slice(1).map((quote) => renderMobileQuote(quote, true))}
-                    </div>
-                  </details>}
+                  <QuotationMobileFooter count={group.quotes.length}
+                    pdfHref={'/dashboard/quotations/' + group.quotes[0]!.row.id + '/pdf?view=1'}>
+                    {group.quotes.slice(1).map((quote) => renderMobileQuote(quote, true))}
+                  </QuotationMobileFooter>
                 </section>
               ))}
             </div>
