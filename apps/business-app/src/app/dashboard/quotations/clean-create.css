@@ -75,7 +75,7 @@
 .qs-clean-field span { color:#f15b10; }
 .qs-clean-field input,.qs-clean-field select,.qs-clean-field textarea {
   min-height:43px; width:100%; border:1px solid #e0e6f0; border-radius:9px;
-  background:#fff; padding:11px 12px; font:600 12px/1.4 inherit;
+  background:#fff; padding:11px 12px; font-size:12px; font-weight:600; line-height:1.4; font-family:inherit;
   color:#1e304d; outline-offset:2px;
 }
 .qs-clean-field input::placeholder,.qs-clean-field textarea::placeholder { color:#a1acc0; font-weight:400; }
