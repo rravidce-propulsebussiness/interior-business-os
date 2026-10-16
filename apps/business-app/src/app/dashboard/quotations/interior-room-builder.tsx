@@ -2,7 +2,6 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import type { QuotationPackage } from '@business-os/database/quotation-packages';
 import { applyIndustryQuotationPackage } from './industry-package-actions';
 import { addInteriorStudioLine } from './interior-actions';
@@ -49,7 +48,7 @@ export function InteriorRoomBuilder({
   const router = useRouter();
   const [pending, start] = useTransition();
   const [message, setMessage] = useState('');
-  const [packageId, setPackageId] = useState('');
+  const [packageId, setPackageId] = useState(packages.length ? '' : 'custom');
   const [packageQuantity, setPackageQuantity] = useState('1');
   const selectedPackage = packages.find((item) => item.id === packageId);
   const packageTotal = selectedPackage
@@ -96,8 +95,7 @@ export function InteriorRoomBuilder({
         <div>
           <h2>Room-wise Interior BOQ</h2>
           <p className="qs-muted">
-            Choose a saved company package, or build a customized room-wise BOQ
-            with dimensions, brands, hardware and prices.
+            Choose a saved package or Custom Quote to edit individual works, brands, dimensions and rates.
           </p>
         </div>
         <span className="qs-selected-pill">L × B × ₹ / SFT</span>
@@ -106,22 +104,15 @@ export function InteriorRoomBuilder({
         <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
           <div>
             <strong className="text-sm font-extrabold text-slate-950">
-              Apply a saved company package
+              Select Quotation Package
             </strong>
             <p className="mt-1 text-xs text-slate-600">
-              Server-verified package price and specifications are saved to this
-              quotation. Later package edits will not change this saved line.
+              Saved packages include their rate and specifications. Select Custom Quote for individual works.
             </p>
           </div>
-          <Link
-            href="/dashboard/quotations/packages"
-            className="text-xs font-bold text-blue-700 underline"
-          >
-            Package Manager ↗
-          </Link>
+
         </div>
-        {packages.length ? (
-          <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-3 sm:grid-cols-2">
             <label className="qs-field">
               Company package
               <select
@@ -139,8 +130,10 @@ export function InteriorRoomBuilder({
                     {item.name} · {displayPrice(Number(item.basePrice))}
                   </option>
                 ))}
+                <option value="custom">Custom Quote</option>
               </select>
             </label>
+            {selectedPackage && (
             <label className="qs-field">
               Quantity ({priceUnit})
               <input
@@ -169,6 +162,7 @@ export function InteriorRoomBuilder({
                 onChange={(event) => setPackageQuantity(event.target.value)}
               />
             </label>
+            )}
             {selectedPackage && (
               <div className="sm:col-span-2 rounded-xl border border-blue-100 bg-white p-4">
                 <p className="text-xs font-semibold text-slate-700">
@@ -214,16 +208,12 @@ export function InteriorRoomBuilder({
               </div>
             )}
           </div>
-        ) : (
-          <p className="text-xs text-slate-600">
-            No active packages are available for this industry and currency.
-            Create one in Package Manager, or enter custom BOQ items below.
-          </p>
-        )}
+
       </div>
+      {packageId === 'custom' && <>
       <div className="mb-3">
         <h3 className="text-sm font-extrabold text-slate-950">
-          Custom item pricing
+          Editable custom quotation items
         </h3>
       </div>
       <form
@@ -408,6 +398,8 @@ export function InteriorRoomBuilder({
           </button>
         </div>
       </form>
+      </>}
+      {packageId === '' && <p className="qs-info-box">Select a saved package or Custom Quote.</p>}
       {message && (
         <p role="status" className="qs-message" style={{ marginTop: 12 }}>
           {message}

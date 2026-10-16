@@ -2,7 +2,6 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import {
   calculateSftEstimate,
   type SftEstimateDetails,
@@ -89,25 +88,29 @@ export function PremiumSftBuilder({
   initialSchedule,
   revisionId,
   version,
+  selectedPackageId,
 }: {
   rates: ConstructionRate[];
   packages: ConstructionPackage[];
   initialSchedule: SftEstimateDetails | null;
   revisionId: string;
   version: number;
+  selectedPackageId?: string | undefined;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const activePackages = packages.filter((item) => item.status === 'active');
   const activeRates = rates.filter((item) => item.status === 'active');
-  const [packageId, setPackageId] = useState(() => {
-    const prior = initialSchedule?.package;
-    return (
-      activePackages.find(
-        (item) => item.id === prior?.id || item.code === prior?.code,
-      )?.id ?? ''
-    );
-  });
+  const previousPackage = activePackages.find((item) =>
+    item.id === initialSchedule?.package?.id ||
+    item.code === initialSchedule?.package?.code
+  );
+  const chosenPackage = selectedPackageId
+    ? activePackages.find((item) => item.id === selectedPackageId)
+    : previousPackage;
+  const replacePackage = Boolean(chosenPackage &&
+    (!previousPackage || previousPackage.id !== chosenPackage.id));
+  const packageId = chosenPackage?.id ?? '';
   const selectedPackage = activePackages.find((item) => item.id === packageId);
   const [rows, setRows] = useState<WorkRow[]>(
     initialSchedule?.rows.map((row) => ({
@@ -115,14 +118,29 @@ export function PremiumSftBuilder({
       name: row.name,
       lengthFeet: row.lengthFeet,
       widthFeet: row.widthFeet,
-      ratePerSqft: row.ratePerSqft,
-    })) ?? [makeRow('floor', 'Ground Floor', '')],
+      ratePerSqft: replacePackage && row.kind === 'floor'
+        ? chosenPackage!.ratePerSqft : row.ratePerSqft,
+    })) ?? [makeRow('floor', 'Ground Floor', chosenPackage?.ratePerSqft ?? '')],
   );
-  const [sections, setSections] = useState<Section[]>(
-    initialSchedule?.sections?.length
+  const [sections, setSections] = useState<Section[]>(() => {
+    if (chosenPackage && (replacePackage || !initialSchedule?.sections?.length)) {
+      return [
+        { title: 'Package scope & inclusions', description: chosenPackage.description },
+        ...(chosenPackage.specSections.length
+          ? chosenPackage.specSections.map((section) => ({
+              title: section.title,
+              description: section.description,
+              brand: section.brand,
+              grade: section.grade,
+              allowancePerSqft: section.allowancePerSqft,
+            }))
+          : freshSections().slice(1)),
+      ];
+    }
+    return initialSchedule?.sections?.length
       ? initialSchedule.sections.map((item) => ({ ...item }))
-      : freshSections(),
-  );
+      : freshSections();
+  });
   const [brands, setBrands] = useState<Record<string, string>>(() => {
     const selected: Record<string, string> = {};
     for (const material of initialSchedule?.materials ?? []) {
@@ -189,45 +207,6 @@ export function PremiumSftBuilder({
     );
     setMessage('');
     setSaved(false);
-  };
-  const applyPackage = (id: string) => {
-    const choice = activePackages.find((item) => item.id === id);
-    setPackageId(id);
-    if (choice) {
-      setRows((current) =>
-        current.map((row) =>
-          row.kind === 'floor'
-            ? { ...row, ratePerSqft: choice.ratePerSqft }
-            : row,
-        ),
-      );
-      setSections([
-        {
-          title: 'Package scope & inclusions',
-          description: choice.description,
-        },
-        ...(choice.specSections.length
-          ? choice.specSections
-              .filter((section) =>
-                Boolean(
-                  section.description.trim() ||
-                  section.brand.trim() ||
-                  section.grade.trim() ||
-                  section.allowancePerSqft.trim(),
-                ),
-              )
-              .map((section) => ({
-                title: section.title,
-                description: section.description,
-                brand: section.brand,
-                grade: section.grade,
-                allowancePerSqft: section.allowancePerSqft,
-              }))
-          : freshSections().slice(1)),
-      ]);
-    }
-    setSaved(false);
-    setMessage('');
   };
   const addFloor = () => {
     if (rows.length >= 18) return;
@@ -314,37 +293,6 @@ export function PremiumSftBuilder({
 
         {step === 1 ? (
           <div className="space-y-5 p-4 sm:p-7">
-            <div className="grid gap-3 rounded-2xl border border-blue-100 bg-blue-50 p-4 sm:grid-cols-[1fr_auto] sm:items-end">
-              <label className="grid gap-2 text-xs font-bold text-slate-700">
-                Construction package <span className="text-rose-600">*</span>
-                <select
-                  className={field}
-                  value={packageId}
-                  onChange={(event) => applyPackage(event.target.value)}
-                >
-                  <option value="">
-                    {activePackages.length
-                      ? 'Choose company package'
-                      : 'No packages configured'}
-                  </option>
-                  {activePackages.map((item) => (
-                    <option key={item.id} value={item.id}>
-                      {item.name} · {money(Number(item.ratePerSqft))}/sq ft
-                    </option>
-                  ))}
-                </select>
-                <span className="font-normal text-slate-500">
-                  Applies the package rate to each floor. Individual work rates
-                  may be adjusted before saving.
-                </span>
-              </label>
-              <Link
-                href="/dashboard/pricing/construction"
-                className="inline-flex min-h-11 items-center justify-center rounded-xl border border-blue-200 bg-white px-4 py-3 text-xs font-bold text-blue-700"
-              >
-                Manage packages ↗
-              </Link>
-            </div>
             {selectedPackage && (
               <div className="flex flex-wrap items-start justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
                 <div>
@@ -755,14 +703,7 @@ export function PremiumSftBuilder({
               >
                 ← Edit floor costing
               </button>
-              <Link
-                href={
-                  '/dashboard/quotations/' + revisionId + '/studio?step=files'
-                }
-                className="rounded-xl border border-blue-200 bg-blue-50 px-5 py-3 text-sm font-bold text-blue-700"
-              >
-                Attach PDF annexures ↗
-              </Link>
+
             </div>
           </div>
         )}

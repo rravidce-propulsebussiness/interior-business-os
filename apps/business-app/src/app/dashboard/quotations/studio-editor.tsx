@@ -38,7 +38,7 @@ type DocumentHeader = {
 
 const steps: { id: Tab; title: string }[] = [
   { id: 'quote', title: 'Estimate & Specifications' },
-  { id: 'files', title: 'Project Files' },
+  { id: 'files', title: 'Terms & Inclusions' },
   { id: 'payments', title: 'Payment Schedule' },
   { id: 'client', title: 'Client Details' },
 ];
@@ -59,7 +59,6 @@ export function QuotationStudioEditor({
   brandingEditor,
   constructionEditor,
   interiorEditor,
-  filesEditor,
   termsEditor,
   paymentEditor,
   sharingEditor,
@@ -84,7 +83,6 @@ export function QuotationStudioEditor({
   brandingEditor: ReactNode;
   constructionEditor: ReactNode;
   interiorEditor: ReactNode;
-  filesEditor: ReactNode;
   termsEditor: ReactNode;
   paymentEditor: ReactNode;
   sharingEditor: ReactNode;
@@ -283,16 +281,14 @@ export function QuotationStudioEditor({
           {step === 'files' && (
             <>
               <section className="qs-card">
-                <h2>Specifications, inclusions &amp; files</h2>
+                <h2>Quotation Terms &amp; Inclusions</h2>
                 <p className="qs-muted" style={{ marginBottom: 15 }}>
-                  Your edited package inclusions print on their own PDF pages
-                  after the floor-cost schedule. Upload any existing
-                  specifications or plans below to append the original PDFs.
-                  Set warranty and exclusions here. Use the Payments step for stage-wise milestones.
+                  Your selected package's specifications are already included.
+                  Update warranty, exclusions and any additional terms here.
+                  Set payment stages in the Payments section.
                 </p>
                 {termsEditor}
               </section>
-              {filesEditor}
             </>
           )}
 
