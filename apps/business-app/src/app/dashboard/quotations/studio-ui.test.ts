@@ -44,3 +44,25 @@ describe('minimal quotation studio navigation', () => {
     expect(studio).toContain('Preview contains saved amounts');
   });
 });
+
+describe('single package choice in the saved quotation editor', () => {
+  const construction = file('./construction-selector.tsx');
+  const sft = file('./premium-sft-builder.tsx');
+  const interior = file('./interior-room-builder.tsx');
+
+  it('shows one construction package selector and Custom Quote, not a second pricing-method selector', () => {
+    expect(construction).toContain('Select construction quotation package');
+    expect(construction).toContain('<option value="custom">Custom Quote</option>');
+    expect(construction).not.toContain('Select quotation calculation method');
+    expect(construction).not.toContain('2. Customized quotation');
+    expect(construction).toContain('hidePackagePicker');
+    expect(sft).toContain('!hidePackagePicker');
+  });
+
+  it('shows the interior custom item editor only for Custom Quote and no package manager link', () => {
+    expect(interior).toContain('<option value="custom">Custom Quote</option>');
+    expect(interior).toContain("packageId === 'custom'");
+    expect(interior).not.toContain('Package Manager ↗');
+    expect(interior).toContain('data-studio-save={!selectedPackage');
+  });
+});
