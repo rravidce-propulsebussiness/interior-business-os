@@ -134,29 +134,22 @@ export function QuotationStudioEditor({
   const showMethod = canEdit;
   return (
     <>
-      {step !== 'payments' && !(isConstruction && canEdit && step === 'quote') && <div className="qs-heading qs-studio-hero qs-studio-clean-header">
-        <div className="qs-heading-label">
-          <span className="qs-heading-icon">▤</span>
-          <div>
-            <h1>{industryName} Quote</h1>
-            <p className="qs-hero-meta">
-              {quoteNumber} · Revision {revisionNumber} ·{' '}
-              <span className="qs-saved-pill">{status === 'issued' ? 'Shared' : 'Saved'}</span>
-            </p>
-            <p className="qs-hero-client">Prepared for <strong>{header.customer.name}</strong></p>
-            <div className="qs-hero-total"><small>Total project cost</small><strong>{price}</strong></div>
-          </div>
-        </div>
-        <div className="qs-toolbar qs-studio-actions" aria-label="Quotation actions">
-          <button type="button" className="qs-btn qs-top-save" onClick={saveCurrent}>
+      <div className="qs-studio-compact-bar" aria-label="Quotation identity and actions">
+        <p className="qs-studio-compact-ref">
+          <strong>{quoteNumber}</strong>
+          <span>R{revisionNumber} · {header.customer.name}</span>
+          <span className="qs-studio-compact-status">{status === 'issued' ? 'Shared' : 'Saved'}</span>
+        </p>
+        <div className="qs-toolbar qs-studio-compact-buttons" aria-label="Quotation actions">
+          <button type="button" className="qs-btn" onClick={saveCurrent} disabled={!canEdit}>
             ▣ Save
           </button>
-          <button type="button" className="qs-btn primary qs-top-preview"
+          <button type="button" className="qs-btn primary"
             onClick={() => { setStep('preview'); setMessage(''); }}>
             ◉ Preview &amp; Share
           </button>
         </div>
-      </div>}
+      </div>
       <nav className="qs-simple-tabs" aria-label="Quotation sections">
         {steps.map(({ id, title }) => (
           <button type="button" key={id}
