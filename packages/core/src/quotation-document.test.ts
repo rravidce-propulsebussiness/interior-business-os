@@ -244,7 +244,7 @@ it('prints a 33-stage construction payment plan without amount or percentage dri
   d.terms = '[STAGE_PAYMENT_PLAN]\n' + amounts.join('\n') + '\n[/STAGE_PAYMENT_PLAN]';
   const html = renderQuotationDocument(d);
   expect(html).toContain('Stage 33');
-  expect(html).toContain('100.00%');
+  expect(html).toContain('<td>100%</td>');
   expect(html).toContain('24035000.00');
   expect(html).not.toContain('[STAGE_PAYMENT_PLAN]');
 });
