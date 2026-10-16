@@ -132,4 +132,28 @@ create trigger quotation_prospect_contract_activated
   for each row execute function private.quotation_prospect_activate_on_contract();
 
 
+-- Dashboard/repository project search must not count unconverted prospects.
+-- The create-quotation form uses its direct customer lookup, so existing CRM
+-- prospect matching remains available while the main Customers list stays clean.
+create or replace function public.commercial_search(p_organization_id uuid,p_entity text,p_query text default '',p_page integer default 1,p_status text default '',p_parent_id uuid default null) returns jsonb language plpgsql stable security invoker set search_path='' as $$
+declare result jsonb;count_rows bigint;q text;filter_sql text;label_column text;
+begin
+ if p_entity not in ('customers','projects','quotations','catalog_items','catalog_categories') or p_page not between 1 and 10000 or length(p_query)>100 then raise exception 'Invalid search' using errcode='22023';end if;
+ if not private.is_member(p_organization_id) then raise exception 'Forbidden' using errcode='42501';end if;
+ label_column=case when p_entity='customers' then 'display_name' when p_entity='quotations' then 'quotation_number' else 'name' end;
+ q=replace(replace(replace(lower(p_query),'\','\\'),'%','\%'),'_','\_')||'%';
+ if p_entity='quotations' then
+  select count(*) into count_rows from public.quotation_revisions r join public.quotations t on t.id=r.quotation_id where r.organization_id=p_organization_id and lower(t.quotation_number) like q and (p_status='' or r.status=p_status);
+  select coalesce(jsonb_agg(x),'[]') into result from (select r.id,t.quotation_number,r.revision_number,r.valid_until,r.totals->>'final_amount' amount,r.currency,r.status,r.document_snapshot->'customer'->>'name' customer_name,r.document_snapshot->'project'->>'name' project_name from public.quotation_revisions r join public.quotations t on t.id=r.quotation_id where r.organization_id=p_organization_id and lower(t.quotation_number) like q and (p_status='' or r.status=p_status) order by r.created_at desc,r.id limit 25 offset (p_page-1)*25) x;
+  return jsonb_build_object('rows',result,'total',count_rows,'page',p_page,'page_size',25);
+ end if;
+ filter_sql=format('organization_id=$1 and lower(%I) like $2 and ($3='''' or status=$3)',label_column);
+ if p_entity='projects' then filter_sql=filter_sql||' and is_sales_prospect=false and ($4 is null or customer_id=$4)';elsif p_entity='customers' then filter_sql=filter_sql||' and is_sales_prospect=false';elsif p_entity='catalog_items' then filter_sql=filter_sql||' and ($4 is null or category_id=$4)';else filter_sql=filter_sql||' and ($4 is null or $4 is not null)';end if;
+ execute format('select count(*) from public.%I where %s',p_entity,filter_sql) into count_rows using p_organization_id,q,p_status,p_parent_id;
+ if p_entity='quotations' then
+  execute format('select coalesce(jsonb_agg(x),''[]'') from (select t.*,r.revision_number,r.valid_until,r.totals->>''final_amount'' amount,r.currency,r.status revision_status,c.display_name customer_name,p.name project_name from public.quotations t join public.quotation_revisions r on r.id=t.current_revision_id join public.customers c on c.id=t.customer_id join public.projects p on p.id=t.project_id where t.organization_id=$1 and lower(t.quotation_number) like $2 and ($3='''' or t.status=$3) and ($4 is null or $4 is not null) order by t.created_at desc,t.id limit 25 offset $5) x') into result using p_organization_id,q,p_status,p_parent_id,(p_page-1)*25;
+ else execute format('select coalesce(jsonb_agg(x),''[]'') from (select * from public.%I where %s order by lower(%I),id limit 25 offset $5) x',p_entity,filter_sql,label_column) into result using p_organization_id,q,p_status,p_parent_id,(p_page-1)*25;end if;
+ return jsonb_build_object('rows',result,'total',count_rows,'page',p_page,'page_size',25);
+end $$;
+
 commit;
