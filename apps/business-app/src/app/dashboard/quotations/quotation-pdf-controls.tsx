@@ -27,7 +27,7 @@ export function QuotationPdfControls({
     const response = await fetch(route, {
       cache: 'no-store',
       credentials: 'same-origin',
-      signal,
+      ...(signal ? { signal } : {}),
     });
     if (!response.ok) {
       let detail = '';
