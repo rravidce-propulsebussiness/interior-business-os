@@ -193,7 +193,7 @@ export default async function QuotationStudio({
               version={revision.version}
               initialSchedule={existingSft}
               initialMode={mode === 'custom' ? 'custom' : 'sft'}
-              previewHtml={previewHtml}
+              canSharePdf={s.allowed('quotation.share', 'quotation')}
               quoteNumber={root.quotation_number}
               clientName={header.data.customer.name}
               location={header.data.project.site_address.city}
