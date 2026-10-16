@@ -225,12 +225,12 @@ export function QuotationStudioEditor({
                   >
                     Print A4 design / Save as PDF
                   </button>
-                  <a className="qs-btn primary" href={url + '/pdf'}>
+                  <a className="qs-btn primary" href={url + '/pdf?version=' + revisionVersion}>
                     ↓ Download quotation PDF
                   </a>
                   <a
                     className="qs-btn"
-                    href={url + '/pdf?view=1'}
+                    href={url + '/pdf?view=1&version=' + revisionVersion}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -284,7 +284,7 @@ export function QuotationStudioEditor({
             className="qs-preview-frame"
             title="Live customer quotation PDF preview"
             srcDoc={previewHtml}
-            src={previewHtml ? undefined : url + '/preview'}
+            src={previewHtml ? undefined : url + '/preview?version=' + revisionVersion}
             sandbox=""
             loading="lazy"
           />
