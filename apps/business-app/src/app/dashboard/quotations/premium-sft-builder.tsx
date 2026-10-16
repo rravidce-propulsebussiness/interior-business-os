@@ -206,10 +206,11 @@ export function PremiumSftBuilder({
     setRows([...next,...extras]);
     touch();
   };
-  const addFloorZone=(level:number,zone:'parking'|'penthouse')=>{
+  const addFloorZone=(level:number,zone:FloorZone)=>{
     if(rows.length>=18)return;
     if(floors.some(r=>r.name===floorZoneName(level,zone)))return;
-    const defaultRate=zone==='parking'?floorRateDefaults.parking:floorRateDefaults.penthouse;
+    const defaultRate=zone==='parking' ? floorRateDefaults.parking :
+      zone==='penthouse' ? floorRateDefaults.penthouse : packageRate;
     const item={...floor(floorZoneName(level,zone),defaultRate)};
     const where=rows.reduce((index,r,i)=>
       r.kind==='floor'&&floorLevel(r.name)===level ? i:index,-1);
@@ -278,6 +279,9 @@ export function PremiumSftBuilder({
             })} SFT · construction / parking / penthouse separately priced</small>
           </div>
           <div className="qs-work-split-buttons">
+            {!group.portions.some(r=>floorZone(r.name)==='construction') &&
+              <button type="button" disabled={rows.length>=18}
+                onClick={()=>addFloorZone(group.level,'construction')}>＋ Construction</button>}
             {!group.portions.some(r=>floorZone(r.name)==='parking') &&
               <button type="button" disabled={rows.length>=18}
                 onClick={()=>addFloorZone(group.level,'parking')}>＋ Parking</button>}
@@ -340,7 +344,9 @@ export function PremiumSftBuilder({
                 min="0" max="999999.99" step=".01" placeholder="₹/unit"
                 value={r.ratePerSqft} onChange={e=>updateRow(i,{ratePerSqft:e.target.value})}/></td>
               <td className="qs-work-amount">{amount>0?fmt(amount):'—'}</td>
-              <td>{(r.kind==='additional'||(r.kind==='floor'&&floorZone(r.name)!=='construction')) &&
+              <td>{(r.kind==='additional'||(r.kind==='floor'&&
+                (floorZone(r.name)!=='construction'||
+                  floors.filter(f=>floorLevel(f.name)===floorLevel(r.name)).length>1))) &&
                 <button type="button" className="qs-work-remove"
                 aria-label={'Remove '+r.name} onClick={()=>{setRows(old=>old.filter((_,j)=>j!==i));touch();}}>×</button>}</td>
             </tr>;
