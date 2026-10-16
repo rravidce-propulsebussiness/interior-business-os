@@ -21,7 +21,11 @@ export function QuotationPdfControls({
   const [loadedVersion, setLoadedVersion] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
-  const route = '/dashboard/quotations/' + revisionId + '/pdf?view=1';
+  // A revision can be edited after opening the page; version-qualified
+  // URLs keep Android PDF viewers from reopening an older cached document.
+  const base = '/dashboard/quotations/' + revisionId + '/pdf';
+  const route = base + '?view=1&version=' + version;
+  const downloadRoute = base + '?version=' + version;
   const filename = (quoteNumber.replace(/[^a-z0-9_-]/gi, '_') || 'Quotation') + '.pdf';
 
   const loadPdf = useCallback(async (signal?: AbortSignal) => {
@@ -116,7 +120,7 @@ export function QuotationPdfControls({
           }}>
           ◉ View PDF
         </a>
-        <a href={route.replace('?view=1', '')}
+        <a href={downloadRoute}
           onClick={(event) => {
             if (dirty) { event.preventDefault(); setMessage('Save your latest changes before downloading the PDF.'); }
           }}>
