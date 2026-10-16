@@ -488,7 +488,7 @@ export function PremiumSftBuilder({
                           <p className="rounded-xl border border-teal-200 bg-teal-50 px-4 py-3 text-xs font-semibold text-teal-800">
                             ▤ {selectedPackage.attachmentFilename} · The company
                             package PDF will be attached to this quotation when
-                            you save the draft.
+                            you save the quotation.
                           </p>
                         )}
                         <div className="rounded-xl bg-slate-50 px-3 py-3 text-sm font-extrabold text-slate-900">
