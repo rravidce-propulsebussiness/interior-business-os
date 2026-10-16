@@ -135,15 +135,17 @@ export function QuotationStudioEditor({
   const showMethod = canEdit;
   return (
     <>
-      <div className="qs-heading">
+      <div className="qs-heading qs-studio-hero">
         <div className="qs-heading-label">
           <span className="qs-heading-icon">▤</span>
           <div>
-            <h1>Quotation Studio</h1>
-            <p>
+            <h1>{industryName} Quote</h1>
+            <p className="qs-hero-meta">
               {quoteNumber} · Revision {revisionNumber} ·{' '}
               <span className="qs-saved-pill">{status === 'issued' ? 'Shared' : 'Saved'}</span>
             </p>
+            <p className="qs-hero-client">Prepared for {header.customer.name}</p>
+            <div className="qs-hero-total"><small>Total project cost</small><strong>{price}</strong></div>
           </div>
         </div>
         <div className="qs-toolbar qs-studio-actions" aria-label="Quotation actions">
@@ -290,21 +292,17 @@ export function QuotationStudioEditor({
 
           {step === 'preview' && (
             <>
-              <section className="qs-card">
+              <section className="qs-card" id="qs-preview-share">
                 <h2>Preview &amp; Share</h2>
                 <p className="qs-muted" style={{ marginBottom: 14 }}>
                   This is the actual PDF generated with{' '}
                   <strong>{header.branding.name || industryName}</strong>{' '}
                   branding and saved quotation values.
                 </p>
-                <div className="mb-4 flex flex-wrap items-center gap-3">
-                  <Link href="/dashboard/quotations/settings" className="qs-btn">
-                    Edit company logo &amp; address ↗
-                  </Link>
-                  <button className="qs-btn" type="button" onClick={() => setStep('client')}>
-                    Update branding for this draft ↗
-                  </button>
-                </div>
+                <p className="qs-muted" style={{marginBottom: 12}}>
+                  Preview contains saved amounts and specifications only.
+                  Save any edits before sharing.
+                </p>
                 <div className="qs-toolbar">
                   <button
                     type="button"
@@ -373,24 +371,7 @@ export function QuotationStudioEditor({
             <span>
               ▤ PDF Preview <span className="qs-badge">A4 · Portrait</span>
             </span>
-            <span className="qs-preview-actions">
-              <a
-                href={url + '/preview'}
-                className="qs-btn"
-                style={{ minHeight: 28, padding: '0 8px' }}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                ↗
-              </a>
-              <a
-                href={url + '/pdf'}
-                className="qs-btn"
-                style={{ minHeight: 28, padding: '0 8px' }}
-              >
-                ↓
-              </a>
-            </span>
+            
           </div>
           <iframe
             className="qs-preview-frame"
