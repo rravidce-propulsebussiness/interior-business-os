@@ -248,3 +248,30 @@ it('prints a 33-stage construction payment plan without amount or percentage dri
   expect(html).toContain('24035000.00');
   expect(html).not.toContain('[STAGE_PAYMENT_PLAN]');
 });
+
+it('shows distinct quotation page surfaces and factual saved specification cards', () => {
+  const d = quotationDocumentFixture();
+  const html = renderQuotationDocument(d);
+  expect(html).toContain('pb-cover');
+  expect(html).toContain('pb-page pb-pricing');
+  expect(html).toContain('pb-page pb-specs-page');
+  expect(html).toContain('pb-page pb-payment-page');
+  expect(html).toContain('pb-close');
+  expect(html).toContain('Pricing summary');
+  expect(html).toContain('Selected materials &amp; specifications');
+  expect(html).toContain('Plywood grade');
+  expect(html).toContain('Hettich');
+  expect(html).toContain('Work items in quotation');
+  expect(html).not.toContain('Kajaria / Somany');
+  expect(html).not.toContain('TATA / Tiscon');
+});
+
+it('only inserts company-uploaded material photo in the same revision', () => {
+  const d = quotationDocumentFixture();
+  d.header.branding.materials_image_data_uri = 'data:image/jpeg;base64,AA==';
+  const html = renderQuotationDocument(d);
+  expect(html).toContain('Company-provided materials and finishes');
+  expect(html).toContain('src="data:image/jpeg;base64,AA=="');
+  d.header.branding.materials_image_data_uri = 'https://untrusted.example/photo.jpg';
+  expect(() => renderQuotationDocument(d)).toThrow();
+});
