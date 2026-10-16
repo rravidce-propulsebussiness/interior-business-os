@@ -296,7 +296,7 @@ export async function saveFloorwiseSftEstimate(
   revisionId: string,
   version: number,
   input: unknown,
-): Promise<{ message: string; id?: string; total?: string; version?: number }> {
+): Promise<{ message: string; id?: string; total?: string; version?: number; requestId?: string; code?: string }> {
   try {
     const rid = idSchema.parse(revisionId);
     const parsed = sftEstimateInputSchema.parse(input);
@@ -420,6 +420,9 @@ export async function saveFloorwiseSftEstimate(
           : 'Floor-wise estimate saved with the itemized area/rate schedule. Review your PDF before issuing.',
     };
   } catch (error) {
-    return { message: safeFailure(error).message };
+    const failure=safeFailure(error);
+    const code=error instanceof DomainError ? error.code :
+      error instanceof z.ZodError ? 'VALIDATION_FAILED' : 'INTERNAL_ERROR';
+    return { message:failure.message, requestId:failure.requestId,code };
   }
 }
