@@ -95,6 +95,12 @@ export function QuotationStudioEditor({
   // A successful child save increments the version via the authoritative
   // server action; clear transient 'Saving…' only after that acknowledgement.
   useEffect(() => { setMessage(''); }, [revisionVersion]);
+  const amount = Number(total);
+  const price = Number.isFinite(amount)
+    ? new Intl.NumberFormat('en-IN', {
+        style: 'currency', currency, maximumFractionDigits: 2,
+      }).format(amount)
+    : currency + ' ' + total;
   const url = '/dashboard/quotations/' + revisionId;
   const isConstruction = industryKey === 'construction';
   const isInterior = industryKey === 'interior';
