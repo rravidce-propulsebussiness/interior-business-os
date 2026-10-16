@@ -267,8 +267,8 @@
   to {opacity:1; transform:translateY(0);}
 }
 @keyframes qs-quote-expand {
-  from {opacity:0; transform:translateY(-5px);}
-  to {opacity:1; transform:translateY(0);}
+  from {opacity:0; transform:scaleY(.97);}
+  to {opacity:1; transform:scaleY(1);}
 }
 
 @media (max-width: 1199px) {
@@ -398,7 +398,7 @@
     grid-column:1/-1;
     min-width:0;display:grid;gap:7px;padding:12px;
     border:1px solid #f3dacb;border-radius:12px;background:#fffaf6;
-    animation:qs-quote-expand .18s ease-out both;
+    animation:qs-quote-expand .18s ease-out both;transform-origin:top;
   }
   .qs-quotes-mobile-more-panel a,
   .qs-quotes-mobile-more-panel .qs-btn {
