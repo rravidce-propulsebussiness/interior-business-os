@@ -53,7 +53,11 @@ const storedBrand = (
   const material = materials.find((m) => matchesBrand(m.category, key));
   if (material) return material.name;
   const section = sections.find((s) => matchesBrand(s.title, key) && s.brand?.trim());
-  return section?.brand ?? '';
+  if (section?.brand) return section.brand;
+  const marker = 'Quote-only ' + key + ' brand: ';
+  const fromDescription = sections.flatMap((s) => s.description.split('\n'))
+    .find((line) => line.startsWith(marker));
+  return fromDescription ? fromDescription.slice(marker.length) : '';
 };
 
 export function PremiumSftBuilder({
@@ -78,6 +82,7 @@ export function PremiumSftBuilder({
   const replacePackage = Boolean(selectedPackage && savedPackage?.id !== selectedPackage.id);
   const packageId = selectedPackage?.id ?? '';
   const packageRate = selectedPackage?.ratePerSqft ?? '';
+  const initialMaterials = replacePackage ? [] : initialSchedule?.materials ?? [];
 
   const [rows, setRows] = useState<WorkRow[]>(() => {
     if (!initialSchedule?.rows.length) return [floorRow(floorNames[0]!, packageRate)];
@@ -127,7 +132,11 @@ export function PremiumSftBuilder({
   const archived = (replacePackage ? [] : initialSchedule?.materials ?? []).filter(
     (item) => !activeRates.some((rate) =>
       rate.category === item.category && rate.name === item.name &&
-      rate.specification === item.specification));
+      rate.specification === item.specification) &&
+      !brandKeys.some((key) => matchesBrand(item.category, key) &&
+        (sections.some((section) => section.title === overrideTitle(key)) ||
+        sections.some((section) => section.description.includes(
+          'Quote-only ' + key + ' brand: ')))));
   const quote = (() => {
     try {
       return calculateSftEstimate(
@@ -273,8 +282,9 @@ export function PremiumSftBuilder({
               <label><span className="sr-only">{floor.name} built-up area</span>
                 <input aria-label={floor.name + ' built-up area'} type="number"
                   min="0.01" max="9999.99" step="0.01" inputMode="decimal"
-                  placeholder="Area" value={decimalArea(
-                    Number(floor.lengthFeet || 0) * Number(floor.widthFeet || 0))}
+                  placeholder="Area" value={floor.widthFeet === '1'
+                    ? floor.lengthFeet
+                    : decimalArea(Number(floor.lengthFeet || 0) * Number(floor.widthFeet || 0))}
                   onChange={(event) => changeArea(rowIndex, event.target.value)}/>
                 <small>SFT</small>
               </label>
@@ -328,7 +338,7 @@ export function PremiumSftBuilder({
         </div>
         <div className="qs-build-brand-grid">
           {brandKeys.map((key) => <div className="qs-build-brand" key={key}>
-            <small>{key}</small><strong>{storedBrand(key, sections, initialSchedule?.materials ?? []) || 'As per package'}</strong>
+            <small>{key}</small><strong>{storedBrand(key, sections, initialMaterials) || 'As per package'}</strong>
           </div>)}
         </div>
         <p className="qs-build-note">Changes are saved only in this quotation's specification snapshot. Company packages remain unchanged.</p>
@@ -360,7 +370,7 @@ export function PremiumSftBuilder({
           {brandKeys.map((key) => {
             const options = [...new Set(activeRates.filter((rate) =>
               matchesBrand(rate.category, key)).map((rate) => rate.name))];
-            const current = storedBrand(key, sections, initialSchedule?.materials ?? []);
+            const current = storedBrand(key, sections, initialMaterials);
             return <label className="qs-build-brand-field" key={key}>{key}
               <input type="text" maxLength={120} list={'qs-brand-options-' + key}
                 value={brandChanges[key] ?? current}
