@@ -1,3 +1,5 @@
+// Company branding supports company-owned PNG/JPEG data URIs only.
+/* eslint-disable @next/next/no-img-element -- Inline validated tenant logo */
 'use client';
 
 import Link from 'next/link';
@@ -26,10 +28,12 @@ const quotationLinks = [
 
 export function QuotationStudioFrame({
   companyName,
+  companyLogo,
   accountEmail,
   children,
 }: {
   companyName: string;
+  companyLogo?: string;
   accountEmail?: string;
   children: ReactNode;
 }) {
@@ -111,7 +115,8 @@ export function QuotationStudioFrame({
           className="qs-brand"
           onClick={() => setMenuOpen(false)}
         >
-          <span className="qs-brand-mark">{initials}</span>
+          {companyLogo ? <img className="qs-company-logo" src={companyLogo} alt={companyName + ' logo'}/> :
+            <span className="qs-brand-mark">{initials}</span>}
           <span>
             <strong>{companyName}</strong>
             <small>Company workspace</small>
