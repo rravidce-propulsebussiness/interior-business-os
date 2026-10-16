@@ -145,7 +145,6 @@ export function PremiumSftBuilder({
       rows,materialIds,packageId:selectedPackage?.id??null,sections,
     },usedMaterials);}catch{return null;}
   })();
-  const url='/dashboard/quotations/'+revisionId;
   const total=floors.reduce((sum,r)=>sum+measured(r)*Number(r.ratePerSqft||0),0)+
     extras.reduce((sum,r)=>sum+measured(r)*Number(r.ratePerSqft||0),0);
   const area=floors.reduce((sum,r)=>sum+measured(r),0);
