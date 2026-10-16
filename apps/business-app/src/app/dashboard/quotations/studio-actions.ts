@@ -112,6 +112,21 @@ export async function createStudioQuotation(input: unknown): Promise<{
       };
     }
 
+    // Fail before creating customer records if the quote-only prospect SQL
+    // is not installed or the signed-in actor lacks quotation permission.
+    const checkProspect = s.client.rpc.bind(s.client) as unknown as (
+      name: string, args: Record<string, string>,
+    ) => Promise<{ data: boolean | null; error: { message: string } | null }>;
+    const prospectReady = await checkProspect('quotation_prospect_ready', {
+      p_organization_id: s.org,
+    });
+    if (prospectReady.error || prospectReady.data !== true)
+      return {
+        ok: false,
+        message: 'Quote-only prospect support is not ready. ' +
+          'Apply the latest quotation database migration before creating a quote.',
+      };
+
     // Reuse a contact by CRN. A quote is not yet a project; it retains the
     // chosen name, industry and site details as a sales proposal snapshot.
     const baseAddress = {
