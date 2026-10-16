@@ -211,7 +211,8 @@ export function PremiumSftBuilder({
     if(floors.some(r=>r.name===floorZoneName(level,zone)))return;
     const defaultRate=zone==='parking'?floorRateDefaults.parking:floorRateDefaults.penthouse;
     const item={...floor(floorZoneName(level,zone),defaultRate)};
-    const where=rows.findLastIndex(r=>r.kind==='floor'&&floorLevel(r.name)===level);
+    const where=rows.reduce((index,r,i)=>
+      r.kind==='floor'&&floorLevel(r.name)===level ? i:index,-1);
     setRows(current=>[
       ...current.slice(0,where+1),item,...current.slice(where+1),
     ]);
