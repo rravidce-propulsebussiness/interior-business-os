@@ -85,7 +85,7 @@ export function PremiumSftBuilder({
   rates:ConstructionRate[];
   packages:ConstructionPackage[];
   initialSchedule:SftEstimateDetails|null;
-  revisionId:string; version:number; selectedPackageId?:string; previewHtml?:string;
+  revisionId:string; version:number; selectedPackageId?:string; previewHtml?:string|undefined;
 }){
   const router=useRouter();
   const [pending,startTransition]=useTransition();
