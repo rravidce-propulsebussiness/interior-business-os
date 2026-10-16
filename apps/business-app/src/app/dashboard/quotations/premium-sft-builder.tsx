@@ -80,12 +80,12 @@ const measured = (row:Work) => {
 const nonempty=(s:string|undefined)=>Boolean(s?.trim());
 
 export function PremiumSftBuilder({
-  rates,packages,initialSchedule,revisionId,version,selectedPackageId,
+  rates,packages,initialSchedule,revisionId,version,selectedPackageId,previewHtml,
 }:{
   rates:ConstructionRate[];
   packages:ConstructionPackage[];
   initialSchedule:SftEstimateDetails|null;
-  revisionId:string; version:number; selectedPackageId?:string;
+  revisionId:string; version:number; selectedPackageId?:string; previewHtml?:string;
 }){
   const router=useRouter();
   const [pending,startTransition]=useTransition();
@@ -298,7 +298,8 @@ export function PremiumSftBuilder({
       <div className="qs-work-preview-grid">
         <div className="qs-work-preview-frame">
           {showPdf&&<iframe title="Quotation document preview" loading="lazy"
-            src={url+'/preview'}/>}
+            sandbox="" srcDoc={previewHtml}
+            src={previewHtml ? undefined : url+'/preview'}/>}
           {!showPdf&&<p>Preview hidden. Open the quotation document directly.</p>}
         </div>
         <div className="qs-work-preview-actions">
