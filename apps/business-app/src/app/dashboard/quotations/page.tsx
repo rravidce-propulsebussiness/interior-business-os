@@ -6,6 +6,7 @@ import {
 import { commercialServices } from '../commercial/service';
 import { QuotationStudioFrame } from './studio-frame';
 import { QuotationRemovalButton } from './quotation-removal-button';
+import { QuotationReviseButton } from './quotation-revise-button';
 import './quotations-list.css';
 
 export const dynamic = 'force-dynamic';
@@ -288,6 +289,9 @@ export default async function Quotations({
                           title="Preview quotation" className="qs-quote-icon-button">◉</Link>
                         {row.status === 'draft' && canEdit && <Link className="qs-quote-edit" href={editor + '?step=quote'}
                           aria-label={'Edit ' + (row.quotation_number || 'quotation')}>✎ Edit</Link>}
+                        {row.status === 'issued' && canCreate && revision &&
+                          <QuotationReviseButton revisionId={row.id} version={revision.version}
+                            number={row.quotation_number || 'Quotation'} />}
                         <Link href={editor + '?step=preview'}
                           aria-label={'Review and share ' + (row.quotation_number || 'quotation')}
                           title="Review and share in Quotation Studio" className="qs-quote-icon-button">➤</Link>
@@ -297,13 +301,10 @@ export default async function Quotations({
                             {row.status !== 'draft' && <Link href={editor}>Open quotation</Link>}
                             <Link href={'/dashboard/quotations/' + row.id + '/pdf?view=1'}
                               target="_blank" rel="noopener noreferrer">View PDF</Link>
-                            {canRemove && (row.status === 'draft' || row.status === 'issued') &&
-                              revision && (
-                                <QuotationRemovalButton id={row.id}
-                                  number={row.quotation_number || 'Quotation'}
-                                  version={revision.version}
-                                  issued={row.status === 'issued'}/>
-                              )}
+                            {canRemove && row.status === 'draft' && revision &&
+                              <QuotationRemovalButton id={row.id}
+                                number={row.quotation_number || 'Quotation'}
+                                version={revision.version} issued={false} />}
                           </div>
                         </details>
                       </div>
@@ -334,7 +335,10 @@ export default async function Quotations({
                     <Link href={preview} target="_blank" rel="noopener noreferrer">◉ View</Link>
                     {row.status === 'draft' && canEdit
                       ? <Link className="qs-quote-edit" href={editor + '?step=quote'}>✎ Edit</Link>
-                      : <Link href={editor}>Open</Link>}
+                      : row.status === 'issued' && canCreate && revision
+                        ? <QuotationReviseButton revisionId={row.id} version={revision.version}
+                            number={row.quotation_number || 'Quotation'} />
+                        : <Link href={editor}>Open</Link>}
                     <Link href={editor + '?step=preview'}>➤ Share</Link>
                     <details className="qs-quotes-mobile-more">
                       <summary>••• More</summary>
@@ -342,11 +346,10 @@ export default async function Quotations({
                         
                         <Link href={'/dashboard/quotations/' + row.id + '/pdf?view=1'}
                           target="_blank" rel="noopener noreferrer">View PDF</Link>
-                        {canRemove && (row.status === 'draft' || row.status === 'issued') &&
-                          revision && <QuotationRemovalButton id={row.id}
+                        {canRemove && row.status === 'draft' && revision &&
+                          <QuotationRemovalButton id={row.id}
                             number={row.quotation_number || 'Quotation'}
-                            version={revision.version}
-                            issued={row.status === 'issued'}/>}
+                            version={revision.version} issued={false} />}
                       </div>
                     </details>
                   </div>
