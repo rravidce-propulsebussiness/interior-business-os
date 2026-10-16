@@ -285,39 +285,47 @@ describe('unified construction quote page and reliable preview', () => {
     expect(page).toContain('previewHtml={previewHtml}');
     expect(editor).not.toContain('srcDoc={previewHtml}');
     expect(editor).not.toContain('Hide inline preview');
-    expect(editor).toContain("url+'/pdf?view=1'");
-    expect(editor).toContain("url+'/pdf'");
-    expect(editor).toContain('createWhatsAppPdfShare(revisionId)');
+    expect(editor).toContain('<QuotationPdfControls');
+    expect(editor).not.toContain('Hide inline preview');
+    expect(editor).toContain('<QuotationPdfControls');
   });
 });
 
-describe('simplified WhatsApp quotation PDF actions', () => {
+describe('PDF attachment sharing and reliable file operations', () => {
   const editor = file('./premium-sft-builder.tsx');
-  const share = file('./sharing-actions.ts');
+  const controls = file('./quotation-pdf-controls.tsx');
+  const renderer = file('./pdf-renderer.ts');
+  const secureRoute = file('./[id]/pdf/route.ts');
   const css = file('./studio.css');
 
-  it('shows only view, download and WhatsApp controls without duplicate preview buttons', () => {
-    expect(editor).toContain('◉ View PDF');
-    expect(editor).toContain('↓ Download PDF');
-    expect(editor).toContain('Share PDF on WhatsApp');
+  it('shows only view PDF, download PDF, and actual file share actions', () => {
+    expect(editor).toContain('<QuotationPdfControls');
+    expect(controls).toContain('◉ View PDF');
+    expect(controls).toContain('↓ Download PDF');
+    expect(controls).toContain('Share PDF to WhatsApp');
+    expect(controls).not.toContain('wa.me/');
     expect(editor).not.toContain('Hide inline preview');
-    expect(editor).not.toContain('Show inline preview');
-    expect(editor).not.toContain('Open preview');
     expect(editor).not.toContain("url+'/studio?step=preview'");
     expect(css).toContain('.qs-work-pdf-actions');
     expect(css).not.toContain('.qs-work-preview-grid');
   });
 
-  it('shares a public tokenized PDF through WhatsApp, not the authenticated employee route', () => {
-    expect(share).toContain('createWhatsAppPdfShare');
-    expect(share).toContain("p_action: 'create'");
-    expect(share).toContain('pdf_enabled: true');
-    expect(share).toContain('hasSavedStagePaymentPlan(revision.terms)');
-    expect(share).toContain("action: 'issue'");
-    expect(share).toContain("revision.status !== 'draft' && revision.status !== 'issued'");
-    expect(editor).toContain("window.location.origin+'/q/'+result.token+'/pdf'");
-    expect(editor).toContain("'https://wa.me/'");
-    expect(editor).toContain('encodeURIComponent(caption)');
-    expect(editor).toContain('if(dirty)');
+  it('shares an actual checked PDF File, not a link, using native Android sharing', () => {
+    expect(controls).toContain("new File([blob], filename, { type: 'application/pdf' })");
+    expect(controls).toContain("header !== PDF_HEADER");
+    expect(controls).toContain('navigator.canShare?.({ files: [pdf] })');
+    expect(controls).toContain('void navigator.share({');
+    expect(controls).toContain('files: [pdf]');
+    expect(controls).toContain('choose WhatsApp');
+    expect(controls).toContain('downloadFile(pdf)');
+    expect(controls).toContain("if (dirty)");
+  });
+
+  it('uses authenticated PDF bytes with renderer-independent fallback', () => {
+    expect(controls).toContain("credentials: 'same-origin'");
+    expect(controls).toContain("'/pdf?view=1'");
+    expect(renderer).toContain('renderQuotationFallbackPdf');
+    expect(renderer).toContain('parseSftEstimate');
+    expect(secureRoute).toContain('renderQuotationPdf(html, document)');
   });
 });
