@@ -10,9 +10,9 @@ export const dynamic = 'force-dynamic';
 export default async function NewQuotation({
   searchParams,
 }: {
-  searchParams: Promise<{ lead?: string }>;
+  searchParams: Promise<{ lead?: string; package?: string; industry?: string; mode?: string }>;
 }) {
-  const { lead } = await searchParams;
+  const { lead, package: initialPackageId, industry: initialPackageIndustry, mode } = await searchParams;
   const s = await commercialServices('quotation.create', 'quotation', true);
   const [organization, user, industries] = await Promise.all([
     s.repository.organization(s.org),
@@ -94,6 +94,9 @@ export default async function NewQuotation({
           }))}
           defaultCurrency={organization.default_currency || 'INR'}
           initialLeadId={selectedLead?.id ?? ''}
+          initialPackageId={initialPackageId ?? ''}
+          initialPackageIndustry={initialPackageIndustry ?? ''}
+          initialCustomizedQuote={mode === 'custom'}
         />
       </div>
     </QuotationStudioFrame>
