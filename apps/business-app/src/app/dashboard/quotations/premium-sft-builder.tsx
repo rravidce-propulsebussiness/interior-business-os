@@ -197,7 +197,7 @@ export function PremiumSftBuilder({
         :combinedArea>0
           ?{lengthFeet:String(Number(combinedArea.toFixed(2))),widthFeet:'1'}
           :{lengthFeet:'',widthFeet:''};
-      next.push({...floor(floorZoneName(level,'construction'),packageRate),...copied});
+      next.push({...floor(floorZoneName(level,'construction'),construction?.ratePerSqft || packageRate),...copied});
     }
     if(next.length+extras.length>18){
       setMessage('Too many floor portions and extra works (maximum 18 rows).');
