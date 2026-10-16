@@ -18,25 +18,32 @@ export async function GET(
     const { html, document } = await quotationDocument(id);
     const base = await renderQuotationPdf(html, document);
 
-    // Pull strictly private, authenticated annexures in customer-chosen upload
-    // order and append their pages to the actual generated PDF document.
-    const ctx = await quotationAttachmentContext(id);
-    const { data: attachments, error: filesError } = await ctx.admin
-      .from('quotation_studio_attachments')
-      .select('storage_path,byte_size')
-      .eq('organization_id', ctx.organizationId)
-      .eq('revision_id', ctx.revisionId)
-      .order('created_at')
-      .order('id');
-    if (filesError) throw new Error('Quotation annexures unavailable');
+    // Basic PDF generation must not depend on optional privileged storage
+    // credentials. The private annexure upload facility cannot operate without
+    // these credentials either. When configured, all saved annexures remain
+    // mandatory and any missing attachment fails explicitly (never silently).
     const additional: Uint8Array[] = [];
-    for (const file of attachments ?? []) {
-      const { data, error } = await ctx.admin.storage
-        .from(QUOTATION_PDF_BUCKET)
-        .download(file.storage_path);
-      if (error || !data || data.size > 15 * 1024 * 1024)
-        throw new Error('Quotation attachment unavailable');
-      additional.push(new Uint8Array(await data.arrayBuffer()));
+    const privilegedStorageConfigured = Boolean(
+      process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY
+    );
+    if (privilegedStorageConfigured) {
+      const ctx = await quotationAttachmentContext(id);
+      const { data: attachments, error: filesError } = await ctx.admin
+        .from('quotation_studio_attachments')
+        .select('storage_path,byte_size')
+        .eq('organization_id', ctx.organizationId)
+        .eq('revision_id', ctx.revisionId)
+        .order('created_at')
+        .order('id');
+      if (filesError) throw new Error('Quotation annexures unavailable');
+      for (const file of attachments ?? []) {
+        const { data, error } = await ctx.admin.storage
+          .from(QUOTATION_PDF_BUCKET)
+          .download(file.storage_path);
+        if (error || !data || data.size > 15 * 1024 * 1024)
+          throw new Error('Quotation attachment unavailable');
+        additional.push(new Uint8Array(await data.arrayBuffer()));
+      }
     }
     const bytes = await appendQuotationAnnexures(base, additional);
     return new Response(new Uint8Array(bytes), {
