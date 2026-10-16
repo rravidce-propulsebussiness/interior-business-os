@@ -111,7 +111,7 @@ export function PremiumSftBuilder({
     : previousPackage;
   const replacePackage = Boolean(chosenPackage &&
     (!previousPackage || previousPackage.id !== chosenPackage.id));
-  const [packageId, setPackageId] = useState(chosenPackage?.id ?? '');
+  const packageId = chosenPackage?.id ?? '';
   const selectedPackage = activePackages.find((item) => item.id === packageId);
   const [rows, setRows] = useState<WorkRow[]>(
     initialSchedule?.rows.map((row) => ({
