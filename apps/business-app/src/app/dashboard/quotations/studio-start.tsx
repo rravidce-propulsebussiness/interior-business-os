@@ -71,7 +71,8 @@ export function QuotationStudioStart({
   };
   const chooseCustomer = (customer: Customer | undefined) => {
     setCustomerId(customer?.id ?? '');
-    if (leadId && customer && !contactMatches(customer, leads.find((l) => l.id === leadId) ?? {})) {
+    const linkedLead = leads.find((l) => l.id === leadId);
+    if (linkedLead && customer && !contactMatches(customer, linkedLead)) {
       setLeadId('');
     }
     setProjectId('');
