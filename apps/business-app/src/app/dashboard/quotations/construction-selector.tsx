@@ -198,7 +198,7 @@ export function ConstructionSelector({
   revisionId: string;
   version: number;
   initialMode?: 'sft' | 'custom';
-  previewHtml?: string;
+  previewHtml?: string | undefined;
 }) {
   const activePackages = packages.filter((pkg) => pkg.status === 'active');
   const previous = activePackages.find((pkg) =>
