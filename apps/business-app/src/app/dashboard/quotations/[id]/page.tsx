@@ -691,13 +691,6 @@ export default async function Quotation({
             initial={{ ...command, action: 'clone' }}
           />
         )}
-      {['draft', 'issued'].includes(r.status) &&
-        s.allowed('quotation.delete', 'quotation') && (
-          <CommandForm
-            title="Cancel revision"
-            initial={{ ...command, action: 'cancel' }}
-          />
-        )}
     </main>
   );
 }
