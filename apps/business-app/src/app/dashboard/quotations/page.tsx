@@ -23,16 +23,6 @@ function niceDate(value: string | null) {
   }).format(parsed);
 }
 
-function statusName(value: string) {
-  switch (value) {
-    case 'issued': return 'Shared';
-    case 'draft': return 'Draft';
-    case 'superseded': return 'Superseded';
-    case 'cancelled': return 'Cancelled';
-    default: return value.replaceAll('_', ' ');
-  }
-}
-
 function currencyValue(currency: string, amount: string | null | undefined) {
   const numeric = Number(amount);
   if (amount === null || amount === undefined || !Number.isFinite(numeric)) return '—';
@@ -47,7 +37,6 @@ function currencyValue(currency: string, amount: string | null | undefined) {
 
 const statusTabs = [
   { label: 'All', status: '' },
-  { label: 'Draft', status: 'draft' },
   { label: 'Shared', status: 'shared' },
 ] as const;
 
@@ -57,7 +46,7 @@ export default async function Quotations({
   searchParams: Promise<{ q?: string; page?: string; status?: string }>;
 }) {
   const p = await searchParams;
-  const viewStatus = p.status === 'draft' || p.status === 'shared' ? p.status : '';
+  const viewStatus = p.status === 'shared' ? 'shared' : '';
   const filter = searchSchema.parse({
     query: p.q ?? '',
     page: Math.min(10000, Math.max(1, Number.parseInt(p.page || '1', 10) || 1)),
@@ -94,7 +83,7 @@ export default async function Quotations({
     await Promise.all([
       projectIds.length
         ? s.client.from('projects')
-          .select('id,industry_id')
+          .select('id,industry_id,customer_id')
           .eq('organization_id', s.org)
           .in('id', projectIds)
         : Promise.resolve({ data: [] }),
@@ -152,10 +141,14 @@ export default async function Quotations({
       tone: 'orange',
     },
     {
-      label: 'Drafts',
-      value: quotes.filter((row) => row.status === 'draft').length.toLocaleString('en-IN'),
+      label: 'Clients Quoted',
+      value: new Set(quotes.flatMap((row) => {
+        const revision = revisions.get(row.id);
+        const customerId = revision ? projectById.get(revision.project_id)?.customer_id : null;
+        return customerId ? [customerId] : [];
+      })).size.toLocaleString('en-IN'),
       note: 'On this page',
-      icon: '◷',
+      icon: '♙',
       tone: 'purple',
     },
     {
@@ -183,12 +176,29 @@ export default async function Quotations({
     return {
       row,
       revision,
+      customerId: project?.customer_id ?? 'quote:' + row.id,
       industry: industry || 'Not specified',
       createdAt: revision?.created_at ?? null,
       preview, editor, shared: sharedIds.has(row.id),
     };
   };
   const visible = quotes.map(quoteItem);
+  // One mobile customer card can contain multiple independent quote options.
+  // Group by canonical customer ID; matching names do not imply identical people.
+  type VisibleQuote = (typeof visible)[number];
+  const customerGroups = new Map<string, {
+    id: string; name: string; quotes: VisibleQuote[];
+  }>();
+  for (const quote of visible) {
+    const group = customerGroups.get(quote.customerId);
+    if (group) group.quotes.push(quote);
+    else customerGroups.set(quote.customerId, {
+      id: quote.customerId,
+      name: quote.row.customer_name || 'Customer',
+      quotes: [quote],
+    });
+  }
+  const mobileCustomers = [...customerGroups.values()];
 
   return (
     <QuotationStudioFrame companyName={organization.name} accountEmail={user.email ?? ''}>
@@ -236,7 +246,6 @@ export default async function Quotations({
               <span className="sr-only">Quotation status</span>
               <select name="status" defaultValue={viewStatus}>
                 <option value="">All quotations</option>
-                <option value="draft">Draft</option>
                 <option value="shared">Shared</option>
               </select>
             </label>
@@ -254,7 +263,7 @@ export default async function Quotations({
                   <th>Client &amp; Project</th>
                   <th>Service Type</th>
                   <th>Amount</th>
-                  <th>Status</th>
+                  <th>Sharing</th>
                   <th>Created</th>
                   <th>Actions</th>
                 </tr></thead>
@@ -280,7 +289,9 @@ export default async function Quotations({
                     </span></td>
                     <td className="qs-quotes-amount">{currencyValue(
                       row.currency || organization.default_currency || 'INR', row.amount)}</td>
-                    <td><span className={'qs-quotes-state qs-state-' + (shared ? 'shared' : row.status)}>{row.status === 'issued' && !shared ? 'Ready to share' : statusName(row.status)}</span></td>
+                    <td>{shared
+                      ? <span className="qs-quotes-state qs-state-shared">Shared</span>
+                      : <span className="qs-quotes-unshared">Not shared</span>}</td>
                     <td className="qs-quotes-created">{niceDate(createdAt)}</td>
                     <td>
                       <div className="qs-quotes-actions">
@@ -314,46 +325,55 @@ export default async function Quotations({
               </table>
             </div>
             <div className="qs-quotes-mobile-list">
-              {visible.map(({ row, revision, industry, createdAt, preview, editor, shared }) => (
-                <article className="qs-quotes-mobile-card" key={row.id}>
-                  <div className="qs-quotes-mobile-top">
-                    <Link href={editor}>{row.quotation_number || 'Quotation'}</Link>
-                    <span className={'qs-quotes-state qs-state-' + (shared ? 'shared' : row.status)}>{row.status === 'issued' && !shared ? 'Ready to share' : statusName(row.status)}</span>
-                  </div>
-                  <div className="qs-quotes-mobile-person">
-                    <span className="qs-quotes-initials">{initials(row.customer_name || 'Customer')}</span>
-                    <div><strong>{row.customer_name || 'Customer'}</strong>
-                      <small>{row.project_name || 'Project'}</small></div>
-                    <strong className="qs-quotes-amount">{currencyValue(
-                      row.currency || organization.default_currency || 'INR', row.amount)}</strong>
-                  </div>
-                  <div className="qs-quotes-mobile-meta">
-                    <span className="qs-quotes-service">{industry}</span>
-                    <span>{niceDate(createdAt)} · R{row.revision_number ?? 1}</span>
-                  </div>
-                  <div className="qs-quotes-mobile-actions">
-                    <Link href={preview} target="_blank" rel="noopener noreferrer">◉ View</Link>
-                    {row.status === 'draft' && canEdit
-                      ? <Link className="qs-quote-edit" href={editor + '?step=quote'}>✎ Edit</Link>
-                      : row.status === 'issued' && canCreate && revision
-                        ? <QuotationReviseButton revisionId={row.id} version={revision.version}
-                            number={row.quotation_number || 'Quotation'} />
-                        : <Link href={editor}>Open</Link>}
-                    <Link href={editor + '?step=preview'}>➤ Share</Link>
-                    <details className="qs-quotes-mobile-more">
-                      <summary>••• More</summary>
-                      <div>
-                        
-                        <Link href={'/dashboard/quotations/' + row.id + '/pdf?view=1'}
-                          target="_blank" rel="noopener noreferrer">View PDF</Link>
-                        {canRemove && row.status === 'draft' && revision &&
-                          <QuotationRemovalButton id={row.id}
-                            number={row.quotation_number || 'Quotation'}
-                            version={revision.version} issued={false} />}
+              {mobileCustomers.map((group) => (
+                <section className="qs-quotes-customer-card" key={group.id}
+                  aria-label={group.name + ' quotations'}>
+                  <header className="qs-quotes-customer-header">
+                    <span className="qs-quotes-initials">{initials(group.name)}</span>
+                    <div className="qs-quotes-customer-name">
+                      <strong>{group.name}</strong>
+                      <small>{group.quotes.length} quotation{group.quotes.length === 1 ? '' : 's'}</small>
+                    </div>
+                  </header>
+                  {group.quotes.map(({ row, revision, industry, createdAt, preview, editor, shared }) => (
+                    <article className="qs-quotes-mobile-quote" key={row.id}>
+                      <div className="qs-quotes-mobile-top">
+                        <Link href={editor}>{row.quotation_number || 'Quotation'}</Link>
+                        {shared && <span className="qs-quotes-state qs-state-shared">Shared</span>}
                       </div>
-                    </details>
-                  </div>
-                </article>
+                      <div className="qs-quotes-mobile-meta">
+                        <span className="qs-quotes-service">{industry}</span>
+                        <strong className="qs-quotes-amount">{currencyValue(
+                          row.currency || organization.default_currency || 'INR', row.amount)}</strong>
+                      </div>
+                      <div className="qs-quotes-mobile-subline">
+                        <span>{row.project_name || 'Project'}</span>
+                        <span>{niceDate(createdAt)} · R{row.revision_number ?? 1}</span>
+                      </div>
+                      <div className="qs-quotes-mobile-actions">
+                        <Link href={preview} target="_blank" rel="noopener noreferrer">◉ View</Link>
+                        {row.status === 'draft' && canEdit
+                          ? <Link className="qs-quote-edit" href={editor + '?step=quote'}>✎ Edit</Link>
+                          : row.status === 'issued' && canCreate && revision
+                            ? <QuotationReviseButton revisionId={row.id} version={revision.version}
+                                number={row.quotation_number || 'Quotation'} />
+                            : <Link href={editor}>Open</Link>}
+                        <Link href={editor + '?step=preview'}>➤ Share</Link>
+                        <details className="qs-quotes-mobile-more">
+                          <summary>••• More</summary>
+                          <div>
+                            <Link href={'/dashboard/quotations/' + row.id + '/pdf?view=1'}
+                              target="_blank" rel="noopener noreferrer">View PDF</Link>
+                            {canRemove && row.status === 'draft' && revision &&
+                              <QuotationRemovalButton id={row.id}
+                                number={row.quotation_number || 'Quotation'}
+                                version={revision.version} issued={false} />}
+                          </div>
+                        </details>
+                      </div>
+                    </article>
+                  ))}
+                </section>
               ))}
             </div>
           </> : <div className="qs-quotes-empty">
