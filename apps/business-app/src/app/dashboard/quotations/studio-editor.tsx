@@ -80,7 +80,7 @@ export function QuotationStudioEditor({
   lines: QuotationLine[];
   total: string;
   hasSavedPaymentPlan: boolean;
-  previewHtml?: string;
+  previewHtml?: string | undefined;
   brandingEditor: ReactNode;
   constructionEditor: ReactNode;
   interiorEditor: ReactNode;
