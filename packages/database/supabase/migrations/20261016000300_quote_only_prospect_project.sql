@@ -4,6 +4,22 @@
 -- project visible to execution workers/clients, until a confirmed conversion.
 begin;
 
+-- A zero-write preflight prevents creating orphan sales customers when the
+-- backend has deployed before the corresponding database migration.
+create or replace function public.quotation_prospect_ready(
+  p_organization_id uuid
+) returns boolean language plpgsql stable security definer set search_path=''
+as $ready$
+begin
+  return auth.uid() is not null
+    and coalesce(private.commercial_access(
+      p_organization_id,'quotation.create','quotation'),false);
+end;
+$ready$;
+revoke all on function public.quotation_prospect_ready(uuid)
+  from public,anon,authenticated;
+grant execute on function public.quotation_prospect_ready(uuid) to authenticated;
+
 create or replace function public.quotation_prospect_project_create(
   p_organization_id uuid,
   p_customer_id uuid,
