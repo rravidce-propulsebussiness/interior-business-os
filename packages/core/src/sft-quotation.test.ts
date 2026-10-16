@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   calculateSftEstimate,
+  editableSftRows,
+  sftEstimateInputSchema,
   encodeSftEstimate,
   parseSftEstimate,
 } from './sft-quotation';
@@ -214,5 +216,37 @@ describe('different rates for the construction, parking, and penthouse portions 
     expect(estimate.totalAreaSqft).toBe('2200.00');
     expect(estimate.total).toBe('3435000.00');
     expect(parseSftEstimate(encodeSftEstimate(estimate))).toEqual(estimate);
+  });
+});
+
+describe('reopening a saved construction quote does not block Save', () => {
+  it('strips calculated display-only amounts while retaining real entered floor data', () => {
+    const original=calculateSftEstimate({
+      rows: [
+        {kind:'floor', name:'Ground Floor', lengthFeet:'30',widthFeet:'40',
+          heightFeet:'', quantity:'',unit:'sqft',ratePerSqft:'1850'},
+        {kind:'floor', name:'First Floor', lengthFeet:'20',widthFeet:'40',
+          inheritFromPrevious:false,heightFeet:'',quantity:'',unit:'sqft',ratePerSqft:'1850'},
+        {kind:'floor', name:'Second Floor', lengthFeet:'20',widthFeet:'40',
+          inheritFromPrevious:true,heightFeet:'',quantity:'',unit:'sqft',ratePerSqft:'1850'},
+        {kind:'floor', name:'Second Floor — Penthouse', lengthFeet:'20',widthFeet:'20',
+          heightFeet:'', quantity:'',unit:'sqft',ratePerSqft:'1850'},
+      ],
+      materialIds:[],
+    });
+    const restored=parseSftEstimate(encodeSftEstimate(original));
+    expect(restored).not.toBeNull();
+    // The former editor copied these output fields into strict input rows.
+    expect(sftEstimateInputSchema.safeParse({
+      rows:restored!.rows,materialIds:[],
+    }).success).toBe(false);
+    const editable=editableSftRows(restored!);
+    expect(editable).toHaveLength(4);
+    expect(editable[0]).toMatchObject({name:'Ground Floor',lengthFeet:'30',widthFeet:'40'});
+    expect(editable[0]).not.toHaveProperty('areaSqft');
+    expect(editable[0]).not.toHaveProperty('amount');
+    expect(editable[2]?.inheritFromPrevious).toBe(true);
+    expect(sftEstimateInputSchema.safeParse({rows:editable,materialIds:[]}).success).toBe(true);
+    expect(calculateSftEstimate({rows:editable,materialIds:[]}).total).toBe(original.total);
   });
 });
