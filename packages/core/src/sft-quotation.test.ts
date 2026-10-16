@@ -197,3 +197,22 @@ describe('work-wise dimensions and mixed pricing units', () => {
     expect(a.total).toBe('750000.00');
   });
 });
+
+describe('different rates for the construction, parking, and penthouse portions of each floor', () => {
+  it('prices ground floor split separately, copies full area upstairs and uses penthouse rate', () => {
+    const estimate=calculateSftEstimate({
+      rows:[
+        {kind:'floor',name:'Ground Floor',unit:'sqft',lengthFeet:'20',widthFeet:'25',ratePerSqft:'1850'},
+        {kind:'floor',name:'Ground Floor — Parking',unit:'sqft',lengthFeet:'20',widthFeet:'25',ratePerSqft:'800'},
+        {kind:'floor',name:'First Floor',unit:'sqft',lengthFeet:'40',widthFeet:'25',ratePerSqft:'1850'},
+        {kind:'floor',name:'Second Floor — Penthouse',unit:'sqft',lengthFeet:'20',widthFeet:'10',ratePerSqft:'1300'},
+      ],
+      materialIds:[],
+    });
+    expect(estimate.rows.map(row=>row.amount))
+      .toEqual(['925000.00','400000.00','1850000.00','260000.00']);
+    expect(estimate.totalAreaSqft).toBe('2200.00');
+    expect(estimate.total).toBe('3435000.00');
+    expect(parseSftEstimate(encodeSftEstimate(estimate))).toEqual(estimate);
+  });
+});
