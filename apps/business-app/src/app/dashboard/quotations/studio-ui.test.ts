@@ -82,7 +82,7 @@ describe('lead-driven quotation creation', () => {
     expect(form).toContain('const industry = selectedLead?.industryKey');
     expect(form).toContain('Auto-detected from lead');
     expect(form).toContain('disabled={pending || !leadId || !industry');
-    expect(form).toContain("industry === 'construction' ? 'sft' : 'custom'");
+    expect(form).toContain("industry === 'construction' && !initialCustomizedQuote ? 'sft' : 'custom'");
   });
 
   it('does not require a project name before the lead is Won', () => {
@@ -105,6 +105,55 @@ describe('lead-driven quotation creation', () => {
     expect(action).toContain('entry.id === lead.industry_id');
     expect(action).toContain('resolveLeadCategory(lead, industries)');
     expect(action).toContain('Classify this lead in CRM');
+  });
+});
+
+describe('single premium package library and working Custom Quote entry', () => {
+  const page = file('./packages/page.tsx');
+  const library = file('./packages/package-library.tsx');
+  const stylesheet = file('./packages/package-library.css');
+  const creation = file('./studio-start.tsx');
+  const createPage = file('./new/page.tsx');
+  const studio = file('./[id]/studio/page.tsx');
+
+  it('renders a single company package catalogue, not both old manager pages', () => {
+    expect(page).toContain('<PackageLibrary');
+    expect(page).not.toContain('<ConstructionPackagesManager');
+    expect(page).not.toContain('<QuotationPackagesManager');
+    expect(page).toContain('construction={construction}');
+    expect(page).toContain('other={configurable}');
+    expect(library).toContain('Construction Packages');
+    expect(library).toContain('Interior &amp; Other Packages');
+    expect(library).toContain('Custom Quote');
+    expect(library).toContain('Create Custom Quote');
+    expect(library).toContain('/dashboard/quotations/new?mode=custom');
+    expect(stylesheet).toContain('.qpl-cards');
+    expect(stylesheet).toContain('grid-template-columns:repeat(3,minmax(0,1fr))');
+    expect(stylesheet).toContain('@media (max-width:740px)');
+  });
+
+  it('preserves editing, duplication, removal and company snapshot PDF previews', () => {
+    expect(library).toContain('<PremiumPackageEditor');
+    expect(library).toContain('<IndustryPackageEditor');
+    expect(library).toContain('duplicateConstructionPackage');
+    expect(library).toContain('deleteConstructionPackage');
+    expect(library).toContain('duplicateQuotationPackage');
+    expect(library).toContain('deleteQuotationPackage');
+    expect(library).toContain("preview?format=pdf");
+    expect(library).toContain("entry.item.status === 'active'");
+    expect(library).toContain("construction.map((item)");
+    expect(library).toContain("(other ?? []).map((item)");
+  });
+
+  it('routes through classified CRM leads then preselects tenant-owned package or custom mode', () => {
+    expect(library).toContain('new URLSearchParams');
+    expect(library).toContain('package: entry.item.id');
+    expect(createPage).toContain('initialPackageId={initialPackageId');
+    expect(creation).toContain("initialPackageIndustry === industry");
+    expect(creation).toContain("route.set('package', 'custom')");
+    expect(studio).toContain('initialPackageId={query.package ??');
+    expect(file('./construction-selector.tsx')).toContain("initialPackageId === 'custom'");
+    expect(file('./interior-room-builder.tsx')).toContain("initialPackageId === 'custom'");
   });
 });
 
