@@ -14,7 +14,7 @@ type Work = {
   lengthFeet: string;
   widthFeet: string;
   heightFeet?: string;
-  quantity?: string;
+  quantity?: string | undefined;
   unit?: Unit;
   ratePerSqft: string;
 };
