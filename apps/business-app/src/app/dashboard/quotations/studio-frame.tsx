@@ -1,3 +1,5 @@
+// Company branding supports company-owned PNG/JPEG data URIs only.
+/* eslint-disable @next/next/no-img-element -- Inline validated tenant logo */
 'use client';
 
 import Link from 'next/link';
@@ -9,27 +11,36 @@ import './studio.css';
 const links: { title: string; href: string; icon: OwnerIconName }[] = [
   { title: 'Dashboard', href: '/dashboard', icon: 'dashboard' },
   { title: 'Leads', href: '/dashboard/crm/leads', icon: 'leads' },
-  { title: 'Quotations', href: '/dashboard/quotations', icon: 'quotations' },
-  { title: 'Packages', href: '/dashboard/quotations/packages', icon: 'quotations' },
-  { title: 'Projects', href: '/dashboard/projects', icon: 'projects' },
   { title: 'Clients', href: '/dashboard/customers', icon: 'clients' },
+  { title: 'Projects', href: '/dashboard/projects', icon: 'projects' },
   { title: 'Billing', href: '/dashboard/billing', icon: 'billing' },
   { title: 'Team', href: '/dashboard/company/team', icon: 'team' },
   { title: 'Reports', href: '/dashboard/reports', icon: 'reports' },
   { title: 'Company Settings', href: '/dashboard/company/settings', icon: 'settings' },
 ];
 
+const quotationLinks = [
+  { title: 'Create Quote', href: '/dashboard/quotations/new' },
+  { title: 'My Quotes', href: '/dashboard/quotations' },
+  { title: 'Packages', href: '/dashboard/quotations/packages' },
+  { title: 'Branding & Settings', href: '/dashboard/quotations/settings' },
+] as const;
+
 export function QuotationStudioFrame({
   companyName,
+  companyLogo,
   accountEmail,
   children,
 }: {
   companyName: string;
+  companyLogo?: string | undefined;
   accountEmail?: string;
   children: ReactNode;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const pathname = usePathname();
+  const [quotesExpanded, setQuotesExpanded] = useState(() => pathname.startsWith('/dashboard/quotations'));
+  const quotationPath = pathname.startsWith('/dashboard/quotations');
   const toggleRef = useRef<HTMLButtonElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const sidebarRef = useRef<HTMLElement>(null);
@@ -104,10 +115,11 @@ export function QuotationStudioFrame({
           className="qs-brand"
           onClick={() => setMenuOpen(false)}
         >
-          <span className="qs-brand-mark">{initials}</span>
+          {companyLogo ? <img className="qs-company-logo" src={companyLogo} alt={companyName + ' logo'}/> :
+            <span className="qs-brand-mark">{initials}</span>}
           <span>
             <strong>{companyName}</strong>
-            <small>Business OS · Workspace</small>
+            <small>Company workspace</small>
           </span>
         </Link>
         <div className="qs-mobile-heading">
@@ -125,37 +137,52 @@ export function QuotationStudioFrame({
             <OwnerIcon name="close" size={21} />
           </button>
         </div>
-        <nav aria-label="Workspace navigation" className="qs-nav">
-          {links.map((entry) => {
-            const selected =
-              entry.href === '/dashboard/quotations'
-                ? pathname.startsWith('/dashboard/quotations') &&
-                  !pathname.startsWith('/dashboard/quotations/settings') &&
-                  !pathname.startsWith('/dashboard/quotations/packages')
-                : pathname === entry.href ||
-                  (entry.href !== '/dashboard' &&
-                    pathname.startsWith(entry.href + '/'));
-            return (
-              <Link
-                href={entry.href}
-                key={entry.href}
-                className={'qs-nav-item' + (selected ? ' qs-active' : '')}
-                aria-current={selected ? 'page' : undefined}
-                onClick={() => setMenuOpen(false)}
-              >
-                <OwnerIcon name={entry.icon} size={19} />
-                <span>{entry.title}</span>
-              </Link>
-            );
+        <nav aria-label="Workspace navigation" className="qs-nav qs-nav-clean">
+          {links.slice(0, 4).map((entry) => {
+            const selected = pathname === entry.href ||
+              (entry.href !== '/dashboard' && pathname.startsWith(entry.href + '/'));
+            return <Link key={entry.href} href={entry.href}
+              className={'qs-nav-item' + (selected ? ' qs-active' : '')}
+              aria-current={selected ? 'page' : undefined}
+              onClick={() => setMenuOpen(false)}>
+              <OwnerIcon name={entry.icon} size={19} />
+              <span>{entry.title}</span>
+            </Link>;
+          })}
+          <div className="qs-quote-nav-group">
+            <button type="button" className={'qs-nav-item qs-quote-group-trigger' +
+              (quotationPath ? ' qs-active' : '')}
+              aria-expanded={quotesExpanded} aria-controls="qs-quote-subnav"
+              onClick={() => setQuotesExpanded((expanded) => !expanded)}>
+              <OwnerIcon name="quotations" size={19}/>
+              <span>Quotations</span>
+              <span className="qs-quote-nav-chevron" aria-hidden="true">
+                {quotesExpanded ? '⌃' : '⌄'}
+              </span>
+            </button>
+            {quotesExpanded && <div className="qs-quote-subnav" id="qs-quote-subnav">
+              {quotationLinks.map((entry) => {
+                const selected = entry.href === '/dashboard/quotations'
+                  ? pathname === entry.href
+                  : pathname === entry.href || pathname.startsWith(entry.href + '/');
+                return <Link href={entry.href} key={entry.href}
+                  className={'qs-quote-subnav-link' + (selected ? ' current' : '')}
+                  aria-current={selected ? 'page' : undefined}
+                  onClick={() => setMenuOpen(false)}>{entry.title}</Link>;
+              })}
+            </div>}
+          </div>
+          {links.slice(4).map((entry) => {
+            const selected = pathname === entry.href || pathname.startsWith(entry.href + '/');
+            return <Link key={entry.href} href={entry.href}
+              className={'qs-nav-item' + (selected ? ' qs-active' : '')}
+              aria-current={selected ? 'page' : undefined}
+              onClick={() => setMenuOpen(false)}>
+              <OwnerIcon name={entry.icon} size={19}/>
+              <span>{entry.title}</span>
+            </Link>;
           })}
         </nav>
-        <div className="qs-sidebar-foot">
-          <span className="qs-plan-spark">✦</span>
-          <div>
-            <strong>Quotation Studio</strong>
-            <small>Branded proposals for your company</small>
-          </div>
-        </div>
       </aside>
       <div className="qs-workspace">
         <header className="qs-topbar">
