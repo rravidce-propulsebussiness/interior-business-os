@@ -181,7 +181,9 @@ export default async function Quotations({
     const revision = revisions.get(row.id);
     const project = revision ? projectById.get(revision.project_id) : undefined;
     const industry = project?.industry_id ? industryById.get(project.industry_id) : null;
-    const preview = '/dashboard/quotations/' + row.id + '/preview';
+    // View and Download must use the same saved premium PDF bytes, never an
+    // HTML-only preview that can differ from the downloaded attachment.
+    const preview = '/dashboard/quotations/' + row.id + '/pdf?view=1';
     const editor = '/dashboard/quotations/' + row.id + '/studio';
     return {
       row,
