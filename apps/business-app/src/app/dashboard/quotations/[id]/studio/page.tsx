@@ -14,7 +14,6 @@ import { InteriorRoomBuilder } from '../../interior-room-builder';
 import { CommandForm } from '../../command-form';
 import { SharingSection } from '../../sharing-section';
 import { ContractHandoff } from '../../../finance/handoff';
-import { QuotationAttachments } from '../../quotation-attachments';
 import { PaymentScheduleEditor } from '../../payment-schedule-editor';
 import { DraftBrandingControl } from '../../draft-branding-control';
 import { CreateRevisionControl } from '../../create-revision-control';
@@ -217,9 +216,6 @@ export default async function QuotationStudio({
           ) : (
             <p className="qs-note">This revision cannot be edited.</p>
           )
-        }
-        filesEditor={
-          <QuotationAttachments revisionId={revision.id} editable={editable} />
         }
         termsEditor={
           editable ? (
