@@ -94,3 +94,30 @@ describe('lead-driven quotation creation', () => {
     expect(action).toContain('Classify this lead in CRM');
   });
 });
+
+describe('automatic CRN reuse from selected lead', () => {
+  const form = file('./studio-start.tsx');
+  const page = file('./new/page.tsx');
+  const action = file('./studio-actions.ts');
+  const css = file('./clean-create.css');
+
+  it('does not show or load a manual customer / CRN selector', () => {
+    expect(form).not.toContain('Existing client / CRN');
+    expect(form).not.toContain('New customer');
+    expect(form).not.toContain('existingCustomers');
+    expect(form).not.toContain('chooseCustomer');
+    expect(form).not.toContain('matchingCustomers');
+    expect(page).not.toContain('existingCustomers=');
+    expect(css).not.toContain('.qs-create-existing');
+  });
+
+  it('resolves existing CRN securely on the server, never by a browser-selected id', () => {
+    expect(form).toContain('...data, leadId, currency: defaultCurrency');
+    expect(action).not.toContain('customerId: z.uuid()');
+    expect(action).toContain("await s.client.rpc('lead_quotation_list'");
+    expect(action).toContain('contactMatches(candidate, values)');
+    expect(action).toContain('phone: lead.phone');
+    expect(action).toContain('let customerId = leadCustomerId || matches[0]?.id ||');
+    expect(action).toContain('if (!customerId) {');
+  });
+});
