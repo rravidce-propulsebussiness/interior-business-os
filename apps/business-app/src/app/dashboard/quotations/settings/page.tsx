@@ -26,9 +26,9 @@ export default async function Settings() {
           Every company's information is saved separately and appears in its own quotations.
         </p>
         <p className="mt-3 text-xs font-semibold leading-5 text-orange-800">
-          Save these details here. New quotations use them automatically.
-          To update an existing draft quotation, open its Client &amp; Project tab
-          and select “Apply Saved Branding to This Draft”. Issued PDFs stay unchanged.
+          Save the company logo, photographs, business address and contact information here.
+          New quotations automatically use these settings. Existing saved versions keep their
+          original company snapshot so a quotation already shared with a client does not change silently.
         </p>
       </div>
       <div className="mt-5 max-w-2xl">
