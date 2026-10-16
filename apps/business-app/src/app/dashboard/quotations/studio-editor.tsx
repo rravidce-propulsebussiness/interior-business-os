@@ -44,7 +44,6 @@ const steps: { id: Tab; title: string }[] = [
 export function QuotationStudioEditor({
   revisionId,
   quoteNumber,
-  revisionNumber,
   revisionVersion,
   currency,
   status,
