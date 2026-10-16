@@ -14,11 +14,17 @@ type QuoteLead = {
 export function QuotationStudioStart({
   leads, industries, defaultCurrency,
   initialLeadId = '',
+  initialPackageId = '',
+  initialPackageIndustry = '',
+  initialCustomizedQuote = false,
 }: {
   leads: QuoteLead[];
   industries: Industry[];
   defaultCurrency: string;
   initialLeadId?: string;
+  initialPackageId?: string;
+  initialPackageIndustry?: string;
+  initialCustomizedQuote?: boolean;
 }) {
   const router = useRouter();
   const initialLead = leads.find((entry) => entry.id === initialLeadId);
@@ -71,13 +77,24 @@ export function QuotationStudioStart({
           setFeedback(result.message);
           return;
         }
-        const mode = industry === 'construction' ? 'sft' : 'custom';
-        router.push('/dashboard/quotations/' + result.revisionId + '/studio?mode=' + mode + '&step=quote');
+        // Industry always comes from the saved CRM lead, not the requested card.
+        const allowedPackage = !initialCustomizedQuote &&
+          initialPackageIndustry === industry &&
+          /^[0-9a-f]{8}-[0-9a-f-]{27,36}$/i.test(initialPackageId);
+        const mode = industry === 'construction' && !initialCustomizedQuote ? 'sft' : 'custom';
+        const route = new URLSearchParams({ mode, step: 'quote' });
+        if (allowedPackage) route.set('package', initialPackageId);
+        if (initialCustomizedQuote) route.set('package', 'custom');
+        router.push('/dashboard/quotations/' + result.revisionId + '/studio?' + route.toString());
       });
     }}>
       <div className="qs-clean-form-title">
         <span className="qs-clean-form-icon" aria-hidden="true">♙</span>
         <h2>Client &amp; Quotation Details</h2>
+        {(initialCustomizedQuote || initialPackageId) && <p className="qs-muted">
+          {initialCustomizedQuote ? 'Custom Quote · Select a classified lead to start'
+            : 'Package selected · Your lead determines the quote industry'}
+        </p>}
       </div>
 
       <div className="qs-source-lead">
