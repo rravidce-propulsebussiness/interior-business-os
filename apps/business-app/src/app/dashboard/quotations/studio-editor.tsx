@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import Link from 'next/link';
 import { parseSftEstimate } from '@business-os/core/sft-quotation';
 
@@ -47,6 +47,7 @@ export function QuotationStudioEditor({
   revisionId,
   quoteNumber,
   revisionNumber,
+  revisionVersion,
   currency,
   status,
   industryKey,
@@ -71,6 +72,7 @@ export function QuotationStudioEditor({
   revisionId: string;
   quoteNumber: string;
   revisionNumber: number;
+  revisionVersion: number;
   currency: string;
   status: string;
   industryKey: string;
@@ -94,6 +96,9 @@ export function QuotationStudioEditor({
 }) {
   const [step, setStep] = useState<Tab>(initialStep);
   const [message, setMessage] = useState('');
+  // A successful child save increments the version via the authoritative
+  // server action; clear transient 'Saving…' only after that acknowledgement.
+  useEffect(() => { setMessage(''); }, [revisionVersion]);
   const saveCurrent = () => {
     if (!canEdit) {
       setMessage('This shared quotation is protected. Start a new revision to edit it.');
