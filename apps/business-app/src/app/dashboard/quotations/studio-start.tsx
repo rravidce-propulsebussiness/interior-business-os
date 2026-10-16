@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { createStudioQuotation } from './studio-actions';
 import { contactMatches } from './customer-match';
 
@@ -11,7 +12,6 @@ type QuoteLead = {
   id: string; lead_number: string; name: string; phone: string; email: string;
   location: string; project_size: string; service_type: string; industryKey: string;
 };
-type QuoteStyle = 'construction' | 'interior' | 'custom';
 
 export function QuotationStudioStart({
   leads, existingCustomers, industries, defaultCurrency,
@@ -32,16 +32,13 @@ export function QuotationStudioStart({
       : undefined);
   const [leadId, setLeadId] = useState(initialLead?.id ?? '');
   const [customerId, setCustomerId] = useState(initialCustomer?.id ?? '');
-  const [industry, setIndustry] = useState(initialLead?.industryKey &&
-    industries.some((i) => i.key === initialLead.industryKey)
-      ? initialLead.industryKey
-      : (industries.find((i) => i.key === 'construction')?.key ?? industries[0]?.key ?? ''));
-  const [style, setStyle] = useState<QuoteStyle>(
-    initialLead?.industryKey === 'interior' ? 'interior' :
-    initialLead?.industryKey && initialLead.industryKey !== 'construction' ? 'custom' :
-    !industries.some((i) => i.key === 'construction') ? 'custom' : 'construction',
-  );
-  const [advancedOpen, setAdvancedOpen] = useState(Boolean(initialLead || initialCustomer));
+  const [advancedOpen, setAdvancedOpen] = useState(Boolean(initialCustomerId));
+  const selectedLead = leads.find((entry) => entry.id === leadId);
+  // Quote industry is sourced only from the CRM lead, never chosen a second time.
+  const industry = selectedLead?.industryKey &&
+    industries.some((entry) => entry.key === selectedLead.industryKey)
+      ? selectedLead.industryKey : '';
+  const industryName = industries.find((entry) => entry.key === industry)?.name ?? '';
   const [pending, start] = useTransition();
   const [feedback, setFeedback] = useState('');
   const [data, setData] = useState({
@@ -56,72 +53,46 @@ export function QuotationStudioStart({
   });
   const currentCustomer = existingCustomers.find((c) => c.id === customerId);
   const matchingCustomers = !customerId ? existingCustomers.filter((c) => contactMatches(c, data)) : [];
-  const hasConstruction = industries.some((i) => i.key === 'construction');
-  const hasInterior = industries.some((i) => i.key === 'interior');
-  const otherIndustries = industries.filter((i) => i.key !== 'construction' && i.key !== 'interior');
-
   const update = (name: keyof typeof data, value: string) => {
     setData((current) => ({ ...current, [name]: value }));
     setFeedback('');
   };
   const chooseCustomer = (customer: Customer | undefined) => {
-    setCustomerId(customer?.id ?? '');
-    const linkedLead = leads.find((l) => l.id === leadId);
-    if (linkedLead && customer && !contactMatches(customer, linkedLead)) {
-      setLeadId('');
+    if (selectedLead && customer && !contactMatches(customer, selectedLead)) {
+      setFeedback('This customer does not match the selected lead. Choose the matching client.');
+      return;
     }
+    setCustomerId(customer?.id ?? '');
     setData((current) => ({
       ...current,
-      clientName: customer?.display_name ?? '',
-      phone: customer?.phone ?? '',
-      email: customer?.email ?? '',
+      clientName: customer?.display_name ?? selectedLead?.name ?? '',
+      phone: customer?.phone ?? selectedLead?.phone ?? '',
+      email: customer?.email ?? selectedLead?.email ?? '',
     }));
     setFeedback('');
   };
-  const chooseStyle = (next: QuoteStyle) => {
-    setStyle(next);
-    if (next === 'construction') setIndustry(hasConstruction ? 'construction' : industry);
-    else if (next === 'interior') setIndustry(hasInterior ? 'interior' : industry);
-    else setIndustry(otherIndustries[0]?.key ?? (hasConstruction ? 'construction' : industry));
+  const chooseLead = (value: string) => {
+    const lead = leads.find((entry) => entry.id === value);
+    const customer = lead ? existingCustomers.find((entry) =>
+      contactMatches(entry, { phone: lead.phone, email: lead.email })) : undefined;
+    setLeadId(lead?.id ?? '');
+    setCustomerId(customer?.id ?? '');
+    setData((current) => ({
+      ...current,
+      clientName: customer?.display_name ?? lead?.name ?? '',
+      phone: customer?.phone ?? lead?.phone ?? '',
+      email: customer?.email ?? lead?.email ?? '',
+      projectName: lead ? (lead.service_type || 'Client') + ' project' : '',
+      location: lead?.location ?? '',
+      plotSize: lead?.project_size ?? '',
+    }));
     setFeedback('');
   };
 
   return <div className="qs-create-start">
-    <div className="qs-create-types" role="group" aria-label="Quotation category">
-      <button type="button" className={'qs-create-type' + (style === 'construction' ? ' current' : '')}
-        disabled={!hasConstruction} aria-pressed={style === 'construction'}
-        onClick={() => chooseStyle('construction')}>
-        <span className="qs-create-type-icon">▥</span>
-        <strong>Construction</strong>
-        <small>Residential, Commercial<br/>Renovation, Extension</small>
-      </button>
-      <button type="button" className={'qs-create-type' + (style === 'interior' ? ' current' : '')}
-        disabled={!hasInterior} aria-pressed={style === 'interior'}
-        onClick={() => chooseStyle('interior')}>
-        <span className="qs-create-type-icon">▱</span>
-        <strong>Interior Design</strong>
-        <small>Homes, Apartments<br/>Villas, Offices</small>
-      </button>
-      <button type="button" className={'qs-create-type' + (style === 'custom' ? ' current' : '')}
-        aria-pressed={style === 'custom'} onClick={() => chooseStyle('custom')}>
-        <span className="qs-create-type-icon">▦</span>
-        <strong>Custom / Others</strong>
-        <small>Item-wise BOQ<br/>Custom quotation</small>
-      </button>
-    </div>
-
-    {style === 'custom' && otherIndustries.length > 0 && <label className="qs-clean-field qs-industry-picker">
-      Industry
-      <select value={industry} onChange={(event) => setIndustry(event.target.value)}>
-        {otherIndustries.map((item) => <option key={item.key} value={item.key}>{item.name}</option>)}
-        {hasConstruction && <option value="construction">Construction BOQ</option>}
-        {hasInterior && <option value="interior">Interior BOQ</option>}
-      </select>
-    </label>}
-
     <form className="qs-create-form" onSubmit={(event) => {
       event.preventDefault();
-      if (!industry) { setFeedback('Select an available quotation type.'); return; }
+      if (!leadId || !industry) { setFeedback('Select a classified lead before continuing.'); return; }
       if (matchingCustomers.length > 0) {
         setFeedback('An existing client has these contact details. Select that client before continuing.');
         setAdvancedOpen(true);
@@ -131,13 +102,13 @@ export function QuotationStudioStart({
       start(async () => {
         const result = await createStudioQuotation({
           ...data, customerId: customerId || null,
-          leadId: leadId || null, industryKey: industry, currency: defaultCurrency,
+          leadId, currency: defaultCurrency,
         });
         if (!result.ok || !result.revisionId) {
           setFeedback(result.message);
           return;
         }
-        const mode = style === 'construction' ? 'sft' : 'custom';
+        const mode = industry === 'construction' ? 'sft' : 'custom';
         router.push('/dashboard/quotations/' + result.revisionId + '/studio?mode=' + mode + '&step=quote');
       });
     }}>
@@ -146,54 +117,54 @@ export function QuotationStudioStart({
         <h2>Client &amp; Project Details</h2>
       </div>
 
-      {(leads.length > 0 || existingCustomers.length > 0) &&
-        <details className="qs-create-existing" open={advancedOpen}
-          onToggle={(event) => setAdvancedOpen(event.currentTarget.open)}>
-          <summary>Use existing client or lead <span aria-hidden="true">⌄</span></summary>
-          <div className="qs-create-existing-body">
-            {leads.length > 0 && <label className="qs-clean-field">Select a lead
-              <select value={leadId} onChange={(event) => {
-                const value = event.target.value;
-                setLeadId(value);
-                const lead = leads.find((l) => l.id === value);
-                if (!lead) return;
-                const customer = existingCustomers.find((c) =>
-                  contactMatches(c, { phone: lead.phone, email: lead.email }));
-                setCustomerId(customer?.id ?? '');
-                setData((current) => ({
-                  ...current,
-                  clientName: customer?.display_name || lead.name,
-                  phone: customer?.phone || lead.phone,
-                  email: customer?.email || lead.email,
-                  projectName: (lead.service_type || 'Client') + ' project',
-                  location: lead.location || '', plotSize: lead.project_size || '',
-                }));
-                if (industries.some((i) => i.key === lead.industryKey)) {
-                  setIndustry(lead.industryKey);
-                  setStyle(lead.industryKey === 'interior' ? 'interior' :
-                    lead.industryKey === 'construction' ? 'construction' : 'custom');
-                }
-                setFeedback('');
-              }}>
-                <option value="">No lead selected</option>
-                {leads.map((lead) => <option key={lead.id} value={lead.id}>
-                  {lead.name} · {lead.lead_number}
-                </option>)}
-              </select>
-            </label>}
-            {existingCustomers.length > 0 && <label className="qs-clean-field">Existing customer / CRN
-              <select value={customerId} onChange={(event) => {
-                const selected = existingCustomers.find((c) => c.id === event.target.value);
-                chooseCustomer(selected);
-              }}>
-                <option value="">New customer</option>
-                {existingCustomers.map((customer) => <option key={customer.id} value={customer.id}>
-                  {customer.display_name} · CRN-{customer.id.replaceAll('-', '').slice(0, 12).toUpperCase()}
-                </option>)}
-              </select>
-            </label>}
-          </div>
-        </details>}
+      <div className="qs-source-lead">
+        {leads.length > 0 ? (
+          <label className="qs-clean-field qs-source-picker">
+            Select lead <span>*</span>
+            <select required value={leadId} onChange={(event) => chooseLead(event.target.value)}>
+              <option value="">Choose a lead</option>
+              {leads.map((entry) => <option key={entry.id} value={entry.id}>
+                {entry.name} · {entry.lead_number}
+              </option>)}
+            </select>
+          </label>
+        ) : (
+          <p className="qs-source-guidance">
+            No leads available. <Link href="/dashboard/crm/leads">Add a lead</Link> before creating a quote.
+          </p>
+        )}
+        {selectedLead && industry ? (
+          <p className="qs-source-service" role="status">
+            <span className="qs-source-indicator" aria-hidden="true"/> {industryName} · Auto-detected from lead
+          </p>
+        ) : selectedLead ? (
+          <p className="qs-source-warning" role="alert">
+            This lead needs an industry classification.
+            {' '}<Link href={'/dashboard/crm/leads/' + selectedLead.id}>Classify the lead</Link> to prepare its quote.
+          </p>
+        ) : leads.length > 0 ? (
+          <p className="qs-source-guidance">Client and project details fill automatically from the selected lead.</p>
+        ) : null}
+      </div>
+
+      {existingCustomers.length > 0 && <details className="qs-create-existing"
+        open={advancedOpen}
+        onToggle={(event) => setAdvancedOpen(event.currentTarget.open)}>
+        <summary>Existing client / CRN <span aria-hidden="true">⌄</span></summary>
+        <div className="qs-create-existing-body">
+          <label className="qs-clean-field">Existing customer / CRN
+            <select value={customerId} onChange={(event) => {
+              const selected = existingCustomers.find((c) => c.id === event.target.value);
+              chooseCustomer(selected);
+            }}>
+              <option value="">New customer</option>
+              {existingCustomers.map((customer) => <option key={customer.id} value={customer.id}>
+                {customer.display_name} · CRN-{customer.id.replaceAll('-', '').slice(0, 12).toUpperCase()}
+              </option>)}
+            </select>
+          </label>
+        </div>
+      </details>}
 
       {matchingCustomers.length > 0 && <div className="qs-clean-matches" role="alert">
         <strong>Existing client found.</strong> Choose the matching account to keep one CRN.
@@ -248,7 +219,7 @@ export function QuotationStudioStart({
       {feedback && <p role="alert" className="qs-clean-feedback">{feedback}</p>}
       <div className="qs-clean-form-actions">
         <button className="qs-clean-next" type="submit"
-          disabled={pending || !industry || matchingCustomers.length > 0}>
+          disabled={pending || !leadId || !industry || matchingCustomers.length > 0}>
           {pending ? 'Creating quotation…' : 'Next →'}
         </button>
       </div>
