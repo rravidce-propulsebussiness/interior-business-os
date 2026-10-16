@@ -239,22 +239,48 @@ describe('compact single-screen construction quotation editor', () => {
   });
 
   it('offers floor count and optional shelves with direct area inputs', () => {
-    expect(editor).toContain('setFloorCount(count)');
-    expect(editor).toContain("'Ground Floor', 'First Floor', 'Second Floor'");
+    expect(editor).toContain('setFloors(n)');
+    expect(editor).toContain("'Ground Floor','First Floor','Second Floor'");
     expect(editor).toContain('Shelves & Sajjas');
-    expect(editor).toContain('toggleShelves(event.target.checked)');
-    expect(editor).toContain('Shelves rate per square foot');
+    expect(editor).toContain("name:'Shelves & Sajjas'");
+    expect(editor).toContain("'Compound Wall'");
+    expect(editor).toContain("'wall_sqft'");
+    expect(editor).toContain('Length (ft)');
+    expect(editor).toContain('Height (ft)');
+    expect(editor).toContain('Area / Qty');
     expect(editor).toContain('data-studio-save="quote"');
   });
 
   it('stores brand edits in a quotation specification snapshot, not a package template', () => {
-    expect(editor).toContain('Edit material brands');
-    expect(editor).toContain('Apply to this quote');
-    expect(editor).toContain('quotation brand override');
-    expect(editor).toContain('setSections(nextSections)');
-    expect(editor).toContain('saveFloorwiseSftEstimate(revisionId, version,');
+    expect(editor).toContain('Edit all material specifications');
+    expect(editor).toContain('Apply to this quotation');
+    expect(editor).toContain('Company package');
+    expect(editor).toContain('Quote-only editable');
+    expect(editor).toContain('setSections(curr=>curr.map(');
+    expect(editor).toContain('saveFloorwiseSftEstimate(revisionId,version,');
     expect(editor).not.toContain('construction_package_save');
     expect(actions).toContain('const calculated = calculateSftEstimate(');
     expect(actions).toContain('const description = encodeSftEstimate(calculated)');
+  });
+});
+
+describe('unified construction quote page and reliable preview', () => {
+  const detail = file('./[id]/page.tsx');
+  const studio = file('./studio-editor.tsx');
+  const page = file('./[id]/studio/page.tsx');
+  const editor = file('./premium-sft-builder.tsx');
+
+  it('redirects the old details route to Studio without a second editor', () => {
+    expect(detail).toContain("redirect('/dashboard/quotations/'");
+    expect(detail).not.toContain('LineForm');
+    expect(studio).not.toContain('Advanced item editing, discounts &amp; revisions');
+    expect(studio).toContain('!isConstruction && <section className="qs-card"');
+  });
+  it('passes authenticated PDF preview HTML instead of depending on a separate iframe request', () => {
+    expect(page).toContain('quotationDocument(revision.id)');
+    expect(page).toContain('previewHtml={previewHtml}');
+    expect(editor).toContain('srcDoc={previewHtml}');
+    expect(editor).toContain("url+'/pdf?view=1'");
+    expect(editor).toContain("url+'/pdf'");
   });
 });
