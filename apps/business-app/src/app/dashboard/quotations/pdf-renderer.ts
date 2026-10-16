@@ -1,6 +1,8 @@
 import { renderPdf, renderQuotationFallbackPdf } from '@business-os/shared/pdf';
 import type { CustomerDocument } from '@business-os/core/quotation-document';
 import { parseSftEstimate } from '@business-os/core/sft-quotation';
+import { savedStagePaymentPlan } from '@business-os/core/quotation-payment-plan';
+import { customerTermSections } from '@business-os/core/quotation-terms';
 
 const address = (parts: Record<string, string>) =>
   Object.entries(parts)
@@ -13,6 +15,23 @@ const number = (value: string) => {
     ? parsed.toLocaleString('en-IN', { maximumFractionDigits: 2 })
     : value;
 };
+
+/** Derive rupee amounts from the exact saved revision total, not percentages
+ * applied to an unsaved estimate. The final stage absorbs rounding pennies. */
+export function savedPdfPaymentRows(terms: string, total: string) {
+  const plan = savedStagePaymentPlan(terms);
+  if (!plan) return [];
+  const totalCents=Math.round(Number(total)*100);
+  if (!Number.isSafeInteger(totalCents) || totalCents < 0) return [];
+  let allocated=0;
+  return plan.map((row,i)=>{
+    const cents=i===plan.length-1
+      ?totalCents-allocated :Math.round(totalCents*row.percent/100);
+    allocated+=cents;
+    return {name:row.name,percent:row.percent,
+      amount:number((cents/100).toFixed(2))};
+  });
+}
 
 /**
  * The browser preview can use explicitly labelled public concept photography,
@@ -115,7 +134,11 @@ export async function renderQuotationPdf(html: string, document?: CustomerDocume
       accent: h.branding.accent,
       total: number(document.totals.final_amount),
       items,
-      terms: document.terms.replace(/\[\/?STAGE_PAYMENT_PLAN\]/g, ''),
+      // Terms and stage payments are saved on the revision; never invent
+      // payment suggestions that the owner has not yet confirmed.
+      terms: '',
+      termSections: customerTermSections(document.terms),
+      paymentSchedule: savedPdfPaymentRows(document.terms, document.totals.final_amount),
       notes: document.notes,
     });
   }
