@@ -72,4 +72,22 @@ describe('construction floor inheritance', () => {
     expect(changed[2]).toEqual(extra);
     expect(followPreviousFloor(changed,1)[2]).toEqual(extra);
   });
+  it('keeps a standard-rate penthouse aligned with construction but preserves manual overrides', () => {
+    const rows = [
+      floor('Ground Floor','30','40','1850'),
+      floor('First Floor','30','40','1850',true),
+      floor('First Floor — Penthouse','12','20','1850'),
+      floor('Second Floor','30','40','1850',true),
+      floor('Second Floor — Penthouse','10','20','1400'),
+    ];
+    const updated=propagateFloorChanges(rows,0,{ratePerSqft:'1950'});
+    expect(updated[1]?.ratePerSqft).toBe('1950');
+    expect(updated[2]?.ratePerSqft).toBe('1950');
+    expect(updated[3]?.ratePerSqft).toBe('1950');
+    expect(updated[4]?.ratePerSqft).toBe('1400');
+    const custom=propagateFloorChanges(updated,2,{ratePerSqft:'2100'});
+    expect(custom[2]?.ratePerSqft).toBe('2100');
+    expect(custom[1]?.ratePerSqft).toBe('1950');
+  });
+
 });
