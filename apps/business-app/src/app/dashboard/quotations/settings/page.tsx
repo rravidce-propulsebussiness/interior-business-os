@@ -13,18 +13,34 @@ export default async function Settings() {
   return (
     <main id="main-content" tabIndex={-1} className="mx-auto max-w-5xl p-6">
       <Link href="/dashboard/quotations">Quotations</Link>
-      <h1 className="my-6 text-3xl">Company quotation design &amp; code</h1>
-      <p>
-        Set your company logo, brand colour and optional building/interior photos
-        for the premium multipage quotation brochure. Add your own images only.
-        All embedded images and the logo must fit within the 190 KB branding
-        budget combined. Photos display only when supplied by your company;
-        specifications continue using saved quotation brands and grades.
-        Saved quotation revisions keep their existing branding and amounts.
-      </p>
+      <div className="mt-5 rounded-3xl border border-orange-100 bg-gradient-to-br from-orange-50 via-white to-white p-5 shadow-sm sm:p-8">
+        <p className="text-xs font-extrabold uppercase tracking-[.16em] text-orange-600">
+          Company-owned quotation branding
+        </p>
+        <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-slate-950">
+          Logo, Address &amp; Contact Details
+        </h1>
+        <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600">
+          Upload <strong>your company logo</strong> and edit your business name,
+          full address, phone, email, tax ID and brochure photographs.
+          Every company's information is saved separately and appears in its own quotations.
+        </p>
+        <p className="mt-3 text-xs font-semibold leading-5 text-orange-800">
+          Save these details here. New quotations use them automatically.
+          To update an existing draft quotation, open its Client &amp; Project tab
+          and select “Apply Saved Branding to This Draft”. Issued PDFs stay unchanged.
+        </p>
+      </div>
+      <div className="mt-5 max-w-2xl">
+        <h2 className="text-lg font-extrabold text-slate-950">Company identity and address</h2>
+        <p className="mt-1 text-xs text-slate-600">
+          Logo files are previewed after selection. You can replace or remove an
+          image before saving. Logo and photos together must fit within 190 KB.
+        </p>
+      </div>
       <MasterForm
         entity="organization_quotation_settings"
-        title="Save defaults"
+        title="Save Company Branding"
         initial={
           data ?? {
             organization_id: s.org,
@@ -58,8 +74,8 @@ export default async function Settings() {
             label: 'Business display name',
             required: true,
           },
-          { key: 'branding.phone', label: 'Business phone' },
-          { key: 'branding.email', label: 'Business email', type: 'email' },
+          { key: 'branding.phone', label: 'Company contact number', type: 'tel' },
+          { key: 'branding.email', label: 'Company contact email', type: 'email' },
           { key: 'branding.tax_identifier', label: 'Tax identifier' },
           ...[
             'line1',
@@ -75,7 +91,7 @@ export default async function Settings() {
           { key: 'branding.accent', label: 'Accent color (hex)' },
           {
             key: 'branding.logo_data_uri',
-            label: 'Logo (PNG/JPEG, up to 130 KB)',
+            label: 'Upload or replace company logo (PNG/JPEG, up to 130 KB)',
             type: 'file',
           },
           {

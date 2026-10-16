@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { addressSchema, brandingSchema } from './commercial';
 import { parseSftEstimate } from './sft-quotation';
 import { premiumCss, premiumSections } from './premium-quotation';
+import { savedStagePaymentPlan } from './quotation-payment-plan';
 const money = z.string().regex(/^(0|[1-9]\d{0,79})(\.\d{1,100})?$/);
 export const documentHeaderSchema = z.object({
   branding: brandingSchema,
@@ -84,18 +85,9 @@ export function renderQuotationDocument(input: unknown): string {
 
   // Payment milestones are saved as an immutable part of the quotation's
   // customer-facing terms. Print a readable table without exposing markers.
-  const paymentMarker = d.terms.match(/\[STAGE_PAYMENT_PLAN\]([\s\S]*?)\[\/STAGE_PAYMENT_PLAN\]/);
   const remainingTerms = d.terms.replace(/\[STAGE_PAYMENT_PLAN\][\s\S]*?\[\/STAGE_PAYMENT_PLAN\]/g, '').trim();
-  const paymentRows = (paymentMarker?.[1] ?? '').trim().split(/\r?\n/).flatMap((line) => {
-    const divider = line.lastIndexOf('|');
-    if (divider <= 0) return [];
-    const name = line.slice(0, divider).trim();
-    const percent = Number(line.slice(divider + 1).trim());
-    if (!name || name.length > 100 || !Number.isFinite(percent) || percent <= 0 || percent > 100) return [];
-    return [{ name, percent }];
-  });
-  const paymentValid = paymentRows.length > 0 && paymentRows.length <= 40 &&
-    Math.abs(paymentRows.reduce((sum, row) => sum + row.percent, 0) - 100) < 0.001;
+  const paymentRows = savedStagePaymentPlan(d.terms) ?? [];
+  const paymentValid = paymentRows.length > 0;
   const fullCents = Math.round(Number(d.totals.final_amount) * 100);
   let paidCents = 0;
   const paymentSection = paymentValid && Number.isSafeInteger(fullCents)
@@ -319,18 +311,19 @@ export function renderQuotationDocument(input: unknown): string {
     additionalSpecs + sftSpecifications + '</div>' +
     brochure.pageFooter('Material specifications') + '</section>'
     : '';
-  const schedulePage = paymentSection || d.notes || remainingTerms ?
+  const schedulePage =
     '<section class="pb-page pb-payment-page">' +
     brochure.pageHeader('Payments / terms') +
     '<div class="pb-section-title"><h2>Payment schedule &amp; conditions</h2></div>' +
     (paymentSection ||
-      '<p class="muted">No stage-wise payment schedule is specified in this quotation.</p>') +
+      '<div class="pb-terms-panel"><h2>Stage-wise payments not specified</h2>' +
+      '<p class="text">No confirmed payment milestones are included in this quotation revision. ' +
+      'Payment terms must be agreed and documented before they are treated as part of the contract.</p></div>') +
     (d.notes ? '<section class="pb-terms-panel"><h2>Project notes</h2>' +
       '<p class="text">' + escape(d.notes) + '</p></section>' : '') +
     (remainingTerms ? '<section class="pb-terms-panel"><h2>Terms and conditions</h2>' +
       '<p class="text">' + escape(remainingTerms) + '</p></section>' : '') +
-    brochure.pageFooter('Payments / terms') + '</section>'
-    : '';
+    brochure.pageFooter('Payments / terms') + '</section>';
   const amountLabel = isFloorQuote ? 'Total proposed construction cost' : 'Total quotation amount';
   const total = '<div class="pb-final-total"><span>' + amountLabel +
     '</span><strong>' + money(d.totals.final_amount) + '</strong></div>';

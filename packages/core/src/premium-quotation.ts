@@ -80,11 +80,6 @@ img { max-width:100%; display:block; }
 .pb-cover-bottom .pb-cover-client { max-width:55%; }
 .pb-cover-bottom .pb-cover-status { text-align:right; }
 .pb-cover-photo-note { font-size:9px; color:#ffdfc7; padding-top:8px; }
-.pb-cover-steps {
-  display:flex; gap:10px; align-items:center; flex-wrap:wrap;
-  font-size:10px; color:#e3eefa; font-weight:700; margin-top:19px;
-}
-.pb-cover-steps span { border-radius:18px; border:1px solid #ffffff55; padding:6px 9px; }
 .pb-page {
   position:relative; background:white;
   break-before:page; page-break-before:always;
@@ -225,8 +220,6 @@ tr.total td { border-top:1px solid #ffc7aa; }
  .pb-investment { margin-top:19px; padding:11px; }
  .pb-investment strong { font-size:clamp(19px,6vw,27px); }
  .pb-cover-bottom { gap:7px; font-size:9px; }
- .pb-cover-steps { gap:5px; font-size:9px; }
- .pb-cover-steps span { padding:4px 7px; }
  .pb-page-header { margin-bottom:12px; }
  .pb-brand-name { font-size:16px; }
  .pb-page-header small { font-size:8px; }
@@ -298,10 +291,9 @@ export function premiumSections(document: CustomerDocument) {
     '<h1>Building your<br>next <em>chapter.</em></h1>'+
     '<p class="pb-cover-project">'+escape(document.header.project.name)+'</p>'+
     '<p class="pb-cover-number">'+number+' · Revision '+document.revision+'</p>'+
-    '<div class="pb-investment"><small>Proposed project investment</small>'+
+    '<div class="pb-investment"><small>Total project cost</small>'+
     '<strong>'+escape(displayMoney)+'</strong></div>'+
-    '<div class="pb-cover-steps"><span>Detailed estimate</span><span>Material specifications</span>'+
-    '<span>Payment milestones</span></div></div></div>'+
+    '</div></div>'+
     '<div class="pb-cover-bottom"><div class="pb-cover-client"><strong>Prepared for '+escape(document.header.customer.name)+'</strong>'+
     (location || contact)+'</div><div class="pb-cover-status"><strong>Valid until '+escape(valid)+'</strong>'+
     escape(document.status.toUpperCase())+'</div></div>'+

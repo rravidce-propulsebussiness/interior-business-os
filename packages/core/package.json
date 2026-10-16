@@ -7,6 +7,7 @@
     ".": "./src/index.ts",
     "./commercial": "./src/commercial.ts",
     "./quotation-document": "./src/quotation-document.ts",
+    "./quotation-payment-plan": "./src/quotation-payment-plan.ts",
     "./sft-quotation": "./src/sft-quotation.ts",
     "./crm": "./src/crm.ts",
     "./quotation-sharing": "./src/quotation-sharing.ts",

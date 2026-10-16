@@ -16,6 +16,8 @@ import { SharingSection } from '../../sharing-section';
 import { ContractHandoff } from '../../../finance/handoff';
 import { QuotationAttachments } from '../../quotation-attachments';
 import { PaymentScheduleEditor } from '../../payment-schedule-editor';
+import { DraftBrandingControl } from '../../draft-branding-control';
+import { hasSavedStagePaymentPlan } from '@business-os/core/quotation-payment-plan';
 
 export const dynamic = 'force-dynamic';
 
@@ -173,6 +175,8 @@ export default async function QuotationStudio({
           )
           .map((row) => ({ key: row.key, name: row.name }))}
         header={header.data}
+        hasSavedPaymentPlan={hasSavedStagePaymentPlan(revision.terms)}
+        brandingEditor={<DraftBrandingControl revisionId={revision.id} version={revision.version} editable={editable} />}
         lines={saved}
         total={total}
         initialMode={mode}
