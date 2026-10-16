@@ -5,8 +5,8 @@
  */
 export const FLOOR_RATE_TITLE = 'Floor area price defaults';
 export type FloorRateDefaults = { parking: string; penthouse: string };
-type SpecLike = { title: string; description: string; brand?: string; grade?: string;
-  allowancePerSqft?: string; unit?: string; pricingTreatment?: string; allowanceValue?: string };
+type SpecLike = { title: string; description: string; brand?: string | undefined; grade?: string | undefined;
+  allowancePerSqft?: string | undefined; unit?: string | undefined; pricingTreatment?: string | undefined; allowanceValue?: string | undefined };
 const valid = (value: string) =>
   !value || (/^(0|[1-9]\d{0,5})(\.\d{1,2})?$/.test(value) && Number(value) > 0);
 
