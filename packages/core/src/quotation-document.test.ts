@@ -334,3 +334,37 @@ it('labels illustrative concept photographs instead of claiming company ownershi
   expect(branded).not.toContain('not an image of the proposed project');
   expect(branded).toContain('Company-provided project photograph');
 });
+
+it('calls quotation value project cost and no longer claims three extra cover benefits', () => {
+  const document = quotationDocumentFixture();
+  const html = renderQuotationDocument(document);
+  expect(html).toContain('Total project cost');
+  expect(html).not.toContain('Proposed project investment');
+  expect(html).not.toContain('class="pb-cover-steps"');
+});
+
+it('does not invent stage payments when the quotation has none saved', () => {
+  const document = quotationDocumentFixture();
+  document.terms = 'Materials as specified.';
+  const html = renderQuotationDocument(document);
+  expect(html).toContain('Payment schedule &amp; conditions');
+  expect(html).toContain('Stage-wise payments not specified');
+  expect(html).not.toContain('Agreement &amp; advance');
+  expect(html).not.toContain('10.00%');
+  expect(html).toContain('Materials as specified.');
+});
+
+it('keeps the saved payment table and exact final amount in the PDF', () => {
+  const document = quotationDocumentFixture();
+  document.totals.final_amount = '5550000.00';
+  document.terms = '[STAGE_PAYMENT_PLAN]\nAdvance|10.00\nRCC & steel|40.00\nHandover|50.00\n[/STAGE_PAYMENT_PLAN]';
+  const html = renderQuotationDocument(document);
+  expect(html).toContain('Proposed stage-wise payment schedule');
+  expect(html).toContain('RCC &amp; steel');
+  expect(html).toContain('5,55,000');
+  expect(html).toContain('22,20,000');
+  expect(html).toContain('27,75,000');
+  expect(html).toContain('55,50,000');
+  expect(html).not.toContain('Stage-wise payments not specified');
+  expect(html).not.toContain('[STAGE_PAYMENT_PLAN]');
+});
