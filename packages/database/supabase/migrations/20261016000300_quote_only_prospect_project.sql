@@ -106,4 +106,30 @@ update public.projects p
                    where l.organization_id=p.organization_id
                      and l.converted_project_id=p.id and l.converted_at is not null);
 
+-- Some businesses quote without an originating lead. An activated accepted
+-- contract also converts their quote-only prospect into a visible execution
+-- project. Pending/cancelled agreements do not trigger project activation.
+create or replace function private.quotation_prospect_activate_on_contract()
+returns trigger language plpgsql security definer set search_path=''
+as $promote$
+begin
+  if new.status='active' and old.status is distinct from 'active' then
+    update public.projects
+      set is_sales_prospect=false
+      where organization_id=new.organization_id and id=new.project_id
+        and customer_id=new.customer_id and is_sales_prospect;
+    update public.customers
+      set is_sales_prospect=false
+      where organization_id=new.organization_id and id=new.customer_id
+        and is_sales_prospect;
+  end if;
+  return new;
+end;
+$promote$;
+drop trigger if exists quotation_prospect_contract_activated on public.contracts;
+create trigger quotation_prospect_contract_activated
+  after update of status on public.contracts
+  for each row execute function private.quotation_prospect_activate_on_contract();
+
+
 commit;
