@@ -15,7 +15,7 @@ describe('minimal quotation studio navigation', () => {
   const page = file('./[id]/studio/page.tsx');
 
   it('shows only Save and Preview & Share in the primary action toolbar', () => {
-    const actions = studio.match(/<div className="qs-toolbar qs-studio-actions"[\s\S]*?<\/div>/)?.[0] ?? '';
+    const actions = studio.match(/<div className="qs-toolbar qs-studio-compact-buttons"[\s\S]*?<\/div>/)?.[0] ?? '';
     expect(actions).toContain('▣ Save');
     expect(actions).toContain('◉ Preview &amp; Share');
     expect((actions.match(/<button/g) ?? [])).toHaveLength(2);
@@ -465,7 +465,9 @@ describe('streamlined quote, terms and payment Studio', () => {
     expect(terms).toContain("action: 'edit_revision'");
     expect(terms).toContain('paymentPlan: fields.paymentPlan');
     expect(studio).toContain("{step === 'files' && termsEditor}");
-    expect(studio).toContain('qs-studio-clean-header');
+    expect(studio).toContain('qs-studio-compact-bar');
+    expect(studio).not.toContain('<h1>{industryName} Quote</h1>');
+    expect(studio).not.toContain('qs-studio-hero');
     expect(css).toContain('.qs-terms-grid');
     expect(css).toContain('grid-template-columns:repeat(3,minmax(0,1fr))');
   });
