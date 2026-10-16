@@ -8,6 +8,8 @@ import type { ConstructionPackage } from '@business-os/database/construction-pac
 import { saveFloorwiseSftEstimate } from './construction-actions';
 import { QuotationPdfControls } from './quotation-pdf-controls';
 import { FLOOR_RATE_TITLE, readFloorRateDefaults } from '../pricing/construction/floor-rate-rules';
+import { propagateFloorChanges, followPreviousFloor, restoreFloorFollowing } from './construction-floor-inheritance';
+import { sftEstimateInputSchema } from '@business-os/core/sft-quotation';
 
 type Unit = 'sqft' | 'wall_sqft' | 'running_ft' | 'cubic_ft' | 'piece' | 'lumpsum';
 type Work = {
@@ -19,6 +21,7 @@ type Work = {
   quantity?: string | undefined;
   unit?: Unit;
   ratePerSqft: string;
+  inheritFromPrevious?: boolean | undefined;
 };
 type Material = {
   title: string;
@@ -121,6 +124,9 @@ export function PremiumSftBuilder({
       unit:item.unit??'sqft',
       heightFeet:item.heightFeet??'',
       quantity:item.quantity??'',
+      inheritFromPrevious:(item.kind??'floor')==='floor' &&
+        floorLevel(item.name)>0 && floorZone(item.name)==='construction'
+        ? item.inheritFromPrevious!==false : item.inheritFromPrevious,
       ratePerSqft:changedPackage&&(item.kind??'floor')==='floor'
         ?(floorZone(item.name)==='parking' ? floorRateDefaults.parking :
           floorZone(item.name)==='penthouse' ? floorRateDefaults.penthouse : packageRate)
@@ -154,6 +160,7 @@ export function PremiumSftBuilder({
   const [message,setMessage]=useState('');
   const [saved,setSaved]=useState(false);
   const [dirty,setDirty]=useState(false);
+  const [savedVersion,setSavedVersion]=useState(version);
   const floors=rows.filter(r=>r.kind==='floor');
   const extras=rows.filter(r=>r.kind==='additional');
   const levels=names.map((name,level)=>({
@@ -178,7 +185,10 @@ export function PremiumSftBuilder({
     (activePackages.length===0||Boolean(selectedPackage));
   const touch=()=>{setSaved(false);setDirty(true);setMessage('');};
   const updateRow=(index:number,patch:Partial<Work>)=>{
-    setRows(current=>current.map((r,i)=>i===index?{...r,...patch}:r));touch();
+    setRows(current=>propagateFloorChanges(current,index,patch));touch();
+  };
+  const restoreFollowing=(level:number)=>{
+    setRows(current=>restoreFloorFollowing(current,level));touch();
   };
   const setFloors=(num:number)=>{
     const count=Math.max(1,Math.min(8,num));
@@ -197,13 +207,18 @@ export function PremiumSftBuilder({
         :combinedArea>0
           ?{lengthFeet:String(Number(combinedArea.toFixed(2))),widthFeet:'1'}
           :{lengthFeet:'',widthFeet:''};
-      next.push({...floor(floorZoneName(level,'construction'),construction?.ratePerSqft || packageRate),...copied});
+      next.push({...floor(floorZoneName(level,'construction'),construction?.ratePerSqft || packageRate),
+        ...copied,inheritFromPrevious:level>0});
     }
     if(next.length+extras.length>18){
       setMessage('Too many floor portions and extra works (maximum 18 rows).');
       return;
     }
-    setRows([...next,...extras]);
+    const restored=[...next,...extras];
+    // Carry linked floor-area changes through every newly added upper floor.
+    let propagated=restored;
+    for(let level=1;level<count;level++) propagated=followPreviousFloor(propagated,level);
+    setRows(propagated);
     touch();
   };
   const addFloorZone=(level:number,zone:FloorZone)=>{
@@ -279,6 +294,22 @@ export function PremiumSftBuilder({
             })} SFT · construction / parking / penthouse separately priced</small>
           </div>
           <div className="qs-work-split-buttons">
+            {group.level>0&&group.portions.some(r=>floorZone(r.name)==='construction')&&
+              <label className="qs-work-floor-follow">
+                <input type="checkbox"
+                  aria-label={group.name+' follow previous floor'}
+                  checked={group.portions.find(r=>floorZone(r.name)==='construction')?.inheritFromPrevious!==false}
+                  onChange={event=>{
+                    if(event.target.checked) restoreFollowing(group.level);
+                    else {
+                      setRows(current=>current.map(row=>
+                        row.kind==='floor'&&floorLevel(row.name)===group.level&&floorZone(row.name)==='construction'
+                          ? {...row,inheritFromPrevious:false}:row));
+                      touch();
+                    }
+                  }}/>
+                Follow lower floor
+              </label>}
             {!group.portions.some(r=>floorZone(r.name)==='construction') &&
               <button type="button" disabled={rows.length>=18}
                 onClick={()=>addFloorZone(group.level,'construction')}>＋ Construction</button>}
@@ -292,8 +323,8 @@ export function PremiumSftBuilder({
         </div>)}
       </div>
       <p className="qs-work-copy-hint">
-        New floors copy the previous floor's area. A mixed ground floor becomes full construction on
-        the new floor by default. All dimensions, portions and rates can be edited independently.
+        Upper floors follow changes to the floor below until you untick Follow lower floor or
+        edit that upper floor yourself. Parking and penthouse rates stay independent.
       </p>
       <div className="qs-work-table-scroll" role="region" aria-label="Work quantities and rates" tabIndex={0}>
         <table className="qs-work-table">
