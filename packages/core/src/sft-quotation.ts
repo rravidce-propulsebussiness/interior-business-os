@@ -16,8 +16,8 @@ const inputRow = z
     widthFeet: positive,
     // Optional for backward-compatible older estimates; height is only billed
     // for wall-area or volume measurements, never silently for floor SFT.
-    heightFeet: positive.optional(),
-    quantity: positive.optional(),
+    heightFeet: z.union([z.literal(''), positive]).optional(),
+    quantity: z.union([z.literal(''), positive]).optional(),
     unit: workUnit.optional(),
     ratePerSqft: rate,
   })
