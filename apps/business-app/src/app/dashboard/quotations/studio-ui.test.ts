@@ -506,7 +506,7 @@ describe('streamlined quote, terms and payment Studio', () => {
     expect(terms).toContain('data-studio-save="files"');
     expect(terms).toContain("kind:'terms'");
     expect(terms).toContain("'/dashboard/quotations/'+initial.revision_id+'/conditions'");
-    expect(terms).toContain('paymentPlan: fields.paymentPlan');
+    expect(file('./[id]/conditions/route.ts')).toContain('paymentPlan:saved.paymentPlan');
     expect(studio).toContain("{step === 'files' && termsEditor}");
     expect(studio).not.toContain('qs-studio-compact-bar');
     expect(studio).not.toContain('<h1>{industryName} Quote</h1>');
