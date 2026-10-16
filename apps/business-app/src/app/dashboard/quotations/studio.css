@@ -1770,3 +1770,176 @@
 @media(prefers-reduced-motion:reduce){
   .qs-payment-panel * {transition:none!important;}
 }
+
+
+/* Clean Quote Studio (2026-10): quote-specific editing only.
+ * Company identity assets always live under Quotations > Settings. */
+.qs-studio-clean-header {
+  min-height:0 !important;
+  margin:0 0 14px !important;
+  padding:19px 22px !important;
+  display:flex;gap:15px;align-items:center;justify-content:space-between;
+  border:1px solid #f4decf;border-radius:18px !important;
+  background:linear-gradient(110deg,#fff9f4,#fff 46%,#f5fbfb 100%) !important;
+  box-shadow:0 10px 26px #2a3e5410;
+  color:#172943;
+}
+.qs-studio-clean-header .qs-heading-label{min-width:0;flex:1}
+.qs-studio-clean-header h1 {
+  margin:0 !important;color:#1b2a43 !important;
+  font-size:clamp(21px,2.1vw,26px) !important;letter-spacing:-.04em;
+}
+.qs-studio-clean-header .qs-hero-meta,
+.qs-studio-clean-header .qs-hero-client{
+  color:#6b7c91 !important;line-height:1.4;font-size:11px !important;
+  margin:6px 0 !important;
+}
+.qs-studio-clean-header .qs-hero-client strong{color:#1d3453;font-weight:850}
+.qs-studio-clean-header .qs-hero-total{
+  display:flex;flex-direction:row;align-items:center;gap:10px;
+  border:0 !important;border-radius:0 !important;background:none !important;
+  padding:0 !important;margin:10px 0 0 !important;color:#172943 !important;
+}
+.qs-studio-clean-header .qs-hero-total small{
+  color:#8491a3;font-size:10px;letter-spacing:.2px;
+  font-weight:750;text-transform:none;
+}
+.qs-studio-clean-header .qs-hero-total strong{
+  color:#eb651b !important;font-size:clamp(18px,2.1vw,24px);
+}
+.qs-studio-clean-header .qs-studio-actions{flex-shrink:0}
+.qs-studio-clean-header .qs-studio-actions .qs-btn{
+  background:white;color:#c85b1c;border:1px solid #f1c6a9;
+}
+.qs-studio-clean-header .qs-studio-actions .qs-btn.primary {
+  background:linear-gradient(105deg,#ff862e,#f36513);
+  border-color:#ff8532;color:white;
+}
+.qs-simple-tabs {
+  display:grid !important;grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:6px !important;overflow:visible !important;
+  padding:7px !important;border-radius:16px !important;
+  background:#fff !important;
+  box-shadow:0 4px 18px #18324a0d;
+}
+.qs-simple-tab{
+  flex:initial !important;min-width:0;white-space:normal;
+  border-radius:10px !important;
+  min-height:49px !important;padding:9px !important;
+  font-size:12px !important;line-height:1.35;font-weight:850;
+}
+.qs-simple-tab.active{
+  color:#de5e19 !important;
+  background:linear-gradient(125deg,#fff4ec,#ffe6d8) !important;
+  box-shadow:inset 0 0 0 1px #ffc9a6;
+}
+
+/* Dedicated premium quotation-specific terms panel. */
+.qs-terms-workspace {
+  display:grid;gap:15px;min-width:0;
+  border:1px solid #e8edf1;background:#fff;
+  border-radius:20px;padding:21px;
+  box-shadow:0 12px 32px #2036500d;
+  animation:qs-terms-enter .28s ease both;
+}
+.qs-terms-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
+.qs-terms-heading>div{min-width:0;flex:1}
+.qs-terms-eyebrow{
+  font-size:10px;letter-spacing:.13em;text-transform:uppercase;
+  font-weight:900;color:#e66a1f;
+}
+.qs-terms-heading h2 {
+  color:#1c2b44;font-size:clamp(18px,2.2vw,25px);
+  letter-spacing:-.04em;font-weight:900;line-height:1.25;margin:6px 0;
+}
+.qs-terms-heading p {margin:0;color:#78899b;font-size:12px;line-height:1.65;max-width:640px}
+.qs-terms-saved{
+  border-radius:999px;background:#effaf6;border:1px solid #d3e9dd;
+  padding:8px 11px;color:#238258;white-space:nowrap;font-size:10px;font-weight:800;
+}
+.qs-terms-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.qs-terms-field{display:flex;min-width:0;flex-direction:column;gap:12px;
+  border:1px solid #e7ebf1;border-radius:14px;padding:16px;
+  background:#fff;transition:border-color .2s,box-shadow .2s,transform .2s;
+}
+.qs-terms-field:hover{border-color:#fed4b9;box-shadow:0 6px 20px #a37c5910}
+.qs-terms-date-card{background:linear-gradient(108deg,#fff9f3,#fff);grid-column:1/-1}
+.qs-terms-field-heading{display:flex;gap:11px;align-items:center;min-width:0}
+.qs-terms-field-heading>span:last-child{min-width:0;flex:1}
+.qs-terms-field-icon{
+  width:36px;height:36px;flex:0 0 36px;display:grid;place-items:center;
+  border-radius:11px;background:#fff0e6;color:#f16a1d;font-size:19px;font-weight:900;
+}
+.qs-terms-field-heading strong {display:block;color:#24354e;font-size:13px;line-height:1.45;font-weight:850}
+.qs-terms-field-heading small {display:block;color:#8b98a9;font-size:10px;line-height:1.5;margin-top:2px}
+.qs-terms-input,
+.qs-terms-discount input,.qs-terms-discount select{
+  display:block;min-width:0;width:100%;border:1px solid #dce2e9;
+  background:#fafbfe;color:#23344e;
+  padding:13px;border-radius:11px;font:inherit;font-size:12px;
+  line-height:1.6;outline:0;
+}
+.qs-terms-input:focus,.qs-terms-discount input:focus,.qs-terms-discount select:focus{
+  border-color:#f49d61;box-shadow:0 0 0 3px #ffd2ad82;background:white;
+}
+.qs-terms-input:disabled{opacity:.8;color:#63768a;cursor:default}
+.qs-terms-textarea{resize:vertical;min-height:106px}
+.qs-terms-date-card .qs-terms-input{max-width:290px;color-scheme:light;font-weight:750}
+.qs-terms-wide{grid-column:1/-1;min-width:0}
+.qs-terms-advanced{
+  border:1px solid #e9edf3;border-radius:13px;background:#fbfcfe;overflow:hidden;
+}
+.qs-terms-advanced summary{
+  display:flex;justify-content:space-between;gap:12px;
+  list-style:none;cursor:pointer;
+  padding:15px 17px;font-size:12px;color:#475b74;font-weight:850;
+}
+.qs-terms-advanced summary::-webkit-details-marker{display:none}
+.qs-terms-advanced[open] summary{border-bottom:1px solid #e8ecf2;background:#fff5ee;color:#cc5b16}
+.qs-terms-advanced-content{padding:15px;display:grid;gap:13px}
+.qs-terms-discount{display:grid;gap:9px;font-size:12px;color:#445870;font-weight:800}
+.qs-terms-discount-row{display:flex;gap:10px}
+.qs-terms-discount-row input{max-width:170px}
+.qs-terms-footer{
+  border-radius:14px;background:linear-gradient(105deg,#fff8f3,#fff);
+  border:1px solid #f5ddc9;padding:16px;
+  display:flex;align-items:center;justify-content:space-between;gap:15px;
+}
+.qs-terms-footer p{margin:0;color:#7d8797;font-size:11px;line-height:1.6;max-width:520px}
+.qs-terms-footer strong{color:#283a52}
+.qs-terms-save{
+  min-height:45px;border:0;border-radius:10px;
+  padding:12px 17px;font-size:12px;font-weight:900;
+  color:white;background:linear-gradient(100deg,#fe8433,#f36610);
+  white-space:nowrap;cursor:pointer;box-shadow:0 6px 16px #f66a1b24;
+}
+.qs-terms-save:disabled{opacity:.6;cursor:wait}
+.qs-terms-message{
+  margin:0;padding:12px 14px;
+  border:1px solid #f9cda8;border-radius:10px;background:#fff4e9;
+  color:#91501e;font-size:12px;font-weight:700;line-height:1.5;
+}
+@keyframes qs-terms-enter{
+ from{opacity:.3;transform:translateY(8px)}
+ to{opacity:1;transform:translateY(0)}
+}
+@media(max-width:750px){
+  .qs-studio-clean-header{padding:14px !important;min-height:0 !important;gap:9px}
+  .qs-studio-clean-header .qs-studio-actions{width:100%}
+  .qs-studio-clean-header .qs-hero-total{gap:5px;flex-wrap:wrap}
+  .qs-simple-tabs{gap:4px !important;padding:5px !important}
+  .qs-simple-tab{min-height:50px !important;font-size:10px !important;padding:8px 5px !important}
+  .qs-terms-workspace{padding:13px;border-radius:17px;gap:11px}
+  .qs-terms-heading{gap:9px}
+  .qs-terms-heading h2{font-size:20px}
+  .qs-terms-heading p{font-size:11px}
+  .qs-terms-saved{font-size:9px;padding:7px 8px}
+  .qs-terms-grid{grid-template-columns:1fr;gap:9px}
+  .qs-terms-field{padding:13px;gap:10px}
+  .qs-terms-footer{flex-direction:column;align-items:stretch;padding:13px}
+  .qs-terms-save{width:100%}
+}
+@media(prefers-reduced-motion:reduce){
+  .qs-terms-workspace{animation:none}
+  .qs-terms-field{transition:none}
+}
