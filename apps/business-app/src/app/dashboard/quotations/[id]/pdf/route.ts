@@ -16,7 +16,7 @@ export async function GET(
   try {
     const { id } = await params;
     const { html, document } = await quotationDocument(id);
-    const base = await renderQuotationPdf(html);
+    const base = await renderQuotationPdf(html, document);
 
     // Pull strictly private, authenticated annexures in customer-chosen upload
     // order and append their pages to the actual generated PDF document.
