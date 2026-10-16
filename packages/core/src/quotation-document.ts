@@ -122,7 +122,7 @@ export function renderQuotationDocument(input: unknown): string {
   const packageAccent = h.branding.accent;
   const renderSftSchedule = sftSchedules
     .map(({ details }) =>
-      '<section class="pb-estimate"><div class="pb-section-title"><h2>Construction work-wise estimate</h2></div>' +
+      '<section class="pb-estimate"><div class="pb-section-title"><h2>Work-wise SFT estimate</h2></div>' +
       '<p class="pb-section-subtitle">Dimensions, units, quantities and quotation-specific rates</p>' +
       '<table><thead><tr>' +
       '<th>Work description</th><th>L (ft)</th><th>W (ft)</th><th>H (ft)</th><th>Area / Qty</th>' +
