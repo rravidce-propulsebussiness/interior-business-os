@@ -268,6 +268,16 @@ export default async function Dashboard({
       label: 'Quotations',
       href: '/dashboard/quotations',
       icon: 'quotations',
+      children: [
+        ...(has('quotation.create', 'quotation')
+          ? [{ label: 'Create Quote', href: '/dashboard/quotations/new' }]
+          : []),
+        { label: 'My Quotes', href: '/dashboard/quotations' },
+        { label: 'Packages', href: '/dashboard/quotations/packages' },
+        ...(has('settings.manage', 'quotation')
+          ? [{ label: 'Branding & Settings', href: '/dashboard/quotations/settings' }]
+          : []),
+      ],
     });
   if (canProjects)
     navigation.push({
