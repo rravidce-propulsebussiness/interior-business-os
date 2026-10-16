@@ -41,6 +41,6 @@ describe('minimal quotation studio navigation', () => {
     expect(studio).toContain('reviseEditor');
     expect(page).toContain('Confirm & Enable Customer Sharing');
     expect(page).toContain('CreateRevisionControl');
-    expect(studio).toContain('Preview shows the saved quotation.');
+    expect(studio).toContain('Preview contains saved amounts');
   });
 });
