@@ -73,7 +73,9 @@ test('Quotation actions remain 49px tall and never overlap PDF or history at mob
     const pdf = await page.locator('.qs-quotes-mobile-pdf').boundingBox();
     expect(menu).not.toBeNull();
     expect(pdf).not.toBeNull();
-    expect(menu!.y).toBeGreaterThanOrEqual(before[3]!.bottom);
+    const expandedMore = await buttons.nth(3).boundingBox();
+    expect(expandedMore).not.toBeNull();
+    expect(menu!.y).toBeGreaterThanOrEqual(expandedMore!.y + expandedMore!.height - 1);
     expect(menu!.y+menu!.height).toBeLessThanOrEqual(pdf!.y+1);
     const overflow = await page.evaluate(()=>({
       content: document.documentElement.scrollWidth, viewport: document.documentElement.clientWidth,
