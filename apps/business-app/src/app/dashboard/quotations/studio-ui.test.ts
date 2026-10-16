@@ -329,3 +329,33 @@ describe('PDF attachment sharing and reliable file operations', () => {
     expect(secureRoute).toContain('renderQuotationPdf(html, document)');
   });
 });
+
+describe('split-floor construction area editing and resilient PDF routes', () => {
+  const pkg = file('../pricing/construction/premium-package-editor.tsx');
+  const builder = file('./premium-sft-builder.tsx');
+  const pdf = file('./[id]/pdf/route.ts');
+
+  it('keeps parking and penthouse rate defaults in company package settings', () => {
+    expect(pkg).toContain('Default parking area rate');
+    expect(pkg).toContain('Default penthouse rate');
+    expect(pkg).toContain('writeFloorRateDefaults(sections');
+    expect(pkg).toContain('name="specSections" value={JSON.stringify(savedSections)}');
+  });
+
+  it('allows independently priced construction, parking and penthouse portions', () => {
+    expect(builder).toContain("type FloorZone = 'construction' | 'parking' | 'penthouse'");
+    expect(builder).toContain("floorZoneName(level,'parking')");
+    expect(builder).toContain("floorZoneName(level,'penthouse')");
+    expect(builder).toContain('addFloorZone(group.level');
+    expect(builder).toContain('combinedArea');
+    expect(builder).toContain('floorRateDefaults.parking');
+    expect(builder).toContain('floorRateDefaults.penthouse');
+    expect(builder).toContain("rows.length>=18");
+  });
+
+  it('serves base PDF when optional annexure credentials are not set', () => {
+    expect(pdf).toContain('privilegedStorageConfigured');
+    expect(pdf).toContain('const base = await renderQuotationPdf(html, document)');
+    expect(pdf).toContain('const bytes = await appendQuotationAnnexures(base, additional)');
+  });
+});
