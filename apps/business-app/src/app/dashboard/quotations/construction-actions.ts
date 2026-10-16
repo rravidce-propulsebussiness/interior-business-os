@@ -110,6 +110,22 @@ export async function saveConstructionPackage(
       .join('\n');
     if (breakdown.length > 3000) throw new DomainError('VALIDATION_FAILED');
     if (Number(p.ratePerSqft) <= 0) throw new DomainError('VALIDATION_FAILED');
+    // If a package has an attached source PDF, snapshot it independently;
+    // saving a price line must not require privileged storage when there are
+    // no package attachments (the common case).
+    const [sourcePdf, oldPdf] = await Promise.all([
+      selectedPackage
+        ? s.client.from('construction_package_spec_attachments')
+            .select('id').eq('organization_id', s.org)
+            .eq('package_id', selectedPackage.id).limit(1)
+        : Promise.resolve({ data: [], error: null }),
+      s.client.from('quotation_studio_attachments')
+        .select('id').eq('organization_id', s.org)
+        .eq('revision_id', rid).not('source_package_id', 'is', null).limit(1),
+    ]);
+    if (sourcePdf.error || oldPdf.error)
+      throw new DomainError('VALIDATION_FAILED');
+
     const id = await s.commercial.saveManualLine(s.org, rid, version, {
       area_id: null,
       sort_order: 0,
@@ -296,7 +312,7 @@ export async function saveFloorwiseSftEstimate(
   revisionId: string,
   version: number,
   input: unknown,
-): Promise<{ message: string; id?: string; total?: string }> {
+): Promise<{ message: string; id?: string; total?: string; version?: number }> {
   try {
     const rid = idSchema.parse(revisionId);
     const parsed = sftEstimateInputSchema.parse(input);
@@ -372,20 +388,39 @@ export async function saveFloorwiseSftEstimate(
       discount: { kind: 'none', value: '0' },
       estimated_cost_rate: null,
     });
-    const user = await s.authorization.requireAuthenticatedUser();
-    await snapshotConstructionPackagePdf(
-      s.org,
-      rid,
-      selectedPackage?.id ?? null,
-      user.id,
-    );
+    let attachmentWarning = false;
+    if ((sourcePdf.data?.length ?? 0) > 0 || (oldPdf.data?.length ?? 0) > 0) {
+      try {
+        const user = await s.authorization.requireAuthenticatedUser();
+        await snapshotConstructionPackagePdf(
+          s.org, rid, selectedPackage?.id ?? null, user.id,
+        );
+      } catch {
+        // The quotation line has already been saved. Never report a failed
+        // save because an optional PDF attachment snapshot was unavailable.
+        // The owner must resolve the attachment before sharing it.
+        attachmentWarning = true;
+        console.error('construction.quotation.package_snapshot_failed', {
+          revisionId: rid, organizationId: s.org,
+        });
+      }
+    }
+    const { data: updatedRevision } = await s.client
+      .from('quotation_revisions')
+      .select('version')
+      .eq('organization_id', s.org)
+      .eq('id', rid)
+      .maybeSingle();
     revalidatePath('/dashboard/quotations', 'layout');
     return {
       id,
       total: calculated.total,
-      message: existing.length
-        ? 'Floor-wise estimate updated. Review your revision before issuing.'
-        : 'Floor-wise estimate saved with the itemized area/rate schedule. Review your PDF before issuing.',
+      ...(updatedRevision?.version ? { version: updatedRevision.version } : {}),
+      message: attachmentWarning
+        ? 'Quotation saved. Package PDF attachment needs attention before sharing.'
+        : existing.length
+          ? 'Floor-wise estimate updated. Review your revision before issuing.'
+          : 'Floor-wise estimate saved with the itemized area/rate schedule. Review your PDF before issuing.',
     };
   } catch (error) {
     return { message: safeFailure(error).message };
