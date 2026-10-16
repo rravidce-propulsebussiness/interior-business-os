@@ -314,12 +314,12 @@ it('shows other separately quoted work and discounts without erasing payable amo
     quantity:'1',unit:'unit',rate:'80000',amount:'80000',
   });
   d.totals.revision_discount = '5000';
-  d.totals.final_amount = '1250000';
+  d.totals.final_amount = '1245000';
   const html = renderQuotationDocument(d);
   expect(html).toContain('Additional quoted items');
   expect(html).toContain('Extra compound wall');
   expect(html).toContain('Quotation discount');
-  expect(html).toContain('12,50,000');
+  expect(html).toContain('12,45,000');
   expect(html).toContain('Total proposed construction cost');
 });
 
