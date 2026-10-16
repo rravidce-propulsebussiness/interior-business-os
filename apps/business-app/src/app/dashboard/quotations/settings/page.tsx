@@ -17,8 +17,9 @@ export default async function Settings() {
       <p>
         Set your company logo, brand colour and optional building/interior photos
         for the premium multipage quotation brochure. Add your own images only.
-        All embedded images and the logo must fit within the existing 190 KB
-        branding budget combined; compress a large logo before adding photos.
+        All embedded images and the logo must fit within the 190 KB branding
+        budget combined. Photos display only when supplied by your company;
+        specifications continue using saved quotation brands and grades.
         Saved quotation revisions keep their existing branding and amounts.
       </p>
       <MasterForm
@@ -45,6 +46,7 @@ export default async function Settings() {
               logo_data_uri: '',
               cover_image_data_uri: '',
               detail_image_data_uri: '',
+              materials_image_data_uri: '',
             },
           }
         }
@@ -87,6 +89,12 @@ export default async function Settings() {
             label: 'Specifications / project photograph (PNG/JPEG, up to 39 KB)',
             type: 'file',
             fileMaxBytes: 39000,
+          },
+          {
+            key: 'branding.materials_image_data_uri',
+            label: 'Materials / finishes photograph (PNG/JPEG, up to 42 KB)',
+            type: 'file',
+            fileMaxBytes: 42000,
           },
           {
             key: 'show_quantity',
