@@ -2,7 +2,6 @@
 
 import { useState, type ReactNode } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { parseSftEstimate } from '@business-os/core/sft-quotation';
 
 type Tab = 'client' | 'quote' | 'files' | 'payments' | 'preview';
@@ -39,31 +38,10 @@ type DocumentHeader = {
 };
 
 const steps: { id: Tab; title: string }[] = [
-  { id: 'client', title: 'Client & Project' },
-  { id: 'quote', title: 'Quote Builder' },
-  { id: 'files', title: 'Specifications & Files' },
-  { id: 'payments', title: 'Payments' },
-  { id: 'preview', title: 'Preview & Share' },
-];
-const modes: { id: Mode; name: string; note: string; icon: string }[] = [
-  {
-    id: 'sft',
-    name: 'Per sq ft (SFT)',
-    note: 'Floor-wise area and rate',
-    icon: '▦',
-  },
-  {
-    id: 'custom',
-    name: 'Custom BOQ / Materials',
-    note: 'Room-wise or item-wise',
-    icon: '▤',
-  },
-  {
-    id: 'pdf',
-    name: 'Upload existing PDF',
-    note: 'Supporting documents',
-    icon: '⇧',
-  },
+  { id: 'quote', title: 'Estimate & Specifications' },
+  { id: 'files', title: 'Project Files' },
+  { id: 'payments', title: 'Payment Schedule' },
+  { id: 'client', title: 'Client Details' },
 ];
 
 export function QuotationStudioEditor({
@@ -117,10 +95,33 @@ export function QuotationStudioEditor({
   canIssue: boolean;
   issueEditor: ReactNode;
 }) {
-  const router = useRouter();
   const [step, setStep] = useState<Tab>(initialStep);
-  const [mode, setMode] = useState<Mode>(initialMode);
   const [message, setMessage] = useState('');
+  const saveCurrent = () => {
+    if (!canEdit) {
+      setMessage('This shared quotation is protected. Start a new revision to edit it.');
+      return;
+    }
+    const saveButton = document.querySelector<HTMLButtonElement>(
+      '[data-studio-save="' + step + '"]',
+    );
+    if (!saveButton) {
+      setMessage('No pending changes in this section. Your quotation is saved.');
+      return;
+    }
+    if (saveButton.disabled) {
+      setMessage('Complete the required estimate or payment details before saving.');
+      return;
+    }
+    if (saveButton.form && !saveButton.form.reportValidity()) {
+      setMessage('Complete the highlighted fields before saving.');
+      return;
+    }
+    setMessage('Saving this section…');
+    // Click the actual permission-checked child editor action, not a fake
+    // router.refresh(). The child displays backend success/error feedback.
+    saveButton.click();
+  };
   const amount = Number(total);
   const price = Number.isFinite(amount)
     ? new Intl.NumberFormat('en-IN', {
@@ -132,7 +133,7 @@ export function QuotationStudioEditor({
   const url = '/dashboard/quotations/' + revisionId;
   const isConstruction = industryKey === 'construction';
   const isInterior = industryKey === 'interior';
-  const showMethod = mode === 'pdf' ? false : canEdit;
+  const showMethod = canEdit;
   return (
     <>
       <div className="qs-heading">
@@ -142,56 +143,30 @@ export function QuotationStudioEditor({
             <h1>Quotation Studio</h1>
             <p>
               {quoteNumber} · Revision {revisionNumber} ·{' '}
-              <span style={{ textTransform: 'capitalize' }}>{status}</span>
+              <span className="qs-saved-pill">{status === 'issued' ? 'Shared' : 'Saved'}</span>
             </p>
           </div>
         </div>
-        <div className="qs-toolbar">
-          <button
-            type="button"
-            className="qs-btn"
-            onClick={() => {
-              router.refresh();
-              setMessage(
-                'Saved quotation items are up to date. Use the Save button in each editor before leaving.',
-              );
-            }}
-          >
-            ▣ Save Draft
+        <div className="qs-toolbar qs-studio-actions" aria-label="Quotation actions">
+          <button type="button" className="qs-btn qs-top-save" onClick={saveCurrent}>
+            ▣ Save
           </button>
-          <a
-            className="qs-btn ghost"
-            href={url + '/preview'}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            ▧ Preview PDF
-          </a>
-          <button
-            type="button"
-            className="qs-btn primary"
-            onClick={() => setStep('preview')}
-          >
-            ➤ {status === 'issued' ? 'Share Quote' : 'Issue & Share'}
+          <button type="button" className="qs-btn primary qs-top-preview"
+            onClick={() => { setStep('preview'); setMessage(''); }}>
+            ◉ Preview &amp; Share
           </button>
         </div>
       </div>
-      <div className="qs-stepper" aria-label="Quotation steps">
-        {steps.map(({ id, title }, i) => (
-          <button
-            key={id}
-            type="button"
-            className={'qs-step' + (step === id ? ' selected' : '')}
-            onClick={() => setStep(id)}
-          >
-            <b>{i + 1}</b>
-            <span>
-              <strong>0{i + 1}</strong>
-              <small>{title}</small>
-            </span>
+      <nav className="qs-simple-tabs" aria-label="Quotation sections">
+        {steps.map(({ id, title }) => (
+          <button type="button" key={id}
+            className={'qs-simple-tab' + (step === id ? ' active' : '')}
+            aria-current={step === id ? 'page' : undefined}
+            onClick={() => { setStep(id); setMessage(''); }}>
+            {title}
           </button>
         ))}
-      </div>
+      </nav>
       {message && (
         <div className="qs-message" role="status" style={{ marginBottom: 12 }}>
           {message}
@@ -199,142 +174,28 @@ export function QuotationStudioEditor({
       )}
       <div className="qs-studio-grid">
         <div className="qs-editor">
-          <section className="qs-card">
-            <div className="qs-sector-tabs">
-              {[
-                { key: 'construction', name: 'Construction', icon: '▦' },
-                { key: 'interior', name: 'Interiors', icon: '▱' },
-              ].map((item) =>
-                industryKey === item.key ? (
-                  <span
-                    key={item.key}
-                    className="qs-sector current"
-                    aria-current="true"
-                  >
-                    {item.icon} {item.name}
-                  </span>
-                ) : (
-                  <Link
-                    key={item.key}
-                    className="qs-sector"
-                    href={'/dashboard/quotations/new?industry=' + item.key}
-                    title="Start a new quotation in this industry"
-                  >
-                    {item.icon} {item.name}
-                  </Link>
-                ),
-              )}
-              {otherIndustries.length ? (
-                <Link
-                  href="/dashboard/quotations/new"
-                  className="qs-sector"
-                  title="Create quotation in another industry"
-                >
-                  ◈{' '}
-                  {otherIndustries.length === 1
-                    ? otherIndustries[0]?.name
-                    : 'Other industries'}
-                </Link>
-              ) : (
-                <span className="qs-sector" style={{ opacity: 0.6 }}>
-                  ◈ More industries
-                </span>
-              )}
+          <section className="qs-client-strip" aria-label="Saved customer and project">
+            <div className="qs-client-identity">
+              <span className="qs-client-avatar" aria-hidden="true">♙</span>
+              <span><strong>{header.customer.name}</strong><small>{header.project.name}</small></span>
             </div>
-            <div className="qs-divider" />
-            <div className="qs-method-tabs">
-              {modes.map((option) => (
-                <button
-                  key={option.id}
-                  type="button"
-                  className={
-                    'qs-method' + (mode === option.id ? ' current' : '')
-                  }
-                  onClick={() => {
-                    setMode(option.id);
-                    if (option.id === 'pdf') setStep('files');
-                    else setStep('quote');
-                  }}
-                >
-                  <span className="qs-icon-chip">{option.icon}</span>
-                  <span>
-                    <strong>{option.name}</strong>
-                    <small>{option.note}</small>
-                  </span>
-                </button>
-              ))}
-            </div>
+            {header.project.site_address.city && <span>{header.project.site_address.city}</span>}
+            {header.customer.phone && <span>{header.customer.phone}</span>}
+            <button type="button" className="qs-client-edit"
+              onClick={() => { setStep('client'); setMessage(''); }}>View details</button>
           </section>
 
-          <section className="qs-card">
-            <div className="qs-heading" style={{ marginBottom: 14 }}>
-              <h2>Client &amp; Project Details</h2>
-              <Link
-                href="/dashboard/customers"
-                className="qs-btn ghost"
-                style={{ minHeight: 31 }}
-              >
-                Clients ↗
-              </Link>
-            </div>
-            <div className="qs-fields">
-              <label className="qs-field">
-                Client name
-                <input
-                  readOnly
-                  className="qs-readonly"
-                  value={header.customer.name}
-                />
-              </label>
-              <label className="qs-field">
-                Phone
-                <input
-                  readOnly
-                  className="qs-readonly"
-                  value={header.customer.phone}
-                />
-              </label>
-              <label className="qs-field">
-                Email
-                <input
-                  readOnly
-                  className="qs-readonly"
-                  value={header.customer.email}
-                />
-              </label>
-              <label className="qs-field qs-field-wide">
-                Project
-                <input
-                  readOnly
-                  className="qs-readonly"
-                  value={header.project.name}
-                />
-              </label>
-              <label className="qs-field">
-                Project location
-                <input
-                  readOnly
-                  className="qs-readonly"
-                  value={[
-                    header.project.site_address.city,
-                    header.project.site_address.region,
-                  ]
-                    .filter(Boolean)
-                    .join(', ')}
-                />
-              </label>
-            </div>
-            {step === 'client' && (
-              <p className="qs-note" style={{ marginTop: 12 }}>
-                These customer and project fields were captured when the
-                quotation draft was created. Existing quotations preserve their
-                historical client snapshot. Use a new revision for revised
-                commercial terms.
-              </p>
-            )}
-          </section>
-
-          {step === 'client' && brandingEditor}
+          {step === 'client' && (
+            <>
+              <section className="qs-card">
+                <h2>Client &amp; Project Details</h2>
+                <p className="qs-muted">{header.customer.name} · {header.customer.phone} · {header.customer.email}</p>
+                <p className="qs-muted">{header.project.name} · {header.project.site_address.city}</p>
+                <p className="qs-note">Details are inherited from the saved client and quotation record.</p>
+              </section>
+              {brandingEditor}
+            </>
+          )}
 
           {step === 'quote' && (
             <>
@@ -342,7 +203,7 @@ export function QuotationStudioEditor({
               {showMethod && (isInterior || !isConstruction) && interiorEditor}
               {!canEdit && (
                 <p className="qs-note">
-                  This revision is {status}. Create a draft revision before
+                  This shared version is protected. Create a new revision before
                   modifying quotation prices.
                 </p>
               )}
@@ -431,7 +292,7 @@ export function QuotationStudioEditor({
           {step === 'preview' && (
             <>
               <section className="qs-card">
-                <h2>Review and share</h2>
+                <h2>Preview &amp; Share</h2>
                 <p className="qs-muted" style={{ marginBottom: 14 }}>
                   This is the actual PDF generated with{' '}
                   <strong>{header.branding.name || industryName}</strong>{' '}
@@ -491,8 +352,8 @@ export function QuotationStudioEditor({
                 {status === 'draft' && canIssue && lines.length > 0 &&
                   hasSavedPaymentPlan && (
                   <div className="qs-warning" style={{ marginTop: 16 }}>
-                    Check final amounts and attached annexures before issuing.
-                    The issued revision is an immutable customer-facing snapshot.
+                    Check final amounts and attached annexures before sharing.
+                    Shared versions are preserved for your customer's records.
                   </div>
                 )}
                 {status === 'draft' && canIssue && lines.length > 0 &&
