@@ -158,8 +158,14 @@ export const brandingSchema = z
       .string()
       .max(180000)
       .regex(/^$|^data:image\/(png|jpeg);base64,[A-Za-z0-9+/=]+$/),
+    cover_image_data_uri: z.string().max(85000)
+      .regex(/^$|^data:image\/(png|jpeg);base64,[A-Za-z0-9+/=]+$/).optional(),
+    detail_image_data_uri: z.string().max(55000)
+      .regex(/^$|^data:image\/(png|jpeg);base64,[A-Za-z0-9+/=]+$/).optional(),
   })
-  .strict();
+  .strict()
+  .refine((brand) => JSON.stringify(brand).length <= 190000,
+    'Combined logo and quotation photos must fit within 190 KB. Reduce image sizes.');
 export const quoteSettingsSchema = z.object({
   ...base,
   prefix: z.string().regex(/^[A-Z][A-Z0-9-]{0,15}$/),
