@@ -54,7 +54,7 @@ export default async function QuotationStudio({
       .maybeSingle(),
     s.client
       .from('projects')
-      .select('id,industry_id,branch_id')
+      .select('id,industry_id,branch_id,is_sales_prospect')
       .eq('organization_id', s.org)
       .eq('id', revision.project_id)
       .maybeSingle(),
@@ -325,10 +325,17 @@ export default async function QuotationStudio({
             approvals and the existing project workspace.
           </p>
           <ContractHandoff revisionId={revision.id} />
-          <Link href={'/dashboard/projects/' + revision.project_id + '/site#agreement-readiness'}
-            className="qs-btn">
-            Open agreement &amp; project stages →
-          </Link>
+          {!project.is_sales_prospect ? (
+            <Link href={'/dashboard/projects/' + revision.project_id + '/site#agreement-readiness'}
+              className="qs-btn">
+              Open agreement &amp; project stages →
+            </Link>
+          ) : (
+            <p className="qs-warning" role="status">
+              This is still a sales quotation. No execution project appears in
+              Projects until the lead is confirmed Won and converted.
+            </p>
+          )}
         </section>
       )}
     </QuotationStudioFrame>
