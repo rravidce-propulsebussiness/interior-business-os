@@ -13,7 +13,7 @@ type TermsInitial = {
   valid_until: string;
   customer_notes: string;
   internal_notes: string;
-  discount: Discount;
+  discount: unknown;
 };
 
 export function QuotationTermsEditor({
@@ -31,7 +31,17 @@ export function QuotationTermsEditor({
   const [additional, setAdditional] = useState(fields.additional);
   const [customerNotes, setCustomerNotes] = useState(initial.customer_notes);
   const [internalNotes, setInternalNotes] = useState(initial.internal_notes);
-  const [discount, setDiscount] = useState<Discount>(initial.discount);
+  const savedDiscount: Discount = (() => {
+    const value=initial.discount;
+    if(value && typeof value==='object' && !Array.isArray(value)){
+      const input=value as Record<string,unknown>;
+      if(['none','fixed','percentage'].includes(String(input.kind)) &&
+        typeof input.value==='string')
+        return {kind:input.kind as Discount['kind'],value:input.value};
+    }
+    return {kind:'none',value:'0'};
+  })();
+  const [discount, setDiscount] = useState<Discount>(savedDiscount);
   const [message, setMessage] = useState('');
   const [pending, startTransition] = useTransition();
   const router = useRouter();
@@ -69,7 +79,7 @@ export function QuotationTermsEditor({
           customer_notes: customerNotes,
           internal_notes: internalNotes,
           // Authorization still applies to discounts on the server.
-          discount: canDiscount ? discount : initial.discount,
+          discount: canDiscount ? discount : savedDiscount,
         });
         setMessage(result.message);
         if (result.id) router.refresh();
