@@ -481,7 +481,9 @@ test('one lead supports multiple package quotations and previews newest, with si
   assert.match(quoteList, /\?step=quote/);
   assert.match(quoteList, /Not shared/);
   assert.match(quoteList, /mobileCustomers\.map/);
-  assert.match(quoteList, /group\.quotes\.map/);
+  assert.match(quoteList, /group\\.quotes\\.slice\\(1\\)\\.map/);
+  assert.match(quoteList, /renderMobileQuote\\(group\\.quotes\\[0\\]!\\)/);
+  assert.match(quoteList, /renderTableRow\\(group\\.quotes\\[0\\]!\\)/);
   const revise = readFileSync(fileURLToPath(new URL('quotations/quotation-revise-button.tsx', appRoot)), 'utf8');
   assert.match(quoteList, /<QuotationReviseButton/);
   assert.match(revise, /action: 'clone'/);
