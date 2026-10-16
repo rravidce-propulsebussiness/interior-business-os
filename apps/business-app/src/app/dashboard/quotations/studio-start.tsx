@@ -7,7 +7,6 @@ import { contactMatches } from './customer-match';
 
 type Industry = { key: string; name: string };
 type Customer = { id: string; display_name: string; phone: string; email: string };
-type Project = { id: string; customer_id: string; name: string };
 type QuoteLead = {
   id: string; lead_number: string; name: string; phone: string; email: string;
   location: string; project_size: string; service_type: string; industryKey: string;
@@ -15,12 +14,11 @@ type QuoteLead = {
 type QuoteStyle = 'construction' | 'interior' | 'custom';
 
 export function QuotationStudioStart({
-  leads, existingCustomers, existingProjects, industries, defaultCurrency,
+  leads, existingCustomers, industries, defaultCurrency,
   initialCustomerId = '', initialLeadId = '',
 }: {
   leads: QuoteLead[];
   existingCustomers: Customer[];
-  existingProjects: Project[];
   industries: Industry[];
   defaultCurrency: string;
   initialCustomerId?: string;
@@ -34,7 +32,6 @@ export function QuotationStudioStart({
       : undefined);
   const [leadId, setLeadId] = useState(initialLead?.id ?? '');
   const [customerId, setCustomerId] = useState(initialCustomer?.id ?? '');
-  const [projectId, setProjectId] = useState('');
   const [industry, setIndustry] = useState(initialLead?.industryKey &&
     industries.some((i) => i.key === initialLead.industryKey)
       ? initialLead.industryKey
@@ -58,8 +55,6 @@ export function QuotationStudioStart({
     notes: '',
   });
   const currentCustomer = existingCustomers.find((c) => c.id === customerId);
-  const customerProjects = existingProjects.filter((p) => p.customer_id === customerId);
-  const selectedProject = customerProjects.find((p) => p.id === projectId);
   const matchingCustomers = !customerId ? existingCustomers.filter((c) => contactMatches(c, data)) : [];
   const hasConstruction = industries.some((i) => i.key === 'construction');
   const hasInterior = industries.some((i) => i.key === 'interior');
@@ -75,7 +70,6 @@ export function QuotationStudioStart({
     if (linkedLead && customer && !contactMatches(customer, linkedLead)) {
       setLeadId('');
     }
-    setProjectId('');
     setData((current) => ({
       ...current,
       clientName: customer?.display_name ?? '',
@@ -136,7 +130,7 @@ export function QuotationStudioStart({
       setFeedback('');
       start(async () => {
         const result = await createStudioQuotation({
-          ...data, customerId: customerId || null, projectId: projectId || null,
+          ...data, customerId: customerId || null,
           leadId: leadId || null, industryKey: industry, currency: defaultCurrency,
         });
         if (!result.ok || !result.revisionId) {
@@ -166,7 +160,6 @@ export function QuotationStudioStart({
                 const customer = existingCustomers.find((c) =>
                   contactMatches(c, { phone: lead.phone, email: lead.email }));
                 setCustomerId(customer?.id ?? '');
-                setProjectId('');
                 setData((current) => ({
                   ...current,
                   clientName: customer?.display_name || lead.name,
@@ -197,16 +190,6 @@ export function QuotationStudioStart({
                 {existingCustomers.map((customer) => <option key={customer.id} value={customer.id}>
                   {customer.display_name} · CRN-{customer.id.replaceAll('-', '').slice(0, 12).toUpperCase()}
                 </option>)}
-              </select>
-            </label>}
-            {currentCustomer && <label className="qs-clean-field">Existing project (optional)
-              <select value={projectId} onChange={(event) => {
-                const project = customerProjects.find((p) => p.id === event.target.value);
-                setProjectId(project?.id ?? '');
-                if (project) update('projectName', project.name);
-              }}>
-                <option value="">Create new project</option>
-                {customerProjects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
               </select>
             </label>}
           </div>
@@ -240,7 +223,6 @@ export function QuotationStudioStart({
         </label>
         <label className="qs-clean-field">Project Name <span>*</span>
           <input required maxLength={200} placeholder="Enter project name"
-            readOnly={Boolean(selectedProject)}
             value={data.projectName} onChange={(event) => update('projectName', event.target.value)}/>
         </label>
         <label className="qs-clean-field">Project Location
@@ -258,10 +240,8 @@ export function QuotationStudioStart({
           </select>
         </label>
         <label className="qs-clean-field qs-clean-notes">Additional Notes (optional)
-          <textarea rows={3} maxLength={1000} disabled={Boolean(selectedProject)}
-            placeholder={selectedProject
-              ? 'Use Projects to edit notes on an existing project'
-              : 'Any special requirements, site details or notes…'}
+          <textarea rows={3} maxLength={1000}
+            placeholder="Any special requirements, site details or notes…"
             value={data.notes} onChange={(event) => update('notes', event.target.value)}/>
         </label>
       </div>

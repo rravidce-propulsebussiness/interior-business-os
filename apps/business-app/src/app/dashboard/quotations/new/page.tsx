@@ -71,14 +71,6 @@ export default async function NewQuotation({
     .eq('status', 'active')
     .order('created_at', { ascending: false })
     .limit(150);
-  const { data: existingProjects } = await s.client
-    .from('projects')
-    .select('id,customer_id,name')
-    .eq('organization_id', s.org)
-    .eq('status', 'active')
-    .order('created_at', { ascending: false })
-    .limit(300);
-
   return (
     <QuotationStudioFrame companyName={organization.name}
       companyLogo={companyLogo} accountEmail={user.email ?? ''}>
@@ -96,7 +88,6 @@ export default async function NewQuotation({
         <QuotationStudioStart
           leads={leads}
           existingCustomers={existingCustomers ?? []}
-          existingProjects={existingProjects ?? []}
           industries={industries
             .filter((industry) => industry.status === 'active')
             .map((industry) => ({

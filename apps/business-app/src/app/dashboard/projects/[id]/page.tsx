@@ -200,6 +200,7 @@ export default async function Project({
     .select('*')
     .eq('organization_id', s.org)
     .eq('id', id)
+    .eq('is_sales_prospect', false)
     .maybeSingle();
   if (projectError || !project) notFound();
 
