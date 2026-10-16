@@ -3,6 +3,7 @@ import { addressSchema, brandingSchema } from './commercial';
 import { parseSftEstimate } from './sft-quotation';
 import { premiumCss, premiumSections } from './premium-quotation';
 import { savedStagePaymentPlan } from './quotation-payment-plan';
+import { customerTermSections } from './quotation-terms';
 const money = z.string().regex(/^(0|[1-9]\d{0,79})(\.\d{1,100})?$/);
 export const documentHeaderSchema = z.object({
   branding: brandingSchema,
@@ -85,7 +86,7 @@ export function renderQuotationDocument(input: unknown): string {
 
   // Payment milestones are saved as an immutable part of the quotation's
   // customer-facing terms. Print a readable table without exposing markers.
-  const remainingTerms = d.terms.replace(/\[STAGE_PAYMENT_PLAN\][\s\S]*?\[\/STAGE_PAYMENT_PLAN\]/g, '').trim();
+  const savedTerms = customerTermSections(d.terms);
   const paymentRows = savedStagePaymentPlan(d.terms) ?? [];
   const paymentValid = paymentRows.length > 0;
   const fullCents = Math.round(Number(d.totals.final_amount) * 100);
@@ -310,8 +311,11 @@ export function renderQuotationDocument(input: unknown): string {
       'Payment terms must be agreed and documented before they are treated as part of the contract.</p></div>') +
     (d.notes ? '<section class="pb-terms-panel"><h2>Project notes</h2>' +
       '<p class="text">' + escape(d.notes) + '</p></section>' : '') +
-    (remainingTerms ? '<section class="pb-terms-panel"><h2>Terms and conditions</h2>' +
-      '<p class="text">' + escape(remainingTerms) + '</p></section>' : '') +
+    (savedTerms.length ? '<section class="pb-terms-panel pb-quote-conditions">' +
+      '<h2>Terms &amp; Inclusions</h2>' +
+      savedTerms.map(section => '<div class="pb-term-section"><h3>' +
+        escape(section.title) + '</h3><p class="text">' +
+        escape(section.text) + '</p></div>').join('') + '</section>' : '') +
     brochure.pageFooter('Payments / terms') + '</section>';
   const amountLabel = isFloorQuote ? 'Total proposed construction cost' : 'Total quotation amount';
   const total = '<div class="pb-final-total"><span>' + amountLabel +
