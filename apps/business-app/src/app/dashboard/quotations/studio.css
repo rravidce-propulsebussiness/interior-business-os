@@ -1554,31 +1554,6 @@
 
 
 /* Approved white quotation identity summary replaces the oversized hero. */
-.qs-build-overview{
-  display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,1fr) minmax(0,1fr);
-  gap:0;min-width:0;align-items:center;
-  border:1px solid #f2e4d8;border-radius:18px;background:#fff;
-  box-shadow:0 10px 30px #c2672710;padding:16px 10px;
-}
-.qs-build-overview>div{min-width:0;padding:4px 17px;display:grid;gap:5px}
-.qs-build-overview>div+div{border-left:1px solid #e8ebf2}
-.qs-build-overview small{display:block;color:#7a8a9e;font-size:10px;font-weight:700}
-.qs-build-overview-client small{color:#c75b1a}
-.qs-build-overview strong{display:block;font-size:15px;font-weight:850;overflow-wrap:anywhere;
-  color:#1a2d49;line-height:1.25}
-.qs-build-overview span{display:block;font-size:10px;color:#91a0af}
-.qs-build-overview-price strong{color:#f36a19;font-size:21px;letter-spacing:-.5px}
-@media(max-width:650px){
-  .qs-build-overview{grid-template-columns:1fr 1fr;padding:10px 5px}
-  .qs-build-overview>div{padding:7px 11px}
-  .qs-build-overview>div:first-child{grid-column:1/-1;border-bottom:1px solid #edf0f5;padding-bottom:11px}
-  .qs-build-overview>div:nth-child(2){border-left:0}
-  .qs-build-overview>div:nth-child(3){border-left:1px solid #e8ebf2}
-  .qs-build-overview strong{font-size:13px}
-  .qs-build-overview-price strong{font-size:18px}
-}
-
-
 /* Split-floor pricing: parking and penthouse are scoped to their own floor. */
 .qs-work-floor-splits{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-bottom:9px}
 .qs-work-split{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:9px;
@@ -1772,49 +1747,6 @@
 }
 
 
-/* Clean Quote Studio (2026-10): quote-specific editing only.
- * Company identity assets always live under Quotations > Settings. */
-.qs-studio-clean-header {
-  min-height:0 !important;
-  margin:0 0 14px !important;
-  padding:19px 22px !important;
-  display:flex;gap:15px;align-items:center;justify-content:space-between;
-  border:1px solid #f4decf;border-radius:18px !important;
-  background:linear-gradient(110deg,#fff9f4,#fff 46%,#f5fbfb 100%) !important;
-  box-shadow:0 10px 26px #2a3e5410;
-  color:#172943;
-}
-.qs-studio-clean-header .qs-heading-label{min-width:0;flex:1}
-.qs-studio-clean-header h1 {
-  margin:0 !important;color:#1b2a43 !important;
-  font-size:clamp(21px,2.1vw,26px) !important;letter-spacing:-.04em;
-}
-.qs-studio-clean-header .qs-hero-meta,
-.qs-studio-clean-header .qs-hero-client{
-  color:#6b7c91 !important;line-height:1.4;font-size:11px !important;
-  margin:6px 0 !important;
-}
-.qs-studio-clean-header .qs-hero-client strong{color:#1d3453;font-weight:850}
-.qs-studio-clean-header .qs-hero-total{
-  display:flex;flex-direction:row;align-items:center;gap:10px;
-  border:0 !important;border-radius:0 !important;background:none !important;
-  padding:0 !important;margin:10px 0 0 !important;color:#172943 !important;
-}
-.qs-studio-clean-header .qs-hero-total small{
-  color:#8491a3;font-size:10px;letter-spacing:.2px;
-  font-weight:750;text-transform:none;
-}
-.qs-studio-clean-header .qs-hero-total strong{
-  color:#eb651b !important;font-size:clamp(18px,2.1vw,24px);
-}
-.qs-studio-clean-header .qs-studio-actions{flex-shrink:0}
-.qs-studio-clean-header .qs-studio-actions .qs-btn{
-  background:white;color:#c85b1c;border:1px solid #f1c6a9;
-}
-.qs-studio-clean-header .qs-studio-actions .qs-btn.primary {
-  background:linear-gradient(105deg,#ff862e,#f36513);
-  border-color:#ff8532;color:white;
-}
 .qs-simple-tabs {
   display:grid !important;grid-template-columns:repeat(3,minmax(0,1fr));
   gap:6px !important;overflow:visible !important;
@@ -1924,9 +1856,6 @@
  to{opacity:1;transform:translateY(0)}
 }
 @media(max-width:750px){
-  .qs-studio-clean-header{padding:14px !important;min-height:0 !important;gap:9px}
-  .qs-studio-clean-header .qs-studio-actions{width:100%}
-  .qs-studio-clean-header .qs-hero-total{gap:5px;flex-wrap:wrap}
   .qs-simple-tabs{gap:4px !important;padding:5px !important}
   .qs-simple-tab{min-height:50px !important;font-size:10px !important;padding:8px 5px !important}
   .qs-terms-workspace{padding:13px;border-radius:17px;gap:11px}
@@ -1945,37 +1874,15 @@
 }
 
 
-/* Compact quotation identity replaces the oversized Construction Quote card.
- * Save and Preview remain accessible in Scope, Terms and Payment Schedule. */
-.qs-studio-compact-bar {
-  display:flex;align-items:center;justify-content:space-between;gap:12px;
-  min-width:0;margin:0 0 12px;padding:10px 13px;
-  border:1px solid #e8ebf1;border-radius:14px;background:#fff;
-  box-shadow:0 4px 15px #18283a0b;
+
+/* Preview is accessible after each section without recreating a top quote card. */
+.qs-studio-bottom-actions{display:flex;justify-content:flex-end;margin:13px 0 20px;}
+.qs-studio-bottom-actions .qs-btn{
+  border:1px solid #ffd3b3;border-radius:11px;padding:12px 20px;
+  color:white;background:linear-gradient(95deg,#ff8229,#f46a18);
+  font-size:12px;font-weight:850;min-height:43px;
 }
-.qs-studio-compact-ref {
-  display:flex;flex-wrap:wrap;align-items:center;min-width:0;gap:5px 10px;
-  color:#748397;font-size:11px;margin:0;
-}
-.qs-studio-compact-ref strong {color:#22334c;font-size:12px}
-.qs-studio-compact-status {
-  color:#238057;background:#eafaf1;border:1px solid #c8edd9;
-  border-radius:999px;padding:4px 9px;font-size:10px;font-weight:850;
-}
-.qs-studio-compact-buttons{display:flex;align-items:center;gap:8px;flex-shrink:0}
-.qs-studio-compact-buttons .qs-btn{
-  display:inline-flex;align-items:center;justify-content:center;
-  min-height:40px;padding:9px 15px;border-radius:10px;
-  border:1px solid #f3cbb0;background:#fff7f1;color:#c95512;
-  font-size:11px;font-weight:850;text-decoration:none;
-}
-.qs-studio-compact-buttons .qs-btn.primary {
-  border-color:#f87727;background:#f97316;color:#fff;
-}
-.qs-studio-compact-buttons .qs-btn:disabled{opacity:.45;cursor:not-allowed}
-@media(max-width:700px){
-  .qs-studio-compact-bar{padding:10px;flex-wrap:wrap;gap:9px}
-  .qs-studio-compact-ref{flex:1 1 100%;justify-content:flex-start}
-  .qs-studio-compact-buttons{display:grid;grid-template-columns:1fr 1.45fr;width:100%}
-  .qs-studio-compact-buttons .qs-btn{min-width:0;min-height:43px;padding:9px;font-size:11px}
+@media(max-width:650px){
+  .qs-studio-bottom-actions{margin:13px 0;}
+  .qs-studio-bottom-actions .qs-btn{width:100%;}
 }
