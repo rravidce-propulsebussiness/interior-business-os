@@ -121,49 +121,37 @@ export function renderQuotationDocument(input: unknown): string {
   });
   const packageAccent = h.branding.accent;
   const renderSftSchedule = sftSchedules
-    .map(
-      ({ details }) =>
-        '<section class="pb-estimate"><div class="pb-section-title"><h2>Work-wise SFT estimate</h2></div>' +
-        '<p class="pb-section-subtitle">Floor area and rate-based construction calculation</p>' +
-        '<table><thead><tr>' +
-        '<th>Work description</th><th>L (ft)</th><th>W (ft)</th><th>SFT</th>' +
-        (h.display.unit_rate ? '<th class="amount">Rate / SFT</th>' : '') +
-        '<th class="amount">Amount</th></tr></thead><tbody>' +
-        details.rows
-          .map(
-            (row) =>
-              '<tr><td>' +
-              (row.kind === 'additional'
-                ? '<span class="additional-work">Additional work</span>'
-                : '') +
-              escape(row.name) +
-              '</td>' +
-              '<td>' +
-              escape(row.lengthFeet) +
-              '</td><td>' +
-              escape(row.widthFeet) +
-              '</td>' +
-              '<td>' +
-              escape(row.areaSqft) +
-              '</td>' +
-              (h.display.unit_rate
-                ? '<td class="amount">' + money(row.ratePerSqft) + '</td>'
-                : '') +
-              '<td class="amount">' +
-              money(row.amount) +
-              '</td></tr>',
-          )
-          .join('') +
-        '<tr class="total"><td>Construction cost (floors + additions)</td><td></td><td></td><td>' +
-        escape(details.totalAreaSqft) +
-        '</td>' +
-        (h.display.unit_rate ? '<td></td>' : '') +
-        '<td class="amount">' +
-        money(details.total) +
-        '</td></tr>' +
-        '</tbody></table></section>',
-    )
-    .join('');
+    .map(({ details }) =>
+      '<section class="pb-estimate"><div class="pb-section-title"><h2>Construction work-wise estimate</h2></div>' +
+      '<p class="pb-section-subtitle">Dimensions, units, quantities and quotation-specific rates</p>' +
+      '<table><thead><tr>' +
+      '<th>Work description</th><th>L (ft)</th><th>W (ft)</th><th>H (ft)</th><th>Area / Qty</th>' +
+      (h.display.unit_rate ? '<th class="amount">Rate</th>' : '') +
+      '<th class="amount">Amount</th></tr></thead><tbody>' +
+      details.rows.map((row) => {
+        const unit = row.unit === 'running_ft' ? 'RFT'
+          : row.unit === 'piece' ? 'Nos'
+          : row.unit === 'lumpsum' ? 'LS'
+          : row.unit === 'cubic_ft' ? 'CFT' : 'SFT';
+        const hft = row.heightFeet?.trim() || '—';
+        return '<tr><td>' +
+          (row.kind === 'additional' ? '<span class="additional-work">Additional work</span>' : '') +
+          escape(row.name) + '</td><td>' +
+          escape(row.unit === 'piece' || row.unit === 'lumpsum' ? '—' : row.lengthFeet) +
+          '</td><td>' +
+          escape(row.unit === 'running_ft' || row.unit === 'wall_sqft' ||
+            row.unit === 'piece' || row.unit === 'lumpsum' ? '—' : row.widthFeet) +
+          '</td><td>' + escape(hft) + '</td><td>' +
+          escape(row.areaSqft) + ' ' + unit + '</td>' +
+          (h.display.unit_rate ? '<td class="amount">' + money(row.ratePerSqft) + '</td>' : '') +
+          '<td class="amount">' + money(row.amount) + '</td></tr>';
+      }).join('') +
+      '<tr class="total"><td>Construction total (floors + additional works)</td>' +
+      '<td></td><td></td><td></td><td>' +
+      escape(details.totalAreaSqft) + ' SFT (floors)</td>' +
+      (h.display.unit_rate ? '<td></td>' : '') +
+      '<td class="amount">' + money(details.total) + '</td></tr></tbody></table></section>',
+    ).join('');
   const sftSpecifications = sftSchedules
     .map(({ details }) => {
       const packageTitle = details.package
