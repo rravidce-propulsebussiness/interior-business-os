@@ -143,10 +143,41 @@ describe('customer-grouped quotation list without Draft presentation', () => {
     expect(list).toContain('customerGroups.get(quote.customerId)');
     expect(list).toContain('group.quotes.push(quote)');
     expect(list).toContain('mobileCustomers.map((group)');
-    expect(list).toContain('group.quotes.map(');
+    expect(list).toContain('renderMobileQuote(group.quotes[0]!)');
+    expect(list).toContain('renderTableRow(group.quotes[0]!)');
+    expect(list).toContain('group.quotes.slice(1).map(');
     expect(list).toContain('qs-quotes-customer-card');
     expect(list).toContain('qs-quotes-mobile-quote');
     expect(list).toContain('<QuotationReviseButton');
     expect(css).toContain('.qs-quotes-customer-header');
+  });
+});
+
+describe('latest quote per customer with expandable prior history', () => {
+  const page = file('./page.tsx');
+  const css = file('./quotations-list.css');
+
+  it('orders by newly created quotation date rather than revised snapshot date', () => {
+    expect(page).toContain("from('quotations')");
+    expect(page).toContain(".select('id,created_at')");
+    expect(page).toContain('quoteCreatedAt.get(revision.quotation_id)');
+    expect(page).toContain("b.createdAt ?? ''");
+    expect(page).toContain('b.row.quotation_number');
+  });
+
+  it('only renders the newest quote initially on desktop and mobile', () => {
+    expect(page).toContain('renderTableRow(group.quotes[0]!)');
+    expect(page).toContain('renderMobileQuote(group.quotes[0]!)');
+    expect(page).toContain('group.quotes.length > 1 && <details');
+    expect(page).toContain('View all quotations ({group.quotes.length})');
+    expect(page).toContain('group.quotes.slice(1).map(');
+    expect(css).toContain('.qs-quotes-history[open]');
+  });
+
+  it('keeps other quote options available with independent edit and sharing', () => {
+    expect(page).toContain("row.status === 'draft' && canEdit");
+    expect(page).toContain('QuotationReviseButton');
+    expect(page).toContain("editor + '?step=preview'");
+    expect(page).toContain('QuotationRemovalButton');
   });
 });
