@@ -61,17 +61,6 @@ export function QuotationPdfControls({
     return () => controller.abort();
   }, [loadPdf, version, dirty]);
 
-  const getPdf = async () => {
-    if (dirty) throw new Error('Save the latest quotation changes first.');
-    if (pdf && loadedVersion === version) return pdf;
-    setLoading(true);
-    try {
-      const file = await loadPdf();
-      setPdf(file);
-      setLoadedVersion(version);
-      return file;
-    } finally { setLoading(false); }
-  };
   const downloadFile = (file: File) => {
     const href = URL.createObjectURL(file);
     const link = document.createElement('a');
@@ -82,34 +71,6 @@ export function QuotationPdfControls({
     link.remove();
     // Allow mobile browsers to complete the download before revoking the blob.
     window.setTimeout(() => URL.revokeObjectURL(href), 30_000);
-  };
-  const view = async () => {
-    setMessage('');
-    if (dirty) { setMessage('Save your quotation changes before viewing the PDF.'); return; }
-    // Reserve a tab on the initial tap; mobile browsers block delayed popups.
-    const target = window.open('', '_blank');
-    try {
-      const file = await getPdf();
-      const href = URL.createObjectURL(file);
-      if (target) {
-        target.location.href = href;
-        window.setTimeout(() => URL.revokeObjectURL(href), 120_000);
-      } else {
-        // Browser blocked the new tab; offer the existing secure PDF route.
-        URL.revokeObjectURL(href);
-        setMessage('Allow pop-ups to view the PDF, or use Download PDF.');
-      }
-    } catch (error) {
-      target?.close();
-      setMessage(error instanceof Error ? error.message : 'Unable to view the PDF.');
-    }
-  };
-  const download = async () => {
-    setMessage('');
-    try { downloadFile(await getPdf()); }
-    catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Unable to download the PDF.');
-    }
   };
   const sharePdf = () => {
     setMessage('');
@@ -149,12 +110,18 @@ export function QuotationPdfControls({
   return (
     <>
       <div className="qs-work-pdf-actions">
-        <button type="button" disabled={loading} onClick={() => { void view(); }}>
+        <a href={route} target="_blank" rel="noopener noreferrer"
+          onClick={(event) => {
+            if (dirty) { event.preventDefault(); setMessage('Save your latest changes before viewing the PDF.'); }
+          }}>
           ◉ View PDF
-        </button>
-        <button type="button" disabled={loading} onClick={() => { void download(); }}>
+        </a>
+        <a href={route.replace('?view=1', '')}
+          onClick={(event) => {
+            if (dirty) { event.preventDefault(); setMessage('Save your latest changes before downloading the PDF.'); }
+          }}>
           ↓ Download PDF
-        </button>
+        </a>
         {canShare && <button type="button" disabled={loading} onClick={sharePdf}
           className="qs-work-whatsapp">
           {loading ? 'Preparing PDF…' : '➤ Share PDF to WhatsApp'}
