@@ -25,6 +25,8 @@ export type QuotationPdfFallbackInput = {
   }>;
   terms: string;
   notes: string;
+  termSections?: ReadonlyArray<{ title: string; text: string }>;
+  paymentSchedule?: ReadonlyArray<{ name: string; percent: number; amount: string }>;
 };
 
 export async function renderQuotationFallbackPdf(
@@ -139,11 +141,34 @@ export async function renderQuotationFallbackPdf(
     }
     y -= 8;
   }
-  if (input.terms.trim()) {
-    section('Terms and payment schedule');
-    for (const paragraph of input.terms.split(/\r?\n/)) {
-      if (paragraph.trim()) write(paragraph, 9, false, navy);
-      else y -= 6;
+  section('Payment schedule');
+  if (input.paymentSchedule?.length) {
+    write('Proposed stage-wise payments based on the saved quotation total:', 9, false, grey);
+    for (const row of input.paymentSchedule) {
+      ensure(36);
+      write(row.name, 10, true);
+      write(row.percent.toFixed(2) + '%  |  ' + input.currency + ' ' + row.amount,
+        10, false, navy, 11);
+      y -= 5;
+    }
+    write('Total: 100.00%  |  ' + input.currency + ' ' + input.total, 10, true, accent);
+    write('Proposed milestones, not an invoice or confirmation of payment.', 9, false, grey);
+  } else {
+    write('No confirmed stage-wise payment schedule has been saved to this quotation.', 9, false, grey);
+  }
+  const conditions = input.termSections ??
+    (input.terms.trim() ? [{ title: 'Additional terms', text: input.terms }] : []);
+  if (conditions.length) {
+    section('Terms & Inclusions');
+    for (const condition of conditions) {
+      if (!condition.text.trim()) continue;
+      ensure(35);
+      write(condition.title, 11, true, accent);
+      for (const paragraph of condition.text.split(/\r?\n/)) {
+        if (paragraph.trim()) write(paragraph, 9, false, navy, 8);
+        else y -= 6;
+      }
+      y -= 6;
     }
   }
   if (input.notes.trim()) {
