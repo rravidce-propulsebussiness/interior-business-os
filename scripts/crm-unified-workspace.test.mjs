@@ -474,17 +474,19 @@ test('one lead supports multiple package quotations and previews newest, with si
   assert.match(summarySql, /order by l\.created_at desc,q\.created_at desc/);
   assert.match(summarySql, /quotation_shared_revisions/);
   assert.match(quoteList, /\{ label: 'Shared', status: 'shared' \}/);
-  assert.match(quoteList, /\{ label: 'Draft', status: 'draft' \}/);
+  assert.doesNotMatch(quoteList, /\{ label: 'Draft', status: 'draft' \}/);
   assert.doesNotMatch(quoteList, /\{ label: 'Superseded', status:/);
   assert.doesNotMatch(quoteList, /\{ label: 'Cancelled', status:/);
   assert.match(quoteList, /qs-quote-edit/);
   assert.match(quoteList, /\?step=quote/);
-  assert.match(quoteList, /Ready to share/);
+  assert.match(quoteList, /Not shared/);
+  assert.match(quoteList, /mobileCustomers\.map/);
+  assert.match(quoteList, /group\.quotes\.map/);
   const revise = readFileSync(fileURLToPath(new URL('quotations/quotation-revise-button.tsx', appRoot)), 'utf8');
   assert.match(quoteList, /<QuotationReviseButton/);
   assert.match(revise, /action: 'clone'/);
   assert.match(revise, /step=quote/);
-  assert.match(revise, /Edit as a new draft revision/);
+  assert.match(revise, /Edit a new version/);
   assert.ok(!quoteList.includes("issued={row.status === 'issued'}"));
 });
 
