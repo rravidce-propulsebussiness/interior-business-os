@@ -251,6 +251,47 @@ export function renderQuotationDocument(input: unknown): string {
         '</p></div></section>',
     )
     .join('');
+
+  const additionalSpecs = d.lines.flatMap((line) =>
+    line.specifications.map((spec) => ({ item: line.name, ...spec })),
+  ).slice(0, 30).map((spec, index) =>
+    '<article class="spec-item"><div class="spec-number">' +
+    String(index + 1).padStart(2, '0') +
+    '</div><div><h3>' + escape(spec.label) + '</h3><p>' +
+    '<strong>' + escape(spec.item) + '</strong> · ' +
+    escape(spec.value) + '</p></div></article>',
+  ).join('');
   const brochure = premiumSections(d);
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escape(d.number)} R${d.revision}</title>${premiumCss.replaceAll('__ACCENT__', packageAccent)}</head><body><main>${brochure.cover}<header>${h.branding.logo_data_uri ? `<img alt="Business logo" src="${escape(h.branding.logo_data_uri)}">` : ''}<h1>${escape(h.branding.name)}</h1><p>${address(h.branding.address)}</p><p>${escape(h.branding.phone)} ${escape(h.branding.email)}</p>${h.branding.tax_identifier ? `<p>Tax ID: ${escape(h.branding.tax_identifier)}</p>` : ''}</header><div class="pb-title"><h1>Quotation ${escape(d.number)}</h1><p>Revision ${d.revision} · Valid until ${escape(d.valid_until)}</p>${d.status !== 'issued' ? `<p class="status">${escape(d.status.toUpperCase())}</p>` : ''}</div><div class="parties"><section><h2>Prepared for</h2><h3>${escape(h.customer.name)}</h3><p>${escape(h.customer.legal_name)}</p><p>${address(h.customer.billing_address)}</p><p>${escape(h.customer.phone)} ${escape(h.customer.email)}</p>${h.customer.tax_identifier ? `<p>Tax ID: ${escape(h.customer.tax_identifier)}</p>` : ''}</section><section><h2>Project</h2><h3>${escape(h.project.name)}</h3><p>${escape(h.project.code)}</p><p>${address(h.project.site_address)}</p></section></div><h2>2 · Pricing</h2><table><thead><tr><th class="line">Item / package</th>${h.display.quantity ? '<th>Quantity</th>' : ''}${h.display.unit_rate ? '<th class="amount">Unit rate</th>' : ''}<th class="amount">Amount</th></tr></thead><tbody>${grouped.map((l, index) => `${index === 0 || grouped[index - 1]?.area !== l.area ? `<tr><td colspan="${2 + Number(h.display.quantity) + Number(h.display.unit_rate)}"><h3>${escape(l.area || 'General work')}</h3></td></tr>` : ''}<tr${l.optional ? ' class="optional"' : ''}><td><strong>${escape(l.name)}</strong>${l.optional ? ' <strong>(optional)</strong>' : ''}${l.area ? `<p class="muted">${escape(l.area)}</p>` : ''}${constructionSpecs.includes(l) || parseSftEstimate(l.description) ? '' : `<p class="text">${escape(l.description)}</p>`}${h.display.specifications ? l.specifications.map((s) => `<p>${escape(s.label)}: ${escape(s.value)}</p>`).join('') : ''}${l.discount !== '0' ? `<p>Line discount: ${money(l.discount)}</p>` : ''}</td>${h.display.quantity ? `<td>${escape(l.quantity)} ${escape(l.unit)}</td>` : ''}${h.display.unit_rate ? `<td class="amount">${money(l.rate)}</td>` : ''}<td class="amount">${money(l.amount)}</td></tr>`).join('')}</tbody></table>${renderSftSchedule}<table class="totals"><tbody><tr><td>Line subtotal</td><td class="amount">${money(d.totals.line_subtotal)}</td></tr><tr><td>Line discounts</td><td class="amount">${money(d.totals.line_discount)}</td></tr><tr><td>Revision discount</td><td class="amount">${money(d.totals.revision_discount)}</td></tr><tr class="total"><td>Total payable</td><td class="amount">${money(d.totals.final_amount)}</td></tr><tr><td>Optional items (excluded)</td><td class="amount">${money(d.totals.optional_amount)}</td></tr></tbody></table>${brochure.photo}${(constructionSpecs.length || sftSpecifications) && h.display.specifications ? `<section class="terms">${constructionSpecs.length ? '<h2>3 · Materials &amp; brand specifications</h2>' : ''}${otherConstructionSpecs}${sftSpecifications}</section>` : ''}${d.notes ? `<section><h2>Notes</h2><p class="text">${escape(d.notes)}</p></section>` : ''}${paymentSection}${remainingTerms ? `<section class="terms"><h2>Terms and conditions</h2><p class="text">${escape(remainingTerms)}</p></section>` : ''}${brochure.end}</main></body></html>`;
+
+  const hasSpecs = h.display.specifications &&
+    Boolean(otherConstructionSpecs || sftSpecifications || additionalSpecs);
+  const highlights = '<div class="pb-fact-strip"><span><b>' + d.lines.length +
+    '</b> Work items in quotation</span>' +
+    (sftSchedules.length ? '<span><b>' + sftSchedules.length +
+      '</b> Floor-wise estimates</span>' : '') +
+    (paymentValid ? '<span><b>' + paymentRows.length +
+      '</b> Payment milestones</span>' : '') + '</div>';
+  const specificationPage = hasSpecs ?
+    '<section class="pb-page pb-specs-page">' +
+    brochure.pageHeader('Materials / specifications') +
+    '<h2 class="pb-summary-title">Selected materials &amp; specifications</h2>' +
+    '<p class="pb-spec-intro">Materials and finishes shown below are taken from the saved quotation. Product photographs represent company-supplied inspiration, not an additional promise.</p>' +
+    brochure.materialBanner +
+    '<div class="pb-saved-specs">' + otherConstructionSpecs +
+    additionalSpecs + sftSpecifications + '</div>' +
+    brochure.pageFooter('Materials / specifications') + '</section>'
+    : '';
+  const schedulePage = paymentSection || d.notes || remainingTerms ?
+    '<section class="pb-page pb-payment-page">' +
+    brochure.pageHeader('Payments / terms') +
+    '<h2 class="pb-summary-title">Payments &amp; conditions</h2>' +
+    '<div class="pb-color-band"></div>' +
+    (paymentSection ||
+      '<p class="muted">No stage-wise payment schedule is specified in this quotation.</p>') +
+    (d.notes ? '<section class="pb-terms-panel"><h2>Project notes</h2>' +
+      '<p class="text">' + escape(d.notes) + '</p></section>' : '') +
+    (remainingTerms ? '<section class="pb-terms-panel"><h2>Terms and conditions</h2>' +
+      '<p class="text">' + escape(remainingTerms) + '</p></section>' : '') +
+    brochure.pageFooter('Payments / terms') + '</section>' : '';
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escape(d.number)} R${d.revision}</title>${premiumCss.replaceAll('__ACCENT__', packageAccent)}</head><body><main>${brochure.cover}<section class="pb-page pb-pricing">${brochure.pageHeader('Project details / pricing')}<header>${h.branding.logo_data_uri ? `<img alt="Business logo" src="${escape(h.branding.logo_data_uri)}">` : ''}<h1>${escape(h.branding.name)}</h1><p>${address(h.branding.address)}</p><p>${escape(h.branding.phone)} ${escape(h.branding.email)}</p>${h.branding.tax_identifier ? `<p>Tax ID: ${escape(h.branding.tax_identifier)}</p>` : ''}</header>${brochure.projectBanner}<div class="pb-title"><h1>Quotation ${escape(d.number)}</h1><p>Revision ${d.revision} · Valid until ${escape(d.valid_until)}</p>${d.status !== 'issued' ? `<p class="status">${escape(d.status.toUpperCase())}</p>` : ''}</div><div class="parties"><section><h2>Prepared for</h2><h3>${escape(h.customer.name)}</h3><p>${escape(h.customer.legal_name)}</p><p>${address(h.customer.billing_address)}</p><p>${escape(h.customer.phone)} ${escape(h.customer.email)}</p>${h.customer.tax_identifier ? `<p>Tax ID: ${escape(h.customer.tax_identifier)}</p>` : ''}</section><section><h2>Project</h2><h3>${escape(h.project.name)}</h3><p>${escape(h.project.code)}</p><p>${address(h.project.site_address)}</p></section></div><h2 class="pb-summary-title">Pricing summary</h2>${highlights}<table><thead><tr><th class="line">Item / package</th>${h.display.quantity ? '<th>Quantity</th>' : ''}${h.display.unit_rate ? '<th class="amount">Unit rate</th>' : ''}<th class="amount">Amount</th></tr></thead><tbody>${grouped.map((l, index) => `${index === 0 || grouped[index - 1]?.area !== l.area ? `<tr><td colspan="${2 + Number(h.display.quantity) + Number(h.display.unit_rate)}"><h3>${escape(l.area || 'General work')}</h3></td></tr>` : ''}<tr${l.optional ? ' class="optional"' : ''}><td><strong>${escape(l.name)}</strong>${l.optional ? ' <strong>(optional)</strong>' : ''}${l.area ? `<p class="muted">${escape(l.area)}</p>` : ''}${constructionSpecs.includes(l) || parseSftEstimate(l.description) ? '' : `<p class="text">${escape(l.description)}</p>`}${h.display.specifications ? l.specifications.map((s) => `<p>${escape(s.label)}: ${escape(s.value)}</p>`).join('') : ''}${l.discount !== '0' ? `<p>Line discount: ${money(l.discount)}</p>` : ''}</td>${h.display.quantity ? `<td>${escape(l.quantity)} ${escape(l.unit)}</td>` : ''}${h.display.unit_rate ? `<td class="amount">${money(l.rate)}</td>` : ''}<td class="amount">${money(l.amount)}</td></tr>`).join('')}</tbody></table>${renderSftSchedule}<table class="totals"><tbody><tr><td>Line subtotal</td><td class="amount">${money(d.totals.line_subtotal)}</td></tr><tr><td>Line discounts</td><td class="amount">${money(d.totals.line_discount)}</td></tr><tr><td>Revision discount</td><td class="amount">${money(d.totals.revision_discount)}</td></tr><tr class="total"><td>Total payable</td><td class="amount">${money(d.totals.final_amount)}</td></tr><tr><td>Optional items (excluded)</td><td class="amount">${money(d.totals.optional_amount)}</td></tr></tbody></table>${brochure.pageFooter('Pricing / estimate')}</section>${specificationPage}${schedulePage}${brochure.end}</main></body></html>`;
 }
