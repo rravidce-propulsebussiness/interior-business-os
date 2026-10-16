@@ -17,6 +17,7 @@ import { ContractHandoff } from '../../../finance/handoff';
 import { QuotationAttachments } from '../../quotation-attachments';
 import { PaymentScheduleEditor } from '../../payment-schedule-editor';
 import { DraftBrandingControl } from '../../draft-branding-control';
+import { CreateRevisionControl } from '../../create-revision-control';
 import { hasSavedStagePaymentPlan } from '@business-os/core/quotation-payment-plan';
 
 export const dynamic = 'force-dynamic';
@@ -163,23 +164,16 @@ export default async function QuotationStudio({
         revisionId={revision.id}
         quoteNumber={root.quotation_number}
         revisionNumber={revision.revision_number}
+        revisionVersion={revision.version}
         currency={revision.currency}
         status={revision.status}
         industryKey={industryKey}
         industryName={industry?.name ?? 'Project'}
-        otherIndustries={allIndustries
-          .filter(
-            (row) =>
-              row.status === 'active' &&
-              !['construction', 'interior'].includes(row.key),
-          )
-          .map((row) => ({ key: row.key, name: row.name }))}
         header={header.data}
         hasSavedPaymentPlan={hasSavedStagePaymentPlan(revision.terms)}
         brandingEditor={<DraftBrandingControl revisionId={revision.id} version={revision.version} editable={editable} />}
         lines={saved}
         total={total}
-        initialMode={mode}
         initialStep={step}
         canEdit={editable}
         canIssue={canIssue}
@@ -196,7 +190,7 @@ export default async function QuotationStudio({
             />
           ) : (
             <div className="qs-note">
-              You need draft quotation editing and company construction pricing
+              You need quotation editing and company construction pricing
               permissions to change SFT or package rates.
               <Link
                 className="ml-2 font-semibold underline"
@@ -229,6 +223,7 @@ export default async function QuotationStudio({
         }
         termsEditor={
           editable ? (
+            <div data-studio-save-section="files">
             <CommandForm
               title="Save quotation specifications & terms"
               initial={{
@@ -278,6 +273,7 @@ export default async function QuotationStudio({
                   : []),
               ]}
             />
+            </div>
           ) : (
             <div className="qs-info-box">
               <strong>Customer terms</strong>
@@ -309,9 +305,13 @@ export default async function QuotationStudio({
         sharingEditor={
           <SharingSection revisionId={revision.id} status={revision.status} />
         }
+        reviseEditor={['issued', 'superseded'].includes(revision.status) &&
+          s.allowed('quotation.create', 'quotation')
+          ? <CreateRevisionControl revisionId={revision.id} version={revision.version} />
+          : null}
         issueEditor={
           <CommandForm
-            title="Issue and freeze this quotation"
+            title="Confirm & Enable Customer Sharing"
             initial={{ ...command, action: 'issue' }}
           />
         }

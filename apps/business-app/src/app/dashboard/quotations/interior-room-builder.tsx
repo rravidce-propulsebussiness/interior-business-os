@@ -189,6 +189,7 @@ export function InteriorRoomBuilder({
                       !Number.isFinite(packageTotal) ||
                       Number(packageQuantity) <= 0
                     }
+                    data-studio-save={selectedPackage ? 'quote' : undefined}
                     onClick={() => {
                       setMessage('');
                       start(async () => {
@@ -401,7 +402,8 @@ export function InteriorRoomBuilder({
           className="qs-field-full qs-toolbar"
           style={{ justifyContent: 'flex-end' }}
         >
-          <button className="qs-btn primary" type="submit" disabled={pending}>
+          <button className="qs-btn primary" type="submit" disabled={pending}
+            data-studio-save={!selectedPackage ? 'quote' : undefined}>
             {pending ? 'Saving item…' : '＋ Add item to quotation'}
           </button>
         </div>
