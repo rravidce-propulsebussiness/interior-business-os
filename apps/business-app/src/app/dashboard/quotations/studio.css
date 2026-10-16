@@ -1595,3 +1595,19 @@
 .qs-work-pdf-message{padding:11px 12px;margin:12px 0 0;border:1px solid #f7d5b9;
   border-radius:10px;color:#a74e19;background:#fff6ee;font-size:12px;font-weight:700}
 @media(max-width:700px){.qs-work-floor-splits{grid-template-columns:1fr}.qs-work-split{padding:11px}}
+
+
+/* Upper-floor linkage is explicit; users can keep a floor independent. */
+.qs-work-floor-follow{
+  display:inline-flex;align-items:center;gap:6px;min-height:35px;
+  border:1px solid #cce2d1;background:#f0fbf3;
+  border-radius:9px;padding:7px 9px;color:#245b36;
+  font-size:10px;font-weight:850;white-space:nowrap;cursor:pointer;
+}
+.qs-work-floor-follow input{height:15px;width:15px;accent-color:#16804b;cursor:pointer;}
+.qs-work-summary-save:not(:disabled){opacity:1;box-shadow:0 7px 16px #e76d2833;}
+.qs-work-save-message{white-space:normal;line-height:1.6;}
+@media(max-width:650px){
+  .qs-work-split-buttons{width:100%;align-items:center;}
+  .qs-work-floor-follow{margin-right:auto;}
+}
