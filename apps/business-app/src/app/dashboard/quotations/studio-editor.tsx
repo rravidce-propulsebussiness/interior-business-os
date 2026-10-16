@@ -95,61 +95,12 @@ export function QuotationStudioEditor({
   // A successful child save increments the version via the authoritative
   // server action; clear transient 'Saving…' only after that acknowledgement.
   useEffect(() => { setMessage(''); }, [revisionVersion]);
-  const saveCurrent = () => {
-    if (!canEdit) {
-      setMessage('This shared quotation is protected. Start a new revision to edit it.');
-      return;
-    }
-    const saveButton = document.querySelector<HTMLButtonElement>(
-      '[data-studio-save="' + step + '"]',
-    );
-    if (!saveButton) {
-      setMessage('No pending changes in this section. Your quotation is saved.');
-      return;
-    }
-    if (saveButton.disabled) {
-      setMessage('Complete the required estimate or payment details before saving.');
-      return;
-    }
-    if (saveButton.form && !saveButton.form.reportValidity()) {
-      setMessage('Complete the highlighted fields before saving.');
-      return;
-    }
-    setMessage('Saving this section…');
-    // Click the actual permission-checked child editor action, not a fake
-    // router.refresh(). The child displays backend success/error feedback.
-    saveButton.click();
-  };
-  const amount = Number(total);
-  const price = Number.isFinite(amount)
-    ? new Intl.NumberFormat('en-IN', {
-        style: 'currency',
-        currency,
-        maximumFractionDigits: 2,
-      }).format(amount)
-    : currency + ' ' + total;
   const url = '/dashboard/quotations/' + revisionId;
   const isConstruction = industryKey === 'construction';
   const isInterior = industryKey === 'interior';
   const showMethod = canEdit;
   return (
     <>
-      <div className="qs-studio-compact-bar" aria-label="Quotation identity and actions">
-        <p className="qs-studio-compact-ref">
-          <strong>{quoteNumber}</strong>
-          <span>R{revisionNumber} · {header.customer.name}</span>
-          <span className="qs-studio-compact-status">{status === 'issued' ? 'Shared' : 'Saved'}</span>
-        </p>
-        <div className="qs-toolbar qs-studio-compact-buttons" aria-label="Quotation actions">
-          <button type="button" className="qs-btn" onClick={saveCurrent} disabled={!canEdit}>
-            ▣ Save
-          </button>
-          <button type="button" className="qs-btn primary"
-            onClick={() => { setStep('preview'); setMessage(''); }}>
-            ◉ Preview &amp; Share
-          </button>
-        </div>
-      </div>
       <nav className="qs-simple-tabs" aria-label="Quotation sections">
         {steps.map(({ id, title }) => (
           <button type="button" key={id}
@@ -342,6 +293,14 @@ export function QuotationStudioEditor({
           </div>
         </aside>}
       </div>
+      {step !== 'preview' && (step !== 'quote' || !isConstruction) && (
+        <div className="qs-studio-bottom-actions">
+          <button type="button" className="qs-btn primary"
+            onClick={() => { setStep('preview'); setMessage(''); }}>
+            Preview &amp; Share saved PDF →
+          </button>
+        </div>
+      )}
     </>
   );
 }
