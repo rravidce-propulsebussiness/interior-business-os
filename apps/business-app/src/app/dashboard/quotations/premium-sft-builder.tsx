@@ -126,6 +126,9 @@ export function PremiumSftBuilder({
     });
   });
   const [drawer,setDrawer]=useState(false);
+  const [draftSections,setDraftSections]=useState<Material[]>([]);
+  const openMaterials=()=>{setDraftSections(sections.map(s=>({...s})));setDrawer(true);};
+  const cancelMaterials=()=>{setDraftSections([]);setDrawer(false);};
   const [message,setMessage]=useState('');
   const [saved,setSaved]=useState(false);
   const floors=rows.filter(r=>r.kind==='floor');
@@ -162,15 +165,23 @@ export function PremiumSftBuilder({
     setRows([...rows,work(name,preset?.unit??'sqft')]);touch();
   };
   const updateMaterial=(index:number,patch:Partial<Material>)=>{
-    setSections(curr=>curr.map((m,i)=>i===index?{...m,...patch}:m));
-    if(patch.brand!==undefined||patch.description!==undefined){
-      const key=sections[index]?.title.toLowerCase()??'';
-      setMaterialIds(curr=>curr.filter(id=>{
-        const match=activeRates.find(r=>r.id===id);
-        return !match||!key.includes(match.category.toLowerCase());
-      }));
-    }
-    touch();
+    setDraftSections(curr=>curr.map((m,i)=>i===index?{...m,...patch}:m));
+  };
+  const applyMaterials=()=>{
+    // Snapshot changed specifications on the quotation only; master package
+    // definitions and prices remain intact.
+    const changed=sections.filter((previous,i)=>{
+      const current=draftSections[i];
+      return current && (current.brand!==previous.brand||
+        current.description!==previous.description||current.grade!==previous.grade);
+    });
+    setSections(draftSections.map(m=>({...m})));
+    if(changed.length) setMaterialIds(curr=>curr.filter(id=>{
+      const rate=activeRates.find(r=>r.id===id);
+      return !rate||!changed.some(spec=>
+        spec.title.toLowerCase().includes(rate.category.toLowerCase()));
+    }));
+    setDrawer(false);setDraftSections([]);touch();
   };
   const save=()=>{
     if(!valid)return;
@@ -271,19 +282,19 @@ export function PremiumSftBuilder({
       <div className="qs-work-heading">
         <div className="qs-work-heading-icon">◇</div>
         <div><h3>Material brands</h3><p>Edit every package specification for this quotation only.</p></div>
-        <button type="button" className="qs-work-edit" onClick={()=>setDrawer(true)}>✎ Edit all materials</button>
+        <button type="button" className="qs-work-edit" onClick={openMaterials}>✎ Edit all materials</button>
       </div>
       <div className="qs-work-material-grid">
         {sections.filter(s=>s.title!=='Package scope & inclusions').map((s,i)=>
           <button type="button" key={s.title+':'+i} className="qs-work-material"
-            onClick={()=>setDrawer(true)}>
+            onClick={openMaterials}>
             <span className="qs-work-material-icon">▣</span>
             <span><strong>{s.title}</strong>
               <small>{s.brand||s.grade||s.description||'As per package'}</small>
               <em>Quote-only editable</em>
             </span><span className="qs-work-chevron">⌄</span>
           </button>)}
-        <button type="button" className="qs-work-material-add" onClick={()=>setDrawer(true)}>
+        <button type="button" className="qs-work-material-add" onClick={openMaterials}>
           ＋ Add / Edit more materials
         </button>
       </div>
@@ -328,16 +339,16 @@ export function PremiumSftBuilder({
     </div>
 
     {drawer&&<div className="qs-work-drawer-backdrop"
-      onClick={e=>{if(e.target===e.currentTarget)setDrawer(false);}}>
+      onClick={e=>{if(e.target===e.currentTarget)cancelMaterials();}}>
       <section role="dialog" aria-modal="true" aria-label="Edit quotation materials"
         className="qs-work-drawer">
         <div className="qs-work-drawer-head">
           <div><h3>Edit all material specifications</h3>
             <p>All changes affect this quotation only. The master package remains untouched.</p></div>
-          <button type="button" aria-label="Close materials editor" onClick={()=>setDrawer(false)}>✕</button>
+          <button type="button" aria-label="Close materials editor" onClick={cancelMaterials}>✕</button>
         </div>
         <div className="qs-work-drawer-scroll">
-          {sections.map((s,i)=><details key={i} className="qs-work-spec-entry">
+          {draftSections.map((s,i)=><details key={i} className="qs-work-spec-entry">
             <summary>{s.title}<span>⌄</span></summary>
             <div>
               <label>Specification name<input maxLength={90} value={s.title}
@@ -360,18 +371,18 @@ export function PremiumSftBuilder({
                   onChange={e=>updateMaterial(i,{description:e.target.value})}/></label>
             </div>
           </details>)}
-          {sections.length<18&&<button type="button" className="qs-work-add-material"
-            onClick={()=>{setSections(prev=>[...prev,{
+          {draftSections.length<18&&<button type="button" className="qs-work-add-material"
+            onClick={()=>{setDraftSections(prev=>[...prev,{
               title:'New material',description:'',brand:'',grade:'',allowancePerSqft:'',
-            }]);touch();}}>＋ Add another material / specification</button>}
+            }]);}}>＋ Add another material / specification</button>}
           <p className="qs-work-drawer-hint">
             These are specification inclusions. A brand change does not silently alter the package rate.
             Use the work table to add separately priced items.
           </p>
         </div>
         <div className="qs-work-drawer-actions">
-          <button type="button" onClick={()=>setDrawer(false)}>Close</button>
-          <button type="button" onClick={()=>{setDrawer(false);touch();}}>
+          <button type="button" onClick={cancelMaterials}>Cancel</button>
+          <button type="button" onClick={applyMaterials}>
             Apply to this quotation</button>
         </div>
         <p className="qs-work-drawer-footer">Tap Save quotation to persist changes.</p>
