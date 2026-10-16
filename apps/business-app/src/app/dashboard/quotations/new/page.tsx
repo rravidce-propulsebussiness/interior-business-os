@@ -19,6 +19,19 @@ export default async function NewQuotation({
     s.repository.industries(),
   ]);
   if (!organization) throw new Error('Company workspace unavailable');
+  const { data: quoteSettings } = await s.client
+    .from('organization_quotation_settings')
+    .select('branding')
+    .eq('organization_id', s.org)
+    .maybeSingle();
+  const storedLogo = quoteSettings?.branding && typeof quoteSettings.branding === 'object' &&
+    !Array.isArray(quoteSettings.branding) &&
+    'logo_data_uri' in quoteSettings.branding
+    ? quoteSettings.branding.logo_data_uri : '';
+  const companyLogo = typeof storedLogo === 'string' &&
+    /^data:image\/(png|jpeg);base64,[A-Za-z0-9+/=]+$/.test(storedLogo)
+    ? storedLogo : undefined;
+
 
   const { data: rawLeads } = s.allowed('lead.view', 'crm')
     ? await s.client
@@ -67,7 +80,8 @@ export default async function NewQuotation({
     .limit(300);
 
   return (
-    <QuotationStudioFrame companyName={organization.name} accountEmail={user.email ?? ''}>
+    <QuotationStudioFrame companyName={organization.name}
+      companyLogo={companyLogo} accountEmail={user.email ?? ''}>
       <div className="qs-clean-create">
         <section className="qs-create-landing" aria-label="Create quotation">
           <div className="qs-landing-copy">
