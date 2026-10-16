@@ -110,22 +110,6 @@ export async function saveConstructionPackage(
       .join('\n');
     if (breakdown.length > 3000) throw new DomainError('VALIDATION_FAILED');
     if (Number(p.ratePerSqft) <= 0) throw new DomainError('VALIDATION_FAILED');
-    // If a package has an attached source PDF, snapshot it independently;
-    // saving a price line must not require privileged storage when there are
-    // no package attachments (the common case).
-    const [sourcePdf, oldPdf] = await Promise.all([
-      selectedPackage
-        ? s.client.from('construction_package_spec_attachments')
-            .select('id').eq('organization_id', s.org)
-            .eq('package_id', selectedPackage.id).limit(1)
-        : Promise.resolve({ data: [], error: null }),
-      s.client.from('quotation_studio_attachments')
-        .select('id').eq('organization_id', s.org)
-        .eq('revision_id', rid).not('source_package_id', 'is', null).limit(1),
-    ]);
-    if (sourcePdf.error || oldPdf.error)
-      throw new DomainError('VALIDATION_FAILED');
-
     const id = await s.commercial.saveManualLine(s.org, rid, version, {
       area_id: null,
       sort_order: 0,
@@ -371,6 +355,22 @@ export async function saveFloorwiseSftEstimate(
       .limit(2);
     if (error || !existing || existing.length > 1)
       throw new DomainError('VALIDATION_FAILED');
+    // If a package has an attached source PDF, snapshot it independently;
+    // saving a price line must not require privileged storage when there are
+    // no package attachments (the common case).
+    const [sourcePdf, oldPdf] = await Promise.all([
+      selectedPackage
+        ? s.client.from('construction_package_spec_attachments')
+            .select('id').eq('organization_id', s.org)
+            .eq('package_id', selectedPackage.id).limit(1)
+        : Promise.resolve({ data: [], error: null }),
+      s.client.from('quotation_studio_attachments')
+        .select('id').eq('organization_id', s.org)
+        .eq('revision_id', rid).not('source_package_id', 'is', null).limit(1),
+    ]);
+    if (sourcePdf.error || oldPdf.error)
+      throw new DomainError('VALIDATION_FAILED');
+
     const id = await s.commercial.saveManualLine(s.org, rid, version, {
       ...(existing[0] ? { id: existing[0].id } : {}),
       area_id: null,
