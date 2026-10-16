@@ -11,9 +11,12 @@ export function customerTermSections(source: string): CustomerTermSection[] {
   const plain = source.replace(stageBlock, '').trim();
   if (!plain) return [];
   const matches = [...plain.matchAll(headings)];
-  if (!matches.length || matches[0]?.index !== 0)
+  if (!matches.length)
     return [{ title: 'Additional terms', text: plain }];
   const found: CustomerTermSection[] = [];
+  // Some saved revisions start with legacy free text before named headings.
+  const prefix=plain.slice(0,matches[0]?.index ?? 0).trim();
+  if(prefix)found.push({title:'Additional terms',text:prefix});
   for (let i=0;i<matches.length;i++) {
     const match=matches[i]!;
     const label=sections.find(s => s.toLowerCase() === match[1]?.toLowerCase());
