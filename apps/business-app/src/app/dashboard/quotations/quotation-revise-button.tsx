@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { quotationCommand } from './actions';
 
-/** Shared/issued quotations remain immutable. Editing safely forks a draft
+/** Shared/issued quotations remain immutable. Editing safely forks an editable
  * revision using the existing versioned, permission-checked quotation command. */
 export function QuotationReviseButton({
   revisionId, version, number,
@@ -21,8 +21,8 @@ export function QuotationReviseButton({
       <button
         type="button"
         className="qs-quote-edit"
-        title="Edit as a new draft revision. The quotation already shared with the customer stays unchanged."
-        aria-label={'Edit ' + number + ' as a new draft revision'}
+        title="Edit a new version. The quotation already shared with the customer stays unchanged."
+        aria-label={'Edit ' + number + ' as a new version'}
         disabled={pending}
         onClick={async () => {
           if (pending) return;
