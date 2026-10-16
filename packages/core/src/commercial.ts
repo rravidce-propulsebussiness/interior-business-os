@@ -162,6 +162,8 @@ export const brandingSchema = z
       .regex(/^$|^data:image\/(png|jpeg);base64,[A-Za-z0-9+/=]+$/).optional(),
     detail_image_data_uri: z.string().max(55000)
       .regex(/^$|^data:image\/(png|jpeg);base64,[A-Za-z0-9+/=]+$/).optional(),
+    materials_image_data_uri: z.string().max(60000)
+      .regex(/^$|^data:image\/(png|jpeg);base64,[A-Za-z0-9+/=]+$/).optional(),
   })
   .strict()
   .refine((brand) => JSON.stringify(brand).length <= 190000,

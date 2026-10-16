@@ -54,14 +54,14 @@ it('renders client, pricing, then selected construction specifications without d
     'Package: Premium (PREMIUM)\\nScope: Complete structure\\nMaterials / brands:\\nSteel: Tata\\nBricks: Karimnagar';
   const html = renderQuotationDocument(d);
   const client = html.indexOf('Prepared for');
-  const pricing = html.indexOf('2 · Pricing');
-  const specs = html.indexOf('3 · Materials &amp; brand specifications');
+  const pricing = html.indexOf('Pricing summary');
+  const specs = html.indexOf('Selected materials &amp; specifications');
   expect(client).toBeGreaterThan(0);
   expect(pricing).toBeGreaterThan(client);
   expect(specs).toBeGreaterThan(pricing);
   expect(html).toContain('Steel: Tata');
   expect(html).toContain('Bricks: Karimnagar');
-  expect(html).toContain('133280');
+  expect(html).toContain('1,33,280');
 });
 
 it('prints floor-wise SFT pricing table and separate included brands without exposing snapshot encoding', () => {
@@ -93,7 +93,7 @@ it('prints floor-wise SFT pricing table and separate included brands without exp
   expect(html).toContain('Parking Area');
   expect(html).toContain('Ground floor commercial');
   expect(html).toContain('160.00');
-  expect(html).toContain('144000.00');
+  expect(html).toContain('1,44,000');
   expect(html).toContain('Steel');
   expect(html).toContain('Tata');
   expect(html).not.toContain('SFT_ESTIMATE_V1:');
@@ -142,7 +142,7 @@ it('prints edited package specifications on a following page with escaped conten
   expect(html).not.toContain('SFT_ESTIMATE_V2:');
 });
 
-it('renders package theme and brand, grade, allowance as a safe company snapshot', () => {
+it('renders company theme and saved package brand, grade, allowance safely', () => {
   const d = quotationDocumentFixture();
   d.lines[0]!.description = encodeSftEstimate(
     calculateSftEstimate(
@@ -178,7 +178,7 @@ it('renders package theme and brand, grade, allowance as a safe company snapshot
     ),
   );
   const html = renderQuotationDocument(d);
-  expect(html).toContain('border-bottom:3px solid #089E9C');
+  expect(html).toContain('border-bottom:3px solid #245b55');
   expect(html).toContain('Kajaria');
   expect(html).toContain('Vitrified 2x2');
   expect(html).toContain('Material allowance:');
@@ -196,9 +196,9 @@ it('shows editable proposed payment milestones in the customer PDF without leaki
   expect(html).toContain('Proposed stage-wise payment schedule');
   expect(html).toContain('Agreement &amp; advance');
   expect(html).toContain('RCC frame');
-  expect(html).toContain('10000.00');
-  expect(html).toContain('60000.00');
-  expect(html).toContain('30000.00');
+  expect(html).toContain('10,000');
+  expect(html).toContain('60,000');
+  expect(html).toContain('30,000');
   expect(html).toContain('Workmanship warranty applies.');
   expect(html).not.toContain('[STAGE_PAYMENT_PLAN]');
   expect(html).not.toContain('[/STAGE_PAYMENT_PLAN]');
@@ -212,7 +212,7 @@ it('renders a branded brochure cover, readable pricing and closing page', () => 
   expect(html).toContain('pb-cover-amount');
   expect(html).toContain('pb-close');
   expect(html).toContain('Prepared for Ravi Residence');
-  expect(html).toContain('133280');
+  expect(html).toContain('1,33,280');
   expect(html).toContain('Quotation Q-2026-000001');
   expect(html).toContain('break-after:page');
   expect(html).not.toContain('Building Better Tomorrows'); // not hardcoded SG Homes claims
@@ -225,7 +225,7 @@ it('embeds only saved company-owned photo data, never remote images or other com
   d.header.branding.detail_image_data_uri = 'data:image/png;base64,' + 'AA==';
   const html = renderQuotationDocument(d);
   expect(html).toContain('Company-supplied building photograph');
-  expect(html).toContain('Company-supplied project photo');
+  expect(html).toContain('Company-provided project photograph');
   expect(html).toContain('src="data:image/jpeg;base64,AA=="');
   expect(html).toContain('src="data:image/png;base64,AA=="');
   d.header.branding.cover_image_data_uri = 'https://example.test/photo.jpg';
@@ -245,6 +245,33 @@ it('prints a 33-stage construction payment plan without amount or percentage dri
   const html = renderQuotationDocument(d);
   expect(html).toContain('Stage 33');
   expect(html).toContain('<td>100%</td>');
-  expect(html).toContain('24035000.00');
+  expect(html).toContain('2,40,35,000');
   expect(html).not.toContain('[STAGE_PAYMENT_PLAN]');
+});
+
+it('shows distinct quotation page surfaces and factual saved specification cards', () => {
+  const d = quotationDocumentFixture();
+  const html = renderQuotationDocument(d);
+  expect(html).toContain('pb-cover');
+  expect(html).toContain('pb-page pb-pricing');
+  expect(html).toContain('pb-page pb-specs-page');
+  expect(html).toContain('pb-page pb-payment-page');
+  expect(html).toContain('pb-close');
+  expect(html).toContain('Pricing summary');
+  expect(html).toContain('Selected materials &amp; specifications');
+  expect(html).toContain('Plywood grade');
+  expect(html).toContain('Hettich');
+  expect(html).toContain('Work items in quotation');
+  expect(html).not.toContain('Kajaria / Somany');
+  expect(html).not.toContain('TATA / Tiscon');
+});
+
+it('only inserts company-uploaded material photo in the same revision', () => {
+  const d = quotationDocumentFixture();
+  d.header.branding.materials_image_data_uri = 'data:image/jpeg;base64,AA==';
+  const html = renderQuotationDocument(d);
+  expect(html).toContain('Company-provided materials and finishes');
+  expect(html).toContain('src="data:image/jpeg;base64,AA=="');
+  d.header.branding.materials_image_data_uri = 'https://untrusted.example/photo.jpg';
+  expect(() => renderQuotationDocument(d)).toThrow();
 });
