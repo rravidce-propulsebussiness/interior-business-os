@@ -1126,3 +1126,34 @@
  }
  .qs-studio-actions .qs-btn:hover,.qs-client-edit:hover{transform:translateY(-1px);}
 }
+
+/* Package selection is one field, not nested calculation/method cards. */
+.qs-simple-package-editor {padding:19px;overflow:hidden;}
+.qs-simple-package-top {
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(240px,330px);
+  gap:17px;align-items:center;margin-bottom:17px;padding:18px;
+  border-radius:14px;background:linear-gradient(105deg,#fff5ee,#fff 60%,#eef6ff);
+  border:1px solid #ffdfc8;
+}
+.qs-simple-package-top h2 {margin:0 0 7px;font-size:20px;color:#162a45;}
+.qs-package-eyebrow {
+  margin:0 0 7px;text-transform:uppercase;letter-spacing:1.5px;
+  font-size:10px;color:#e75e0d;font-weight:900;
+}
+.qs-simple-package-select select {
+  appearance:auto;min-height:48px;padding:11px 13px;
+  background:#fff;border:1px solid #ffc09d;border-radius:11px;
+  color:#172a43;font-weight:750;width:100%;max-width:100%;
+}
+.qs-simple-package-select select:focus-visible {outline:3px solid #ffcaa8;}
+@media(max-width:720px) {
+  .qs-simple-package-editor {padding:12px;}
+  .qs-simple-package-top {grid-template-columns:1fr;gap:11px;padding:13px;}
+  .qs-simple-package-top h2 {font-size:17px;}
+}
+@media(prefers-reduced-motion:no-preference) {
+  .qs-simple-package-select select {
+    transition:border-color .2s ease,box-shadow .2s ease;
+  }
+  .qs-simple-package-select select:hover {border-color:#fb731a;}
+}
