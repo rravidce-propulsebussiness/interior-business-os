@@ -181,6 +181,12 @@ tr.total td { border-top:1px solid #ffc7aa; }
 .pb-payment-page .text { white-space:pre-wrap; }
 .pb-terms-panel { background:#faf8f5; border:1px solid #e7e0d7; padding:14px; border-radius:10px; margin:16px 0; }
 .pb-terms-panel h2 { font-size:14px; }
+.pb-quote-conditions { break-inside:auto; }
+.pb-quote-conditions > h2 { margin:0 0 12px; }
+.pb-term-section { border-top:1px solid #e6e0d8; padding:12px 0; break-inside:avoid; }
+.pb-term-section:first-of-type { border-top:0; }
+.pb-term-section h3 { margin:0 0 5px; color:__ACCENT__; font-size:12px; font-weight:850; }
+.pb-term-section .text { margin:0; white-space:pre-wrap; font-size:10px; line-height:1.65; }
 .pb-end {
   break-before:page; page-break-before:always; break-inside:avoid;
   min-height:255mm; padding:20mm 13mm 13mm; position:relative; overflow:hidden;
