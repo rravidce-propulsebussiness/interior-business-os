@@ -379,9 +379,26 @@ export async function renderConstructionPackageSamplePdf(input: {
   y -= 104;
   line('The illustration does not replace a customer-specific quotation, measurement or approved scope.', 9, false, subdued);
   y -= 24;
+  const floorPrices = input.sections.find(section => section.title === 'Floor area price defaults');
+  if (floorPrices) {
+    try {
+      const rates: unknown = JSON.parse(floorPrices.description);
+      if (rates && typeof rates === 'object' && !Array.isArray(rates)) {
+        const values = rates as Record<string, unknown>;
+        line('SEPARATE AREA RATES', 13, true, accent);
+        if (typeof values.parking === 'string' && values.parking)
+          line('Parking / stilt area: INR ' + values.parking + ' / SFT', 10);
+        if (typeof values.penthouse === 'string' && values.penthouse)
+          line('Penthouse area: INR ' + values.penthouse + ' / SFT', 10);
+        line('These rates replace the base construction rate only for the matching area.', 9, false, subdued);
+        y -= 16;
+      }
+    } catch { /* Malformed legacy price metadata is not rendered. */ }
+  }
   line('MATERIALS AND INCLUSIONS', 14, true, accent);
   y -= 12;
   const sections = input.sections.filter((section) =>
+    section.title !== 'Floor area price defaults' &&
     Boolean(section.title.trim() || section.brand.trim() || section.grade.trim() ||
       section.description.trim() || section.allowancePerSqft.trim() ||
       Boolean(section.allowanceValue?.trim())));
