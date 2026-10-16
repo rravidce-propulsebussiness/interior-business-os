@@ -1,5 +1,6 @@
 import { idSchema } from '@business-os/shared';
 import { commercialServices } from '../../commercial/service';
+import { resolveLeadCategory } from '../../crm/leads/lead-category';
 import { QuotationStudioFrame } from '../studio-frame';
 import { QuotationStudioStart } from '../studio-start';
 import '../clean-create.css';
@@ -37,7 +38,7 @@ export default async function NewQuotation({
     ? await s.client
         .from('leads')
         .select(
-          'id,lead_number,name,phone,email,location,project_size,service_type,industry_id',
+          'id,lead_number,name,phone,email,location,project_size,service_type,industry_id,requirements',
         )
         .eq('organization_id', s.org)
         .order('created_at', { ascending: false })
@@ -48,7 +49,7 @@ export default async function NewQuotation({
   const selectedLead = lead && idSchema.safeParse(lead).success &&
     s.allowed('lead.view', 'crm')
     ? (await s.client.from('leads')
-        .select('id,lead_number,name,phone,email,location,project_size,service_type,industry_id')
+        .select('id,lead_number,name,phone,email,location,project_size,service_type,industry_id,requirements')
         .eq('organization_id', s.org)
         .eq('id', lead)
         .maybeSingle()).data
@@ -57,12 +58,19 @@ export default async function NewQuotation({
     ...(selectedLead ? [selectedLead] : []),
     ...(rawLeads ?? []).filter((item) => item.id !== selectedLead?.id),
   ];
-  const leads = leadChoices.map((lead) => ({
-    ...lead,
-    industryKey:
-      industries.find((industry) => industry.id === lead.industry_id)?.key ??
-      '',
-  }));
+  const enabledIndustries = industries.filter((entry) => entry.status === 'active');
+  const leads = leadChoices.map((entry) => {
+    const assignedIndustry = enabledIndustries.find((industry) =>
+      industry.id === entry.industry_id);
+    // Legacy enquiries can only infer a service from an explicit, unambiguous
+    // stored classification. Do not silently make an unknown lead construction.
+    const legacyCategory = !entry.industry_id
+      ? resolveLeadCategory(entry, enabledIndustries)
+      : null;
+    const industry = assignedIndustry ?? enabledIndustries.find((candidate) =>
+      candidate.key === legacyCategory);
+    return { ...entry, industryKey: industry?.key ?? '' };
+  });
 
   const { data: existingCustomers } = await s.client
     .from('customers')
@@ -88,12 +96,10 @@ export default async function NewQuotation({
         <QuotationStudioStart
           leads={leads}
           existingCustomers={existingCustomers ?? []}
-          industries={industries
-            .filter((industry) => industry.status === 'active')
-            .map((industry) => ({
-              key: industry.key,
-              name: industry.name,
-            }))}
+          industries={enabledIndustries.map((industry) => ({
+            key: industry.key,
+            name: industry.name,
+          }))}
           defaultCurrency={organization.default_currency || 'INR'}
           initialCustomerId={customer ?? ''}
           initialLeadId={selectedLead?.id ?? ''}
