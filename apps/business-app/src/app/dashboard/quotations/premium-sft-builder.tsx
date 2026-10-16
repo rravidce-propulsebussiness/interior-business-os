@@ -45,7 +45,7 @@ const commonWorks: { name:string; unit:Unit }[] = [
   {name:'Shelves & Sajjas',unit:'sqft'},
   {name:'Compound Wall',unit:'wall_sqft'},
   {name:'Staircase / Headroom',unit:'lumpsum'},
-  {name:'Parking / Portico',unit:'sqft'},
+  {name:'External Portico / Canopy',unit:'sqft'},
   {name:'Overhead Tank Platform',unit:'sqft'},
   {name:'Elevation Works',unit:'sqft'},
   {name:'Water Sump',unit:'lumpsum'},
