@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { calculateSftEstimate, type SftEstimateDetails } from '@business-os/core/sft-quotation';
 import type { ConstructionRate } from '@business-os/database/construction-rates';
@@ -161,6 +161,7 @@ export function PremiumSftBuilder({
   const [saved,setSaved]=useState(false);
   const [dirty,setDirty]=useState(false);
   const [savedVersion,setSavedVersion]=useState(version);
+  useEffect(()=>{setSavedVersion(version);},[version]);
   const floors=rows.filter(r=>r.kind==='floor');
   const extras=rows.filter(r=>r.kind==='additional');
   const levels=names.map((name,level)=>({
@@ -181,8 +182,30 @@ export function PremiumSftBuilder({
     extras.reduce((sum,r)=>sum+measured(r)*Number(r.ratePerSqft||0),0);
   const area=floors.reduce((sum,r)=>sum+measured(r),0);
   const displayedTotal=estimate?Number(estimate.total):total;
-  const valid=Boolean(estimate)&&!pending&&stale.length===0&&
-    (activePackages.length===0||Boolean(selectedPackage));
+  const savePayload={
+    rows,materialIds,packageId:selectedPackage?.id??null,
+    sections:sections.filter(s=>nonempty(s.description)||nonempty(s.brand)||
+      nonempty(s.grade)||nonempty(s.allowancePerSqft)),
+  };
+  const parsedInput=sftEstimateInputSchema.safeParse(savePayload);
+  const validationMessage=(()=>{
+    if(!parsedInput.success){
+      const problem=parsedInput.error.issues[0];
+      const index=typeof problem?.path[1]==='number'&&problem.path[0]==='rows'
+        ?problem.path[1]:null;
+      const name=index!==null?rows[index]?.name:null;
+      const field=problem?.path.at(-1);
+      const fieldLabel=field==='lengthFeet'?'length':field==='widthFeet'?'width':
+        field==='heightFeet'?'height':field==='ratePerSqft'?'rate':
+        field==='name'?'work description':'details';
+      return (name ? name+': ' : '')+'Please enter a valid '+fieldLabel+
+        ' before saving the quotation.';
+    }
+    if(stale.length)return 'A previously selected material is unavailable. Update it before saving.';
+    if(activePackages.length&&!selectedPackage)return 'Choose a construction package before saving.';
+    if(!estimate)return 'Enter valid areas and a positive construction amount before saving.';
+    return '';
+  })();
   const touch=()=>{setSaved(false);setDirty(true);setMessage('');};
   const updateRow=(index:number,patch:Partial<Work>)=>{
     setRows(current=>propagateFloorChanges(current,index,patch));touch();
@@ -259,15 +282,27 @@ export function PremiumSftBuilder({
     setDrawer(false);setDraftSections([]);touch();
   };
   const save=()=>{
-    if(!valid)return;
+    if(pending)return;
+    if(validationMessage){
+      setMessage(validationMessage);
+      setSaved(false);
+      return;
+    }
     startTransition(async()=>{
-      const response=await saveFloorwiseSftEstimate(revisionId,version,{
-        rows,materialIds,packageId:selectedPackage?.id??null,
-        sections:sections.filter(s=>nonempty(s.description)||nonempty(s.brand)||nonempty(s.grade)||nonempty(s.allowancePerSqft)),
-      });
-      setMessage(response.message);
-      setSaved(Boolean(response.id));
-      if(response.id){setDirty(false);setDrawer(false);router.refresh();}
+      try{
+        const response=await saveFloorwiseSftEstimate(revisionId,savedVersion,savePayload);
+        setMessage(response.message);
+        setSaved(Boolean(response.id));
+        if(response.id){
+          setSavedVersion(response.version??savedVersion+1);
+          setDirty(false);
+          setDrawer(false);
+          router.refresh();
+        }
+      }catch{
+        setSaved(false);
+        setMessage('Could not save the quotation. Please try again or reload this page.');
+      }
     });
   };
   return <div className="qs-workflow">
@@ -439,7 +474,7 @@ export function PremiumSftBuilder({
         <strong>{displayedTotal>0?fmt(displayedTotal):'Enter dimensions'}</strong>
       </div>
       <button data-studio-save="quote" type="button" className="qs-work-summary-save"
-        onClick={save} disabled={!valid}>{pending?'Saving…':'▣ Save quotation →'}</button>
+        onClick={save} disabled={pending}>{pending?'Saving…':'▣ Save quotation →'}</button>
       {message&&<p className="qs-work-save-message" role="status">{message}</p>}
       {saved&&<p className="qs-work-save-message">Saved. Your PDF preview is ready to open.</p>}
     </div>
