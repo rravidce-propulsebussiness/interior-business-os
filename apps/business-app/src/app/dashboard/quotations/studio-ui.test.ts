@@ -275,7 +275,8 @@ describe('compact single-screen construction quotation editor', () => {
     expect(selector).not.toContain('clientName');
     expect(selector).toContain('Select construction quotation package');
     expect(selector).toContain('qs-build-package-rate');
-    expect(css).toContain('.qs-build-overview');
+    expect(css).not.toContain('.qs-build-overview');
+    expect(css).not.toContain('.qs-studio-compact-bar');
     expect(css).toContain('#f16a22');
     expect(editor).not.toContain('01 · Package & floor costing');
     expect(editor).not.toContain('02 · Package specifications');
