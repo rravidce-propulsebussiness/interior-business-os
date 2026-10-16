@@ -113,6 +113,13 @@ export function QuotationStudioStart({
             No leads available. <Link href="/dashboard/crm/leads">Add a lead</Link> before creating a quote.
           </p>
         )}
+        {initialPackageId && industry && initialPackageIndustry &&
+          initialPackageIndustry !== industry && (
+            <p className="qs-source-warning" role="status">
+              The selected package belongs to {initialPackageIndustry}, but this lead is
+              {' '}{industryName}. The quotation will use this lead’s industry instead.
+            </p>
+          )}
         {selectedLead && industry ? (
           <p className="qs-source-service" role="status">
             <span className="qs-source-indicator" aria-hidden="true"/> {industryName} · Auto-detected from lead
