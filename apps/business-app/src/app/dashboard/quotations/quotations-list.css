@@ -352,3 +352,33 @@
     width: 100%;
   }
 }
+
+/* One latest quotation per customer, with previous quotes revealed on demand. */
+.qs-quotes-history {
+  border-top: 1px solid #f0e4dc;
+}
+.qs-quotes-history > summary {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; padding: 13px 16px; list-style: none; cursor: pointer;
+  font-size: 12px; font-weight: 800; color: #e45b12;
+  background: #fff8f2; transition: background .2s ease;
+}
+.qs-quotes-history > summary:hover { background: #fff0e4; }
+.qs-quotes-history > summary:focus-visible { outline: 2px solid #ff8e4a; outline-offset: -3px; }
+.qs-quotes-history > summary::-webkit-details-marker { display: none; }
+.qs-quotes-history > summary span { transition: transform .2s ease; font-size: 17px; }
+.qs-quotes-history[open] > summary span { transform: rotate(180deg); }
+.qs-quotes-past-list { background: #f9fafc; }
+.qs-quotes-past-list .qs-quotes-past-quote {
+  border-top: 1px solid #e9ebf0; background: #fdfdfe;
+}
+.qs-quotes-history-row td { padding: 0 12px 13px; background: #fffaf7; }
+.qs-quotes-history-row .qs-quotes-history { border: 1px solid #f0e4dc; border-radius: 10px; overflow: hidden; }
+.qs-quotes-history-table-wrap { width: 100%; overflow-x: auto; }
+.qs-quotes-history-table { background: #fbfcff; min-width: 930px; }
+.qs-quotes-history-table td { background: #fbfcff; }
+@media (max-width: 720px) {
+  .qs-quotes-customer-card > .qs-quotes-mobile-quote { border-bottom: 0; }
+  .qs-quotes-past-list .qs-quotes-mobile-quote { padding: 13px; }
+  .qs-quotes-history > summary { min-height: 46px; font-size: 12px; padding: 13px; }
+}
