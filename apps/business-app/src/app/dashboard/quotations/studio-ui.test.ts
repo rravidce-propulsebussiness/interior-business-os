@@ -362,3 +362,32 @@ describe('split-floor construction area editing and resilient PDF routes', () =>
     expect(pdf).toContain('const bytes = await appendQuotationAnnexures(base, additional)');
   });
 });
+
+describe('save resiliency and floor auto-inheritance', () => {
+  const builder = file('./premium-sft-builder.tsx');
+  const action = file('./construction-actions.ts');
+
+  it('accepts Save taps and reports invalid row fields rather than disabling the button', () => {
+    expect(builder).toContain('disabled={pending}');
+    expect(builder).toContain('if(validationMessage)');
+    expect(builder).toContain('setMessage(validationMessage)');
+    expect(builder).toContain('setSavedVersion(response.version??savedVersion+1)');
+    expect(builder).toContain("sftEstimateInputSchema.safeParse(savePayload)");
+  });
+
+  it('copies updates through linked upper floors while supporting individual exceptions', () => {
+    expect(builder).toContain('propagateFloorChanges(current,index,patch)');
+    expect(builder).toContain('restoreFloorFollowing(current,level)');
+    expect(builder).toContain("Follow lower floor");
+    expect(builder).toContain('inheritFromPrevious');
+  });
+
+  it('never checks private PDF tables with the authenticated browser client', () => {
+    const floorSave = action.slice(action.indexOf('export async function saveFloorwiseSftEstimate('));
+    expect(floorSave).not.toContain("s.client.from('quotation_studio_attachments')");
+    expect(floorSave).not.toContain("s.client.from('construction_package_spec_attachments')");
+    expect(floorSave).toContain('privilegedStorageConfigured');
+    expect(floorSave).toContain('const id = await s.commercial.saveManualLine(');
+    expect(floorSave).toContain('attachmentWarning');
+  });
+});
