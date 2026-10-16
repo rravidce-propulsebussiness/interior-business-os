@@ -2,6 +2,7 @@ import { idSchema } from '@business-os/shared';
 import { commercialServices } from '../../commercial/service';
 import { QuotationStudioFrame } from '../studio-frame';
 import { QuotationStudioStart } from '../studio-start';
+import '../clean-create.css';
 
 export const dynamic = 'force-dynamic';
 
