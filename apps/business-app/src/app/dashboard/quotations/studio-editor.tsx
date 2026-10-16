@@ -36,7 +36,7 @@ type DocumentHeader = {
 };
 
 const steps: { id: Tab; title: string }[] = [
-  { id: 'quote', title: 'Scope' },
+  { id: 'quote', title: 'Estimate & Specifications' },
   { id: 'files', title: 'Terms & Inclusions' },
   { id: 'payments', title: 'Payment Schedule' },
 ];
