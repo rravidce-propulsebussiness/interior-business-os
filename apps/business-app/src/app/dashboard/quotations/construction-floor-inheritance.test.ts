@@ -57,7 +57,7 @@ describe('construction floor inheritance', () => {
       floor('Second Floor — Penthouse','10','20','1300'),
     ];
     const changed=propagateFloorChanges(rows,1,{lengthFeet:'30'});
-    expect(changed[1].ratePerSqft).toBe('800');
+    expect(changed[1]!.ratePerSqft).toBe('800');
     expect(changed[2]).toMatchObject({lengthFeet:'1250',widthFeet:'1',ratePerSqft:'1850'});
     expect(changed[3]).toMatchObject({lengthFeet:'1250',widthFeet:'1',ratePerSqft:'1850'});
     expect(changed[4]).toEqual(rows[4]);
@@ -68,7 +68,7 @@ describe('construction floor inheritance', () => {
     };
     const rows=[floor('Ground Floor','30','40'),floor('First Floor','30','40','1850',true),extra];
     const changed=propagateFloorChanges(rows,0,{lengthFeet:'28'});
-    expect(changed[1].lengthFeet).toBe('28');
+    expect(changed[1]!.lengthFeet).toBe('28');
     expect(changed[2]).toEqual(extra);
     expect(followPreviousFloor(changed,1)[2]).toEqual(extra);
   });
