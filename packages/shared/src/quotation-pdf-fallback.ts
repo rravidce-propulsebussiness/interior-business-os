@@ -158,8 +158,8 @@ export async function renderQuotationFallbackPdf(
   }
   const conditions = input.termSections ??
     (input.terms.trim() ? [{ title: 'Additional terms', text: input.terms }] : []);
+  section('Terms & Inclusions');
   if (conditions.length) {
-    section('Terms & Inclusions');
     for (const condition of conditions) {
       if (!condition.text.trim()) continue;
       ensure(35);
@@ -170,6 +170,8 @@ export async function renderQuotationFallbackPdf(
       }
       y -= 6;
     }
+  } else {
+    write('No additional quotation-specific conditions have been saved.', 9, false, grey);
   }
   if (input.notes.trim()) {
     section('Notes');
