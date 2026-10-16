@@ -72,7 +72,15 @@ const address = (a: z.infer<typeof addressSchema>) =>
 export function renderQuotationDocument(input: unknown): string {
   const d = customerDocumentSchema.parse(input),
     h = d.header,
-    money = (value: string) => `${escape(d.currency)} ${escape(value)}`;
+    money = (value: string) => {
+      const parsed = Number(value);
+      return Number.isFinite(parsed) && Number.isSafeInteger(Math.round(parsed * 100))
+        ? new Intl.NumberFormat('en-IN', {
+            style: 'currency', currency: d.currency,
+            maximumFractionDigits: 2,
+          }).format(parsed)
+        : `${escape(d.currency)} ${escape(value)}`;
+    };
 
   // Payment milestones are saved as an immutable part of the quotation's
   // customer-facing terms. Print a readable table without exposing markers.
@@ -119,9 +127,7 @@ export function renderQuotationDocument(input: unknown): string {
     const details = parseSftEstimate(line.description);
     return details ? [{ line, details }] : [];
   });
-  const packageAccent =
-    sftSchedules.find(({ details }) => details.package?.themeColor)?.details
-      .package?.themeColor ?? h.branding.accent;
+  const packageAccent = h.branding.accent;
   const renderSftSchedule = sftSchedules
     .map(
       ({ details }) =>
