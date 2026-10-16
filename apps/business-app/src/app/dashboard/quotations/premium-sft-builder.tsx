@@ -90,7 +90,6 @@ export function PremiumSftBuilder({
   revisionId,
   version,
   selectedPackageId,
-  hidePackagePicker = false,
 }: {
   rates: ConstructionRate[];
   packages: ConstructionPackage[];
@@ -98,7 +97,6 @@ export function PremiumSftBuilder({
   revisionId: string;
   version: number;
   selectedPackageId?: string | undefined;
-  hidePackagePicker?: boolean | undefined;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -211,45 +209,6 @@ export function PremiumSftBuilder({
     setMessage('');
     setSaved(false);
   };
-  const applyPackage = (id: string) => {
-    const choice = activePackages.find((item) => item.id === id);
-    setPackageId(id);
-    if (choice) {
-      setRows((current) =>
-        current.map((row) =>
-          row.kind === 'floor'
-            ? { ...row, ratePerSqft: choice.ratePerSqft }
-            : row,
-        ),
-      );
-      setSections([
-        {
-          title: 'Package scope & inclusions',
-          description: choice.description,
-        },
-        ...(choice.specSections.length
-          ? choice.specSections
-              .filter((section) =>
-                Boolean(
-                  section.description.trim() ||
-                  section.brand.trim() ||
-                  section.grade.trim() ||
-                  section.allowancePerSqft.trim(),
-                ),
-              )
-              .map((section) => ({
-                title: section.title,
-                description: section.description,
-                brand: section.brand,
-                grade: section.grade,
-                allowancePerSqft: section.allowancePerSqft,
-              }))
-          : freshSections().slice(1)),
-      ]);
-    }
-    setSaved(false);
-    setMessage('');
-  };
   const addFloor = () => {
     if (rows.length >= 18) return;
     const next =
@@ -335,39 +294,6 @@ export function PremiumSftBuilder({
 
         {step === 1 ? (
           <div className="space-y-5 p-4 sm:p-7">
-            {!hidePackagePicker && (
-            <div className="grid gap-3 rounded-2xl border border-blue-100 bg-blue-50 p-4 sm:grid-cols-[1fr_auto] sm:items-end">
-              <label className="grid gap-2 text-xs font-bold text-slate-700">
-                Construction package <span className="text-rose-600">*</span>
-                <select
-                  className={field}
-                  value={packageId}
-                  onChange={(event) => applyPackage(event.target.value)}
-                >
-                  <option value="">
-                    {activePackages.length
-                      ? 'Choose company package'
-                      : 'No packages configured'}
-                  </option>
-                  {activePackages.map((item) => (
-                    <option key={item.id} value={item.id}>
-                      {item.name} · {money(Number(item.ratePerSqft))}/sq ft
-                    </option>
-                  ))}
-                </select>
-                <span className="font-normal text-slate-500">
-                  Applies the package rate to each floor. Individual work rates
-                  may be adjusted before saving.
-                </span>
-              </label>
-              <Link
-                href="/dashboard/pricing/construction"
-                className="inline-flex min-h-11 items-center justify-center rounded-xl border border-blue-200 bg-white px-4 py-3 text-xs font-bold text-blue-700"
-              >
-                Manage packages ↗
-              </Link>
-            </div>
-            )}
             {selectedPackage && (
               <div className="flex flex-wrap items-start justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
                 <div>
@@ -778,14 +704,7 @@ export function PremiumSftBuilder({
               >
                 ← Edit floor costing
               </button>
-              <Link
-                href={
-                  '/dashboard/quotations/' + revisionId + '/studio?step=files'
-                }
-                className="rounded-xl border border-blue-200 bg-blue-50 px-5 py-3 text-sm font-bold text-blue-700"
-              >
-                Attach PDF annexures ↗
-              </Link>
+
             </div>
           </div>
         )}
