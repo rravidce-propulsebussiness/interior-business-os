@@ -985,3 +985,45 @@
   .qs-preview-frame { min-height: 370px; height: 62vh; }
   .qs-line-table { max-width: calc(100vw - 36px); }
 }
+
+/* One consistent orange/white sidebar for all Quotation Studio pages. */
+.qs-layout .qs-sidebar {
+  background:#fff;
+  color:#19304d;
+  border-right:1px solid #e9edf2;
+  padding:21px 10px 15px;
+}
+.qs-layout .qs-brand {color:#19304d;padding-bottom:24px;}
+.qs-layout .qs-brand strong {color:#142642;}
+.qs-layout .qs-brand small {color:#7c8b9f;}
+.qs-layout .qs-nav-item {color:#354a67;font-weight:650;min-height:44px;}
+.qs-layout .qs-nav-item:hover {background:#fff4ed;color:#ed5c0e;}
+.qs-layout .qs-nav-item.qs-active {
+  background:linear-gradient(105deg,#ff7921,#ff4f00);
+  color:#fff;
+  box-shadow:0 7px 16px #f2641d25;
+}
+.qs-layout .qs-nav-item:focus-visible,
+.qs-layout .qs-quote-subnav-link:focus-visible {outline:3px solid #ffba8d;outline-offset:2px;}
+.qs-quote-nav-group {margin:3px 0;min-width:0;}
+.qs-layout .qs-quote-group-trigger {
+  width:100%;text-align:left;cursor:pointer;
+  border:0;display:flex;align-items:center;gap:13px;
+}
+.qs-quote-group-trigger span:nth-child(2) {flex:1;}
+.qs-quote-nav-chevron {margin-left:auto;font-size:19px;font-weight:800;line-height:1;}
+.qs-quote-subnav {display:grid;gap:3px;padding:6px 4px 8px 28px;}
+.qs-quote-subnav-link {
+  min-height:35px;display:flex;align-items:center;padding:9px 12px;
+  border-radius:9px;text-decoration:none;font-size:12px;
+  color:#4e6380;font-weight:700;
+}
+.qs-quote-subnav-link:hover {color:#ea5a0c;background:#fff6f0;}
+.qs-quote-subnav-link.current {color:#f06013;background:#fff0e7;font-weight:850;}
+.qs-layout .qs-mobile-close-button {background:#fff5ee;border-color:#f5d5c2;color:#f06114;}
+.qs-layout .qs-mobile-menu-button {background:#fff5ec;border-color:#f2d7c6;color:#e95b0b;}
+.qs-layout .qs-avatar {background:#ff6612;}
+@media (max-width:1199px) {
+ .qs-layout .qs-sidebar {box-shadow:14px 0 38px #14263b28;}
+ .qs-layout .qs-quote-subnav {padding-left:29px;}
+}
