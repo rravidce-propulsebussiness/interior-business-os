@@ -7,6 +7,7 @@ import type {
   ConstructionSpecSection,
 } from '@business-os/database/construction-packages';
 import { saveConstructionPackage } from './package-actions';
+import { FLOOR_RATE_TITLE, readFloorRateDefaults, writeFloorRateDefaults } from './floor-rate-rules';
 
 type Unit = NonNullable<ConstructionSpecSection['unit']>;
 type Treatment = NonNullable<ConstructionSpecSection['pricingTreatment']>;
@@ -99,11 +100,15 @@ export function PremiumPackageEditor({
   const [name, setName] = useState(item?.name ?? '');
   const [code, setCode] = useState(item?.code ?? '');
   const [rate, setRate] = useState(item?.ratePerSqft ?? '');
+  const originalFloorRates = readFloorRateDefaults(item?.specSections ?? []);
+  const [parkingRate, setParkingRate] = useState(originalFloorRates.parking);
+  const [penthouseRate, setPenthouseRate] = useState(originalFloorRates.penthouse);
+  const [floorRateError, setFloorRateError] = useState('');
   const [description, setDescription] = useState(item?.description ?? '');
   const [status, setStatus] = useState(item?.status ?? 'active');
   const [themeColor, setThemeColor] = useState(item?.themeColor ?? orange);
   const [sections, setSections] = useState<ConstructionSpecSection[]>(
-    item?.specSections?.length ? item.specSections.map(prepare) :
+    item?.specSections?.length ? item.specSections.filter(s => s.title !== FLOOR_RATE_TITLE).map(prepare) :
       starter.map((record) => initialSpec(record)),
   );
   const [active, setActive] = useState(0);
@@ -170,16 +175,30 @@ export function PremiumPackageEditor({
   }
   const isBrandless = (title: string) => brandless.test(title);
   const moneyPreview = (Number(rate) || 0) * 1000;
+  let savedSections = sections;
+  let pricingValidation = '';
+  try {
+    savedSections = writeFloorRateDefaults(sections, {
+      parking: parkingRate, penthouse: penthouseRate,
+    });
+  } catch (error) {
+    pricingValidation = error instanceof Error ? error.message : 'Invalid floor rates';
+  }
 
   return (
     <div className="min-w-0 overflow-hidden rounded-[24px] border border-slate-200 bg-[#F8FAFD] shadow-2xl sm:rounded-[30px]">
-      <form action={submit}>
+      <form action={submit} onSubmit={(event) => {
+        if (pricingValidation) {
+          event.preventDefault();
+          setFloorRateError(pricingValidation);
+        }
+      }}>
         {currentId && <>
           <input type="hidden" name="id" value={currentId} />
           <input type="hidden" name="version" value={result.version ?? item?.version ?? 1} />
         </>}
         <input type="hidden" name="themeColor" value={themeColor} />
-        <input type="hidden" name="specSections" value={JSON.stringify(sections)} />
+        <input type="hidden" name="specSections" value={JSON.stringify(savedSections)} />
         <div className="border-b border-slate-200 bg-white px-4 py-5 sm:px-7">
           <div className="mb-4 flex items-center justify-between gap-3">
             <div>
@@ -216,6 +235,34 @@ export function PremiumPackageEditor({
                 onChange={(e) => setDescription(e.target.value)} placeholder="Scope, warranties and exclusions" />
             </label>
           </div>
+          <section className="mt-4 rounded-2xl border border-orange-200 bg-orange-50/60 p-4" aria-label="Construction area rate defaults">
+            <h3 className="text-sm font-extrabold text-[#172845]">Separate floor-area rates</h3>
+            <p className="mt-1 text-xs text-slate-600">
+              Construction uses the package rate above. Parking and penthouse can have different rates.
+              These defaults are copied into new quotes and remain editable per floor.
+            </p>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              <label className={label}>Parking / stilt area (₹ per SFT)
+                <input className={field} aria-label="Default parking area rate"
+                  type="number" min="1" max="999999.99" step=".01"
+                  placeholder="Enter parking rate"
+                  value={parkingRate} onChange={(e) => { setParkingRate(e.target.value); setFloorRateError(''); }} />
+              </label>
+              <label className={label}>Penthouse area (₹ per SFT)
+                <input className={field} aria-label="Default penthouse rate"
+                  type="number" min="1" max="999999.99" step=".01"
+                  placeholder="Enter penthouse rate"
+                  value={penthouseRate} onChange={(e) => { setPenthouseRate(e.target.value); setFloorRateError(''); }} />
+              </label>
+            </div>
+            {(floorRateError || pricingValidation) &&
+              <p role="alert" className="mt-2 text-xs font-bold text-red-700">
+                {floorRateError || pricingValidation}</p>}
+            <p className="mt-2 text-[11px] text-slate-500">
+              Leave a rate blank to configure it directly in a customer quotation.
+              Neither rate changes the normal construction ₹/SFT.
+            </p>
+          </section>
           <div className="mt-5 flex flex-wrap gap-2 text-[11px] font-bold">
             <span className="rounded-lg bg-slate-100 px-3 py-2 text-slate-500">01 &nbsp; Package details</span>
             <span className="rounded-lg bg-orange-600 px-3 py-2 text-white">02 &nbsp; Specifications</span>
