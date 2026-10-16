@@ -2,7 +2,6 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { quotationCommand } from './actions';
 import { joinQuotationTerms, splitQuotationTerms } from './quotation-terms-format';
 
 type Discount = { kind: 'none' | 'fixed' | 'percentage'; value: string };
@@ -57,34 +56,38 @@ export function QuotationTermsEditor({
       setMessage('Notes exceed the 10,000-character limit.');
       return;
     }
-    let terms = '';
     try {
-      terms = joinQuotationTerms({
-        inclusions, exclusions, warranty, additional,
-        paymentPlan: fields.paymentPlan,
+      joinQuotationTerms({
+        inclusions, exclusions, warranty, additional, paymentPlan:fields.paymentPlan,
       });
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Please review the terms.');
+      setMessage(error instanceof Error?error.message:'Please review the terms.');
       return;
     }
     setMessage('');
     startTransition(async () => {
       try {
-        const result = await quotationCommand({
-          action: 'edit_revision',
-          revision_id: initial.revision_id,
-          version: initial.version,
-          terms,
-          valid_until: validUntil,
-          customer_notes: customerNotes,
-          internal_notes: internalNotes,
-          // Authorization still applies to discounts on the server.
-          discount: canDiscount ? discount : savedDiscount,
+        const response=await fetch('/dashboard/quotations/'+initial.revision_id+'/conditions',{
+          method:'POST',credentials:'same-origin',cache:'no-store',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({
+            kind:'terms',validUntil,inclusions,exclusions,warranty,additional,
+            customerNotes,internalNotes,
+            discount:canDiscount?discount:savedDiscount,
+          }),
         });
-        setMessage(result.message);
-        if (result.id) router.refresh();
+        const result:unknown=await response.json().catch(()=>null);
+        const data=result&&typeof result==='object'
+          ?result as {id?:string;message?:string;reference?:string}:null;
+        if(!response.ok || !data?.id){
+          setMessage((data?.message || 'Could not save quotation terms (HTTP '+response.status+').')+
+            (data?.reference?' Reference '+data.reference:''));
+          return;
+        }
+        setMessage(data.message || 'Terms & Inclusions saved to this quotation.');
+        router.refresh();
       } catch {
-        setMessage('Could not save quotation terms. Try reloading the latest revision.');
+        setMessage('Network error saving quotation conditions. Please try again.');
       }
     });
   };
