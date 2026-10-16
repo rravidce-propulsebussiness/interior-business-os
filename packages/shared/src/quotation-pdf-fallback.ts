@@ -140,7 +140,7 @@ export async function renderQuotationFallbackPdf(
   page.drawRectangle({ x: MARGIN, y: PAGE_H - 252, width: 56, height: 4, color: accent });
   fittedText('YOUR PROJECT. OUR COMMITMENT.', MARGIN, PAGE_H - 235, 10, bold,
     rgb(0.82, 0.86, 0.92), 455);
-  fittedText('CONSTRUCTION', MARGIN, PAGE_H - 317, 33, bold, white, 495);
+  fittedText('PROJECT', MARGIN, PAGE_H - 317, 33, bold, white, 495);
   fittedText('QUOTATION', MARGIN, PAGE_H - 360, 33, bold, white, 495);
   fittedText(input.project, MARGIN, PAGE_H - 410, 15, regular, rgb(0.84, 0.88, 0.93), 480);
   fittedText(input.site, MARGIN, PAGE_H - 439, 10, regular, rgb(0.77, 0.84, 0.9), 460);
