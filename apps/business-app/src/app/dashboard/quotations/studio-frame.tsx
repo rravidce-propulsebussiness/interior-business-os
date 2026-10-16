@@ -33,7 +33,7 @@ export function QuotationStudioFrame({
   children,
 }: {
   companyName: string;
-  companyLogo?: string;
+  companyLogo?: string | undefined;
   accountEmail?: string;
   children: ReactNode;
 }) {
