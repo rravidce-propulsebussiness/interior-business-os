@@ -283,8 +283,41 @@ describe('unified construction quote page and reliable preview', () => {
   it('passes authenticated PDF preview HTML instead of depending on a separate iframe request', () => {
     expect(page).toContain('quotationDocument(revision.id)');
     expect(page).toContain('previewHtml={previewHtml}');
-    expect(editor).toContain('srcDoc={previewHtml}');
+    expect(editor).not.toContain('srcDoc={previewHtml}');
+    expect(editor).not.toContain('Hide inline preview');
     expect(editor).toContain("url+'/pdf?view=1'");
     expect(editor).toContain("url+'/pdf'");
+    expect(editor).toContain('createWhatsAppPdfShare(revisionId)');
+  });
+});
+
+describe('simplified WhatsApp quotation PDF actions', () => {
+  const editor = file('./premium-sft-builder.tsx');
+  const share = file('./sharing-actions.ts');
+  const css = file('./studio.css');
+
+  it('shows only view, download and WhatsApp controls without duplicate preview buttons', () => {
+    expect(editor).toContain('◉ View PDF');
+    expect(editor).toContain('↓ Download PDF');
+    expect(editor).toContain('Share PDF on WhatsApp');
+    expect(editor).not.toContain('Hide inline preview');
+    expect(editor).not.toContain('Show inline preview');
+    expect(editor).not.toContain('Open preview');
+    expect(editor).not.toContain("url+'/studio?step=preview'");
+    expect(css).toContain('.qs-work-pdf-actions');
+    expect(css).not.toContain('.qs-work-preview-grid');
+  });
+
+  it('shares a public tokenized PDF through WhatsApp, not the authenticated employee route', () => {
+    expect(share).toContain('createWhatsAppPdfShare');
+    expect(share).toContain("p_action: 'create'");
+    expect(share).toContain('pdf_enabled: true');
+    expect(share).toContain('hasSavedStagePaymentPlan(revision.terms)');
+    expect(share).toContain("action: 'issue'");
+    expect(share).toContain("revision.status !== 'draft' && revision.status !== 'issued'");
+    expect(editor).toContain("window.location.origin+'/q/'+result.token+'/pdf'");
+    expect(editor).toContain("'https://wa.me/'");
+    expect(editor).toContain('encodeURIComponent(caption)');
+    expect(editor).toContain('if(dirty)');
   });
 });
