@@ -2,7 +2,6 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import type { ConstructionRate } from '@business-os/database/construction-rates';
 import type { ConstructionPackage } from '@business-os/database/construction-packages';
 import { PremiumSftBuilder } from './premium-sft-builder';
@@ -179,16 +178,7 @@ function CustomizedQuote({
           {message}
         </p>
       )}
-      <p className="text-xs leading-5 text-slate-500">
-        To edit material options, brands or company pricing, open
-        <Link
-          href="/dashboard/pricing/construction"
-          className="ml-1 font-bold text-blue-700 underline"
-        >
-          Construction Pricing
-        </Link>
-        . Saved items can be rearranged or removed in the quotation below.
-      </p>
+
     </div>
   );
 }
@@ -208,83 +198,49 @@ export function ConstructionSelector({
   version: number;
   initialMode?: 'sft' | 'custom';
 }) {
-  const [mode, setMode] = useState<'sft' | 'custom'>(initialMode);
+  const activePackages = packages.filter((pkg) => pkg.status === 'active');
+  const previous = activePackages.find((pkg) =>
+    pkg.id === initialSchedule?.package?.id ||
+    pkg.code === initialSchedule?.package?.code,
+  );
+  const [selected, setSelected] = useState(
+    previous?.id ??
+    (initialMode === 'custom' || activePackages.length === 0 ? 'custom' : ''),
+  );
+  const chosen = activePackages.find((pkg) => pkg.id === selected);
   return (
-    <section className="my-7 overflow-hidden rounded-3xl border border-blue-200 bg-white shadow-sm">
-      <div className="bg-slate-950 px-6 py-7 text-white sm:px-8">
-        <p className="text-xs font-bold uppercase tracking-widest text-blue-300">
-          Construction quotation
-        </p>
-        <h2 className="mt-2 text-2xl font-extrabold">
-          Select quotation calculation method
-        </h2>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">
-          Floor-wise per-SFT estimates and item-wise customized pricing are two
-          different methods. Client details are recorded above. Prices and
-          specifications appear separately in the PDF.
-        </p>
-      </div>
-      <div className="space-y-6 p-5 sm:p-7">
-        <div
-          className="grid gap-3 sm:grid-cols-2"
-          role="group"
-          aria-label="Quotation calculation method"
-        >
-          <button
-            type="button"
-            aria-pressed={mode === 'sft'}
-            onClick={() => setMode('sft')}
-            className={
-              'rounded-2xl border p-5 text-left ' +
-              (mode === 'sft'
-                ? 'border-blue-500 bg-blue-50'
-                : 'border-slate-200')
-            }
-          >
-            <strong className="block text-base font-extrabold text-slate-950">
-              1. Per-SFT quotation
-            </strong>
-            <span className="mt-2 block text-xs leading-5 text-slate-600">
-              Floor/work schedule: L × W × price per SFT, with material and
-              brand inclusions below.
-            </span>
-          </button>
-          <button
-            type="button"
-            aria-pressed={mode === 'custom'}
-            onClick={() => setMode('custom')}
-            className={
-              'rounded-2xl border p-5 text-left ' +
-              (mode === 'custom'
-                ? 'border-blue-500 bg-blue-50'
-                : 'border-slate-200')
-            }
-          >
-            <strong className="block text-base font-extrabold text-slate-950">
-              2. Customized quotation
-            </strong>
-            <span className="mt-2 block text-xs leading-5 text-slate-600">
-              Choose and price each material/brand independently with its own
-              rate and area.
-            </span>
-          </button>
+    <section className="qs-card qs-simple-package-editor" aria-label="Construction quotation package">
+      <div className="qs-simple-package-top">
+        <div>
+          <p className="qs-package-eyebrow">Construction quote</p>
+          <h2>Quotation Package</h2>
+          <p className="qs-muted">Choose a company package or Custom Quote. You can change individual materials, rates and specifications.</p>
         </div>
-        {mode === 'sft' ? (
-          <PremiumSftBuilder
-            rates={rates}
-            packages={packages}
-            initialSchedule={initialSchedule}
-            revisionId={revisionId}
-            version={version}
-          />
-        ) : (
-          <CustomizedQuote
-            rates={rates}
-            revisionId={revisionId}
-            version={version}
-          />
-        )}
+        <label className="qs-field qs-simple-package-select">
+          Package
+          <select aria-label="Select construction quotation package"
+            value={selected}
+            onChange={(event) => setSelected(event.target.value)}>
+            <option value="">Select a package</option>
+            {activePackages.map((pkg) => (
+              <option key={pkg.id} value={pkg.id}>
+                {pkg.name} · {money(Number(pkg.ratePerSqft))}/SFT
+              </option>
+            ))}
+            <option value="custom">Custom Quote</option>
+          </select>
+        </label>
       </div>
+      {selected === 'custom' ? (
+        <CustomizedQuote rates={rates} revisionId={revisionId} version={version} />
+      ) : chosen ? (
+        <PremiumSftBuilder key={selected}
+          selectedPackageId={chosen.id} hidePackagePicker
+          rates={rates} packages={packages} initialSchedule={initialSchedule}
+          revisionId={revisionId} version={version} />
+      ) : (
+        <p className="qs-info-box">Select one of your saved packages or Custom Quote to start.</p>
+      )}
     </section>
   );
 }
