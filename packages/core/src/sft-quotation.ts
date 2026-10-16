@@ -7,12 +7,18 @@ const positive = z
   .refine((value) => Number(value) > 0, 'Enter a positive dimension');
 const rate = z.string().regex(/^(0|[1-9][0-9]{0,5})(\.[0-9]{1,2})?$/);
 const workKind = z.enum(['floor', 'additional']);
+const workUnit = z.enum(['sqft', 'wall_sqft', 'running_ft', 'cubic_ft', 'piece', 'lumpsum']);
 const inputRow = z
   .object({
     name: z.string().trim().min(2).max(90),
     kind: workKind.optional(),
     lengthFeet: positive,
     widthFeet: positive,
+    // Optional for backward-compatible older estimates; height is only billed
+    // for wall-area or volume measurements, never silently for floor SFT.
+    heightFeet: positive.optional(),
+    quantity: positive.optional(),
+    unit: workUnit.optional(),
     ratePerSqft: rate,
   })
   .strict();
@@ -124,12 +130,27 @@ export function calculateSftEstimate(
   const rows = input.rows.map((row) => {
     const length = hundredths(row.lengthFeet);
     const width = hundredths(row.widthFeet);
-    const area = (length * width + 50n) / 100n;
+    const unit = row.unit ?? 'sqft';
+    const height = row.heightFeet ? hundredths(row.heightFeet) : 0n;
+    const quantity = row.quantity ? hundredths(row.quantity) : 100n;
+    // Area/quantity stored with two-decimal precision, including non-SFT
+    // optional works. The PDF renderer displays the correct measurement unit.
+    const area = unit === 'piece' ? quantity
+      : unit === 'lumpsum' ? 100n
+      : unit === 'running_ft' ? length
+      : unit === 'wall_sqft'
+        ? (length * height + 50n) / 100n
+        : unit === 'cubic_ft'
+          ? (length * width * height + 5000n) / 10000n
+          : (length * width + 50n) / 100n;
     if (area <= 0n || area > 100000000n)
-      throw new Error('Invalid calculated area');
+      throw new Error('Invalid calculated measurement');
+    if ((row.kind ?? 'floor') === 'floor' && unit !== 'sqft')
+      throw new Error('Floor construction area must use SFT');
     const amount = (area * hundredths(row.ratePerSqft) + 50n) / 100n;
-    if ((row.kind ?? 'floor') === 'additional') additionalArea += area;
-    else builtUpArea += area;
+    if ((row.kind ?? 'floor') === 'additional') {
+      if (unit === 'sqft' || unit === 'wall_sqft') additionalArea += area;
+    } else builtUpArea += area;
     totalAmount += amount;
     if (totalAmount > 99999999999999n)
       throw new Error('Estimate amount too large');
