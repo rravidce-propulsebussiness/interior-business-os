@@ -20,6 +20,7 @@ const createInput = z
     location: z.string().trim().max(200),
     projectType: z.string().trim().min(2).max(100),
     plotSize: z.string().trim().max(40),
+    notes: z.string().trim().max(1000).optional().default(''),
     industryKey: z.string().regex(/^[a-z][a-z0-9_]{0,63}$/),
     currency: z
       .string()
@@ -283,9 +284,10 @@ export async function createStudioQuotation(input: unknown): Promise<{
           project_type: values.projectType,
           site_address: baseAddress,
           status: 'active',
-          notes: values.plotSize
-            ? 'Plot / project size: ' + values.plotSize
-            : '',
+          notes: [
+            values.plotSize ? 'Plot / project size: ' + values.plotSize : '',
+            values.notes,
+          ].filter(Boolean).join('\n'),
           assigned_user_id: null,
         });
         createdProject = true;
