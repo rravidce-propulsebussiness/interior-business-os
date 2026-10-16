@@ -10,9 +10,9 @@ export const dynamic = 'force-dynamic';
 export default async function NewQuotation({
   searchParams,
 }: {
-  searchParams: Promise<{ customer?: string; lead?: string }>;
+  searchParams: Promise<{ lead?: string }>;
 }) {
-  const { customer, lead } = await searchParams;
+  const { lead } = await searchParams;
   const s = await commercialServices('quotation.create', 'quotation', true);
   const [organization, user, industries] = await Promise.all([
     s.repository.organization(s.org),
@@ -72,13 +72,6 @@ export default async function NewQuotation({
     return { ...entry, industryKey: industry?.key ?? '' };
   });
 
-  const { data: existingCustomers } = await s.client
-    .from('customers')
-    .select('id,display_name,phone,email')
-    .eq('organization_id', s.org)
-    .eq('status', 'active')
-    .order('created_at', { ascending: false })
-    .limit(150);
   return (
     <QuotationStudioFrame companyName={organization.name}
       companyLogo={companyLogo} accountEmail={user.email ?? ''}>
@@ -95,13 +88,11 @@ export default async function NewQuotation({
         </section>
         <QuotationStudioStart
           leads={leads}
-          existingCustomers={existingCustomers ?? []}
           industries={enabledIndustries.map((industry) => ({
             key: industry.key,
             name: industry.name,
           }))}
           defaultCurrency={organization.default_currency || 'INR'}
-          initialCustomerId={customer ?? ''}
           initialLeadId={selectedLead?.id ?? ''}
         />
       </div>
