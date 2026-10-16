@@ -55,8 +55,8 @@ describe('single package choice in the saved quotation editor', () => {
     expect(construction).toContain('<option value="custom">Custom Quote</option>');
     expect(construction).not.toContain('Select quotation calculation method');
     expect(construction).not.toContain('2. Customized quotation');
-    expect(construction).toContain('hidePackagePicker');
-    expect(sft).toContain('!hidePackagePicker');
+    expect(construction).toContain('selectedPackageId={chosen.id}');
+    expect(sft).not.toContain('Manage packages ↗');
   });
 
   it('shows the interior custom item editor only for Custom Quote and no package manager link', () => {
