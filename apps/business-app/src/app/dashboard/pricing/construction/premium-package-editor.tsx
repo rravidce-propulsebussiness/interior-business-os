@@ -102,7 +102,6 @@ export function PremiumPackageEditor({
   const [rate, setRate] = useState(item?.ratePerSqft ?? '');
   const originalFloorRates = readFloorRateDefaults(item?.specSections ?? []);
   const [parkingRate, setParkingRate] = useState(originalFloorRates.parking);
-  const [penthouseRate, setPenthouseRate] = useState(originalFloorRates.penthouse);
   const [floorRateError, setFloorRateError] = useState('');
   const [description, setDescription] = useState(item?.description ?? '');
   const [status, setStatus] = useState(item?.status ?? 'active');
@@ -179,7 +178,7 @@ export function PremiumPackageEditor({
   let pricingValidation = '';
   try {
     savedSections = writeFloorRateDefaults(sections, {
-      parking: parkingRate, penthouse: penthouseRate,
+      parking: parkingRate, penthouse: '',
     });
   } catch (error) {
     pricingValidation = error instanceof Error ? error.message : 'Invalid floor rates';
@@ -238,8 +237,8 @@ export function PremiumPackageEditor({
           <section className="mt-4 rounded-2xl border border-orange-200 bg-orange-50/60 p-4" aria-label="Construction area rate defaults">
             <h3 className="text-sm font-extrabold text-[#172845]">Separate floor-area rates</h3>
             <p className="mt-1 text-xs text-slate-600">
-              Construction uses the package rate above. Parking and penthouse can have different rates.
-              These defaults are copied into new quotes and remain editable per floor.
+              Construction and penthouse use the same package rate above. Only parking
+              needs a separate default rate; individual quotation rates remain editable.
             </p>
             <div className="mt-3 grid gap-3 sm:grid-cols-2">
               <label className={label}>Parking / stilt area (₹ per SFT)
@@ -248,19 +247,17 @@ export function PremiumPackageEditor({
                   placeholder="Enter parking rate"
                   value={parkingRate} onChange={(e) => { setParkingRate(e.target.value); setFloorRateError(''); }} />
               </label>
-              <label className={label}>Penthouse area (₹ per SFT)
-                <input className={field} aria-label="Default penthouse rate"
-                  type="number" min="1" max="999999.99" step=".01"
-                  placeholder="Enter penthouse rate"
-                  value={penthouseRate} onChange={(e) => { setPenthouseRate(e.target.value); setFloorRateError(''); }} />
-              </label>
+              <div className="rounded-xl border border-orange-100 bg-white p-3 text-xs text-slate-700">
+                <strong className="block text-slate-900">Penthouse rate</strong>
+                Same as construction package: {currency(rate)} / SFT.
+              </div>
             </div>
             {(floorRateError || pricingValidation) &&
               <p role="alert" className="mt-2 text-xs font-bold text-red-700">
                 {floorRateError || pricingValidation}</p>}
             <p className="mt-2 text-[11px] text-slate-500">
-              Leave a rate blank to configure it directly in a customer quotation.
-              Neither rate changes the normal construction ₹/SFT.
+              Parking rate is optional. Penthouse uses the regular construction ₹/SFT,
+              and either rate can be adjusted for a specific quotation.
             </p>
           </section>
           <div className="mt-5 flex flex-wrap gap-2 text-[11px] font-bold">
