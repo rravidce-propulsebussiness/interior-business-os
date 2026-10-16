@@ -311,11 +311,13 @@ export function renderQuotationDocument(input: unknown): string {
       'Payment terms must be agreed and documented before they are treated as part of the contract.</p></div>') +
     (d.notes ? '<section class="pb-terms-panel"><h2>Project notes</h2>' +
       '<p class="text">' + escape(d.notes) + '</p></section>' : '') +
-    (savedTerms.length ? '<section class="pb-terms-panel pb-quote-conditions">' +
+    '<section class="pb-terms-panel pb-quote-conditions">' +
       '<h2>Terms &amp; Inclusions</h2>' +
-      savedTerms.map(section => '<div class="pb-term-section"><h3>' +
+      (savedTerms.length ? savedTerms.map(section => '<div class="pb-term-section"><h3>' +
         escape(section.title) + '</h3><p class="text">' +
-        escape(section.text) + '</p></div>').join('') + '</section>' : '') +
+        escape(section.text) + '</p></div>').join('') :
+        '<p class="text muted">No additional quotation-specific conditions have been saved.</p>') +
+      '</section>' +
     brochure.pageFooter('Payments / terms') + '</section>';
   const amountLabel = isFloorQuote ? 'Total proposed construction cost' : 'Total quotation amount';
   const total = '<div class="pb-final-total"><span>' + amountLabel +
