@@ -56,8 +56,12 @@ export async function POST(request: Request, {
     const result = await saveFloorwiseSftEstimate(id,data.data.version,data.data.input);
     if (!result.id) return json({
       message:result.message,
-      reference:ref,
-    },422);
+      reference:result.requestId || ref,
+      code:result.code || 'VALIDATION_FAILED',
+    }, result.code==='CONFLICT' ? 409 :
+       result.code==='UNAUTHENTICATED' ? 401 :
+       result.code==='FORBIDDEN' ? 403 :
+       result.code==='INTERNAL_ERROR' ? 500 : 422);
     return json(result,200);
   } catch (error) {
     // Error details belong only in server logs. The reference identifies the
