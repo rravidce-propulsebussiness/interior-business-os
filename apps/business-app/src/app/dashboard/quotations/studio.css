@@ -1943,3 +1943,39 @@
   .qs-terms-workspace{animation:none}
   .qs-terms-field{transition:none}
 }
+
+
+/* Compact quotation identity replaces the oversized Construction Quote card.
+ * Save and Preview remain accessible in Scope, Terms and Payment Schedule. */
+.qs-studio-compact-bar {
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  min-width:0;margin:0 0 12px;padding:10px 13px;
+  border:1px solid #e8ebf1;border-radius:14px;background:#fff;
+  box-shadow:0 4px 15px #18283a0b;
+}
+.qs-studio-compact-ref {
+  display:flex;flex-wrap:wrap;align-items:center;min-width:0;gap:5px 10px;
+  color:#748397;font-size:11px;margin:0;
+}
+.qs-studio-compact-ref strong {color:#22334c;font-size:12px}
+.qs-studio-compact-status {
+  color:#238057;background:#eafaf1;border:1px solid #c8edd9;
+  border-radius:999px;padding:4px 9px;font-size:10px;font-weight:850;
+}
+.qs-studio-compact-buttons{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.qs-studio-compact-buttons .qs-btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-height:40px;padding:9px 15px;border-radius:10px;
+  border:1px solid #f3cbb0;background:#fff7f1;color:#c95512;
+  font-size:11px;font-weight:850;text-decoration:none;
+}
+.qs-studio-compact-buttons .qs-btn.primary {
+  border-color:#f87727;background:#f97316;color:#fff;
+}
+.qs-studio-compact-buttons .qs-btn:disabled{opacity:.45;cursor:not-allowed}
+@media(max-width:700px){
+  .qs-studio-compact-bar{padding:10px;flex-wrap:wrap;gap:9px}
+  .qs-studio-compact-ref{flex:1 1 100%;justify-content:flex-start}
+  .qs-studio-compact-buttons{display:grid;grid-template-columns:1fr 1.45fr;width:100%}
+  .qs-studio-compact-buttons .qs-btn{min-width:0;min-height:43px;padding:9px;font-size:11px}
+}
