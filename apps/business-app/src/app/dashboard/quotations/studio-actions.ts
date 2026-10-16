@@ -12,7 +12,6 @@ import { resolveLeadCategory } from '../crm/leads/lead-category';
 const createInput = z
   .object({
     clientName: z.string().trim().min(2).max(200),
-    customerId: z.uuid().nullable().optional(),
     leadId: z.uuid(),
     phone: z.string().trim().min(3).max(40),
     email: z.union([z.literal(''), z.email().max(254)]),
@@ -140,79 +139,83 @@ export async function createStudioQuotation(input: unknown): Promise<{
       country_code: 'IN',
     };
 
-    let createdCustomer = false;
-    let customerId = values.customerId ?? '';
-    if (customerId) {
-      const { data: existing, error } = await s.client
-        .from('customers')
-        .select('id')
+    // A lead owns the identity of the customer being quoted. Resolve the CRN
+    // automatically on the server, regardless of which browser was used.
+    // Names alone cannot prove identity; confirmed phone/email must match.
+    const escapedName = values.clientName
+      .replaceAll('\\', '\\\\')
+      .replaceAll('%', '\\%')
+      .replaceAll('_', '\\_');
+    const escapedEmail = values.email
+      .replaceAll('\\', '\\\\')
+      .replaceAll('%', '\\%')
+      .replaceAll('_', '\\_');
+    const phoneKey = normalizedCustomerPhone(values.phone);
+    const lookups = [
+      s.client.from('customers')
+        .select('id,display_name,phone,email,created_at')
         .eq('organization_id', s.org)
-        .eq('id', customerId)
         .eq('status', 'active')
-        .maybeSingle();
-      if (error || !existing)
-        return {
-          ok: false,
-          message: 'The selected customer is not available in your company.',
-        };
-    } else {
-      const escapedName = values.clientName
-        .replaceAll('\\', '\\\\')
-        .replaceAll('%', '\\%')
-        .replaceAll('_', '\\_');
-      const lookups = [
-        s.client
-          .from('customers')
-          .select('id,display_name,phone,email')
+        .ilike('display_name', escapedName)
+        .limit(250),
+      ...(phoneKey.length >= 4
+        ? [s.client.from('customers')
+          .select('id,display_name,phone,email,created_at')
           .eq('organization_id', s.org)
-          .ilike('display_name', escapedName)
-          .limit(250),
-        s.client
-          .from('customers')
-          .select('id,display_name,phone,email')
+          .eq('status', 'active')
+          // Broad indexed-by-suffix candidate search, then exact normalization.
+          // Also matches +91 and spaced legacy mobile numbers.
+          .ilike('phone', '%' + phoneKey.slice(-4))
+          .limit(300)]
+        : []),
+      ...(values.email
+        ? [s.client.from('customers')
+          .select('id,display_name,phone,email,created_at')
           .eq('organization_id', s.org)
-          .eq('phone', values.phone)
-          .limit(5),
-        ...(values.email
-          ? [
-              s.client
-                .from('customers')
-                .select('id,display_name,phone,email')
-                .eq('organization_id', s.org)
-                .ilike(
-                  'email',
-                  values.email
-                    .replaceAll('\\', '\\\\')
-                    .replaceAll('%', '\\%')
-                    .replaceAll('_', '\\_'),
-                )
-                .limit(5),
-            ]
-          : []),
-      ];
-      const potential = await Promise.all(lookups);
-      if (potential.some((found) => found.error))
-        return {
-          ok: false,
-          message: 'Could not check existing customers. Please try again.',
-        };
-      const matches = [
-        ...new Map(
-          potential
-            .flatMap((found) => found.data ?? [])
-            .filter((customer) => contactMatches(customer, values))
-            .map((customer) => [customer.id, customer]),
-        ).values(),
-      ];
-      if (matches.length)
-        return {
-          ok: false,
-          message:
-            'These contact details already belong to ' +
-            matches.length +
-            ' customer account(s). Choose the correct Existing customer / CRN before making another quotation.',
-        };
+          .eq('status', 'active')
+          .ilike('email', escapedEmail)
+          .limit(100)]
+        : []),
+    ];
+    const results = await Promise.all(lookups);
+    if (results.some((result) => result.error))
+      return { ok: false, message: 'Could not verify the client identity. Please retry.' };
 
+    const matches = [...new Map(
+      results.flatMap((result) => result.data ?? [])
+        .filter((candidate) => contactMatches(candidate, values))
+        .map((candidate) => [candidate.id, candidate]),
+    ).values()].sort((a, b) =>
+      a.created_at.localeCompare(b.created_at) || a.id.localeCompare(b.id));
+
+    // Prefer the CRN already attached to a previous quote from this exact lead.
+    // For older duplicate CRNs without a linked quote, consistently reuse the
+    // oldest confirmed match. Existing historical duplicates need a separate
+    // audited merge that preserves their linked quotations and projects.
+    let leadCustomerId = '';
+    const linked = await s.client.rpc('lead_quotation_list', {
+      p_organization_id: s.org,
+      p_lead_id: values.leadId,
+    });
+    if (!linked.error && Array.isArray(linked.data)) {
+      const firstLink = linked.data.find((item: unknown) =>
+        item !== null && typeof item === 'object' &&
+        'project_id' in item && typeof item.project_id === 'string');
+      if (firstLink && typeof firstLink.project_id === 'string') {
+        const { data: previousProject } = await s.client.from('projects')
+          .select('customer_id')
+          .eq('organization_id', s.org)
+          .eq('id', firstLink.project_id)
+          .maybeSingle();
+        const previousCustomer = matches.find((item) =>
+          item.id === previousProject?.customer_id);
+        if (previousCustomer) leadCustomerId = previousCustomer.id;
+      }
+    }
+
+    let createdCustomer = false;
+    let customerId = leadCustomerId || matches[0]?.id || '';
+    if (!customerId) {
       customerId = randomUUID();
       await s.commercial.saveEntity(s.org, 'customers', {
         id: customerId,
