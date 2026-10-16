@@ -18,10 +18,10 @@ export function QuotationRemovalButton({
         style={{ color: '#b42318', cursor: 'pointer', whiteSpace: 'nowrap' }}
         title={issued
           ? 'Cancel issued quotation while retaining the customer and audit history'
-          : 'Remove draft quotation from the active list while keeping history'}
+          : 'Remove quotation from the active list while retaining history'}
         onClick={async () => {
           if (!window.confirm(
-            (issued ? 'Cancel issued ' : 'Delete draft ') + number +
+            (issued ? 'Cancel issued ' : 'Delete quotation ') + number +
               '? This removes the quotation from the active list but keeps the document history, related projects and customer records.',
           )) return;
           setPending(true);
@@ -35,7 +35,7 @@ export function QuotationRemovalButton({
             if (result.id) router.refresh();
             else setMessage(result.message);
           } catch {
-            setMessage('Unable to cancel this draft.');
+            setMessage('Unable to remove this quotation.');
           } finally {
             setPending(false);
           }
