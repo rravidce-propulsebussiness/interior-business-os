@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { emptyAddress } from '@business-os/core/commercial';
 import { commercialServices } from '../../commercial/service';
 import { MasterForm } from '../../commercial/master-form';
+import { ApplyBrandingToDrafts } from '../apply-branding-to-drafts';
 export default async function Settings() {
   const s = await commercialServices('settings.manage', 'quotation', true),
     { data, error } = await s.client
@@ -10,6 +11,31 @@ export default async function Settings() {
       .eq('organization_id', s.org)
       .maybeSingle();
   if (error) throw new Error('Unable to load quotation settings');
+  // Keep company branding edits out of Quote Studio. Draft users may refresh
+  // saved company branding here without changing an issued quotation.
+  const canRefreshDrafts = s.allowed('quotation.edit', 'quotation');
+  const { data: pendingDrafts } = canRefreshDrafts
+    ? await s.client.from('quotation_revisions')
+        .select('id,version,quotation_id')
+        .eq('organization_id', s.org)
+        .eq('status', 'draft')
+        .order('created_at', { ascending: false })
+        .limit(30)
+    : { data: [] };
+  const draftIds = (pendingDrafts ?? []).map(item => item.quotation_id);
+  const { data: draftNumbers } = draftIds.length
+    ? await s.client.from('quotations')
+        .select('id,quotation_number')
+        .eq('organization_id', s.org)
+        .in('id', draftIds)
+    : { data: [] };
+  const labels = new Map((draftNumbers ?? []).map(item => [item.id, item.quotation_number]));
+  const draftOptions = (pendingDrafts ?? []).map(row => ({
+    id:row.id,
+    version:row.version,
+    quotationNumber:labels.get(row.quotation_id) ?? 'Draft quotation',
+  }));
+
   return (
     <main id="main-content" tabIndex={-1} className="mx-auto max-w-5xl p-6">
       <Link href="/dashboard/quotations">Quotations</Link>
@@ -135,6 +161,7 @@ export default async function Settings() {
           },
         ]}
       />
+      {canRefreshDrafts && <ApplyBrandingToDrafts drafts={draftOptions} />}
     </main>
   );
 }
