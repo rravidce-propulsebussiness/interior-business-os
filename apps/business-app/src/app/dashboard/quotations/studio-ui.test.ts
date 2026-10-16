@@ -140,7 +140,7 @@ describe('single premium package library and working Custom Quote entry', () => 
     expect(library).toContain('duplicateQuotationPackage');
     expect(library).toContain('deleteQuotationPackage');
     expect(library).toContain("preview?format=pdf");
-    expect(library).toContain("entry.item.status === 'active'");
+    expect(library).toContain("detail.item.status === 'active'");
     expect(library).toContain("construction.map((item)");
     expect(library).toContain("(other ?? []).map((item)");
   });
