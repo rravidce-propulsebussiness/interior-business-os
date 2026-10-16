@@ -18,6 +18,7 @@ export function QuotationPdfControls({
   canShare: boolean;
 }) {
   const [pdf, setPdf] = useState<File | null>(null);
+  const [loadedVersion, setLoadedVersion] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const route = '/dashboard/quotations/' + revisionId + '/pdf?view=1';
@@ -50,24 +51,24 @@ export function QuotationPdfControls({
   // Prepare once in advance so navigator.share() can be called synchronously
   // while Android still retains the user's tap activation.
   useEffect(() => {
-    if (dirty) {
-      setPdf(null);
-      return;
-    }
+    setPdf(null);
+    setLoadedVersion(null);
+    if (dirty) return;
     const controller = new AbortController();
     void loadPdf(controller.signal)
-      .then(file => { if (!controller.signal.aborted) setPdf(file); })
+      .then(file => { if (!controller.signal.aborted) { setPdf(file); setLoadedVersion(version); } })
       .catch(() => { /* The user can retry from any button. */ });
     return () => controller.abort();
   }, [loadPdf, version, dirty]);
 
   const getPdf = async () => {
     if (dirty) throw new Error('Save the latest quotation changes first.');
-    if (pdf) return pdf;
+    if (pdf && loadedVersion === version) return pdf;
     setLoading(true);
     try {
       const file = await loadPdf();
       setPdf(file);
+      setLoadedVersion(version);
       return file;
     } finally { setLoading(false); }
   };
@@ -116,12 +117,13 @@ export function QuotationPdfControls({
       setMessage('Save the latest quotation changes before sharing the PDF.');
       return;
     }
-    if (!pdf) {
+    if (!pdf || loadedVersion !== version) {
       // If prefetch has not finished, prepare the file. A second tap is
       // necessary because browsers require a fresh gesture for file sharing.
       setLoading(true);
       void loadPdf().then(file => {
         setPdf(file);
+        setLoadedVersion(version);
         setMessage('PDF ready. Tap Share PDF again and choose WhatsApp.');
       }).catch(error => {
         setMessage(error instanceof Error ? error.message : 'Could not prepare PDF.');
