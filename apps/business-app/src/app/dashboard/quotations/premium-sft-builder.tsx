@@ -6,7 +6,7 @@ import { calculateSftEstimate, type SftEstimateDetails } from '@business-os/core
 import type { ConstructionRate } from '@business-os/database/construction-rates';
 import type { ConstructionPackage } from '@business-os/database/construction-packages';
 import { saveFloorwiseSftEstimate } from './construction-actions';
-import { createWhatsAppPdfShare } from './sharing-actions';
+import { QuotationPdfControls } from './quotation-pdf-controls';
 
 type Unit = 'sqft' | 'wall_sqft' | 'running_ft' | 'cubic_ft' | 'piece' | 'lumpsum';
 type Work = {
@@ -81,12 +81,12 @@ const measured = (row:Work) => {
 const nonempty=(s:string|undefined)=>Boolean(s?.trim());
 
 export function PremiumSftBuilder({
-  rates,packages,initialSchedule,revisionId,version,selectedPackageId,
+  rates,packages,initialSchedule,revisionId,version,selectedPackageId,quoteNumber,canSharePdf,
 }:{
   rates:ConstructionRate[];
   packages:ConstructionPackage[];
   initialSchedule:SftEstimateDetails|null;
-  revisionId:string; version:number; selectedPackageId?:string; previewHtml?:string|undefined;
+  revisionId:string; version:number; selectedPackageId?:string; quoteNumber:string; canSharePdf:boolean;
 }){
   const router=useRouter();
   const [pending,startTransition]=useTransition();
@@ -133,8 +133,6 @@ export function PremiumSftBuilder({
   const [message,setMessage]=useState('');
   const [saved,setSaved]=useState(false);
   const [dirty,setDirty]=useState(false);
-  const [sharing,setSharing]=useState(false);
-  const [whatsAppFallback,setWhatsAppFallback]=useState('');
   const floors=rows.filter(r=>r.kind==='floor');
   const extras=rows.filter(r=>r.kind==='additional');
   const usedMaterials=activeRates.filter(r=>materialIds.includes(r.id))
@@ -154,7 +152,7 @@ export function PremiumSftBuilder({
   const displayedTotal=estimate?Number(estimate.total):total;
   const valid=Boolean(estimate)&&!pending&&stale.length===0&&
     (activePackages.length===0||Boolean(selectedPackage));
-  const touch=()=>{setSaved(false);setDirty(true);setWhatsAppFallback('');setMessage('');};
+  const touch=()=>{setSaved(false);setDirty(true);setMessage('');};
   const updateRow=(index:number,patch:Partial<Work>)=>{
     setRows(current=>current.map((r,i)=>i===index?{...r,...patch}:r));touch();
   };
@@ -198,39 +196,6 @@ export function PremiumSftBuilder({
       setSaved(Boolean(response.id));
       if(response.id){setDirty(false);setDrawer(false);router.refresh();}
     });
-  };
-  const shareOnWhatsApp=async()=>{
-    if(sharing||pending)return;
-    if(dirty){setMessage('Save your changes before sharing the PDF.');return;}
-    setSharing(true);
-    setWhatsAppFallback('');
-    setMessage('');
-    try{
-      const result=await createWhatsAppPdfShare(revisionId);
-      if(!result.ok||!result.token){
-        setMessage(result.message||'Could not create a PDF sharing link.');
-        return;
-      }
-      // Customer receives the revocable, no-login PDF link, never the
-      // employee-only /dashboard/quotations/.../pdf URL.
-      const publicPdf=window.location.origin+'/q/'+result.token+'/pdf';
-      const phone=(result.recipientPhone||'').replace(/\D/g,'');
-      const recipient=phone.length===10&&/^[6-9]/.test(phone)
-        ? '91'+phone
-        : phone.length>=11&&phone.length<=15&&!phone.startsWith('0')
-          ?phone:'';
-      const caption='Hello '+(result.clientName||'')+
-        ', your quotation '+(result.quoteNumber||'')+
-        ' PDF is ready. Open or download it here: '+publicPdf;
-      const whatsApp='https://wa.me/'+recipient+'?text='+encodeURIComponent(caption);
-      setWhatsAppFallback(whatsApp);
-      setMessage('Opening WhatsApp with the secure PDF link. Tap Send in WhatsApp.');
-      window.location.assign(whatsApp);
-    }catch{
-      setMessage('Unable to open WhatsApp. Please try again.');
-    }finally{
-      setSharing(false);
-    }
   };
   return <div className="qs-workflow">
     <section className="qs-work-card qs-work-card-table">
@@ -344,22 +309,10 @@ export function PremiumSftBuilder({
         <div><h3>Quotation PDF</h3>
           <p>View, download or send the saved PDF directly through WhatsApp.</p></div>
       </div>
-      <div className="qs-work-pdf-actions">
-        <a href={url+'/pdf?view=1'} target="_blank" rel="noopener noreferrer">
-          ◉ View PDF
-        </a>
-        <a href={url+'/pdf'}>↓ Download PDF</a>
-        <button type="button" disabled={sharing||pending} onClick={shareOnWhatsApp}
-          className="qs-work-whatsapp">
-          {sharing?'Preparing PDF link…':'➤ Share PDF on WhatsApp'}
-        </button>
-      </div>
-      {whatsAppFallback&&<p className="qs-work-whatsapp-fallback">
-        WhatsApp didn't open? <a href={whatsAppFallback} target="_blank"
-          rel="noopener noreferrer">Open WhatsApp</a>
-      </p>}
-      <p className="qs-work-preview-note">Share opens WhatsApp with a secure PDF link.
-        Save any new changes first; you confirm the message in WhatsApp.</p>
+      <QuotationPdfControls
+        revisionId={revisionId} version={version}
+        quoteNumber={quoteNumber} dirty={dirty} canShare={canSharePdf}
+      />
     </section>
 
     <div className="qs-work-summary" aria-label="Construction quotation total">
