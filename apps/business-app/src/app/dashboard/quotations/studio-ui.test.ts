@@ -108,6 +108,32 @@ describe('lead-driven quotation creation', () => {
   });
 });
 
+describe('uniform quotation creation inputs', () => {
+  const form = file('./studio-start.tsx');
+  const css = file('./clean-create.css');
+
+  it('uses a single inline field label for required marks and consistent full-width groups', () => {
+    expect(form).toContain('className="qs-field-label"');
+    expect(form).toContain('className="qs-field-required"');
+    expect(form).toContain('qs-clean-field qs-field-full');
+    expect(form).not.toContain('Client Name <span>*</span>');
+    expect(form).not.toContain('Phone Number <span>*</span>');
+    expect(form).not.toContain('Enter project name');
+    expect(css).toContain('.qs-field-full, .qs-clean-notes { grid-column:1/-1; }');
+    expect(css).toContain('grid-template-columns:minmax(0,1fr)');
+    expect(css).not.toContain('.qs-create-field-grid .qs-clean-field:nth-child(');
+  });
+
+  it('has one scoped focus ring instead of inherited teal shadow and orange outline', () => {
+    expect(css).toContain('.qs-clean-create .qs-clean-field :is(input,select,textarea):focus');
+    expect(css).toContain('outline:none !important;');
+    expect(css).toContain('box-shadow:0 0 0 3px rgba(249,115,22,.19) !important;');
+    expect(css).toContain('background:#fff !important;');
+    expect(css).not.toContain('outline:2px solid #ffc4a3');
+    expect(css).not.toContain('.qs-clean-field :is(input,select):read-only');
+  });
+});
+
 describe('automatic CRN reuse from selected lead', () => {
   const form = file('./studio-start.tsx');
   const page = file('./new/page.tsx');

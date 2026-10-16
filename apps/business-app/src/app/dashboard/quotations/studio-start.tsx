@@ -83,7 +83,7 @@ export function QuotationStudioStart({
       <div className="qs-source-lead">
         {leads.length > 0 ? (
           <label className="qs-clean-field qs-source-picker">
-            Select lead <span>*</span>
+            <span className="qs-field-label">Select lead <span className="qs-field-required" aria-hidden="true">*</span></span>
             <select required value={leadId} onChange={(event) => chooseLead(event.target.value)}>
               <option value="">Choose a lead</option>
               {leads.map((entry) => <option key={entry.id} value={entry.id}>
@@ -111,36 +111,36 @@ export function QuotationStudioStart({
       </div>
 
       <div className="qs-create-field-grid">
-        <label className="qs-clean-field">Client Name <span>*</span>
+        <label className="qs-clean-field qs-field-full"><span className="qs-field-label">Client Name <span className="qs-field-required" aria-hidden="true">*</span></span>
           <input required maxLength={200} placeholder="Enter client name"
             autoComplete="name"
             value={data.clientName} onChange={(event) => update('clientName', event.target.value)}/>
         </label>
-        <label className="qs-clean-field">Phone Number <span>*</span>
+        <label className="qs-clean-field"><span className="qs-field-label">Phone Number <span className="qs-field-required" aria-hidden="true">*</span></span>
           <input type="tel" required minLength={3} maxLength={40} autoComplete="tel"
             placeholder="Enter phone number"
             value={data.phone} onChange={(event) => update('phone', event.target.value)}/>
         </label>
-        <label className="qs-clean-field">Email Address
+        <label className="qs-clean-field"><span className="qs-field-label">Email Address</span>
           <input type="email" maxLength={254} autoComplete="email"
             placeholder="Enter email address"
             value={data.email} onChange={(event) => update('email', event.target.value)}/>
         </label>
-        <label className="qs-clean-field">Project Location
+        <label className="qs-clean-field qs-field-full"><span className="qs-field-label">Project Location</span>
           <input maxLength={200} placeholder="Enter project location"
             value={data.location} onChange={(event) => update('location', event.target.value)}/>
         </label>
-        <label className="qs-clean-field">Plot Area / Property Configuration
+        <label className="qs-clean-field"><span className="qs-field-label">Plot Area / Property Configuration</span>
           <input maxLength={40} placeholder={industry === 'interior' ? '3BHK' : 'e.g. 200 sq yards'}
             value={data.plotSize} onChange={(event) => update('plotSize', event.target.value)}/>
         </label>
-        <label className="qs-clean-field">Project Type
+        <label className="qs-clean-field"><span className="qs-field-label">Project Type</span>
           <select value={data.projectType} onChange={(event) => update('projectType', event.target.value)}>
             <option>Residential</option><option>Commercial</option>
             <option>Renovation</option><option>Extension</option>
           </select>
         </label>
-        <label className="qs-clean-field qs-clean-notes">Additional Notes (optional)
+        <label className="qs-clean-field qs-field-full qs-clean-notes"><span className="qs-field-label">Additional Notes (optional)</span>
           <textarea rows={3} maxLength={1000}
             placeholder="Any special requirements, site details or notes…"
             value={data.notes} onChange={(event) => update('notes', event.target.value)}/>
