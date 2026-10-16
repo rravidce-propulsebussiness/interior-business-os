@@ -5,7 +5,7 @@ import {
 } from '../../quotation-storage';
 import { quotationDocument } from '../../document';
 import { renderQuotationPdf } from '../../pdf';
-import { safeFailure } from '@business-os/shared';
+import { DomainError, safeFailure } from '@business-os/shared';
 import { PdfServiceError } from '@business-os/shared/pdf';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -61,10 +61,18 @@ export async function GET(
         headers: { 'Cache-Control': 'private, no-store' },
       });
     }
+    const denied = error instanceof DomainError &&
+      (error.code === 'FORBIDDEN' || error.code === 'NOT_FOUND');
+    // 403 is reserved for actual authentication/authorization failures.
+    // Unexpected server PDF failures are 500, with sanitized error text.
+    // Never leak quotation details or storage credentials in responses.
     const failure = safeFailure(error);
-    return new Response(failure.message, {
-      status: 403,
-      headers: { 'Cache-Control': 'no-store' },
-    });
+    return new Response(
+      denied ? failure.message : 'Quotation PDF could not be generated. Please contact the administrator.',
+      {
+        status: denied ? 403 : 500,
+        headers: { 'Cache-Control': 'private, no-store' },
+      },
+    );
   }
 }
