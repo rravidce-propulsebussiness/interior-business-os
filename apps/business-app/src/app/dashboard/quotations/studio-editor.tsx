@@ -210,31 +210,15 @@ export function QuotationStudioEditor({
                   Preview contains saved amounts and specifications only.
                   Save any edits before sharing.
                 </p>
-                <div className="qs-toolbar">
-                  <button
-                    type="button"
-                    className="qs-btn ghost"
-                    onClick={() => {
-                      const preview =
-                        document.querySelector<HTMLIFrameElement>(
-                          '.qs-preview-frame',
-                        );
-                      if (preview?.contentWindow) preview.contentWindow.print();
-                      else window.open(url + '/preview', '_blank', 'noopener');
-                    }}
-                  >
-                    Print A4 design / Save as PDF
-                  </button>
-                  <a className="qs-btn primary" href={url + '/pdf?version=' + revisionVersion}>
-                    ↓ Download quotation PDF
-                  </a>
-                  <a
-                    className="qs-btn"
+                <div className="qs-toolbar" aria-label="Saved quotation PDF">
+                  <a className="qs-btn primary"
                     href={url + '/pdf?view=1&version=' + revisionVersion}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    View complete PDF + attachments ↗
+                    target="_blank" rel="noopener noreferrer">
+                    ◉ View premium PDF
+                  </a>
+                  <a className="qs-btn"
+                    href={url + '/pdf?version=' + revisionVersion}>
+                    ↓ Download premium PDF
                   </a>
                 </div>
                 {!hasSavedPaymentPlan && (
