@@ -194,6 +194,10 @@ export default async function QuotationStudio({
               initialSchedule={existingSft}
               initialMode={mode === 'custom' ? 'custom' : 'sft'}
               previewHtml={previewHtml}
+              quoteNumber={root.quotation_number}
+              clientName={header.data.customer.name}
+              location={header.data.project.site_address.city}
+              savedTotal={total}
             />
           ) : (
             <div className="qs-note">
