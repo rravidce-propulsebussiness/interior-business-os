@@ -16,7 +16,7 @@ const priceUnits: Record<QuotationPackage['pricingBasis'], string> = {
   per_unit: 'per item',
 };
 
-function Editor({
+export function IndustryPackageEditor({
   item,
   industries,
   currency,
@@ -261,7 +261,7 @@ export function QuotationPackagesManager({
         </select>
       </div>
       {editing === 'new' && (
-        <Editor
+        <IndustryPackageEditor
           industries={industries}
           currency={currency}
           onClose={() => setEditing(null)}
@@ -337,7 +337,7 @@ export function QuotationPackagesManager({
               </div>
             )}
             {canManage && editing === item.id && (
-              <Editor
+              <IndustryPackageEditor
                 key={item.version}
                 item={item}
                 industries={industries}
