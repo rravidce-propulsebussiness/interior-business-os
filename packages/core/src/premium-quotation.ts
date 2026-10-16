@@ -69,6 +69,105 @@ section.spec-pages{break-before:page;page-break-before:always;padding-top:10px}
 .pb-fine{font-size:10px!important;color:#cbd7e7!important}
 @media screen{body{background:#f0f3f7;padding:20px;overflow-x:auto}main{width:185mm;min-width:185mm;max-width:none;padding:15px;background:#fff;box-shadow:0 10px 32px #15264022}.pb-cover{height:760px;max-height:none}.pb-close{min-height:700px}}
 @media print{body,main{margin:0;padding:0;max-width:none;box-shadow:none}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+
+/* Printed pages and compact, true-page mobile previews share one layout. */
+.pb-page { background:#fff; position:relative; break-after:page; page-break-after:always; }
+.pb-page-header {display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid #e8e0d9;padding:9px 0 12px;margin-bottom:14px}
+.pb-page-header .pb-brand-small {font-size:19px;font-weight:900;color:#17263f;letter-spacing:-.05em}
+.pb-page-header .pb-brand-small::first-letter {color:__ACCENT__}
+.pb-page-header small {font-size:9px;letter-spacing:1.3px;text-transform:uppercase;color:#586983;font-weight:800}
+.pb-page-label{font-size:10px;color:__ACCENT__;font-weight:850;text-transform:uppercase;letter-spacing:1.3px}
+.pb-page-footer {font-size:9px;color:#65768e;border-top:1px solid #ecdfd5;padding:9px 2px;display:flex;justify-content:space-between;gap:10px;margin-top:18px}
+.pb-project-banner{display:flex;align-items:center;min-height:58mm;position:relative;overflow:hidden;border-radius:13px;margin:8px 0 14px;
+  background:linear-gradient(100deg,#182b45,#394d64);color:#fff}
+.pb-project-banner img {width:100%;height:58mm;object-fit:cover;position:absolute;inset:0}
+.pb-project-banner:after {content:"";position:absolute;inset:0;background:linear-gradient(90deg,#102239ed 0%,#102239ab 48%,#10223920 100%)}
+.pb-project-banner .pb-banner-title {position:relative;z-index:1;padding:17px;max-width:58%;font-size:19px;color:#fff;font-weight:850;line-height:1.2}
+.pb-project-banner .pb-banner-title small {display:block;font-size:9px;font-weight:800;letter-spacing:1.3px;margin-bottom:8px;color:#ffbc8d;text-transform:uppercase}
+.pb-pricing .parties{margin:10px 0 15px}
+.pb-summary-title{margin:17px 0 12px;font-size:18px;font-weight:850;color:#17283f;border-left:4px solid __ACCENT__;padding-left:11px}
+.pb-fact-strip{display:flex;gap:8px;flex-wrap:wrap;background:#fff5ee;border:1px solid #f5ddcb;padding:12px;margin:12px 0;border-radius:10px}
+.pb-fact-strip span{font-size:10px;color:#455470;font-weight:750;flex:1 1 120px;white-space:normal}
+.pb-fact-strip b{display:block;font-size:16px;color:__ACCENT__}
+.pb-specs-page{break-before:page;page-break-before:always}
+.pb-material-image{width:100%;height:55mm;border-radius:11px;object-fit:cover;margin:8px 0 12px;display:block}
+.pb-specs-page .spec-pages{break-before:auto;page-break-before:auto}
+.pb-specs-page .spec-item{display:inline-flex;vertical-align:top;width:calc(50% - 8px);min-height:115px;margin:5px 3px 5px 0;background:#fff;border:1px solid #e8e1dc;border-left:3px solid __ACCENT__;box-shadow:0 4px 10px #1520380a}
+.pb-specs-page .spec-item h3{font-size:12px}.pb-specs-page .spec-item p{font-size:10px}
+.pb-specs-page .spec-number{border-radius:50%;width:28px;min-width:28px;height:28px}
+.pb-spec-intro {font-size:11px;color:#596880;margin-bottom:10px}
+.pb-payment-page{break-before:page;page-break-before:always}
+.pb-payment-page h2 {border-left:4px solid __ACCENT__;padding-left:11px;font-size:19px}
+.pb-payment-page .terms{break-inside:auto}
+.pb-payment-page .payment-plan tr td:nth-child(2){white-space:nowrap}
+.pb-payment-page .payment-plan tr:nth-child(2n){background:#fff9f3}
+.pb-payment-page .payment-plan tr.total {background:#fff0e6}
+.pb-terms-panel{padding:14px 16px;border:1px solid #eaded5;border-radius:11px;background:#faf9f7;margin-top:16px}
+.pb-terms-panel .text{font-size:10px}
+.pb-color-band{background:linear-gradient(100deg,__ACCENT__,#162943);height:8px;border-radius:7px;margin:15px 0}
+.pb-cover .pb-cover-amount{word-break:break-word}
+.pb-photo figcaption{font-weight:700}
+@media screen {
+ body{padding:20px;background:#eef2f6;overflow-x:hidden}
+ main{width:100%;max-width:185mm;min-width:0;padding:0;background:transparent;box-shadow:none}
+ .pb-cover,.pb-page,.pb-close {width:100%;max-width:100%;margin:0 auto 16px;box-shadow:0 8px 28px #20334b24}
+ .pb-page{padding:15px 18px;min-height:260mm;border:1px solid #e6e8eb}
+ .pb-cover{height:260mm;max-height:none}
+ .pb-close{min-height:255mm}
+}
+@media screen and (max-width:720px){
+ body{padding:8px!important;margin:0;background:#edf1f6;overflow-x:hidden!important}
+ main{display:block!important;min-width:0!important;width:100%!important;max-width:none!important;padding:0!important;box-shadow:none!important}
+ .pb-cover,.pb-page,.pb-close{display:flex;flex-direction:column;box-sizing:border-box;width:100%!important;max-width:100%!important;min-width:0;min-height:calc((100vw - 16px)*1.414);height:auto;max-height:none;overflow:hidden;margin:0 0 12px!important;border-radius:9px;box-shadow:0 3px 13px #1627401a}
+ .pb-page{padding:13px 12px;border:0;overflow:visible}
+ .pb-cover{padding:23px 19px 20px}
+ .pb-cover h2{font-size:clamp(27px,7vw,46px);margin:15px 0}
+ .pb-cover h3{font-size:clamp(15px,4.3vw,20px)}
+ .pb-cover-body{min-height:310px}
+ .pb-cover-amount{font-size:clamp(18px,5vw,26px);margin-top:22px}
+ .pb-top{min-height:40px}.pb-company{font-size:clamp(16px,4.8vw,21px)}
+ .pb-tag{font-size:7px;letter-spacing:1px;padding:5px 7px}
+ .pb-bottom{font-size:9px;flex-wrap:wrap;gap:7px}
+ .pb-page-header .pb-brand-small{font-size:16px}
+ .pb-page-header small{font-size:8px}
+ .pb-page-label{font-size:8px}
+ .pb-project-banner{min-height:145px;margin:7px 0 11px}
+ .pb-project-banner img{height:145px}
+ .pb-project-banner .pb-banner-title{font-size:15px;padding:12px;max-width:70%}
+ .pb-quote-heading,.pb-title{padding:9px 10px;margin:10px 0}
+ .pb-title h1{font-size:clamp(16px,4.5vw,25px)}
+ .parties{gap:7px!important;margin:8px 0!important}
+ .parties section{min-height:0;padding:9px 8px;border-radius:9px}
+ .parties h2{font-size:9px}.parties h3{font-size:11px}
+ .parties p{font-size:8px;overflow-wrap:anywhere;line-height:1.4}
+ .pb-summary-title{font-size:15px;margin:11px 0}
+ table{font-size:8px;table-layout:fixed;margin:8px 0}
+ th,td{font-size:8px;padding:7px 4px;overflow-wrap:anywhere}
+ th{font-size:8px}.line{width:38%}.amount{word-break:break-word}
+ .totals{width:100%;margin:12px 0}
+ .totals .total td{font-size:12px}
+ .pb-fact-strip{gap:6px;padding:9px}.pb-fact-strip span{font-size:9px;flex:1 1 70px}.pb-fact-strip b{font-size:13px}
+ .pb-specs-page .spec-item{min-height:0;padding:9px 7px;gap:6px;width:calc(50% - 6px);margin:3px 2px 3px 0;display:inline-flex}
+ .pb-specs-page .spec-item h3{font-size:10px}.pb-specs-page .spec-item p{font-size:8px;line-height:1.45}
+ .pb-specs-page .spec-number{min-width:20px;width:20px;height:20px;font-size:9px}
+ .pb-material-image{height:130px;object-fit:cover}
+ .pb-specs-page h2,.pb-payment-page h2{font-size:16px}
+ .pb-payment-page .terms h2{font-size:16px}
+ .pb-terms-panel{padding:10px 12px}
+ .pb-terms-panel .text{font-size:9px}
+ .pb-close{padding:20px}.pb-close h2{font-size:clamp(23px,7vw,36px);margin:45px 0 12px}
+ .pb-close p{font-size:11px}.pb-contact{font-size:9px}
+ .pb-page-footer{font-size:8px;margin-top:auto;padding-top:12px}
+}
+@media print{
+ main{width:auto!important;max-width:none!important;padding:0!important;margin:0!important}
+ .pb-cover,.pb-page,.pb-close{box-shadow:none!important;border:0!important;border-radius:0!important}
+ .pb-page{min-height:0}
+ .pb-page-header{margin-top:0}
+ .pb-page-footer{margin-top:14px}
+ .pb-specs-page .spec-item{display:inline-flex}
+}
+
 </style>`;
 
 export function premiumSections(d: CustomerDocument) {
@@ -78,6 +177,7 @@ export function premiumSections(d: CustomerDocument) {
   const site = esc([brand.address.line1,brand.address.city,brand.address.region,brand.address.country_code].filter(Boolean).join(', '));
   const coverImage = brand.cover_image_data_uri ?? '';
   const detailImage = brand.detail_image_data_uri ?? '';
+  const materialImage = brand.materials_image_data_uri ?? '';
   const logoTag = logo ? '<img alt="Company logo" src="'+esc(logo)+'">' : '<span class="pb-company">'+company+'</span>';
   const value = new Intl.NumberFormat('en-IN',{style:'currency',currency:d.currency,maximumFractionDigits:2}).format(Number(d.totals.final_amount));
   const cover = '<section class="pb-cover">'+
@@ -98,5 +198,14 @@ export function premiumSections(d: CustomerDocument) {
     '<div><strong>Location</strong>'+site+'</div></div>'+
     '<p class="pb-fine">Quotation '+esc(d.number)+' · Revision '+d.revision+
     '. This proposal is not a signed contract. Scope and prices are governed by the written quotation and terms.</p></div></section>';
-  return {cover,photo,end};
+  const materialBanner = materialImage ? '<img class="pb-material-image" src="'+esc(materialImage)+'" alt="Company-provided materials and finishes">' : '';
+  const projectBanner = '<div class="pb-project-banner">'+
+    (detailImage ? '<img src="'+esc(detailImage)+'" alt="Company-provided project photograph">' : '')+
+    '<div class="pb-banner-title"><small>Project proposal</small>'+
+    esc(d.header.project.name)+'</div></div>';
+  const pageHeader = (section: string) => '<div class="pb-page-header"><span class="pb-brand-small">'+company+
+    '</span><small>'+esc(section)+'</small></div>';
+  const pageFooter = (section: string) => '<div class="pb-page-footer"><span>'+esc(d.number)+' · R'+d.revision+
+    '</span><strong>'+esc(section)+'</strong></div>';
+  return {cover,photo,end,materialBanner,projectBanner,pageHeader,pageFooter};
 }
