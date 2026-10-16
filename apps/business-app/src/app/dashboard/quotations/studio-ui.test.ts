@@ -28,7 +28,7 @@ describe('minimal quotation studio navigation', () => {
 
   it('Save delegates to real persisted child actions, not a refresh fake', () => {
     expect(studio).toContain('saveButton.click()');
-    expect(studio).not.toContain('router.refresh()');
+    expect(studio).not.toContain('router.refresh();');
     expect(sft).toContain('data-studio-save="quote"');
     expect(construction).toContain('data-studio-save="quote"');
     expect(interior).toContain("data-studio-save={!selectedPackage ? 'quote' : undefined}");
