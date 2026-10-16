@@ -228,10 +228,12 @@ describe('compact single-screen construction quotation editor', () => {
   const css = file('./studio.css');
 
   it('uses company orange hero and one package selector instead of a navy multi-step wizard', () => {
-    expect(selector).toContain('qs-build-hero');
+    expect(selector).toContain('qs-build-overview');
+    expect(selector).toContain('quoteNumber ||');
+    expect(selector).toContain('savedTotal ||');
     expect(selector).toContain('Select construction quotation package');
     expect(selector).toContain('qs-build-package-rate');
-    expect(css).toContain('#fff6ed');
+    expect(css).toContain('.qs-build-overview');
     expect(css).toContain('#f16a22');
     expect(editor).not.toContain('01 · Package & floor costing');
     expect(editor).not.toContain('02 · Package specifications');
