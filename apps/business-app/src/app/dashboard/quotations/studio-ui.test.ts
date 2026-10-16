@@ -356,6 +356,16 @@ describe('PDF attachment sharing and reliable file operations', () => {
     expect(css).not.toContain('.qs-work-preview-grid');
   });
 
+  it('opens the very same PDF for list view and studio preview as for download', () => {
+    const list = file('./page.tsx');
+    const studio = file('./studio-editor.tsx');
+    expect(list).toContain("const preview = '/dashboard/quotations/' + row.id + '/pdf?view=1'");
+    expect(studio).toContain("'/pdf?view=1&version=' + revisionVersion");
+    expect(studio).toContain("'/pdf?version=' + revisionVersion");
+    expect(studio).not.toContain('Print A4 design / Save as PDF');
+    expect(studio).not.toContain('qs-studio-compact-bar');
+  });
+
   it('shares an actual checked PDF File, not a link, using native Android sharing', () => {
     expect(controls).toContain("new File([blob], filename, { type: 'application/pdf' })");
     expect(controls).toContain("header !== PDF_HEADER");
