@@ -33,7 +33,7 @@ describe('minimal quotation studio navigation', () => {
     expect(construction).toContain('data-studio-save="quote"');
     expect(interior).toContain("data-studio-save={!selectedPackage ? 'quote' : undefined}");
     expect(payments).toContain('data-studio-save="payments"');
-    expect(page).toContain('data-studio-save-section="files"');
+    expect(file('./quotation-terms-editor.tsx')).toContain('data-studio-save="files"');
   });
 
   it('preserves server-side issue/share and new revision after customer sharing', () => {
