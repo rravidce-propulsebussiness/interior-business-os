@@ -340,7 +340,8 @@ describe('split-floor construction area editing and resilient PDF routes', () =>
 
   it('keeps parking and penthouse rate defaults in company package settings', () => {
     expect(pkg).toContain('Default parking area rate');
-    expect(pkg).toContain('Default penthouse rate');
+    expect(pkg).toContain('Same as construction package');
+    expect(pkg).not.toContain('Default penthouse rate');
     expect(pkg).toContain('writeFloorRateDefaults(sections');
     expect(pkg).toContain('name="specSections" value={JSON.stringify(savedSections)}');
   });
@@ -352,7 +353,9 @@ describe('split-floor construction area editing and resilient PDF routes', () =>
     expect(builder).toContain('addFloorZone(group.level');
     expect(builder).toContain('combinedArea');
     expect(builder).toContain('floorRateDefaults.parking');
-    expect(builder).toContain('floorRateDefaults.penthouse');
+    expect(builder).toContain('editableSftRows(initialSchedule)');
+    expect(builder).not.toContain('floorRateDefaults.penthouse');
+    expect(builder).toContain("zone==='parking'");
     expect(builder).toContain("rows.length>=18");
   });
 
@@ -389,5 +392,20 @@ describe('save resiliency and floor auto-inheritance', () => {
     expect(floorSave).toContain('privilegedStorageConfigured');
     expect(floorSave).toContain('const id = await s.commercial.saveManualLine(');
     expect(floorSave).toContain('attachmentWarning');
+  });
+});
+
+describe('regression for Ground Floor Save and penthouse default rate', () => {
+  const editor = file('./premium-sft-builder.tsx');
+  const pkg = file('../pricing/construction/premium-package-editor.tsx');
+  it('converts saved snapshot rows to strict editable inputs without deleting floor measurements', () => {
+    expect(editor).toContain('editableSftRows(initialSchedule)');
+    expect(editor).toContain('sftEstimateInputSchema.safeParse(savePayload)');
+  });
+  it('sets new penthouse to construction rate, not separate package rate', () => {
+    expect(editor).not.toContain('floorRateDefaults.penthouse');
+    expect(pkg).toContain('penthouse:');
+    expect(pkg).toContain("penthouse: ''");
+    expect(pkg).toContain('Same as construction package');
   });
 });
