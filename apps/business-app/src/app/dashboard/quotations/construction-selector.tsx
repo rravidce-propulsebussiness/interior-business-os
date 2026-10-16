@@ -209,38 +209,51 @@ export function ConstructionSelector({
   );
   const chosen = activePackages.find((pkg) => pkg.id === selected);
   return (
-    <section className="qs-card qs-simple-package-editor" aria-label="Construction quotation package">
-      <div className="qs-simple-package-top">
-        <div>
-          <p className="qs-package-eyebrow">Construction quote</p>
-          <h2>Quotation Package</h2>
-          <p className="qs-muted">Choose a company package or Custom Quote. You can change individual materials, rates and specifications.</p>
+    <div className="qs-build-workspace">
+      <header className="qs-build-hero">
+        <span className="qs-build-eyebrow">CONSTRUCTION QUOTATION</span>
+        <h2>Create your quotation</h2>
+        <p>One package. Your floors. Only the changes your client needs.</p>
+      </header>
+      <section className="qs-build-panel qs-build-package">
+        <div className="qs-build-title">
+          <span className="qs-build-number">01</span>
+          <div><h3>Choose package</h3><p>Select your company package.</p></div>
         </div>
-        <label className="qs-field qs-simple-package-select">
-          Package
-          <select aria-label="Select construction quotation package"
-            value={selected}
-            onChange={(event) => setSelected(event.target.value)}>
-            <option value="">Select a package</option>
-            {activePackages.map((pkg) => (
-              <option key={pkg.id} value={pkg.id}>
-                {pkg.name} · {money(Number(pkg.ratePerSqft))}/SFT
-              </option>
-            ))}
-            <option value="custom">Custom Quote</option>
-          </select>
-        </label>
-      </div>
+        <div className="qs-build-package-choice">
+          <label className="qs-build-package-field">
+            <span className="sr-only">Construction package</span>
+            <select aria-label="Select construction quotation package"
+              value={selected}
+              onChange={(event) => setSelected(event.target.value)}>
+              <option value="">Select a package</option>
+              {activePackages.map((pkg) => <option key={pkg.id} value={pkg.id}>
+                {pkg.name}
+              </option>)}
+              <option value="custom">Custom Quote</option>
+            </select>
+          </label>
+          {chosen && <div className="qs-build-package-rate">
+            <strong>{money(Number(chosen.ratePerSqft))}</strong>
+            <small>per SFT</small>
+          </div>}
+        </div>
+        {chosen && <p className="qs-build-package-desc">
+          {chosen.description || 'Company package specifications included.'}
+        </p>}
+      </section>
       {selected === 'custom' ? (
-        <CustomizedQuote rates={rates} revisionId={revisionId} version={version} />
+        <section className="qs-build-custom-wrap">
+          <CustomizedQuote rates={rates} revisionId={revisionId} version={version}/>
+        </section>
       ) : chosen ? (
         <PremiumSftBuilder key={selected}
           selectedPackageId={chosen.id}
           rates={rates} packages={packages} initialSchedule={initialSchedule}
           revisionId={revisionId} version={version} />
       ) : (
-        <p className="qs-info-box">Select one of your saved packages or Custom Quote to start.</p>
+        <p className="qs-build-empty">Choose a package above to enter floor areas, optional works and material brands.</p>
       )}
-    </section>
+    </div>
   );
 }
