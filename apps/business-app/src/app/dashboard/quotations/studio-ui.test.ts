@@ -438,7 +438,7 @@ describe('streamlined quote, terms and payment Studio', () => {
   const css = file('./studio.css');
 
   it('keeps only three editing tabs and removes duplicate client and branding panels', () => {
-    expect(studio).toContain("{ id: 'quote', title: 'Estimate & Specifications' }");
+    expect(studio).toContain("{ id: 'quote', title: 'Scope' }");
     expect(studio).toContain("{ id: 'files', title: 'Terms & Inclusions' }");
     expect(studio).toContain("{ id: 'payments', title: 'Payment Schedule' }");
     expect(studio).not.toContain("id: 'client'");
@@ -469,4 +469,19 @@ describe('streamlined quote, terms and payment Studio', () => {
     expect(css).toContain('.qs-terms-grid');
     expect(css).toContain('grid-template-columns:repeat(3,minmax(0,1fr))');
   });
+  
+  it('shows only milestone payment details on the Payment Schedule tab', () => {
+    const payments = file('./payment-schedule-editor.tsx');
+    expect(studio).toContain("step !== 'payments' &&");
+    expect(studio).toContain("step === 'payments' ? ' qs-studio-grid-full'");
+    expect(studio).toContain("step !== 'payments' && <aside");
+    expect(payments).toContain('Save Payment Schedule');
+    expect(payments).toContain('data-studio-save="payments"');
+    expect(payments).toContain('qs-payment-summary');
+    expect(payments).toContain('qs-payment-row');
+    expect(payments).not.toContain('<table');
+    expect(css).toContain('.qs-payment-panel');
+    expect(css).toContain('grid-template-areas:"grip stage stage remove"');
+  });
+
 });
