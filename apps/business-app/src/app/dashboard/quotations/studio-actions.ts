@@ -32,9 +32,10 @@ const createInput = z
 /**
  * Real quote creation from entered client and project data.
  *
- * Saves a customer, its project and then a signed, versioned draft using
- * existing tenant permission-enforced RPCs. It does not issue a quote and
- * never use elevated credentials to bypass a user's create permissions.
+ * Saves a pre-sale customer and a signed versioned quotation draft.
+ * Until the CRM conversion, the database's mandatory project FK is only an
+ * internal sales-prospect reference, not a visible execution project.
+ * Never use elevated credentials to bypass the actor's permissions.
  */
 export async function createStudioQuotation(input: unknown): Promise<{
   ok: boolean;
@@ -44,13 +45,10 @@ export async function createStudioQuotation(input: unknown): Promise<{
   try {
     const values = createInput.parse(input);
     const s = await commercialServices('quotation.create', 'quotation');
-    if (
-      !(
-        s.allowed('customer.create', 'crm') ||
-        s.allowed('customer.create', 'quotation')
-      ) ||
-      !s.allowed('project.create', 'projects')
-    )
+    // A salesperson may prepare a quotation without project.create permission.
+    // Projects are execution workspaces and have a separate conversion gate.
+    if (!(s.allowed('customer.create', 'crm') ||
+          s.allowed('customer.create', 'quotation')))
       throw new DomainError('FORBIDDEN');
 
     // Quoting an enquiry is not the same as closing it Won. Keep its
@@ -102,8 +100,8 @@ export async function createStudioQuotation(input: unknown): Promise<{
           'Company quotation branding is not configured yet. Open Quotation Settings to finish setup.',
       };
 
-    // A broken Hostinger/database signing-key pair used to create customer
-    // and project records and only then reject the final quotation. Verify
+    // A broken signing key previously created a sales prospect even when
+    // the final quotation was rejected. Verify
     // the same attestation up front so retries are safe and actionable.
     try {
       await s.commercial.assertSigningReady(s.org);
@@ -115,9 +113,8 @@ export async function createStudioQuotation(input: unknown): Promise<{
       };
     }
 
-    // The CRN belongs to a customer, not to a quotation. Reuse the existing
-    // customer/project whenever selected; never manufacture another customer
-    // for a known phone or email address.
+    // Reuse a contact by CRN. A quote is not yet a project; it retains the
+    // chosen name, industry and site details as a sales proposal snapshot.
     const baseAddress = {
       line1: '',
       line2: '',
@@ -219,7 +216,7 @@ export async function createStudioQuotation(input: unknown): Promise<{
       createdCustomer = true;
     }
 
-    let createdProject = false;
+    let createdProspect = false;
     let projectId = values.projectId ?? '';
     if (projectId) {
       const { data: selectedProject, error } = await s.client
@@ -244,6 +241,8 @@ export async function createStudioQuotation(input: unknown): Promise<{
           message: 'Choose the correct industry for this existing project.',
         };
     } else {
+      // Reuse only an internal quote prospect, never silently connect a new
+      // sales quotation to a confirmed execution project with the same name.
       const { data: projectMatches, error } = await s.client
         .from('projects')
         .select('id')
@@ -251,6 +250,7 @@ export async function createStudioQuotation(input: unknown): Promise<{
         .eq('customer_id', customerId)
         .eq('name', values.projectName)
         .eq('industry_id', activeIndustry.id)
+        .eq('is_sales_prospect', true)
         .eq('status', 'active')
         .limit(2);
       if (error)
@@ -267,30 +267,35 @@ export async function createStudioQuotation(input: unknown): Promise<{
             'Multiple projects share this name. Select the intended existing project.',
         };
       } else {
-        projectId = randomUUID();
-        const projectCode =
-          'Q' +
-          Date.now().toString(36).toUpperCase() +
-          randomUUID().slice(0, 5).toUpperCase();
-        await s.commercial.saveEntity(s.org, 'projects', {
-          id: projectId,
-          organization_id: s.org,
-          version: 1,
-          customer_id: customerId,
-          name: values.projectName,
-          code: projectCode.slice(0, 64),
-          industry_id: activeIndustry.id,
-          branch_id: null,
-          project_type: values.projectType,
-          site_address: baseAddress,
-          status: 'active',
-          notes: [
-            values.plotSize ? 'Plot / project size: ' + values.plotSize : '',
-            values.notes,
-          ].filter(Boolean).join('\n'),
-          assigned_user_id: null,
-        });
-        createdProject = true;
+        // Atomically create a quote-only prospect record with the correct
+        // sales flag already set. This record is excluded from the Projects
+        // execution workspace until CRM Closed-Won conversion.
+        const createProspect = s.client.rpc.bind(s.client) as unknown as (
+          name: string,
+          args: Record<string, string | boolean>,
+        ) => Promise<{ data: string | null; error: { message: string } | null }>;
+        const { data: prospectId, error: prospectError } =
+          await createProspect('quotation_prospect_project_create', {
+            p_organization_id: s.org,
+            p_customer_id: customerId,
+            p_industry_id: activeIndustry.id,
+            p_name: values.projectName,
+            p_project_type: values.projectType,
+            p_site_city: values.location,
+            p_notes: [
+              values.plotSize ? 'Plot / project size: ' + values.plotSize : '',
+              values.notes,
+            ].filter(Boolean).join('\n'),
+            p_new_customer: createdCustomer,
+          });
+        if (prospectError || !prospectId)
+          return {
+            ok: false,
+            message: 'Could not prepare the quotation prospect. Check that the ' +
+              'latest quotation database migration has been deployed.',
+          };
+        projectId = prospectId;
+        createdProspect = true;
       }
     }
 
@@ -302,7 +307,7 @@ export async function createStudioQuotation(input: unknown): Promise<{
       const rpc = s.client.rpc.bind(s.client) as unknown as (
         fn: string, args: Record<string, string | boolean>,
       ) => Promise<{ error: { message: string } | null }>;
-      const provisional = createdCustomer || createdProject;
+      const provisional = createdCustomer || createdProspect;
       const linked = await rpc(
         provisional ? 'lead_quotation_link_provisional' : 'lead_quotation_link', {
           p_organization_id: s.org,
@@ -311,7 +316,7 @@ export async function createStudioQuotation(input: unknown): Promise<{
           p_project_id: projectId,
           ...(provisional ? {
             p_new_customer: createdCustomer,
-            p_new_project: createdProject,
+            p_new_project: createdProspect,
           } : {}),
         },
       );
@@ -320,9 +325,9 @@ export async function createStudioQuotation(input: unknown): Promise<{
         : '';
     };
 
-    // Each commercial alternative is a distinct quotation under the SAME
-    // customer/CRN and planning project: Standard, Premium, and later options
-    // must not silently reopen a previous customer's quotation. A revision
+    // Each alternative is a new quotation under the same customer/CRN, using
+    // a sales prospect reference internally until an actual conversion.
+    // Standard and Premium must not silently reopen an existing quote. A revision
     // remains a version of a single option and issued snapshots remain frozen.
     const revisionId = await s.commercial.commit(
       s.org,
