@@ -66,6 +66,7 @@ export function QuotationStudioEditor({
   canEdit,
   canIssue,
   issueEditor,
+  reviseEditor,
 }: {
   revisionId: string;
   quoteNumber: string;
@@ -89,6 +90,7 @@ export function QuotationStudioEditor({
   canEdit: boolean;
   canIssue: boolean;
   issueEditor: ReactNode;
+  reviseEditor: ReactNode;
 }) {
   const [step, setStep] = useState<Tab>(initialStep);
   const [message, setMessage] = useState('');
@@ -208,6 +210,7 @@ export function QuotationStudioEditor({
                   modifying quotation prices.
                 </p>
               )}
+              {!canEdit && reviseEditor}
               <section className="qs-card">
                 <h2>Saved quotation items</h2>
                 {lines.length ? (
@@ -357,7 +360,7 @@ export function QuotationStudioEditor({
                   hasSavedPaymentPlan && issueEditor}
                 {status === 'draft' && lines.length === 0 && (
                   <p className="qs-note" style={{ marginTop: 13 }}>
-                    Add at least one priced line before issuing.
+                    Add at least one priced line before enabling customer sharing.
                   </p>
                 )}
               </section>
