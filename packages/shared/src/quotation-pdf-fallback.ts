@@ -20,7 +20,7 @@ export type QuotationPdfFallbackInput = {
   accent: string;
   total: string;
   logoDataUri?: string;
-  coverImageDataUri?: string;
+  coverImageDataUri?: string | undefined;
   items: ReadonlyArray<{
     heading: string;
     price?: string;
