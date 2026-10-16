@@ -85,7 +85,6 @@ export function renderQuotationDocument(input: unknown): string {
 
   // Payment milestones are saved as an immutable part of the quotation's
   // customer-facing terms. Print a readable table without exposing markers.
-  const paymentMarker = d.terms.match(/\[STAGE_PAYMENT_PLAN\]([\s\S]*?)\[\/STAGE_PAYMENT_PLAN\]/);
   const remainingTerms = d.terms.replace(/\[STAGE_PAYMENT_PLAN\][\s\S]*?\[\/STAGE_PAYMENT_PLAN\]/g, '').trim();
   const paymentRows = savedStagePaymentPlan(d.terms) ?? [];
   const paymentValid = paymentRows.length > 0;
