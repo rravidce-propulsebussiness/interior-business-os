@@ -89,25 +89,31 @@ export function PremiumSftBuilder({
   initialSchedule,
   revisionId,
   version,
+  selectedPackageId,
+  hidePackagePicker = false,
 }: {
   rates: ConstructionRate[];
   packages: ConstructionPackage[];
   initialSchedule: SftEstimateDetails | null;
   revisionId: string;
   version: number;
+  selectedPackageId?: string | undefined;
+  hidePackagePicker?: boolean | undefined;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const activePackages = packages.filter((item) => item.status === 'active');
   const activeRates = rates.filter((item) => item.status === 'active');
-  const [packageId, setPackageId] = useState(() => {
-    const prior = initialSchedule?.package;
-    return (
-      activePackages.find(
-        (item) => item.id === prior?.id || item.code === prior?.code,
-      )?.id ?? ''
-    );
-  });
+  const previousPackage = activePackages.find((item) =>
+    item.id === initialSchedule?.package?.id ||
+    item.code === initialSchedule?.package?.code
+  );
+  const chosenPackage = selectedPackageId
+    ? activePackages.find((item) => item.id === selectedPackageId)
+    : previousPackage;
+  const replacePackage = Boolean(chosenPackage &&
+    (!previousPackage || previousPackage.id !== chosenPackage.id));
+  const [packageId, setPackageId] = useState(chosenPackage?.id ?? '');
   const selectedPackage = activePackages.find((item) => item.id === packageId);
   const [rows, setRows] = useState<WorkRow[]>(
     initialSchedule?.rows.map((row) => ({
@@ -115,14 +121,29 @@ export function PremiumSftBuilder({
       name: row.name,
       lengthFeet: row.lengthFeet,
       widthFeet: row.widthFeet,
-      ratePerSqft: row.ratePerSqft,
-    })) ?? [makeRow('floor', 'Ground Floor', '')],
+      ratePerSqft: replacePackage && row.kind === 'floor'
+        ? chosenPackage!.ratePerSqft : row.ratePerSqft,
+    })) ?? [makeRow('floor', 'Ground Floor', chosenPackage?.ratePerSqft ?? '')],
   );
-  const [sections, setSections] = useState<Section[]>(
-    initialSchedule?.sections?.length
+  const [sections, setSections] = useState<Section[]>(() => {
+    if (chosenPackage && (replacePackage || !initialSchedule?.sections?.length)) {
+      return [
+        { title: 'Package scope & inclusions', description: chosenPackage.description },
+        ...(chosenPackage.specSections.length
+          ? chosenPackage.specSections.map((section) => ({
+              title: section.title,
+              description: section.description,
+              brand: section.brand,
+              grade: section.grade,
+              allowancePerSqft: section.allowancePerSqft,
+            }))
+          : freshSections().slice(1)),
+      ];
+    }
+    return initialSchedule?.sections?.length
       ? initialSchedule.sections.map((item) => ({ ...item }))
-      : freshSections(),
-  );
+      : freshSections();
+  });
   const [brands, setBrands] = useState<Record<string, string>>(() => {
     const selected: Record<string, string> = {};
     for (const material of initialSchedule?.materials ?? []) {
@@ -314,6 +335,7 @@ export function PremiumSftBuilder({
 
         {step === 1 ? (
           <div className="space-y-5 p-4 sm:p-7">
+            {!hidePackagePicker && (
             <div className="grid gap-3 rounded-2xl border border-blue-100 bg-blue-50 p-4 sm:grid-cols-[1fr_auto] sm:items-end">
               <label className="grid gap-2 text-xs font-bold text-slate-700">
                 Construction package <span className="text-rose-600">*</span>
@@ -345,6 +367,7 @@ export function PremiumSftBuilder({
                 Manage packages ↗
               </Link>
             </div>
+            )}
             {selectedPackage && (
               <div className="flex flex-wrap items-start justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
                 <div>
