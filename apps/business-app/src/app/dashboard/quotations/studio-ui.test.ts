@@ -344,8 +344,8 @@ describe('split-floor construction area editing and resilient PDF routes', () =>
 
   it('allows independently priced construction, parking and penthouse portions', () => {
     expect(builder).toContain("type FloorZone = 'construction' | 'parking' | 'penthouse'");
-    expect(builder).toContain("floorZoneName(level,'parking')");
-    expect(builder).toContain("floorZoneName(level,'penthouse')");
+    expect(builder).toContain("floorZoneName(level,zone)");
+    expect(builder).toContain("zone==='parking'");
     expect(builder).toContain('addFloorZone(group.level');
     expect(builder).toContain('combinedArea');
     expect(builder).toContain('floorRateDefaults.parking');
