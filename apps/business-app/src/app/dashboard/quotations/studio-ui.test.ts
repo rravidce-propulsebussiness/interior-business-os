@@ -261,7 +261,10 @@ describe('compact single-screen construction quotation editor', () => {
     expect(editor).toContain('setDraftSections(curr=>curr.map(');
     expect(editor).toContain('setSections(draftSections.map(');
     expect(editor).toContain('cancelMaterials');
-    expect(editor).toContain('saveFloorwiseSftEstimate(revisionId,version,');
+    expect(editor).toContain('saveFloorwiseSftEstimate(revisionId,savedVersion,savePayload)');
+    expect(editor).toContain('if(validationMessage)');
+    expect(editor).toContain('setSavedVersion(response.version??savedVersion+1)');
+    expect(editor).toContain('propagateFloorChanges(current,index,patch)');
     expect(editor).not.toContain('construction_package_save');
     expect(actions).toContain('const calculated = calculateSftEstimate(');
     expect(actions).toContain('const description = encodeSftEstimate(calculated)');
