@@ -7,6 +7,7 @@ import type { ConstructionRate } from '@business-os/database/construction-rates'
 import type { ConstructionPackage } from '@business-os/database/construction-packages';
 import { saveFloorwiseSftEstimate } from './construction-actions';
 import { QuotationPdfControls } from './quotation-pdf-controls';
+import { FLOOR_RATE_TITLE, readFloorRateDefaults } from '../pricing/construction/floor-rate-rules';
 
 type Unit = 'sqft' | 'wall_sqft' | 'running_ft' | 'cubic_ft' | 'piece' | 'lumpsum';
 type Work = {
@@ -30,6 +31,16 @@ const names = [
   'Ground Floor','First Floor','Second Floor','Third Floor',
   'Fourth Floor','Fifth Floor','Sixth Floor','Seventh Floor',
 ];
+type FloorZone = 'construction' | 'parking' | 'penthouse';
+const floorLabel = (level: number) => names[level] ?? 'Floor';
+const floorZoneName = (level: number, zone: FloorZone) =>
+  floorLabel(level) + (zone === 'construction' ? '' :
+    zone === 'parking' ? ' — Parking' : ' — Penthouse');
+const floorLevel = (name: string) =>
+  names.findIndex(n => name === n || name.startsWith(n + ' — '));
+const floorZone = (name: string): FloorZone =>
+  name.endsWith(' — Parking') ? 'parking' :
+    name.endsWith(' — Penthouse') ? 'penthouse' : 'construction';
 const commonWorks: { name:string; unit:Unit }[] = [
   {name:'Shelves & Sajjas',unit:'sqft'},
   {name:'Compound Wall',unit:'wall_sqft'},
@@ -95,29 +106,39 @@ export function PremiumSftBuilder({
   const selectedPackage=activePackages.find(p=>p.id===selectedPackageId)??previous;
   const changedPackage=Boolean(selectedPackage&&previous?.id!==selectedPackage.id);
   const packageRate=selectedPackage?.ratePerSqft??'';
+  const floorRateDefaults=readFloorRateDefaults(selectedPackage?.specSections??[]);
   const activeRates=rates.filter(r=>r.status==='active');
   const [rows,setRows]=useState<Work[]>(()=>{
     const initial=initialSchedule?.rows;
     if(!initial?.length)return [floor('Ground Floor',packageRate)];
-    return initial.map(item=>({
+    return initial.map((item, index)=>({
+      // Existing legacy floor rows remain editable; special zone names are
+      // persisted inside the existing signed floor-wise quotation schedule.
       ...item,
+      name:(item.kind??'floor')==='floor' && floorLevel(item.name)<0
+        ? floorLabel(index) : item.name,
       kind:item.kind??'floor',
       unit:item.unit??'sqft',
       heightFeet:item.heightFeet??'',
       quantity:item.quantity??'',
       ratePerSqft:changedPackage&&(item.kind??'floor')==='floor'
-        ?packageRate:item.ratePerSqft,
+        ?(floorZone(item.name)==='parking' ? floorRateDefaults.parking :
+          floorZone(item.name)==='penthouse' ? floorRateDefaults.penthouse : packageRate)
+        :item.ratePerSqft,
     }));
   });
   const [sections,setSections]=useState<Material[]>(()=>{
     if(selectedPackage&&(changedPackage||!initialSchedule?.sections?.length)){
-      const configured=selectedPackage.specSections.length?selectedPackage.specSections.map(s=>({
+      const packageSpecs=selectedPackage.specSections.filter(s=>s.title!==FLOOR_RATE_TITLE);
+      const configured=packageSpecs.length?packageSpecs.map(s=>({
         title:s.title,description:s.description,brand:s.brand,
         grade:s.grade,allowancePerSqft:s.allowancePerSqft,
       })):defaultSpecs.map(title=>({title,description:'',brand:'',grade:'',allowancePerSqft:''}));
-      return [{title:'Package scope & inclusions',description:selectedPackage.description},...configured].slice(0,18);
+      return [...(configured.length < 18
+        ? [{title:'Package scope & inclusions',description:selectedPackage.description}]
+        : []), ...configured].slice(0,18);
     }
-    return initialSchedule?.sections?.map(s=>({...s}))??[];
+    return initialSchedule?.sections?.filter(s=>s.title!==FLOOR_RATE_TITLE).map(s=>({...s}))??[];
   });
   const [materialIds,setMaterialIds]=useState<string[]>(()=>{
     if(changedPackage)return [];
@@ -135,6 +156,10 @@ export function PremiumSftBuilder({
   const [dirty,setDirty]=useState(false);
   const floors=rows.filter(r=>r.kind==='floor');
   const extras=rows.filter(r=>r.kind==='additional');
+  const levels=names.map((name,level)=>({
+    level, name, portions:floors.filter(r=>floorLevel(r.name)===level),
+  })).filter(g=>g.portions.length>0);
+  const floorCount=levels.length;
   const usedMaterials=activeRates.filter(r=>materialIds.includes(r.id))
     .map(r=>({category:r.category,name:r.name,specification:r.specification}));
   const stale=(changedPackage?[]:initialSchedule?.materials??[]).filter(m=>
@@ -157,7 +182,39 @@ export function PremiumSftBuilder({
   };
   const setFloors=(num:number)=>{
     const count=Math.max(1,Math.min(8,num));
-    setRows([...Array.from({length:count},(_,i)=>floors[i]??floor(names[i]!,packageRate)),...extras]);
+    const kept=floors.filter(r=>{
+      const level=floorLevel(r.name);
+      return level<0 || level<count;
+    });
+    let next=[...kept];
+    for(let level=0;level<count;level++){
+      if(next.some(r=>floorLevel(r.name)===level))continue;
+      const previous=next.filter(r=>floorLevel(r.name)===level-1);
+      const construction=previous.find(r=>floorZone(r.name)==='construction');
+      const combinedArea=previous.reduce((sum,r)=>sum+measured(r),0);
+      const copied=construction && previous.length===1
+        ?{lengthFeet:construction.lengthFeet,widthFeet:construction.widthFeet}
+        :combinedArea>0
+          ?{lengthFeet:String(Number(combinedArea.toFixed(2))),widthFeet:'1'}
+          :{lengthFeet:'',widthFeet:''};
+      next.push({...floor(floorZoneName(level,'construction'),packageRate),...copied});
+    }
+    if(next.length+extras.length>18){
+      setMessage('Too many floor portions and extra works (maximum 18 rows).');
+      return;
+    }
+    setRows([...next,...extras]);
+    touch();
+  };
+  const addFloorZone=(level:number,zone:'parking'|'penthouse')=>{
+    if(rows.length>=18)return;
+    if(floors.some(r=>r.name===floorZoneName(level,zone)))return;
+    const defaultRate=zone==='parking'?floorRateDefaults.parking:floorRateDefaults.penthouse;
+    const item={...floor(floorZoneName(level,zone),defaultRate)};
+    const where=rows.findLastIndex(r=>r.kind==='floor'&&floorLevel(r.name)===level);
+    setRows(current=>[
+      ...current.slice(0,where+1),item,...current.slice(where+1),
+    ]);
     touch();
   };
   const addExtra=(name:string)=>{
@@ -205,12 +262,34 @@ export function PremiumSftBuilder({
       </div>
       <div className="qs-work-floor-tabs" role="group" aria-label="Construction floors">
         {[1,2,3,4].map(n=><button type="button" key={n}
-          aria-pressed={floors.length===n}
-          className={floors.length===n?'active':''} onClick={()=>setFloors(n)}>
+          aria-pressed={floorCount===n}
+          className={floorCount===n?'active':''} onClick={()=>setFloors(n)}>
           {n===1?'G only':'G+'+(n-1)}</button>)}
-        <button type="button" disabled={floors.length>=8||rows.length>=18}
-          onClick={()=>setFloors(floors.length+1)}>+ Add floor</button>
+        <button type="button" disabled={floorCount>=8||rows.length>=18}
+          onClick={()=>setFloors(floorCount+1)}>+ Add floor</button>
       </div>
+      <div className="qs-work-floor-splits">
+        {levels.map(group=><div className="qs-work-split" key={group.level}>
+          <div>
+            <strong>{group.name}</strong>
+            <small>{group.portions.reduce((sum,r)=>sum+measured(r),0).toLocaleString('en-IN',{
+              maximumFractionDigits:2,
+            })} SFT · construction / parking / penthouse separately priced</small>
+          </div>
+          <div className="qs-work-split-buttons">
+            {!group.portions.some(r=>floorZone(r.name)==='parking') &&
+              <button type="button" disabled={rows.length>=18}
+                onClick={()=>addFloorZone(group.level,'parking')}>＋ Parking</button>}
+            {!group.portions.some(r=>floorZone(r.name)==='penthouse') &&
+              <button type="button" disabled={rows.length>=18}
+                onClick={()=>addFloorZone(group.level,'penthouse')}>＋ Penthouse</button>}
+          </div>
+        </div>)}
+      </div>
+      <p className="qs-work-copy-hint">
+        New floors copy the previous floor's area. A mixed ground floor becomes full construction on
+        the new floor by default. All dimensions, portions and rates can be edited independently.
+      </p>
       <div className="qs-work-table-scroll" role="region" aria-label="Work quantities and rates" tabIndex={0}>
         <table className="qs-work-table">
           <thead><tr>
@@ -229,6 +308,7 @@ export function PremiumSftBuilder({
               <td><span className="qs-work-index">{String(i+1).padStart(2,'0')}</span></td>
               <td className="qs-work-name"><input aria-label={'Item '+(i+1)+' name'}
                 value={r.name} maxLength={90}
+                readOnly={r.kind==='floor'}
                 onChange={e=>updateRow(i,{name:e.target.value})}/>
                 {r.kind==='additional'&&<select aria-label={'Unit for '+r.name}
                   value={u} onChange={e=>updateRow(i,{unit:e.target.value as Unit,
@@ -259,7 +339,8 @@ export function PremiumSftBuilder({
                 min="0" max="999999.99" step=".01" placeholder="₹/unit"
                 value={r.ratePerSqft} onChange={e=>updateRow(i,{ratePerSqft:e.target.value})}/></td>
               <td className="qs-work-amount">{amount>0?fmt(amount):'—'}</td>
-              <td>{r.kind==='additional'&&<button type="button" className="qs-work-remove"
+              <td>{(r.kind==='additional'||(r.kind==='floor'&&floorZone(r.name)!=='construction')) &&
+                <button type="button" className="qs-work-remove"
                 aria-label={'Remove '+r.name} onClick={()=>{setRows(old=>old.filter((_,j)=>j!==i));touch();}}>×</button>}</td>
             </tr>;
           })}</tbody>
@@ -286,7 +367,7 @@ export function PremiumSftBuilder({
         <button type="button" className="qs-work-edit" onClick={openMaterials}>✎ Edit all materials</button>
       </div>
       <div className="qs-work-material-grid">
-        {sections.filter(s=>s.title!=='Package scope & inclusions').map((s,i)=>
+        {sections.filter(s=>s.title!=='Package scope & inclusions'&&s.title!==FLOOR_RATE_TITLE).map((s,i)=>
           <button type="button" key={s.title+':'+i} className="qs-work-material"
             onClick={openMaterials}>
             <span className="qs-work-material-icon">▣</span>
@@ -316,7 +397,7 @@ export function PremiumSftBuilder({
 
     <div className="qs-work-summary" aria-label="Construction quotation total">
       <div className="qs-work-summary-info">
-        <small>Total estimate · {floors.length} floors · {area.toLocaleString('en-IN',{maximumFractionDigits:2})} SFT</small>
+        <small>Total estimate · {floorCount} floors · {area.toLocaleString('en-IN',{maximumFractionDigits:2})} SFT</small>
         <strong>{displayedTotal>0?fmt(displayedTotal):'Enter dimensions'}</strong>
       </div>
       <button data-studio-save="quote" type="button" className="qs-work-summary-save"
