@@ -189,7 +189,7 @@ export default async function QuotationStudio({
             />
           ) : (
             <div className="qs-note">
-              You need draft quotation editing and company construction pricing
+              You need quotation editing and company construction pricing
               permissions to change SFT or package rates.
               <Link
                 className="ml-2 font-semibold underline"
