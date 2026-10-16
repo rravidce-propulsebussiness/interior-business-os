@@ -235,7 +235,7 @@ export function ConstructionSelector({
         <CustomizedQuote rates={rates} revisionId={revisionId} version={version} />
       ) : chosen ? (
         <PremiumSftBuilder key={selected}
-          selectedPackageId={chosen.id} hidePackagePicker
+          selectedPackageId={chosen.id}
           rates={rates} packages={packages} initialSchedule={initialSchedule}
           revisionId={revisionId} version={version} />
       ) : (
