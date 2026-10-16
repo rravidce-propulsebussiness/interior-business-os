@@ -256,7 +256,9 @@ describe('compact single-screen construction quotation editor', () => {
     expect(editor).toContain('Apply to this quotation');
     expect(editor).toContain('master package remains untouched');
     expect(editor).toContain('Quote-only editable');
-    expect(editor).toContain('setSections(curr=>curr.map(');
+    expect(editor).toContain('setDraftSections(curr=>curr.map(');
+    expect(editor).toContain('setSections(draftSections.map(');
+    expect(editor).toContain('cancelMaterials');
     expect(editor).toContain('saveFloorwiseSftEstimate(revisionId,version,');
     expect(editor).not.toContain('construction_package_save');
     expect(actions).toContain('const calculated = calculateSftEstimate(');
