@@ -12,6 +12,9 @@ const inputRow = z
   .object({
     name: z.string().trim().min(2).max(90),
     kind: workKind.optional(),
+    // Upper construction floors follow the floor below until customized.
+    // Old V1/V2 quotation snapshots remain valid without this field.
+    inheritFromPrevious: z.boolean().optional(),
     lengthFeet: positive,
     widthFeet: positive,
     // Optional for backward-compatible older estimates; height is only billed
