@@ -20,6 +20,7 @@ export interface Field {
     | 'datetime-local'
     | 'tel';
   nullable?: boolean;
+  fileMaxBytes?: number;
   required?: boolean;
   options?: { value: string; label: string }[];
 }
@@ -102,10 +103,10 @@ export function MasterForm({
                 const file = event.target.files?.[0];
                 if (!file) return;
                 if (
-                  file.size > 130000 ||
+                  file.size > (field.fileMaxBytes ?? 130000) ||
                   !['image/png', 'image/jpeg'].includes(file.type)
                 ) {
-                  setMessage('Choose a PNG or JPEG logo smaller than 130 KB.');
+                  setMessage('Choose a PNG or JPEG smaller than ' + Math.round((field.fileMaxBytes ?? 130000) / 1000) + ' KB.');
                   return;
                 }
                 const reader = new FileReader();
