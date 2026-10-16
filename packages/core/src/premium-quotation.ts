@@ -71,7 +71,7 @@ section.spec-pages{break-before:page;page-break-before:always;padding-top:10px}
 @media print{body,main{margin:0;padding:0;max-width:none;box-shadow:none}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
 
 /* Printed pages and compact, true-page mobile previews share one layout. */
-.pb-page { background:#fff; position:relative; break-after:page; page-break-after:always; }
+.pb-page { background:#fff; position:relative; break-inside:auto; }
 .pb-page-header {display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid #e8e0d9;padding:9px 0 12px;margin-bottom:14px}
 .pb-page-header .pb-brand-small {font-size:19px;font-weight:900;color:#17263f;letter-spacing:-.05em}
 .pb-page-header .pb-brand-small::first-letter {color:__ACCENT__}
