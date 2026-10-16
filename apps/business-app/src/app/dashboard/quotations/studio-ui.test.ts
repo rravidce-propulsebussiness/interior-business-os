@@ -254,7 +254,7 @@ describe('compact single-screen construction quotation editor', () => {
   it('stores brand edits in a quotation specification snapshot, not a package template', () => {
     expect(editor).toContain('Edit all material specifications');
     expect(editor).toContain('Apply to this quotation');
-    expect(editor).toContain('Company package');
+    expect(editor).toContain('master package remains untouched');
     expect(editor).toContain('Quote-only editable');
     expect(editor).toContain('setSections(curr=>curr.map(');
     expect(editor).toContain('saveFloorwiseSftEstimate(revisionId,version,');
