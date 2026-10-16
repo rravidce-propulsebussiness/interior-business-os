@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { calculateSftEstimate, editableSftRows, type SftEstimateDetails } from '@business-os/core/sft-quotation';
 import type { ConstructionRate } from '@business-os/database/construction-rates';
 import type { ConstructionPackage } from '@business-os/database/construction-packages';
-import { saveFloorwiseSftEstimate } from './construction-actions';
 import { QuotationPdfControls } from './quotation-pdf-controls';
 import { FLOOR_RATE_TITLE, readFloorRateDefaults } from '../pricing/construction/floor-rate-rules';
 import { propagateFloorChanges, followPreviousFloor, restoreFloorFollowing } from './construction-floor-inheritance';
@@ -301,18 +300,38 @@ export function PremiumSftBuilder({
     }
     startTransition(async()=>{
       try{
-        const response=await saveFloorwiseSftEstimate(revisionId,savedVersion,savePayload);
-        setMessage(response.message);
-        setSaved(Boolean(response.id));
-        if(response.id){
-          setSavedVersion(response.version??savedVersion+1);
-          setDirty(false);
-          setDrawer(false);
-          router.refresh();
+        const response=await fetch('/dashboard/quotations/'+revisionId+'/sft-save',{
+          method:'POST',credentials:'same-origin',cache:'no-store',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({version:savedVersion,input:savePayload}),
+        });
+        const result:unknown=await response.json().catch(()=>null);
+        const data=result&&typeof result==='object'
+          ? result as {message?:string;id?:string;version?:number;reference?:string}
+          : null;
+        if(!response.ok){
+          setSaved(false);
+          const detail=data?.message||('Save request failed (HTTP '+response.status+').');
+          setMessage(detail+(data?.reference?' ['+data.reference+']':''));
+          return;
         }
-      }catch{
+        if(!data?.id){
+          setSaved(false);
+          setMessage('The server returned no saved quotation. Please retry.');
+          return;
+        }
+        setMessage(data.message||'Quotation saved successfully.');
+        setSaved(true);
+        setSavedVersion(data.version??savedVersion+1);
+        setDirty(false);
+        setDrawer(false);
+        router.refresh();
+      }catch(error){
         setSaved(false);
-        setMessage('Could not save the quotation. Please try again or reload this page.');
+        const message=error instanceof Error&&error.name==='TypeError'
+          ?'Network error connecting to the quotation save endpoint.'
+          :'Could not process the quotation save response.';
+        setMessage(message+' Check your internet connection and try again.');
       }
     });
   };
