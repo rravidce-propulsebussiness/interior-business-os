@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState, type ReactNode } from 'react';
-import Link from 'next/link';
 import { parseSftEstimate } from '@business-os/core/sft-quotation';
 
 type Tab = 'client' | 'quote' | 'files' | 'payments' | 'preview';
@@ -56,6 +55,7 @@ export function QuotationStudioEditor({
   lines,
   total,
   hasSavedPaymentPlan,
+  previewHtml,
   brandingEditor,
   constructionEditor,
   interiorEditor,
@@ -80,6 +80,7 @@ export function QuotationStudioEditor({
   lines: QuotationLine[];
   total: string;
   hasSavedPaymentPlan: boolean;
+  previewHtml?: string;
   brandingEditor: ReactNode;
   constructionEditor: ReactNode;
   interiorEditor: ReactNode;
@@ -214,7 +215,7 @@ export function QuotationStudioEditor({
                 </p>
               )}
               {!canEdit && reviseEditor}
-              <section className="qs-card">
+              {!isConstruction && <section className="qs-card">
                 <h2>Saved quotation items</h2>
                 {lines.length ? (
                   <div className="qs-line-table">
@@ -269,12 +270,7 @@ export function QuotationStudioEditor({
                   <span>Current quotation total</span>
                   <strong>{price}</strong>
                 </div>
-                {canEdit && (
-                  <Link href={url} className="qs-btn" style={{ marginTop: 12 }}>
-                    Advanced item editing, discounts &amp; revisions ↗
-                  </Link>
-                )}
-              </section>
+              </section>}
             </>
           )}
 
@@ -370,7 +366,7 @@ export function QuotationStudioEditor({
           )}
         </div>
 
-        <aside className="qs-preview-pane">
+        {!isConstruction && <aside className="qs-preview-pane">
           <div className="qs-preview-top">
             <span>
               ▤ PDF Preview <span className="qs-badge">A4 · Portrait</span>
@@ -380,7 +376,9 @@ export function QuotationStudioEditor({
           <iframe
             className="qs-preview-frame"
             title="Live customer quotation PDF preview"
-            src={url + '/preview'}
+            srcDoc={previewHtml}
+            src={previewHtml ? undefined : url + '/preview'}
+            sandbox=""
             loading="lazy"
           />
           <div className="qs-info-box" style={{ marginTop: 10 }}>
@@ -391,7 +389,7 @@ export function QuotationStudioEditor({
               reflected in the preview.
             </span>
           </div>
-        </aside>
+        </aside>}
       </div>
     </>
   );
