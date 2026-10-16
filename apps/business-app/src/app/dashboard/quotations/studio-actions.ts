@@ -183,7 +183,12 @@ export async function createStudioQuotation(input: unknown): Promise<{
 
     const matches = [...new Map(
       results.flatMap((result) => result.data ?? [])
-        .filter((candidate) => contactMatches(candidate, values))
+        .filter((candidate) =>
+          contactMatches(candidate, values) &&
+          contactMatches(candidate, {
+            phone: lead.phone ?? '',
+            email: lead.email ?? '',
+          }))
         .map((candidate) => [candidate.id, candidate]),
     ).values()].sort((a, b) =>
       a.created_at.localeCompare(b.created_at) || a.id.localeCompare(b.id));
