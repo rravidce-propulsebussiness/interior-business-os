@@ -1027,3 +1027,15 @@
  .qs-layout .qs-sidebar {box-shadow:14px 0 38px #14263b28;}
  .qs-layout .qs-quote-subnav {padding-left:29px;}
 }
+
+.qs-company-logo {
+  width:116px;max-width:116px;max-height:59px;
+  object-fit:contain;display:block;background:#fff;
+  border:1px solid #edf0f5;border-radius:9px;padding:4px;
+  flex:0 0 auto;
+}
+.qs-mobile-brand .qs-company-logo {max-height:39px;max-width:92px;width:auto;}
+.qs-brand:has(.qs-company-logo) {gap:10px;}
+@media(max-width:720px) {
+ .qs-brand .qs-company-logo {max-height:50px;max-width:100px;}
+}
