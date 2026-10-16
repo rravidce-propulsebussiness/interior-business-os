@@ -374,7 +374,7 @@ describe('save resiliency and floor auto-inheritance', () => {
     expect(builder).toContain('disabled={pending}');
     expect(builder).toContain('if(validationMessage)');
     expect(builder).toContain('setMessage(validationMessage)');
-    expect(builder).toContain('setSavedVersion(response.version??savedVersion+1)');
+    expect(builder).toContain('setSavedVersion(data.version??savedVersion+1)');
     expect(builder).toContain("sftEstimateInputSchema.safeParse(savePayload)");
   });
 
