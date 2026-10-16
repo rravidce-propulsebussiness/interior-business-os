@@ -2,13 +2,10 @@
 
 import { useMemo, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { quotationCommand } from './actions';
 import { savedStagePaymentPlan } from '@business-os/core/quotation-payment-plan';
 
 type Milestone = { name: string; percent: string };
 type Feedback = { type: 'success' | 'error'; text: string } | null;
-const START = '[STAGE_PAYMENT_PLAN]';
-const END = '[/STAGE_PAYMENT_PLAN]';
 const MAX_STAGES = 40;
 
 const templates: Record<string, Milestone[]> = {
@@ -126,23 +123,28 @@ export function PaymentScheduleEditor({
       setFeedback({ type: 'error', text: 'The quotation total is invalid. Save the estimate first.' });
       return;
     }
-    const plan = START + '\n'
-      + rows.map((row) => row.name.trim().replaceAll('|', '-') + '|' + Number(row.percent).toFixed(2)).join('\n')
-      + '\n' + END;
-    const existing = initial.terms.replace(/\[STAGE_PAYMENT_PLAN\][\s\S]*?\[\/STAGE_PAYMENT_PLAN\]/g, '').trim();
-    const terms = (existing ? existing + '\n\n' : '') + plan;
     setFeedback(null);
     start(async () => {
       try {
-        const result = await quotationCommand({ ...initial, action: 'edit_revision', terms });
-        if (result.id) {
-          setFeedback({ type: 'success', text: 'Payment schedule saved. It will be included in the customer PDF.' });
+        const response=await fetch('/dashboard/quotations/'+initial.revision_id+'/conditions',{
+          method:'POST',credentials:'same-origin',cache:'no-store',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({kind:'payments',stages:rows}),
+        });
+        const result:unknown=await response.json().catch(()=>null);
+        const data=result&&typeof result==='object'
+          ?result as {id?:string;message?:string;reference?:string}:null;
+        if(response.ok && data?.id){
+          setFeedback({type:'success',text:data.message||
+            'Payment schedule saved and included in the customer PDF.'});
           router.refresh();
-        } else {
-          setFeedback({ type: 'error', text: result.message || 'Could not save payment schedule. Please try again.' });
+        }else{
+          setFeedback({type:'error',text:
+            (data?.message||'Unable to save the payment schedule (HTTP '+response.status+').')+
+            (data?.reference?' Reference '+data.reference:'')});
         }
-      } catch {
-        setFeedback({ type: 'error', text: 'Unable to save right now. Please try again.' });
+      }catch{
+        setFeedback({type:'error',text:'Network error saving payment schedule. Try again.'});
       }
     });
   }
