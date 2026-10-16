@@ -7,13 +7,22 @@ test('premium quotation is a complete multi-page A4 PDF with a cover and closing
   const document = quotationDocumentFixture();
   document.header.branding.accent = '#f5650b';
   const html = renderQuotationDocument(document);
+  // A deterministic browser test should not depend on Unsplash availability.
+  // Tenant-uploaded photos remain data: URLs in real quotation snapshots.
+  await page.route('https://images.unsplash.com/**', async (route) => {
+    await route.fulfill({status: 200, contentType: 'image/svg+xml',
+      body: '<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1200"><rect width="900" height="1200" fill="#17314c"/></svg>'});
+  });
   await page.setContent(html, { waitUntil: 'load' });
   await expect(page.locator('.pb-cover')).toBeVisible();
-  await expect(page.locator('.pb-close')).toBeAttached();
+  await expect(page.locator('.pb-end')).toBeAttached();
   await expect(page.locator('.pb-pricing')).toBeVisible();
   await expect(page.locator('.pb-specs-page')).toBeAttached();
   await expect(page.locator('.pb-payment-page')).toBeAttached();
-  await expect(page.locator('.pb-title')).toContainText(document.number);
+  await expect(page.locator('.pb-cover-number')).toContainText(document.number);
+  await expect(page.locator('.pb-estimate')).toBeVisible();
+  await expect(page.locator('.pb-intro-card')).toHaveCount(2);
+  await expect(page.locator('.pb-material-hero')).toBeVisible();
   const pdfBytes = await page.pdf({
     format: 'A4',
     preferCSSPageSize: true,
@@ -31,7 +40,7 @@ test('premium quotation is a complete multi-page A4 PDF with a cover and closing
   const metrics = await page.evaluate(() => ({
     viewport: document.documentElement.clientWidth,
     scrollWidth: document.documentElement.scrollWidth,
-    pageWidths: Array.from(document.querySelectorAll('.pb-cover,.pb-page,.pb-close'))
+    pageWidths: Array.from(document.querySelectorAll('.pb-cover,.pb-page,.pb-end'))
       .map((element) => element.getBoundingClientRect().width),
   }));
   expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.viewport + 1);

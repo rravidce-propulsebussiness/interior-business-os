@@ -131,7 +131,9 @@ export function renderQuotationDocument(input: unknown): string {
   const renderSftSchedule = sftSchedules
     .map(
       ({ details }) =>
-        '<section class="terms"><h2>Work-wise SFT estimate</h2><table><thead><tr>' +
+        '<section class="pb-estimate"><div class="pb-section-title"><h2>Work-wise SFT estimate</h2></div>' +
+        '<p class="pb-section-subtitle">Floor area and rate-based construction calculation</p>' +
+        '<table><thead><tr>' +
         '<th>Work description</th><th>L (ft)</th><th>W (ft)</th><th>SFT</th>' +
         (h.display.unit_rate ? '<th class="amount">Rate / SFT</th>' : '') +
         '<th class="amount">Amount</th></tr></thead><tbody>' +
@@ -167,13 +169,13 @@ export function renderQuotationDocument(input: unknown): string {
         '<td class="amount">' +
         money(details.total) +
         '</td></tr>' +
-        '</tbody></table><p class="muted">The floor-wise total is already included in the quotation summary; it is not an extra charge.</p></section>',
+        '</tbody></table></section>',
     )
     .join('');
   const sftSpecifications = sftSchedules
     .map(({ details }) => {
       const packageTitle = details.package
-        ? '<div class="package-banner"><span>Selected construction package</span><h3>' +
+        ? '<div class="pb-spec-package"><span>Selected construction package</span><h3>' +
           escape(details.package.name) +
           ' · ' +
           escape(details.package.code) +
@@ -232,12 +234,12 @@ export function renderQuotationDocument(input: unknown): string {
           '</section>'
         : '';
       return (
-        '<section class="spec-pages"><div class="spec-eyebrow">SECTION 02 / PACKAGE SPECIFICATIONS</div><h2>Package materials, finishes &amp; scope</h2><p class="muted">The descriptions below form part of this quotation and are saved with this revision.</p>' +
+        '<div class="pb-package-specifications">' +
         packageTitle +
         (sections ||
           '<p class="muted">No additional written specifications supplied.</p>') +
         materialChoices +
-        '<p class="muted">The material descriptions above do not add a second charge to the floor-wise estimate.</p></section>'
+        '<p class="pb-material-footnote">The inclusions above form part of this saved quotation and do not add a second charge.</p></div>'
       );
     })
     .join('');
@@ -254,7 +256,7 @@ export function renderQuotationDocument(input: unknown): string {
 
   const additionalSpecs = d.lines.flatMap((line) =>
     line.specifications.map((spec) => ({ item: line.name, ...spec })),
-  ).slice(0, 30).map((spec, index) =>
+  ).map((spec, index) =>
     '<article class="spec-item"><div class="spec-number">' +
     String(index + 1).padStart(2, '0') +
     '</div><div><h3>' + escape(spec.label) + '</h3><p>' +
@@ -265,33 +267,87 @@ export function renderQuotationDocument(input: unknown): string {
 
   const hasSpecs = h.display.specifications &&
     Boolean(otherConstructionSpecs || sftSpecifications || additionalSpecs);
-  const highlights = '<div class="pb-fact-strip"><span><b>' + d.lines.length +
-    '</b> Work items in quotation</span>' +
-    (sftSchedules.length ? '<span><b>' + sftSchedules.length +
-      '</b> Floor-wise estimates</span>' : '') +
-    (paymentValid ? '<span><b>' + paymentRows.length +
-      '</b> Payment milestones</span>' : '') + '</div>';
+  const mainRows = grouped.filter((line) => !parseSftEstimate(line.description));
+  const isFloorQuote = sftSchedules.length > 0;
+  const itemTable = mainRows.length
+    ? '<section class="pb-estimate"><div class="pb-section-title"><h2>' +
+      (isFloorQuote ? 'Additional quoted items' : 'Detailed quotation') + '</h2></div>' +
+      '<table><thead><tr><th class="line">Item / package</th>' +
+      (h.display.quantity ? '<th>Quantity</th>' : '') +
+      (h.display.unit_rate ? '<th class="amount">Unit rate</th>' : '') +
+      '<th class="amount">Amount</th></tr></thead><tbody>' +
+      mainRows.map((line) => '<tr' + (line.optional ? ' class="optional"' : '') + '>' +
+        '<td><strong>' + escape(line.name) + '</strong>' +
+        (line.optional ? ' <strong>(optional, excluded)</strong>' : '') +
+        (line.description && !constructionSpecs.includes(line)
+          ? '<p class="text">' + escape(line.description) + '</p>' : '') +
+        '</td>' +
+        (h.display.quantity ? '<td>' + escape(line.quantity) + ' ' + escape(line.unit) + '</td>' : '') +
+        (h.display.unit_rate ? '<td class="amount">' + money(line.rate) + '</td>' : '') +
+        '<td class="amount">' + money(line.amount) + '</td></tr>').join('') +
+      '</tbody></table></section>'
+    : '';
+  const nonZero = (value: string) => Number(value) !== 0;
+  const adjustments = [
+    ...(nonZero(d.totals.line_discount)
+      ? [['Line discounts', money(d.totals.line_discount)]] : []),
+    ...(nonZero(d.totals.revision_discount)
+      ? [['Quotation discount', money(d.totals.revision_discount)]] : []),
+    ...(nonZero(d.totals.optional_amount)
+      ? [['Optional items (excluded)', money(d.totals.optional_amount)]] : []),
+  ];
+  const adjustmentMarkup = adjustments.length
+    ? '<div class="pb-adjustments">' + adjustments.map(([name, value]) =>
+      '<p><span>' + name + '</span><strong>' + value + '</strong></p>').join('') + '</div>'
+    : '';
+  const introCards =
+    '<div class="pb-intro-grid">' +
+    '<section class="pb-intro-card"><div class="pb-mini-head"><span class="pb-intro-icon">●</span>Prepared for</div>' +
+    '<h3>' + escape(h.customer.name) + '</h3><p>' + address(h.customer.billing_address) + '</p>' +
+    (h.customer.phone ? '<p>Tel: ' + escape(h.customer.phone) + '</p>' : '') +
+    (h.customer.email ? '<p>' + escape(h.customer.email) + '</p>' : '') + '</section>' +
+    '<section class="pb-intro-card project"><div class="pb-mini-head"><span class="pb-intro-icon">⌂</span>Project</div>' +
+    '<h3>' + escape(h.project.name) + '</h3>' +
+    (h.project.code ? '<p>Ref: ' + escape(h.project.code) + '</p>' : '') +
+    '<p>' + address(h.project.site_address) + '</p></section></div>';
   const specificationPage = hasSpecs ?
     '<section class="pb-page pb-specs-page">' +
-    brochure.pageHeader('Materials / specifications') +
-    '<h2 class="pb-summary-title">Selected materials &amp; specifications</h2>' +
-    '<p class="pb-spec-intro">Materials and finishes shown below are taken from the saved quotation. Product photographs represent company-supplied inspiration, not an additional promise.</p>' +
-    brochure.materialBanner +
-    '<div class="pb-saved-specs">' + otherConstructionSpecs +
+    brochure.pageHeader('Materials & specifications') + brochure.specHero +
+    '<div class="pb-section-title"><h2>Selected package inclusions</h2></div>' +
+    '<p class="pb-section-subtitle">These are the actual materials, brands, grades and allowances recorded for this quotation.</p>' +
+    otherConstructionSpecs + '<div class="pb-spec-card-grid">' +
     additionalSpecs + sftSpecifications + '</div>' +
-    brochure.pageFooter('Materials / specifications') + '</section>'
+    brochure.pageFooter('Material specifications') + '</section>'
     : '';
   const schedulePage = paymentSection || d.notes || remainingTerms ?
     '<section class="pb-page pb-payment-page">' +
     brochure.pageHeader('Payments / terms') +
-    '<h2 class="pb-summary-title">Payments &amp; conditions</h2>' +
-    '<div class="pb-color-band"></div>' +
+    '<div class="pb-section-title"><h2>Payment schedule &amp; conditions</h2></div>' +
     (paymentSection ||
       '<p class="muted">No stage-wise payment schedule is specified in this quotation.</p>') +
     (d.notes ? '<section class="pb-terms-panel"><h2>Project notes</h2>' +
       '<p class="text">' + escape(d.notes) + '</p></section>' : '') +
     (remainingTerms ? '<section class="pb-terms-panel"><h2>Terms and conditions</h2>' +
       '<p class="text">' + escape(remainingTerms) + '</p></section>' : '') +
-    brochure.pageFooter('Payments / terms') + '</section>' : '';
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escape(d.number)} R${d.revision}</title>${premiumCss.replaceAll('__ACCENT__', packageAccent)}</head><body><main>${brochure.cover}<section class="pb-page pb-pricing">${brochure.pageHeader('Project details / pricing')}<header>${h.branding.logo_data_uri ? `<img alt="Business logo" src="${escape(h.branding.logo_data_uri)}">` : ''}<h1>${escape(h.branding.name)}</h1><p>${address(h.branding.address)}</p><p>${escape(h.branding.phone)} ${escape(h.branding.email)}</p>${h.branding.tax_identifier ? `<p>Tax ID: ${escape(h.branding.tax_identifier)}</p>` : ''}</header>${brochure.projectBanner}<div class="pb-title"><h1>Quotation ${escape(d.number)}</h1><p>Revision ${d.revision} · Valid until ${escape(d.valid_until)}</p>${d.status !== 'issued' ? `<p class="status">${escape(d.status.toUpperCase())}</p>` : ''}</div><div class="parties"><section><h2>Prepared for</h2><h3>${escape(h.customer.name)}</h3><p>${escape(h.customer.legal_name)}</p><p>${address(h.customer.billing_address)}</p><p>${escape(h.customer.phone)} ${escape(h.customer.email)}</p>${h.customer.tax_identifier ? `<p>Tax ID: ${escape(h.customer.tax_identifier)}</p>` : ''}</section><section><h2>Project</h2><h3>${escape(h.project.name)}</h3><p>${escape(h.project.code)}</p><p>${address(h.project.site_address)}</p></section></div><h2 class="pb-summary-title">Pricing summary</h2>${highlights}<table><thead><tr><th class="line">Item / package</th>${h.display.quantity ? '<th>Quantity</th>' : ''}${h.display.unit_rate ? '<th class="amount">Unit rate</th>' : ''}<th class="amount">Amount</th></tr></thead><tbody>${grouped.map((l, index) => `${index === 0 || grouped[index - 1]?.area !== l.area ? `<tr><td colspan="${2 + Number(h.display.quantity) + Number(h.display.unit_rate)}"><h3>${escape(l.area || 'General work')}</h3></td></tr>` : ''}<tr${l.optional ? ' class="optional"' : ''}><td><strong>${escape(l.name)}</strong>${l.optional ? ' <strong>(optional)</strong>' : ''}${l.area ? `<p class="muted">${escape(l.area)}</p>` : ''}${constructionSpecs.includes(l) || parseSftEstimate(l.description) ? '' : `<p class="text">${escape(l.description)}</p>`}${h.display.specifications ? l.specifications.map((s) => `<p>${escape(s.label)}: ${escape(s.value)}</p>`).join('') : ''}${l.discount !== '0' ? `<p>Line discount: ${money(l.discount)}</p>` : ''}</td>${h.display.quantity ? `<td>${escape(l.quantity)} ${escape(l.unit)}</td>` : ''}${h.display.unit_rate ? `<td class="amount">${money(l.rate)}</td>` : ''}<td class="amount">${money(l.amount)}</td></tr>`).join('')}</tbody></table>${renderSftSchedule}<table class="totals"><tbody><tr><td>Line subtotal</td><td class="amount">${money(d.totals.line_subtotal)}</td></tr><tr><td>Line discounts</td><td class="amount">${money(d.totals.line_discount)}</td></tr><tr><td>Revision discount</td><td class="amount">${money(d.totals.revision_discount)}</td></tr><tr class="total"><td>Total payable</td><td class="amount">${money(d.totals.final_amount)}</td></tr><tr><td>Optional items (excluded)</td><td class="amount">${money(d.totals.optional_amount)}</td></tr></tbody></table>${brochure.pageFooter('Pricing / estimate')}</section>${specificationPage}${schedulePage}${brochure.end}</main></body></html>`;
+    brochure.pageFooter('Payments / terms') + '</section>'
+    : '';
+  const amountLabel = isFloorQuote ? 'Total proposed construction cost' : 'Total quotation amount';
+  const total = '<div class="pb-final-total"><span>' + amountLabel +
+    '</span><strong>' + money(d.totals.final_amount) + '</strong></div>';
+  const pricingPage = '<section class="pb-page pb-pricing">' +
+    brochure.pageHeader('Project details / estimate') + introCards +
+    '<p class="pb-quote-meta">Quotation ' + escape(d.number) +
+    ' · Revision ' + d.revision + ' · Valid until ' + escape(d.valid_until) + '</p>' +
+    (isFloorQuote ? renderSftSchedule + itemTable : itemTable) +
+    adjustmentMarkup + total +
+    '<p class="pb-pricing-caption">Only the included quoted amounts are part of the total. ' +
+    'Payment terms, detailed specifications and any exclusions are shown in the following sections.</p>' +
+    brochure.pageFooter('Work-wise estimate') + '</section>';
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>${escape(d.number)} R${d.revision}</title>
+    ${premiumCss.replaceAll('__ACCENT__', packageAccent)}</head><body><main>
+    ${brochure.cover}${pricingPage}${specificationPage}${schedulePage}${brochure.close}
+    </main></body></html>`;
+
 }

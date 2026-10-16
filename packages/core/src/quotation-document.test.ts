@@ -54,8 +54,8 @@ it('renders client, pricing, then selected construction specifications without d
     'Package: Premium (PREMIUM)\\nScope: Complete structure\\nMaterials / brands:\\nSteel: Tata\\nBricks: Karimnagar';
   const html = renderQuotationDocument(d);
   const client = html.indexOf('Prepared for');
-  const pricing = html.indexOf('Pricing summary');
-  const specs = html.indexOf('Selected materials &amp; specifications');
+  const pricing = html.indexOf('Detailed quotation');
+  const specs = html.indexOf('Selected package inclusions');
   expect(client).toBeGreaterThan(0);
   expect(pricing).toBeGreaterThan(client);
   expect(specs).toBeGreaterThan(pricing);
@@ -132,10 +132,10 @@ it('prints edited package specifications on a following page with escaped conten
     ),
   );
   const html = renderQuotationDocument(d);
-  expect(html).toContain('02 / PACKAGE SPECIFICATIONS');
+  expect(html).toContain('Selected package inclusions');
   expect(html).toContain('Ground Floor');
   expect(html).toContain('Footings and steel');
-  expect(html).toContain('section class="spec-pages"');
+  expect(html).toContain('class="pb-package-specifications"');
   expect(html).toContain('break-before:page');
   expect(html).toContain('&lt;script&gt;');
   expect(html).not.toContain('<script>alert(1)</script>');
@@ -178,7 +178,7 @@ it('renders company theme and saved package brand, grade, allowance safely', () 
     ),
   );
   const html = renderQuotationDocument(d);
-  expect(html).toContain('border-bottom:3px solid #245b55');
+  expect(html).toContain('border-left:4px solid #245b55');
   expect(html).toContain('Kajaria');
   expect(html).toContain('Vitrified 2x2');
   expect(html).toContain('Material allowance:');
@@ -209,11 +209,11 @@ it('renders a branded brochure cover, readable pricing and closing page', () => 
   const d = quotationDocumentFixture();
   const html = renderQuotationDocument(d);
   expect(html).toContain('pb-cover');
-  expect(html).toContain('pb-cover-amount');
-  expect(html).toContain('pb-close');
+  expect(html).toContain('pb-investment');
+  expect(html).toContain('pb-end');
   expect(html).toContain('Prepared for Ravi Residence');
   expect(html).toContain('1,33,280');
-  expect(html).toContain('Quotation Q-2026-000001');
+  expect(html).toContain('Q-2026-000001');
   expect(html).toContain('break-after:page');
   expect(html).not.toContain('Building Better Tomorrows'); // not hardcoded SG Homes claims
   expect(renderQuotationDocument(structuredClone(d))).toBe(html);
@@ -224,7 +224,7 @@ it('embeds only saved company-owned photo data, never remote images or other com
   d.header.branding.cover_image_data_uri = 'data:image/jpeg;base64,' + 'AA==';
   d.header.branding.detail_image_data_uri = 'data:image/png;base64,' + 'AA==';
   const html = renderQuotationDocument(d);
-  expect(html).toContain('Company-supplied building photograph');
+  expect(html).toContain('Company-provided project photograph');
   expect(html).toContain('Company-provided project photograph');
   expect(html).toContain('src="data:image/jpeg;base64,AA=="');
   expect(html).toContain('src="data:image/png;base64,AA=="');
@@ -256,12 +256,12 @@ it('shows distinct quotation page surfaces and factual saved specification cards
   expect(html).toContain('pb-page pb-pricing');
   expect(html).toContain('pb-page pb-specs-page');
   expect(html).toContain('pb-page pb-payment-page');
-  expect(html).toContain('pb-close');
-  expect(html).toContain('Pricing summary');
-  expect(html).toContain('Selected materials &amp; specifications');
+  expect(html).toContain('pb-end');
+  expect(html).toContain('Detailed quotation');
+  expect(html).toContain('Selected package inclusions');
   expect(html).toContain('Plywood grade');
   expect(html).toContain('Hettich');
-  expect(html).toContain('Work items in quotation');
+  expect(html).toContain('Total quotation amount');
   expect(html).not.toContain('Kajaria / Somany');
   expect(html).not.toContain('TATA / Tiscon');
 });
@@ -270,8 +270,67 @@ it('only inserts company-uploaded material photo in the same revision', () => {
   const d = quotationDocumentFixture();
   d.header.branding.materials_image_data_uri = 'data:image/jpeg;base64,AA==';
   const html = renderQuotationDocument(d);
-  expect(html).toContain('Company-provided materials and finishes');
+  expect(html).toContain('Company-supplied materials photograph');
   expect(html).toContain('src="data:image/jpeg;base64,AA=="');
   d.header.branding.materials_image_data_uri = 'https://untrusted.example/photo.jpg';
   expect(() => renderQuotationDocument(d)).toThrow();
+});
+
+
+it('uses the work-wise SFT estimate without printing the same package twice', () => {
+  const d = quotationDocumentFixture();
+  d.lines[0]!.name = 'Luxury — floor-wise construction';
+  d.lines[0]!.description = encodeSftEstimate(
+    calculateSftEstimate({
+      rows: [{name:'Ground Floor',kind:'floor',lengthFeet:'50',widthFeet:'60',ratePerSqft:'1850'}],
+      materialIds: [],
+    }, []),
+  );
+  d.lines[0]!.amount = '5550000';
+  d.totals.final_amount = '5550000';
+  d.totals.line_subtotal = '5550000';
+  d.totals.subtotal = '5550000';
+  const html = renderQuotationDocument(d);
+  expect(html).toContain('Work-wise SFT estimate');
+  expect(html).toContain('Ground Floor');
+  expect(html).toContain('55,50,000');
+  expect(html).not.toContain('Pricing summary');
+  expect(html).not.toContain('<th class="line">Item / package</th>');
+  // The package may still be named in its included material specifications.
+  // It must not appear again as a separately billed pricing-table row.
+  expect(html).toContain('Total proposed construction cost');
+});
+
+it('shows other separately quoted work and discounts without erasing payable amounts', () => {
+  const d = quotationDocumentFixture();
+  d.lines[0]!.description = encodeSftEstimate(
+    calculateSftEstimate({
+      rows: [{name:'Ground Floor',kind:'floor',lengthFeet:'20',widthFeet:'30',ratePerSqft:'1950'}],
+      materialIds: [],
+    }, []),
+  );
+  d.lines.push({
+    ...d.lines[0]!,
+    name:'Extra compound wall', description:'Independent additional item',
+    quantity:'1',unit:'unit',rate:'80000',amount:'80000',
+  });
+  d.totals.revision_discount = '5000';
+  d.totals.final_amount = '1245000';
+  const html = renderQuotationDocument(d);
+  expect(html).toContain('Additional quoted items');
+  expect(html).toContain('Extra compound wall');
+  expect(html).toContain('Quotation discount');
+  expect(html).toContain('12,45,000');
+  expect(html).toContain('Total proposed construction cost');
+});
+
+it('labels illustrative concept photographs instead of claiming company ownership', () => {
+  const d = quotationDocumentFixture();
+  const preview = renderQuotationDocument(d);
+  expect(preview).toContain('Illustrative architectural concept');
+  expect(preview).toContain('not an image of the proposed project');
+  d.header.branding.cover_image_data_uri = 'data:image/jpeg;base64,AA==';
+  const branded = renderQuotationDocument(d);
+  expect(branded).not.toContain('not an image of the proposed project');
+  expect(branded).toContain('Company-provided project photograph');
 });
