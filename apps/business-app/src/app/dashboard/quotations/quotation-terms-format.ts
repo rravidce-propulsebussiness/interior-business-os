@@ -25,10 +25,14 @@ export function splitQuotationTerms(terms: string): QuotationTermsSections {
     inclusions: '', exclusions: '', warranty: '', additional: '', paymentPlan,
   };
   const headings = [...plain.matchAll(HEADER)];
-  if (!headings.length || headings[0]?.index !== 0) {
+  if (!headings.length) {
     sections.additional = plain;
     return sections;
   }
+  // Old terms can contain introductory free text before structured
+  // conditions. Keep that text instead of swallowing named sections.
+  if ((headings[0]?.index ?? 0) > 0)
+    sections.additional = plain.slice(0,headings[0]!.index).trim();
   for (let i = 0; i < headings.length; i++) {
     const heading = headings[i]!;
     const label = heading[1]?.toLowerCase();
