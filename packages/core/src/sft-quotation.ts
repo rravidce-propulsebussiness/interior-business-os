@@ -100,6 +100,29 @@ const detailSchema = z
   .strict();
 
 export type SftEstimateDetails = z.infer<typeof detailSchema>;
+/**
+ * Quotation snapshots contain calculated areaSqft and amount for display/PDF.
+ * Those fields are forbidden by the strict save-input schema. Convert saved
+ * snapshots back into editable source rows before passing them to React.
+ * Preserves ALL user-entered dimensions, floor linkage and custom rates.
+ */
+export function editableSftRows(
+  saved: Pick<SftEstimateDetails, 'rows'>,
+): z.infer<typeof inputRow>[] {
+  return saved.rows.map(row => ({
+    name: row.name,
+    ...(row.kind ? { kind: row.kind } : {}),
+    lengthFeet: row.lengthFeet,
+    widthFeet: row.widthFeet,
+    ...(row.heightFeet !== undefined ? { heightFeet: row.heightFeet } : {}),
+    ...(row.quantity !== undefined ? { quantity: row.quantity } : {}),
+    ...(row.unit ? { unit: row.unit } : {}),
+    ratePerSqft: row.ratePerSqft,
+    ...(row.inheritFromPrevious !== undefined
+      ? { inheritFromPrevious: row.inheritFromPrevious } : {}),
+  }));
+}
+
 export const SFT_ESTIMATE_PREFIX = 'SFT_ESTIMATE_V1:';
 export const SFT_ESTIMATE_PREFIX_V2 = 'SFT_ESTIMATE_V2:';
 
