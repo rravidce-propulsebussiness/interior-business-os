@@ -480,6 +480,12 @@ test('one lead supports multiple package quotations and previews newest, with si
   assert.match(quoteList, /qs-quote-edit/);
   assert.match(quoteList, /\?step=quote/);
   assert.match(quoteList, /Ready to share/);
+  const revise = readFileSync(fileURLToPath(new URL('quotations/quotation-revise-button.tsx', appRoot)), 'utf8');
+  assert.match(quoteList, /<QuotationReviseButton/);
+  assert.match(revise, /action: 'clone'/);
+  assert.match(revise, /\\/studio\\?step=quote/);
+  assert.match(revise, /Edit as a new draft revision/);
+  assert.doesNotMatch(quoteList, /issued=\\{row.status === 'issued'\\}/);
 });
 
 test('Follow-ups and Visits are handled inside Leads and legacy links redirect', () => {
