@@ -82,6 +82,7 @@ export function MasterForm({
 }) {
   const {
     register,
+    watch,
     setValue,
     reset,
     handleSubmit,
@@ -123,7 +124,7 @@ export function MasterForm({
       })}
     >
       {fields.map((field) => (
-        <label className="grid gap-1" key={field.key}>
+        <label className="grid gap-2 rounded-xl border border-slate-100 bg-white px-3 py-3 text-sm font-semibold text-slate-800" key={field.key}>
           {field.label}
           {field.options ? (
             <select
@@ -141,7 +142,23 @@ export function MasterForm({
               ))}
             </select>
           ) : field.type === 'file' ? (
-            <input
+            <div className="grid gap-2">
+              {typeof watch(field.key) === 'string' &&
+               /^data:image\/(?:png|jpeg);base64,[A-Za-z0-9+/=]+$/.test(watch(field.key) as string) && (
+                <div className="flex flex-wrap items-center gap-3 rounded-xl bg-slate-50 p-3">
+                  <img src={watch(field.key) as string} alt={field.label + ' currently saved'}
+                    className="h-20 w-28 rounded-lg border border-slate-200 bg-white object-contain p-1" />
+                  <button type="button"
+                    className="rounded-lg border border-red-200 px-3 py-2 text-xs font-bold text-red-600"
+                    onClick={() => {
+                      setValue(field.key, '', { shouldDirty: true });
+                      setMessage('Image cleared. Save company branding to apply the removal.');
+                    }}>
+                    Remove image
+                  </button>
+                </div>
+              )}
+              <input
               type="file"
               accept="image/png,image/jpeg"
               onChange={(event) => {
@@ -156,7 +173,11 @@ export function MasterForm({
                   .catch((error: unknown) => setMessage(
                     error instanceof Error ? error.message : 'Unable to prepare photo.'
                   ));
-              }}            />
+              }}
+              className="block w-full rounded-xl border border-dashed border-orange-200 bg-orange-50/40 p-3 text-xs text-slate-700"
+              aria-label={field.label}
+              />
+            </div>
           ) : field.type === 'textarea' ? (
             <textarea
               className="rounded border bg-background p-2"
