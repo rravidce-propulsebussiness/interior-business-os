@@ -171,10 +171,10 @@
   background:#f0f2f6; color:#67768b;
 }
 .qs-state-issued { color:#0c9158; background:#e1f8eb; }
-.qs-state-draft { color:#526380; background:#eaf0f7; }
 .qs-state-superseded { color:#ad6812; background:#fff2df; }
 .qs-state-cancelled { color:#c84450; background:#ffedf0; }
 .qs-quotes-created { color:#5c6b85; white-space:nowrap; }
+.qs-quotes-unshared { color:#8491a2; font-weight:700; }
 .qs-quotes-actions { display:flex; align-items:center; gap:5px; }
 .qs-quote-icon-button {
   display:grid; place-items:center;
@@ -250,17 +250,21 @@
   .qs-quotes-apply { min-height:40px; flex:0 0 auto; }
   .qs-quotes-table-wrap { display:none; }
   .qs-quotes-mobile-list { display:grid; gap:10px; background:#fff8f4; padding:10px; }
-  .qs-quotes-mobile-card { background:#fff; border:1px solid #f1e6dd; border-radius:13px; overflow:hidden; padding:12px; }
+  .qs-quotes-customer-card { background:#fff; border:1px solid #f1e6dd; border-radius:14px; overflow:hidden; }
+  .qs-quotes-customer-header { display:flex; align-items:center; gap:11px; padding:13px; background:#fffaf6; border-bottom:1px solid #f1e6dd; }
+  .qs-quotes-customer-name { flex:1; min-width:0; }
+  .qs-quotes-customer-name strong { display:block; font-size:13px; color:#1b2941; }
+  .qs-quotes-customer-name small { display:block; margin-top:3px; color:#78879b; font-size:10px; }
+  .qs-quotes-mobile-quote { padding:13px; }
+  .qs-quotes-mobile-quote + .qs-quotes-mobile-quote { border-top:1px solid #ebedf1; }
+  .qs-quotes-mobile-subline { display:flex; align-items:center; justify-content:space-between; gap:7px; padding:0 0 11px; color:#7b8798; font-size:10px; }
+  .qs-quotes-mobile-subline span:first-child { color:#46556c; overflow-wrap:anywhere; }
   .qs-quotes-mobile-top { display:flex; justify-content:space-between; gap:9px; align-items:center; }
   .qs-quotes-mobile-top a { color:#162943; font-weight:800; font-size:12px; }
-  .qs-quotes-mobile-person { display:flex; align-items:center; gap:9px; padding:13px 0; min-width:0; }
-  .qs-quotes-mobile-person > div { flex:1; min-width:0; }
-  .qs-quotes-mobile-person strong { display:block; color:#263149; font-size:12px; }
-  .qs-quotes-mobile-person small { display:block; color:#7d8b9f; margin-top:5px; font-size:10px; }
-  .qs-quotes-mobile-person > .qs-quotes-amount { white-space:normal; text-align:right; font-size:12px; max-width:36%; }
-  .qs-quotes-mobile-meta { display:flex; justify-content:space-between; align-items:center; gap:8px; font-size:10px; color:#7d8a9b; padding-bottom:11px; }
+  .qs-quotes-mobile-meta { display:flex; justify-content:space-between; align-items:center; gap:8px; font-size:10px; color:#7d8a9b; padding:11px 0 9px; }
   .qs-quotes-mobile-meta .qs-quotes-service { font-size:9px; padding:5px 8px; }
-  .qs-quotes-mobile-actions { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); border-top:1px solid #f1e9e4; padding-top:9px; gap:6px; }
+  .qs-quotes-mobile-meta .qs-quotes-amount {font-size:13px; color:#1b2941; white-space:nowrap;}
+  .qs-quotes-mobile-actions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); border-top:1px solid #f1e9e4; padding-top:10px; gap:7px; }
   .qs-quotes-mobile-actions a { display:grid; place-items:center; border:1px solid #f0e6dd; border-radius:9px; color:#ed590c; padding:10px 4px; font-size:11px; font-weight:750; text-align:center; }
   .qs-quotes-mobile-actions a:hover { background:#fff2e8; }
   .qs-quotes-footer { padding:12px; }
@@ -286,7 +290,7 @@
   .qs-quotes-mobile-more .qs-btn { min-height:34px; width:100%; font-size:11px; }
 }
 
-/* Edit is a primary, visible draft action (not hidden in More). */
+/* Edit remains visible for saved quotes (and safely creates a revision once shared). */
 .qs-quotes-actions .qs-quote-edit,
 .qs-quotes-mobile-actions .qs-quote-edit {
   display: inline-flex;
