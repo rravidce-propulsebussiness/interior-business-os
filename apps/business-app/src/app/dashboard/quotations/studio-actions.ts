@@ -12,7 +12,6 @@ const createInput = z
   .object({
     clientName: z.string().trim().min(2).max(200),
     customerId: z.uuid().nullable().optional(),
-    projectId: z.uuid().nullable().optional(),
     leadId: z.uuid().nullable().optional(),
     phone: z.string().trim().min(3).max(40),
     email: z.union([z.literal(''), z.email().max(254)]),
@@ -217,86 +216,58 @@ export async function createStudioQuotation(input: unknown): Promise<{
     }
 
     let createdProspect = false;
-    let projectId = values.projectId ?? '';
-    if (projectId) {
-      const { data: selectedProject, error } = await s.client
-        .from('projects')
-        .select('id,industry_id')
-        .eq('organization_id', s.org)
-        .eq('customer_id', customerId)
-        .eq('id', projectId)
-        .eq('status', 'active')
-        .maybeSingle();
-      if (error || !selectedProject)
-        return {
-          ok: false,
-          message: 'This project does not belong to the selected customer.',
-        };
-      if (
-        selectedProject.industry_id &&
-        selectedProject.industry_id !== activeIndustry.id
-      )
-        return {
-          ok: false,
-          message: 'Choose the correct industry for this existing project.',
-        };
+    let projectId = '';
+    // Only reuse a pre-sale reference for the same customer and requirement.
+    // An existing signed/execution project is NEVER auto-selected here.
+    const { data: projectMatches, error: matchesError } = await s.client
+      .from('projects')
+      .select('id')
+      .eq('organization_id', s.org)
+      .eq('customer_id', customerId)
+      .eq('name', values.projectName)
+      .eq('industry_id', activeIndustry.id)
+      .eq('is_sales_prospect', true)
+      .eq('status', 'active')
+      .limit(2);
+    if (matchesError)
+      return {
+        ok: false, message: 'Could not check existing quotation requirements. Try again.',
+      };
+    if ((projectMatches?.length ?? 0) > 1)
+      return {
+        ok: false, message: 'Multiple quotation requirements share this name. ' +
+          'Please use a distinct requirement name.',
+      };
+    if (projectMatches?.length) {
+      projectId = projectMatches[0]!.id;
     } else {
-      // Reuse only an internal quote prospect, never silently connect a new
-      // sales quotation to a confirmed execution project with the same name.
-      const { data: projectMatches, error } = await s.client
-        .from('projects')
-        .select('id')
-        .eq('organization_id', s.org)
-        .eq('customer_id', customerId)
-        .eq('name', values.projectName)
-        .eq('industry_id', activeIndustry.id)
-        .eq('is_sales_prospect', true)
-        .eq('status', 'active')
-        .limit(2);
-      if (error)
+      // SQL inserts with is_sales_prospect=true atomically. It stays hidden
+      // from Projects/Clients until conversion to a won execution project.
+      const createProspect = s.client.rpc.bind(s.client) as unknown as (
+        name: string,
+        args: Record<string, string | boolean>,
+      ) => Promise<{ data: string | null; error: { message: string } | null }>;
+      const { data: prospectId, error: prospectError } =
+        await createProspect('quotation_prospect_project_create', {
+          p_organization_id: s.org,
+          p_customer_id: customerId,
+          p_industry_id: activeIndustry.id,
+          p_name: values.projectName,
+          p_project_type: values.projectType,
+          p_site_city: values.location,
+          p_notes: [
+            values.plotSize ? 'Plot / project size: ' + values.plotSize : '',
+            values.notes,
+          ].filter(Boolean).join('\\n'),
+          p_new_customer: createdCustomer,
+        });
+      if (prospectError || !prospectId)
         return {
-          ok: false,
-          message: 'Could not check existing projects. Please try again.',
+          ok: false, message: 'Could not prepare the quote-only sales reference. ' +
+            'Confirm the latest quotation database migration is installed.',
         };
-      if (projectMatches?.length === 1) {
-        projectId = projectMatches[0]!.id;
-      } else if (projectMatches?.length) {
-        return {
-          ok: false,
-          message:
-            'Multiple projects share this name. Select the intended existing project.',
-        };
-      } else {
-        // Atomically create a quote-only prospect record with the correct
-        // sales flag already set. This record is excluded from the Projects
-        // execution workspace until CRM Closed-Won conversion.
-        const createProspect = s.client.rpc.bind(s.client) as unknown as (
-          name: string,
-          args: Record<string, string | boolean>,
-        ) => Promise<{ data: string | null; error: { message: string } | null }>;
-        const { data: prospectId, error: prospectError } =
-          await createProspect('quotation_prospect_project_create', {
-            p_organization_id: s.org,
-            p_customer_id: customerId,
-            p_industry_id: activeIndustry.id,
-            p_name: values.projectName,
-            p_project_type: values.projectType,
-            p_site_city: values.location,
-            p_notes: [
-              values.plotSize ? 'Plot / project size: ' + values.plotSize : '',
-              values.notes,
-            ].filter(Boolean).join('\n'),
-            p_new_customer: createdCustomer,
-          });
-        if (prospectError || !prospectId)
-          return {
-            ok: false,
-            message: 'Could not prepare the quotation prospect. Check that the ' +
-              'latest quotation database migration has been deployed.',
-          };
-        projectId = prospectId;
-        createdProspect = true;
-      }
+      projectId = prospectId;
+      createdProspect = true;
     }
 
     const attachLead = async (quotationId: string) => {
