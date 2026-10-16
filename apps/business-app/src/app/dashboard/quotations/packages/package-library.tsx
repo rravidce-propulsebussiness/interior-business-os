@@ -19,7 +19,6 @@ type CatalogItem =
   | { kind: 'other'; item: QuotationPackage };
 type EditorState = { kind: 'construction' | 'other'; id: string } | null;
 
-const starterCodes = new Set(['STANDARD', 'PREMIUM', 'LUXURY', 'ROYAL']);
 const features = [
   { symbol: '▣', title: 'Premium Templates', caption: 'Ready-to-use packages' },
   { symbol: '✧', title: 'Fully Customizable', caption: 'Edit scope, brands & pricing' },
@@ -240,14 +239,14 @@ export function PackageLibrary({
             onClick={() => {setEditing(null);setDetail(null);setRemove(null);}}>×</button>
           {editing?.kind === 'construction' && (
             <PremiumPackageEditor key={editing.id + ':' + (selectedItem?.version ?? '')}
-              item={selectedItem?.id !== undefined && 'ratePerSqft' in selectedItem
-                ? selectedItem : undefined}
+              {...(selectedItem && 'ratePerSqft' in selectedItem
+                ? { item: selectedItem } : {})}
               close={() => {setEditing(null);router.refresh();}}/>
           )}
           {editing?.kind === 'other' && activeIndustries.length > 0 && (
             <IndustryPackageEditor key={editing.id + ':' + (selectedItem?.version ?? '')}
-              item={selectedItem?.id !== undefined && 'basePrice' in selectedItem
-                ? selectedItem : undefined}
+              {...(selectedItem && 'basePrice' in selectedItem
+                ? { item: selectedItem } : {})}
               industries={activeIndustries} currency={currency}
               onClose={() => {setEditing(null);router.refresh();}}/>
           )}
@@ -309,11 +308,11 @@ export function PackageLibrary({
           {current.description || 'Company-defined specifications and materials'}
         </p>
         <div className="qpl-price">{entry.kind === 'construction'
-          ? cash(current.ratePerSqft) : cash(current.basePrice,current.currency)}
+          ? cash(entry.item.ratePerSqft) : cash(entry.item.basePrice,entry.item.currency)}
           <span>{entry.kind === 'construction' ? 'per sq ft'
-            : current.pricingBasis === 'fixed' ? 'fixed price'
-              : current.pricingBasis === 'per_sqft' ? 'per sq ft'
-                : current.pricingBasis === 'per_bhk' ? 'per BHK' : 'per item'}</span>
+            : entry.item.pricingBasis === 'fixed' ? 'fixed price'
+              : entry.item.pricingBasis === 'per_sqft' ? 'per sq ft'
+                : entry.item.pricingBasis === 'per_bhk' ? 'per BHK' : 'per item'}</span>
         </div>
         <ul className="qpl-specs">
           {rows.length > 0 ? rows.map((line,i)=>
