@@ -13,10 +13,13 @@ export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  let stage = 'document';
   try {
     const { id } = await params;
     const { html, document } = await quotationDocument(id);
+    stage = 'render';
     const base = await renderQuotationPdf(html, document);
+    stage = 'annexures';
 
     // Basic PDF generation must not depend on optional privileged storage
     // credentials. The private annexure upload facility cannot operate without
@@ -45,7 +48,9 @@ export async function GET(
         additional.push(new Uint8Array(await data.arrayBuffer()));
       }
     }
+    stage = 'merge';
     const bytes = await appendQuotationAnnexures(base, additional);
+    stage = 'response';
     return new Response(new Uint8Array(bytes), {
       headers: {
         'Content-Type': 'application/pdf',
@@ -55,23 +60,32 @@ export async function GET(
       },
     });
   } catch (error) {
-    if (error instanceof PdfServiceError) {
-      return new Response('PDF rendering service is unavailable', {
-        status: error.status,
-        headers: { 'Cache-Control': 'private, no-store' },
-      });
-    }
     const denied = error instanceof DomainError &&
       (error.code === 'FORBIDDEN' || error.code === 'NOT_FOUND');
+    const requestId = crypto.randomUUID();
+    // Log only failure stage and allowlisted error code. Never log customer
+    // content, private PDF bytes, Supabase secrets or share-token values.
+    console.error('quotation.pdf.failed', {
+      requestId,
+      stage,
+      code: denied ? error.code :
+        error instanceof PdfServiceError ? error.code : 'PDF_INTERNAL_ERROR',
+    });
     // 403 is reserved for actual authentication/authorization failures.
     // Unexpected server PDF failures are 500, with sanitized error text.
     // Never leak quotation details or storage credentials in responses.
     const failure = safeFailure(error);
     return new Response(
-      denied ? failure.message : 'Quotation PDF could not be generated. Please contact the administrator.',
+      denied ? failure.message :
+        'Quotation PDF unavailable (' + stage + '). Reference ' + requestId.slice(0, 8) + '.',
       {
         status: denied ? 403 : 500,
-        headers: { 'Cache-Control': 'private, no-store' },
+        headers: {
+          'Cache-Control': 'private, no-store',
+          'X-Quotation-PDF-Stage': stage,
+          'X-Quotation-PDF-Request': requestId,
+          'X-Content-Type-Options': 'nosniff',
+        },
       },
     );
   }
