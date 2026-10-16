@@ -203,14 +203,16 @@ export async function createStudioQuotation(input: unknown): Promise<{
       p_lead_id: values.leadId,
     });
     if (!linked.error && Array.isArray(linked.data)) {
-      const firstLink = linked.data.find((item: unknown) =>
-        item !== null && typeof item === 'object' &&
-        'project_id' in item && typeof item.project_id === 'string');
-      if (firstLink && typeof firstLink.project_id === 'string') {
+      const firstProjectId = linked.data.flatMap((item: unknown) =>
+        item !== null && typeof item === 'object' && !Array.isArray(item) &&
+        'project_id' in item && typeof item.project_id === 'string'
+          ? [item.project_id]
+          : [])[0];
+      if (firstProjectId) {
         const { data: previousProject } = await s.client.from('projects')
           .select('customer_id')
           .eq('organization_id', s.org)
-          .eq('id', firstLink.project_id)
+          .eq('id', firstProjectId)
           .maybeSingle();
         const previousCustomer = matches.find((item) =>
           item.id === previousProject?.customer_id);
