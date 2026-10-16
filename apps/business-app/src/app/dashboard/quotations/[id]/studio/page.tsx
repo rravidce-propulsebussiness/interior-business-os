@@ -17,6 +17,7 @@ import { ContractHandoff } from '../../../finance/handoff';
 import { QuotationAttachments } from '../../quotation-attachments';
 import { PaymentScheduleEditor } from '../../payment-schedule-editor';
 import { DraftBrandingControl } from '../../draft-branding-control';
+import { CreateRevisionControl } from '../../create-revision-control';
 import { hasSavedStagePaymentPlan } from '@business-os/core/quotation-payment-plan';
 
 export const dynamic = 'force-dynamic';
@@ -303,6 +304,10 @@ export default async function QuotationStudio({
         sharingEditor={
           <SharingSection revisionId={revision.id} status={revision.status} />
         }
+        reviseEditor={['issued', 'superseded'].includes(revision.status) &&
+          s.allowed('quotation.create', 'quotation')
+          ? <CreateRevisionControl revisionId={revision.id} version={revision.version} />
+          : null}
         issueEditor={
           <CommandForm
             title="Confirm & Enable Customer Sharing"
