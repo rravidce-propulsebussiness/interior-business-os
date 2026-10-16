@@ -16,9 +16,9 @@ const templates: Record<string, Milestone[]> = {
     { name: 'Agreement & advance', percent: '10' },
     { name: 'Foundation & plinth', percent: '20' },
     { name: 'RCC structure', percent: '25' },
-    { name: 'Brickwork & roofing', percent: '15' },
-    { name: 'Finishing works', percent: '20' },
-    { name: 'Handover', percent: '10' },
+    { name: 'Brick work & block work', percent: '15' },
+    { name: 'Plastering & flooring', percent: '15' },
+    { name: 'Finishing & handover', percent: '15' },
   ],
   interior: [
     { name: 'Agreement & advance', percent: '20' },
@@ -88,7 +88,7 @@ export function PaymentScheduleEditor({
     && Math.abs(percentTotal - 100) < 0.001;
   const amount = Number(total);
   const money = (value: number) => new Intl.NumberFormat('en-IN', {
-    style: 'currency', currency, maximumFractionDigits: 2,
+    style: 'currency', currency, minimumFractionDigits: 0, maximumFractionDigits: 2,
   }).format(Number.isFinite(value) ? value : 0);
   const stageAmounts = useMemo(() => {
     const cents = Math.round((Number.isFinite(amount) ? amount : 0) * 100);
