@@ -16,7 +16,7 @@ it('reproduces and fixes the quotation PDF preflight failure for public concept 
   const printHtml = safeQuotationPrintHtml(html);
   expect(printHtml).not.toContain('images.unsplash.com');
   expect(printHtml).toContain('data:image/png;base64,');
-  expect(validatePrintHtml(printHtml)).toContain('QUOTATION');
+  expect(validatePrintHtml(printHtml)).toContain('pb-cover');
   // Rendering a PDF must not mutate the browser-visible premium template.
   expect(html).toContain('images.unsplash.com');
 });
