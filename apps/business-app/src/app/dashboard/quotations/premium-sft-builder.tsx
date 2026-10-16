@@ -49,7 +49,7 @@ const fmt = (n:number) => new Intl.NumberFormat('en-IN',{
 }).format(Number.isFinite(n)?n:0);
 const work = (name:string,unit:Unit,rate=''):Work => ({
   kind:'additional',name,unit,ratePerSqft:rate,
-  lengthFeet:'',widthFeet:unit==='sqft'||unit==='cubic_ft'?'':'1',
+  lengthFeet:unit==='piece'||unit==='lumpsum'?'1':'',widthFeet:unit==='sqft'||unit==='cubic_ft'?'':'1',
   heightFeet:'',quantity:unit==='piece'||unit==='lumpsum'?'1':'',
 });
 const floor = (name:string,rate=''):Work => ({
@@ -126,7 +126,6 @@ export function PremiumSftBuilder({
     });
   });
   const [drawer,setDrawer]=useState(false);
-  const [materialError,setMaterialError]=useState('');
   const [message,setMessage]=useState('');
   const [saved,setSaved]=useState(false);
   const floors=rows.filter(r=>r.kind==='floor');
@@ -368,11 +367,10 @@ export function PremiumSftBuilder({
             These are specification inclusions. A brand change does not silently alter the package rate.
             Use the work table to add separately priced items.
           </p>
-          {materialError&&<p role="alert" className="qs-work-alert">{materialError}</p>}
         </div>
         <div className="qs-work-drawer-actions">
           <button type="button" onClick={()=>setDrawer(false)}>Close</button>
-          <button type="button" onClick={()=>{setMaterialError('');setDrawer(false);touch();}}>
+          <button type="button" onClick={()=>{setDrawer(false);touch();}}>
             Apply to this quotation</button>
         </div>
         <p className="qs-work-drawer-footer">Tap Save quotation to persist changes.</p>
