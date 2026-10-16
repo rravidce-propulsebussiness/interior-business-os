@@ -190,7 +190,6 @@ export function ConstructionSelector({
   revisionId,
   version,
   initialMode = 'sft',
-  previewHtml,
   quoteNumber,
   clientName,
   location,
