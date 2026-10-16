@@ -368,3 +368,43 @@ it('keeps the saved payment table and exact final amount in the PDF', () => {
   expect(html).not.toContain('Stage-wise payments not specified');
   expect(html).not.toContain('[STAGE_PAYMENT_PLAN]');
 });
+
+
+it('prints saved Terms & Inclusions with distinct warranty and exclusions plus stage payment amounts', () => {
+  const document=quotationDocumentFixture();
+  document.totals.final_amount='5550000';
+  document.terms=[
+    'Inclusions:', 'Steel and cement as quoted', '',
+    'Exclusions:', 'Borewell and owner-provided power', '',
+    'Warranty:', 'Structural coverage for ten years', '',
+    'Additional terms:', 'Subject to site accessibility', '',
+    '[STAGE_PAYMENT_PLAN]', 'Advance|10.00', 'RCC & brickwork|60.00',
+    'Handover|30.00', '[/STAGE_PAYMENT_PLAN]',
+  ].join('\n');
+  const html=renderQuotationDocument(document);
+  expect(html).toContain('Terms &amp; Inclusions');
+  expect(html).toContain('<h3>Inclusions</h3>');
+  expect(html).toContain('Steel and cement as quoted');
+  expect(html).toContain('<h3>Exclusions</h3>');
+  expect(html).toContain('<h3>Warranty</h3>');
+  expect(html).toContain('Structural coverage for ten years');
+  expect(html).toContain('<h3>Additional terms</h3>');
+  expect(html).toContain('Proposed stage-wise payment schedule');
+  expect(html).toContain('RCC &amp; brickwork');
+  expect(html).toContain('5,55,000');
+  expect(html).toContain('33,30,000');
+  expect(html).toContain('16,65,000');
+  expect(html).not.toContain('[STAGE_PAYMENT_PLAN]');
+});
+
+it('safely prints legacy free-text terms without inventing milestone payments', () => {
+  const document=quotationDocumentFixture();
+  document.terms='Owner will arrange water and power; <script>unsafe()</script>';
+  const html=renderQuotationDocument(document);
+  expect(html).toContain('Terms &amp; Inclusions');
+  expect(html).toContain('Additional terms');
+  expect(html).toContain('&lt;script&gt;');
+  expect(html).not.toContain('<script>unsafe()</script>');
+  expect(html).toContain('Stage-wise payments not specified');
+  expect(html).not.toContain('Advance|10.00');
+});
