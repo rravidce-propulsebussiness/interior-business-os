@@ -10860,6 +10860,10 @@ export interface Database {
         };
         Returns: undefined;
       };
+      client_portal_grantable_projects: {
+        Args: { p_organization_id: string; p_customer_id: string };
+        Returns: Json;
+      };
       client_portal_manage: {
         Args: {
           p_organization_id: string;
@@ -10905,6 +10909,10 @@ export interface Database {
         Returns: Json;
       };
       company_self_register: { Args: { p_input: Json }; Returns: Json };
+      construction_custom_package_settings_save: {
+        Args: { p_org: string; p_rows: Json };
+        Returns: Json;
+      };
       construction_package_delete: {
         Args: { p_org: string; p_package_id: string; p_version: number };
         Returns: boolean;
@@ -11848,6 +11856,31 @@ export interface Database {
         Args: { p_org: string; p_input: Json };
         Returns: string;
       };
+      quotation_prospect_project_create: {
+        Args: {
+          p_organization_id: string;
+          p_customer_id: string;
+          p_industry_id: string;
+          p_name: string;
+          p_project_type: string;
+          p_site_city: string;
+          p_notes: string;
+          p_new_customer?: boolean;
+        };
+        Returns: string;
+      };
+      quotation_prospect_ready: {
+        Args: { p_organization_id: string };
+        Returns: boolean;
+      };
+      quotation_refresh_draft_branding: {
+        Args: {
+          p_organization_id: string;
+          p_revision_id: string;
+          p_expected_version: number;
+        };
+        Returns: number;
+      };
       quotation_response_queue: {
         Args: {
           p_organization_id: string;
@@ -11864,6 +11897,10 @@ export interface Database {
       quotation_share_pdf_attachments: {
         Args: { p_token: string };
         Returns: Json;
+      };
+      quotation_shared_revisions: {
+        Args: { p_organization_id: string; p_revision_ids: string[] };
+        Returns: string[];
       };
       quotation_signing_preflight: {
         Args: { p_message: string; p_signature: string };
