@@ -523,14 +523,14 @@ export default async function ProjectDeliveryPage({
               allowFinance={has('invoice.view','billing')}
               allowUpdates={(open || site.stage === 'handover') &&
                 (isEngineer || isQuality || canSeeManagerUpdates)}
-              allowTeam={manager}
+              allowTeam={manager && site.stage !== 'not_started'}
               allowMaterials={(open || site.stage === 'handover') &&
                 (isEngineer || isProcurement)}
               allowQuality={(open || site.stage === 'handover') && isQuality}
-              allowFiles={isDesign || isEngineer || isQuality || isWatchman}
+              allowFiles={isDesign || isEngineer || isQuality}
               allowSetup={isDesign || isEngineer || manager}
               allowSecurity={isWatchman}
-              allowHandover={manager}/>
+              allowHandover={manager && open}/>
 
             {agreement && (
               <div className="site-agreement-panel">

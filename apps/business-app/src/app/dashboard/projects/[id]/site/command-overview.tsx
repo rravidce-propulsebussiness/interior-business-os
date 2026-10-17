@@ -89,12 +89,6 @@ export function SiteCommandOverview(props: SiteCommandOverviewProps) {
             </p>
           </div>
           <div className="sc-hero-actions">
-            <Link
-              className="sc-btn sc-btn-outline"
-              href={'/dashboard/projects/' + projectId}
-            >
-              <OwnerIcon name="projects" size={17} /> Project details
-            </Link>
             {canUploadEvidence && (
               <a
                 className="sc-btn sc-btn-outline"

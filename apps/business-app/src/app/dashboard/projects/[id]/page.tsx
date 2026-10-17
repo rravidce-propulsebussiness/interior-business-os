@@ -315,9 +315,9 @@ export default async function Project({
           allowQuality={Boolean(site && (site.can_manage ||
             ['site_engineer','quality_inspector'].includes(site.role ?? '')))}
           allowFiles={Boolean(site && (site.can_manage ||
-            ['architect','structural_designer','site_engineer','quality_inspector','watchman'].includes(site.role ?? '')))}
+            ['architect','structural_designer','site_engineer','quality_inspector'].includes(site.role ?? '')))}
           allowSecurity={Boolean(site && (site.can_manage || site.role === 'watchman'))}
-          allowHandover={site?.can_manage === true}
+          allowHandover={site?.can_manage === true && site.stage === 'execution'}
           allowSetup={Boolean(site && (site.can_manage ||
             ['architect','structural_designer','site_engineer'].includes(site.role ?? '')))}/>
 
