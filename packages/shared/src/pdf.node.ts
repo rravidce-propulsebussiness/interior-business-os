@@ -38,9 +38,13 @@ export async function renderNodePdf(
         break;
       } catch { /* Try the next explicitly known local binary. */ }
     }
-    if (!recovered) throw initialError;
+    if (!recovered) {
+      // Never log or expose filesystem paths and process environment details.
+      // The upstream PDF router maps this stable code to a safe actionable error.
+      throw new Error('PDF_CHROMIUM_UNAVAILABLE', { cause: initialError });
+    }
   }
-  if (!browser) throw new Error('No installed Chromium browser available for PDF rendering');
+  if (!browser) throw new Error('PDF_CHROMIUM_UNAVAILABLE');
   const readyBrowser = browser;
   // Hard stop if the renderer hangs. Closing the browser fails the job closed.
   const watchdog = setTimeout(() => {
