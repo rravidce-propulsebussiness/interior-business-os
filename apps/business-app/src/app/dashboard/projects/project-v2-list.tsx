@@ -7,7 +7,6 @@ import { type ProjectEntry,pretty } from './project-v2-types';
 export function ProjectsDirectory({projects}:{projects:ProjectEntry[]}){
  const [search,setSearch]=useState('');
  const [filter,setFilter]=useState('all');
- const normalized=(value:string)=>value.toLowerCase().replaceAll('_',' ');
  const completed=(status:string)=>['completed','handover','closed'].includes(status);
  const ongoing=(status:string)=>['active','in_progress','ongoing','started'].includes(status);
  const shown=useMemo(()=>projects.filter(p=>{
