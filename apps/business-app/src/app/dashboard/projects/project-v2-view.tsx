@@ -5,10 +5,10 @@ import { ownerWorkspaceNavigation } from '../owner-workspace-navigation';
 import { canAccess } from '@business-os/auth';
 import { activeOrganization } from '@business-os/auth/server';
 import { projectWorkspace,formatMoney,pretty,shortDate,stringValue,
- type WorkspaceData,type SiteRow,type Stage } from './project-v2-data';
+ type WorkspaceData,type SiteRow } from './project-v2-data';
 import {
  SiteReportForm,SiteMediaForm,MaterialRequestForm,MaterialUpdateForm,
- QualityForm,ReviewCheck,DesignSubmitForm,GateForm,AssignRole,InitializeSite,SyncStages,
+ QualityForm,ReviewCheck,DesignSubmitForm,GateForm,AssignRole,SyncStages,
 } from './project-v2-forms';
 import '../owner-dashboard.css';
 import './project-v2.css';
@@ -170,7 +170,7 @@ function Timeline({d}:{d:WorkspaceData}){
     action={<span className="pv2-label">{all.length} recorded activities</span>}/>
    <div className="pv2-timeline-grid">
     <div className="pv2-timeline-main">
-     {all.length?all.map((a,i)=><article className="pv2-timeline-entry" key={a.kind+a.id}>
+     {all.length?all.map(a=><article className="pv2-timeline-entry" key={a.kind+a.id}>
       <div className="pv2-time-column"><span>{shortDate(a.date)}</span><b className={'pv2-time-dot '+a.kind}/></div>
       <div className="pv2-timeline-details"><div className="pv2-between">
        <strong>{a.title}</strong><span className="pv2-label">{pretty(a.kind)}</span></div>
@@ -263,7 +263,7 @@ function Procurement({d}:{d:WorkspaceData}){
     <span className="pv2-material-icon"><OwnerIcon name="purchases" size={23}/></span>
     <div><strong>{stringValue(m.item)}</strong>
      <small>{stringValue(m.quantity)} {stringValue(m.unit)} · {shortDate(m.created_at)}</small>
-     {m.vendor_reference&&<small>Supplier / order: {stringValue(m.vendor_reference)}</small>}</div>
+     {Boolean(m.vendor_reference)&&<small>Supplier / order: {stringValue(m.vendor_reference)}</small>}</div>
     <Status value={stringValue(m.status)}/>
     {site?.stage==='execution'&&site.role&&['manager','procurement'].includes(site.role)&&
      <MaterialUpdateForm id={d.project.id} material={{id:m.id,status:stringValue(m.status)}}/>}
@@ -314,7 +314,7 @@ function Execution({d}:{d:WorkspaceData}){
     <div><strong>{stringValue(row.completed_work)}</strong><Status value="recorded"/></div>
     <small>{shortDate(row.report_date)} · {stringValue(row.worker_count)} workers</small>
     <p>Tomorrow: {stringValue(row.tomorrow_plan)}</p>
-    {row.blockers&&<small>Blockers: {stringValue(row.blockers)}</small>}
+    {Boolean(row.blockers)&&<small>Blockers: {stringValue(row.blockers)}</small>}
    </article>)}</div>:<Blank title="No daily execution reports" detail="When work starts, site engineers can record daily updates here."/>}
    <PhotoStrip projectId={d.project.id} rows={d.site?.media??[]}/>
    {d.site?.stage==='execution'&&['manager','site_engineer'].includes(d.site.role)&&
