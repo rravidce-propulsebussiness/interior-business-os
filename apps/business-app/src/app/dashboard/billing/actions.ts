@@ -137,6 +137,10 @@ export async function saveGstDocument(form: FormData) {
     const revisionId = String(form.get('revisionId') ?? '').trim();
     const stageNumber = String(form.get('stageNumber') ?? '').trim();
     const stageRequested = Boolean(leadId || revisionId || stageNumber);
+    const customerId = String(form.get('customerId') ?? '').trim();
+    // Stage invoices must stay tied to the accepted quote. Ordinary invoices
+    // may optionally reference an existing tenant customer without conversion.
+    if (stageRequested && customerId) throw new DomainError('VALIDATION_FAILED');
     if (stageRequested) {
       const checkedLead = idSchema.parse(leadId);
       const checkedRevision = idSchema.parse(revisionId);
@@ -145,8 +149,13 @@ export async function saveGstDocument(form: FormData) {
       id = await createGstRepository(client).saveStageDocument(
         org, input, checkedLead, checkedRevision, checkedStage,
       );
+    } else if (input.kind === 'sales_invoice' && !marketplaceOrderId) {
+      id = await createGstRepository(client).saveCustomerDocument(
+        org, input, customerId ? idSchema.parse(customerId) : null,
+      );
     } else {
-      // Standard manual GST bills still use the existing fixed platform format.
+      if (customerId) throw new DomainError('VALIDATION_FAILED');
+      // Supplier and marketplace bills continue through their original path.
       id = await createGstTemplatesRepository(client).saveDocument(org, input, null);
     }
     revalidatePath('/dashboard/billing');
