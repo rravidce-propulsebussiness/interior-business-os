@@ -657,3 +657,125 @@
 .crm-leads-root .crm-quote-alternative:hover {
   background: #ffeada;
 }
+
+
+/* Lead quotation actions: reliable preview and secure WhatsApp PDF sharing. */
+.crm-leads-root .crm-quote-summary .crm-quote-buttons {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  align-items:stretch;
+  gap:8px;
+  width:100%;
+  min-width:0;
+  margin-top:11px;
+}
+.crm-leads-root .crm-quote-summary .crm-quote-buttons > :is(button,a) {
+  display:inline-flex;
+  justify-content:center;
+  align-items:center;
+  width:100%;
+  min-width:0;
+  min-height:40px;
+  padding:9px 8px;
+  line-height:1.3;
+  white-space:normal;
+  text-align:center;
+  border-radius:10px;
+  font-size:12px;
+  font-weight:800;
+  cursor:pointer;
+}
+.crm-leads-root .crm-quote-summary .crm-quote-buttons .crm-quote-whatsapp {
+  grid-column:1/-1;
+  background:#e9f9ef;
+  color:#137a48;
+  border:1px solid #a9dfbf;
+  font-size:12px;
+}
+.crm-leads-root .crm-quote-summary .crm-quote-buttons .crm-quote-whatsapp:hover:not(:disabled) {
+  background:#d4f4df;
+  border-color:#7fcc9e;
+}
+.crm-leads-root .crm-quote-summary .crm-quote-buttons .crm-quote-whatsapp:disabled {
+  cursor:wait;
+  opacity:.7;
+}
+.crm-leads-root .crm-quote-share-error,.crm-leads-root .crm-quote-share-ready {
+  margin:9px 0 0;
+  padding:10px 12px;
+  border-radius:10px;
+  font-size:11px;
+  line-height:1.55;
+  overflow-wrap:anywhere;
+}
+.crm-leads-root .crm-quote-share-error {color:#a42c27;background:#fff0ef;border:1px solid #f4c6c1;}
+.crm-leads-root .crm-quote-share-ready {color:#126541;background:#ebfbf1;border:1px solid #b8e7ca;}
+.crm-leads-root .crm-quote-share-ready a {font-weight:850;text-decoration:underline;color:#14683f;}
+.crm-quote-dialog[open] {
+  display:flex;
+  flex-direction:column;
+  height:min(89dvh,850px);
+  overflow:hidden;
+}
+.crm-quote-dialog .crm-quote-dialog-head {flex:0 0 auto;}
+.crm-quote-dialog .crm-quote-dialog-footer {flex:0 0 auto;}
+.crm-quote-dialog iframe {
+  flex:1 1 auto;
+  min-height:0;
+  height:auto;
+  width:100%;
+  background:white;
+}
+.crm-quote-preview-state {
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  gap:13px;
+  flex:1 1 auto;
+  padding:28px 20px;
+  min-height:200px;
+  text-align:center;
+  font-size:13px;
+  line-height:1.55;
+  color:#4a5e79;
+  background:#f9fbff;
+  overflow:auto;
+}
+.crm-quote-preview-state strong {font-size:17px;color:#162d4c;}
+.crm-quote-preview-state p {max-width:440px;margin:0;overflow-wrap:anywhere;}
+.crm-quote-preview-state :is(button,a) {
+  border:1px solid #ffd0b6;
+  border-radius:10px;
+  padding:10px 14px;
+  min-height:40px;
+  background:#fff5ed;
+  color:#d35a1b;
+  font-weight:800;
+  font-size:12px;
+  text-decoration:none;
+  cursor:pointer;
+}
+.crm-quote-dialog .crm-quote-dialog-footer {gap:7px;}
+.crm-quote-dialog .crm-quote-dialog-footer :is(button,a) {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:41px;
+  text-align:center;
+}
+@media(max-width:800px) {
+  .crm-quote-dialog[open] {height:100dvh;max-height:100dvh;}
+  .crm-quote-dialog iframe {height:auto;min-height:0;}
+  .crm-quote-dialog .crm-quote-dialog-head {padding:12px 15px;}
+  .crm-quote-dialog .crm-quote-dialog-footer {padding:10px 9px;justify-content:center;}
+  .crm-quote-dialog .crm-quote-dialog-footer :is(button,a) {
+    flex:1 1 auto;
+    padding:10px 8px;
+    font-size:11px;
+    min-width:0;
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  .crm-leads-root .crm-quote-summary .crm-quote-buttons * {transition:none!important;}
+}
