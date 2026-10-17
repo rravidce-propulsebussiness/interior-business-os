@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { addressSchema, brandingSchema } from './commercial';
 import { parseSftEstimate } from './sft-quotation';
+import { parseCustomBrandQuote } from './custom-brand-quote';
 import { premiumCss, premiumSections } from './premium-quotation';
 import { savedStagePaymentPlan } from './quotation-payment-plan';
 import { customerTermSections } from './quotation-terms';
@@ -116,6 +117,43 @@ export function renderQuotationDocument(input: unknown): string {
   const constructionSpecs = d.lines.filter((line) =>
     line.description.includes('Materials / brands:'),
   );
+
+  // A Custom Quote is a calculated material package, not a printed JSON row.
+  // All brand prices and SFT usage values come from the saved revision.
+  const customBrandQuotes = d.lines.flatMap((line) => {
+    const quote = parseCustomBrandQuote(line.description);
+    return quote ? [quote] : [];
+  });
+  const customPricingTables = customBrandQuotes.map(quote =>
+    '<section class="pb-estimate pb-custom-estimate">' +
+    '<div class="pb-section-title"><h2>Custom brand-based construction estimate</h2></div>' +
+    '<p class="pb-section-subtitle">Customer-selected brand · purchase price × usage per SFT = cost per SFT</p>' +
+    '<table><thead><tr><th>Material / selected brand</th><th>Rate / unit</th>' +
+    '<th>Usage / SFT</th><th class="amount">Cost / SFT</th></tr></thead><tbody>' +
+    quote.selections.map(item =>
+      '<tr><td><strong>' + escape(item.category) + ' · ' +
+      escape(item.name) + '</strong>' +
+      (item.specification ? '<p class="text">' + escape(item.specification) + '</p>' : '') +
+      '</td><td>' + money(item.unitPrice) + ' / ' + escape(item.priceUnit) + '</td>' +
+      '<td>' + escape(item.consumptionPerSqft) + ' ' + escape(item.priceUnit) + '</td>' +
+      '<td class="amount">' + money(item.ratePerSqft) + '</td></tr>',
+    ).join('') +
+    '<tr class="total"><td>Calculated custom package rate</td><td></td><td></td>' +
+    '<td class="amount">' + money(quote.ratePerSqft) + ' / SFT</td></tr>' +
+    '</tbody></table><p class="pb-section-subtitle">Built-up area: ' +
+    escape(quote.areaSqft) + ' SFT · Total: ' + money(quote.total) + '</p></section>',
+  ).join('');
+  const customBrandSpecifications = customBrandQuotes.map(quote =>
+    '<section class="material-choices"><h3>Custom package · selected brands</h3>' +
+    quote.selections.map(item => '<p><strong>' + escape(item.category) +
+      '</strong> · ' + escape(item.name) + ' — ' +
+      escape(item.consumptionPerSqft) + ' ' + escape(item.priceUnit) +
+      '/SFT at ' + money(item.unitPrice) + '/' + escape(item.priceUnit) +
+      ' (' + money(item.ratePerSqft) + '/SFT)' +
+      (item.specification ? ' · ' + escape(item.specification) : '') +
+      '</p>').join('') + '</section>',
+  ).join('');
+
   const sftSchedules = d.lines.flatMap((line) => {
     const details = parseSftEstimate(line.description);
     return details ? [{ line, details }] : [];
@@ -247,8 +285,8 @@ export function renderQuotationDocument(input: unknown): string {
   const brochure = premiumSections(d);
 
   const hasSpecs = h.display.specifications &&
-    Boolean(otherConstructionSpecs || sftSpecifications || additionalSpecs);
-  const mainRows = grouped.filter((line) => !parseSftEstimate(line.description));
+    Boolean(otherConstructionSpecs || sftSpecifications || additionalSpecs || customBrandSpecifications);
+  const mainRows = grouped.filter((line) => !parseSftEstimate(line.description) && !parseCustomBrandQuote(line.description));
   const isFloorQuote = sftSchedules.length > 0;
   const itemTable = mainRows.length
     ? '<section class="pb-estimate"><div class="pb-section-title"><h2>' +
@@ -298,7 +336,7 @@ export function renderQuotationDocument(input: unknown): string {
     '<div class="pb-section-title"><h2>Selected package inclusions</h2></div>' +
     '<p class="pb-section-subtitle">These are the actual materials, brands, grades and allowances recorded for this quotation.</p>' +
     otherConstructionSpecs + '<div class="pb-spec-card-grid">' +
-    additionalSpecs + sftSpecifications + '</div>' +
+    additionalSpecs + sftSpecifications + customBrandSpecifications + '</div>' +
     brochure.pageFooter('Material specifications') + '</section>'
     : '';
   const schedulePage =
@@ -326,7 +364,7 @@ export function renderQuotationDocument(input: unknown): string {
     brochure.pageHeader('Project details / estimate') + introCards +
     '<p class="pb-quote-meta">Quotation ' + escape(d.number) +
     ' · Revision ' + d.revision + ' · Valid until ' + escape(d.valid_until) + '</p>' +
-    (isFloorQuote ? renderSftSchedule + itemTable : itemTable) +
+    (isFloorQuote ? renderSftSchedule + itemTable : itemTable) + customPricingTables +
     adjustmentMarkup + total +
     '<p class="pb-pricing-caption">Only the included quoted amounts are part of the total. ' +
     'Payment terms, detailed specifications and any exclusions are shown in the following sections.</p>' +
