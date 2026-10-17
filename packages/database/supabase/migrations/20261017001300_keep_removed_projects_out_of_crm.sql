@@ -85,4 +85,4 @@ declare l public.leads;c public.customers;p public.projects;org uuid=p_organizat
  perform private.crm_event(org,l.id,'conversion','Converted to customer and project',jsonb_build_object('customer_id',customer,'project_id',project));
  perform private.crm_audit(org,'lead.converted','leads',l.id);
  return jsonb_build_object('customer_id',customer,'project_id',project);
-end$function$
+end$function$;
