@@ -59,6 +59,38 @@ describe('lead quotation preview and secure WhatsApp PDF sharing', () => {
   });
 });
 
+describe('consistent premium quotation document across previews and PDF routes', () => {
+  const leadsPreview = file('../crm/leads/lead-quote-preview.tsx');
+  const quoteList = file('./page.tsx');
+  const quoteStudio = file('./studio-editor.tsx');
+  const privatePreview = file('./[id]/preview/route.ts');
+  const privatePdf = file('./[id]/pdf/route.ts');
+  const publicPdf = file('../../../q/[token]/pdf/route.ts');
+  const nodeRenderer = fileURLToPath(new URL('../../../../../../../packages/shared/src/pdf.node.ts', import.meta.url));
+
+  it('renders the same saved premium HTML in Leads, Quotations and Studio', () => {
+    expect(leadsPreview).toContain("fetch(base + '/preview'");
+    expect(quoteList).toContain("const preview = '/dashboard/quotations/' + row.id + '/preview'");
+    expect(quoteStudio).toContain('srcDoc={previewHtml}');
+    expect(privatePreview).toContain('quotationDocument(id)');
+    expect(privatePdf).toContain('quotationDocument(id)');
+    expect(privatePdf).toContain('renderQuotationPdf(html, document)');
+    expect(publicPdf).toContain('renderQuotationDocument(q.document)');
+    expect(publicPdf).toContain('renderQuotationPdf(');
+  });
+
+  it('uses browser HTML printing when provisioned and keeps the real PDF file for sharing', () => {
+    const renderer = readFileSync(nodeRenderer,'utf8');
+    const pdfEntry = readFileSync(fileURLToPath(new URL('../../../../../../../packages/shared/src/pdf.ts', import.meta.url)), 'utf8');
+    const pdfClient = file('./quotation-pdf-file.ts');
+    expect(renderer).toContain("CHROMIUM_EXECUTABLE_PATH");
+    expect(renderer).toContain("chromium.launch");
+    expect(pdfEntry).toContain("env.CF_BROWSER_ACCOUNT_ID && env.CF_BROWSER_API_TOKEN");
+    expect(pdfClient).toContain('fetchQuotationPdfFile(');
+    expect(pdfClient).toContain('files: [file]');
+  });
+});
+
 describe('minimal quotation studio navigation', () => {
   const studio = file('./studio-editor.tsx');
   const sft = file('./premium-sft-builder.tsx');
