@@ -1,5 +1,6 @@
 import { catalogPage } from '../../catalog/access';
 import { pageServices } from '@business-os/auth/server';
+import { createConstructionRatesRepository } from '@business-os/database/construction-rates';
 import { createConstructionPackagesRepository } from '@business-os/database/construction-packages';
 import { createQuotationPackagesRepository } from '@business-os/database/quotation-packages';
 import { QuotationStudioFrame } from '../studio-frame';
@@ -12,12 +13,13 @@ export const dynamic = 'force-dynamic';
 export default async function QuotationPackagesPage() {
   const { org, canManagePrice } = await catalogPage(true);
   const { client, repository, authorization } = await pageServices();
-  const [organization, user, industries, construction, configurable] =
+  const [organization, user, industries, construction, rates, configurable] =
     await Promise.all([
       repository.organization(org),
       authorization.requireAuthenticatedUser(),
       repository.industries(),
       createConstructionPackagesRepository(client).list(org),
+      createConstructionRatesRepository(client).list(org),
       createQuotationPackagesRepository(client).list(org).catch(() => null),
     ]);
   if (!organization) throw new Error('Company workspace unavailable');
@@ -28,6 +30,7 @@ export default async function QuotationPackagesPage() {
     >
       <PackageLibrary
         construction={construction}
+        rates={rates}
         other={configurable}
         industries={industries.filter((i) =>
           i.status === 'active' && i.key !== 'construction').map((i) => ({
