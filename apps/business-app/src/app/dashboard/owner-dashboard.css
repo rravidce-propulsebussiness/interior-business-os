@@ -1153,3 +1153,81 @@ a.owner-stat:hover {
 .owner-subnav-active .owner-subnav-dot {
   background: #fff;
 }
+
+/*
+ * The single Business OS shell shares the dashboard's premium orange palette
+ * on every module—not just pages with .command-dashboard or .fw-page.
+ */
+.owner-layout.owner-layout-unified {
+  --owner-blue:#fe5105;
+  --owner-text:#111c34;
+  --owner-muted:#66758b;
+  --owner-line:#f1e8e2;
+  background:#fffaf7;
+}
+.owner-layout.owner-layout-unified .owner-workspace {
+  background:radial-gradient(circle at 80% 2%,#fff3eb 0%,transparent 550px),#fffaf7;
+}
+.owner-layout.owner-layout-unified .owner-sidebar {
+  background:#fff;
+  border-right:1px solid #f2e8e2;
+  color:#17243e;
+  padding:18px 14px;
+}
+.owner-layout.owner-layout-unified .owner-brand {
+  color:#13203b!important;
+  padding:2px 8px 24px;
+}
+.owner-layout.owner-layout-unified .owner-brand-icon {
+  background:linear-gradient(140deg,#ff791c,#ff4e02);
+  color:#fff;
+  box-shadow:0 5px 15px #ff700c20;
+}
+.owner-layout.owner-layout-unified .owner-brand strong {font-size:18px}
+.owner-layout.owner-layout-unified .owner-brand small {color:#64748b}
+.owner-layout.owner-layout-unified .owner-nav-item {
+  color:#37455f!important;
+  font-size:13px;
+  font-weight:650;
+}
+.owner-layout.owner-layout-unified .owner-nav-item:hover,
+.owner-layout.owner-layout-unified .owner-nav-group-toggle:hover {
+  background:#fff0e6;color:#fd520a!important;
+}
+.owner-layout.owner-layout-unified .owner-nav-item.owner-nav-active {
+  background:linear-gradient(120deg,#ff6a0b,#ff4600);
+  box-shadow:0 8px 18px #ff691b28;
+  color:#fff!important;
+}
+.owner-layout.owner-layout-unified .owner-subnav {border-left-color:#ffe0ca}
+.owner-layout.owner-layout-unified .owner-subnav-link {color:#68758a!important}
+.owner-layout.owner-layout-unified .owner-subnav-link:hover,
+.owner-layout.owner-layout-unified .owner-subnav-active {
+  background:#fff3ea;
+  color:#ed530b!important;
+}
+.owner-layout.owner-layout-unified .owner-sidebar-bottom,
+.owner-layout.owner-layout-unified .owner-plan-card {display:none}
+.owner-layout.owner-layout-unified .owner-topbar {min-height:70px;border-color:#f3eae5}
+.owner-layout.owner-layout-unified .owner-search {background:#fcf8f7;border:1px solid #f1e8e4}
+.owner-layout.owner-layout-unified .owner-profile-avatar {background:#47556c}
+.owner-layout.owner-layout-unified .owner-mobile-heading,
+.owner-layout.owner-layout-unified .owner-mobile-heading button {color:#24344f}
+@media(max-width:740px) {
+  .owner-layout.owner-layout-unified .owner-topbar {
+    min-height:61px;padding:8px 12px;
+  }
+  .owner-layout.owner-layout-unified .owner-command-mobile-brand {
+    display:flex;align-items:center;gap:9px;flex:1;min-width:0;
+    color:#18223b;font-size:13px;
+  }
+  .owner-layout.owner-layout-unified .owner-command-mobile-brand strong {
+    min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .owner-layout.owner-layout-unified .owner-command-mobile-mark {
+    flex:0 0 34px;width:34px;height:34px;display:grid;place-items:center;
+    border-radius:10px;background:linear-gradient(135deg,#ff8024,#ff4d00);
+    color:#fff;font-size:16px;font-weight:850;
+  }
+  .owner-layout.owner-layout-unified .owner-search {display:none}
+}

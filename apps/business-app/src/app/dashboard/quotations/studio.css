@@ -1941,3 +1941,13 @@
  .qs-custom-brand,.qs-custom-actions button{transition:none}
  .qs-custom-brand:focus-within,.qs-custom-actions button:hover{transform:none}
 }
+
+/* Studio contents now live inside the single shared OwnerShell. Only one
+   responsive sidebar and header should ever be mounted on quotation routes. */
+.qs-layout.qs-unified-workspace {
+  display:block;
+  width:100%;
+  min-height:0;
+  background:transparent;
+}
+.qs-layout.qs-unified-workspace .qs-main {max-width:1600px}

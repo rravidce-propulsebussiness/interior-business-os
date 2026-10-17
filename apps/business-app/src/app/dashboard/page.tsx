@@ -322,7 +322,7 @@ export default async function Dashboard({
     });
     navigation.push({
       label: 'Billing & Plans',
-      href: '/dashboard/finance',
+      href: '/dashboard/billing',
       icon: 'billing',
     });
   }
