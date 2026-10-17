@@ -259,7 +259,7 @@ export default async function Customers({
     if (Number(merged.page) > 1) data.set('page', String(merged.page));
     return '/dashboard/customers' + (data.size ? '?' + data.toString() : '');
   };
-  const nav = projectWorkspaceNavigation(has);
+  const nav = ownerWorkspaceNavigation(s.context);
   const accountEmail = user.email ?? '';
 
   return (
