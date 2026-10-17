@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { OwnerIcon, type OwnerIconName } from '../../owner-shell';
+import { OwnerIcon } from '../../owner-shell';
 import { MasterForm } from '../../commercial/master-form';
 import {
  activityFeed,friendlyDate,human,linkedStageCounts,location,moduleCounts,textValue,
@@ -23,10 +23,6 @@ type Agreement={
  advance_required:boolean;advance_received:boolean;execution_authorized:boolean;
 };
 type Access={email:string;active:boolean;created_at:string};
-type Card={
- id:string;title:string;description:string;value:string;href:string;
- icon:OwnerIconName;color:string;
-};
 function Pill({status}: {status:string}){
  const normalized=status.toLowerCase().replace(/[^a-z_]/g,'');
  const positive=['active','completed','approved','passed','received','delivered','verified','paid','handover'];
@@ -51,7 +47,18 @@ function TruncatedList({rows,render,max=5}:{
 function Count({number,label}: {number:number|null;label:string}) {
  return <span className="pcc-count"><strong>{number===null?'—':number}</strong><small>{label}</small></span>;
 }
-const moduleOrder=['documents','payments','designs','team','materials','labour','procurement','execution','checks','timeline'] as const;
+// One navigation item per content section. Never render the same module twice.
+const projectSections=[
+ {id:'documents',label:'Documents & Agreement'},
+ {id:'payments',label:'Client Payments'},
+ {id:'designs',label:'Designs'},
+ {id:'team',label:'Team & Owner'},
+ {id:'materials',label:'Materials & Procurement'},
+ {id:'labour',label:'Labour'},
+ {id:'execution',label:'Execution'},
+ {id:'checks',label:'Checks & Quality'},
+ {id:'timeline',label:'Timeline'},
+] as const;
 
 export function ProjectCommandCentre({project,industry,customer,site,stages,stageRecords,
  agreement,access,progress,canManage,canFinance,canPurchase,canSeeCustomer,
@@ -82,34 +89,6 @@ export function ProjectCommandCentre({project,industry,customer,site,stages,stag
   if(!existing||Number(textValue(design,'revision'))>Number(textValue(existing,'revision')))
    newestDesigns.set(kind,design);
  }
- const visibleModules:Card[]=[
-  {id:'documents',title:'Documents & Agreement',description:'Signed contract, drawings and project evidence',
-   value:agreement?.contract_status?human(agreement.contract_status):counts?counts.media+' files':'Not available',
-   href:'#documents',icon:'quotations',color:'orange'},
-  ...(canFinance?[{id:'payments',title:'Client Payments',description:'Recurring schedule and payment requests',
-   value:String(uniqueScheduled.size||stagePayments.length)+' milestones',href:'#payments',
-   icon:'billing' as const,color:'green'}]:[]),
-  {id:'designs',title:'Designs',description:'Revision history and client approvals',
-   value:counts?counts.designs+' revisions':'Not available',href:'#designs',icon:'quotations',color:'rose'},
-  {id:'team',title:'Team & Owner',description:'Site assignments and client portal access',
-   value:counts?counts.team+' members':'Not available',href:'#team',icon:'team',color:'blue'},
-  {id:'materials',title:'Materials',description:'Site requests and delivery state',
-   value:counts?counts.materials+' requests':'Not available',href:'#materials',icon:'marketplace',color:'green'},
-  {id:'labour',title:'Labour',description:'Daily workforce and tomorrow’s requirement',
-   value:latestReport?(textValue(latestReport,'worker_count')||'—')+' on latest report':'Not recorded',
-   href:'#labour',icon:'team',color:'rose'},
-  {id:'procurement',title:'Procurement',description:'Repeated sourcing, ordering and deliveries',
-   value:counts?counts.pendingMaterials+' open needs':'Not available',href:'#procurement',
-   icon:'purchases',color:'purple'},
-  {id:'execution',title:'Execution',description:'Daily site progress and work plan',
-   value:counts?counts.reports+' updates':'Not available',href:'#execution',icon:'projects',color:'green'},
-  {id:'checks',title:'Checks & Quality',description:'Site checks, hold points and inspection results',
-   value:counts?counts.pendingChecks+' require review':'Not available',href:'#checks',
-   icon:'check',color:'teal'},
-  {id:'timeline',title:'Timeline',description:'Quote-derived stages with repeated site activities',
-   value:stages.length?stages.length+' stages':'Not initialized',href:'#timeline',
-   icon:'calendar',color:'orange'},
- ];
  // Do not convert issued requests into "received" amounts; cash must be
  // verified through the existing Finance invoice/receipt allocation system.
  const currentStage=stages.find(s=>!['completed','certified','skipped'].includes(s.status));
@@ -166,18 +145,22 @@ export function ProjectCommandCentre({project,industry,customer,site,stages,stag
   </section>
   <nav className="pcc-tabs" aria-label="Project sections">
    <a className="active" href="#overview">Overview</a>
-   {visibleModules.filter(m=>moduleOrder.includes(m.id as typeof moduleOrder[number]))
-    .map(m=><a href={m.href} key={m.id}>{m.title.replace('Documents & Agreement','Documents')}</a>)}
+   {projectSections.filter(section=>section.id!=='payments'||canFinance)
+    .map(section=><a href={'#'+section.id} key={section.id}>{section.label}</a>)}
   </nav>
   <div className="pcc-layout" id="overview">
    <div className="pcc-main">
-    <section className="pcc-module-grid" aria-label="Project modules">
-     {visibleModules.map(card=><a key={card.id} href={card.href} className="pcc-module">
-      <span className={'pcc-module-icon '+card.color}><OwnerIcon name={card.icon} size={19}/></span>
-      <span className="pcc-module-copy"><strong>{card.title}</strong><small>{card.description}</small>
-       <em>{card.value}</em></span><span className="pcc-module-arrow">›</span></a>)}
-    </section>
-
+   <section className="pcc-panel pcc-next-work">
+    <header className="pcc-panel-heading"><div><h2>Upcoming Work</h2>
+     <p>Next scheduled task and tomorrow’s latest site plan</p></div>
+     <Link href={siteUrl+'#daily-reports'}>Update plan ↗</Link></header>
+    <div className="pcc-next-work-items">
+     <div><small>Next activity</small><strong>{upcomingTask?.title??'No task scheduled'}</strong>
+      <span>{friendlyDate(upcomingTask?.planned_start)}</span></div>
+     <div><small>Tomorrow’s plan</small>
+      <strong>{textValue(latestReport,'tomorrow_plan')||'Not entered'}</strong></div>
+    </div>
+   </section>
     <div className="pcc-section-columns">
      <Panel id="documents" title="Documents & Agreement" href={siteUrl+'#media'}
       note="Private files and the canonical signed agreement">
@@ -238,13 +221,22 @@ export function ProjectCommandCentre({project,industry,customer,site,stages,stag
        {canManageCustomer&&customer&&<Link href={'/dashboard/customers/'+customer.id}>Manage client access →</Link>}
       </div>}
      </Panel>
-     <Panel id="materials" title="Materials" href={siteUrl+'#materials'}
-      note="Repeated site requests are recorded separately from purchase orders">
+     <Panel id="materials" title="Materials & Procurement" href={siteUrl+'#materials'}
+      note="Every request, quantity, supplier and sourcing stage in one register">
       {site?.materials.length?<TruncatedList rows={site.materials} render={row=><>
-       <span className="pcc-row-icon">▣</span><div className="pcc-row-content">
-        <strong>{textValue(row,'item')||'Material'}</strong>
-        <small>{[textValue(row,'quantity'),textValue(row,'unit')].filter(Boolean).join(' ')}</small></div>
-       <Pill status={textValue(row,'status')||'requested'}/></>}/>:<Empty message="No materials requested yet."/>}
+       <span className="pcc-row-icon">▣</span>
+       <div className="pcc-row-content">
+        <strong>{textValue(row,'item')||'Material requirement'}</strong>
+        <small>{[textValue(row,'quantity'),textValue(row,'unit')].filter(Boolean).join(' ')}
+         {' · '}{textValue(row,'vendor_reference')||
+          human(textValue(row,'source')||'Supplier not selected')}</small>
+       </div>
+       <Pill status={textValue(row,'status')||'requested'}/>
+      </>}/>:<Empty message="No material requirements recorded yet. Add a site material request when work needs supplies."/>}
+      <div className="pcc-section-footer">
+       <Link href={siteUrl+'#materials'}>Request, order or record receipt →</Link>
+       {canPurchase&&<Link href="/dashboard/marketplace/orders">Purchase orders →</Link>}
+      </div>
      </Panel>
      <Panel id="labour" title="Labour" href={siteUrl+'#daily-reports'}
       note="Daily workforce requirements and gate records">
@@ -256,15 +248,6 @@ export function ProjectCommandCentre({project,industry,customer,site,stages,stag
        <Empty message="No labour attendance captured in site reports."/>}
       <div className="pcc-section-footer"><Link href={'/dashboard/billing/labour?project='+id}>
        Open labour disbursements →</Link></div>
-     </Panel>
-     <Panel id="procurement" title="Procurement" href={siteUrl+'#materials'}
-      note="Each request can progress through sourcing, order and delivery">
-      {site?.materials.length?<TruncatedList rows={[...site.materials].reverse() as SiteRow[]} render={row=><>
-       <span className="pcc-row-icon">⌑</span><div className="pcc-row-content">
-        <strong>{textValue(row,'item')||'Requested material'}</strong>
-        <small>{textValue(row,'vendor_reference')||human(textValue(row,'source')||'Source not assigned')}</small></div>
-       <Pill status={textValue(row,'status')||'requested'}/></>}/>:<Empty message="Procurement starts when material requirements are recorded."/>}
-      {canPurchase&&<div className="pcc-section-footer"><Link href="/dashboard/marketplace/orders">View actual purchase orders →</Link></div>}
      </Panel>
      <Panel id="execution" title="Execution Updates" href={siteUrl+'#daily-reports'}
       note="Every site work report remains in chronological history">
@@ -343,27 +326,6 @@ export function ProjectCommandCentre({project,industry,customer,site,stages,stag
      </div>
     </details>}
    </div>
-   <aside className="pcc-sidebar">
-    <section className="pcc-panel pcc-timeline-aside">
-     <header className="pcc-panel-heading"><div><h2>Project Timeline</h2><p>Live ordered stages, not a sample plan</p></div>
-      <a href="#timeline">View full ↗</a></header>
-     {stages.length?<ol className="pcc-aside-stages">{stages.slice(0,13).map((stage,i)=><li key={stage.id}>
-      <span className={'pcc-aside-number '+(stage.status==='completed'?'done':
-       stage.status==='in_progress'?'now':'')}>{i+1}</span>
-      <div><strong>{stage.title}</strong><small>{human(stage.phase)}</small></div>
-      <Pill status={stage.status}/>
-     </li>)}</ol>:<Empty message="The approved quote has not generated a stage plan yet."/>}
-     {stages.length>13&&<a href="#timeline" className="pcc-inline-link">
-      View all {stages.length} stages ↓</a>}
-    </section>
-    <section className="pcc-panel pcc-today">
-     <header className="pcc-panel-heading"><h2>Today & Next Work</h2></header>
-     <div><small>Upcoming task</small><strong>{upcomingTask?.title??'No dated task scheduled'}</strong>
-      <span>{friendlyDate(upcomingTask?.planned_start)}</span></div>
-     <div><small>Tomorrow’s plan</small><strong>{textValue(latestReport,'tomorrow_plan')||'Not entered'}</strong></div>
-     <Link href={siteUrl+'#daily-reports'}>Update execution plan →</Link>
-    </section>
-   </aside>
   </div>
  </main>;
 }
