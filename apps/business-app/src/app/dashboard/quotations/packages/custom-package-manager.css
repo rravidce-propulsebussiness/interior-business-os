@@ -25,7 +25,7 @@
 .cpm-categories h3{font-size:12px;font-weight:850;color:#152944;margin:4px 6px 12px}
 .cpm-category{width:100%;min-height:39px;border:0;border-radius:9px;
   background:none;color:#334660;display:flex;align-items:center;gap:10px;
-  text-align:left;padding:9px 10px;font-size:11px;font-weight:650;transition:background .18s;color .18s}
+  text-align:left;padding:9px 10px;font-size:11px;font-weight:650;transition:background .18s,color .18s}
 .cpm-category+.cpm-category{margin-top:2px}
 .cpm-category .cpm-cat-icon{min-width:17px;color:#495e7a;font-size:17px;text-align:center}
 .cpm-cat-chevron{margin-left:auto;font-size:19px;color:#b5bfc9}
