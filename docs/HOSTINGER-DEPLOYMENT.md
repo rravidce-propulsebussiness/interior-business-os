@@ -106,6 +106,32 @@ Validate configuration with `node scripts/start-service.mjs business-app --check
 
 **Release status:** the repository's production checklist currently records **NO-GO**, including unverified hosted Auth, migrations, email, signing, public sites, PDF/Chromium and restricted automation worker. Passing a Hostinger build does not authorize a production cutover. Business App PDF generation needs Playwright Chromium and Linux libraries, which the hosting runtime must support. See `docs/PRODUCTION-ARCHITECTURE.md`, `docs/PRODUCTION-CHECKLIST.md`, and `docs/RELEASE-CHECKLIST.md`.
 
+## Premium quotation PDF parity
+
+The saved premium quotation HTML is the single design used by Leads preview,
+Quotations preview, downloaded PDF, and WhatsApp PDF-file sharing.
+The old independent PDF-lib quotation layout must not be used as an automatic fallback.
+If premium browser rendering is unavailable, PDF generation returns HTTP 503
+instead of sending a different-looking document to the customer.
+
+Hostinger production requirements:
+
+- Build from branch main, Node 24, project root, with npm run hostinger:build.
+- Build installs Playwright chromium-headless-shell inside .playwright-browsers.
+- Publish .playwright-browsers together with the Next.js build; the launcher
+  sets PLAYWRIGHT_BROWSERS_PATH at runtime.
+- Linux system libraries for Chromium must be supported by the host.
+- Alternatively configure the existing Cloudflare Browser Rendering service
+  with server-only PDF_RENDERER=cloudflare-rest, CF_BROWSER_ACCOUNT_ID
+  and CF_BROWSER_API_TOKEN. Never expose these secrets in public environment variables.
+- Do not force PDF_RENDERER=node unless Chromium is confirmed launchable.
+
+The authenticated PDF response is marked X-Quotation-PDF-Template: premium-html-v1.
+The mobile WhatsApp File Share action refuses to share an older PDF response
+that lacks this marker. Verify PDF visual parity before sharing:
+open Preview, View PDF, and Download PDF for the same saved revision.
+Mobile sharing uses two taps when needed: prepare the actual PDF file,
+then Share PDF File to open the Android share sheet and choose WhatsApp.
 ## Single-website Business App and Super Admin deployment
 
 **The production website uses ONE Hostinger Node.js deployment** at `https://sghomesinterior.in`. Do not deploy `BUSINESS_OS_SERVICE=platform-admin` to the existing domain. The Super Admin routes are integrated into the Business App and share the same origin, deployment, Supabase project, and existing login session:
