@@ -41,7 +41,7 @@ CREATE FUNCTION public.gst_customer_invoice_save(
 RETURNS uuid LANGUAGE plpgsql SECURITY DEFINER SET search_path TO ''
 AS $$
 DECLARE
-  invoice_id uuid;
+  saved_id uuid;
   existing_id uuid;
 BEGIN
   PERFORM private.finance_require(p_org,'invoice.create');
@@ -70,18 +70,18 @@ BEGIN
         USING ERRCODE='22023';
     END IF;
   END IF;
-  invoice_id:=public.gst_document_with_template_save(p_org,p_input,NULL);
+  saved_id:=public.gst_document_with_template_save(p_org,p_input,NULL);
   IF p_customer IS NOT NULL THEN
     INSERT INTO private.gst_customer_invoice_links(
       invoice_id,organization_id,customer_id
-    ) VALUES(invoice_id,p_org,p_customer)
+    ) VALUES(saved_id,p_org,p_customer)
     ON CONFLICT (invoice_id) DO UPDATE
     SET customer_id=excluded.customer_id,updated_at=now();
   ELSE
-    DELETE FROM private.gst_customer_invoice_links
-      WHERE invoice_id=invoice_id AND organization_id=p_org;
+    DELETE FROM private.gst_customer_invoice_links link
+      WHERE link.invoice_id=saved_id AND link.organization_id=p_org;
   END IF;
-  RETURN invoice_id;
+  RETURN saved_id;
 END;
 $$;
 REVOKE ALL ON FUNCTION public.gst_customer_invoice_save(uuid,jsonb,uuid) FROM PUBLIC,anon;
