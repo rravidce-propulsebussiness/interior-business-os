@@ -321,7 +321,7 @@ export function PackageLibrary({
     const title = current.name;
     const kind = entry.kind === 'construction' ? 'construction' : 'interior';
     const price = entry.kind === 'construction'
-      ? cash(current.ratePerSqft) : cash(current.basePrice,current.currency);
+      ? cash(entry.item.ratePerSqft) : cash(entry.item.basePrice,entry.item.currency);
     const basis = entry.kind === 'construction' ? 'per SFT'
       : entry.item.pricingBasis === 'fixed' ? 'fixed price'
         : entry.item.pricingBasis === 'per_sqft' ? 'per SFT'
