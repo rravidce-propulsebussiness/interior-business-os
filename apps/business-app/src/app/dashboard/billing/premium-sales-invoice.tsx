@@ -6,6 +6,7 @@ import type { GstDocument, GstBusinessProfile, GstLine } from '@business-os/data
 import type { GstStageInvoiceContext } from '@business-os/database/gst';
 import type { GstInvoiceAppearance } from '@business-os/database/gst-templates';
 import type { InvoiceStageChoice } from './stage-choices';
+import type { InvoiceCustomer } from './customer-choices';
 import './premium-sales-invoice.css';
 
 type Props = {
@@ -14,6 +15,9 @@ type Props = {
   existing: GstDocument | null;
   stageContext: GstStageInvoiceContext | null;
   choices: InvoiceStageChoice[];
+  customers: InvoiceCustomer[];
+  customerAccess: boolean;
+  existingCustomerId: string | null;
   initialLead: string;
 };
 const blank = (): GstLine => ({
@@ -29,25 +33,31 @@ const currencyTotal = (line: GstLine) =>
   Math.max(0, toFinite(line.quantity) * toFinite(line.unitPrice) - toFinite(line.discount));
 
 export function PremiumSalesInvoice({
-  profile, standard, existing, stageContext, choices, initialLead,
+  profile, standard, existing, stageContext, choices,
+  customers, customerAccess, existingCustomerId, initialLead,
 }: Props) {
-  const firstLead = choices.find((choice) =>
-    choice.leadId === (stageContext?.leadId ?? initialLead));
+  const firstLead = choices.find((row) =>
+    row.leadId === (stageContext?.leadId ?? initialLead));
+  const [customerId, setCustomerId] = useState(
+    firstLead?.customerId ?? existingCustomerId ?? '',
+  );
   const [leadId, setLeadId] = useState(firstLead?.leadId ?? '');
-  const choice = choices.find((row) => row.leadId === leadId);
-  const initialStage = stageContext?.stageNumber ?? (choice ? 1 : 0);
+  const initialStage = stageContext?.stageNumber ?? (firstLead ? 1 : 0);
   const [stageNumber, setStageNumber] = useState(initialStage);
+  const selectedClient = customers.find((row) => row.id === customerId);
+  const eligibleStages = choices.filter((row) => row.customerId === customerId);
+  const choice = eligibleStages.find((row) => row.leadId === leadId);
   const stage = choice?.stages.find((row) => row.number === stageNumber);
-  const [partyName, setPartyName] = useState(existing?.partyName ?? firstLead?.clientName ?? '');
-  const [partyGstin, setPartyGstin] = useState(existing?.partyGstin ?? firstLead?.clientGstin ?? '');
-  const [partyState, setPartyState] = useState(existing?.partyState ?? firstLead?.clientState ?? profile.stateCode);
-  const [partyAddress, setPartyAddress] = useState(existing?.partyAddress ?? firstLead?.clientAddress ?? '');
+  const [partyName, setPartyName] = useState(existing?.partyName ?? selectedClient?.name ?? '');
+  const [partyGstin, setPartyGstin] = useState(existing?.partyGstin ?? selectedClient?.gstin ?? '');
+  const [partyState, setPartyState] = useState(existing?.partyState ?? selectedClient?.stateCode ?? profile.stateCode);
+  const [partyAddress, setPartyAddress] = useState(existing?.partyAddress ?? selectedClient?.address ?? '');
   const [deliveryAddress, setDeliveryAddress] = useState(existing?.deliveryAddress ?? '');
   const [type, setType] = useState<GstDocument['documentType']>(
     existing?.documentType ?? 'tax_invoice');
   const [date, setDate] = useState(existing?.date ?? dateIndia());
   const [dueDate, setDueDate] = useState(existing?.dueDate ?? '');
-  const [placeOfSupply, setPlaceOfSupply] = useState(existing?.placeOfSupply ?? firstLead?.clientState ?? profile.stateCode);
+  const [placeOfSupply, setPlaceOfSupply] = useState(existing?.placeOfSupply ?? selectedClient?.stateCode ?? profile.stateCode);
   const [reverseCharge, setReverseCharge] = useState(existing?.reverseCharge ?? false);
   const [lines, setLines] = useState<GstLine[]>(() => {
     if (existing?.lines?.length) return existing.lines.map((line) => ({ ...line }));
@@ -58,32 +68,34 @@ export function PremiumSalesInvoice({
   const [notes, setNotes] = useState(existing?.notes ?? '');
   const [preview, setPreview] = useState(false);
 
-  const changeLead = (value: string) => {
-    setLeadId(value);
-    const selected = choices.find((row) => row.leadId === value);
-    setStageNumber(selected ? 1 : 0);
-    if (selected) {
-      setPartyName(selected.clientName);
-      setPartyGstin(selected.clientGstin);
-      setPartyAddress(selected.clientAddress);
-      setPartyState(selected.clientState);
-      setPlaceOfSupply(selected.clientState);
-      const first = selected.stages[0];
-      if (first) setLines([{ ...blank(), description: 'Stage payment - ' + first.name,
-        unitPrice: first.amount }]);
-    } else {
-      setLines([blank()]);
-    }
+  const changeCustomer = (value: string) => {
+    setCustomerId(value);
+    setLeadId('');
+    setStageNumber(0);
+    const client = customers.find((row) => row.id === value);
+    setPartyName(client?.name ?? '');
+    setPartyGstin(client?.gstin ?? '');
+    setPartyAddress(client?.address ?? '');
+    setPartyState(client?.stateCode ?? profile.stateCode);
+    setPlaceOfSupply(client?.stateCode ?? profile.stateCode);
+    setLines([blank()]);
   };
-  const changeStage = (next: number) => {
-    setStageNumber(next);
-    const chosen = choice?.stages.find((row) => row.number === next);
-    if (!chosen) return;
-    setLines((before) => {
-      const rest = before.slice(1);
-      return [{ ...(before[0] ?? blank()), description: 'Stage payment - ' + chosen.name,
-        unitPrice: chosen.amount, quantity: 1, discount: 0 }, ...rest];
-    });
+  const changeStage = (value: string) => {
+    if (!value) {
+      setLeadId('');
+      setStageNumber(0);
+      setLines([blank()]);
+      return;
+    }
+    const [nextLead, nextNumber] = value.split(':');
+    const selected = eligibleStages.find((row) => row.leadId === nextLead);
+    const nextStage = Number(nextNumber);
+    const chosen = selected?.stages.find((row) => row.number === nextStage);
+    if (!selected || !chosen) return;
+    setLeadId(selected.leadId);
+    setStageNumber(chosen.number);
+    setLines([{ ...blank(), description: 'Stage payment - ' + chosen.name,
+      unitPrice: chosen.amount, quantity: 1, discount: 0 }]);
   };
   const updateLine = (i: number, key: keyof GstLine, value: string) => {
     setLines((before) => before.map((line, index) => index === i ? {
@@ -118,7 +130,8 @@ export function PremiumSalesInvoice({
     gstRate: type === 'tax_invoice' ? line.gstRate : 0,
   }));
   const disabledSave = stageInvalid || (leadId !== '' && !hasStage) ||
-    (stageContext !== null && !hasStage);
+    (stageContext !== null && !hasStage) ||
+    (selectedClient?.fromApprovedQuotation === true && !hasStage);
 
   const invoicePreview = (
     <div className="psi-paper">
@@ -155,6 +168,7 @@ export function PremiumSalesInvoice({
       <input type="hidden" name="version" value={existing.version}/></>}
     <input type="hidden" name="kind" value="sales_invoice"/>
     <input type="hidden" name="linesJson" value={JSON.stringify(safeLines)}/>
+    {customerId && !hasStage && <input type="hidden" name="customerId" value={customerId}/>}
     {hasStage && <><input type="hidden" name="leadId" value={choice!.leadId}/>
       <input type="hidden" name="revisionId" value={choice!.revisionId}/>
       <input type="hidden" name="stageNumber" value={stage!.number}/></>}
@@ -162,7 +176,7 @@ export function PremiumSalesInvoice({
       <div><div className="psi-breadcrumb"><Link href="/dashboard/billing">Billing</Link>
         <span>/</span><span>Sales invoices</span><span>/</span><b>{existing ? 'Edit draft' : 'New invoice'}</b></div>
         <h1>Create sales invoice <span className="psi-draft">Draft</span></h1>
-        <p>Choose your client, select one approved quotation stage and prepare an invoice.</p>
+        <p>Select an existing client or enter a new customer. Choose a payment stage when applicable.</p>
       </div>
       <div className="psi-header-actions"><Link href="/dashboard/billing" className="psi-muted-button">Cancel</Link>
         <button type="button" className="psi-outline-button" onClick={()=>setPreview(true)}>Preview invoice</button>
@@ -173,10 +187,13 @@ export function PremiumSalesInvoice({
         <section className="psi-card">
           <div className="psi-title"><span className="psi-step">1</span><h2>Select client &amp; project</h2></div>
           <div className="psi-fields">
-            <label className="psi-field psi-wide"><span>Client from lead / quotation</span>
-              <select value={leadId} onChange={e=>changeLead(e.target.value)} disabled={!canSwitchLead}>
-                <option value="">Manual customer / one-time invoice</option>
-                {choices.map(row=><option key={row.leadId} value={row.leadId}>{row.clientName} · {row.leadNumber} · {row.quoteNumber}</option>)}
+            <label className="psi-field psi-wide"><span>Select existing client</span>
+              <select aria-label="Select existing client" value={customerId}
+                onChange={e=>changeCustomer(e.target.value)} disabled={!canSwitchLead}>
+                <option value="">New / one-time customer (enter details below)</option>
+                {customers.map(row=><option key={row.id} value={row.id}>
+                  {row.name}{row.phone ? ' · '+row.phone : ''}{row.fromApprovedQuotation ? ' · Approved quote' : ''}
+                </option>)}
               </select></label>
           </div>
           {hasStage && <div className="psi-attached">
@@ -184,7 +201,12 @@ export function PremiumSalesInvoice({
               <p>Accepted quote {choice!.quoteNumber} · {choice!.projectType || 'Project'}</p>
               <small>On the first issued invoice, this existing quotation project becomes active. Saving a draft does not create it.</small></div>
             </div>}
-          {!hasStage && <p className="psi-hint">Stage payment invoicing requires a won lead with an accepted quotation and a saved payment plan. Other sales invoices can still be prepared manually.</p>}
+          {!customerAccess && !customers.length && <p className="psi-hint">Client directory access is required to select existing customers. Manual invoices remain available.</p>}
+          {!hasStage && <p className="psi-hint">{customerId
+            ? eligibleStages.length
+              ? 'This client has an approved quotation. Choose its payment stage below or prepare a normal invoice.'
+              : 'Existing client selected. Their billing details are filled in; you can prepare a normal invoice.'
+            : 'Choose a saved customer or enter one-time billing details. No new client record is created automatically.'}</p>}
           <div className="psi-fields psi-party-fields">
             <label className="psi-field"><span>Client / company name *</span>
               <input required name="partyName" minLength={2} maxLength={200} value={partyName}
@@ -221,25 +243,36 @@ export function PremiumSalesInvoice({
           <label className="psi-toggle"><input type="checkbox" name="reverseCharge" value="true" checked={reverseCharge}
             onChange={e=>setReverseCharge(e.target.checked)}/> Reverse charge applies</label>
         </section>
-        {hasStage && <section className="psi-card">
+        {eligibleStages.length>0 && <section className="psi-card">
           <div className="psi-title"><span className="psi-step">3</span><h2>Select project stage &amp; payment</h2></div>
           <div className="psi-fields psi-three">
-            <label className="psi-field"><span>Payment stage</span><select aria-label="Payment stage"
-              value={stageNumber} onChange={e=>changeStage(Number(e.target.value))} disabled={!!existing}>
-              {choice!.stages.map(row=><option key={row.number} value={row.number}>
-                {row.number}. {row.name} ({row.percent}%)
-              </option>)}</select></label>
-            <div className="psi-field"><span>Scheduled percentage</span><output className="psi-readonly">{stage!.percent}%</output></div>
+            <label className="psi-field"><span>Payment stage</span>
+              <select aria-label="Payment stage"
+                value={hasStage ? leadId+':'+stageNumber : ''}
+                onChange={e=>changeStage(e.target.value)} disabled={!!existing}>
+                <option value="">{selectedClient?.fromApprovedQuotation
+                  ? 'Choose an approved payment stage' : 'One-time invoice (no stage)'}</option>
+                {eligibleStages.map(group=><optgroup key={group.leadId}
+                  label={'Quotation '+group.quoteNumber+' · '+group.projectName}>
+                  {group.stages.map(row=><option key={row.number}
+                    value={group.leadId+':'+row.number}>
+                    {row.number}. {row.name} ({row.percent}%)
+                  </option>)}
+                </optgroup>)}
+              </select></label>
+            <div className="psi-field"><span>Scheduled percentage</span>
+              <output className="psi-readonly">{stage ? stage.percent+'%' : '—'}</output></div>
             <label className="psi-field"><span>Stage amount (₹)</span>
-              <input aria-label="Stage amount" type="number" min="0.01" max={stage!.amount}
-                step="0.01" value={lines[0]?.unitPrice ?? 0}
+              <input aria-label="Stage amount" type="number" min="0.01"
+                max={stage?.amount} disabled={!hasStage} step="0.01"
+                value={hasStage ? lines[0]?.unitPrice ?? 0 : ''}
                 onChange={e=>updateLine(0,'unitPrice',e.target.value)}/></label>
           </div>
-          <p className="psi-hint">Suggested from the saved quotation ({money(choice!.quoteTotal)}). Partial stage billing is allowed up to {money(stage!.amount)} before applicable GST.</p>
+          {hasStage && <p className="psi-hint">Suggested from the saved quotation ({money(choice!.quoteTotal)}). Partial stage billing is allowed up to {money(stage!.amount)} before applicable GST.</p>}
           {stageInvalid && <p className="psi-alert" role="alert">Stage billing amount must be above zero and cannot exceed the agreed stage amount.</p>}
         </section>}
         <section className="psi-card">
-          <div className="psi-title psi-title-between"><div><span className="psi-step">{hasStage?4:3}</span>
+          <div className="psi-title psi-title-between"><div><span className="psi-step">{eligibleStages.length?4:3}</span>
             <h2>Items &amp; services</h2></div><button className="psi-add" type="button" disabled={lines.length>=50}
             onClick={()=>setLines(prev=>[...prev,blank()])}>＋ Add item</button></div>
           <div className="psi-table-wrap"><table className="psi-items-table"><thead><tr>
@@ -276,7 +309,7 @@ export function PremiumSalesInvoice({
           <p className="psi-hint">Use correct HSN/SAC and GST rates for each supply. The server calculates final taxes when saving.</p>
         </section>
         <section className="psi-card">
-          <div className="psi-title"><span className="psi-step">{hasStage?5:4}</span><h2>Notes &amp; terms</h2></div>
+          <div className="psi-title"><span className="psi-step">{eligibleStages.length?5:4}</span><h2>Notes &amp; terms</h2></div>
           <textarea className="psi-notes" name="notes" maxLength={2000} rows={3} value={notes}
             placeholder="Additional invoice notes..." onChange={e=>setNotes(e.target.value)}/>
         </section>
