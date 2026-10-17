@@ -206,7 +206,7 @@ export function PremiumSalesInvoice({
             ? eligibleStages.length
               ? 'This client has an approved quotation. Choose its payment stage below or prepare a normal invoice.'
               : 'Existing client selected. Their billing details are filled in; you can prepare a normal invoice.'
-            : 'Choose a saved customer or enter one-time billing details. No new client record is created automatically.'}</p>
+            : 'Choose a saved customer or enter one-time billing details. No new client record is created automatically.'}</p>}
           <div className="psi-fields psi-party-fields">
             <label className="psi-field"><span>Client / company name *</span>
               <input required name="partyName" minLength={2} maxLength={200} value={partyName}
