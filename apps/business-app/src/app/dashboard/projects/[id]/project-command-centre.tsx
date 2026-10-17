@@ -82,7 +82,6 @@ export function ProjectCommandCentre({project,industry,customer,site,stages,stag
  const activities=activityFeed({projectId:id,site,stageRecord:stageRecords,showFinance:canFinance});
  const stagePayments=canFinance?stageRecords?.payments??[]:[];
  const paymentOptions=canFinance?stageRecords?.options??[]:[];
- const uniqueScheduled=new Map(paymentOptions.map(x=>[x.id,x]));
  const heroMedia=site?.media.find(row=>textValue(row,'mime').startsWith('image/')&&
   ['site','daily','inspection'].includes(textValue(row,'category')));
  const latestReports=[...(site?.reports??[])].sort((a,b)=>
