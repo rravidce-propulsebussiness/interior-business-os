@@ -468,19 +468,24 @@ describe('PDF attachment sharing and reliable file operations', () => {
     expect(studio).not.toContain('qs-studio-compact-bar');
   });
 
-  it('shares an actual checked PDF File, not a link, using native Android sharing', () => {
-    expect(controls).toContain("new File([blob], filename, { type: 'application/pdf' })");
-    expect(controls).toContain("header !== PDF_HEADER");
-    expect(controls).toContain('navigator.canShare?.({ files: [pdf] })');
-    expect(controls).toContain('void navigator.share({');
-    expect(controls).toContain('files: [pdf]');
+  it('shares the same checked PDF File through the Studio and Leads', () => {
+    const common = file('./quotation-pdf-file.ts');
+    expect(controls).toContain('fetchQuotationPdfFile(revisionId, quoteNumber, signal)');
+    expect(controls).toContain('supportsPdfFileSharing(pdf)');
+    expect(controls).toContain('sharePdfFile(pdf, quoteNumber)');
+    expect(controls).toContain('downloadQuotationPdfFile(pdf)');
     expect(controls).toContain('choose WhatsApp');
-    expect(controls).toContain('downloadFile(pdf)');
-    expect(controls).toContain("if (dirty)");
+    expect(controls).toContain('if (dirty)');
+    expect(common).toContain("new File([blob], quotationPdfFilename(quoteNumber)");
+    expect(common).toContain("await blob.slice(0, 5).text() !== '%PDF-'");
+    expect(common).toContain('navigator.share({');
+    expect(common).toContain('files: [file]');
+    expect(common).toContain("credentials: 'same-origin'");
   });
 
-  it('uses authenticated PDF bytes with renderer-independent fallback', () => {
-    expect(controls).toContain("credentials: 'same-origin'");
+  it('uses one authenticated PDF route with renderer-independent fallback', () => {
+    const common = file('./quotation-pdf-file.ts');
+    expect(common).toContain('/pdf?view=1&_pdf=');
     expect(controls).toContain("'?view=1&version=' + version");
     expect(controls).toContain('downloadRoute');
     expect(renderer).toContain('renderQuotationFallbackPdf');
