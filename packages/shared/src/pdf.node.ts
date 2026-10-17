@@ -1,4 +1,5 @@
 import { chromium } from 'playwright';
+import { existsSync } from 'node:fs';
 import type { PdfOptions } from './pdf';
 
 /** A Node-only adapter. Never launch Chromium from a Cloudflare Worker. */
@@ -6,15 +7,39 @@ export async function renderNodePdf(
   html: string,
   options: PdfOptions,
 ): Promise<Buffer> {
-  const browser = await chromium.launch({
-    headless: true,
-    timeout: 15_000,
-    args: [
-      '--disable-background-networking',
-      '--no-first-run',
-      '--disable-extensions',
-    ],
-  });
+  const args = [
+    '--disable-background-networking',
+    '--no-first-run',
+    '--disable-extensions',
+  ];
+  const configured = process.env.CHROMIUM_EXECUTABLE_PATH;
+  // Prefer packaged Playwright Chromium, but some managed Node hosts provide a
+  // system Chromium/Chrome binary instead. Do not download or execute unknown
+  // paths and never downgrade to a remote webpage screenshot.
+  const systemPaths = [
+    ...(configured ? [configured] : []),
+    '/usr/bin/chromium',
+    '/usr/bin/chromium-browser',
+    '/usr/bin/google-chrome',
+    '/opt/google/chrome/chrome',
+  ];
+  let browser;
+  try {
+    browser = await chromium.launch({ headless: true, timeout: 15_000, args });
+  } catch (initialError) {
+    let recovered = false;
+    for (const executablePath of systemPaths) {
+      if (!existsSync(executablePath)) continue;
+      try {
+        browser = await chromium.launch({
+          headless: true, timeout: 15_000, args, executablePath,
+        });
+        recovered = true;
+        break;
+      } catch { /* Try the next explicitly known local binary. */ }
+    }
+    if (!recovered) throw initialError;
+  }
   // Hard stop if the renderer hangs. Closing the browser fails the job closed.
   const watchdog = setTimeout(() => {
     void browser.close().catch(() => {});
