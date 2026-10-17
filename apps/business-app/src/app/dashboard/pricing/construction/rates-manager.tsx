@@ -23,18 +23,20 @@ const categories = [
 const input =
   'w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100';
 
-function RateForm({
+export function RateForm({
   rate,
   close,
+  initialCategory,
 }: {
   rate?: ConstructionRate;
   close?: () => void;
+  initialCategory?: string;
 }) {
   const router = useRouter();
   const [state, action, pending] = useActionState(saveConstructionRate, {
     message: '',
   });
-  const [category, setCategory] = useState(rate?.category ?? 'Steel');
+  const [category, setCategory] = useState(rate?.category ?? initialCategory ?? 'Steel');
   useEffect(() => {
     if (state.saved) {
       router.refresh();
