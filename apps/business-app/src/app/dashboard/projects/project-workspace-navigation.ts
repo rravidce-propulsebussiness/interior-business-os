@@ -68,6 +68,8 @@ export function projectWorkspaceNavigation(
       href: '/dashboard/reports',
       icon: 'reports',
     });
+  if (has('team.manage'))
+    navigation.push({ label: 'Employees', href: '/dashboard/employees', icon: 'team' });
   if (has('team.view') || has('role.view'))
     navigation.push({
       label: 'Team',
