@@ -99,10 +99,14 @@ describe('minimal quotation studio navigation', () => {
   const construction = file('./construction-selector.tsx');
   const page = file('./[id]/studio/page.tsx');
 
-  it('shows only Save and Preview & Share in the primary action toolbar', () => {
+  it('keeps only the three editing tabs and links directly to the saved premium preview', () => {
     expect(studio).not.toContain('qs-studio-compact-bar');
     expect(studio).not.toContain('qs-studio-hero');
-    expect(studio).toContain('Preview &amp; Share saved PDF');
+    expect(studio).toContain("href={url + '/preview'}");
+    expect(studio).toContain('View saved quotation');
+    expect(studio).not.toContain("step === 'preview'");
+    expect(studio).not.toContain("setStep('preview')");
+    expect(studio).not.toContain('Preview &amp; Share');
     expect(sft).toContain('▣ Save quotation →');
     expect(studio).not.toContain('Save Draft');
     expect(studio).not.toContain('Issue & Share');
@@ -121,12 +125,13 @@ describe('minimal quotation studio navigation', () => {
     expect(file('./quotation-terms-editor.tsx')).toContain('data-studio-save="files"');
   });
 
-  it('preserves server-side issue/share and new revision after customer sharing', () => {
-    expect(studio).toContain('issueEditor');
+  it('preserves independent revision workflow and redirects legacy studio preview links', () => {
     expect(studio).toContain('reviseEditor');
-    expect(page).toContain('Confirm & Enable Customer Sharing');
     expect(page).toContain('CreateRevisionControl');
-    expect(studio).toContain('Preview contains saved amounts');
+    expect(page).toContain("query.step === 'preview'");
+    expect(page).toContain("redirect('/dashboard/quotations/' + encodeURIComponent(id) + '/preview')");
+    expect(page).not.toContain('Confirm & Enable Customer Sharing');
+    expect(page).not.toContain('<SharingSection');
   });
 });
 
@@ -351,10 +356,11 @@ describe('latest quote per customer with expandable prior history', () => {
     expect(css).toContain('.qs-quotes-mobile-more-panel');
   });
 
-  it('keeps other quote options available with independent edit and sharing', () => {
+  it('keeps other quote options available with independent editing and PDF download', () => {
     expect(page).toContain("row.status === 'draft' && canEdit");
     expect(page).toContain('QuotationReviseButton');
-    expect(page).toContain("editor + '?step=preview'");
+    expect(page).not.toContain("editor + '?step=preview'");
+    expect(page).toContain("const preview = '/dashboard/quotations/' + row.id + '/preview'");
     expect(page).toContain('QuotationRemovalButton');
   });
 });
@@ -379,9 +385,12 @@ describe('premium mobile quotation actions and matching workspace navigation', (
     expect(mobile).toContain('qs-quotes-mobile-expanded');
   });
 
-  it('cannot stretch Share or overlap previous quotations and animates safely', () => {
+  it('keeps More as a separate row without a Share tile or overlap', () => {
     expect(css).toContain('grid-template-columns:repeat(2,minmax(0,1fr))');
     expect(css).toContain('.qs-quotes-mobile-actions > .qs-quotes-mobile-more-panel');
+    expect(css).toContain('.qs-quotes-mobile-actions > .qs-quotes-more-trigger');
+    expect(page).not.toContain('qs-quotes-action-share');
+    expect(page).not.toContain('Review and share in Quotation Studio');
     expect(css).toContain('grid-column:1/-1');
     expect(css).toContain('width:100%;height:49px;min-height:49px');
     expect(css).toContain('@keyframes qs-quote-expand');
@@ -494,8 +503,8 @@ describe('PDF attachment sharing and reliable file operations', () => {
     const list = file('./page.tsx');
     const studio = file('./studio-editor.tsx');
     expect(list).toContain("const preview = '/dashboard/quotations/' + row.id + '/preview'");
-    expect(studio).toContain("'/pdf?view=1&version=' + revisionVersion");
-    expect(studio).toContain("'/pdf?version=' + revisionVersion");
+    expect(studio).toContain("href={url + '/preview'}");
+    expect(studio).not.toContain("'/pdf?view=1&version=' + revisionVersion");
     expect(studio).not.toContain('Print A4 design / Save as PDF');
     expect(studio).not.toContain('qs-studio-compact-bar');
   });
@@ -669,7 +678,7 @@ describe('streamlined quote, terms and payment Studio', () => {
   
   it('shows only milestone payment details on the Payment Schedule tab', () => {
     const payments = file('./payment-schedule-editor.tsx');
-    expect(studio).toContain("step !== 'preview' &&");
+    expect(studio).not.toContain("step !== 'preview' &&");
     expect(studio).toContain("step === 'payments' ? ' qs-studio-grid-full'");
     expect(studio).toContain("step !== 'payments' && <aside");
     expect(payments).toContain('Save Payment Schedule');
