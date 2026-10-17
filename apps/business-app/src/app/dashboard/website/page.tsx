@@ -1,4 +1,5 @@
 import { OwnerShell } from '../owner-shell';
+import { canAccess } from '@business-os/auth';
 import { ownerWorkspaceNavigation } from '../owner-workspace-navigation';
 import { websiteServices } from './service';
 import { websiteSchemaPending } from '../../../website-schema';
@@ -102,7 +103,10 @@ export default async function Websites() {
       navigation={ownerWorkspaceNavigation(s.context)}
       currentHref="/dashboard/website"
       search=""
-      notificationsEnabled={s.allowed('notification.view')}
+      notificationsEnabled={canAccess(s.context, {
+        organizationId: s.context.organizationId,
+        permission: 'notification.view',
+      })}
       dashboardBrand
       searchPlaceholder="Search leads, projects, quotations..."
     >
