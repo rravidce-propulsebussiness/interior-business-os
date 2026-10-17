@@ -853,11 +853,12 @@ export function LeadsWorkspace({
                           </div>
                         </div>
                         <div className="crm-mobile-inline-grid">
-                          <label>Stage
+                          <div className="crm-mobile-stage">
+                            <span>Stage</span>
                             <LeadStageSelect lead={lead} stages={stages} lostReasons={lostReasons}
                               canManage={canManage} canWin={canWin} canConvert={canConvert}
-                                 canViewProject={canViewProject}/>
-                          </label>
+                              canViewProject={canViewProject}/>
+                          </div>
                           <label>Priority
                             <LeadPrioritySelect lead={lead} canManage={canManage}/>
                           </label>
