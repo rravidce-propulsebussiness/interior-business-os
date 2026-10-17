@@ -50,6 +50,7 @@ describe('unified company settings',()=>{
    expect(dashboard).not.toContain("href: '/dashboard/quotations/settings'");
    expect(dashboard).not.toContain("href: '/dashboard/company/settings'");
    expect(billing).toContain('Billing & Plans');
-   expect(finance).toContain('/dashboard/settings?tab=invoice');
+   expect(page).toContain('InvoiceTemplateSelector');
+   expect(finance).not.toContain('Quick Actions');
  });
 });
