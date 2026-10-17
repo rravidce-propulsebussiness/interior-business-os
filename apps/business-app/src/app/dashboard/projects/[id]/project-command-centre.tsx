@@ -117,7 +117,7 @@ export function ProjectCommandCentre({project,industry,customer,site,stages,stag
    ].map(section=><Link key={section.id} href={workspaceUrl(section.id)}
     aria-current={selectedView===section.id?'page':undefined}
     className={selectedView===section.id?'active':''}>{section.label}</Link>)}
-   <details className="pcc-more-menu" open={undefined}>
+   <details className="pcc-more-menu">
     <summary className={['documents','designs','team','labour'].includes(selectedView)?'active':''}>
      {['documents','designs','team','labour'].includes(selectedView)?selectedTitle:'More'} <span aria-hidden="true">⌄</span>
     </summary>
