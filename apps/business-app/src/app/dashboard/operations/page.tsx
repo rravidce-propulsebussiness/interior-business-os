@@ -281,7 +281,7 @@ export default async function OperationsPage({
   const opsHref = (entity: string) => base + '/' + entity + projectQuery;
   const commandHref = (command: string) =>
     base + '/command/' + command + projectQuery;
-  const nav = projectWorkspaceNavigation(has);
+  const nav = ownerWorkspaceNavigation(s.context);
   const planName =
     plans.find((plan) => plan.id === organization.plan_id)?.name ??
     'Business plan';
