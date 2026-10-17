@@ -217,6 +217,7 @@ export function LeadsWorkspace({
   canManage,
   canWin,
   canQuote,
+  canShareQuote,
   canAssign,
   canNote,
   canFollowUp,
@@ -258,6 +259,7 @@ export function LeadsWorkspace({
   canVisit: boolean;
   canConvert: boolean;
   canQuote: boolean;
+  canShareQuote: boolean;
   organizationName: string;
   timeZone: string;
   asOf: string;
@@ -740,7 +742,7 @@ export function LeadsWorkspace({
                                     number={lead.quoteNumber || 'Quotation'}
                                     status={lead.quoteStatus}
                                     amount={lead.quoteAmount}
-                                    shared={lead.quoteShared}
+                                    shared={lead.quoteShared} canShare={canShareQuote}
                                   />
                                   {canQuote && <a className="crm-quote-alternative"
                                     href={'/dashboard/quotations/new?lead=' + encodeURIComponent(lead.id)}>
@@ -875,7 +877,7 @@ export function LeadsWorkspace({
                               <div className="crm-quote-stack">
                                 <LeadQuotePreview revisionId={lead.quoteRevisionId}
                                   number={lead.quoteNumber || 'Quotation'} status={lead.quoteStatus}
-                                  amount={lead.quoteAmount} shared={lead.quoteShared} />
+                                  amount={lead.quoteAmount} shared={lead.quoteShared} canShare={canShareQuote} />
                                 {canQuote && <a className="crm-quote-alternative"
                                   href={'/dashboard/quotations/new?lead=' + encodeURIComponent(lead.id)}>
                                   + New quotation
