@@ -3,9 +3,6 @@ import type { ReactNode } from 'react';
 import { pageServices, activeOrganization } from '@business-os/auth/server';
 import { createGstRepository, type GstDocumentRow } from '@business-os/database/gst';
 import { createGstTemplatesRepository } from '@business-os/database/gst-templates';
-import { ActionForm } from '@business-os/ui/action-form';
-import { saveGstProfile } from './actions';
-import { BillingProfileEditButton } from './billing-profile-edit-button';
 import './billing-premium.css';
 
 export const dynamic = 'force-dynamic';
@@ -117,7 +114,7 @@ export default async function BusinessBilling({
   const salesValue=issued.reduce((sum,d)=>sum+Number(d.total),0);
   const purchasesValue=purchase.reduce((sum,d)=>sum+Number(d.total),0);
   const recent=[...inPeriod].sort((a,b)=>b.date.localeCompare(a.date)||b.createdAt.localeCompare(a.createdAt)).slice(0,5);
-  const formField='billing-field';
+
 
   return <main id="main-content" className="billing-v2" tabIndex={-1}>
     <div className="billing-heading">
@@ -178,7 +175,7 @@ export default async function BusinessBilling({
               </div>
               <div className="billing-template-buttons">
                 {canCreate&&<Link href="/dashboard/billing/new?kind=sales_invoice" className="billing-primary"><Icon name="plus"/> New invoice</Link>}
-                <a href="#profile" className="billing-secondary">Billing settings</a>
+                <Link href="/dashboard/settings?tab=invoice" className="billing-secondary">Billing settings</Link>
               </div>
             </div>
             <div className="billing-inclusions">
@@ -260,7 +257,7 @@ export default async function BusinessBilling({
       <aside className="billing-right">
         <section className="billing-panel billing-profile" id="profile">
           <div className="billing-panel-heading"><div><h2>Billing Address &amp; GST</h2></div>
-            {canManage&&<BillingProfileEditButton/>}
+            {canManage&&<Link href="/dashboard/settings?tab=invoice" className="billing-edit-link">Edit →</Link>}
           </div>
           <div className="billing-profile-row"><span className="billing-profile-icon"><Icon name="location"/></span>
             <div><strong>{profile?.legalName??'Billing identity not configured'}</strong><p>{profile?.address??'Add your registered legal business address.'}</p><small>State code: {profile?.stateCode??'—'}</small></div>
@@ -270,19 +267,7 @@ export default async function BusinessBilling({
               {profile?.authorizedSignatory&&<small>Signatory: {profile.authorizedSignatory}</small>}
             </div>
           </div>
-          {canManage&&<details className="billing-profile-edit" id="billing-profile-edit" open={!profile}>
-            <summary>{profile?'Edit business billing identity':'Set up billing identity'} <span>⌄</span></summary>
-            <p>These details are frozen into documents once they are issued.</p>
-            <ActionForm action={saveGstProfile} label="Save billing identity">
-              <div className="billing-form-grid">
-                <label>Legal business name<input required name="legalName" minLength={2} maxLength={200} defaultValue={profile?.legalName??''} className={formField}/></label>
-                <label>State code<input required name="stateCode" pattern="[0-9]{2}" maxLength={2} defaultValue={profile?.stateCode??'36'} className={formField}/></label>
-                <label>GSTIN (optional)<input name="gstin" maxLength={15} defaultValue={profile?.gstin??''} placeholder="36ABCDE1234F1Z5" className={formField}/></label>
-                <label>Authorized signatory<input name="authorizedSignatory" maxLength={150} defaultValue={profile?.authorizedSignatory??''} className={formField}/></label>
-                <label className="billing-form-address">Registered billing address<textarea required name="address" minLength={5} maxLength={1000} rows={3} defaultValue={profile?.address??''} className={formField}/></label>
-              </div>
-            </ActionForm>
-          </details>}
+          {canManage&&<Link href="/dashboard/settings?tab=invoice" className="billing-secondary">Edit billing identity in Settings →</Link>}
         </section>
 
         <section className="billing-panel billing-quick">

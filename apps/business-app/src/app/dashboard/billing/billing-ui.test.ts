@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 const page = readFileSync(new URL('./page.tsx', import.meta.url), 'utf8');
 const css = readFileSync(new URL('./billing-premium.css', import.meta.url), 'utf8');
 const actions = readFileSync(new URL('./actions.ts', import.meta.url), 'utf8');
+const settings = readFileSync(new URL('../settings/page.tsx', import.meta.url), 'utf8');
 
 describe('premium tenant GST billing dashboard', () => {
   it('loads only the authenticated organization billing data', () => {
@@ -35,11 +36,11 @@ describe('premium tenant GST billing dashboard', () => {
     expect(page).toContain('href="/dashboard/billing/new?kind=purchase_bill"');
     expect(page).toContain('href="/dashboard/billing/gst-reports"');
     expect(page).toContain("href={'/dashboard/billing/'+d.id}");
-    expect(page).toContain('action={saveGstProfile}');
-    expect(page).toContain('<BillingProfileEditButton/>');
+    expect(settings).toContain('action={saveGstProfile}');
+    expect(page).toContain('/dashboard/settings?tab=invoice');
     expect(page).toContain('billing-coverage');
-    expect(page).toContain('name="legalName"');
-    expect(page).toContain('name="gstin"');
+    expect(settings).toContain('name="legalName"');
+    expect(settings).toContain('name="gstin"');
     expect(actions).toContain("authorization.requirePermission(org, 'billing.manage')");
     expect(page).toContain('canPayments&&<Link href="/dashboard/finance/payment_methods"');
   });

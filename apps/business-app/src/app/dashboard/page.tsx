@@ -274,9 +274,7 @@ export default async function Dashboard({
           : []),
         { label: 'My Quotes', href: '/dashboard/quotations' },
         { label: 'Packages', href: '/dashboard/quotations/packages' },
-        ...(has('settings.manage', 'quotation')
-          ? [{ label: 'Branding & Settings', href: '/dashboard/quotations/settings' }]
-          : []),
+
       ],
     });
   if (canProjects)
@@ -341,8 +339,8 @@ export default async function Dashboard({
     });
   if (canSettings)
     navigation.push({
-      label: 'Company Settings',
-      href: '/dashboard/company/settings',
+      label: 'Settings',
+      href: '/dashboard/settings',
       icon: 'settings',
     });
 
@@ -538,7 +536,7 @@ export default async function Dashboard({
     ...(canProjects ? [{ label: 'Projects', href: '/dashboard/projects', icon: 'projects' as const }] : []),
     ...(canBilling ? [{ label: 'Invoices', href: '/dashboard/billing', icon: 'billing' as const }] : []),
     ...(canTeam ? [{ label: 'Team', href: '/dashboard/company/team', icon: 'team' as const }] : []),
-    ...(canSettings ? [{ label: 'Settings', href: '/dashboard/company/settings', icon: 'settings' as const }] : []),
+    ...(canSettings ? [{ label: 'Settings', href: '/dashboard/settings', icon: 'settings' as const }] : []),
   ];
 
   return (
