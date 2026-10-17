@@ -11335,6 +11335,14 @@ export interface Database {
         Args: { p_id: string; p_active: boolean };
         Returns: undefined;
       };
+      gst_won_lead_invoice_context: {
+        Args: { p_org: string; p_invoice: string };
+        Returns: string;
+      };
+      gst_won_lead_invoice_save: {
+        Args: { p_org: string; p_input: Json; p_lead: string };
+        Returns: string;
+      };
       has_entitlement: {
         Args: { p_organization_id: string; p_module_key: string };
         Returns: boolean;

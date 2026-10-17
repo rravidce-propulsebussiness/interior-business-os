@@ -73,6 +73,9 @@ export default async function PrepareDocument({
   const customers = invoiceCustomerChoices(
     clientRows,choices,profile?.stateCode??'36',
   );
+  const existingWonLeadId = existing && !purchase && !order
+    ? await gst.wonLeadInvoiceContext(context.organizationId, existing.id)
+    : null;
   const existingCustomerId = existing && !purchase && !order
     ? await gst.customerContext(context.organizationId, existing.id)
     : null;
@@ -111,6 +114,7 @@ export default async function PrepareDocument({
       existing={existing} stageContext={stageContext} choices={choices}
       customers={customers} customerAccess={true}
       existingCustomerId={existingCustomerId}
+      existingWonLeadId={existingWonLeadId}
       initialLead={params.lead??''}/>}
   </OwnerShell>;
 }

@@ -13,6 +13,7 @@ const actions = file('./actions.ts');
 const migrations = file('../../../../../../packages/database/supabase/migrations/20261017000500_stage_invoice_project_activation.sql');
 const customerMigration = file('../../../../../../packages/database/supabase/migrations/20261017000700_gst_existing_customer_link.sql');
 const billingCustomersMigration = file('../../../../../../packages/database/supabase/migrations/20261017000800_invoice_client_options_and_save.sql');
+const wonLeadMigration = file('../../../../../../packages/database/supabase/migrations/20261017000900_won_lead_invoice_picker_no_reason.sql');
 const leadStage = file('../crm/leads/lead-inline-controls.tsx');
 const conversionPage = file('../crm/leads/[id]/convert/page.tsx');
 
@@ -101,6 +102,41 @@ describe('lead-linked GST milestone invoicing',()=>{
     expect(billingCustomersMigration).toContain("p.customer_id=NEW.converted_customer_id");
     expect(billingCustomersMigration).not.toContain("INSERT INTO public.customers");
     expect(billingCustomersMigration).not.toContain("INSERT INTO public.projects");
+  });
+
+  it('makes Won leads invoice-selectable with or without an accepted quote',()=>{
+    const wonClient = invoiceCustomerChoices([{
+      id:'00000000-0000-4000-8000-000000000010',
+      display_name:'Ramya',legal_name:null,phone:'8978911262',email:null,
+      tax_identifier:null,billing_address:{city:'Hyderabad'},
+      won_lead_id:'00000000-0000-4000-8000-000000000010',
+      won_lead_number:'L-2026-000002',
+    }],[],'36');
+    expect(wonClient).toHaveLength(1);
+    expect(wonClient[0]?.wonLeadId).toBe('00000000-0000-4000-8000-000000000010');
+    expect(wonClient[0]?.fromApprovedQuotation).toBe(false);
+    expect(screen).toContain('Won lead');
+    expect(screen).toContain('name="wonLeadId"');
+    expect(screen).toContain('row.leadId === selectedClient?.wonLeadId');
+    expect(screen).toContain('Create project from this lead');
+    expect(page).toContain('existingWonLeadId={existingWonLeadId}');
+    expect(actions).toContain('.saveWonLeadDocument(');
+    expect(wonLeadMigration).toContain("l.lifecycle='won'");
+    expect(wonLeadMigration).toContain("l.converted_customer_id IS NULL");
+    expect(wonLeadMigration).toContain('private.finance_require(p_org,\'invoice.create\')');
+    expect(wonLeadMigration).toContain('private.gst_won_lead_invoice_links');
+    expect(wonLeadMigration).toContain('FORCE ROW LEVEL SECURITY');
+    expect(wonLeadMigration).not.toContain('INSERT INTO public.customers');
+    expect(wonLeadMigration).not.toContain('INSERT INTO public.projects');
+  });
+  it('changes Won immediately without mandatory reason while retaining lost validation',()=>{
+    expect(leadStage).toContain("selected.outcome === 'won'");
+    expect(leadStage).not.toContain('Why was this lead won?');
+    expect(leadStage).not.toContain("target.outcome === 'won' && !note.trim()");
+    expect(leadStage).toContain('Lead marked Won. Create a project?');
+    expect(wonLeadMigration).not.toContain('Won reason required');
+    expect(wonLeadMigration).toContain('Lost reason required');
+    expect(wonLeadMigration).toContain("private.crm_require(org,'lead.win')");
   });
   it('routes linked sales draft through the validated tenant RPC',()=>{
     expect(actions).toContain('idSchema.parse(leadId)');
