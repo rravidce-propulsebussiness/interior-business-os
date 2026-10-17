@@ -9,7 +9,7 @@ import type { ConstructionPackage } from '@business-os/database/construction-pac
 import type { QuotationPackage } from '@business-os/database/quotation-packages';
 import { PremiumPackageEditor } from '../../pricing/construction/premium-package-editor';
 import {
-  installConstructionBrochurePackages, duplicateConstructionPackage, deleteConstructionPackage,
+  duplicateConstructionPackage, deleteConstructionPackage,
 } from '../../pricing/construction/package-actions';
 import { IndustryPackageEditor } from '../package-manager';
 import { duplicateQuotationPackage, deleteQuotationPackage } from '../package-actions';
@@ -139,9 +139,7 @@ export function PackageLibrary({
       : deleteQuotationPackage(entry.item.id, entry.item.version));
   }
   const addAllowed = canManage && (tab === 'construction' || activeIndustries.length > 0);
-  const addStarter = canManage && tab === 'construction' && !showCustomManagement &&
-    !['STANDARD','PREMIUM','LUXURY','ROYAL'].every((code) =>
-      construction.some((item) => item.code === code));
+
 
   return (
     <div className="qpl">
@@ -206,14 +204,6 @@ export function PackageLibrary({
         </div>
       </div>}
       {message && <div role="status" className="qpl-message">{message}</div>}
-      {addStarter && <div className="qpl-starter">
-        <span>Missing a standard construction package template?</span>
-        <button type="button" disabled={pending}
-          onClick={() => refreshWith(installConstructionBrochurePackages)}>
-          {pending ? 'Working…' : 'Add starter packages'}
-        </button>
-      </div>}
-
       {!showCustomManagement && <>
         <section className="qpl-cards" role="tabpanel"
           aria-label={tab==='construction'?'Construction package cards':'Interior package cards'}>
