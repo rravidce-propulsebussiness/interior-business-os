@@ -270,8 +270,17 @@ export default async function Leads({
         const {data: quoteProjects} = await s.client.from('quotations')
           .select('id,project_id').eq('organization_id',s.org)
           .in('id',[...new Set(quoteIds)]);
+        const projectIds = [...new Set((quoteProjects ?? [])
+          .flatMap(quote => quote.project_id ? [quote.project_id] : []))];
+        const eligibleProjects = projectIds.length
+          ? await s.client.from('projects').select('id')
+              .eq('organization_id',s.org)
+              .eq('removed_from_workspace',false).in('id',projectIds)
+          : {data:[]};
+        const eligible = new Set((eligibleProjects.data ?? []).map(p=>p.id));
         for (const quote of quoteProjects ?? []) {
-          if (quote.project_id) projectByQuote.set(quote.id,quote.project_id);
+          if (quote.project_id && eligible.has(quote.project_id))
+            projectByQuote.set(quote.id,quote.project_id);
         }
       }
       const byId = new Map(rows.map((row) => [row.id, row]));
