@@ -64,15 +64,20 @@ export async function saveEmployeeProof(form:FormData):Promise<EmployeeActionRes
     const file=form.get('file');
     if(!(file instanceof File)||!PROOF_MIME.has(file.type)||
        file.size<1||file.size>MAX_PROOF_BYTES)throw new DomainError('VALIDATION_FAILED');
-    const people=await employeeRepository(client).list(organizationId);
-    if(!people.some(p=>p.id===employeeId)) throw new DomainError('FORBIDDEN');
+    const directory=employeeRepository(client);
+    const people=await directory.list(organizationId);
+    const person=people.find(p=>p.id===employeeId);
+    if(!person) throw new DomainError('FORBIDDEN');
+    const previous=person.documents.find(d=>d.kind===kind);
+    const oldDocument=previous?await directory.proof(organizationId,previous.id):null;
     const fileName=file.name.trim().slice(0,200)||'Identity proof';
     uploadedKey=employeeProofKey(organizationId,employeeId,crypto.randomUUID());
     await uploadEmployeeProof(uploadedKey,file);
-    const id=await employeeRepository(client).registerProof(
+    const id=await directory.registerProof(
       organizationId,employeeId,kind,fileName,file.type,uploadedKey,
     );
     uploadedKey=null;
+    if(oldDocument?.storageKey)await removeEmployeeProof(oldDocument.storageKey).catch(()=>undefined);
     revalidatePath('/dashboard/employees');
     return {ok:true,id,message:'Identity proof uploaded privately. Review and verify it.'};
   }catch(error) {
