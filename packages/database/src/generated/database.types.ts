@@ -10908,6 +10908,23 @@ export interface Database {
         Args: { p_approval_required: boolean };
         Returns: Json;
       };
+      company_salary_create: {
+        Args: { p_org: string; p_input: Json };
+        Returns: string;
+      };
+      company_salary_list: {
+        Args: { p_org: string; p_month: string };
+        Returns: Json;
+      };
+      company_salary_mark_paid: {
+        Args: {
+          p_org: string;
+          p_id: string;
+          p_method: string;
+          p_reference?: string;
+        };
+        Returns: undefined;
+      };
       company_self_register: { Args: { p_input: Json }; Returns: Json };
       construction_custom_package_settings_save: {
         Args: { p_org: string; p_rows: Json };
@@ -11269,6 +11286,10 @@ export interface Database {
           p_page?: number;
         };
         Returns: Json;
+      };
+      gst_company_template_select: {
+        Args: { p_org: string; p_template_id: string };
+        Returns: undefined;
       };
       gst_customer_invoice_context: {
         Args: { p_org: string; p_invoice: string };

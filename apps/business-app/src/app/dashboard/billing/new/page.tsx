@@ -86,14 +86,14 @@ export default async function PrepareDocument({
     ...(hasGrant('lead.view')?[{label:'Leads',href:'/dashboard/crm/leads',icon:'leads' as const}]:[]),
     ...(hasGrant('quotation.view')?[{label:'Quotations',href:'/dashboard/quotations',icon:'quotations' as const}]:[]),
     ...(hasGrant('project.view')?[{label:'Projects',href:'/dashboard/projects',icon:'projects' as const}]:[]),
-    {label:'Billing',href:'/dashboard/billing',icon:'billing'},
+    {label:'Finance',href:'/dashboard/finance',icon:'billing'},
     ...(hasGrant('payment.view')?[{label:'Finance',href:'/dashboard/finance',icon:'expenses' as const}]:[]),
     {label:'Settings',href:'/dashboard/settings',icon:'settings'},
   ];
   return <OwnerShell companyName={company.data?.name??profile?.legalName??'Business OS'}
     accountLabel={(account.email??'Account').split('@')[0]??'Account'}
     accountEmail={account.email??''} planLabel="Business workspace"
-    navigation={navigation} search="" currentHref="/dashboard/billing"
+    navigation={navigation} search="" currentHref="/dashboard/finance"
     notificationsEnabled={hasGrant('notification.view')}>
     {params.error && <div role="alert" style={{
       background:'#fff1f2',border:'1px solid #fecdd3',padding:14,
@@ -105,7 +105,7 @@ export default async function PrepareDocument({
       <Link href="/dashboard/settings?tab=invoice" className="text-orange-600 underline">Configure billing identity →</Link>
     </main> : purchase || !!order ? <main id="main-content"
       className="mx-auto max-w-7xl space-y-5 px-4 py-8 text-slate-900 sm:px-7">
-      <Link href="/dashboard/billing" className="text-sm text-slate-500">← Billing</Link>
+      <Link href="/dashboard/finance" className="text-sm text-slate-500">← Finance</Link>
       <h1 className="text-2xl font-extrabold">{purchase?'Supplier purchase bill':'Marketplace invoice'}</h1>
       <DocumentEditor existing={existing} order={order} profile={profile}
         standard={standard} existingLayout={existingLayout}

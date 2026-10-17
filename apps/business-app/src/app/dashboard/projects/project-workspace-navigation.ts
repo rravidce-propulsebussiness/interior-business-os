@@ -38,22 +38,24 @@ export function projectWorkspaceNavigation(
       href: '/dashboard/marketplace',
       icon: 'marketplace',
     });
-    navigation.push({
-      label: 'Purchases',
-      href: '/dashboard/marketplace/orders',
-      icon: 'purchases',
-    });
+
   }
   if (has('invoice.view', 'billing')) {
     navigation.push({
-      label: 'Billing & Invoices',
-      href: '/dashboard/billing',
+      label: 'Finance',
+      href: '/dashboard/finance',
       icon: 'billing',
+      children: [
+        { label: 'Invoices', href: '/dashboard/finance?tab=invoices' },
+        { label: 'Expenses', href: '/dashboard/finance?tab=expenses' },
+        { label: 'GST', href: '/dashboard/finance?tab=gst' },
+        { label: 'Salaries', href: '/dashboard/finance?tab=salaries' },
+      ],
     });
     navigation.push({
-      label: 'Expenses',
-      href: '/dashboard/billing?kind=purchase_bill',
-      icon: 'expenses',
+      label: 'Billing & Plans',
+      href: '/dashboard/billing',
+      icon: 'billing',
     });
   }
   if (
