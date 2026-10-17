@@ -43,18 +43,18 @@ end $fn$;
 -- The existing post-insert trigger is the shared source of new document designs.
 create or replace function private.gst_assign_standard_on_invoice_insert()
 returns trigger language plpgsql security definer set search_path='' as $fn$
-declare v_selected record;
+declare v_template_id uuid;v_name text;v_config jsonb;
 begin
   if new.kind='sales_invoice' then
-    select t.id as template_id,t.name,t.config into v_selected
+    select t.id,t.name,t.config into v_template_id,v_name,v_config
     from private.gst_company_template_choices c
     join private.gst_invoice_templates t on t.id=c.template_id
     where c.organization_id=new.organization_id and t.status='active'
       and t.kind='sales_invoice';
   end if;
-  if v_selected.template_id is not null then
+  if v_template_id is not null then
     insert into private.gst_invoice_document_layouts(document_id,template_id,template_name,config)
-      values(new.id,v_selected.template_id,v_selected.name,v_selected.config);
+      values(new.id,v_template_id,v_name,v_config);
   else
     insert into private.gst_invoice_document_layouts(document_id,template_id,template_name,config)
       select new.id,template_id,name,config from private.gst_invoice_standard where id=true;
