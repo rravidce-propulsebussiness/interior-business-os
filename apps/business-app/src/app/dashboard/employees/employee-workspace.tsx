@@ -153,7 +153,7 @@ export function EmployeeWorkspace({
   ]);
   const escape=(v:string)=>{
    // Spreadsheet tools interpret cells beginning with formula operators as code.
-   const guarded=/^[\\s\\u0000-\\u001f]*[=+\\-@]/.test(v)?"'"+v:v;
+   const guarded=/^[\s\u0000-\u001f]*[=+\-@]/.test(v)?"'"+v:v;
    return '"'+guarded.replaceAll('"','""')+'"';
   };
   const blob=new Blob(['\uFEFF'+[cols,...values].map(row=>row.map(escape).join(',')).join('\r\n')],
