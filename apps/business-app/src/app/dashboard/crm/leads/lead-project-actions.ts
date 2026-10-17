@@ -57,8 +57,8 @@ export async function openOrCreateWonLeadProject(input: unknown):
         }) as Record<string,unknown> | undefined;
         if (quote && typeof quote.project_id === 'string') {
           const existing = await s.client.from('projects')
-            .select('name').eq('organization_id',s.org)
-            .eq('id',quote.project_id).maybeSingle();
+            .select('name,removed_from_workspace').eq('organization_id',s.org)
+            .eq('id',quote.project_id).eq('removed_from_workspace',false).maybeSingle();
           if (existing.data?.name) projectName = existing.data.name;
         }
       }
