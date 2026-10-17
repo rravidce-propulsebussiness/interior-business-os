@@ -5,7 +5,7 @@ import { OriginLeads } from '../../commercial/origin-leads';
 import { commercialServices } from '../../commercial/service';
 import { MasterForm } from '../../commercial/master-form';
 import { OwnerIcon, OwnerShell } from '../../owner-shell';
-import { projectWorkspaceNavigation } from '../../projects/project-workspace-navigation';
+import { ownerWorkspaceNavigation } from '../../owner-workspace-navigation';
 import { CustomerReference } from './reference';
 import { ClientAccess } from './client-access';
 import { leadServiceFromIndustryKey } from '../../crm/leads/lead-service-options';
@@ -275,7 +275,7 @@ export default async function Customer({
         accountLabel={accountEmail.split('@')[0] || 'Team member'}
         accountEmail={accountEmail}
         planLabel={planLabel}
-        navigation={projectWorkspaceNavigation(has)}
+        navigation={ownerWorkspaceNavigation(s.context)}
         search=""
         notificationsEnabled={has('notification.view')}
         currentHref="/dashboard/customers"

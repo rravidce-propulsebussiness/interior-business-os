@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { canAccess } from '@business-os/auth';
 import { commercialServices } from '../commercial/service';
 import { OwnerShell, OwnerIcon } from '../owner-shell';
-import { projectWorkspaceNavigation } from '../projects/project-workspace-navigation';
+import { ownerWorkspaceNavigation } from '../owner-workspace-navigation';
 import { leadServiceFromIndustryKey } from '../crm/leads/lead-service-options';
 import '../owner-dashboard.css';
 import './clients-directory.css';
@@ -259,7 +259,7 @@ export default async function Customers({
     if (Number(merged.page) > 1) data.set('page', String(merged.page));
     return '/dashboard/customers' + (data.size ? '?' + data.toString() : '');
   };
-  const nav = projectWorkspaceNavigation(has);
+  const nav = ownerWorkspaceNavigation(s.context);
   const accountEmail = user.email ?? '';
 
   return (
