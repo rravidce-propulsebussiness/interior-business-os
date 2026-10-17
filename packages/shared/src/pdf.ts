@@ -230,13 +230,32 @@ export async function renderPdf(
 ): Promise<Buffer> {
   const provider = configuredPdfProvider();
   if (active >= 2) throw new PdfServiceError('PDF_RENDERER_BUSY');
-  const safeHtml = validatePrintHtml(html);
+  let safeHtml: string;
+  try {
+    safeHtml = validatePrintHtml(html);
+  } catch {
+    // Untrusted/remote images must never be fetched by a PDF renderer.
+    throw new PdfServiceError('PDF_PRINT_HTML_INVALID');
+  }
   active++;
   try {
-    const bytes =
-      provider === 'node'
-        ? await (await import('./pdf.node')).renderNodePdf(safeHtml, options)
-        : await cloudflarePdf(safeHtml, options);
+    let bytes: Buffer;
+    if (provider === 'node') {
+      try {
+        bytes = await (await import('./pdf.node')).renderNodePdf(safeHtml, options);
+      } catch (localError) {
+        // Two trustworthy engines, *one HTML template*. When a host lacks
+        // Chromium, fail over to the configured Browser Rendering provider.
+        // Never downgrade to the unrelated PDF-lib quotation layout.
+        if (process.env.CF_BROWSER_ACCOUNT_ID && process.env.CF_BROWSER_API_TOKEN) {
+          bytes = await cloudflarePdf(safeHtml, options);
+        } else {
+          throw localError;
+        }
+      }
+    } else {
+      bytes = await cloudflarePdf(safeHtml, options);
+    }
     if (
       bytes.byteLength < 5 ||
       Buffer.from(bytes).toString('ascii', 0, 5) !== '%PDF-'
@@ -247,8 +266,10 @@ export async function renderPdf(
     return await applyMetadata(bytes, options);
   } catch (error) {
     if (error instanceof PdfServiceError) throw error;
+    if (error instanceof Error && error.message === 'PDF_CHROMIUM_UNAVAILABLE')
+      throw new PdfServiceError('PDF_CHROMIUM_UNAVAILABLE');
     if (error instanceof Error && error.message.startsWith('Print preflight'))
-      throw error;
+      throw new PdfServiceError('PDF_PRINT_OVERFLOW');
     throw new PdfServiceError('PDF_RENDER_FAILED');
   } finally {
     active--;
