@@ -1,14 +1,16 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import type { ConstructionRate } from '@business-os/database/construction-rates';
 import type { ConstructionPackage } from '@business-os/database/construction-packages';
 import { PremiumSftBuilder } from './premium-sft-builder';
 import type { SftEstimateDetails } from '@business-os/core/sft-quotation';
+import type { CustomBrandQuote } from '@business-os/core/custom-brand-quote';
+import { QuotationPdfControls } from './quotation-pdf-controls';
 import {
   previewConstructionPackage,
-  saveCustomizedMaterial,
+  saveCustomBrandQuote,
 } from './construction-actions';
 
 const money = (v: number) =>
@@ -19,174 +21,165 @@ const field =
   'w-full rounded-xl border border-slate-300 bg-white px-3 py-3 text-sm text-slate-900';
 
 function CustomizedQuote({
-  rates,
-  revisionId,
-  version,
+  rates, revisionId, version, quoteNumber, canSharePdf, initialQuote,
 }: {
   rates: ConstructionRate[];
   revisionId: string;
   version: number;
+  quoteNumber: string;
+  canSharePdf: boolean;
+  initialQuote: CustomBrandQuote | null;
 }) {
   const router = useRouter();
   const [pending, start] = useTransition();
-  const [area, setArea] = useState('');
-  const [materialId, setMaterialId] = useState('');
+  const [savedVersion, setSavedVersion] = useState(version);
+  useEffect(() => {
+    setSavedVersion(v => Math.max(v, version));
+  }, [version]);
+  const [area, setArea] = useState(initialQuote?.areaSqft ?? '');
+  const [chosen, setChosen] = useState<Record<string, string>>(() =>
+    Object.fromEntries(initialQuote?.selections.map(item => [item.category, item.id]) ?? []));
+  const [dirty, setDirty] = useState(!initialQuote);
   const [message, setMessage] = useState('');
-  const [preview, setPreview] = useState<{
-    total: string;
-    rate: string;
-  } | null>(null);
-  const active = rates.filter(
-    (x) => x.status === 'active' && Number(x.ratePerSqft) > 0,
-  );
-  const categories = [...new Set(active.map((x) => x.category))].sort();
-  const selected = active.find((x) => x.id === materialId);
+  const [verified, setVerified] = useState<{rate: string; total: string} | null>(null);
+  const active = rates.filter(r => r.status === 'active' && Number(r.ratePerSqft) >= 0);
+  const categories = [...new Set(active.map(r => r.category))].sort();
+  const selected = categories.map(category =>
+    active.find(r => r.category === category && r.id === chosen[category])).filter(
+      (value): value is ConstructionRate => Boolean(value));
+  const ids = selected.map(r => r.id);
+  const calculatedRate = selected.reduce((total, r) => total + Number(r.ratePerSqft), 0);
+  const estimatedTotal = Number(area) * calculatedRate;
+  const valid = /^([1-9]\\d{0,5}|0)(\\.\\d{1,2})?$/.test(area) &&
+    Number(area) > 0 && Number(area) <= 1000000;
+  // Show calculations as guidance, but save always re-prices using tenant DB rows.
+  const eligible = valid && selected.length > 0 && selected.length <= 20 && calculatedRate > 0;
+  const resetPreview = () => {setDirty(true);setVerified(null);setMessage('');};
+
   function submit(save: boolean) {
+    if (!eligible || pending) return;
     setMessage('');
-    setPreview(null);
     start(async () => {
-      if (save) {
-        const result = await saveCustomizedMaterial(revisionId, version, {
-          materialId,
-          areaSqft: area,
-        });
-        setMessage(result.message);
-        if (result.id) {
-          setMaterialId('');
-          router.refresh();
+      try {
+        if (!save) {
+          const result = await previewConstructionPackage(revisionId, {ids, areaSqft: area});
+          setMessage(result.message);
+          setVerified(result.total && result.ratePerSqft
+            ? {total: result.total, rate: result.ratePerSqft} : null);
+        } else {
+          const result = await saveCustomBrandQuote(
+            revisionId, savedVersion, {ids, areaSqft: area},
+          );
+          setMessage(result.message);
+          if (result.id) {
+            setDirty(false);
+            setVerified({rate: calculatedRate.toFixed(2), total: result.total ?? ''});
+            setSavedVersion(result.version ?? savedVersion + 1);
+            router.refresh();
+          }
         }
-      } else {
-        const result = await previewConstructionPackage(revisionId, {
-          ids: [materialId],
-          areaSqft: area,
-        });
-        setMessage(result.message);
-        if (result.total && result.ratePerSqft)
-          setPreview({ total: result.total, rate: result.ratePerSqft });
+      } catch {
+        setMessage('The quotation could not be updated. Reload and try again.');
       }
     });
   }
-  return (
-    <div className="space-y-5">
-      <div className="rounded-2xl border border-blue-200 bg-blue-50 p-5">
-        <p className="text-xs font-bold uppercase tracking-widest text-blue-700">
-          Option 2 · Customized quotation
-        </p>
-        <h3 className="mt-2 text-xl font-extrabold text-slate-950">
-          Price each material and brand separately
-        </h3>
-        <p className="mt-2 text-sm leading-6 text-slate-600">
-          Choose the material/brand, enter applicable area and add a priced
-          line. Repeat for steel, bricks, cement, painting or any other
-          construction item. The total grows from the saved item prices, not a
-          base package.
-        </p>
+  return <div className="qs-custom-price-workspace">
+    <div className="qs-custom-intro">
+      <div><span className="qs-custom-eyebrow">CALCULATED PACKAGE</span>
+        <h3>Custom Quote · Choose customer brands</h3>
+        <p>Pick one brand per material category. Each cost per SFT comes from
+          the company’s saved purchase-unit price × consumption per SFT.</p>
       </div>
-      <div className="grid gap-4 md:grid-cols-2">
-        <label className="grid gap-2 text-xs font-bold text-slate-700">
-          Brand / material
-          <select
-            className={field}
-            value={materialId}
-            onChange={(e) => {
-              setMaterialId(e.target.value);
-              setPreview(null);
-            }}
-          >
-            <option value="">Choose a material</option>
-            {categories.map((c) => (
-              <optgroup key={c} label={c}>
-                {active
-                  .filter((x) => x.category === c)
-                  .map((item) => (
-                    <option key={item.id} value={item.id}>
-                      {item.name} · {money(Number(item.ratePerSqft))}/sq ft
-                    </option>
-                  ))}
-              </optgroup>
-            ))}
-          </select>
-        </label>
-        <label className="grid gap-2 text-xs font-bold text-slate-700">
-          Applicable area (sq ft)
-          <input
-            className={field}
-            type="number"
-            min=".01"
-            max="1000000"
-            step=".01"
-            value={area}
-            onChange={(e) => {
-              setArea(e.target.value);
-              setPreview(null);
-            }}
-            placeholder="e.g. 1440"
-          />
-        </label>
+      <div className="qs-custom-area">
+        <label htmlFor="qs-custom-area">Built-up construction area (SFT)</label>
+        <input id="qs-custom-area" type="number" className={field}
+          min=".01" max="1000000" step=".01" value={area}
+          placeholder="e.g. 3200"
+          onChange={event => {setArea(event.target.value);resetPreview();}}/>
       </div>
-      {selected && (
-        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-          <p className="text-base font-extrabold text-slate-950">
-            {selected.category} · {selected.name}
-          </p>
-          <p className="mt-1 text-xs text-slate-600">
-            {selected.specification}
-          </p>
-          <p className="mt-3 text-xl font-extrabold text-blue-700">
-            {money(Number(selected.ratePerSqft))}/sq ft
-          </p>
-        </div>
-      )}
-      <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-slate-950 p-5 text-white">
-        <div>
-          <p className="text-xs font-semibold text-blue-200">
-            This material&apos;s indicative amount
-          </p>
-          <p className="mt-1 text-2xl font-extrabold">
-            {selected && Number(area) > 0
-              ? money(Number(selected.ratePerSqft) * Number(area))
-              : '—'}
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            disabled={!selected || !Number(area) || pending}
-            onClick={() => submit(false)}
-            className="rounded-xl bg-white px-4 py-3 text-xs font-bold text-blue-700 disabled:opacity-40"
-          >
-            Verify price
-          </button>
-          <button
-            type="button"
-            disabled={!selected || !Number(area) || pending}
-            data-studio-save="quote"
-            onClick={() => submit(true)}
-            className="rounded-xl bg-blue-600 px-5 py-3 text-xs font-bold text-white disabled:opacity-40"
-          >
-            {pending ? 'Working…' : '+ Add priced material'}
-          </button>
-        </div>
-      </div>
-      {preview && (
-        <p className="text-sm font-semibold text-emerald-700">
-          Verified material amount: {money(Number(preview.total))}
-        </p>
-      )}
-      {message && (
-        <p role="status" className="text-sm text-slate-600">
-          {message}
-        </p>
-      )}
-
     </div>
-  );
+    {categories.length === 0 ? (
+      <p className="qs-custom-empty">No material prices configured for this company.
+        Open Packages → Custom Quote → Manage Brand &amp; Unit Prices to add material options.</p>
+    ) : (
+      <div className="qs-custom-brand-grid">
+        {categories.map(category => {
+          const options = active.filter(rate => rate.category === category);
+          const selectedRate = options.find(rate => rate.id === chosen[category]);
+          return <div className="qs-custom-brand" key={category}>
+            <div className="qs-custom-brand-top">
+              <span className="qs-custom-category">{category}</span>
+              <span className="qs-custom-price">{selectedRate ? money(Number(selectedRate.ratePerSqft)) + '/SFT' : 'Not included'}</span>
+            </div>
+            <label>
+              <span className="sr-only">Select {category} brand</span>
+              <select className={field} value={chosen[category] ?? ''}
+                onChange={event => {
+                  setChosen(current => ({...current,[category]:event.target.value}));
+                  resetPreview();
+                }}>
+                <option value="">Select brand / exclude</option>
+                {options.map(option => <option key={option.id} value={option.id}>
+                  {option.name} — {money(Number(option.unitPrice ?? option.ratePerSqft))}/{option.priceUnit ?? 'sqft'}
+                </option>)}
+              </select>
+            </label>
+            {selectedRate && <>
+              <p className="qs-custom-formula">
+                {money(Number(selectedRate.unitPrice ?? selectedRate.ratePerSqft))}
+                /{selectedRate.priceUnit ?? 'sqft'} × {selectedRate.consumptionPerSqft ?? '1'}
+                {' '}{selectedRate.priceUnit ?? 'sqft'}/SFT =
+                <strong> {money(Number(selectedRate.ratePerSqft))}/SFT</strong>
+              </p>
+              {selectedRate.specification && <p className="qs-custom-spec">{selectedRate.specification}</p>}
+            </>}
+          </div>;
+        })}
+      </div>
+    )}
+    <div className="qs-custom-totals">
+      <div>
+        <p>{selected.length} material categories selected</p>
+        <strong>{money(calculatedRate)} <small>per SFT</small></strong>
+        <span>× {Number(area || 0).toLocaleString('en-IN')} SFT</span>
+        <h3>{eligible ? money(estimatedTotal) : 'Select area and brands'}</h3>
+        <small>Only selected categories are included; add labour, overhead and other
+          costs as priced categories if they belong in this quote.</small>
+      </div>
+      <div className="qs-custom-actions">
+        <button type="button" disabled={!eligible || pending}
+          onClick={() => submit(false)} className="qs-custom-verify">
+          {pending ? 'Calculating…' : 'Verify unit pricing'}
+        </button>
+        <button data-studio-save="quote" type="button" disabled={!eligible || pending}
+          onClick={() => submit(true)} className="qs-custom-save">
+          {pending ? 'Saving…' : 'Save quotation →'}
+        </button>
+      </div>
+    </div>
+    {verified && <p className="qs-custom-verified" role="status">
+      Verified company rate: {money(Number(verified.rate))}/SFT,
+      total {money(Number(verified.total))}.
+    </p>}
+    {message && <p className="qs-custom-message" role="status">{message}</p>}
+    <section className="qs-work-card qs-work-preview-card">
+      <div className="qs-work-heading">
+        <div className="qs-work-heading-icon">▤</div>
+        <div><h3>Premium Quotation PDF</h3>
+          <p>Saved brand choices and prices are included in the same View, Download and WhatsApp PDF.</p>
+        </div>
+      </div>
+      <QuotationPdfControls revisionId={revisionId} version={savedVersion}
+        quoteNumber={quoteNumber} dirty={dirty || pending} canShare={canSharePdf}/>
+    </section>
+  </div>;
 }
 
 export function ConstructionSelector({
   rates,
   packages,
   initialSchedule,
+  initialCustomQuote,
   revisionId,
   version,
   initialMode = 'sft',
@@ -197,6 +190,7 @@ export function ConstructionSelector({
   rates: ConstructionRate[];
   packages: ConstructionPackage[];
   initialSchedule: SftEstimateDetails | null;
+  initialCustomQuote?: CustomBrandQuote | null;
   revisionId: string;
   version: number;
   initialMode?: 'sft' | 'custom';
@@ -210,7 +204,7 @@ export function ConstructionSelector({
     pkg.code === initialSchedule?.package?.code,
   );
   const [selected, setSelected] = useState(
-    previous?.id ??
+    initialCustomQuote ? 'custom' : previous?.id ??
     (initialMode === 'custom' || initialPackageId === 'custom' ? 'custom'
       : activePackages.find((pkg) => pkg.id === initialPackageId)?.id ??
         (activePackages.length === 0 ? 'custom' : '')),
@@ -247,7 +241,9 @@ export function ConstructionSelector({
       </section>
       {selected === 'custom' ? (
         <section className="qs-build-custom-wrap">
-          <CustomizedQuote rates={rates} revisionId={revisionId} version={version}/>
+          <CustomizedQuote rates={rates} revisionId={revisionId} version={version}
+            quoteNumber={quoteNumber || 'Quotation'} canSharePdf={canSharePdf}
+            initialQuote={initialCustomQuote ?? null}/>
         </section>
       ) : chosen ? (
         <PremiumSftBuilder key={selected}
