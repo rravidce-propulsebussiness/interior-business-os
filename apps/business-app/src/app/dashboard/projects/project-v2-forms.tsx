@@ -3,6 +3,7 @@ import { useActionState, useTransition, useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { saveProjectSite, uploadProjectSiteMedia } from './[id]/site/actions';
 import { syncConstructionFromProjectAgreement, assignConstructionRole } from './[id]/site/construction-actions';
+import { recordSignedAgreement } from './[id]/site/agreement-actions';
 
 type Result={saved:boolean;message:string};
 const initial:Result={saved:false,message:''};
@@ -51,6 +52,63 @@ export function AssignRole({projectId,users}:{projectId:string;users:{id:string;
    </select></label>
   </div>
   <button className="pv2-button pv2-primary" disabled={pending}>Assign to project</button>
+  {state.message&&<p role="status" className="pv2-form-feedback">{state.message}</p>}
+ </form>;
+}
+export function ProjectLifecycle({id,stage,canManage,designs}:{
+ id:string;stage:string;canManage:boolean;designs:{id:string;kind:string;status:string}[];
+}){
+ if(!canManage)return null;
+ if(stage==='not_started')return <section className="pv2-panel pv2-lifecycle">
+  <h2>Start project delivery</h2><p>Initialize the existing project delivery workspace. This does not create another project.</p>
+  <InitializeSite id={id}/>
+ </section>;
+ if(stage==='design')return <section className="pv2-panel pv2-lifecycle">
+  <h2>Design Review & Client Confirmation</h2>
+  <p>Review the latest plan revisions before recording client acknowledgement.</p>
+  {designs.filter(x=>x.status==='submitted').map(x=><details className="pv2-edit-drawer" key={x.id}>
+   <summary>Review {x.kind.replaceAll('_',' ')}</summary>
+   <ProjectForm projectId={id} operation="design_decide" label="Save design review">
+    <input type="hidden" name="id" value={x.id}/>
+    <label>Decision<select name="decision"><option value="approved">Approve</option>
+     <option value="changes_requested">Request changes</option></select></label>
+    <label>Review note<textarea name="note" rows={2}/></label>
+   </ProjectForm>
+  </details>)}
+  <details className="pv2-edit-drawer"><summary>Record client design confirmation</summary>
+   <ProjectForm projectId={id} operation="client_approve" label="Record client confirmation">
+    <label>Confirmation evidence<textarea name="evidence" required minLength={10} maxLength={3000}
+     placeholder="Client approval reference, date and communication or signed reference"/></label>
+    <p className="pv2-hint">A manager-recorded confirmation is not a verified digital customer signature.</p>
+   </ProjectForm>
+  </details>
+ </section>;
+ if(stage==='client_approved')return <section className="pv2-panel pv2-lifecycle">
+  <h2>Ready to Begin Execution</h2>
+  <p>The latest required designs have been approved. Start the site execution stage when the team is ready.</p>
+  <ProjectForm projectId={id} operation="execution_start" label="Start site execution">
+   <p className="pv2-hint">Only authorized project managers can start work after client approval.</p>
+  </ProjectForm>
+ </section>;
+ return null;
+}
+export function SignedAgreementForm({projectId,contractId,media}:{
+ projectId:string;contractId:string;media:{id:string;name:string}[];
+}){
+ const router=useRouter();
+ const [state,submit,pending]=useActionState(async(_prev:Result,form:FormData)=>{
+  const result=await recordSignedAgreement(projectId,contractId,form);
+  if(result.saved)router.refresh();
+  return result;
+ },initial);
+ return <form action={submit} className="pv2-form">
+  <label>Uploaded signed agreement PDF<select name="media_id" required defaultValue="">
+   <option value="" disabled>Select uploaded agreement</option>
+   {media.map(m=><option key={m.id} value={m.id}>{m.name}</option>)}
+  </select></label>
+  <label>Signed agreement evidence<textarea name="note" minLength={12} maxLength={3000}
+   rows={2} required placeholder="Who signed, date, and how the signed copy was received"/></label>
+  <button className="pv2-button pv2-primary" disabled={pending}>Record signed agreement</button>
   {state.message&&<p role="status" className="pv2-form-feedback">{state.message}</p>}
  </form>;
 }
