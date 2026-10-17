@@ -176,7 +176,7 @@ export async function saveCustomBrandQuote(
       .select('id')
       .eq('organization_id', s.org)
       .eq('revision_id', rid)
-      .like('description', 'CUSTOM_BRAND_QUOTE_V1:%')
+      .or('description.like.CUSTOM_BRAND_QUOTE_V1:%,description.like.SFT_ESTIMATE_V1:%,description.like.SFT_ESTIMATE_V2:%')
       .limit(2);
     if (error || !existing || existing.length > 1)
       throw new DomainError('VALIDATION_FAILED');
@@ -426,7 +426,7 @@ export async function saveFloorwiseSftEstimate(
       .eq('organization_id', s.org)
       .eq('revision_id', rid)
       .or(
-        'description.like.SFT_ESTIMATE_V1:%,description.like.SFT_ESTIMATE_V2:%',
+        'description.like.SFT_ESTIMATE_V1:%,description.like.SFT_ESTIMATE_V2:%,description.like.CUSTOM_BRAND_QUOTE_V1:%',
       )
       .limit(2);
     if (error || !existing || existing.length > 1)
