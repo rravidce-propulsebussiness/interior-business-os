@@ -37,7 +37,7 @@ describe('Employees directory and sensitive access',()=>{
   expect(proof).toContain("public:false");
   expect(proof).toContain('MAX_PROOF_BYTES');
   expect(proofRoute).toContain("requirePermission(org.organizationId,'team.manage')");
-  expect(proofRoute).toContain('company');
+  expect(proofRoute).toContain('employeeRepository(client).proof');
   expect(proofRoute).toContain("'Cache-Control':'private, no-store'");
   expect(actions).toContain("requirePermission(organizationId,'payment.record')");
  });
