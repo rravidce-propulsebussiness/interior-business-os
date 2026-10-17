@@ -88,7 +88,7 @@ export default async function PrepareDocument({
     {!profile ? <main className="mx-auto max-w-4xl p-8">
       <h1 className="text-2xl font-bold">Set up your billing identity</h1>
       <p className="my-3 text-sm">Company legal name, billing address and state code are required before preparing invoices.</p>
-      <Link href="/dashboard/billing#profile" className="text-orange-600 underline">Configure billing identity →</Link>
+      <Link href="/dashboard/settings?tab=invoice" className="text-orange-600 underline">Configure billing identity →</Link>
     </main> : purchase || !!order ? <main id="main-content"
       className="mx-auto max-w-7xl space-y-5 px-4 py-8 text-slate-900 sm:px-7">
       <Link href="/dashboard/billing" className="text-sm text-slate-500">← Billing</Link>
