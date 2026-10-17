@@ -76,7 +76,8 @@ describe('Remove project only, keep quotation history',()=>{
   it('removes a project from the workspace without deleting linked quotations',()=>{
     expect(sql).toContain("v_quote_count=0");
     expect(sql).toContain("public.project_permanent_delete");
-    expect(sql).toContain("SET is_sales_prospect=true,status='inactive'");
+    expect(sql).toContain("SET is_sales_prospect=true");
+    expect(sql).not.toContain("SET is_sales_prospect=true,status='inactive'");
     expect(projects).toContain(".eq('is_sales_prospect', false)");
     expect(sql).toContain("converted_project_id=NULL");
     expect(sql).toContain("'project.removed_quotation_history_retained'");
