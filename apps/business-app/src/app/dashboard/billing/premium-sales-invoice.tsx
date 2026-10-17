@@ -2,6 +2,7 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { saveGstDocument } from './actions';
+import { createWonLeadInvoiceProject } from './invoice-project-actions';
 import type { GstDocument, GstBusinessProfile, GstLine } from '@business-os/database/gst';
 import type { GstStageInvoiceContext } from '@business-os/database/gst';
 import type { GstInvoiceAppearance } from '@business-os/database/gst-templates';
@@ -20,6 +21,7 @@ type Props = {
   existingCustomerId: string | null;
   existingWonLeadId: string | null;
   initialLead: string;
+  canCreateProject: boolean;
 };
 const blank = (): GstLine => ({
   description: '', hsnSac: '', unit: 'Nos', quantity: 1,
@@ -36,6 +38,7 @@ const currencyTotal = (line: GstLine) =>
 export function PremiumSalesInvoice({
   profile, standard, existing, stageContext, choices,
   customers, customerAccess, existingCustomerId, existingWonLeadId, initialLead,
+  canCreateProject,
 }: Props) {
   const firstLead = choices.find((row) =>
     row.leadId === (stageContext?.leadId ?? initialLead));
@@ -71,6 +74,44 @@ export function PremiumSalesInvoice({
   });
   const [notes, setNotes] = useState(existing?.notes ?? '');
   const [preview, setPreview] = useState(false);
+  const [projectDialog, setProjectDialog] = useState(false);
+  const [projectName, setProjectName] = useState('');
+  const [projectPending, setProjectPending] = useState(false);
+  const [projectError, setProjectError] = useState('');
+  const [projectLinks, setProjectLinks] = useState<Record<string,{
+    projectId:string; customerId?:string;
+  }>>({});
+  const linkedProject = selectedClient?.wonLeadId
+    ? projectLinks[selectedClient.wonLeadId] : undefined;
+  const openProjectDialog = () => {
+    if (!selectedClient?.wonLeadId) return;
+    setProjectError('');
+    setProjectName((selectedClient.name + ' project').slice(0,200));
+    setProjectDialog(true);
+  };
+  const createProject = async () => {
+    const id = selectedClient?.wonLeadId;
+    const name = projectName.trim();
+    if (!id || projectPending || name.length < 2 || name.length > 200) return;
+    setProjectPending(true);
+    setProjectError('');
+    try {
+      const result = await createWonLeadInvoiceProject({leadId:id,projectName:name});
+      if (!result.ok || !result.projectId) {
+        setProjectError(result.message || 'Could not create project.');
+        return;
+      }
+      setProjectLinks(before=>({...before,[id]:{
+        projectId:result.projectId!,
+        ...(result.customerId ? {customerId:result.customerId} : {}),
+      }}));
+      setProjectDialog(false);
+    } catch {
+      setProjectError('Unable to create project. Please retry.');
+    } finally {
+      setProjectPending(false);
+    }
+  };
 
   const changeCustomer = (value: string) => {
     setCustomerId(value);
@@ -175,18 +216,20 @@ export function PremiumSalesInvoice({
     {customerId && !hasStage && selectedClient?.fromExistingCustomer &&
       <input type="hidden" name="customerId" value={customerId}/>}
     {selectedClient?.wonLeadId && !hasStage && !selectedClient.fromExistingCustomer &&
-      <input type="hidden" name="wonLeadId" value={selectedClient.wonLeadId}/>}
+      (linkedProject?.customerId && !existing
+        ? <input type="hidden" name="customerId" value={linkedProject.customerId}/>
+        : <input type="hidden" name="wonLeadId" value={selectedClient.wonLeadId}/> )}
 
     {hasStage && <><input type="hidden" name="leadId" value={choice!.leadId}/>
       <input type="hidden" name="revisionId" value={choice!.revisionId}/>
       <input type="hidden" name="stageNumber" value={stage!.number}/></>}
     <header className="psi-top">
-      <div><div className="psi-breadcrumb"><Link href="/dashboard/billing">Billing</Link>
+      <div><div className="psi-breadcrumb"><Link href="/dashboard/finance?tab=invoices">Finance</Link>
         <span>/</span><span>Sales invoices</span><span>/</span><b>{existing ? 'Edit draft' : 'New invoice'}</b></div>
         <h1>Create sales invoice <span className="psi-draft">Draft</span></h1>
         <p>Select an existing client or enter a new customer. Choose a payment stage when applicable.</p>
       </div>
-      <div className="psi-header-actions"><Link href="/dashboard/billing" className="psi-muted-button">Cancel</Link>
+      <div className="psi-header-actions"><Link href="/dashboard/finance?tab=invoices" className="psi-muted-button">Cancel</Link>
         <button type="button" className="psi-outline-button" onClick={()=>setPreview(true)}>Preview invoice</button>
         <button type="submit" className="psi-orange-button" disabled={disabledSave}>Save &amp; preview</button></div>
     </header>
@@ -214,11 +257,17 @@ export function PremiumSalesInvoice({
           {!customerAccess && !customers.length && <p className="psi-hint">Invoice client options could not be loaded.</p>}
           {selectedClient?.wonLeadId && !hasStage && <div className="psi-attached">
             <span className="psi-check">✓</span>
-            <div><strong>Won lead · {selectedClient.leadNumber}</strong>
-              <p>You can prepare an invoice now. Stage billing requires an accepted quotation and a saved payment plan.</p>
-              <Link href={'/dashboard/crm/leads/'+selectedClient.wonLeadId}>
-                Create project from this lead →
-              </Link>
+            <div className="psi-won-project-content">
+              <strong>Won lead · {selectedClient.leadNumber}</strong>
+              <p>{linkedProject
+                ? 'Project linked successfully. You can continue preparing this invoice.'
+                : 'You can prepare an invoice now. Stage billing requires an accepted quotation and a saved payment plan.'}</p>
+              {linkedProject ? <div className="psi-linked-project">
+                <span className="psi-project-success" role="status">✓ Project created and linked</span>
+                <a href={'/dashboard/projects/'+encodeURIComponent(linkedProject.projectId)}
+                   target="_blank" rel="noopener noreferrer">View project ↗</a>
+              </div> : canCreateProject ? <button type="button" className="psi-project-create"
+                onClick={openProjectDialog}>+ Create Project</button> : null}
             </div>
           </div>}
           {!hasStage && <p className="psi-hint">{customerId
@@ -359,6 +408,49 @@ export function PremiumSalesInvoice({
       <button type="button" onClick={()=>setPreview(true)} className="psi-outline-button">Preview</button>
       <button type="submit" disabled={disabledSave} className="psi-orange-button">Save draft</button>
     </div>
+
+    {projectDialog && selectedClient?.wonLeadId && <div
+      className="psi-modal-backdrop" role="presentation"
+      onMouseDown={()=>{if(!projectPending)setProjectDialog(false);}}>
+      <section className="psi-modal psi-project-modal" role="dialog" aria-modal="true"
+        aria-labelledby="psi-create-project-title"
+        onMouseDown={event=>event.stopPropagation()}>
+        <div className="psi-modal-head">
+          <strong id="psi-create-project-title">Create Project</strong>
+          <button type="button" aria-label="Close project popup"
+            disabled={projectPending} onClick={()=>setProjectDialog(false)}>×</button>
+        </div>
+        <p>For <b>{selectedClient.name}</b> · Won lead {selectedClient.leadNumber}</p>
+        <label className="psi-field" htmlFor="psi-project-name">
+          <span>Project name *</span>
+          <input id="psi-project-name" type="text" autoFocus
+            required minLength={2} maxLength={200} value={projectName}
+            placeholder="Enter project name" disabled={projectPending}
+            onChange={e=>setProjectName(e.target.value)}
+            onKeyDown={event=>{
+              if(event.key==='Escape' && !projectPending) {
+                event.preventDefault();setProjectDialog(false);
+              }
+              if(event.key==='Enter') {
+                event.preventDefault();void createProject();
+              }
+            }}/>
+        </label>
+        <p className="psi-hint">We'll link this project to the selected Won lead.
+          If a quotation already has a project, it will be reused.</p>
+        {projectError && <p className="psi-alert" role="alert">{projectError}</p>}
+        <div className="psi-project-modal-actions">
+          <button className="psi-outline-button" type="button" disabled={projectPending}
+            onClick={()=>setProjectDialog(false)}>Cancel</button>
+          <button className="psi-orange-button" type="button"
+            disabled={projectPending || projectName.trim().length<2}
+            onClick={()=>void createProject()}>
+            {projectPending ? 'Creating…' : 'Create Project'}
+          </button>
+        </div>
+        <small>After creation, this popup closes and your invoice stays open.</small>
+      </section>
+    </div>}
     {preview && <div className="psi-modal-backdrop" role="presentation" onMouseDown={()=>setPreview(false)}>
       <section role="dialog" aria-modal="true" aria-label="Invoice preview" className="psi-modal"
         onMouseDown={event=>event.stopPropagation()}>

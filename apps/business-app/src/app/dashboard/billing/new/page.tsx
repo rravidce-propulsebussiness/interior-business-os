@@ -116,6 +116,7 @@ export default async function PrepareDocument({
       customers={customers} customerAccess={true}
       existingCustomerId={existingCustomerId}
       existingWonLeadId={existingWonLeadId}
+      canCreateProject={hasGrant('lead.convert') && hasGrant('project.view')}
       initialLead={params.lead??''}/>}
     </div>
   </OwnerShell>;

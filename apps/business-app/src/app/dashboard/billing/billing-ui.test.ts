@@ -6,6 +6,10 @@ const css=readFileSync(path('../finance/finance-home.css'),'utf8');
 const billing=readFileSync(path('./page.tsx'),'utf8');
 const settings=readFileSync(path('../settings/page.tsx'),'utf8');
 const actions=readFileSync(path('./actions.ts'),'utf8');
+const salesInvoice=readFileSync(path('./premium-sales-invoice.tsx'),'utf8');
+const invoicePage=readFileSync(path('./new/page.tsx'),'utf8');
+const projectAction=readFileSync(path('./invoice-project-actions.ts'),'utf8');
+
 
 describe('Finance navigation and single-source billing',()=>{
  it('separates company Finance from platform subscription Billing',()=>{
@@ -44,5 +48,29 @@ describe('Finance navigation and single-source billing',()=>{
   expect(finance).toContain('<a className="fw-primary" href={headlineAction.href}>');
   expect(finance).toContain('<a href="/dashboard/billing/new?kind=purchase_bill">');
   expect(finance).toContain("/dashboard/billing/new?kind=sales_invoice");
+ });
+});
+
+describe('in-place Won lead project creation from invoice',()=>{
+ it('replaces the customer-page link with a project name popup',()=>{
+   expect(salesInvoice).toContain('role="dialog" aria-modal="true"');
+   expect(salesInvoice).toContain('Create Project');
+   expect(salesInvoice).toContain('name="customerId" value={linkedProject.customerId}');
+   expect(salesInvoice).not.toContain('Create project from this lead');
+   expect(salesInvoice).toContain('setProjectDialog(false)');
+ });
+ it('does not navigate away or submit the invoice when creating a project',()=>{
+   expect(salesInvoice).toContain('onClick={()=>void createProject()}');
+   expect(salesInvoice).toContain('type="button"');
+   expect(salesInvoice).toContain("if(event.key==='Enter')");
+   expect(salesInvoice).toContain('event.preventDefault()');
+   expect(invoicePage).toContain("canCreateProject={hasGrant('lead.convert') && hasGrant('project.view')}");
+ });
+ it('reuses authorized CRM conversion rather than creating duplicate projects',()=>{
+   expect(projectAction).toContain("crmServices('lead.convert')");
+   expect(projectAction).toContain('openOrCreateWonLeadProject');
+   expect(projectAction).toContain("converted_customer_id");
+   expect(projectAction).toContain(".eq('organization_id',services.org)");
+   expect(projectAction).not.toContain(".insert(");
  });
 });

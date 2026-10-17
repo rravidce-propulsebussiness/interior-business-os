@@ -107,3 +107,25 @@
 @media(max-width:900px){.psi-columns{grid-template-columns:1fr}.psi-right{position:static}.psi-summary{display:none}.psi-header-actions{display:none}.psi-top{margin-bottom:16px}.psi-mobile-actions{display:flex;position:sticky;bottom:0;z-index:15;padding:12px;background:#fffffff4;border:1px solid #e6ebf2;border-radius:13px;box-shadow:0 -6px 18px #19284213;gap:10px;margin-top:14px}.psi-mobile-actions button{flex:1}}
 @media(max-width:560px){.psi-shell{padding:17px 12px 90px}.psi-card{padding:15px 13px;border-radius:13px}.psi-fields,.psi-three,.psi-four{grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.psi-party-fields>.psi-field:first-child,.psi-party-fields>.psi-field:nth-child(2){grid-column:1/-1}.psi-three>.psi-field:first-child{grid-column:1/-1}.psi-title h2{font-size:14px}.psi-breadcrumb{font-size:10px}.psi-top h1{font-size:23px}.psi-items-table,.psi-items-table tbody,.psi-items-table tr,.psi-items-table td{display:block;width:100%;min-width:0}.psi-items-table thead{display:none}.psi-items-table tbody{display:grid;gap:12px}.psi-items-table tr{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;background:#f9fafc;padding:12px;border-radius:10px}.psi-items-table tr td{padding:0;border:0;min-width:0}.psi-items-table td:first-child{grid-column:1/-1}.psi-items-table td:nth-child(2){grid-column:1/-1}.psi-items-table td:nth-child(8){grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;padding-top:6px}.psi-items-table td:last-child{position:relative;justify-self:end}.psi-items-table td input{background:#fff;min-height:35px}.psi-cell-mobile{display:block;font-size:10px;color:#728198;margin-bottom:4px;font-weight:700}.psi-table-wrap{overflow:visible;border:0}.psi-mobile-actions{margin-left:-3px;margin-right:-3px;bottom:5px}.psi-paper{padding:12px 9px}}
 @media(prefers-reduced-motion:reduce){.psi-shell *{scroll-behavior:auto!important;transition:none!important}}
+
+/* Project creation is an invoice-owned dialog, not a navigation to Clients. */
+.psi-won-project-content{min-width:0;flex:1}
+.psi-linked-project{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:11px}
+.psi-project-success{display:inline-flex;align-items:center;font-size:12px;font-weight:850;color:#0d7654}
+.psi-linked-project a{font-size:11px;font-weight:800;color:#08795c;text-decoration:underline}
+.psi-project-create{display:inline-flex;align-items:center;justify-content:center;gap:5px;background:#fe5105;color:#fff!important;border:0;border-radius:9px;min-height:41px;padding:10px 15px;font-size:12px;font-weight:800;margin-top:10px}
+.psi-project-create:hover{background:#e64904}
+.psi-project-modal{width:min(480px,100%);padding:23px}
+.psi-project-modal>.psi-modal-head strong{font-size:19px;color:#14243d}
+.psi-project-modal>p:not(.psi-hint):not(.psi-alert){font-size:12px;line-height:1.6;color:#617087;margin:0 0 19px}
+.psi-project-modal .psi-field>span{font-size:12px}
+.psi-project-modal .psi-field input{min-height:47px;font-size:14px}
+.psi-project-modal .psi-hint{margin:13px 0}
+.psi-project-modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}
+.psi-project-modal-actions button{min-width:110px}
+.psi-project-modal>small{display:block;margin-top:12px;color:#8090a3;font-size:10px}
+@media(max-width:560px){
+.psi-project-modal{padding:19px 16px;border-radius:16px}
+.psi-project-modal-actions button{flex:1}
+.psi-project-create{width:100%}
+}
