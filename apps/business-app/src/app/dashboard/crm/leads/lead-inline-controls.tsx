@@ -6,7 +6,7 @@ import { runCrmCommand } from '../actions';
 import { scheduleLeadFollowUp, changeLeadPriority } from './lead-update-actions';
 import type { LeadOption, LeadStage, LeadView } from './workspace';
 
-type Row = Pick<LeadView, 'id' | 'version' | 'lifecycle' | 'stageId' | 'stageName' | 'assignedTo' | 'nextFollowUpAt'>;
+type Row = Pick<LeadView, 'id' | 'version' | 'lifecycle' | 'stageId' | 'stageName' | 'assignedTo' | 'nextFollowUpAt'> & { convertedProjectId?: string | null };
 
 function localInput(date: string | null): string {
   if (!date) return '';
@@ -18,16 +18,17 @@ function localInput(date: string | null): string {
 }
 
 export function LeadStageSelect({
-  lead, stages, lostReasons, canManage, canWin,
+  lead, stages, lostReasons, canManage, canWin, canConvert = false,
 }: {
   lead: Row; stages: LeadStage[]; lostReasons: LeadOption[];
-  canManage: boolean; canWin: boolean;
+  canManage: boolean; canWin: boolean; canConvert?: boolean;
 }) {
   const [pending, setPending] = useState(false);
   const [targetId, setTargetId] = useState('');
   const [reason, setReason] = useState('');
   const [note, setNote] = useState('');
   const [error, setError] = useState('');
+  const [justWon, setJustWon] = useState(false);
   const router = useRouter();
   const target = stages.find((s) => s.id === targetId);
   const change = async (id: string, reasonId: string | null = null, message = '') => {
@@ -41,6 +42,10 @@ export function LeadStageSelect({
       if (!result.id) setError(result.message);
       else {
         setTargetId('');
+        const selectedStage = stages.find((stage) => stage.id === id);
+        if (selectedStage?.outcome === 'won' && lead.lifecycle !== 'won') {
+          setJustWon(true);
+        }
         router.refresh();
       }
     } catch {
@@ -101,6 +106,22 @@ export function LeadStageSelect({
           </div>
         </div>
       )}
+      {justWon && <div className="crm-won-project-prompt" role="status">
+        <strong>Lead marked Won. Create a project?</strong>
+        <p>Confirm the client and project using the existing quotation. No duplicate customer will be created.</p>
+        <div className="crm-inline-confirm-actions">
+          {canConvert
+            ? <a href={'/dashboard/crm/leads/'+encodeURIComponent(lead.id)+'/convert'}>
+                Create project →
+              </a>
+            : <small>Ask a manager with lead conversion access to create the project.</small>}
+          <button type="button" onClick={()=>setJustWon(false)}>Later</button>
+        </div>
+      </div>}
+      {!justWon && lead.lifecycle === 'won' && !lead.convertedProjectId && canConvert &&
+        <a className="crm-create-project-link" href={'/dashboard/crm/leads/'+encodeURIComponent(lead.id)+'/convert'}>
+          + Create project for this Won lead →
+        </a>}
       {error && <small role="alert" className="crm-inline-error">{error}</small>}
     </div>
   );
