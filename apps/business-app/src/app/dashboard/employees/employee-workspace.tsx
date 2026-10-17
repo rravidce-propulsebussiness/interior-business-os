@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-html-link-for-pages -- Hosted Next.js routes use full navigation to avoid interrupted RSC responses. */
 'use client';
 
-import { useMemo, useState, useTransition, type FormEvent } from 'react';
+import { useMemo, useRef, useState, useTransition, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { OwnerIcon } from '../owner-shell';
 import {
@@ -49,6 +49,7 @@ export function EmployeeWorkspace({
  canViewSalary:boolean;canRecordSalary:boolean;
 }) {
  const router=useRouter();
+ const detailRef=useRef<HTMLElement>(null);
  const [pending,startTransition]=useTransition();
  const [selectedId,setSelectedId]=useState(employees[0]?.id??'');
  const [tab,setTab]=useState<Tab>('overview');
@@ -89,7 +90,12 @@ export function EmployeeWorkspace({
  }),[employees,search,roleFilter,locationFilter,statusFilter,payrollFilter,group]);
  const size=12,totalPages=Math.max(1,Math.ceil(filtered.length/size));
  const visible=filtered.slice((Math.min(page,totalPages)-1)*size,Math.min(page,totalPages)*size);
- const choose=(id:string)=>{setSelectedId(id);setTab('overview');setNotice('');setError('');};
+ const choose=(id:string)=>{
+  setSelectedId(id);setTab('overview');setNotice('');setError('');
+  if(window.innerWidth<=1100) detailRef.current?.scrollIntoView({
+    behavior:'smooth',block:'start',
+  });
+ };
  const flash=(message:string,ok=true)=>{
   if(ok){setNotice(message);setError('');}
   else {setError(message);setNotice('');}
@@ -261,7 +267,7 @@ export function EmployeeWorkspace({
        aria-label="Next employees">›</button></div></footer>
     </div>
    </section>
-   <aside className="emp-detail" aria-label="Selected employee">
+   <aside ref={detailRef} className="emp-detail" aria-label="Selected employee">
     {person?<>
      <div className="emp-detail-top"><span className="emp-avatar emp-avatar-large">{initials(person.name)}</span>
       <div className="emp-detail-intro"><div><h2>{person.name}</h2>
@@ -340,7 +346,10 @@ export function EmployeeWorkspace({
        </>:<p className="emp-detail-help">Salary information requires Finance permission.</p>}
       </section>}
       {tab==='attendance'&&<section className="emp-detail-section">
-       <header><h3>Attendance</h3></header>
+       <header><h3>Attendance</h3>
+        <input aria-label="Attendance month" type="month" value={payrollMonth}
+         onChange={e=>router.push('/dashboard/employees?month='+encodeURIComponent(e.target.value))}/>
+       </header>
        <p className="emp-detail-help">Showing {payrollMonth}. Save one status per employee and day.</p>
        <form onSubmit={markAttendance} className="emp-attendance-form">
         <label>Date<input type="date" required max={today()} value={attendanceDate}
