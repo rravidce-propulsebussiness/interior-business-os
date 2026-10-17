@@ -9,6 +9,7 @@ export type InvoiceCustomer = {
   address: string;
   stateCode: string;
   fromApprovedQuotation: boolean;
+  fromExistingCustomer: boolean;
   wonLeadId: string | null;
   leadNumber: string | null;
 };
@@ -22,6 +23,7 @@ export type CustomerRow = {
   billing_address: unknown;
   won_lead_id?: string | null;
   won_lead_number?: string | null;
+  selection_source?: 'customer' | 'won_lead';
 };
 
 function cleanAddress(value: unknown): { text: string; state: string } {
@@ -57,6 +59,7 @@ export function invoiceCustomerChoices(
       address: address.text,
       stateCode: /^[0-9]{2}$/.test(state) ? state : defaultStateCode,
       fromApprovedQuotation: false,
+      fromExistingCustomer: row.selection_source !== 'won_lead',
       wonLeadId: row.won_lead_id ?? null,
       leadNumber: row.won_lead_number ?? null,
     });
@@ -75,6 +78,7 @@ export function invoiceCustomerChoices(
       address: stage.clientAddress,
       stateCode: stage.clientState,
       fromApprovedQuotation: true,
+      fromExistingCustomer: false,
       wonLeadId: null,
       leadNumber: null,
     });
