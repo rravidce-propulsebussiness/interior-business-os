@@ -11784,6 +11784,15 @@ export interface Database {
         Args: { p_organization_id: string; p_project_id: string };
         Returns: Json;
       };
+      project_permanent_delete: {
+        Args: {
+          p_org: string;
+          p_project: string;
+          p_version: number;
+          p_confirm: string;
+        };
+        Returns: boolean;
+      };
       project_quote_timeline_create: {
         Args: { p_org: string; p_contract: string; p_input: Json };
         Returns: Json;
@@ -11825,15 +11834,6 @@ export interface Database {
           p_caption?: string;
         };
         Returns: string;
-      };
-      project_permanent_delete: {
-        Args: {
-          p_org: string;
-          p_project: string;
-          p_version: number;
-          p_confirm: string;
-        };
-        Returns: boolean;
       };
       project_site_my_projects: {
         Args: { p_organization_id: string };
