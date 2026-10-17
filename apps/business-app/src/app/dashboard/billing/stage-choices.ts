@@ -9,6 +9,7 @@ export type InvoiceStage = {
   amount: number;
 };
 export type InvoiceStageChoice = {
+  customerId: string;
   leadId: string;
   leadNumber: string;
   clientName: string;
@@ -57,6 +58,7 @@ export function invoiceStageChoices(
     const state = /^\d{2}/.exec(tax)?.[0] ??
       (typeof info.state_code === 'string' ? info.state_code : defaultState);
     return [{
+      customerId: row.customerId,
       leadId: row.leadId, leadNumber: row.leadNumber ?? '',
       clientName: row.clientName || row.leadName || '',
       clientGstin: tax, clientAddress: billingAddress(info),
