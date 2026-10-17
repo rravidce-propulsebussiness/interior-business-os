@@ -10,7 +10,7 @@ import { leadCategoryLabel } from './lead-category';
 
 export function LeadDetailsDrawer({
   lead, onClose, stages, lostReasons, assignees,
-  canManage, canWin, canConvert, canFollowUp, canVisit, canNote, canQuote,
+  canManage, canWin, canConvert, canViewProject, canFollowUp, canVisit, canNote, canQuote,
 }: {
   lead: LeadView;
   onClose: () => void;
@@ -20,6 +20,7 @@ export function LeadDetailsDrawer({
   canManage: boolean;
   canWin: boolean;
   canConvert: boolean;
+  canViewProject: boolean;
   canFollowUp: boolean;
   canVisit: boolean;
   canNote: boolean;
@@ -64,7 +65,7 @@ export function LeadDetailsDrawer({
             <div><dt>Service type</dt><dd>{leadCategoryLabel(lead.category)}</dd></div>
             <div><dt>Requirement</dt><dd>{lead.requirement || 'Not provided'}</dd></div>
             <div><dt>Priority</dt><dd><LeadPrioritySelect lead={lead} canManage={canManage}/></dd></div>
-            <div><dt>Status</dt><dd><LeadStageSelect lead={lead} stages={stages} lostReasons={lostReasons} canManage={canManage} canWin={canWin} canConvert={canConvert}/></dd></div>
+            <div><dt>Status</dt><dd><LeadStageSelect lead={lead} stages={stages} lostReasons={lostReasons} canManage={canManage} canWin={canWin} canConvert={canConvert} canViewProject={canViewProject}/></dd></div>
             <div><dt>Next follow-up</dt><dd><LeadFollowUpSetter lead={lead} canFollowUp={canFollowUp}/></dd></div>
           </dl>
           <h3>Latest update</h3>
