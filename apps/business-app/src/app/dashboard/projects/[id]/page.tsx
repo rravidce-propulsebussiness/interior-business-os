@@ -65,7 +65,7 @@ export default async function Project({params}:{params:Promise<{id:string}>}){
  const canPurchase=has('purchase.view');
  const canSeeQuotes=has('quotation.view','quotation');
 
- const [organization,user,industries,siteResponse,areaResult,taskResult]=await Promise.all([
+ const [organization,user,industries,siteResponse,areaResult,taskResult,branches]=await Promise.all([
   s.repository.organization(s.org),
   s.authorization.requireAuthenticatedUser(),
   s.repository.industries(),
@@ -73,6 +73,7 @@ export default async function Project({params}:{params:Promise<{id:string}>}){
   s.client.from('project_areas').select('id').eq('organization_id',s.org).eq('project_id',id).limit(500),
   s.client.from('project_tasks').select('project_id,status,completion_percentage,weight,title,planned_start')
    .eq('organization_id',s.org).eq('project_id',id).limit(1000),
+  canManage?s.repository.branches(s.org):Promise.resolve([]),
  ]);
  if(!organization)notFound();
  const siteParsed=siteResponse.error?null:siteSchema.safeParse(siteResponse.data);
@@ -133,6 +134,7 @@ export default async function Project({params}:{params:Promise<{id:string}>}){
    progress={progress} canManage={canManage} canFinance={canFinance}
    canPurchase={canPurchase} canSeeCustomer={canSeeCustomer} canManageCustomer={canManageCustomer}
    canSeeQuotes={canSeeQuotes} areaCount={areaResult.error?0:areaResult.data.length}
+   settingsInitial={project} branches={branches.map(b=>({id:b.id,name:b.name}))}
    upcomingTask={upcoming?{title:upcoming.title,planned_start:upcoming.planned_start}:null}
   />
  </OwnerShell>;
