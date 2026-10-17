@@ -47,7 +47,7 @@ function TruncatedList({rows,render,max=5}:{
 function Count({number,label}: {number:number|null;label:string}) {
  return <span className="pcc-count"><strong>{number===null?'—':number}</strong><small>{label}</small></span>;
 }
-// One navigation item per content section. Never render the same module twice.
+// One workspace per project function; only the selected workspace renders.
 const projectSections=[
  {id:'documents',label:'Documents & Agreement'},
  {id:'payments',label:'Client Payments'},
@@ -62,7 +62,7 @@ const projectSections=[
 
 export function ProjectCommandCentre({project,industry,customer,site,stages,stageRecords,
  agreement,access,progress,canManage,canFinance,canPurchase,canSeeCustomer,
- canManageCustomer,canSeeQuotes,upcomingTask,areaCount,settingsInitial,branches}:{
+ canManageCustomer,canSeeQuotes,upcomingTask,areaCount,settingsInitial,branches,view='overview'}:{
  project:ProjectInfo;industry:string;customer:{id:string;name:string}|null;
  site:SiteData|null;stages:Stage[];stageRecords:StageRecord|null;
  agreement:Agreement|null;access:Access[]|null;progress:number|null;
@@ -70,13 +70,18 @@ export function ProjectCommandCentre({project,industry,customer,site,stages,stag
  canSeeCustomer:boolean;canManageCustomer:boolean;canSeeQuotes:boolean;
  upcomingTask:{title:string;planned_start:string|null}|null;areaCount:number;
  settingsInitial:Record<string,unknown>;branches:{id:string;name:string}[];
+ view?:string;
 }) {
  const id=project.id,base='/dashboard/projects/'+id,siteUrl=base+'/site';
  const counts=moduleCounts(site);
+ const allowedViews=['overview',...projectSections.filter(x=>x.id!=='payments'||canFinance).map(x=>x.id)];
+ const selectedView=allowedViews.includes(view)?view:'overview';
+ const selectedTitle=selectedView==='overview'?'Project Overview':
+  projectSections.find(section=>section.id===selectedView)?.label??'Project Overview';
+ const workspaceUrl=(tab:string)=>base+'?view='+tab;
  const activities=activityFeed({projectId:id,site,stageRecord:stageRecords,showFinance:canFinance});
  const stagePayments=canFinance?stageRecords?.payments??[]:[];
  const paymentOptions=canFinance?stageRecords?.options??[]:[];
- const uniqueScheduled=new Map(paymentOptions.map(x=>[x.id,x]));
  const heroMedia=site?.media.find(row=>textValue(row,'mime').startsWith('image/')&&
   ['site','daily','inspection'].includes(textValue(row,'category')));
  const latestReports=[...(site?.reports??[])].sort((a,b)=>
@@ -96,18 +101,41 @@ export function ProjectCommandCentre({project,industry,customer,site,stages,stag
  return <main id="main-content" tabIndex={-1} className="pcc-page">
   <nav className="pcc-breadcrumb" aria-label="Breadcrumb"><Link href="/dashboard/projects">Projects</Link>
    <span>›</span><strong>{project.name}</strong></nav>
-  <header className="pcc-heading"><div><h1>Project Command Centre</h1>
-   <p>Manage execution, documents, people, materials and payments from one place.</p></div>
-   {canManage&&<a className="pcc-primary" href="#settings"><OwnerIcon name="settings" size={16}/> Edit Project</a>}
+  <header className="pcc-heading"><div><h1>{selectedTitle}</h1>
+   <p>{project.name} · {project.code||industry||'Company project'}</p></div>
+   {canManage&&<Link className="pcc-primary" href={workspaceUrl('overview')+'#settings'}>
+    <OwnerIcon name="settings" size={16}/> Edit Project</Link>}
   </header>
-  <section className="pcc-project-hero">
-   <div className="pcc-photo">
-    {heroMedia?<Image unoptimized fill sizes="(max-width: 700px) 100vw, 260px"
+  <nav className="pcc-workspaces" aria-label="Project workspaces">
+   {[
+    {id:'overview',label:'Overview'},
+    {id:'timeline',label:'Timeline'},
+    {id:'execution',label:'Execution'},
+    {id:'materials',label:'Materials'},
+    {id:'checks',label:'Checks'},
+    ...(canFinance?[{id:'payments',label:'Payments'}]:[]),
+   ].map(section=><Link key={section.id} href={workspaceUrl(section.id)}
+    aria-current={selectedView===section.id?'page':undefined}
+    className={selectedView===section.id?'active':''}>{section.label}</Link>)}
+   <details className="pcc-more-menu">
+    <summary className={['documents','designs','team','labour'].includes(selectedView)?'active':''}>
+     {['documents','designs','team','labour'].includes(selectedView)?selectedTitle:'More'} <span aria-hidden="true">⌄</span>
+    </summary>
+    <div className="pcc-more-links">
+     {projectSections.filter(section=>['documents','designs','team','labour'].includes(section.id))
+      .map(section=><Link key={section.id} href={workspaceUrl(section.id)}
+       aria-current={selectedView===section.id?'page':undefined}
+       className={selectedView===section.id?'active':''}>{section.label}</Link>)}
+    </div>
+   </details>
+  </nav>
+  {selectedView==='overview'&&<>
+  <section className={'pcc-project-hero '+(!heroMedia?'pcc-no-photo':'')}>
+   {heroMedia&&<div className="pcc-photo">
+    <Image unoptimized fill sizes="(max-width: 700px) 100vw, 260px"
      src={siteUrl+'/media/'+heroMedia.id}
-     alt={textValue(heroMedia,'caption')||'Recorded project site photograph'}/>:
-     <div className="pcc-photo-fallback"><OwnerIcon name="projects" size={38}/>
-      <span>Add site photos from Site Delivery</span></div>}
-   </div>
+     alt={textValue(heroMedia,'caption')||'Recorded project site photograph'}/>
+   </div>}
    <div className="pcc-project-info">
     <div className="pcc-project-title"><h2>{project.name}</h2><Pill status={project.status}/></div>
     <small>{project.code||'Project code not assigned'} · {industry||human(project.projectType||'Project')}</small>
@@ -136,33 +164,49 @@ export function ProjectCommandCentre({project,industry,customer,site,stages,stag
    <article><span className="pcc-metric-icon purple"><OwnerIcon name="purchases" size={20}/></span>
     <div><small>Material needs</small><strong>{counts?.pendingMaterials??'—'}</strong>
      <p>{counts?'Requested / pending delivery':'Not available for this role'}</p></div></article>
-   <article><span className="pcc-metric-icon blue"><OwnerIcon name="team" size={20}/></span>
-    <div><small>Labour on latest report</small><strong>{latestReport?textValue(latestReport,'worker_count')||'—':'—'}</strong>
-     <p>{latestReport?friendlyDate(textValue(latestReport,'report_date')):'No daily report yet'}</p></div></article>
-   {canFinance&&<article><span className="pcc-metric-icon green"><OwnerIcon name="billing" size={20}/></span>
-    <div><small>Payment milestones</small><strong>{uniqueScheduled.size||stagePayments.length}</strong>
-     <p>Requests are not proof of receipts</p></div></article>}
   </section>
-  <nav className="pcc-tabs" aria-label="Project sections">
-   <a className="active" href="#overview">Overview</a>
-   {projectSections.filter(section=>section.id!=='payments'||canFinance)
-    .map(section=><a href={'#'+section.id} key={section.id}>{section.label}</a>)}
-  </nav>
+  </>}
+  {selectedView!=='overview'&&<div className="pcc-workspace-context">
+   <div><strong>{project.name}</strong><small>{industry||human(project.projectType)} · {human(stageStatus)}</small></div>
+   <Pill status={project.status}/>
+  </div>}
+
   <div className="pcc-layout" id="overview">
    <div className="pcc-main">
+   {selectedView==='overview'&&<>
+   <section className="pcc-overview-actions" aria-label="Quick project actions">
+    <Link href={siteUrl+'#daily-reports'}><OwnerIcon name="plus" size={16}/> Add site update</Link>
+    <Link href={siteUrl+'#materials'}><OwnerIcon name="purchases" size={16}/> Request material</Link>
+    <Link href={siteUrl+'#quality'}><OwnerIcon name="check" size={16}/> Record check</Link>
+    <Link href={workspaceUrl('timeline')}><OwnerIcon name="calendar" size={16}/> View timeline</Link>
+   </section>
    <section className="pcc-panel pcc-next-work">
-    <header className="pcc-panel-heading"><div><h2>Upcoming Work</h2>
-     <p>Next scheduled task and tomorrow’s latest site plan</p></div>
-     <Link href={siteUrl+'#daily-reports'}>Update plan ↗</Link></header>
+    <header className="pcc-panel-heading"><div><h2>Next Work</h2>
+     <p>Upcoming work and tomorrow's site plan</p></div>
+     <Link href={siteUrl+'#daily-reports'}>Plan work ↗</Link></header>
     <div className="pcc-next-work-items">
      <div><small>Next activity</small><strong>{upcomingTask?.title??'No task scheduled'}</strong>
       <span>{friendlyDate(upcomingTask?.planned_start)}</span></div>
-     <div><small>Tomorrow’s plan</small>
+     <div><small>Tomorrow's plan</small>
       <strong>{textValue(latestReport,'tomorrow_plan')||'Not entered'}</strong></div>
     </div>
    </section>
-    <div className="pcc-section-columns">
-     <Panel id="documents" title="Documents & Agreement" href={siteUrl+'#media'}
+   <section className="pcc-panel pcc-recent-activity">
+    <header className="pcc-panel-heading"><div><h2>Recent Activity</h2>
+     <p>Latest work, requests and checks in one short feed</p></div>
+     <Link href={workspaceUrl('timeline')}>Full history ↗</Link></header>
+    {activities.length?<div className="pcc-activity-feed">{activities.slice(0,4).map(a=>
+     <Link key={a.id} href={a.href} className="pcc-activity">
+      <span className={'pcc-activity-dot '+a.kind}/>
+      <div><strong>{a.title}</strong><p>{a.description}</p></div>
+      <span className="pcc-activity-meta"><small>{friendlyDate(a.date)}</small></span>
+     </Link>)}</div>:<div className="pcc-overview-empty">
+     <p>No activity recorded yet. Start with a site update when work begins.</p>
+     <Link href={siteUrl+'#daily-reports'}>Add first update →</Link></div>}
+   </section>
+   </>}
+    <div className="pcc-focused-panel" aria-label={selectedTitle}>
+     {selectedView==='documents'&&<Panel id="documents" title="Documents & Agreement" href={siteUrl+'#media'}
       note="Private files and the canonical signed agreement">
       {agreement&&<div className="pcc-agreement">
        <div><small>Agreement</small><strong>{agreement.contract_number||'No contract number'}</strong></div>
@@ -174,8 +218,8 @@ export function ProjectCommandCentre({project,industry,customer,site,stages,stag
         <small>{human(textValue(row,'category')||'Evidence')}</small></div>
        <Link href={siteUrl+'/media/'+row.id}>View</Link></>}/>:<Empty message="No project files recorded. Upload an agreement or site evidence in Site Delivery."/>}
       {canSeeQuotes&&<Link className="pcc-inline-link" href={'/dashboard/quotations?project='+id}>View approved quotation →</Link>}
-     </Panel>
-     {canFinance&&<Panel id="payments" title="Client Payments" href={'/dashboard/finance/contracts?project_id='+id}
+     </Panel>}
+     {canFinance&&selectedView==='payments'&&<Panel id="payments" title="Client Payments" href={'/dashboard/finance/contracts?project_id='+id}
       note="Multiple contract milestones and payment requests; settlement stays in Finance">
       {agreement?.contract_value&&<div className="pcc-agreement">
        <div><small>Recorded contract value</small><strong>{agreement.currency||'INR'} {agreement.contract_value}</strong></div>
@@ -197,15 +241,15 @@ export function ProjectCommandCentre({project,industry,customer,site,stages,stag
       </div>:<Empty message="No payment schedule milestones returned. Set the schedule from the existing Finance contract workflow."/>}
       <p className="pcc-disclaimer">Requested or invoiced does not mean paid. Only verified Finance receipts determine client collections.</p>
      </Panel>}
-     <Panel id="designs" title="Designs & Approvals" href={siteUrl+'#design'}
+     {selectedView==='designs'&&<Panel id="designs" title="Designs & Approvals" href={siteUrl+'#design'}
       note="The latest revision for each drawing type">
       {newestDesigns.size?<div className="pcc-table-scroll"><table><thead><tr><th>Design</th><th>Revision</th><th>Status</th></tr></thead>
        <tbody>{[...newestDesigns.entries()].map(([kind,row])=><tr key={kind}>
         <td><strong>{human(kind)}</strong></td><td>Rev {textValue(row,'revision')||'—'}</td>
         <td><Pill status={textValue(row,'status')||'pending'}/></td>
        </tr>)}</tbody></table></div>:<Empty message="No design revisions available for this project."/>}
-     </Panel>
-     <Panel id="team" title="Team & Owner Access" href={siteUrl+'#team'}
+     </Panel>}
+     {selectedView==='team'&&<Panel id="team" title="Team & Owner Access" href={siteUrl+'#team'}
       note="Assigned site roles are separate from client portal invitations">
       {site?.team.length?<TruncatedList rows={site.team} render={row=>{
        const userId=textValue(row,'user_id')||textValue(row,'membership_id');
@@ -220,8 +264,8 @@ export function ProjectCommandCentre({project,industry,customer,site,stages,stag
         <p>No verified-email client access configured for this project.</p>}
        {canManageCustomer&&customer&&<Link href={'/dashboard/customers/'+customer.id}>Manage client access →</Link>}
       </div>}
-     </Panel>
-     <Panel id="materials" title="Materials & Procurement" href={siteUrl+'#materials'}
+     </Panel>}
+     {selectedView==='materials'&&<Panel id="materials" title="Materials & Procurement" href={siteUrl+'#materials'}
       note="Every request, quantity, supplier and sourcing stage in one register">
       {site?.materials.length?<TruncatedList rows={site.materials} render={row=><>
        <span className="pcc-row-icon">▣</span>
@@ -237,8 +281,8 @@ export function ProjectCommandCentre({project,industry,customer,site,stages,stag
        <Link href={siteUrl+'#materials'}>Request, order or record receipt →</Link>
        {canPurchase&&<Link href="/dashboard/marketplace/orders">Purchase orders →</Link>}
       </div>
-     </Panel>
-     <Panel id="labour" title="Labour" href={siteUrl+'#daily-reports'}
+     </Panel>}
+     {selectedView==='labour'&&<Panel id="labour" title="Labour" href={siteUrl+'#daily-reports'}
       note="Daily workforce requirements and gate records">
       {latestReport?<><div className="pcc-mini-metrics">
        <Count number={Number(textValue(latestReport,'worker_count')||0)} label="Reported on site"/>
@@ -248,26 +292,26 @@ export function ProjectCommandCentre({project,industry,customer,site,stages,stag
        <Empty message="No labour attendance captured in site reports."/>}
       <div className="pcc-section-footer"><Link href={'/dashboard/billing/labour?project='+id}>
        Open labour disbursements →</Link></div>
-     </Panel>
-     <Panel id="execution" title="Execution Updates" href={siteUrl+'#daily-reports'}
+     </Panel>}
+     {selectedView==='execution'&&<Panel id="execution" title="Execution Updates" href={siteUrl+'#daily-reports'}
       note="Every site work report remains in chronological history">
       {latestReports.length?<TruncatedList rows={latestReports} render={row=><>
        <span className="pcc-row-icon">✓</span><div className="pcc-row-content">
         <strong>{textValue(row,'completed_work')||'Daily site progress update'}</strong>
         <small>{friendlyDate(textValue(row,'report_date'))} · {textValue(row,'worker_count')||'—'} workers</small></div>
        <Pill status="recorded"/></>}/>:<Empty message="No execution work updates entered yet."/>}
-     </Panel>
-     <Panel id="checks" title="Checks & Quality" href={siteUrl+'#quality'}
+     </Panel>}
+     {selectedView==='checks'&&<Panel id="checks" title="Checks & Quality" href={siteUrl+'#quality'}
       note="Multiple pass, fail and recheck records through the project">
       {site?.checks.length?<TruncatedList rows={site.checks} render={row=><>
        <span className="pcc-row-icon">✓</span><div className="pcc-row-content">
         <strong>{textValue(row,'title')||'Quality check'}</strong>
         <small>{row.due_date?'Due '+friendlyDate(textValue(row,'due_date')):'No due date'}</small></div>
        <Pill status={textValue(row,'status')||'pending'}/></>}/>:<Empty message="No quality checks recorded yet."/>}
-     </Panel>
+     </Panel>}
     </div>
 
-    <Panel id="timeline" title="Project Timeline & Work History" href={siteUrl+'#construction-timeline'}
+    {selectedView==='timeline'&&<Panel id="timeline" title="Project Timeline & Work History" href={siteUrl+'#construction-timeline'}
      note="Stage-by-stage execution, with material, check, evidence and payment links on each stage">
      {stages.length?<div className="pcc-stages">
       {stages.map((stage,index)=>{
@@ -299,8 +343,8 @@ export function ProjectCommandCentre({project,industry,customer,site,stages,stag
       <div><strong>{a.title}</strong><p>{a.description}</p></div>
       <span className="pcc-activity-meta"><small>{friendlyDate(a.date)}</small><Pill status={a.status}/></span>
      </Link>)}</div>:<Empty message="No dated site updates, requests or quality checks recorded yet."/>}
-    </Panel>
-    {canManage&&<details id="settings" className="pcc-project-settings">
+    </Panel>}
+    {canManage&&selectedView==='overview'&&<details id="settings" className="pcc-project-settings">
      <summary><OwnerIcon name="settings" size={18}/> Project details & settings</summary>
      <p>Update the existing project record here. Quotation scope and the work-stage plan remain managed through their dedicated authorized workflow.</p>
      <MasterForm entity="projects" title="Save project" initial={settingsInitial} fields={[

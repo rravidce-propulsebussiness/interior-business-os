@@ -20,7 +20,13 @@ describe('project mobile command centre',()=>{
  });
  it('uses one project overview navigation and retains role-specific Site Delivery tabs',()=>{
   expect(overview).toContain('<ProjectCommandCentre');
-  expect(workspace).toContain('className="pcc-tabs"');
+  expect(workspace).toContain('className="pcc-workspaces"');
+  expect(workspace).toContain("selectedView==='overview'");
+  expect(workspace).toContain("selectedView==='timeline'");
+  expect(workspace).toContain("selectedView==='materials'");
+  expect(workspace).toContain("selectedView==='checks'");
+  expect(overview).toContain('searchParams');
+  expect(overview).toContain("view={view??'overview'}");
   expect(workspace).not.toContain('pcc-module-grid');
   expect(workspace).not.toContain('pcc-sidebar');
   expect(site).toContain('<ProjectMobileTabs');

@@ -47,8 +47,11 @@ const agreementSchema=z.object({
 const clientAccessSchema=z.array(z.object({
  project_id:z.uuid(),email:z.string(),active:z.boolean(),created_at:z.string(),
 }));
-export default async function Project({params}:{params:Promise<{id:string}>}){
+export default async function Project({params,searchParams}:{
+ params:Promise<{id:string}>;searchParams:Promise<{view?:string}>;
+}){
  const {id}=await params;
+ const {view}=await searchParams;
  if(!z.uuid().safeParse(id).success)notFound();
  const s=await commercialServices('project.view','projects',true);
  const {data:project,error:projectError}=await s.client.from('projects')
@@ -124,7 +127,7 @@ export default async function Project({params}:{params:Promise<{id:string}>}){
   accountEmail={email} planLabel="Business workspace"
   navigation={ownerWorkspaceNavigation(s.context)} currentHref="/dashboard/projects" search=""
   notificationsEnabled={has('notification.view')} dashboardBrand>
-  <ProjectCommandCentre
+  <ProjectCommandCentre view={view??'overview'}
    project={{
     id:project.id,name:project.name,code:project.code??'',status:project.status??'active',
     projectType:project.project_type??'',siteAddress:project.site_address,notes:project.notes??null,
