@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useMemo, useState, type ReactNode } from 'react';
+import { useActionState, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { OwnerIcon } from '../../owner-shell';
 import {
   changeMembershipRole, changeMembershipStatus, createCustomRole,
@@ -59,6 +59,10 @@ export function TeamAccessWorkspace({members,branches,roles,permissions,grants,a
  const [presetOpen,setPresetOpen]=useState(false);
  const [detailTab,setDetailTab]=useState<'access'|'permissions'>('access');
  const [mobileDetail,setMobileDetail]=useState(false);
+ const detailRef=useRef<HTMLElement>(null);
+ useEffect(()=>{
+  if(mobileDetail&&window.innerWidth<=760)detailRef.current?.scrollIntoView({behavior:'smooth',block:'start'});
+ },[mobileDetail,selected]);
  const [page,setPage]=useState(1);
  const person=members.find(m=>m.id===selected)??members[0];
  const assigned=(id:string)=>assignments.filter(a=>a.membershipId===id);
@@ -236,7 +240,7 @@ export function TeamAccessWorkspace({members,branches,roles,permissions,grants,a
      {!shownRoles.length&&<div className="team-empty">No matching roles.</div>}
     </div>}
    </section>
-   {tab==='members'&&canViewTeam&&<aside className={'team-detail '+(mobileDetail?'team-detail-mobile-open':'')} aria-label="Selected member access">
+   {tab==='members'&&canViewTeam&&<aside ref={detailRef} className={'team-detail '+(mobileDetail?'team-detail-mobile-open':'')} aria-label="Selected member access">
     {person?<><div className="team-detail-header">
      <button className="team-detail-back" onClick={()=>setMobileDetail(false)} type="button">‹ Back to members</button>
      <div className="team-detail-person"><span className="team-avatar team-avatar-large">{initial(person.name)}</span>
