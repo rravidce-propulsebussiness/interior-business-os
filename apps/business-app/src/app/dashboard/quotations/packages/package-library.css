@@ -20,7 +20,7 @@
 .qpl-add {display:inline-flex;justify-content:center;align-items:center;gap:9px;min-height:48px;padding:11px 20px;border-radius:11px;font-size:13px;font-weight:800;white-space:nowrap;}
 .qpl-add span {font-size:22px;line-height:1;}
 .qpl-tabs {
-  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0;
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;
   background:#fff;border:1px solid #e8edf4;border-radius:13px;
   overflow:hidden;margin-bottom:24px;
 }
@@ -189,4 +189,71 @@
  .qpl-brand-pricing>summary{padding:15px;font-size:13px}
  .qpl-brand-explainer{padding:13px 16px 0}
  .qpl-brand-pricing .space-y-6{padding:12px}
+}
+
+
+/* Three top-level package modes exactly as the unified Package Library preview. */
+.qpl-header{align-items:center}
+.qpl-header p{max-width:630px}
+.qpl-header-actions{display:flex;gap:10px;align-items:center;justify-content:flex-end;flex-wrap:wrap;flex:0 1 auto}
+.qpl-header-actions button{white-space:nowrap}
+.qpl-compare,.qpl-manage-custom-top{display:inline-flex;align-items:center;justify-content:center;
+  gap:6px;min-height:46px;padding:11px 16px;border-radius:10px;
+  background:#fff7f2;border:1px solid #facfb7;color:#dc561b;font-size:12px;font-weight:800;
+  transition:background .2s,transform .2s}
+.qpl-compare:hover,.qpl-manage-custom-top:hover{background:#ffebdd;transform:translateY(-1px)}
+.qpl-tabs button:last-child{color:#994022;background:#fff7f2}
+.qpl-tabs button:last-child.is-active{color:#e85d15;background:#ffede3}
+.qpl-section-header{margin-top:5px}
+.qpl-cards{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:17px}
+.qpl-card,.qpl-custom{min-height:380px}
+.qpl-custom{min-height:380px;padding:21px 14px 16px}
+.qpl-custom-heading{margin-bottom:18px}
+.qpl-custom-heading>span{font-size:27px}
+.qpl-custom ul{gap:12px;margin:0 0 21px}
+.qpl-custom li{font-size:11px}
+.qpl-custom-cta{margin-top:auto;width:100%}
+.qpl-custom-quote-link{display:block;color:#cc541e!important;margin-top:10px;
+  text-align:center;font-size:11px;font-weight:750}
+.qpl-custom-quote-link:hover{text-decoration:underline}
+.qpl-cards+.cpm{margin-top:16px}
+.qpl-compare-dialog h2{font-size:24px;font-weight:850;letter-spacing:-.04em;margin:0 35px 6px 0}
+.qpl-compare-dialog>p{font-size:12px;color:#687b90;line-height:1.55;margin:0 0 18px}
+.qpl-compare-selects,.qpl-comparison{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.qpl-compare-selects label{display:grid;gap:8px;font-size:12px;color:#3c5069;font-weight:750}
+.qpl-compare-selects select{width:100%;min-height:44px;border:1px solid #d7e0e9;
+  border-radius:10px;padding:8px 12px;background:white}
+.qpl-comparison{margin-top:18px}
+.qpl-comparison article{background:#fffaf6;border:1px solid #fcd7c2;border-radius:12px;padding:17px;min-width:0}
+.qpl-comparison h3{font-size:16px;font-weight:850}
+.qpl-comparison-price{color:#e96216;font-size:19px;font-weight:850;margin:9px 0}
+.qpl-comparison ul{padding-left:0;list-style:none;display:grid;gap:8px;
+  color:#51627b;font-size:12px;margin:0 0 18px}
+.qpl-comparison a{width:100%}
+@media (max-width:1280px){
+ .qpl-cards{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .qpl-header{align-items:flex-start}
+ .qpl-header-actions{max-width:450px}
+}
+@media (max-width:900px){
+ .qpl-cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .qpl-header-actions{max-width:none;width:100%;justify-content:flex-start}
+ .qpl-tabs button{padding:11px 9px;font-size:11px}
+}
+@media(max-width:740px){
+ .qpl-header-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+ .qpl-header-actions>*{min-width:0;padding-left:8px;padding-right:8px;
+  white-space:normal!important;line-height:1.3;text-align:center}
+ .qpl-header-actions>.qpl-add{grid-column:1/-1}
+ .qpl-tabs{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .qpl-tabs button{display:flex;flex-direction:column;justify-content:center;min-height:72px;
+  padding:9px 5px;gap:4px;font-size:10px;line-height:1.25;text-align:center}
+ .qpl-tabs button>span:first-child{display:inline-block;font-size:19px}
+ .qpl-section-header{gap:9px}
+ .qpl-cards{grid-template-columns:1fr;gap:13px}
+ .qpl-card,.qpl-custom{min-height:340px}
+ .qpl-compare-selects,.qpl-comparison{grid-template-columns:1fr}
+}
+@media(min-width:600px) and (max-width:740px){
+ .qpl-cards{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
