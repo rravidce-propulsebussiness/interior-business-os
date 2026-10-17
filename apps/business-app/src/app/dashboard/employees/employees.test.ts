@@ -33,6 +33,17 @@ describe('Employees directory and sensitive access',()=>{
   expect(ui).toContain('recordEmployeeAttendance');
   expect(ui).toContain('saveEmployeeProof');
  });
+ it('links new payroll entries to unique employee IDs, preserving manual ledger records',()=>{
+  expect(sql).toContain('salary_employee_month_once');
+  expect(sql).toContain('WHERE employee_id IS NOT NULL');
+  expect(sql).toContain('company_employee_salary_create');
+  expect(actions).toContain('.createSalary(');
+  expect(actions).not.toContain('salaryLedger(client).create');
+ });
+ it('protects CSV exports from spreadsheet formula cells',()=>{
+  expect(ui).toContain("Spreadsheet tools interpret cells");
+  expect(ui).toContain('guarded.replaceAll');
+ });
  it('never serves uploaded identity documents from a public bucket',()=>{
   expect(proof).toContain("public:false");
   expect(proof).toContain('MAX_PROOF_BYTES');
