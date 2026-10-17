@@ -175,3 +175,18 @@
 @media (prefers-reduced-motion:reduce) {
   .qpl *,.qpl *::before,.qpl *::after {animation:none!important;transition:none!important;}
 }
+
+/* Pricing belongs to the one Package Library, never an extra package screen. */
+.qpl-brand-pricing {margin:6px 0 24px;background:#fff;border:1px solid #ffd5bd;border-radius:18px;overflow:hidden;}
+.qpl-brand-pricing>summary {display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;
+  padding:19px 21px;color:#a9400b;background:linear-gradient(115deg,#fff1e6,#fffaf6);
+  font-size:15px;font-weight:850;cursor:pointer;list-style-position:inside;}
+.qpl-brand-pricing>summary span {font-size:12px;font-weight:700;color:#9b694c;}
+.qpl-brand-pricing[open]>summary {border-bottom:1px solid #f9ddcb;}
+.qpl-brand-explainer {padding:16px 24px 0;font-size:13px;line-height:1.7;color:#536276;}
+.qpl-brand-pricing .space-y-6 {padding:17px;}
+@media(max-width:650px){
+ .qpl-brand-pricing>summary{padding:15px;font-size:13px}
+ .qpl-brand-explainer{padding:13px 16px 0}
+ .qpl-brand-pricing .space-y-6{padding:12px}
+}
