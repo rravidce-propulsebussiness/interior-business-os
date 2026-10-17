@@ -1,15 +1,11 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { createWhatsAppPdfShare } from '../../quotations/sharing-actions';
-
-function whatsappPhone(value: string): string {
-  const digits = value.replace(/\D/g, '');
-  // Stored local 10-digit Indian numbers need a dialling country code.
-  const international = digits.length === 10 ? '91' + digits :
-    digits.length === 11 && digits.startsWith('0') ? '91' + digits.slice(1) : digits;
-  return /^\d{11,15}$/.test(international) ? international : '';
-}
+import { authorizeWhatsAppPdfAttachment } from '../../quotations/sharing-actions';
+import {
+  fetchQuotationPdfFile, supportsPdfFileSharing, sharePdfFile,
+  downloadQuotationPdfFile,
+} from '../../quotations/quotation-pdf-file';
 
 export function LeadQuotePreview({
   revisionId, number, status, amount, shared = false, canShare = false,
@@ -28,8 +24,8 @@ export function LeadQuotePreview({
   const [previewError, setPreviewError] = useState('');
   const [sharing, setSharing] = useState(false);
   const [shareError, setShareError] = useState('');
-  const [whatsappHref, setWhatsappHref] = useState('');
-  const [customerPdfUrl, setCustomerPdfUrl] = useState('');
+  const [shareMessage, setShareMessage] = useState('');
+  const [preparedPdf, setPreparedPdf] = useState<File | null>(null);
 
   const base = '/dashboard/quotations/' + encodeURIComponent(revisionId);
   const visibleStatus = shared ? 'Shared' :
@@ -83,40 +79,49 @@ export function LeadQuotePreview({
     setLoading(false);
   }
 
-  async function shareOnWhatsApp() {
+  function shareOnWhatsApp() {
     if (!canShare || sharing) return;
-    // The server finalizes draft quotes before creating a public link. The
-    // owner must explicitly approve that irreversible transition.
+    setShareError('');
+    if (preparedPdf) {
+      if (!supportsPdfFileSharing(preparedPdf)) {
+        downloadQuotationPdfFile(preparedPdf);
+        setShareMessage(
+          'PDF downloaded. Open the customer’s WhatsApp chat and attach this PDF from Downloads.',
+        );
+        return;
+      }
+      // This MUST be called during the tap; fetching the PDF first would lose
+      // Android's transient user activation and silently fail.
+      void sharePdfFile(preparedPdf, number)
+        .then(() => setShareMessage(
+          'PDF handed to the selected app. Complete sending in WhatsApp.',
+        ))
+        .catch((error: unknown) => {
+          if (error instanceof Error && error.name === 'AbortError') return;
+          setShareError('Could not open the share sheet. Download and attach the PDF in WhatsApp.');
+        });
+      return;
+    }
     if (status === 'draft' && !window.confirm(
-      'Sharing this draft will finalize the quotation and create a secure customer PDF link. Continue?',
+      'This quotation is a draft. Finalize it for customer sharing and prepare the PDF file?',
     )) return;
     setSharing(true);
-    setShareError('');
-    setWhatsappHref('');
-    try {
-      const result = await createWhatsAppPdfShare(revisionId);
-      if (!result.ok || !result.token)
-        throw new Error(result.message || 'Could not create a secure PDF link.');
-      const pdfUrl = window.location.origin + '/q/' + result.token + '/pdf';
-      setCustomerPdfUrl(pdfUrl);
-      const name = (result.clientName ?? '').trim();
-      const message =
-        (name ? 'Hello ' + name + ',\n\n' : 'Hello,\n\n') +
-        'Please find quotation ' + (result.quoteNumber || number) +
-        ' (PDF) at the secure link below:\n' + pdfUrl +
-        '\n\nPlease review it and let us know if you have any questions.';
-      const digits = whatsappPhone(result.recipientPhone ?? '');
-      const url = digits ? 'https://wa.me/' + digits + '?text=' + encodeURIComponent(message)
-        : 'https://api.whatsapp.com/send?text=' + encodeURIComponent(message);
-      setWhatsappHref(url);
-      // A real WhatsApp conversation opens; the user selects Send.
-      // WhatsApp receives a secure customer PDF URL, not a dashboard session URL.
-      window.location.assign(url);
-    } catch (error) {
-      setShareError(error instanceof Error ? error.message : 'WhatsApp sharing is unavailable.');
-    } finally {
-      setSharing(false);
-    }
+    setShareMessage('');
+    void (async () => {
+      try {
+        const result = await authorizeWhatsAppPdfAttachment(revisionId);
+        if (!result.ok) throw new Error(result.message);
+        const file = await fetchQuotationPdfFile(revisionId, number);
+        setPreparedPdf(file);
+        setShareMessage(supportsPdfFileSharing(file)
+          ? 'PDF ready. Tap WhatsApp PDF again, choose WhatsApp and select the customer.'
+          : 'PDF ready. Tap Download PDF, then attach it in the customer’s WhatsApp chat.');
+      } catch (error) {
+        setShareError(error instanceof Error ? error.message : 'Could not prepare the PDF.');
+      } finally {
+        setSharing(false);
+      }
+    })();
   }
 
   return (
@@ -134,16 +139,15 @@ export function LeadQuotePreview({
         {canShare && (status === 'draft' || status === 'issued') &&
           <button type="button" className="crm-quote-whatsapp"
             disabled={sharing} onClick={() => void shareOnWhatsApp()}>
-            {sharing ? 'Preparing secure PDF…' : 'WhatsApp PDF'}
+            {sharing ? 'Preparing PDF…' : preparedPdf ? 'Share PDF File' : 'WhatsApp PDF'}
           </button>}
       </div>
       {shareError && <p className="crm-quote-share-error" role="alert">{shareError}</p>}
-      {whatsappHref && <p className="crm-quote-share-ready" role="status">
-        Secure PDF link created. <a href={whatsappHref} target="_blank"
-          rel="noopener noreferrer">Open WhatsApp</a>
-        {customerPdfUrl && <> · <a href={customerPdfUrl} target="_blank"
-          rel="noopener noreferrer">View customer PDF</a></>}
-      </p>}
+      {shareMessage && <div className="crm-quote-share-ready" role="status">
+        <p>{shareMessage}</p>
+        {preparedPdf && <button type="button"
+          onClick={() => downloadQuotationPdfFile(preparedPdf)}>Download PDF</button>}
+      </div>}
 
       <dialog ref={dialog} className="crm-quote-dialog"
         aria-label={'Quotation preview ' + number}
