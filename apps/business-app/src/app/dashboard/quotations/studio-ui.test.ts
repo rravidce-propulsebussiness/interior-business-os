@@ -700,8 +700,8 @@ describe('tenant-priced calculated Custom Quote package', () => {
   const quotePage = file('./packages/page.tsx');
 
   it('keeps brand and consumption setup inside Packages and selects per category', () => {
-    expect(library).toContain('Manage Brand &amp; Unit Prices');
-    expect(library).toContain('<ConstructionRatesManager');
+    expect(library).toContain('<CustomPackageManager rates={rates} canManage={canManage}');
+    expect(file('./packages/custom-package-manager.tsx')).toContain('Manage brands');
     expect(quotePage).toContain('createConstructionRatesRepository');
     expect(selector).toContain('Custom Quote · Choose customer brands');
     expect(selector).toContain('consumptionPerSqft');
