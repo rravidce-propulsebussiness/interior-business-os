@@ -35,14 +35,6 @@
 .qpl-tabs button>span:first-child {font-size:22px;line-height:1;}
 .qpl-count {margin-left:2px;border-radius:999px;background:#f0f3f7;padding:3px 8px;font-size:10px;color:#5d6b80;}
 .qpl-tabs button.is-active .qpl-count {color:#e85a15;background:#ffdfcd;}
-.qpl-features {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin:0 0 31px;}
-.qpl-feature {display:flex;align-items:center;gap:12px;min-width:0;}
-.qpl-feature-icon {
-  width:49px;height:49px;flex:0 0 49px;display:grid;place-items:center;
-  border-radius:50%;background:#fff0e5;color:#f35d16;font-size:24px;font-weight:800;
-}
-.qpl-feature strong {display:block;font-size:12px;font-weight:850;line-height:1.35;color:#17233d;}
-.qpl-feature small {display:block;margin-top:4px;font-size:10px;line-height:1.35;color:#6e7f96;}
 .qpl-section-header {display:flex;align-items:end;justify-content:space-between;gap:20px;margin:0 0 17px;}
 .qpl-section-header h2 {font-size:20px;font-weight:850;letter-spacing:-.04em;margin:0;color:#121f39;}
 .qpl-section-header p {font-size:11px;margin:5px 0 0;color:#70809b;line-height:1.5;}
@@ -175,22 +167,6 @@
 @media (prefers-reduced-motion:reduce) {
   .qpl *,.qpl *::before,.qpl *::after {animation:none!important;transition:none!important;}
 }
-
-/* Pricing belongs to the one Package Library, never an extra package screen. */
-.qpl-brand-pricing {margin:6px 0 24px;background:#fff;border:1px solid #ffd5bd;border-radius:18px;overflow:hidden;}
-.qpl-brand-pricing>summary {display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;
-  padding:19px 21px;color:#a9400b;background:linear-gradient(115deg,#fff1e6,#fffaf6);
-  font-size:15px;font-weight:850;cursor:pointer;list-style-position:inside;}
-.qpl-brand-pricing>summary span {font-size:12px;font-weight:700;color:#9b694c;}
-.qpl-brand-pricing[open]>summary {border-bottom:1px solid #f9ddcb;}
-.qpl-brand-explainer {padding:16px 24px 0;font-size:13px;line-height:1.7;color:#536276;}
-.qpl-brand-pricing .space-y-6 {padding:17px;}
-@media(max-width:650px){
- .qpl-brand-pricing>summary{padding:15px;font-size:13px}
- .qpl-brand-explainer{padding:13px 16px 0}
- .qpl-brand-pricing .space-y-6{padding:12px}
-}
-
 
 /* Three top-level package modes exactly as the unified Package Library preview. */
 .qpl-header{align-items:center}
