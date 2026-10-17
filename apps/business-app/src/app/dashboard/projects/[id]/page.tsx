@@ -279,6 +279,12 @@ export default async function Project({
             <Link href={deliveryUrl} className="pd-button pd-button-primary">
               <OwnerIcon name="arrow" size={17} /> Open Site Workspace
             </Link>
+            {has('payment.view', 'billing') && (
+              <Link href={'/dashboard/billing/labour?project=' + id}
+                className="pd-button pd-button-outline">
+                <OwnerIcon name="billing" size={16}/> Labour & wages
+              </Link>
+            )}
           </div>
         </header>
 
