@@ -498,6 +498,7 @@ export default async function Leads({
         canVisit={s.allowed('crm.site_visit.manage')}
         canConvert={s.allowed('lead.convert')}
         canQuote={s.allowed('quotation.create', 'quotation')}
+        canShareQuote={s.allowed('quotation.share', 'quotation')}
         organizationName={organization.name}
         timeZone={organization.default_timezone || 'Asia/Kolkata'}
         asOf={new Date().toISOString()}
