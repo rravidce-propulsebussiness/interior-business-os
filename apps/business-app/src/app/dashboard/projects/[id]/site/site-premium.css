@@ -973,3 +973,41 @@
  .site-command-page .sc-report-split{grid-template-columns:1fr;gap:9px}
  .sc-report-photos{gap:6px}
 }
+
+/*
+ * Focused project workspace.
+ * All authorized records/forms remain mounted, but only the chosen section is
+ * visible. Hash navigation updates the current section client-side, without
+ * creating another route or persisting duplicate records.
+ */
+.site-command-page[data-project-focus] :is(
+  .site-agreement-panel,.cj-root,.sc-plan-empty,.sc-advanced-plan,
+  #initialize,#design,#launch,#manager-updates,#daily-reports,
+  #materials,#quality,#team,#security,#media,#handover
+){display:none!important}
+.site-command-page[data-project-focus="timeline"] :is(.cj-root,.sc-plan-empty,.sc-advanced-plan),
+.site-command-page[data-project-focus="setup"] :is(.site-agreement-panel,#initialize,#design,#launch),
+.site-command-page[data-project-focus="site"] :is(#manager-updates,#daily-reports),
+.site-command-page[data-project-focus="materials"] #materials,
+.site-command-page[data-project-focus="quality"] #quality,
+.site-command-page[data-project-focus="team"] #team,
+.site-command-page[data-project-focus="security"] #security,
+.site-command-page[data-project-focus="files"] #media,
+.site-command-page[data-project-focus="handover"] #handover{
+  display:block!important
+}
+.site-command-page .site-agreement-panel{margin:0 0 15px}
+.site-command-page .sc-advanced-plan{background:#fff;border:1px solid #f0e0d6;border-radius:13px;padding:12px 15px;margin:12px 0 22px}
+.site-command-page .sc-advanced-plan>summary{cursor:pointer;font-size:12px;font-weight:800;color:#e9570d;list-style:revert}
+.site-command-page .sc-advanced-plan[open]>summary{margin-bottom:13px}
+.site-command-page .sc-plan-empty{background:#fff;border:1px dashed #f4c4a7;border-radius:14px;padding:22px 18px;margin-bottom:16px}
+.site-command-page .sc-plan-empty h2{font-size:17px;font-weight:850;color:#18243e;margin:0 0 9px}
+.site-command-page .sc-plan-empty p{font-size:12px;line-height:1.6;color:#6f7d92;margin:0 0 12px}
+.site-command-page .sc-plan-empty a{color:#f35f13;font-weight:800}
+.site-command-page .sc-service-alert{margin:0 0 15px}
+.site-command-page .pm-workspace-nav{position:relative;z-index:2}
+@media(max-width:740px){
+ .site-command-page .site-agreement-panel{margin:0 0 11px}
+ .site-command-page .sc-advanced-plan{padding:11px 12px}
+ .site-command-page .sc-plan-empty{padding:18px 13px}
+}

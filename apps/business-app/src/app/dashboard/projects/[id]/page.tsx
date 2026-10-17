@@ -148,7 +148,6 @@ export default async function Project({
     ? null
     : siteSummarySchema.safeParse(siteResponse.data);
   const site: SiteSummary | null = siteResult?.success ? siteResult.data : null;
-  const team = site?.team.filter((member) => member.active === true) ?? [];
   const pendingChecks =
     site?.checks.filter((check) => field(check, 'status') !== 'passed') ?? [];
   const industry = industries.find((item) => item.id === project.industry_id);
@@ -192,7 +191,6 @@ export default async function Project({
       field(b, 'report_date').localeCompare(field(a, 'report_date')),
     )
     .slice(0, 3);
-  const recentMedia = (site?.media ?? []).slice(0, 4);
   const heroPhoto = (site?.media ?? []).find((item) =>
     field(item,'mime').startsWith('image/') &&
     ['site','daily','inspection'].includes(field(item,'category')),
@@ -298,9 +296,6 @@ export default async function Project({
                 <OwnerIcon name="settings" size={16} /> Edit Project
               </a>
             )}
-            <Link href={deliveryUrl} className="pd-button pd-button-primary">
-              <OwnerIcon name="arrow" size={17} /> Open Site Workspace
-            </Link>
             {has('payment.view', 'billing') && (
               <Link href={'/dashboard/billing/labour?project=' + id}
                 className="pd-button pd-button-outline">
@@ -311,8 +306,20 @@ export default async function Project({
         </header>
 
         <ProjectMobileTabs projectId={id} active="overview"
-          allowTeam={Boolean(site)}
-          allowFinance={has('invoice.view','billing')}/>
+          allowFinance={has('invoice.view','billing')}
+          allowTeam={site?.can_manage === true}
+          allowUpdates={Boolean(site && (site.can_manage ||
+            ['site_engineer','quality_inspector'].includes(site.role ?? '')))}
+          allowMaterials={Boolean(site && (site.can_manage ||
+            ['site_engineer','procurement'].includes(site.role ?? '')))}
+          allowQuality={Boolean(site && (site.can_manage ||
+            ['site_engineer','quality_inspector'].includes(site.role ?? '')))}
+          allowFiles={Boolean(site && (site.can_manage ||
+            ['architect','structural_designer','site_engineer','quality_inspector','watchman'].includes(site.role ?? '')))}
+          allowSecurity={Boolean(site && (site.can_manage || site.role === 'watchman'))}
+          allowHandover={site?.can_manage === true}
+          allowSetup={Boolean(site && (site.can_manage ||
+            ['architect','structural_designer','site_engineer'].includes(site.role ?? '')))}/>
 
 
         <section className="pd-quick-overview pd-mobile-snapshot" aria-label="Current project status">
@@ -347,22 +354,6 @@ export default async function Project({
             </span>
             <Link href={deliveryUrl + '#quality'}>Review site issues →</Link>
           </article>
-        </section>
-        <section className="pd-mobile-actions" aria-label="Project quick actions">
-          {has('invoice.create','billing') && <Link
-            href={'/dashboard/billing/new?kind=sales_invoice'+
-              (project.customer_id?'&customer='+encodeURIComponent(project.customer_id):'')}>
-            <OwnerIcon name="quotations" size={18}/><span>Create invoice</span>
-          </Link>}
-          <Link href={deliveryUrl + '#daily-reports'}>
-            <OwnerIcon name="calendar" size={18}/><span>Site update</span>
-          </Link>
-          <Link href={deliveryUrl + '#materials'}>
-            <OwnerIcon name="purchases" size={18}/><span>Materials</span>
-          </Link>
-          {has('invoice.create','billing') && <Link href="/dashboard/finance?tab=expenses">
-            <OwnerIcon name="billing" size={18}/><span>Expenses</span>
-          </Link>}
         </section>
         <div className="pd-content-grid" id="overview">
           <div className="pd-main-column">
@@ -417,6 +408,8 @@ export default async function Project({
               )}
             </section>
 
+            <details className="pd-areas-disclosure">
+              <summary>Rooms &amp; areas <span>{areas.length} recorded</span></summary>
             <section className="pd-panel" id="areas">
               <div className="pd-panel-heading">
                 <div>
@@ -523,83 +516,7 @@ export default async function Project({
               )}
             </section>
 
-            <section className="pd-panel" id="media">
-              <div className="pd-panel-heading">
-                <div>
-                  <h2>
-                    <OwnerIcon name="globe" size={18} /> Site updates & files
-                  </h2>
-                  <p>Reports and restricted site evidence from this project.</p>
-                </div>
-                <Link href={deliveryUrl} className="pd-text-link">
-                  View site workspace →
-                </Link>
-              </div>
-              {site ? (
-                <div className="pd-media-columns">
-                  <div>
-                    <h3>Recent daily reports</h3>
-                    {recentReports.length ? (
-                      recentReports.map((report) => (
-                        <div className="pd-update" key={report.id}>
-                          <span className="pd-update-icon">
-                            <OwnerIcon name="calendar" size={17} />
-                          </span>
-                          <div>
-                            <strong>
-                              {field(report, 'completed_work') || 'Site report'}
-                            </strong>
-                            <small>
-                              {formatDate(field(report, 'report_date'))}
-                            </small>
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="pd-empty-copy">No site reports recorded.</p>
-                    )}
-                  </div>
-                  <div>
-                    <h3>Project media</h3>
-                    {recentMedia.length ? (
-                      recentMedia.map((media) => (
-                        <a
-                          key={media.id}
-                          className="pd-update"
-                          href={deliveryUrl + '/media/' + media.id}
-                          rel="noopener noreferrer"
-                          target="_blank"
-                        >
-                          <span className="pd-update-icon">
-                            <OwnerIcon name="quotations" size={17} />
-                          </span>
-                          <div>
-                            <strong>
-                              {field(media, 'file_name') ||
-                                field(media, 'filename') ||
-                                'Project file'}
-                            </strong>
-                            <small>
-                              {titleCase(
-                                field(media, 'phase') || 'Site evidence',
-                              )}{' '}
-                              · Open securely ↗
-                            </small>
-                          </div>
-                        </a>
-                      ))
-                    ) : (
-                      <p className="pd-empty-copy">No media uploaded yet.</p>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <p className="pd-empty-copy">
-                  Site reports and files are visible to authorized site members.
-                </p>
-              )}
-            </section>
-
+            </details>
             <section className="pd-panel" id="commercial">
               <div className="pd-panel-heading">
                 <div>
@@ -621,6 +538,8 @@ export default async function Project({
                   </Link>
                 )}
               </div>
+              <details className="pd-action-disclosure pd-commercial-advanced">
+                <summary>More commercial links</summary>
               <div className="pd-commercial-actions">
                 {canEditQuotes && (
                   <Link
@@ -647,6 +566,8 @@ export default async function Project({
                   </Link>
                 )}
               </div>
+
+              </details>
               <div className="pd-integrations">
                 <OriginLeads projectId={id} />
                 <CommercialResponseStatus projectId={id} />
@@ -655,94 +576,7 @@ export default async function Project({
             </section>
           </div>
 
-          <aside className="pd-side-column" aria-label="Project tools">
-            <section className="pd-panel" id="team">
-              <div className="pd-panel-heading">
-                <div>
-                  <h2>
-                    <OwnerIcon name="team" size={18} /> Project team
-                  </h2>
-                  <p>Roles assigned to this site.</p>
-                </div>
-                <Link href={deliveryUrl} className="pd-text-link">
-                  Manage →
-                </Link>
-              </div>
-              {site ? (
-                team.length ? (
-                  <div className="pd-team-list">
-                    {team.slice(0, 8).map((member) => {
-                      const label =
-                        site.member_options.find(
-                          (option) => option.id === member.user_id,
-                        )?.label ?? 'Assigned team member';
-                      const role = titleCase(
-                        field(member, 'role') || 'Team member',
-                      );
-                      return (
-                        <div className="pd-member" key={member.id}>
-                          <span className="pd-avatar" aria-hidden="true">
-                            {label
-                              .split(' ')
-                              .slice(0, 2)
-                              .map((word) => word[0] || '')
-                              .join('')
-                              .toUpperCase()}
-                          </span>
-                          <div>
-                            <strong>{label}</strong>
-                            <small>{role}</small>
-                          </div>
-                          <span className="pd-member-status">Active</span>
-                        </div>
-                      );
-                    })}
-                    {team.length > 8 && (
-                      <Link href={deliveryUrl} className="pd-text-link">
-                        View all {team.length} assignments →
-                      </Link>
-                    )}
-                  </div>
-                ) : (
-                  <p className="pd-empty-copy">
-                    No active assignments recorded.
-                  </p>
-                )
-              ) : (
-                <p className="pd-empty-copy">
-                  Team assignments are available in the site workspace if you
-                  have access.
-                </p>
-              )}
-            </section>
-
-            <section className="pd-panel">
-              <div className="pd-panel-heading">
-                <div>
-                  <h2>
-                    <OwnerIcon name="clients" size={18} /> Customer & location
-                  </h2>
-                </div>
-              </div>
-              <div className="pd-side-details">
-                <small>Customer</small>
-                <strong>
-                  {customer?.display_name ??
-                    'Customer details restricted or unavailable'}
-                </strong>
-                {customer && (
-                  <Link href={'/dashboard/customers/' + customer.id}>
-                    Open customer profile →
-                  </Link>
-                )}
-                <small>Site location</small>
-                <strong>{locationSummary(project.site_address)}</strong>
-                <small>Registered</small>
-                <strong>{formatDate(project.created_at)}</strong>
-              </div>
-            </section>
-          </aside>
-        </div>
+          </div>
 
         {canManage && (
           <section className="pd-panel pd-settings" id="settings">

@@ -6,7 +6,6 @@ import { ProjectMobileTabs } from '../project-mobile-tabs';
 import { projectWorkspaceNavigation } from '../../project-workspace-navigation';
 import { SiteCommandOverview } from './command-overview';
 import { SiteAccessState } from './site-access-state';
-import { SiteActivity } from './site-activity';
 import { ConstructionPlanningPanel } from './construction-planning-panel';
 import { ConstructionJourney } from './construction-journey';
 import { stageOwnerSchema, mergeStageOwnerEdits } from './stage-owner-view';
@@ -475,6 +474,11 @@ export default async function ProjectDeliveryPage({
     plans.find((plan) => plan.id === organization.plan_id)?.name ??
     'Business plan';
 
+  const initialSiteFocus: 'timeline' | 'setup' | 'security' =
+    ['not_started','design','client_approved'].includes(site.stage)
+      ? 'setup'
+      : role === 'watchman' && !manager ? 'security' : 'timeline';
+
   return (
     <div className="site-command-theme">
       <OwnerShell
@@ -488,7 +492,8 @@ export default async function ProjectDeliveryPage({
         search=""
         dashboardBrand
       >
-        <main id="main-content" tabIndex={-1} className="site-command-page">
+        <main id="main-content" tabIndex={-1} className="site-command-page"
+          data-project-focus={initialSiteFocus}>
           <div className="site-command-container">
             <SiteCommandOverview
               projectId={id}
@@ -512,19 +517,29 @@ export default async function ProjectDeliveryPage({
               gate={site.gate}
               media={site.media}
             />
-            <ProjectMobileTabs projectId={id} active="site"
+            <ProjectMobileTabs projectId={id}
+              active={initialSiteFocus === 'timeline' ? 'timeline' : 'more'}
+              defaultSiteFocus={initialSiteFocus}
               allowFinance={has('invoice.view','billing')}
+              allowUpdates={(open || site.stage === 'handover') &&
+                (isEngineer || isQuality || canSeeManagerUpdates)}
               allowTeam={manager}
-              allowMaterials={isEngineer || isProcurement}
-              allowQuality={isQuality}
-              allowFiles={isDesign || isEngineer || isQuality || isWatchman}/>
+              allowMaterials={(open || site.stage === 'handover') &&
+                (isEngineer || isProcurement)}
+              allowQuality={(open || site.stage === 'handover') && isQuality}
+              allowFiles={isDesign || isEngineer || isQuality || isWatchman}
+              allowSetup={isDesign || isEngineer || manager}
+              allowSecurity={isWatchman}
+              allowHandover={manager}/>
 
             {agreement && (
-              <AgreementReadinessPanel
+              <div className="site-agreement-panel">
+                <AgreementReadinessPanel
                 projectId={id}
                 state={agreement}
                 files={agreementPdfChoices}
-              />
+                />
+              </div>
             )}
             {construction && (
               <ConstructionJourney
@@ -536,17 +551,22 @@ export default async function ProjectDeliveryPage({
                 media={site.media}
                 reports={site.reports}
                 gate={site.gate}
-                managerUpdates={managerData.updates}
                 canSeeFinance={has('contract.view', 'billing')}
                 inSiteWorkspace
-                canRequestMaterials={open && (isEngineer || isProcurement)}
-                canUploadWorkPhotos={open && isEngineer}
                 canUploadCuringPhotos={open && isWatchman}
                 stageRecords={stageRecords}
                 canLinkRecords={construction.can_manage || isEngineer}
                 canManageLinks={construction.can_manage}
                 isWatchman={role === 'watchman' && !manager}
               />
+            )}
+            {!construction && (
+              <section className="sc-plan-empty" id="construction-timeline">
+                <h2>Timeline not started</h2>
+                <p>The project timeline comes from the accepted quotation and agreement.
+                  No floor or room plan needs to be entered twice.</p>
+                <a href="#design">Open agreement & design →</a>
+              </section>
             )}
             {managerDataUnavailable && (
               <div className="sc-service-alert" role="status">
@@ -555,37 +575,17 @@ export default async function ProjectDeliveryPage({
                 to your role.
               </div>
             )}
-            <div id="overview" className="sc-activity-anchor">
-              <SiteActivity
-                projectId={id}
-                stage={site.stage}
-                isManager={manager}
-                isEngineer={isEngineer}
-                isQuality={isQuality}
-                isProcurement={isProcurement}
-                isWatchman={isWatchman}
-                isDesign={isDesign}
-                canSeeManagerUpdates={
-                  canSeeManagerUpdates && !managerDataUnavailable
-                }
-                canViewOperations={has('execution.view')}
-                reports={site.reports}
-                updates={managerData.updates}
-                checks={site.checks}
-                materials={site.materials}
-                gate={site.gate}
-                media={site.media}
-              />
-            </div>
-
             {construction && (
-              <ConstructionPlanningPanel
+              <details className="sc-advanced-plan">
+                <summary>Manage execution plan and stage assignments</summary>
+                <ConstructionPlanningPanel
                 projectId={id}
                 data={construction}
                 canOwnerEdit={Boolean(ownerData?.can_edit)}
                 memberOptions={site.member_options}
                 quality={constructionQuality}
-              />
+                />
+              </details>
             )}
 
             {site.stage === 'not_started' && (
@@ -1719,20 +1719,7 @@ export default async function ProjectDeliveryPage({
               </section>
             )}
 
-            <footer className="sc-footer flex flex-wrap gap-3 rounded-xl border p-4 text-sm">
-              <Link
-                className="font-semibold text-blue-700 underline"
-                href={`/dashboard/operations?project=${id}`}
-              >
-                Schedule, tasks &amp; inspections →
-              </Link>
-              <Link
-                className="font-semibold text-blue-700 underline"
-                href={`/dashboard/execution?project=${id}`}
-              >
-                BOQ, procurement &amp; receipts →
-              </Link>
-            </footer>
+
           </div>
         </main>
         <OwnerMobileNav

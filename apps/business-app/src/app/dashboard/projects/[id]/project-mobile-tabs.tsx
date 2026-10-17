@@ -1,65 +1,97 @@
 'use client';
+
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { OwnerIcon } from '../../owner-shell';
 import './project-mobile-tabs.css';
 
-type Tab = 'overview' | 'timeline' | 'site' | 'materials' | 'quality' | 'team' | 'files' | 'finance';
-const tabs: {key:Tab;label:string;icon:'dashboard'|'calendar'|'projects'|'purchases'|'check'|'team'|'quotations'|'billing'}[] = [
-  {key:'overview',label:'Overview',icon:'dashboard'},
-  {key:'timeline',label:'Timeline',icon:'calendar'},
-  {key:'site',label:'Site',icon:'projects'},
-  {key:'materials',label:'Materials',icon:'purchases'},
-  {key:'quality',label:'Quality',icon:'check'},
-  {key:'team',label:'Team',icon:'team'},
-  {key:'files',label:'Files',icon:'quotations'},
-  {key:'finance',label:'Finance',icon:'billing'},
-];
+type Focus = 'overview'|'timeline'|'site'|'materials'|'quality'|'team'|
+ 'files'|'setup'|'security'|'handover'|'more';
+type Tab = 'overview'|'timeline'|'site'|'materials'|'more';
+
+const hashFocus:Record<string,Focus>={
+ '#construction-timeline':'timeline',
+ '#construction-planning':'timeline',
+ '#overview':'site',
+ '#daily-reports':'site',
+ '#manager-updates':'site',
+ '#materials':'materials',
+ '#quality':'quality',
+ '#team':'team',
+ '#media':'files',
+ '#design':'setup',
+ '#initialize':'setup',
+ '#launch':'setup',
+ '#agreement-readiness':'setup',
+ '#security':'security',
+ '#handover':'handover',
+ '#more':'more',
+};
+const mainTab=(focus:Focus):Tab=>
+ ['quality','team','files','setup','security','handover','more'].includes(focus)
+ ? 'more' : focus as Tab;
+
 export function ProjectMobileTabs({
- projectId,active,allowFinance=false,allowTeam=true,allowMaterials=true,allowQuality=true,allowFiles=true,
+ projectId,active,allowFinance=false,allowTeam=true,
+ allowMaterials=true,allowQuality=true,allowFiles=true,
+ allowUpdates=true,allowSecurity=false,allowSetup=true,
+ allowHandover=false,defaultSiteFocus='timeline',
 }:{
- projectId:string;active:Tab;allowFinance?:boolean;allowTeam?:boolean;allowMaterials?:boolean;allowQuality?:boolean;allowFiles?:boolean;
+ projectId:string;active:Tab;allowFinance?:boolean;allowTeam?:boolean;
+ allowMaterials?:boolean;allowQuality?:boolean;allowFiles?:boolean;
+ allowUpdates?:boolean;allowSecurity?:boolean;allowSetup?:boolean;
+ allowHandover?:boolean;defaultSiteFocus?:Focus;
 }) {
- const [selected,setSelected]=useState<Tab>(active);
- useEffect(()=>{
-   const update=()=>{
-     if(window.location.pathname.endsWith('/site')){
-       const map:Record<string,Tab>={
-        '#construction-timeline':'timeline',
-        '#daily-reports':'site',
-        '#materials':'materials',
-        '#quality':'quality',
-        '#team':'team',
-        '#media':'files',
-       };
-       setSelected(map[window.location.hash] ?? 'site');
-     } else setSelected('overview');
-   };
-   update();
-   window.addEventListener('hashchange',update);
-   return ()=>window.removeEventListener('hashchange',update);
- },[active]);
+ const [focus,setFocus]=useState<Focus>(active==='overview'?'overview':defaultSiteFocus);
  const base='/dashboard/projects/'+encodeURIComponent(projectId);
- const href=(tab:Tab)=>{
-  switch(tab) {
-   case 'overview':return base;
-   case 'timeline':return base+'/site#construction-timeline';
-   case 'site':return base+'/site#daily-reports';
-   case 'materials':return base+'/site#materials';
-   case 'quality':return base+'/site#quality';
-   case 'team':return base+'/site#team';
-   case 'files':return base+'/site#media';
-   case 'finance':return '/dashboard/finance/contracts?project_id='+encodeURIComponent(projectId);
-  }
- };
- return <nav aria-label="Project workspace" className="pm-tabs">
-  {tabs.filter(t=>(t.key!=='finance'||allowFinance)&&(t.key!=='team'||allowTeam)&&(t.key!=='materials'||allowMaterials)&&(t.key!=='quality'||allowQuality)&&(t.key!=='files'||allowFiles)).map(t=>
-   <Link href={href(t.key)} key={t.key}
-     className={'pm-tab'+(t.key===selected?' pm-tab-selected':'')}
-     aria-current={t.key===selected?'page':undefined}
-     onClick={()=>setSelected(t.key)}>
-     <OwnerIcon name={t.icon} size={15}/>
-     <span>{t.label}</span>
-   </Link>)}
- </nav>;
+ const site=base+'/site';
+ useEffect(()=>{
+   const sync=()=>{
+     const inSite=window.location.pathname.endsWith('/site');
+     const next:Focus=inSite
+       ? hashFocus[window.location.hash] ?? defaultSiteFocus
+       : 'overview';
+     setFocus(next);
+     const page=document.querySelector<HTMLElement>('.site-command-page');
+     if(page) page.dataset.projectFocus=next;
+   };
+   sync();
+   window.addEventListener('hashchange',sync);
+   return ()=>window.removeEventListener('hashchange',sync);
+ },[defaultSiteFocus]);
+
+ const selected=mainTab(focus);
+ const items:Array<{key:Tab;label:string;icon:'dashboard'|'calendar'|'projects'|'purchases'|'settings';href:string}>=[
+   {key:'overview',label:'Overview',icon:'dashboard',href:base},
+   {key:'timeline',label:'Timeline',icon:'calendar',href:site+'#construction-timeline'},
+   ...(allowUpdates?[{key:'site' as const,label:'Updates',icon:'projects' as const,href:site+'#daily-reports'}]:[]),
+   ...(allowMaterials?[{key:'materials' as const,label:'Materials',icon:'purchases' as const,href:site+'#materials'}]:[]),
+   {key:'more',label:'More',icon:'settings',href:site+'#more'},
+ ];
+ const advanced=[
+   ...(allowSetup?[{label:'Agreement & design',href:site+'#design'}]:[]),
+   ...(allowQuality?[{label:'Quality checks',href:site+'#quality'}]:[]),
+   ...(allowTeam?[{label:'Project team',href:site+'#team'}]:[]),
+   ...(allowFiles?[{label:'Documents & photos',href:site+'#media'}]:[]),
+   ...(allowSecurity?[{label:'Curing & security',href:site+'#security'}]:[]),
+   ...(allowHandover?[{label:'Handover',href:site+'#handover'}]:[]),
+   ...(allowFinance?[{label:'Project finances',href:'/dashboard/finance/contracts?project_id='+encodeURIComponent(projectId)}]:[]),
+ ];
+ return <div className="pm-workspace-nav">
+   <nav aria-label="Project workspace" className="pm-tabs">
+     {items.map(item=><Link key={item.key} href={item.href}
+       className={'pm-tab'+(item.key===selected?' pm-tab-selected':'')}
+       aria-current={item.key===selected?'page':undefined}
+       onClick={()=>setFocus(item.key)}>
+       <OwnerIcon name={item.icon} size={16}/><span>{item.label}</span>
+     </Link>)}
+   </nav>
+   {selected==='more' && <nav className="pm-more-tools" aria-label="Additional project tools">
+     <p>More project tools</p>
+     <div>{advanced.map(item=><Link key={item.href} href={item.href}
+        onClick={()=>{const hash=item.href.includes('#')?item.href.slice(item.href.indexOf('#')):'';setFocus(hashFocus[hash]??'more');}}>
+       {item.label} <OwnerIcon name="arrow" size={14}/>
+     </Link>)}</div>
+   </nav>}
+ </div>;
 }

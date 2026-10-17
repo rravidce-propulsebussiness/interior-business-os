@@ -951,3 +951,20 @@
  .pd-mobile-actions a svg{padding:7px;width:20px;height:20px;border-radius:9px}
 }
 @media(prefers-reduced-motion:reduce){.pd-mobile-actions a{transition:none}}
+
+/* Overview is a summary, not a second site workspace. */
+.project-detail-dashboard .pd-content-grid{display:block}
+.project-detail-dashboard .pd-main-column{width:100%;min-width:0;max-width:none}
+.project-detail-dashboard .pd-areas-disclosure{background:#fff;border:1px solid #f1e5dc;border-radius:14px;padding:13px 16px;margin:0 0 15px}
+.project-detail-dashboard .pd-areas-disclosure>summary{display:flex;align-items:center;justify-content:space-between;cursor:pointer;color:#1b2b45;font-size:13px;font-weight:850;gap:10px;list-style:none}
+.project-detail-dashboard .pd-areas-disclosure>summary::after{content:'⌄';font-size:20px;color:#f26921}
+.project-detail-dashboard .pd-areas-disclosure>summary span{margin-left:auto;font-size:10px;font-weight:600;color:#7b8799}
+.project-detail-dashboard .pd-areas-disclosure[open]>summary{margin-bottom:13px}
+.project-detail-dashboard .pd-areas-disclosure .pd-panel{border:0;box-shadow:none;padding:7px 0 0}
+.project-detail-dashboard .pd-commercial-advanced{margin:13px 0}
+.project-detail-dashboard .pd-commercial-advanced>summary{font-size:11px;color:#df611e;cursor:pointer;font-weight:750}
+.project-detail-dashboard .pd-commercial-advanced .pd-commercial-actions{margin:12px 0}
+@media(max-width:740px){
+ .project-detail-dashboard .pd-content-grid{display:block}
+ .project-detail-dashboard .pd-areas-disclosure{padding:13px 12px}
+}

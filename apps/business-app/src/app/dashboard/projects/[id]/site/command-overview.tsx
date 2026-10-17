@@ -33,70 +33,14 @@ const milestones = [
   { key: 'handover', name: 'Quality & handover' },
 ] as const;
 
-function field(record: RecordRow, key: string): string {
-  const value = record[key];
-  return typeof value === 'string' || typeof value === 'number'
-    ? String(value)
-    : '';
-}
-
 function pretty(raw: string) {
   return raw.replaceAll('_', ' ');
 }
 
-function Metric({
-  title,
-  count,
-  caption,
-  icon,
-  color,
-  href,
-}: {
-  title: string;
-  count: number;
-  caption: string;
-  icon: 'quotations' | 'calendar' | 'check' | 'purchases' | 'clients';
-  color: string;
-  href: string;
-}) {
-  return (
-    <a href={href} className="sc-metric">
-      <span className={'sc-metric-icon ' + color}>
-        <OwnerIcon name={icon} size={21} />
-      </span>
-      <span>
-        <small>{title}</small>
-        <strong>{count.toLocaleString('en-IN')}</strong>
-        <em>{caption}</em>
-      </span>
-      <span className="sc-metric-arrow" aria-hidden="true">
-        ›
-      </span>
-    </a>
-  );
-}
-
 export function SiteCommandOverview(props: SiteCommandOverviewProps) {
   const {
-    projectId,
-    projectName,
-    projectCode,
-    stage,
-    role,
-    isManager,
-    isEngineer,
-    isQuality,
-    isProcurement,
-    isWatchman,
-    isDesign,
-    canSeeManagerUpdates,
-    reports,
-    reviews,
-    managerDataUnavailable,
-    checks,
-    materials,
-    gate,
-    media,
+    projectId,projectName,projectCode,stage,role,isManager,isEngineer,
+    isQuality,isWatchman,isDesign,
   } = props;
 
   const currentStage = milestones.findIndex(
@@ -106,33 +50,11 @@ export function SiteCommandOverview(props: SiteCommandOverviewProps) {
     stage === 'not_started'
       ? 'Not started'
       : (milestones[currentStage]?.name ?? pretty(stage));
-  const reviewByReport = new Map<string, RecordRow>();
-  for (const review of reviews) {
-    const reportId = field(review, 'report_id');
-    if (!reviewByReport.has(reportId)) reviewByReport.set(reportId, review);
-  }
-  const awaitingReview = reports.filter(
-    (report) => !reviewByReport.has(String(report.id)),
-  ).length;
-  const passedChecks = checks.filter(
-    (check) => field(check, 'status') === 'passed',
-  ).length;
-  const openChecks = checks.length - passedChecks;
-  const openMaterials = materials.filter(
-    (material) => !['received', 'rejected'].includes(field(material, 'status')),
-  ).length;
   const canUploadEvidence =
     ((isDesign || isEngineer || isQuality) &&
       (stage === 'design' || stage === 'execution')) ||
     (isWatchman && stage === 'execution');
   const canSubmitReport = isEngineer && stage === 'execution';
-  const deliveryActive = stage === 'execution' || stage === 'handover';
-  const reportSection = (isEngineer || isQuality) && deliveryActive;
-  const managerSection =
-    canSeeManagerUpdates && deliveryActive && !managerDataUnavailable;
-  const materialSection = (isEngineer || isProcurement) && deliveryActive;
-  const qualitySection = isQuality && deliveryActive;
-  const securitySection = isWatchman && deliveryActive;
 
   return (
     <>
@@ -203,68 +125,7 @@ export function SiteCommandOverview(props: SiteCommandOverviewProps) {
 
       </header>
 
-      <section className="sc-metrics" aria-label="Project record counts">
-        {reportSection && (
-          <Metric
-            title="Daily reports"
-            count={reports.length}
-            caption="Most recent reports (up to 40)"
-            icon="quotations"
-            color="sc-blue"
-            href="#daily-reports"
-          />
-        )}
-        {managerSection && (
-          <Metric
-            title="Pending reviews"
-            count={awaitingReview}
-            caption="Reports without a review"
-            icon="calendar"
-            color="sc-amber"
-            href="#daily-reports"
-          />
-        )}
-        {qualitySection && (
-          <Metric
-            title="Quality checks"
-            count={checks.length}
-            caption={passedChecks + ' passed · ' + openChecks + ' open'}
-            icon="check"
-            color="sc-green"
-            href="#quality"
-          />
-        )}
-        {materialSection && (
-          <Metric
-            title="Material requests"
-            count={materials.length}
-            caption={openMaterials + ' awaiting closure (latest 70)'}
-            icon="purchases"
-            color="sc-orange"
-            href="#materials"
-          />
-        )}
-        {securitySection && (
-          <Metric
-            title="Security & curing"
-            count={gate.length}
-            caption="Recorded site events"
-            icon="clients"
-            color="sc-cyan"
-            href="#security"
-          />
-        )}
-        {isDesign && !isEngineer && canUploadEvidence && (
-          <Metric
-            title="Design files"
-            count={media.length}
-            caption="Private evidence uploads"
-            icon="quotations"
-            color="sc-blue"
-            href="#media"
-          />
-        )}
-      </section>
+
 
 
     </>
