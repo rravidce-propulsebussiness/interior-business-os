@@ -515,13 +515,14 @@ describe('PDF attachment sharing and reliable file operations', () => {
     expect(common).toContain("credentials: 'same-origin'");
   });
 
-  it('uses one authenticated PDF route with renderer-independent fallback', () => {
+  it('uses one premium HTML PDF printer without switching to a second template', () => {
     const common = file('./quotation-pdf-file.ts');
     expect(common).toContain('/pdf?view=1&_pdf=');
     expect(controls).toContain("'?view=1&version=' + version");
     expect(controls).toContain('downloadRoute');
-    expect(renderer).toContain('renderQuotationFallbackPdf');
-    expect(renderer).toContain('parseSftEstimate');
+    expect(renderer).not.toContain('renderQuotationFallbackPdf');
+    expect(renderer).toContain('return renderPdf(safeQuotationPrintHtml(html)');
+    expect(renderer).toContain('customerDocumentSchema.parse(document)');
     expect(secureRoute).toContain('renderQuotationPdf(html, document)');
   });
 });
