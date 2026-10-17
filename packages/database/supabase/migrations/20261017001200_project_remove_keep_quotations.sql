@@ -3,7 +3,7 @@
 -- the Projects workspace by retaining that minimum quotation-only reference.
 -- Quotation/revision/item records remain byte-for-byte unchanged.
 -- Projects without quotations are physically deleted by the existing guarded RPC.
-CREATE FUNCTION public.project_remove_from_workspace(
+CREATE OR REPLACE FUNCTION public.project_remove_from_workspace(
   p_org uuid,p_project uuid,p_version integer,p_confirm text
 ) RETURNS text
 LANGUAGE plpgsql SECURITY DEFINER SET search_path TO ''
@@ -120,8 +120,8 @@ BEGIN
   GET DIAGNOSTICS v_unlinked=ROW_COUNT;
 
   -- Keep exactly the record that immutable quotations require, but it is
-  -- neither a deliverable project nor an inactive project on the dashboard.
-  UPDATE public.projects SET is_sales_prospect=true,status='inactive',
+  -- not a deliverable project on the dashboard; retain active quote access.
+  UPDATE public.projects SET is_sales_prospect=true,
          version=version+1
   WHERE organization_id=p_org AND id=p_project AND version=p_version;
   IF NOT FOUND THEN
