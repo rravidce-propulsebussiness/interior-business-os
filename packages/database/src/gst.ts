@@ -86,6 +86,20 @@ export type GstSummary = {
   purchaseBills: number;
 };
 
+export type GstStageInvoiceOption = {
+  leadId: string; leadNumber: string; leadName: string;
+  projectId: string; convertedProjectId: string | null;
+  projectName: string; projectType: string; serviceType: string | null;
+  customerId: string; clientName: string; clientGstin: string | null;
+  billingAddress: Record<string, unknown> | null;
+  revisionId: string; quotationId: string; quoteNumber: string;
+  terms: string; totals: Record<string, unknown>;
+};
+export type GstStageInvoiceContext = {
+  leadId: string; revisionId: string; stageNumber: number;
+  stageBaseAmount: number; projectId: string | null;
+};
+
 export function createGstRepository(client: SupabaseClient<Database>) {
   const rpc = client.rpc.bind(client) as unknown as (
     name: string,
@@ -141,6 +155,20 @@ export function createGstRepository(client: SupabaseClient<Database>) {
       }),
     document: (organizationId: string, id: string) =>
       invoke<GstDocument>('gst_document', { p_org: organizationId, p_id: id }),
+    stageOptions: (organizationId: string) =>
+      invoke<GstStageInvoiceOption[]>('gst_stage_invoice_options', {
+        p_org: organizationId,
+      }),
+    stageContext: (organizationId: string, invoiceId: string) =>
+      invoke<GstStageInvoiceContext | null>('gst_stage_invoice_context', {
+        p_org: organizationId, p_invoice: invoiceId,
+      }),
+    saveStageDocument: (organizationId: string, input: GstDocumentInput,
+      leadId: string, revisionId: string, stageNumber: number) =>
+      invoke<string>('gst_stage_invoice_save', {
+        p_org: organizationId, p_input: input, p_lead: leadId,
+        p_revision: revisionId, p_stage: stageNumber,
+      }),
     platformSummary: () => invoke<GstSummary>('platform_gst_summary', {}),
   };
 }

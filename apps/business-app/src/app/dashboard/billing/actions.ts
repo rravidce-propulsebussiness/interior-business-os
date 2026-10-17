@@ -133,11 +133,22 @@ export async function saveGstDocument(form: FormData) {
     const input = parsed as GstDocumentInput;
     // Every tenant uses the same platform-admin-approved appearance.
     // The database ignores client-selected template IDs as a second check.
-    id = await createGstTemplatesRepository(client).saveDocument(
-      org,
-      input,
-      null,
-    );
+    const leadId = String(form.get('leadId') ?? '').trim();
+    const revisionId = String(form.get('revisionId') ?? '').trim();
+    const stageNumber = String(form.get('stageNumber') ?? '').trim();
+    const stageRequested = Boolean(leadId || revisionId || stageNumber);
+    if (stageRequested) {
+      const checkedLead = idSchema.parse(leadId);
+      const checkedRevision = idSchema.parse(revisionId);
+      const checkedStage = z.coerce.number().int().min(1).max(40).parse(stageNumber);
+      if (input.kind !== 'sales_invoice') throw new DomainError('VALIDATION_FAILED');
+      id = await createGstRepository(client).saveStageDocument(
+        org, input, checkedLead, checkedRevision, checkedStage,
+      );
+    } else {
+      // Standard manual GST bills still use the existing fixed platform format.
+      id = await createGstTemplatesRepository(client).saveDocument(org, input, null);
+    }
     revalidatePath('/dashboard/billing');
   } catch (error) {
     redirect(path + '?error=' + encodeURIComponent(safeFailure(error).message));
@@ -157,6 +168,10 @@ export async function finalizeGstDocument(_state: State, form: FormData) {
     await createGstRepository(client).finalize(org, id, version);
     revalidatePath('/dashboard/billing');
     revalidatePath('/dashboard/billing/' + id);
+    // Stage-linked first invoices activate the existing quotation prospect.
+    revalidatePath('/dashboard/projects');
+    revalidatePath('/dashboard/crm/leads');
+    revalidatePath('/dashboard/customers');
     return {
       message:
         'Document finalized and locked. Refresh to view the issued copy.',
