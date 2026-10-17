@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import type { ConstructionRate } from '@business-os/database/construction-rates';
-import { ConstructionRatesManager } from '../../pricing/construction/rates-manager';
+import { CustomPackageManager } from './custom-package-manager';
 import type { ConstructionPackage } from '@business-os/database/construction-packages';
 import type { QuotationPackage } from '@business-os/database/quotation-packages';
 import { PremiumPackageEditor } from '../../pricing/construction/premium-package-editor';
@@ -21,12 +21,6 @@ type CatalogItem =
   | { kind: 'other'; item: QuotationPackage };
 type EditorState = { kind: 'construction' | 'other'; id: string } | null;
 
-const features = [
-  { symbol: '▣', title: 'Premium Templates', caption: 'Ready-to-use packages' },
-  { symbol: '✧', title: 'Fully Customizable', caption: 'Edit scope, brands & pricing' },
-  { symbol: '▤', title: 'Beautiful PDF', caption: 'Generated from saved details' },
-  { symbol: '⌂', title: 'Your Own Packages', caption: 'Create, edit or delete anytime' },
-];
 const cash = (value: string | number, currency = 'INR') => {
   try {
     return new Intl.NumberFormat('en-IN', {
@@ -67,7 +61,7 @@ export function PackageLibrary({
   canManage: boolean;
   currency: string;
 }) {
-  const [tab, setTab] = useState<'construction' | 'other'>('construction');
+  const [tab, setTab] = useState<'construction' | 'other' | 'custom'>('construction');
   const [filter, setFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [search, setSearch] = useState('');
   const [editing, setEditing] = useState<EditorState>(null);
@@ -75,11 +69,13 @@ export function PackageLibrary({
   const [remove, setRemove] = useState<CatalogItem | null>(null);
   const [message, setMessage] = useState('');
   const [pending, start] = useTransition();
+  const [compareOpen, setCompareOpen] = useState(false);
+  const [compareIds, setCompareIds] = useState<[string, string]>(['','']);
   const router = useRouter();
   const dialogRef = useRef<HTMLDivElement>(null);
-  const currentItems: CatalogItem[] = tab === 'construction'
-    ? construction.map((item) => ({kind:'construction', item}))
-    : (other ?? []).map((item) => ({kind:'other', item}));
+  const currentItems: CatalogItem[] = tab === 'other'
+    ? (other ?? []).map((item) => ({kind:'other', item}))
+    : construction.map((item) => ({kind:'construction', item}));
   const sorted = [...currentItems].sort((a,b) => {
     if (a.kind === 'construction' && b.kind === 'construction') {
       const order = ['STANDARD', 'PREMIUM', 'LUXURY', 'ROYAL'];
@@ -99,7 +95,7 @@ export function PackageLibrary({
     ? construction.find((p) => p.id === editing.id)
     : (other ?? []).find((p) => p.id === editing.id)) : null;
   const activeIndustries = industries.filter((i) => i.key !== 'construction');
-  const isOpen = Boolean(editing || detail || remove);
+  const isOpen = Boolean(editing || detail || remove || compareOpen);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -107,7 +103,7 @@ export function PackageLibrary({
     document.body.style.overflow = 'hidden';
     dialogRef.current?.focus();
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {setEditing(null);setDetail(null);setRemove(null);}
+      if (event.key === 'Escape') {setEditing(null);setDetail(null);setRemove(null);setCompareOpen(false);}
     };
     document.addEventListener('keydown', onKey);
     return () => {
@@ -141,7 +137,7 @@ export function PackageLibrary({
       ? deleteConstructionPackage(entry.item.id, entry.item.version)
       : deleteQuotationPackage(entry.item.id, entry.item.version));
   }
-  const addAllowed = canManage && (tab === 'construction' || activeIndustries.length > 0);
+  const addAllowed = canManage && (tab === 'construction' || (tab === 'other' && activeIndustries.length > 0));
   const addStarter = canManage && tab === 'construction' &&
     !['STANDARD','PREMIUM','LUXURY','ROYAL'].every((code) =>
       construction.some((item) => item.code === code));
@@ -152,14 +148,22 @@ export function PackageLibrary({
         <div>
           <span className="qpl-eyebrow">QUOTATIONS / PACKAGES</span>
           <h1>Package Library</h1>
-          <p>Use pre-defined packages or create a custom quote for your client.</p>
+          <p>Use pre-defined packages or create a custom quote for your client.
+            Manage material brands, unit prices and consumption to generate accurate per-SFT rates.</p>
         </div>
-        {addAllowed && (
-          <button className="qpl-add" type="button"
-            onClick={() => setEditing({kind:tab, id:'new'})}>
+        <div className="qpl-header-actions">
+          {tab !== 'custom' && currentItems.filter(p=>p.item.status==='active').length>=2 &&
+            <button className="qpl-compare" type="button" onClick={()=>{
+              setCompareIds(['','']);setCompareOpen(true);}}>
+              ▢ Compare Packages
+            </button>}
+          {tab !== 'custom' && <button className="qpl-manage-custom-top" type="button"
+            onClick={()=>setTab('custom')}>⚙ Custom Package Management</button>}
+          {addAllowed && <button className="qpl-add" type="button"
+            onClick={() => setEditing({kind:tab==='other'?'other':'construction',id:'new'})}>
             <span aria-hidden="true">＋</span> Add New Package
-          </button>
-        )}
+          </button>}
+        </div>
       </div>
 
       <div className="qpl-tabs" role="tablist" aria-label="Package industry">
@@ -175,37 +179,32 @@ export function PackageLibrary({
           <span aria-hidden="true">▧</span> Interior &amp; Other Packages
           <span className="qpl-count">{other?.length ?? 0}</span>
         </button>
+        <button type="button" role="tab" aria-selected={tab === 'custom'}
+          className={tab === 'custom' ? 'is-active' : ''}
+          onClick={() => {setTab('custom');setSearch('');setFilter('all');}}>
+          <span aria-hidden="true">⚙</span> Custom Package Management
+        </button>
       </div>
 
-      <div className="qpl-features" aria-label="Package benefits">
-        {features.map((item) => <div className="qpl-feature" key={item.title}>
-          <span className="qpl-feature-icon" aria-hidden="true">{item.symbol}</span>
-          <div><strong>{item.title}</strong><small>{item.caption}</small></div>
-        </div>)}
-      </div>
-
-      <div className="qpl-section-header">
-        <div>
-          <h2>{tab === 'construction' ? 'Construction Packages' : 'Interior & Other Packages'}</h2>
-          <p>Select a package to create a quote or customize as per client requirement.</p>
-        </div>
+      {tab !== 'custom' && <div className="qpl-section-header">
+        <div><h2>{tab==='construction'?'Construction Packages':'Interior & Other Packages'}</h2>
+          <p>Select a package or choose Custom Quote to calculate material costs for a client.</p></div>
         <div className="qpl-filters">
           <label className="qpl-search">
             <span aria-hidden="true">⌕</span>
-            <input type="search" value={search} onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search packages..." aria-label="Search packages" />
+            <input type="search" value={search} onChange={event=>setSearch(event.target.value)}
+              placeholder="Search packages..." aria-label="Search packages"/>
           </label>
           <label className="qpl-filter">
             <span className="sr-only">Package status</span>
-            <select value={filter} onChange={(e) =>
-              setFilter(e.target.value as typeof filter)}>
+            <select value={filter} onChange={event=>setFilter(event.target.value as typeof filter)}>
               <option value="all">All Packages</option>
               <option value="active">Active Packages</option>
               <option value="inactive">Inactive Packages</option>
             </select>
           </label>
         </div>
-      </div>
+      </div>}
       {message && <div role="status" className="qpl-message">{message}</div>}
       {addStarter && <div className="qpl-starter">
         <span>Missing a standard construction package template?</span>
@@ -215,41 +214,69 @@ export function PackageLibrary({
         </button>
       </div>}
 
-      {tab === 'construction' && <details className="qpl-brand-pricing">
-        <summary>⚙ Custom Quote · Manage Brand &amp; Unit Prices
-          <span>{rates.filter(rate => rate.status === 'active').length} active options</span>
-        </summary>
-        <p className="qpl-brand-explainer">Set every steel, cement, brick and other brand price by kg, bag, brick or your chosen unit.
-          Enter how many units are used per SFT. Your customer can then select a brand for each material
-          and the Custom Quote automatically totals the selected unit costs.</p>
-        <ConstructionRatesManager rates={rates} canManage={canManage}/>
-      </details>}
-
-      <section className="qpl-cards" role="tabpanel"
-        aria-label={tab === 'construction' ? 'Construction package cards' : 'Interior package cards'}>
-        {visible.slice(0, 3).map((entry,index) => renderCard(entry,index))}
-        {renderCustom()}
-        {visible.slice(3).map((entry,index) => renderCard(entry,index+3))}
-      </section>
-      {visible.length === 0 && <p className="qpl-empty">
-        No matching saved packages. You can still create a Custom Quote using the card above.
-      </p>}
-      {other === null && tab === 'other' && <p className="qpl-warning">
-        Industry package storage is not available yet. Custom quotations are still accessible;
-        ask your administrator to apply the pending quotation packages migration.
-      </p>}
-
-      {(editing || detail || remove) && <div className="qpl-overlay"
+      {tab !== 'custom' && <>
+        <section className="qpl-cards" role="tabpanel"
+          aria-label={tab==='construction'?'Construction package cards':'Interior package cards'}>
+          {visible.slice(0,3).map((entry,index)=>renderCard(entry,index))}
+          {tab==='construction'&&renderCustom()}
+          {visible.slice(3).map((entry,index)=>renderCard(entry,index+3))}
+        </section>
+        {visible.length===0&&<p className="qpl-empty">
+          No matching saved packages. {tab==='construction'
+            ? 'You can still configure the Custom Package below.'
+            : 'Add an interior package to get started.'}
+        </p>}
+        {other===null&&tab==='other'&&<p className="qpl-warning">
+          Interior package storage is not available yet. Contact the administrator
+          about the pending database migration.
+        </p>}
+      </>}
+      {tab!=='other'&&<CustomPackageManager rates={rates} canManage={canManage}
+        embedded={tab==='construction'}/>}
+      {(editing || detail || remove || compareOpen) && <div className="qpl-overlay"
         onMouseDown={(event) => {
           if (event.target === event.currentTarget) {
-            setEditing(null);setDetail(null);setRemove(null);
+            setEditing(null);setDetail(null);setRemove(null);setCompareOpen(false);
           }
         }}>
         <div className={'qpl-dialog' + (editing?.kind === 'construction' ? ' qpl-dialog-wide' : '')}
           ref={dialogRef} tabIndex={-1} role="dialog" aria-modal="true"
           aria-label={editing ? 'Package editor' : remove ? 'Delete package' : 'Package details'}>
           <button type="button" className="qpl-close" aria-label="Close dialog"
-            onClick={() => {setEditing(null);setDetail(null);setRemove(null);}}>×</button>
+            onClick={() => {setEditing(null);setDetail(null);setRemove(null);setCompareOpen(false);}}>×</button>
+          {compareOpen&&<div className="qpl-compare-dialog">
+            <h2>Compare Packages</h2>
+            <p>Choose any two company packages to compare their prices and inclusions.</p>
+            <div className="qpl-compare-selects">
+              {[0,1].map(slot=><label key={slot}>
+                Package {slot+1}
+                <select value={compareIds[slot]} onChange={event=>
+                  setCompareIds(curr=>slot===0
+                    ? [event.target.value,curr[1]] : [curr[0],event.target.value])}>
+                  <option value="">Choose package</option>
+                  {currentItems.filter(entry=>entry.item.status==='active').map(entry=>
+                    <option value={entry.item.id} key={entry.item.id}>{entry.item.name}</option>)}
+                </select>
+              </label>)}
+            </div>
+            {compareIds[0]&&compareIds[1]&&compareIds[0]!==compareIds[1]&&
+              <div className="qpl-comparison">
+                {compareIds.map(id=>{
+                  const entry=currentItems.find(p=>p.item.id===id);
+                  if(!entry)return null;
+                  return <article key={id}>
+                    <h3>{entry.item.name}</h3>
+                    <p className="qpl-comparison-price">{entry.kind==='construction'
+                      ? cash(entry.item.ratePerSqft)+' / SFT'
+                      : cash(entry.item.basePrice,entry.item.currency)}</p>
+                    <ul>{featureList(entry).map((s,i)=><li key={i}>✓ {s}</li>)}</ul>
+                    <Link className="qpl-btn-primary" href={quoteLink(entry)}>Use Package →</Link>
+                  </article>;
+                })}
+              </div>}
+            {compareIds[0]===compareIds[1]&&compareIds[0]&&
+              <p className="qpl-warning">Choose two different packages.</p>}
+          </div>}
           {editing?.kind === 'construction' && (
             <PremiumPackageEditor key={editing.id + ':' + (selectedItem?.version ?? '')}
               {...(selectedItem && 'ratePerSqft' in selectedItem
@@ -351,21 +378,22 @@ export function PackageLibrary({
   function renderCustom() {
     return <article className="qpl-custom" key="custom">
       <div className="qpl-custom-heading"><span aria-hidden="true">⚙</span>
-        <div><h3>Custom Quote</h3><p>Tailored to every client</p></div>
+        <div><h3>Custom Package</h3><p>Tailored to every client</p></div>
       </div>
-      <p>Build a calculated Custom Quote: choose brands for steel, cement,
-        bricks and other materials. The final per-SFT rate is calculated from
-        each brand's price per unit and quantity consumed per SFT.</p>
       <ul>
-        {['One brand per material category', 'Calculated cost per SFT',
-          'Automatic total for construction area', 'Editable customer selections',
-          'Generate the same premium quotation PDF'].map((line)=>
+        {['Manage material brands & rates',
+          'Choose brands for each category',
+          'Auto-calculate per SFT rate',
+          'Editable specifications',
+          'Generate premium PDF'].map(line=>
             <li key={line}><span aria-hidden="true">✓</span>{line}</li>)}
       </ul>
-      <Link className="qpl-custom-cta" href="/dashboard/quotations/new?mode=custom">
-        Create Custom Quote <span aria-hidden="true">→</span>
-      </Link>
-      <small>Calculated using the material and brand rates saved above.</small>
+      <button type="button" className="qpl-custom-cta"
+        onClick={()=>setTab('custom')}>
+        Manage Custom Package <span aria-hidden="true">→</span>
+      </button>
+      <Link className="qpl-custom-quote-link"
+        href="/dashboard/quotations/new?mode=custom">Create Custom Quote ↗</Link>
     </article>;
   }
 }
