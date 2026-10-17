@@ -225,7 +225,7 @@ export default async function Quotations({
     a.name.localeCompare(b.name));
 
   // One main card per customer. Their older quotations are preserved in the
-  // expandable history and keep their own independent edit/share actions.
+  // expandable history and keep their own independent preview and editing actions.
   const renderMobileQuote = (
     { row, revision, industry, createdAt, preview, editor, shared }: VisibleQuote,
     history = false,
@@ -267,14 +267,6 @@ export default async function Quotations({
             ? <QuotationReviseButton revisionId={row.id} version={revision.version}
                 number={row.quotation_number || 'Quotation'} />
             : <Link className="qs-quotes-action" href={editor}>Open</Link>}
-        <Link className="qs-quotes-action qs-quotes-action-share" href={editor + '?step=preview'}>
-          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor"
-            strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/>
-            <path d="m8.3 10.8 7.4-4.3M8.3 13.2l7.4 4.3"/>
-          </svg>
-          Share
-        </Link>
         <QuotationMobileMore>
           <Link href={'/dashboard/quotations/' + row.id + '/pdf'}>
             Download PDF
@@ -325,9 +317,6 @@ export default async function Quotations({
         {row.status === 'issued' && canCreate && revision &&
           <QuotationReviseButton revisionId={row.id} version={revision.version}
             number={row.quotation_number || 'Quotation'} />}
-        <Link href={editor + '?step=preview'}
-          aria-label={'Review and share ' + (row.quotation_number || 'quotation')}
-          title="Review and share in Quotation Studio" className="qs-quote-icon-button">➤</Link>
         <details className="qs-quotes-more">
           <summary aria-label={'More options for ' + (row.quotation_number || 'quotation')}>•••</summary>
           <div>
