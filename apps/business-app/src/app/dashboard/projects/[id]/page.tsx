@@ -127,7 +127,7 @@ export default async function Project({params,searchParams}:{
   accountEmail={email} planLabel="Business workspace"
   navigation={ownerWorkspaceNavigation(s.context)} currentHref="/dashboard/projects" search=""
   notificationsEnabled={has('notification.view')} dashboardBrand>
-  <ProjectCommandCentre view={view}
+  <ProjectCommandCentre view={view??'overview'}
    project={{
     id:project.id,name:project.name,code:project.code??'',status:project.status??'active',
     projectType:project.project_type??'',siteAddress:project.site_address,notes:project.notes??null,
