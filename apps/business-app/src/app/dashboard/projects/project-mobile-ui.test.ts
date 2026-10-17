@@ -29,10 +29,11 @@ describe('project mobile command centre',()=>{
  });
  it('preserves secured field reporting and role permissions',()=>{
    expect(site).toContain('<ConstructionJourney');
-   expect(site).toContain('<SiteActivity');
+   expect(site).not.toContain('<SiteActivity');
+   expect(site).toContain('operation="report_add"');
    expect(site).toContain('<AgreementReadinessPanel');
-   expect(site).toContain('allowMaterials={isEngineer || isProcurement}');
-   expect(site).toContain('allowQuality={isQuality}');
+   expect(site).toContain('allowMaterials={(open || site.stage');
+   expect(site).toContain('allowQuality={(open || site.stage');
    expect(site).not.toContain('className="sc-mobile-bottom"');
  });
  it('uses actual project site photographs and existing daily report details',()=>{

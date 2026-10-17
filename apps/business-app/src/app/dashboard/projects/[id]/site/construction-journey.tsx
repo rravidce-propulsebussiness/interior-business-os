@@ -172,11 +172,8 @@ export function ConstructionJourney({
   media,
   reports,
   gate,
-  managerUpdates = [],
   canSeeFinance,
   inSiteWorkspace = false,
-  canRequestMaterials = false,
-  canUploadWorkPhotos = false,
   canUploadCuringPhotos = false,
   stageRecords,
   canLinkRecords = false,
@@ -254,34 +251,8 @@ export function ConstructionJourney({
   const openStage = stages.find(
     (stage) => !qualityByStage.get(stage.id)?.cleared,
   )?.id;
-  const workMedia = media
-    .filter(
-      (record) =>
-        ['site', 'daily', 'inspection'].includes(value(record, 'category')) &&
-        ['image/jpeg', 'image/png', 'image/webp', 'video/mp4'].includes(
-          value(record, 'mime'),
-        ),
-    )
-    .slice(0, 4);
-  const curingMedia = media
-    .filter((record) => value(record, 'category') === 'curing')
-    .slice(0, 4);
-  const curingRounds = gate.filter(
-    (record) => value(record, 'kind') === 'curing',
-  );
-  // Interiors need room-installation and snagging milestones, not mandatory
-  // concrete-curing panels. Keep any recorded curing evidence visible.
-  const showCuring =
-    !isInterior || curingRounds.length > 0 || curingMedia.length > 0;
-  const recentReports = reports.slice(0, 2);
-  const latestReport = recentReports[0];
-  const latestManager = managerUpdates[0];
-  const pendingChecks = checks.filter(
-    (record) => value(record, 'status') !== 'passed',
-  );
-  const materialsOpen = materials.filter(
-    (record) => !['received', 'rejected'].includes(value(record, 'status')),
-  );
+  const curingMedia = media.filter(item => value(item,'category')==='curing').slice(0,4);
+  const curingRounds = gate.filter(item => value(item,'kind')==='curing');
   const operationsUrl = `/dashboard/operations?project=${projectId}`;
   const paymentsUrl = `/dashboard/finance/contracts?project_id=${projectId}`;
 
@@ -677,172 +648,6 @@ export function ConstructionJourney({
                         )}
                       </div>
                     )}
-                    {active && (
-                      <div className="cj-activity">
-                        <div className="cj-section-title">
-                          <div>
-                            <h4>Site records &amp; tomorrow&apos;s plan</h4>
-                            <p>
-                              Recent project-wide activity below is for context
-                              only. Stage-specific evidence appears in the
-                              section above.
-                            </p>
-                          </div>
-                          <Link href={go('#daily-reports')}>All updates →</Link>
-                        </div>
-                        <div className="cj-stage-columns">
-                          <div className="cj-subcard">
-                            <div className="cj-subhead">
-                              <h4>Site engineer updates</h4>
-                              {canUploadWorkPhotos && (
-                                <Link href={go('#media')}>
-                                  Add work photo →
-                                </Link>
-                              )}
-                            </div>
-                            {latestReport ? (
-                              <>
-                                <p>
-                                  <strong>
-                                    {date(value(latestReport, 'report_date'))}:
-                                  </strong>{' '}
-                                  {value(latestReport, 'completed_work')}
-                                </p>
-                                <p>
-                                  <strong>Tomorrow:</strong>{' '}
-                                  {value(latestReport, 'tomorrow_plan')}
-                                </p>
-                                <p className="cj-caption">
-                                  Workers recorded today:{' '}
-                                  {value(latestReport, 'worker_count') ||
-                                    'Not recorded'}
-                                </p>
-                                <p className="cj-labour">
-                                  <strong>
-                                    Tomorrow&apos;s labour requirement:
-                                  </strong>{' '}
-                                  {value(latestReport, 'tomorrow_workers') ||
-                                    'Not planned'}
-                                  {value(latestReport, 'tomorrow_workers')
-                                    ? ' workers'
-                                    : ''}
-                                </p>
-                              </>
-                            ) : (
-                              <p>No daily engineer report yet.</p>
-                            )}
-                            {latestManager && (
-                              <p className="cj-note">
-                                <strong>Manager&apos;s next priorities:</strong>{' '}
-                                {value(latestManager, 'tomorrow_priorities')}
-                              </p>
-                            )}
-                            {!latestReport && (
-                              <Link href={go('#daily-reports')}>
-                                Create first site update →
-                              </Link>
-                            )}
-                          </div>
-                          <div className="cj-subcard">
-                            <div className="cj-subhead">
-                              <h4>Material requirements</h4>
-                              {canRequestMaterials && (
-                                <Link href={go('#materials')}>
-                                  Request / update →
-                                </Link>
-                              )}
-                            </div>
-                            {materials.length ? (
-                              <ul className="cj-materials">
-                                {materials.slice(0, 5).map((item) => (
-                                  <li key={value(item, 'id')}>
-                                    <span>
-                                      {value(item, 'item')} ·{' '}
-                                      {value(item, 'quantity')}{' '}
-                                      {value(item, 'unit')}
-                                    </span>
-                                    <em>{human(value(item, 'status'))}</em>
-                                  </li>
-                                ))}
-                              </ul>
-                            ) : (
-                              <p>No material requests recorded yet.</p>
-                            )}
-                            <p className="cj-caption">
-                              {materialsOpen.length} project-wide requests
-                              awaiting closure. Ordering and receipts remain in
-                              Procurement.
-                            </p>
-                            <Link href={go('#materials')}>
-                              View procurement status →
-                            </Link>
-                          </div>
-                          <div className="cj-subcard">
-                            <div className="cj-subhead">
-                              <h4>Engineer work-start & progress photos</h4>
-                              <Link href={go('#media')}>Photo updates →</Link>
-                            </div>
-                            {workMedia.length ? (
-                              <div className="cj-gallery">
-                                {workMedia.map((item) => (
-                                  <EvidenceTile
-                                    key={value(item, 'id')}
-                                    item={item}
-                                    projectId={projectId}
-                                  />
-                                ))}
-                              </div>
-                            ) : (
-                              <p>
-                                No work-start or progress photos uploaded yet.
-                              </p>
-                            )}
-                          </div>
-                          {showCuring && (
-                            <div className="cj-subcard">
-                              <div className="cj-subhead">
-                                <h4>Watchman curing rounds</h4>
-                                <Link href={go('#security')}>
-                                  Log curing / photos →
-                                </Link>
-                              </div>
-                              <p>
-                                {curingRounds.length} curing rounds logged for
-                                this project. Curing may continue in parallel
-                                with later approved work.
-                              </p>
-                              {curingMedia.length ? (
-                                <div className="cj-gallery">
-                                  {curingMedia.map((item) => (
-                                    <EvidenceTile
-                                      key={value(item, 'id')}
-                                      item={item}
-                                      projectId={projectId}
-                                    />
-                                  ))}
-                                </div>
-                              ) : (
-                                <p className="cj-caption">
-                                  No curing photos uploaded yet.
-                                </p>
-                              )}
-                              {canUploadCuringPhotos && (
-                                <Link href={go('#security')}>
-                                  Upload curing evidence →
-                                </Link>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                        <p className="cj-footer-note">
-                          Open quality checks across the project:{' '}
-                          {pendingChecks.length}. The Operations plan, approved
-                          contract and inspections determine actual{' '}
-                          {isInterior ? 'interior project' : 'construction'}
-                          clearance.
-                        </p>
-                      </div>
-                    )}
                   </div>
                 </details>
               </div>
@@ -850,17 +655,7 @@ export function ConstructionJourney({
           })}
         </div>
       )}
-      <div className="cj-bottom">
-        {!isWatchman && (
-          <Link href={go('#daily-reports')}>＋ Add site update</Link>
-        )}
-        {canRequestMaterials && (
-          <Link href={go('#materials')}>＋ Material request</Link>
-        )}
-        {canUploadCuringPhotos && showCuring && (
-          <Link href={go('#security')}>＋ Curing photo</Link>
-        )}
-      </div>
+
     </section>
   );
 }

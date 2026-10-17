@@ -574,18 +574,6 @@ export default async function Projects({
                           </dt>
                           <dd>{getLocation(project.site_address)}</dd>
                         </div>
-                        <div>
-                          <dt>
-                            <OwnerIcon name="projects" size={15} />
-                            Industry
-                          </dt>
-                          <dd>
-                            {industry?.name ??
-                              displayName(
-                                project.project_type || 'Not assigned',
-                              )}
-                          </dd>
-                        </div>
                       </dl>
                       <div className="proj-progress">
                         <div className="proj-progress-heading">

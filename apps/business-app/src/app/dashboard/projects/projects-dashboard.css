@@ -220,3 +220,17 @@
  .proj-open-label{font-size:11px}
  .proj-card-secondary{display:flex;font-size:10px}
 }
+
+/* One status control per viewport: mobile pills, desktop dropdown. */
+@media(max-width:740px){
+ .proj-filters>.proj-select-wrap:nth-of-type(2){display:none}
+ .proj-filters>.proj-select-wrap:nth-of-type(3){display:block;grid-column:1}
+ .proj-view-toggle{display:none}
+ .proj-card-kind{margin-bottom:9px}
+ .proj-card .proj-meta>div{display:flex;align-items:center;gap:7px}
+ .proj-card .proj-meta>div:first-child{display:none}
+ .proj-card .proj-meta>div:last-child{display:none}
+ .proj-card .proj-meta>div dt{display:none}
+ .proj-card .proj-meta>div dd{font-size:11px;color:#6b798c}
+ .proj-filter-button{grid-row:1}
+}
