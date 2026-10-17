@@ -271,7 +271,7 @@ export function PremiumSalesInvoice({
             <td className="psi-money"><span className="psi-cell-mobile">Amount</span>{money(currencyTotal(line))}</td>
             <td><button aria-label={'Remove item '+(index+1)} type="button" className="psi-remove"
               disabled={lines.length===1||(hasStage&&index===0)}
-              onClick={()=>setLines(all=>all.filter((_,j)=>j!==index))>×</button></td>
+              onClick={()=>setLines(all=>all.filter((_,j)=>j!==index))}>×</button></td>
           </tr>)}</tbody></table></div>
           <p className="psi-hint">Use correct HSN/SAC and GST rates for each supply. The server calculates final taxes when saving.</p>
         </section>
