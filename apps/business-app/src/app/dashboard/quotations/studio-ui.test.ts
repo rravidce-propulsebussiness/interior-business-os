@@ -65,8 +65,8 @@ describe('consistent premium quotation document across previews and PDF routes',
   const quoteStudio = file('./studio-editor.tsx');
   const privatePreview = file('./[id]/preview/route.ts');
   const privatePdf = file('./[id]/pdf/route.ts');
-  const publicPdf = file('../../../q/[token]/pdf/route.ts');
-  const nodeRenderer = fileURLToPath(new URL('../../../../../../../packages/shared/src/pdf.node.ts', import.meta.url));
+  const publicPdf = file('../../q/[token]/pdf/route.ts');
+  const nodeRenderer = fileURLToPath(new URL('../../../../../../packages/shared/src/pdf.node.ts', import.meta.url));
 
   it('renders the same saved premium HTML in Leads, Quotations and Studio', () => {
     expect(leadsPreview).toContain("fetch(base + '/preview'");
@@ -81,7 +81,7 @@ describe('consistent premium quotation document across previews and PDF routes',
 
   it('uses browser HTML printing when provisioned and keeps the real PDF file for sharing', () => {
     const renderer = readFileSync(nodeRenderer,'utf8');
-    const pdfEntry = readFileSync(fileURLToPath(new URL('../../../../../../../packages/shared/src/pdf.ts', import.meta.url)), 'utf8');
+    const pdfEntry = readFileSync(fileURLToPath(new URL('../../../../../../packages/shared/src/pdf.ts', import.meta.url)), 'utf8');
     const pdfClient = file('./quotation-pdf-file.ts');
     expect(renderer).toContain("CHROMIUM_EXECUTABLE_PATH");
     expect(renderer).toContain("chromium.launch");
