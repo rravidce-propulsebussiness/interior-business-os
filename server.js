@@ -32,6 +32,18 @@ console.log(
 );
 validateDeploymentEnvironment(process.env, service);
 
+// Keep Playwright pointed at the exact browser copied with the deployed
+// project, independent of Hostinger's transient user HOME/cache directory.
+const deployedBrowserPath = resolve(root, '.playwright-browsers');
+if (service === 'business-app' && existsSync(deployedBrowserPath)) {
+  process.env.PLAYWRIGHT_BROWSERS_PATH = deployedBrowserPath;
+  console.log('[Business OS] Premium PDF Chromium bundle is available.');
+} else if (service === 'business-app' &&
+  process.env.PDF_RENDERER !== 'cloudflare-rest' &&
+  !(process.env.CF_BROWSER_ACCOUNT_ID && process.env.CF_BROWSER_API_TOKEN)) {
+  console.warn('[Business OS] Premium PDF renderer unavailable; build must install Chromium or configure Browser Rendering.');
+}
+
 const appDir = resolve(root, 'apps', service);
 if (!existsSync(resolve(appDir, '.next', 'BUILD_ID'))) {
   throw new Error(
