@@ -11826,6 +11826,15 @@ export interface Database {
         };
         Returns: string;
       };
+      project_permanent_delete: {
+        Args: {
+          p_org: string;
+          p_project: string;
+          p_version: number;
+          p_confirm: string;
+        };
+        Returns: boolean;
+      };
       project_site_my_projects: {
         Args: { p_organization_id: string };
         Returns: Json;
