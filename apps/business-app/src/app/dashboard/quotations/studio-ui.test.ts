@@ -738,7 +738,8 @@ describe('screenshot-matched Package Library with real company pricing', () => {
     expect(manager).toContain('Add Material');
     expect(manager).toContain('Save Changes');
     expect(manager).toContain('saveCustomPackageSettings');
-    expect(action).toContain('construction_custom_package_settings');
+    expect(action).toContain('saveCustomSettings');
+    expect(file('../../../../../../packages/database/src/construction-rates.ts')).toContain('construction_custom_package_settings_save');
     expect(css).toContain('@media(max-width:670px)');
   });
   it('provides a real authenticated Custom Package PDF instead of an inert CTA', () => {
