@@ -5,6 +5,7 @@ import { createGstRepository, type GstDocumentRow } from '@business-os/database/
 import { createGstTemplatesRepository } from '@business-os/database/gst-templates';
 import { ActionForm } from '@business-os/ui/action-form';
 import { saveGstProfile } from './actions';
+import { BillingProfileEditButton } from './billing-profile-edit-button';
 import './billing-premium.css';
 
 export const dynamic = 'force-dynamic';
@@ -139,11 +140,11 @@ export default async function BusinessBilling({
     <section className="billing-stats" aria-label="Billing summary">
       <div className="billing-stat">
         <span className="billing-stat-symbol warm"><Icon name="invoice"/></span>
-        <div><p>Sales invoiced</p><strong>{inr(salesValue)}</strong><small>{issued.length} issued sales invoices</small></div>
+        <div><p>Sales invoiced</p><strong>{inr(salesValue)}</strong><small>{issued.length} issued invoices in register</small></div>
       </div>
       <div className="billing-stat">
         <span className="billing-stat-symbol rose"><Icon name="bill"/></span>
-        <div><p>Purchase bills</p><strong>{inr(purchasesValue)}</strong><small>{purchase.length} recorded supplier bills</small></div>
+        <div><p>Purchase bills</p><strong>{inr(purchasesValue)}</strong><small>{purchase.length} recorded bills in register</small></div>
       </div>
       <div className="billing-stat">
         <span className="billing-stat-symbol warm"><Icon name="documents"/></span>
@@ -154,6 +155,8 @@ export default async function BusinessBilling({
         <div><p>Draft documents</p><strong>{drafts.length}</strong><small>Awaiting issue or recording</small></div>
       </div>
     </section>
+
+    <p className="billing-coverage">Summary values reflect the latest 100 company billing documents; use finance reports for complete accounting totals.</p>
 
     <div className="billing-layout">
       <div className="billing-left">
@@ -230,7 +233,7 @@ export default async function BusinessBilling({
             </Link>)}</div>
           {!docs.length&&<div className="billing-empty"><Icon name="documents"/><h3>No documents found</h3><p>Try another filter or create a new sales invoice or purchase bill.</p></div>}
           <div className="billing-register-footer">
-            <span>Showing {docs.length} documents · Register lists up to the latest 100 per category.</span>
+            <span>Showing {docs.length} of the latest 100 documents for this category.</span>
             <Link href="/dashboard/billing/gst-reports">GST filing workpapers <Icon name="arrow"/></Link>
           </div>
         </section>
@@ -254,7 +257,7 @@ export default async function BusinessBilling({
       <aside className="billing-right">
         <section className="billing-panel billing-profile" id="profile">
           <div className="billing-panel-heading"><div><h2>Billing Address &amp; GST</h2></div>
-            {canManage&&<a href="#billing-profile-edit" className="billing-edit-link">Edit</a>}
+            {canManage&&<BillingProfileEditButton/>}
           </div>
           <div className="billing-profile-row"><span className="billing-profile-icon"><Icon name="location"/></span>
             <div><strong>{profile?.legalName??'Billing identity not configured'}</strong><p>{profile?.address??'Add your registered legal business address.'}</p><small>State code: {profile?.stateCode??'—'}</small></div>
