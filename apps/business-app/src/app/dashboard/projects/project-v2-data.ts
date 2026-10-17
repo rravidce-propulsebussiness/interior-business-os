@@ -22,7 +22,7 @@ export type WorkspaceData = {
  memberOptions:{id:string;label:string}[]};
  stages:Stage[];links:StageLink[];milestones:PaymentMilestone[];
  transactions: {id:string;number:string;date:string;amount:number;status:string}[]|null;
- purchaseOrders:{id:string;number:string;status:string;date:string}|null;
+ purchaseOrders:{id:string;number:string;status:string;date:string}[]|null;
  tasks:{id:string;title:string;planned_start:string|null;status:string}[];
  contractValue:number|null;expenditure:number|null;
 };
@@ -81,7 +81,7 @@ export async function projectIndex(){
   projectType:p.project_type??'',address:projectAddress(p.site_address),
   createdAt:p.created_at,customerId:p.customer_id,
   client:p.customer_id?names.get(p.customer_id)??'Linked client':'No client',
-  industry:industries.get(p.industry_id)??'Project',
+  industry:(p.industry_id?industries.get(p.industry_id):null)??'Project',
   progress:progress.get(p.id)??null,
  }));
  return {s,list,org, user};
@@ -167,7 +167,7 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
    projectType:project.project_type??'',address:projectAddress(project.site_address),
    createdAt:project.created_at,customerId:project.customer_id,
    client:customer.data?.display_name??'Not linked',
-   industry:industriesById.get(project.industry_id)??'Project',progress
+   industry:(project.industry_id?industriesById.get(project.industry_id):null)??'Project',progress
   },
   site,stages:stageList,links:linkList,milestones,
   transactions:trans,purchaseOrders:po,
