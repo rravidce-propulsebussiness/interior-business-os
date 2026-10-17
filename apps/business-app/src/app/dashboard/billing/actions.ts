@@ -137,10 +137,12 @@ export async function saveGstDocument(form: FormData) {
     const revisionId = String(form.get('revisionId') ?? '').trim();
     const stageNumber = String(form.get('stageNumber') ?? '').trim();
     const stageRequested = Boolean(leadId || revisionId || stageNumber);
+    const wonLeadId = String(form.get('wonLeadId') ?? '').trim();
     const customerId = String(form.get('customerId') ?? '').trim();
     // Stage invoices must stay tied to the accepted quote. Ordinary invoices
     // may optionally reference an existing tenant customer without conversion.
-    if (stageRequested && customerId) throw new DomainError('VALIDATION_FAILED');
+    if ((stageRequested && (customerId || wonLeadId)) || (customerId && wonLeadId))
+      throw new DomainError('VALIDATION_FAILED');
     if (stageRequested) {
       const checkedLead = idSchema.parse(leadId);
       const checkedRevision = idSchema.parse(revisionId);
@@ -149,12 +151,16 @@ export async function saveGstDocument(form: FormData) {
       id = await createGstRepository(client).saveStageDocument(
         org, input, checkedLead, checkedRevision, checkedStage,
       );
+    } else if (input.kind === 'sales_invoice' && !marketplaceOrderId && wonLeadId) {
+      id = await createGstRepository(client).saveWonLeadDocument(
+        org, input, idSchema.parse(wonLeadId),
+      );
     } else if (input.kind === 'sales_invoice' && !marketplaceOrderId) {
       id = await createGstRepository(client).saveCustomerDocument(
         org, input, customerId ? idSchema.parse(customerId) : null,
       );
     } else {
-      if (customerId) throw new DomainError('VALIDATION_FAILED');
+      if (customerId || wonLeadId) throw new DomainError('VALIDATION_FAILED');
       // Supplier and marketplace bills continue through their original path.
       id = await createGstTemplatesRepository(client).saveDocument(org, input, null);
     }
