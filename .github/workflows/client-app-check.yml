@@ -7,6 +7,8 @@ on:
       - 'apps/business-app/src/app/dashboard/leads-navigation.ts'
       - 'apps/business-app/src/app/dashboard/quotations/**'
       - 'apps/business-app/src/app/dashboard/billing/**'
+      - 'apps/business-app/src/app/dashboard/settings/**'
+      - 'packages/database/supabase/migrations/20261017000600_unified_company_settings.sql'
       - 'packages/database/src/gst.ts'
       - 'packages/database/supabase/migrations/20261017000500_stage_invoice_project_activation.sql'
       - 'packages/database/supabase/migrations/20261017000400_gst_readonly_authorization.sql'
@@ -24,6 +26,8 @@ on:
       - 'apps/business-app/src/app/dashboard/leads-navigation.ts'
       - 'apps/business-app/src/app/dashboard/quotations/**'
       - 'apps/business-app/src/app/dashboard/billing/**'
+      - 'apps/business-app/src/app/dashboard/settings/**'
+      - 'packages/database/supabase/migrations/20261017000600_unified_company_settings.sql'
       - 'packages/database/src/gst.ts'
       - 'packages/database/supabase/migrations/20261017000500_stage_invoice_project_activation.sql'
       - 'packages/database/supabase/migrations/20261017000400_gst_readonly_authorization.sql'
@@ -48,7 +52,7 @@ jobs:
           node-version-file: .node-version
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec vitest run packages/core/src/custom-brand-quote.test.ts apps/business-app/src/app/dashboard/quotations/studio-ui.test.ts apps/business-app/src/app/dashboard/billing/billing-ui.test.ts apps/business-app/src/app/dashboard/billing/labour/labour.test.ts apps/business-app/src/app/dashboard/billing/stage-invoice.test.ts
+      - run: pnpm exec vitest run packages/core/src/custom-brand-quote.test.ts apps/business-app/src/app/dashboard/quotations/studio-ui.test.ts apps/business-app/src/app/dashboard/billing/billing-ui.test.ts apps/business-app/src/app/dashboard/billing/labour/labour.test.ts apps/business-app/src/app/dashboard/billing/stage-invoice.test.ts apps/business-app/src/app/dashboard/settings/settings.test.ts
       - run: pnpm --filter @business-os/business-app typecheck
       - run: pnpm --filter @business-os/business-app build
 
