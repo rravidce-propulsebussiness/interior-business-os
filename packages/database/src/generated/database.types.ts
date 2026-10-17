@@ -11346,6 +11346,23 @@ export interface Database {
         Args: { p_organization_id: string; p_id: string; p_reason: string };
         Returns: string;
       };
+      labour_disbursement_create: {
+        Args: { p_org: string; p_input: Json };
+        Returns: string;
+      };
+      labour_disbursement_mark_paid: {
+        Args: {
+          p_org: string;
+          p_id: string;
+          p_method: string;
+          p_reference?: string;
+        };
+        Returns: undefined;
+      };
+      labour_disbursements_list: {
+        Args: { p_org: string; p_from: string; p_to: string };
+        Returns: Json;
+      };
       lead_quotation_link: {
         Args: {
           p_organization_id: string;
