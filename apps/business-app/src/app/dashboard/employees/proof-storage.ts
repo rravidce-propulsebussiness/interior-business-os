@@ -27,9 +27,20 @@ async function storage() {
 export async function uploadEmployeeProof(key:string,file:File) {
   if (!PROOF_MIME.has(file.type)||file.size<1||file.size>MAX_PROOF_BYTES)
     throw new DomainError('VALIDATION_FAILED');
+  const bytes=new Uint8Array(await file.arrayBuffer());
+  const valid=file.type==='application/pdf'
+    ? bytes[0]===37&&bytes[1]===80&&bytes[2]===68&&bytes[3]===70
+    : file.type==='image/jpeg'
+      ? bytes[0]===255&&bytes[1]===216&&bytes[2]===255
+      : file.type==='image/png'
+        ? bytes[0]===137&&bytes[1]===80&&bytes[2]===78&&bytes[3]===71
+        : file.type==='image/webp'
+          ? String.fromCharCode(...bytes.slice(0,4))==='RIFF'&&
+            String.fromCharCode(...bytes.slice(8,12))==='WEBP' : false;
+  if(!valid)throw new DomainError('VALIDATION_FAILED');
   const target = await storage();
   const result = await target.upload(
-    key,new Uint8Array(await file.arrayBuffer()),{
+    key,bytes,{
       contentType:file.type,upsert:false,
     });
   if (result.error) throw new DomainError('INTERNAL_ERROR');
