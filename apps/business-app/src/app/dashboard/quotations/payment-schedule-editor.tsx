@@ -10,14 +10,6 @@ type Feedback = { type: 'success' | 'error'; text: string } | null;
 const MAX_STAGES = 40;
 
 const templates: Record<string, Milestone[]> = {
-  construction: [
-    { name: 'Agreement & advance', percent: '10', stageCodes: [] },
-    { name: 'Foundation & plinth', percent: '20', stageCodes: [] },
-    { name: 'RCC structure', percent: '25', stageCodes: [] },
-    { name: 'Brick work & block work', percent: '15', stageCodes: [] },
-    { name: 'Plastering & flooring', percent: '15', stageCodes: [] },
-    { name: 'Finishing & handover', percent: '15', stageCodes: [] },
-  ],
   interior: [
     { name: 'Agreement & advance', percent: '20', stageCodes: [] },
     { name: 'Design approval', percent: '20', stageCodes: [] },
@@ -28,8 +20,8 @@ const templates: Record<string, Milestone[]> = {
 };
 
 function suggestions(industry: string, floors: readonly string[]): Milestone[] {
-  if(industry==='construction' && floors.length)
-    return proposedConstructionPayments(floors).map(row=>({...row}));
+  if(industry==='construction')
+    return floors.length?proposedConstructionPayments(floors).map(row=>({...row})):[];
   return (templates[industry] ?? templates.interior)!.map(row=>({...row,stageCodes:[...row.stageCodes]}));
 }
 
@@ -218,6 +210,11 @@ export function PaymentScheduleEditor({
         </div>
       )}
 
+      {industry==='construction'&&!floorNames.length&&!savedPlan&&editable&&
+        <p className="qs-payment-footnote">
+          Save the floor-wise SFT quotation scope first to generate slab, brickwork and finishing payments for the actual floors.
+          You can still add a fully custom schedule using Add milestone.
+        </p>}
       <div className="qs-payment-stages">
         <div className="qs-payment-table-head" aria-hidden="true">
           <span>Stage / Milestone</span><span>%</span><span>Amount</span>
