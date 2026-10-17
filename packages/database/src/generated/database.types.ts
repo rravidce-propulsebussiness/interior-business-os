@@ -11598,6 +11598,11 @@ export interface Database {
         Args: { p_organization_id: string; p_operation: string; p_input: Json };
         Returns: string;
       };
+      organization_identity_settings_read: { Args: { p_org: string }; Returns: Json };
+      organization_identity_settings_save: {
+        Args: { p_org: string; p_input: Json };
+        Returns: undefined;
+      };
       organization_context: {
         Args: { p_organization_id: string };
         Returns: Json;
