@@ -3,7 +3,7 @@
   --bi-ink:#17233d;--bi-muted:#66748c;--bi-accent:#fa6219;--bi-line:#e9edf4;
   --bi-soft:#fff6ee;--bi-panel:#fff;
   box-sizing:border-box;
-  width:min(1540px,100%);min-width:0;margin:0 auto;padding:24px clamp(12px,2.4vw,36px) 52px;
+  box-sizing:border-box;width:min(1540px,100%);min-width:0;margin:0 auto;padding:24px clamp(12px,2.4vw,36px) 52px;
   color:var(--bi-ink);background:#fafbfd;font-family:inherit;
 }
 .billing-v2 *,.billing-v2 *::before,.billing-v2 *::after{box-sizing:border-box;}
