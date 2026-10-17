@@ -115,7 +115,14 @@ export default async function LeadDetail({
       }).filter((q)=>q.status!=='cancelled');
     }
   }
-  state.quotationProjectId=quotes.find(q=>q.projectId)?.projectId??null;
+  const potentialProjects=[...new Set(quotes.flatMap(q=>q.projectId?[q.projectId]:[]))];
+  if(potentialProjects.length){
+    const {data:availableProjects}=await s.client.from('projects')
+      .select('id').eq('organization_id',s.org)
+      .eq('removed_from_workspace',false).in('id',potentialProjects);
+    const available=new Set((availableProjects??[]).map(p=>p.id));
+    state.quotationProjectId=quotes.find(q=>q.projectId&&available.has(q.projectId))?.projectId??null;
+  }
   const editing:Record<string,unknown>=Object.fromEntries(
     Object.keys(crmSchemas.leads.shape)
       .filter(k=>k in l&&!['assigned_to','stage_id'].includes(k))
