@@ -22,6 +22,7 @@
     "./marketplace": "./src/marketplace.ts",
     "./platform-companies": "./src/platform-companies.ts",
     "./gst": "./src/gst.ts",
+    "./labour-disbursements": "./src/labour-disbursements.ts",
     "./gst-templates": "./src/gst-templates.ts",
     "./construction-rates": "./src/construction-rates.ts",
     "./construction-packages": "./src/construction-packages.ts",
