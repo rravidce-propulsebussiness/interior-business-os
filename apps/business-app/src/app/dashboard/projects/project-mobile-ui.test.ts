@@ -26,7 +26,7 @@ describe('project mobile command centre',()=>{
   expect(workspace).toContain("selectedView==='materials'");
   expect(workspace).toContain("selectedView==='checks'");
   expect(overview).toContain('searchParams');
-  expect(overview).toContain('view={view}');
+  expect(overview).toContain('view={view??'overview'}');
   expect(workspace).not.toContain('pcc-module-grid');
   expect(workspace).not.toContain('pcc-sidebar');
   expect(site).toContain('<ProjectMobileTabs');
