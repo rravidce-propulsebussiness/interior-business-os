@@ -4,6 +4,8 @@ import { canAccess } from '@business-os/auth';
 import { commercialServices } from '../commercial/service';
 import { activeOrganization,pageServices } from '@business-os/auth/server';
 import { workCompletionByProject } from './work-progress';
+import type { ProjectEntry } from './project-v2-types';
+export type { ProjectEntry } from './project-v2-types';
 
 export type SiteRow = Record<string,unknown> & {id:string};
 export type Stage = {id:string;title:string;status:string;phase:string;floor_code:string|null;
@@ -11,10 +13,6 @@ export type Stage = {id:string;title:string;status:string;phase:string;floor_cod
 export type StageLink = {stage_id:string;kind:string;record_id:string};
 export type PaymentMilestone={id:string;label:string;amount:string;currency:string;contract_number:string;
  contract_id:string};
-export type ProjectEntry = {
- id:string;name:string;code:string;status:string;projectType:string;address:string;
- createdAt:string;client:string;industry:string;progress:number|null;customerId:string|null;
-};
 export type WorkspaceData = {
  project:ProjectEntry;org:string;company:string;email:string;
  permissions:{manage:boolean;finance:boolean;payments:boolean;purchases:boolean;team:boolean};
