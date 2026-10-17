@@ -118,15 +118,9 @@ export async function recordEmployeeSalary(input:unknown):Promise<EmployeeAction
     }).strict().parse(input);
     const {client,organizationId,authorization}=await context('team.manage');
     await authorization.requirePermission(organizationId,'payment.record');
-    const person=(await employeeRepository(client).list(organizationId))
-      .find(p=>p.id===request.employeeId);
-    if(!person||person.status!=='active'||!person.salary||person.salary<=0
-       ||person.salaryType!=='monthly')throw new DomainError('VALIDATION_FAILED');
-    await salaryLedger(client).create(organizationId,{
-      employeeName:person.name,salaryMonth:request.month,
-      gross:Number(person.salary).toFixed(2),deductions:'0',
-      notes:'Payroll entry from '+person.code+'. Confirm payment in Finance.',
-    });
+    await employeeRepository(client).createSalary(
+      organizationId,request.employeeId,request.month,
+    );
     revalidatePath('/dashboard/finance');
     revalidatePath('/dashboard/employees');
     return {ok:true,message:'Salary entry recorded as pending. Open Finance to mark paid after transfer.'};
