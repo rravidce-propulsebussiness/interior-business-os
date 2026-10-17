@@ -4,7 +4,7 @@ import type { LabourDisbursement } from '@business-os/database/labour-disburseme
 import { labourDisbursementsCsv } from './labour-csv';
 
 const read=(url:URL)=>readFileSync(url,'utf8');
-const migration=read(new URL('../../../../../../../../packages/database/supabase/migrations/20261017000300_labour_disbursement_register.sql',import.meta.url));
+const migration=read(new URL('../../../../../../../packages/database/supabase/migrations/20261017000300_labour_disbursement_register.sql',import.meta.url));
 const page=read(new URL('./page.tsx',import.meta.url));
 const actions=read(new URL('./actions.ts',import.meta.url));
 const route=read(new URL('./export/route.ts',import.meta.url));
@@ -22,8 +22,8 @@ describe('labour register and accountant exports',()=>{
   it('generates an Excel-compatible CSV with formula-injection protection',()=>{
     const csv=labourDisbursementsCsv([row]);
     expect(csv.startsWith('\uFEFF')).toBe(true);
-    expect(csv).toContain('\"\\'=PAYLOAD()\"');
-    expect(csv).toContain('\"\\'+Shuttering team\"');
+    expect(csv).toContain(`"'=PAYLOAD()"`);
+    expect(csv).toContain(`"'+Shuttering team"`);
     expect(csv).toContain('\"13500.00\"');
     expect(csv).toContain('\"\"\"Some note\"\"\"');
     expect(csv.split('\r\n')).toHaveLength(3);
