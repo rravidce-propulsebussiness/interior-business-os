@@ -7189,6 +7189,7 @@ export interface Database {
           notes: string;
           assigned_user_id: string | null;
           is_sales_prospect: boolean;
+          removed_from_workspace: boolean;
         };
         Insert: {
           id?: string;
@@ -7208,6 +7209,7 @@ export interface Database {
           notes?: string;
           assigned_user_id?: string | null;
           is_sales_prospect?: boolean;
+          removed_from_workspace?: boolean;
         };
         Update: {
           id?: string;
@@ -7227,6 +7229,7 @@ export interface Database {
           notes?: string;
           assigned_user_id?: string | null;
           is_sales_prospect?: boolean;
+          removed_from_workspace?: boolean;
         };
         Relationships: [
           {
