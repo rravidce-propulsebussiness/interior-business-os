@@ -711,6 +711,14 @@
 .crm-leads-root .crm-quote-share-error {color:#a42c27;background:#fff0ef;border:1px solid #f4c6c1;}
 .crm-leads-root .crm-quote-share-ready {color:#126541;background:#ebfbf1;border:1px solid #b8e7ca;}
 .crm-leads-root .crm-quote-share-ready a {font-weight:850;text-decoration:underline;color:#14683f;}
+.crm-leads-root .crm-quote-share-ready p {margin:0 0 8px;}
+.crm-leads-root .crm-quote-share-ready button {
+  display:inline-flex;align-items:center;justify-content:center;
+  border-radius:9px;border:1px solid #93d9b0;background:white;
+  min-height:37px;padding:8px 12px;color:#11693b;
+  font-size:11px;font-weight:850;cursor:pointer;
+}
+.crm-leads-root .crm-quote-share-ready button:hover {background:#f2fff6;}
 .crm-quote-dialog[open] {
   display:flex;
   flex-direction:column;
