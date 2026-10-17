@@ -1,13 +1,14 @@
 import Link from 'next/link';
 import { z } from 'zod';
-import { emptyAddress } from '@business-os/core/commercial';
 import { canAccess } from '@business-os/auth';
 import { OwnerIcon, OwnerShell } from '../owner-shell';
 import { projectWorkspaceNavigation } from './project-workspace-navigation';
 import { ProjectRemovalButton } from './project-removal-button';
 import { commercialServices } from '../commercial/service';
-import { MasterForm } from '../commercial/master-form';
+import { OwnerMobileNav } from '../owner-mobile-nav';
+import { workCompletionByProject } from './work-progress';
 import '../owner-dashboard.css';
+import '../command-centre.css';
 import './projects-dashboard.css';
 
 export const dynamic = 'force-dynamic';
@@ -21,22 +22,13 @@ const assignedSitesSchema = z.array(
   }),
 );
 
-type ProjectStage =
-  'not_started' | 'design' | 'client_approved' | 'execution' | 'handover';
-const stageOrder: ProjectStage[] = [
-  'design',
-  'client_approved',
-  'execution',
-  'handover',
-];
-
 function stageInfo(stage: string | null, status: string) {
   if (status !== 'active') return { label: 'Inactive', tone: 'muted', step: 0 };
   switch (stage) {
     case 'design':
       return { label: 'Design & engineering', tone: 'amber', step: 1 };
     case 'client_approved':
-      return { label: 'Client approved', tone: 'green', step: 2 };
+      return { label: 'Planning', tone: 'amber', step: 2 };
     case 'execution':
       return { label: 'Site execution', tone: 'blue', step: 3 };
     case 'handover':
@@ -198,7 +190,6 @@ export default async function Projects({
     status?: string;
     industry?: string;
     view?: string;
-    new?: string;
   }>;
 }) {
   const params = await searchParams;
@@ -221,11 +212,25 @@ export default async function Projects({
       permission,
       ...(moduleKey ? { moduleKey } : {}),
     });
-  const canCreate = has('project.create', 'projects');
   const canRemove = has('project.manage', 'projects');
   const canClients =
     has('customer.view', 'crm') || has('customer.view', 'quotation');
   const navigation = projectWorkspaceNavigation(has);
+  const mobileNav = [
+    { label: 'Dashboard', href: '/dashboard', icon: 'dashboard' as const },
+    ...(has('project.view', 'projects')
+      ? [{ label: 'Projects', href: '/dashboard/projects', icon: 'projects' as const }]
+      : []),
+    ...(has('invoice.view', 'billing')
+      ? [{ label: 'Invoices', href: '/dashboard/billing', icon: 'billing' as const }]
+      : []),
+    ...(has('team.view')
+      ? [{ label: 'Team', href: '/dashboard/company/team', icon: 'team' as const }]
+      : []),
+    ...(has('organization.view')
+      ? [{ label: 'Settings', href: '/dashboard/settings', icon: 'settings' as const }]
+      : []),
+  ];
 
   const q = (params.q ?? '').trim().slice(0, 100);
   const page = Math.max(
@@ -245,7 +250,6 @@ export default async function Projects({
     ? (params.customer ?? '')
     : '';
   const view = params.view === 'list' ? 'list' : 'grid';
-  const showCreate = (params.new === '1' || Boolean(customer)) && canCreate;
   const baseParams = new URLSearchParams();
   if (q) baseParams.set('q', q);
   if (status) baseParams.set('status', status);
@@ -300,6 +304,21 @@ export default async function Projects({
     ]);
   if (projectsResult.error) throw new Error('Projects could not be loaded.');
   const projects = projectsResult.data ?? [];
+  const projectIds = projects.map((project) => project.id);
+  const recordedTasks = projectIds.length
+    ? await s.client
+        .from('project_tasks')
+        .select('project_id,status,completion_percentage,weight')
+        .eq('organization_id', s.org)
+        .in('project_id', projectIds)
+        .limit(1000)
+    : null;
+  const completion = workCompletionByProject(
+    projectIds,
+    !recordedTasks?.error && recordedTasks?.data && recordedTasks.data.length < 1000
+      ? recordedTasks.data
+      : null,
+  );
   const customerIds = [
     ...new Set(
       projects
@@ -324,18 +343,6 @@ export default async function Projects({
     : assignedSitesSchema.safeParse(assigned.data);
   const assignedSites = assignedParsed?.success ? assignedParsed.data : [];
   const sitesByProject = new Map(assignedSites.map((site) => [site.id, site]));
-  let customerOptions: { id: string; display_name: string }[] = [];
-  if (showCreate && !customer && canClients) {
-    const response = await s.client
-      .from('customers')
-      .select('id,display_name')
-      .eq('organization_id', s.org)
-      .eq('is_sales_prospect', false)
-      .eq('status', 'active')
-      .order('display_name')
-      .limit(100);
-    customerOptions = response.data ?? [];
-  }
 
   return (
     <OwnerShell
@@ -347,6 +354,7 @@ export default async function Projects({
       search={q}
       notificationsEnabled={has('notification.view')}
       currentHref="/dashboard/projects"
+      dashboardBrand
     >
       <main id="main-content" tabIndex={-1} className="proj-dashboard">
         <nav className="proj-breadcrumb" aria-label="Breadcrumb">
@@ -364,15 +372,10 @@ export default async function Projects({
               <p>Plan, track and deliver every project in one place.</p>
             </div>
           </div>
-          {canCreate && (
-            <Link
-              className="proj-primary-button"
-              href="/dashboard/projects?new=1"
-            >
-              <OwnerIcon name="plus" size={17} />
-              <span>New Project</span>
-            </Link>
-          )}
+          <Link href="/dashboard/quotations" className="proj-quote-link">
+            <OwnerIcon name="quotations" size={16} />
+            View quotations
+          </Link>
         </header>
 
         <section className="proj-stats" aria-label="Project overview">
@@ -410,114 +413,6 @@ export default async function Projects({
             tone="green"
           />
         </section>
-
-        {showCreate && (
-          <section
-            className="proj-create-panel"
-            id="new-project"
-            aria-label="New project"
-          >
-            <div className="proj-section-top">
-              <div>
-                <h2>Create a project</h2>
-                <p>
-                  Projects belong to a customer record so quotations and
-                  delivery remain connected.
-                </p>
-              </div>
-              <Link
-                href="/dashboard/projects"
-                className="proj-secondary-button"
-              >
-                Close
-              </Link>
-            </div>
-            {!customer ? (
-              canClients ? (
-                customerOptions.length ? (
-                  <form
-                    action="/dashboard/projects"
-                    method="get"
-                    className="proj-create-select"
-                  >
-                    <input type="hidden" name="new" value="1" />
-                    <label htmlFor="proj-customer">Select the customer</label>
-                    <select
-                      id="proj-customer"
-                      name="customer"
-                      required
-                      defaultValue=""
-                    >
-                      <option value="" disabled>
-                        Choose an existing customer
-                      </option>
-                      {customerOptions.map((item) => (
-                        <option key={item.id} value={item.id}>
-                          {item.display_name}
-                        </option>
-                      ))}
-                    </select>
-                    <button type="submit" className="proj-primary-button">
-                      Continue <OwnerIcon name="arrow" size={16} />
-                    </button>
-                  </form>
-                ) : (
-                  <p className="proj-empty-copy">
-                    No active customers available yet.{' '}
-                    <Link href="/dashboard/customers">
-                      Create a customer first →
-                    </Link>
-                  </p>
-                )
-              ) : (
-                <p className="proj-empty-copy">
-                  A user with customer access must select a customer to create
-                  the project.
-                </p>
-              )
-            ) : (
-              <MasterForm
-                entity="projects"
-                title="Project details"
-                initial={{
-                  organization_id: s.org,
-                  version: 1,
-                  customer_id: customer,
-                  name: '',
-                  code: '',
-                  industry_id: null,
-                  branch_id: null,
-                  project_type: '',
-                  site_address: emptyAddress,
-                  status: 'active',
-                  notes: '',
-                  assigned_user_id: null,
-                }}
-                fields={[
-                  { key: 'name', label: 'Project name', required: true },
-                  { key: 'code', label: 'Unique project code', required: true },
-                  {
-                    key: 'industry_id',
-                    label: 'Industry',
-                    nullable: true,
-                    options: [
-                      { value: '', label: 'Choose industry' },
-                      ...industries
-                        .filter((item) => item.status === 'active')
-                        .map((item) => ({ value: item.id, label: item.name })),
-                    ],
-                  },
-                  { key: 'project_type', label: 'Project type' },
-                  { key: 'site_address.line1', label: 'Site address' },
-                  { key: 'site_address.city', label: 'Site city' },
-                  { key: 'site_address.region', label: 'Site state / region' },
-                  { key: 'site_address.postal_code', label: 'Site PIN code' },
-                  { key: 'notes', label: 'Internal notes', type: 'textarea' },
-                ]}
-              />
-            )}
-          </section>
-        )}
 
         <section className="proj-register" aria-label="Company projects">
           <form
@@ -609,6 +504,7 @@ export default async function Projects({
             >
               {projects.map((project) => {
                 const stage = sitesByProject.get(project.id);
+              const percent = completion.get(project.id) ?? null;
                 const state = stageInfo(stage?.stage ?? null, project.status);
                 const industry = industries.find(
                   (item) => item.id === project.industry_id,
@@ -620,6 +516,11 @@ export default async function Projects({
                   );
                 return (
                   <article className="proj-card" key={project.id}>
+                    <Link
+                      href={'/dashboard/projects/' + project.id}
+                      className="proj-card-hit-area"
+                      aria-label={'Open ' + project.name + ' project overview'}
+                    />
                     <Illustration interior={interior} />
                     <div className="proj-card-content">
                       <div className="proj-card-heading">
@@ -668,39 +569,18 @@ export default async function Projects({
                         </div>
                       </dl>
                       <div className="proj-progress">
-                        {stage && project.status === 'active' ? (
-                          <>
-                            <div className="proj-progress-heading">
-                              <span>Delivery stage</span>
-                              <strong>
-                                {state.step
-                                  ? 'Stage ' +
-                                    state.step +
-                                    ' of ' +
-                                    stageOrder.length
-                                  : 'Not started'}
-                              </strong>
-                            </div>
-                            <div
-                              className="proj-stage-rail"
-                              aria-label={state.label}
-                            >
-                              {stageOrder.map((key, index) => (
-                                <span
-                                  key={key}
-                                  className={
-                                    index < state.step ? 'proj-stage-done' : ''
-                                  }
-                                />
-                              ))}
-                            </div>
-                          </>
-                        ) : (
-                          <span className="proj-unavailable">
-                            Detailed delivery stage available in the site
-                            workspace when assigned.
-                          </span>
-                        )}
+                        <div className="proj-progress-heading">
+                          <span>Overall work completed</span>
+                          <strong>{percent === null ? 'Not tracked' : percent + '%'}</strong>
+                        </div>
+                        <div className="proj-work-rail"
+                          role={percent === null ? undefined : 'progressbar'}
+                          aria-label="Recorded work completed"
+                          aria-valuenow={percent ?? undefined}
+                          aria-valuemin={percent === null ? undefined : 0}
+                          aria-valuemax={percent === null ? undefined : 100}>
+                          {percent !== null && <span style={{ width: percent + '%' }} />}
+                        </div>
                       </div>
                       <div className="proj-card-bottom">
                         <span className="proj-card-secondary">
@@ -709,16 +589,9 @@ export default async function Projects({
                             ? displayName(stage.role)
                             : 'Company project'}
                         </span>
-                        <Link
-                          className="proj-open"
-                          href={
-                            stage
-                              ? '/dashboard/projects/' + project.id + '/site'
-                              : '/dashboard/projects/' + project.id
-                          }
-                        >
-                          Open workspace <OwnerIcon name="arrow" size={16} />
-                        </Link>
+                        <span className="proj-open-label">
+                          Open project <OwnerIcon name="arrow" size={16} />
+                        </span>
                         {canRemove && (
                           <ProjectRemovalButton
                             id={project.id}
@@ -739,8 +612,8 @@ export default async function Projects({
               </span>
               <h3>No matching projects</h3>
               <p>
-                Try a different project name or filter, or select New Project to
-                begin.
+                Try a different project name or filter. New projects appear
+                here after the approved quotation and first invoice.
               </p>
               <Link href="/dashboard/projects">Clear filters →</Link>
             </div>
@@ -761,6 +634,7 @@ export default async function Projects({
             </div>
           </nav>
         </section>
+        <OwnerMobileNav navigation={mobileNav} currentHref="/dashboard/projects" />
       </main>
     </OwnerShell>
   );

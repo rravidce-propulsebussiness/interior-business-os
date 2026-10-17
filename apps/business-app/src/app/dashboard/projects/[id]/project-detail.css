@@ -1,6 +1,6 @@
 /* Premium project detail layout. Scoped to the Owner workspace, with no global overrides. */
 .project-detail-dashboard {
-  color: #142440;
+  color: #121b34;
   width: min(100%, 1600px);
   margin: 0 auto;
   padding: 22px 28px 54px;
@@ -27,11 +27,11 @@
   font-size: 12px;
 }
 .pd-breadcrumb strong {
-  color: #315583;
+  color: #d94e12;
   font-weight: 700;
 }
 .pd-breadcrumb a:hover {
-  color: #0c61db;
+  color: #f25c0b;
 }
 .pd-hero {
   display: flex;
@@ -54,9 +54,9 @@
   border-radius: 16px;
   flex: 0 0 89px;
   height: 89px;
-  color: #1264e8;
-  background: linear-gradient(135deg, #e5f1ff, #bcd8fc);
-  border: 1px solid #d0e2fc;
+  color: #fe5105;
+  background: linear-gradient(135deg, #fff0e6, #ffe0c8);
+  border: 1px solid #f7d4be;
 }
 .pd-hero-text {
   min-width: 0;
@@ -74,7 +74,7 @@
   line-height: 1.15;
   overflow-wrap: anywhere;
   font-weight: 850;
-  color: #0e2342;
+  color: #111c34;
 }
 .pd-status {
   border-radius: 40px;
@@ -126,20 +126,20 @@
   white-space: nowrap;
 }
 .pd-button-outline {
-  border: 1px solid #bed3f8;
-  color: #155bd0 !important;
+  border: 1px solid #f3cfb9;
+  color: #e9510b !important;
   background: #fff;
 }
 .pd-button-outline:hover {
-  background: #eaf3ff;
+  background: #fff1e8;
 }
 .pd-button-primary {
   color: #fff !important;
-  background: #1165ef;
-  box-shadow: 0 6px 18px #2467d321;
+  background: #fe5105;
+  box-shadow: 0 6px 18px #fd650f25;
 }
 .pd-button-primary:hover {
-  background: #064fbf;
+  background: #df4505;
   color: #fff !important;
 }
 .pd-tabs {
@@ -150,7 +150,7 @@
   scrollbar-width: thin;
   min-width: 0;
   background: #fff;
-  border: 1px solid #e7edf6;
+  border: 1px solid #f1e8e2;
   border-radius: 13px;
   padding: 5px;
   margin-bottom: 15px;
@@ -170,8 +170,8 @@
 }
 .pd-tabs > a:hover,
 .pd-tabs > a:first-child {
-  color: #1164df !important;
-  background: #edf4ff;
+  color: #fa5507 !important;
+  background: #fff1e9;
 }
 .pd-metrics {
   display: grid;
@@ -185,7 +185,7 @@
   display: flex;
   gap: 12px;
   align-items: center;
-  border: 1px solid #e9eef5;
+  border: 1px solid #f3e9e3;
   border-radius: 14px;
   background: #fff;
 }
@@ -198,8 +198,8 @@
   place-items: center;
 }
 .pd-icon-blue {
-  color: #1164ea;
-  background: #e6f1ff;
+  color: #f85a07;
+  background: #fff1e5;
 }
 .pd-icon-green {
   color: #12a470;
@@ -207,7 +207,7 @@
 }
 .pd-icon-amber {
   color: #d28c00;
-  background: #fff4df;
+  background: #fff1e1;
 }
 .pd-icon-purple {
   color: #7455ce;
@@ -249,7 +249,7 @@
 }
 .pd-panel {
   border-radius: 15px;
-  border: 1px solid #e8edf5;
+  border: 1px solid #f0e7e2;
   background: #fff;
   padding: 19px;
   min-width: 0;
@@ -273,7 +273,7 @@
   font-weight: 850;
 }
 .pd-panel-heading h2 svg {
-  color: #1469ee;
+  color: #fe5105;
   flex-shrink: 0;
 }
 .pd-panel-heading p {
@@ -284,7 +284,7 @@
 }
 .pd-text-link,
 .project-detail-dashboard .pd-text-link {
-  color: #1468e7 !important;
+  color: #fe5105 !important;
   font-size: 11px;
   font-weight: 800;
   white-space: nowrap;
@@ -315,7 +315,7 @@
   font-weight: 750;
 }
 .pd-overview-item a {
-  color: #1762cb !important;
+  color: #e7540b !important;
   font-size: 11px;
   font-weight: 750;
 }
@@ -323,7 +323,7 @@
   grid-column: 1 / -1;
 }
 .pd-project-notes {
-  border-top: 1px solid #eaf0f8;
+  border-top: 1px solid #fff4ed;
   margin-top: 17px;
   padding-top: 15px;
 }
@@ -336,8 +336,8 @@
 }
 .pd-current-stage {
   border-radius: 10px;
-  border: 1px solid #dce9ff;
-  background: #f1f7ff;
+  border: 1px solid #ffe8d8;
+  background: #fffaf7;
   padding: 12px 15px;
   display: flex;
   align-items: center;
@@ -346,8 +346,8 @@
   margin-bottom: 24px;
 }
 .pd-stage-flag {
-  color: #145ed1;
-  background: #e2eeff;
+  color: #e9540a;
+  background: #ffe9db;
   border-radius: 18px;
   font-size: 10px;
   font-weight: 800;
@@ -388,7 +388,7 @@
   width: 33px;
   height: 33px;
   border-radius: 50%;
-  background: #e4eaf4;
+  background: #f2e6dd;
   color: #677c9e;
   display: grid;
   place-items: center;
@@ -401,9 +401,9 @@
   color: #fff;
 }
 .pd-step-current .pd-stage-dot {
-  background: #1169ed;
+  background: #fe5105;
   color: #fff;
-  box-shadow: 0 0 0 5px #e1edff;
+  box-shadow: 0 0 0 5px #ffedde;
 }
 .pd-timeline-step strong {
   color: #254165;
@@ -425,7 +425,7 @@
   color: #0e9967;
 }
 .pd-step-current > span {
-  color: #1561d9;
+  color: #e95d18;
 }
 .pd-help-text {
   margin: 15px 0 0;
@@ -444,16 +444,16 @@
   margin: 0;
 }
 .pd-unavailable a {
-  color: #1163df !important;
+  color: #f35b0d !important;
   font-weight: 800;
 }
 .pd-count {
   padding: 5px 10px;
   border-radius: 20px;
-  background: #eaf3ff;
+  background: #fff1e8;
   font-size: 10px;
   font-weight: 800;
-  color: #2868c2;
+  color: #df621d;
 }
 .pd-areas-grid {
   display: grid;
@@ -461,10 +461,10 @@
   gap: 11px;
 }
 .pd-area {
-  border: 1px solid #e6edf7;
+  border: 1px solid #f6ebe4;
   border-radius: 11px;
   min-width: 0;
-  background: #fcfdff;
+  background: #fffdfb;
 }
 .pd-area summary {
   display: flex;
@@ -482,9 +482,9 @@
   place-items: center;
   width: 37px;
   height: 37px;
-  background: #eaf3ff;
+  background: #fff1e8;
   border-radius: 9px;
-  color: #1e68cf;
+  color: #f45a13;
   flex: 0 0 37px;
 }
 .pd-area summary > span:nth-child(2) {
@@ -509,7 +509,7 @@
 }
 .pd-area-body {
   padding: 12px;
-  border-top: 1px solid #e6edf7;
+  border-top: 1px solid #f6ebe4;
   min-width: 0;
 }
 .pd-area-body > p {
@@ -531,15 +531,15 @@
 .pd-action-disclosure {
   margin-top: 16px;
   padding: 12px 14px;
-  border: 1px solid #d4e3fa;
+  border: 1px solid #ffebdd;
   border-radius: 10px;
-  background: #f8fbff;
+  background: #fffaf7;
 }
 .pd-action-disclosure summary {
   cursor: pointer;
   font-size: 12px;
   font-weight: 800;
-  color: #115bcf;
+  color: #e85a11;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -560,7 +560,7 @@
   align-items: start;
   gap: 9px;
   padding: 10px 0;
-  border-bottom: 1px solid #ecf0f7;
+  border-bottom: 1px solid #f7ede7;
   min-width: 0;
 }
 .pd-update-icon {
@@ -568,8 +568,8 @@
   width: 35px;
   height: 35px;
   border-radius: 8px;
-  background: #ecf4ff;
-  color: #266acb;
+  background: #fff0e6;
+  color: #f05a14;
   display: grid;
   place-items: center;
 }
@@ -598,7 +598,7 @@
   color: #526b8e;
 }
 .pd-integrations section {
-  border-top: 1px solid #e9eef5;
+  border-top: 1px solid #f3e9e3;
   padding-top: 13px;
 }
 .pd-integrations h2 {
@@ -607,14 +607,14 @@
   color: #1b385b;
 }
 .pd-integrations a {
-  color: #1562d5 !important;
+  color: #f45c0e !important;
   text-decoration: underline !important;
 }
 .pd-member {
   display: flex;
   align-items: center;
   gap: 9px;
-  border-bottom: 1px solid #ecf0f7;
+  border-bottom: 1px solid #f7ede7;
   padding: 9px 0;
 }
 .pd-avatar {
@@ -622,8 +622,8 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: #e0e8fb;
-  color: #315bc0;
+  background: #fff0e5;
+  color: #e45a18;
   display: grid;
   place-items: center;
   font-weight: 850;
@@ -676,7 +676,7 @@
   width: 14px;
 }
 .pd-quick-actions a:hover {
-  background: #f1f7ff;
+  background: #fffaf7;
   border-color: #b5ceef;
 }
 .pd-side-details {
@@ -856,4 +856,57 @@
   .project-detail-dashboard * {
     scroll-behavior: auto;
   }
+}
+
+
+/* Owner homepage matching project header, work completion and overview. */
+.project-detail-dashboard { padding:24px 22px 105px; }
+.pd-hero { background:transparent; }
+.pd-hero-main { flex:1 1 275px; }
+.pd-hero-symbol {
+  flex:0 0 70px; width:70px; height:70px;
+  border-radius:15px;
+  color:#fe5105; background:linear-gradient(135deg,#fff3ea,#ffdfc9);
+  border:1px solid #ffddc7;
+}
+.pd-hero-progress { flex:0 0 220px; min-width:180px; display:flex; flex-direction:column; gap:7px; }
+.pd-hero-progress > span { color:#637088; font-size:11px; font-weight:700; }
+.pd-hero-progress > strong { color:#13203a; font-size:27px; letter-spacing:-.04em; font-weight:850; }
+.pd-progress-track { width:100%; height:9px; display:block; background:#e9edf1; border-radius:99px; overflow:hidden; }
+.pd-progress-track > span { display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg,#ff9254,#fe5105); transition:width .55s ease; }
+.pd-tabs { border-color:#f0e4dc; border-radius:13px; gap:5px; }
+.pd-tabs a:hover, .pd-tabs a:focus-visible { background:#fff1e9; color:#ed580b; }
+.pd-tabs a:first-child { background:#fff1e9; color:#ef580a; font-weight:800; }
+.pd-quick-overview { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:13px; margin-bottom:16px; }
+.pd-quick-card { display:flex; flex-direction:column; align-items:flex-start; padding:17px; min-width:0; }
+.pd-quick-card h2 { margin:0 0 12px; color:#17213b; font-size:14px; font-weight:850; }
+.pd-quick-number { font-size:27px; font-weight:850; color:#17213b; line-height:1.1; }
+.pd-quick-label { margin:8px 0 16px; font-size:11px; line-height:1.5; color:#758399; }
+.pd-quick-card .pd-progress-track { margin-top:auto; }
+.pd-quick-card > p { font-size:11px; color:#748199; margin:0 0 12px; }
+.pd-quick-card > a { margin-top:auto; color:#f45a0c; font-weight:750; font-size:11px; }
+.pd-quick-lines { width:100%; display:grid; gap:9px; margin-bottom:13px; }
+.pd-quick-lines div { min-width:0; display:flex; align-items:flex-start; justify-content:space-between; gap:8px; }
+.pd-quick-lines strong { min-width:0; max-width:77%; font-size:11px; font-weight:700; line-height:1.4; color:#26364f; overflow-wrap:anywhere; }
+.pd-quick-lines small { flex:0 0 auto; color:#77869a; font-size:10px; }
+@media(max-width:1100px) {
+  .pd-quick-overview { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .pd-quick-overview > :last-child { grid-column:1/-1; }
+}
+@media(max-width:740px) {
+  .project-detail-dashboard { padding:16px 12px 105px; }
+  .pd-hero { gap:14px; }
+  .pd-hero-main { flex:1 1 100%; gap:10px; }
+  .pd-hero-symbol { flex-basis:55px; width:55px; height:55px; border-radius:11px; }
+  .pd-hero-symbol svg { width:25px; height:25px; }
+  .pd-hero-progress { flex:1 1 100%; }
+  .pd-hero-progress > strong { font-size:23px; }
+  .pd-hero-actions { flex:1 1 100%; }
+  .pd-tabs { overflow-x:auto; }
+  .pd-quick-overview { grid-template-columns:1fr; gap:10px; }
+  .pd-quick-overview > :last-child { grid-column:auto; }
+  .pd-quick-card { padding:15px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .pd-progress-track > span { transition:none; }
 }

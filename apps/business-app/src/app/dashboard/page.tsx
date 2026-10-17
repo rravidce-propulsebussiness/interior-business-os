@@ -22,6 +22,7 @@ import {
   type CommandProject,
 } from './command-centre';
 import { leadsNavigation } from './leads-navigation';
+import { workCompletionByProject } from './projects/work-progress';
 import './owner-dashboard.css';
 import './command-centre.css';
 
@@ -480,25 +481,33 @@ export default async function Dashboard({
     });
   }
 
-  const stageProgress: Record<string, number> = {
-    not_started: 5,
-    design: 20,
-    client_approved: 40,
-    execution: 65,
-    handover: 90,
-  };
-  const commandProjects: CommandProject[] = (projects?.rows ?? [])
-    .slice(0, 3)
-    .map((project) => {
-      const stage = siteById.get(project.id)?.stage || 'not_started';
-      return {
-        id: project.id,
-        name: project.name || 'Project',
-        stage,
-        status: project.status,
-        step: stageProgress[stage] ?? null,
-      };
-    });
+  const homeProjectRows = (projects?.rows ?? []).slice(0, 3);
+  const homeProjectIds = homeProjectRows.map((project) => project.id);
+  const homeTasks = homeProjectIds.length
+    ? await client.from('project_tasks')
+        .select('project_id,status,completion_percentage,weight')
+        .eq('organization_id', orgId)
+        .in('project_id', homeProjectIds)
+        .limit(1000)
+    : null;
+  // PostgREST may cap responses at 1000 rows. A capped or failed query
+  // cannot safely be shown as an accurate total.
+  const workProgress = workCompletionByProject(
+    homeProjectIds,
+    !homeTasks?.error && homeTasks?.data && homeTasks.data.length < 1000
+      ? homeTasks.data
+      : null,
+  );
+  const commandProjects: CommandProject[] = homeProjectRows.map((project) => {
+    const stage = siteById.get(project.id)?.stage || 'not_started';
+    return {
+      id: project.id,
+      name: project.name || 'Project',
+      stage,
+      status: project.status,
+      step: workProgress.get(project.id) ?? null,
+    };
+  });
   const mapDocument = (document: {
     id: string;
     partyName: string;

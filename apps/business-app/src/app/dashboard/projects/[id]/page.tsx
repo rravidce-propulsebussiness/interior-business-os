@@ -9,48 +9,11 @@ import { commercialServices } from '../../commercial/service';
 import { MasterForm } from '../../commercial/master-form';
 import { OwnerIcon, OwnerShell } from '../../owner-shell';
 import { projectWorkspaceNavigation } from '../project-workspace-navigation';
-import { ConstructionJourney } from './site/construction-journey';
-import {
-  stageOwnerSchema,
-  mergeStageOwnerEdits,
-} from './site/stage-owner-view';
+import { OwnerMobileNav } from '../../owner-mobile-nav';
+import { workCompletionByProject } from '../work-progress';
 import '../../owner-dashboard.css';
+import '../../command-centre.css';
 import './project-detail.css';
-
-const stageRecordSchema = z.object({
-  owned: z.array(z.object({ kind: z.string(), id: z.uuid() })).default([]),
-  links: z.array(
-    z.object({
-      stage_id: z.uuid(),
-      kind: z.string(),
-      record_id: z.uuid(),
-    }),
-  ),
-  payments: z.array(
-    z.object({
-      stage_id: z.uuid(),
-      item_id: z.uuid(),
-      contract_id: z.uuid(),
-      label: z.string(),
-      amount: z.string(),
-      due_date: z.string().nullable(),
-      currency: z.string(),
-      contract_number: z.string(),
-      request_number: z.string().nullable(),
-      request_status: z.string().nullable(),
-    }),
-  ),
-  options: z.array(
-    z.object({
-      id: z.uuid(),
-      contract_id: z.uuid(),
-      label: z.string(),
-      amount: z.string(),
-      currency: z.string(),
-      contract_number: z.string(),
-    }),
-  ),
-});
 
 export const dynamic = 'force-dynamic';
 
@@ -75,60 +38,6 @@ const siteSummarySchema = z.object({
   designs: z.array(siteRow),
 });
 type SiteSummary = z.infer<typeof siteSummarySchema>;
-const timelineStageSchema = z.object({
-  id: z.uuid(),
-  instance_code: z.string(),
-  template_code: z.string(),
-  phase: z.string(),
-  floor_code: z.string().nullable(),
-  title: z.string(),
-  explanation: z.string(),
-  hold_point: z.string().nullable(),
-  activities: z.array(z.string()),
-  inspection_topics: z.array(z.string()),
-  dependencies: z.array(z.string()),
-  status: z.string(),
-  task_count: z.number().int().nonnegative(),
-});
-const timelineStagesSchema = z.object({ stages: z.array(timelineStageSchema) });
-const timelineQualitySchema = z.object({
-  stages: z.array(
-    z.object({
-      stage_id: z.uuid(),
-      cleared: z.boolean(),
-      inspections: z.array(
-        z.object({
-          mandatory: z.boolean(),
-          status: z.string(),
-          current: z.boolean(),
-        }),
-      ),
-    }),
-  ),
-});
-const deliveryStages = [
-  {
-    key: 'design',
-    label: 'Design & engineering',
-    detail: 'Plans, 3D and structural drawings',
-  },
-  {
-    key: 'client_approved',
-    label: 'Client approval',
-    detail: 'Recorded design acceptance',
-  },
-  {
-    key: 'execution',
-    label: 'Site execution',
-    detail: 'Daily updates and materials',
-  },
-  {
-    key: 'handover',
-    label: 'Quality & handover',
-    detail: 'Inspections and close-out',
-  },
-] as const;
-
 function field(row: Record<string, unknown>, key: string) {
   const value = row[key];
   return typeof value === 'string' || typeof value === 'number'
@@ -172,20 +81,6 @@ function locationSummary(value: unknown) {
   );
   return parts.length ? parts.join(', ') : 'Site address not entered';
 }
-function StageIcon({
-  index,
-  completed,
-  current,
-}: {
-  index: number;
-  completed: boolean;
-  current: boolean;
-}) {
-  if (completed) return <OwnerIcon name="check" size={17} />;
-  if (current) return <span>{index + 1}</span>;
-  return <span>{index + 1}</span>;
-}
-
 export default async function Project({
   params,
 }: {
@@ -251,59 +146,6 @@ export default async function Project({
     ? null
     : siteSummarySchema.safeParse(siteResponse.data);
   const site: SiteSummary | null = siteResult?.success ? siteResult.data : null;
-  const stageResponse = site
-    ? await s.client.rpc('construction_project_read', {
-        p_organization_id: s.org,
-        p_project_id: id,
-      })
-    : null;
-  const stageParsed =
-    stageResponse && !stageResponse.error
-      ? timelineStagesSchema.safeParse(stageResponse.data)
-      : null;
-  const baseTimelineStages = stageParsed?.success
-    ? stageParsed.data.stages
-    : [];
-  const ownerResponse = baseTimelineStages.length
-    ? await s.client.rpc('project_stage_owner_read', {
-        p_org: s.org,
-        p_project: id,
-      })
-    : null;
-  const ownerParsed =
-    ownerResponse && !ownerResponse.error
-      ? stageOwnerSchema.safeParse(ownerResponse.data)
-      : null;
-  const ownerData = ownerParsed?.success ? ownerParsed.data : null;
-  const timelineStages = mergeStageOwnerEdits(baseTimelineStages, ownerData);
-  const qcResponse = timelineStages.length
-    ? await s.client.rpc('construction_quality_read', {
-        p_org: s.org,
-        p_project: id,
-      })
-    : null;
-  const qcParsed =
-    qcResponse && !qcResponse.error
-      ? timelineQualitySchema.safeParse(qcResponse.data)
-      : null;
-  const timelineQuality = qcParsed?.success ? qcParsed.data : null;
-  const stageRecordResponse =
-    site && timelineStages.length
-      ? await s.client.rpc('construction_stage_record_read', {
-          p_organization_id: s.org,
-          p_project_id: id,
-        })
-      : null;
-  const stageRecordParsed =
-    stageRecordResponse && !stageRecordResponse.error
-      ? stageRecordSchema.safeParse(stageRecordResponse.data)
-      : null;
-  const stageRecords = stageRecordParsed?.success
-    ? stageRecordParsed.data
-    : null;
-  const currentStage = site
-    ? deliveryStages.findIndex((stage) => stage.key === site.stage)
-    : -1;
   const team = site?.team.filter((member) => member.active === true) ?? [];
   const pendingChecks =
     site?.checks.filter((check) => field(check, 'status') !== 'passed') ?? [];
@@ -328,12 +170,41 @@ export default async function Project({
   const projectUrl = '/dashboard/projects/' + id;
   const deliveryUrl = projectUrl + '/site';
   const navigation = projectWorkspaceNavigation(has);
+  const mobileNav = [
+    { label: 'Dashboard', href: '/dashboard', icon: 'dashboard' as const },
+    ...(has('project.view', 'projects')
+      ? [{ label: 'Projects', href: '/dashboard/projects', icon: 'projects' as const }]
+      : []),
+    ...(has('invoice.view', 'billing')
+      ? [{ label: 'Invoices', href: '/dashboard/billing', icon: 'billing' as const }]
+      : []),
+    ...(has('team.view')
+      ? [{ label: 'Team', href: '/dashboard/company/team', icon: 'team' as const }]
+      : []),
+    ...(has('organization.view')
+      ? [{ label: 'Settings', href: '/dashboard/settings', icon: 'settings' as const }]
+      : []),
+  ];
   const recentReports = [...(site?.reports ?? [])]
     .sort((a, b) =>
       field(b, 'report_date').localeCompare(field(a, 'report_date')),
     )
     .slice(0, 3);
   const recentMedia = (site?.media ?? []).slice(0, 4);
+  const taskResult = await s.client
+    .from('project_tasks')
+    .select('project_id,status,completion_percentage,weight,title,planned_start')
+    .eq('organization_id', s.org)
+    .eq('project_id', id)
+    .limit(1000);
+  const safeTasks =
+    !taskResult.error && taskResult.data.length < 1000 ? taskResult.data : null;
+  const progress = workCompletionByProject([id], safeTasks).get(id) ?? null;
+  const upcomingTasks = (safeTasks ?? [])
+    .filter((task) => task.status !== 'done' && task.status !== 'cancelled')
+    .filter((task) => Boolean(task.planned_start))
+    .sort((a, b) => (a.planned_start ?? '').localeCompare(b.planned_start ?? ''))
+    .slice(0, 2);
 
   return (
     <OwnerShell
@@ -345,6 +216,7 @@ export default async function Project({
       currentHref="/dashboard/projects"
       search=""
       notificationsEnabled={has('notification.view')}
+      dashboardBrand
     >
       <main
         id="main-content"
@@ -386,6 +258,18 @@ export default async function Project({
               </p>
             </div>
           </div>
+          <div className="pd-hero-progress">
+            <span>Overall work completed</span>
+            <strong>{progress === null ? 'Not tracked' : progress + '%'}</strong>
+            <div className="pd-progress-track"
+              role={progress === null ? undefined : 'progressbar'}
+              aria-label="Recorded work completion"
+              aria-valuenow={progress ?? undefined}
+              aria-valuemin={progress === null ? undefined : 0}
+              aria-valuemax={progress === null ? undefined : 100}>
+              {progress !== null && <span style={{ width: progress + '%' }} />}
+            </div>
+          </div>
           <div className="pd-hero-actions">
             {canManage && (
               <a href="#settings" className="pd-button pd-button-outline">
@@ -399,44 +283,16 @@ export default async function Project({
         </header>
 
         <nav className="pd-tabs" aria-label="Project sections">
-          <a href="#overview">
-            <OwnerIcon name="dashboard" size={16} />
-            Overview
-          </a>
-          <a href="#construction-timeline">
-            <OwnerIcon name="calendar" size={16} />
-            Timeline
-          </a>
+          <a href="#overview"><OwnerIcon name="dashboard" size={16} /> Overview</a>
           <Link href={deliveryUrl + '#daily-reports'}>
-            <OwnerIcon name="globe" size={16} />
-            Site updates
+            <OwnerIcon name="calendar" size={16} /> Site updates
           </Link>
+          <a href="#team"><OwnerIcon name="team" size={16} /> Team</a>
           <Link href={deliveryUrl + '#materials'}>
-            <OwnerIcon name="purchases" size={16} />
-            Materials
+            <OwnerIcon name="purchases" size={16} /> Materials
           </Link>
-          <a href="#team">
-            <OwnerIcon name="team" size={16} />
-            Team
-          </a>
-          <a href="#areas">
-            <OwnerIcon name="projects" size={16} />
-            Rooms & areas
-          </a>
-          <a href="#media">
-            <OwnerIcon name="globe" size={16} />
-            Media & reports
-          </a>
-          <a href="#commercial">
-            <OwnerIcon name="quotations" size={16} />
-            Commercial
-          </a>
-          {canManage && (
-            <a href="#settings">
-              <OwnerIcon name="settings" size={16} />
-              Settings
-            </a>
-          )}
+          <Link href="/dashboard/billing"><OwnerIcon name="billing" size={16} /> Invoices</Link>
+          <a href="#media"><OwnerIcon name="quotations" size={16} /> Documents</a>
         </nav>
 
         <section className="pd-metrics" aria-label="Project summary">
@@ -494,41 +350,50 @@ export default async function Project({
           </div>
         </section>
 
-        {site && (
-          <ConstructionJourney
-            projectId={id}
-            stages={timelineStages}
-            quality={timelineQuality}
-            materials={site.materials}
-            checks={site.checks}
-            media={site.media}
-            reports={site.reports}
-            gate={site.gate}
-            canSeeFinance={has('contract.view', 'billing')}
-            stageRecords={stageRecords}
-            canLinkRecords={Boolean(
-              stageRecords &&
-              (site.can_manage || site.role === 'site_engineer'),
-            )}
-            canManageLinks={site.can_manage}
-            isWatchman={site.role === 'watchman' && !site.can_manage}
-            canRequestMaterials={
-              site.stage === 'execution' &&
-              (site.can_manage ||
-                site.role === 'site_engineer' ||
-                site.role === 'procurement')
-            }
-            canUploadWorkPhotos={
-              site.stage === 'execution' &&
-              (site.can_manage || site.role === 'site_engineer')
-            }
-            canUploadCuringPhotos={
-              site.stage === 'execution' &&
-              (site.can_manage || site.role === 'watchman')
-            }
-          />
-        )}
-
+        <section className="pd-quick-overview" aria-label="Project at a glance">
+          <article className="pd-panel pd-quick-card">
+            <h2>Work progress</h2>
+            <strong className="pd-quick-number">
+              {progress === null ? '—' : progress + '%'}
+            </strong>
+            <span className="pd-quick-label">
+              {progress === null
+                ? 'No measured work recorded yet'
+                : 'Based on actual weighted task completion'}
+            </span>
+            <div className="pd-progress-track">
+              {progress !== null && <span style={{ width: progress + '%' }} />}
+            </div>
+          </article>
+          <article className="pd-panel pd-quick-card">
+            <h2>Upcoming work</h2>
+            {upcomingTasks.length ? (
+              <div className="pd-quick-lines">
+                {upcomingTasks.map((task) => (
+                  <div key={task.title + task.planned_start}>
+                    <strong>{task.title}</strong>
+                    <small>{formatDate(task.planned_start)}</small>
+                  </div>
+                ))}
+              </div>
+            ) : <p>No scheduled work available.</p>}
+            <Link href={deliveryUrl}>Open site workspace →</Link>
+          </article>
+          <article className="pd-panel pd-quick-card">
+            <h2>Recent site update</h2>
+            {recentReports.length ? (
+              <div className="pd-quick-lines">
+                {recentReports.slice(0, 2).map((report, index) => (
+                  <div key={index}>
+                    <strong>{field(report, 'completed_work') || 'Site report recorded'}</strong>
+                    <small>{formatDate(field(report, 'report_date'))}</small>
+                  </div>
+                ))}
+              </div>
+            ) : <p>No daily reports yet.</p>}
+            <Link href={deliveryUrl + '#daily-reports'}>View site updates →</Link>
+          </article>
+        </section>
         <div className="pd-content-grid" id="overview">
           <div className="pd-main-column">
             <section className="pd-panel">
@@ -578,88 +443,6 @@ export default async function Project({
                 <div className="pd-project-notes">
                   <small>Project notes</small>
                   <p>{project.notes}</p>
-                </div>
-              )}
-            </section>
-
-            <section className="pd-panel" id="delivery">
-              <div className="pd-panel-heading">
-                <div>
-                  <h2>
-                    <OwnerIcon name="calendar" size={18} /> Project delivery
-                  </h2>
-                  <p>
-                    Verified workflow stages, from drawings to quality handover.
-                  </p>
-                </div>
-                <Link href={deliveryUrl} className="pd-text-link">
-                  Full workflow →
-                </Link>
-              </div>
-              {site ? (
-                <>
-                  <div className="pd-current-stage">
-                    <span className="pd-stage-flag">
-                      {site.stage === 'not_started'
-                        ? 'Not started'
-                        : 'Current stage'}
-                    </span>
-                    <strong>
-                      {site.stage === 'not_started'
-                        ? 'Initialize the project workflow'
-                        : (deliveryStages[currentStage]?.label ??
-                          titleCase(site.stage))}
-                    </strong>
-                  </div>
-                  <div className="pd-timeline">
-                    {deliveryStages.map((stage, index) => {
-                      const complete = index < currentStage;
-                      const current = index === currentStage;
-                      return (
-                        <div
-                          key={stage.key}
-                          className={
-                            'pd-timeline-step' +
-                            (complete
-                              ? ' pd-step-complete'
-                              : current
-                                ? ' pd-step-current'
-                                : '')
-                          }
-                        >
-                          <div className="pd-stage-dot">
-                            <StageIcon
-                              index={index}
-                              completed={complete}
-                              current={current}
-                            />
-                          </div>
-                          <strong>{stage.label}</strong>
-                          <small>{stage.detail}</small>
-                          <span>
-                            {complete
-                              ? 'Previous stage'
-                              : current
-                                ? 'Current stage'
-                                : 'Upcoming'}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                  <p className="pd-help-text">
-                    Stages indicate workflow position, not a calculated
-                    percentage of physical construction completed.
-                  </p>
-                </>
-              ) : (
-                <div className="pd-unavailable">
-                  <OwnerIcon name="projects" size={24} />
-                  <p>
-                    Delivery information is available to assigned project roles
-                    and authorized managers in the site workspace.
-                  </p>
-                  <Link href={deliveryUrl}>Open site delivery →</Link>
                 </div>
               )}
             </section>
@@ -1091,6 +874,7 @@ export default async function Project({
             </details>
           </section>
         )}
+        <OwnerMobileNav navigation={mobileNav} currentHref="/dashboard/projects" />
       </main>
     </OwnerShell>
   );

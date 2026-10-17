@@ -2,6 +2,7 @@
 /* Dashboard-only presentational component: all values are supplied by the
    authenticated, tenant-scoped server page. No demonstration data. */
 import { OwnerIcon, type OwnerIconName } from './owner-shell';
+import { OwnerMobileNav } from './owner-mobile-nav';
 
 export type CommandMetric = {
   title: string;
@@ -168,11 +169,19 @@ export function CommandCentre({
           {projects.map((project) => <a key={project.id} href={'/dashboard/projects/' + project.id} className="command-project-row">
             <span className="command-project-symbol"><OwnerIcon name="projects" size={25}/></span>
             <span className="command-project-content">
-              <span className="command-project-top"><strong>{project.name}</strong><small>{prettify(project.stage)}</small></span>
-              <span className="command-progress" aria-label={project.stage + ' workflow stage (not completion percentage)'}>
+              <span className="command-project-top">
+                <strong>{project.name}</strong>
+                <small>{project.step === null ? 'Not tracked' : project.step + '% done'}</small>
+              </span>
+              <span className="command-progress"
+                role={project.step === null ? undefined : 'progressbar'}
+                aria-label="Recorded work completed"
+                aria-valuenow={project.step ?? undefined}
+                aria-valuemin={project.step === null ? undefined : 0}
+                aria-valuemax={project.step === null ? undefined : 100}>
                 {project.step !== null && <span style={{ width: project.step + '%' }}/>}
               </span>
-              <small className="command-stage-note">Current stage: {prettify(project.stage)}</small>
+              <small className="command-stage-note">Overall work completion</small>
             </span><span className="command-arrow" aria-hidden="true">›</span>
           </a>)}
         </div> : <p className="command-empty">No active projects to display.</p>}
@@ -217,10 +226,6 @@ export function CommandCentre({
       <DocumentList kind="expense" rows={expenses} href="/dashboard/billing?kind=purchase_bill" empty="No expenses recorded yet."/>
     </div>}
 
-    <nav className="command-mobile-nav" aria-label="Dashboard shortcuts">
-      {navigation.slice(0, 5).map((item) => <a href={item.href} key={item.href}
-        aria-current={item.href === '/dashboard' ? 'page' : undefined}>
-        <OwnerIcon name={item.icon} size={20}/><span>{item.label}</span></a>)}
-    </nav>
+    <OwnerMobileNav navigation={navigation} currentHref="/dashboard" />
   </main>;
 }
