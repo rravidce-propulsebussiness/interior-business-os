@@ -11873,16 +11873,16 @@ export interface Database {
         Args: { p_message: string; p_signature: string };
         Returns: Json;
       };
+      quotation_final_choices: {
+        Args: { p_org: string; p_customer_ids: string[] };
+        Returns: Json;
+      };
       quotation_item_configuration: {
         Args: {
           p_organization_id: string;
           p_item_id: string;
           p_branch_id?: string;
         };
-        Returns: Json;
-      };
-      quotation_final_choices: {
-        Args: { p_org: string; p_customer_ids: string[] };
         Returns: Json;
       };
       quotation_mark_final: {
