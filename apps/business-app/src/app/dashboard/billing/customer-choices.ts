@@ -59,7 +59,7 @@ export function invoiceCustomerChoices(
       address: address.text,
       stateCode: /^[0-9]{2}$/.test(state) ? state : defaultStateCode,
       fromApprovedQuotation: false,
-      fromExistingCustomer: row.selection_source !== 'won_lead',
+      fromExistingCustomer: row.selection_source !== 'won_lead' && row.won_lead_id !== row.id,
       wonLeadId: row.won_lead_id ?? null,
       leadNumber: row.won_lead_number ?? null,
     });
