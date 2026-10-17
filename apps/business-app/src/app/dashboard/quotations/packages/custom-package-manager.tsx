@@ -298,7 +298,7 @@ export function CustomPackageManager({ rates, canManage, embedded = false }: {
           <RateForm key={(editor.rate?.id??editor.category)+':'+(editor.rate?.version??'new')}
             {...(editor.rate?{rate:editor.rate}:{})}
             initialCategory={editor.category}
-            close={()=>{setEditor(null);router.refresh();}}/>
+            close={()=>{setEditor(null);setDirty(true);router.refresh();}}/>
         </>}
         {brandsFor&&<>
           <h3>{brandsFor} · Manage brands</h3>
