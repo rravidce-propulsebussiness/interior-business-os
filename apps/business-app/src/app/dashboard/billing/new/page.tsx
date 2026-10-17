@@ -1,33 +1,28 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { activeOrganization, pageServices } from '@business-os/auth/server';
-import {
-  createGstRepository,
-  type GstDocument,
-} from '@business-os/database/gst';
+import { createGstRepository, type GstDocument } from '@business-os/database/gst';
 import { createMarketplaceRepository } from '@business-os/database/marketplace';
-import { DocumentEditor } from '../document-editor';
 import { createGstTemplatesRepository } from '@business-os/database/gst-templates';
+import { DocumentEditor } from '../document-editor';
+import { PremiumSalesInvoice } from '../premium-sales-invoice';
+import { invoiceStageChoices } from '../stage-choices';
+import { OwnerShell, type OwnerNavItem } from '../../owner-shell';
+import '../../owner-dashboard.css';
 
 export const dynamic = 'force-dynamic';
+
 export default async function PrepareDocument({
   searchParams,
 }: {
-  searchParams: Promise<{
-    edit?: string;
-    order?: string;
-    error?: string;
-    kind?: string;
-  }>;
+  searchParams: Promise<{ edit?: string; order?: string; error?: string;
+    kind?: string; lead?: string }>;
 }) {
   const params = await searchParams;
   const context = await activeOrganization();
   if (!context) notFound();
   const { authorization, client } = await pageServices();
-  await authorization.requirePermission(
-    context.organizationId,
-    'invoice.create',
-  );
+  await authorization.requirePermission(context.organizationId, 'invoice.create');
   const gst = createGstRepository(client);
   const profile = await gst.profile(context.organizationId);
   const templatesRepo = createGstTemplatesRepository(client);
@@ -36,105 +31,73 @@ export default async function PrepareDocument({
   if (params.edit) {
     existing = await gst.document(context.organizationId, params.edit);
     if (!existing.isOwner || existing.status !== 'draft') notFound();
-    await authorization.requirePermission(
-      context.organizationId,
-      'invoice.manage',
-    );
+    await authorization.requirePermission(context.organizationId, 'invoice.manage');
   }
-  const currentLayout = existing
+  const existingLayout = existing
     ? await templatesRepo.documentLayout(context.organizationId, existing.id)
     : null;
-  let order: null | {
-    id: string;
-    productName: string;
-    buyerName: string;
-    quantity: number;
-    unitPrice: number;
-  } = null;
+  let order: null | { id:string;productName:string;buyerName:string;
+    quantity:number;unitPrice:number } = null;
   if (params.order) {
-    await authorization.requirePermission(
-      context.organizationId,
-      'catalog.manage',
-    );
+    await authorization.requirePermission(context.organizationId, 'catalog.manage');
     const orders = await createMarketplaceRepository(client).orders(
-      context.organizationId,
-      'seller',
-    );
-    const matched = orders.find(
-      (o) => o.id === params.order && o.status === 'accepted',
-    );
+      context.organizationId, 'seller');
+    const matched = orders.find(o => o.id===params.order && o.status==='accepted');
     if (!matched) notFound();
-    order = {
-      id: matched.id,
-      productName: matched.productName,
-      buyerName: matched.buyerName,
-      quantity: Number(matched.quantity),
-      unitPrice: Number(matched.unitPrice),
-    };
+    order = { id:matched.id,productName:matched.productName,
+      buyerName:matched.buyerName,quantity:Number(matched.quantity),
+      unitPrice:Number(matched.unitPrice) };
   }
-  return (
-    <main
-      id="main-content"
-      className="mx-auto max-w-7xl space-y-6 px-4 py-8 text-slate-900 sm:px-7"
-    >
-      <nav className="text-sm text-slate-500">
-        <Link href="/dashboard">Dashboard</Link> /{' '}
-        <Link href="/dashboard/billing">GST billing</Link> / Prepare
-      </nav>
-      <header className="rounded-3xl bg-slate-950 px-7 py-8 text-white">
-        <p className="text-xs font-bold uppercase tracking-widest text-teal-300">
-          GST-ready billing
-        </p>
-        <h1 className="mt-3 text-3xl font-semibold">
-          {existing
-            ? 'Edit document draft'
-            : order
-              ? 'Invoice marketplace buyer'
-              : 'Prepare a new invoice or bill'}
-        </h1>
-        <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-300">
-          Save a draft before final issuance. GST tax rates must be selected
-          from applicable law; invoice numbers and calculations are assigned and
-          frozen by the server.
-        </p>
-      </header>
-      {params.error && (
-        <div
-          role="alert"
-          className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700"
-        >
-          The document could not be saved: {params.error}. Check GSTIN, rates,
-          required fields and company permissions.
-        </div>
-      )}
-      {!profile ? (
-        <section className="rounded-2xl border border-amber-300 bg-amber-50 p-6">
-          <h2 className="text-lg font-semibold">
-            Set up your business billing identity first
-          </h2>
-          <p className="mt-2 text-sm">
-            Your legal business name, registered address and state code are
-            required to prepare invoices.
-          </p>
-          <Link
-            href="/dashboard/billing#profile"
-            className="mt-3 inline-block font-semibold text-blue-700 underline"
-          >
-            Configure billing profile →
-          </Link>
-        </section>
-      ) : (
-        <DocumentEditor
-          existing={existing}
-          order={order}
-          profile={profile}
-          standard={standard}
-          existingLayout={currentLayout}
-          requestedKind={
-            params.kind === 'purchase_bill' ? 'purchase_bill' : 'sales_invoice'
-          }
-        />
-      )}
-    </main>
-  );
+  const purchase = existing?.kind === 'purchase_bill' ||
+    (!existing && params.kind === 'purchase_bill');
+  const hasGrant = (key:string) =>
+    context.grants.some(g=>g.scope.kind==='organization'&&g.permission===key);
+  const stageContext = existing && !purchase
+    ? await gst.stageContext(context.organizationId,existing.id).catch(()=>null)
+    : null;
+  const eligible = !purchase && !order &&
+    hasGrant('lead.view') && hasGrant('lead.convert') &&
+    hasGrant('project.view');
+  const eligibleOptions = eligible
+    ? await gst.stageOptions(context.organizationId).catch(()=>[])
+    : [];
+  const choices = invoiceStageChoices(eligibleOptions,profile?.stateCode??'36');
+  const [company,account] = await Promise.all([
+    client.from('organizations').select('name')
+      .eq('id',context.organizationId).maybeSingle(),
+    authorization.requireAuthenticatedUser(),
+  ]);
+  const navigation:OwnerNavItem[] = [
+    {label:'Dashboard',href:'/dashboard',icon:'dashboard'},
+    ...(hasGrant('lead.view')?[{label:'Leads',href:'/dashboard/crm/leads',icon:'leads' as const}]:[]),
+    ...(hasGrant('quotation.view')?[{label:'Quotations',href:'/dashboard/quotations',icon:'quotations' as const}]:[]),
+    ...(hasGrant('project.view')?[{label:'Projects',href:'/dashboard/projects',icon:'projects' as const}]:[]),
+    {label:'Billing',href:'/dashboard/billing',icon:'billing'},
+    ...(hasGrant('payment.view')?[{label:'Finance',href:'/dashboard/finance',icon:'expenses' as const}]:[]),
+    {label:'Settings',href:'/dashboard/settings',icon:'settings'},
+  ];
+  return <OwnerShell companyName={company.data?.name??profile?.legalName??'Business OS'}
+    accountLabel={(account.email??'Account').split('@')[0]??'Account'}
+    accountEmail={account.email??''} planLabel="Business workspace"
+    navigation={navigation} search="" currentHref="/dashboard/billing"
+    notificationsEnabled={hasGrant('notification.view')}>
+    {params.error && <div role="alert" style={{
+      background:'#fff1f2',border:'1px solid #fecdd3',padding:14,
+      margin:'15px 24px',borderRadius:12,color:'#9f1239',fontSize:13,
+    }}>The invoice could not be saved: {params.error}</div>}
+    {!profile ? <main className="mx-auto max-w-4xl p-8">
+      <h1 className="text-2xl font-bold">Set up your billing identity</h1>
+      <p className="my-3 text-sm">Company legal name, billing address and state code are required before preparing invoices.</p>
+      <Link href="/dashboard/billing#profile" className="text-orange-600 underline">Configure billing identity →</Link>
+    </main> : purchase || !!order ? <main id="main-content"
+      className="mx-auto max-w-7xl space-y-5 px-4 py-8 text-slate-900 sm:px-7">
+      <Link href="/dashboard/billing" className="text-sm text-slate-500">← Billing</Link>
+      <h1 className="text-2xl font-extrabold">{purchase?'Supplier purchase bill':'Marketplace invoice'}</h1>
+      <DocumentEditor existing={existing} order={order} profile={profile}
+        standard={standard} existingLayout={existingLayout}
+        requestedKind={purchase?'purchase_bill':'sales_invoice'}/>
+    </main> : <PremiumSalesInvoice profile={profile} standard={standard}
+      existing={existing} stageContext={stageContext} choices={choices}
+      initialLead={params.lead??''}/>}
+  </OwnerShell>;
 }
