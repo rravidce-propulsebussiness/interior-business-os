@@ -14,6 +14,7 @@ import { saveCompanySettings } from './actions';
 import { companyCategoryOptions } from './company-categories';
 import '../owner-dashboard.css';
 import './settings.css';
+import { InvoiceTemplateSelector } from './template-selector';
 
 export const dynamic='force-dynamic';
 type Tab='company'|'branding'|'invoice'|'documents'|'payments'|'team'|'preferences';
@@ -151,7 +152,7 @@ export default async function SettingsPage({searchParams}:{
   ...(has('lead.view','crm')?[{label:'Leads',href:'/dashboard/crm/leads',icon:'leads' as const}]:[]),
   ...(has('quotation.view','quotation')?[{label:'Quotations',href:'/dashboard/quotations',icon:'quotations' as const}]:[]),
   ...(has('project.view','projects')?[{label:'Projects',href:'/dashboard/projects',icon:'projects' as const}]:[]),
-  ...(has('billing.view')?[{label:'Billing',href:'/dashboard/billing',icon:'billing' as const}]:[]),
+  ...(has('billing.view')?[{label:'Finance',href:'/dashboard/finance',icon:'billing' as const}]:[]),
   ...((has('team.view')||has('role.view'))?[{label:'Team',href:'/dashboard/company/team',icon:'team' as const}]:[]),
   {label:'Settings',href:'/dashboard/settings',icon:'settings'},
  ];
@@ -271,6 +272,11 @@ export default async function SettingsPage({searchParams}:{
     </section></aside>
    </div>}
    {tab==='invoice'&&<div className="us-columns">
+    <section className="us-card us-wide">
+      <Header icon="▤" title="Invoice design & templates" detail="Choose the default design for new sales invoices. Existing issued invoices keep their original appearance."/>
+      <p className="us-info">Customize your company invoice appearance in Settings, not the Finance register. Invoice templates are shared platform presets with a company-specific selection.</p>
+      <InvoiceTemplateSelector organizationId={context.organizationId} canManage={canBilling}/>
+    </section>
     <section className="us-card"><Header icon="▤" title="Invoice & GST identity"
       detail="Official legal name, registered address and GST information."/>
      {canBilling?<div className="us-invoice-form"><ActionForm action={saveGstProfile} label="Save billing identity">
@@ -299,7 +305,7 @@ export default async function SettingsPage({searchParams}:{
    {tab==='documents'&&<section className="us-card us-wide">
     <Header icon="▧" title="Documents & Records" detail="Secure company documents remain in their existing modules."/>
     <Cards items={[{label:'Quotation PDFs and approvals',href:'/dashboard/quotations'},
-     {label:'Invoices and purchase bills',href:'/dashboard/billing'},
+     {label:'Invoices and purchase bills',href:'/dashboard/finance'},
      {label:'Project plans, contracts and attachments',href:'/dashboard/projects'}]}/>
     <p className="us-info">No duplicate document store or permission bypass is created in Settings.</p>
    </section>}
@@ -307,7 +313,7 @@ export default async function SettingsPage({searchParams}:{
     <Header icon="♧" title="Payment Settings" detail="Configure accounts and collection options."/>
     <Cards items={[{label:'Edit company bank details',href:'/dashboard/settings?tab=company#bank-details'},
      {label:'Payment methods',href:'/dashboard/finance/payment_methods'},
-     {label:'Invoices & stage collections',href:'/dashboard/billing'}]}/>
+     {label:'Invoices & stage collections',href:'/dashboard/finance'}]}/>
    </section>}
    {tab==='team'&&<section className="us-card us-wide">
     <Header icon="♙" title="Team & Access" detail="Manage employees, roles and permissions."/>

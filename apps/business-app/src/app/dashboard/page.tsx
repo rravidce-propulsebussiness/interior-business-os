@@ -310,14 +310,20 @@ export default async function Dashboard({
   }
   if (canBilling) {
     navigation.push({
-      label: 'Billing & Invoices',
-      href: '/dashboard/billing',
+      label: 'Finance',
+      href: '/dashboard/finance',
+      children: [
+        { label: 'Invoices', href: '/dashboard/finance?tab=invoices' },
+        { label: 'Expenses', href: '/dashboard/finance?tab=expenses' },
+        { label: 'GST', href: '/dashboard/finance?tab=gst' },
+        { label: 'Salaries', href: '/dashboard/finance?tab=salaries' },
+      ],
       icon: 'billing',
     });
     navigation.push({
-      label: 'Expenses',
-      href: '/dashboard/billing?kind=purchase_bill',
-      icon: 'expenses',
+      label: 'Billing & Plans',
+      href: '/dashboard/finance',
+      icon: 'billing',
     });
   }
   if (canReports)
@@ -441,7 +447,7 @@ export default async function Dashboard({
       title: 'Payments Due',
       value: '—',
       detail: outstandingDescription,
-      href: '/dashboard/billing',
+      href: '/dashboard/finance',
       icon: 'expenses',
       tone: 'orange',
     });
@@ -477,7 +483,7 @@ export default async function Dashboard({
       status: 'Draft',
       tone: 'neutral',
       icon: 'billing',
-      href: '/dashboard/billing?kind=sales_invoice',
+      href: '/dashboard/finance?tab=invoices',
     });
   }
 
@@ -543,7 +549,7 @@ export default async function Dashboard({
   const mobileNav = [
     { label: 'Dashboard', href: '/dashboard', icon: 'dashboard' as const },
     ...(canProjects ? [{ label: 'Projects', href: '/dashboard/projects', icon: 'projects' as const }] : []),
-    ...(canBilling ? [{ label: 'Invoices', href: '/dashboard/billing', icon: 'billing' as const }] : []),
+    ...(canBilling ? [{ label: 'Finance', href: '/dashboard/finance', icon: 'billing' as const }] : []),
     ...(canTeam ? [{ label: 'Team', href: '/dashboard/company/team', icon: 'team' as const }] : []),
     ...(canSettings ? [{ label: 'Settings', href: '/dashboard/settings', icon: 'settings' as const }] : []),
   ];
