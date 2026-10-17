@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { OwnerIcon, type OwnerIconName } from '../../owner-shell';
+import { MasterForm } from '../../commercial/master-form';
 import {
  activityFeed,friendlyDate,human,linkedStageCounts,location,moduleCounts,textValue,
  type SiteRow,type Stage,type StageRecord,
@@ -54,13 +55,14 @@ const moduleOrder=['documents','payments','designs','team','materials','labour',
 
 export function ProjectCommandCentre({project,industry,customer,site,stages,stageRecords,
  agreement,access,progress,canManage,canFinance,canPurchase,canSeeCustomer,
- canManageCustomer,canSeeQuotes,upcomingTask,areaCount}:{
+ canManageCustomer,canSeeQuotes,upcomingTask,areaCount,settingsInitial,branches}:{
  project:ProjectInfo;industry:string;customer:{id:string;name:string}|null;
  site:SiteData|null;stages:Stage[];stageRecords:StageRecord|null;
  agreement:Agreement|null;access:Access[]|null;progress:number|null;
  canManage:boolean;canFinance:boolean;canPurchase:boolean;
  canSeeCustomer:boolean;canManageCustomer:boolean;canSeeQuotes:boolean;
  upcomingTask:{title:string;planned_start:string|null}|null;areaCount:number;
+ settingsInitial:Record<string,unknown>;branches:{id:string;name:string}[];
 }) {
  const id=project.id,base='/dashboard/projects/'+id,siteUrl=base+'/site';
  const counts=moduleCounts(site);
@@ -319,9 +321,26 @@ export function ProjectCommandCentre({project,industry,customer,site,stages,stag
     </Panel>
     {canManage&&<details id="settings" className="pcc-project-settings">
      <summary><OwnerIcon name="settings" size={18}/> Project details & settings</summary>
-     <p>Project scope and master data continue to be edited in their existing authorized workflow.</p>
-     <Link href={siteUrl+'#construction-planning'}>Edit execution stages and scope →</Link>
-     {canSeeCustomer&&customer&&<Link href={'/dashboard/customers/'+customer.id}>Open linked customer →</Link>}
+     <p>Update the existing project record here. Quotation scope and the work-stage plan remain managed through their dedicated authorized workflow.</p>
+     <MasterForm entity="projects" title="Save project" initial={settingsInitial} fields={[
+      {key:'name',label:'Project name',required:true},
+      {key:'code',label:'Project code',required:true},
+      {key:'project_type',label:'Project type'},
+      {key:'branch_id',label:'Branch',nullable:true,options:[
+       {value:'',label:'Organization'},...branches.map(b=>({value:b.id,label:b.name})),
+      ]},
+      ...['line1','line2','city','region','postal_code','country_code'].map(key=>({
+       key:'site_address.'+key,label:'Site '+key.replaceAll('_',' '),
+      })),
+      {key:'notes',label:'Internal notes',type:'textarea' as const},
+      {key:'status',label:'Status',options:[
+       {value:'active',label:'Active'},{value:'inactive',label:'Inactive'},
+      ]},
+     ]}/>
+     <div className="pcc-section-footer">
+      <Link href={siteUrl+'#construction-planning'}>Edit execution stages and scope →</Link>
+      {canSeeCustomer&&customer&&<Link href={'/dashboard/customers/'+customer.id}>Open linked customer →</Link>}
+     </div>
     </details>}
    </div>
    <aside className="pcc-sidebar">
