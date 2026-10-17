@@ -2,6 +2,24 @@ import { chromium, type Browser } from 'playwright';
 import { existsSync } from 'node:fs';
 import type { PdfOptions } from './pdf';
 
+/** Stable, sanitized diagnosis. Never print Chromium stderr, local paths or env values. */
+export function chromiumLaunchFailureCategory(error: unknown):
+  'missing-binary' | 'missing-libraries' | 'execution-blocked' | 'resource-exhausted' | 'launch-timeout' | 'unknown' {
+  const detail = error instanceof Error ? error.message : '';
+  if (/error while loading shared libraries|cannot open shared object|host system is missing dependencies|lib(?:nss|atk|X11|gbm|asound|drm|cups)/i.test(detail))
+    return 'missing-libraries';
+  if (/executable doesn't exist|executable not found|enoent|please run .*playwright install/i.test(detail))
+    return 'missing-binary';
+  if (/permission denied|eacces|operation not permitted|no usable sandbox|seccomp|failed to move to new namespace|read.only file system/i.test(detail))
+    return 'execution-blocked';
+  if (/out of memory|cannot allocate memory|ENOMEM|resource temporarily unavailable|EAGAIN/i.test(detail))
+    return 'resource-exhausted';
+  if (/timed out|timeout/i.test(detail))
+    return 'launch-timeout';
+  return 'unknown';
+}
+
+
 /** A Node-only adapter. Never launch Chromium from a Cloudflare Worker. */
 export async function renderNodePdf(
   html: string,
@@ -11,6 +29,7 @@ export async function renderNodePdf(
     '--disable-background-networking',
     '--no-first-run',
     '--disable-extensions',
+    '--disable-dev-shm-usage',
   ];
   const configured = process.env.CHROMIUM_EXECUTABLE_PATH;
   // Prefer packaged Playwright Chromium, but some managed Node hosts provide a
@@ -41,6 +60,11 @@ export async function renderNodePdf(
     if (!recovered) {
       // Never log or expose filesystem paths and process environment details.
       // The upstream PDF router maps this stable code to a safe actionable error.
+      console.error('premium.pdf.chromium_launch_failed', {
+        reason: chromiumLaunchFailureCategory(initialError),
+        playwrightBundleConfigured: Boolean(process.env.PLAYWRIGHT_BROWSERS_PATH),
+        systemChromiumAttempted: systemPaths.some(executablePath => existsSync(executablePath)),
+      });
       throw new Error('PDF_CHROMIUM_UNAVAILABLE', { cause: initialError });
     }
   }
