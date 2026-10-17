@@ -4,6 +4,7 @@ on:
     paths:
       - 'apps/business-app/src/app/client/**'
       - 'apps/business-app/src/app/dashboard/crm/**'
+      - 'apps/business-app/src/app/dashboard/projects/**'
       - 'apps/business-app/src/app/dashboard/leads-navigation.ts'
       - 'apps/business-app/src/app/dashboard/quotations/**'
       - 'apps/business-app/src/app/dashboard/billing/**'
@@ -23,6 +24,7 @@ on:
     paths:
       - 'apps/business-app/src/app/client/**'
       - 'apps/business-app/src/app/dashboard/crm/**'
+      - 'apps/business-app/src/app/dashboard/projects/**'
       - 'apps/business-app/src/app/dashboard/leads-navigation.ts'
       - 'apps/business-app/src/app/dashboard/quotations/**'
       - 'apps/business-app/src/app/dashboard/billing/**'
