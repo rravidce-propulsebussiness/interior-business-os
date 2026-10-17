@@ -70,3 +70,32 @@ END;
 $$;
 REVOKE ALL ON FUNCTION public.gst_customer_invoice_save(uuid,jsonb,uuid) FROM PUBLIC,anon;
 GRANT EXECUTE ON FUNCTION public.gst_customer_invoice_save(uuid,jsonb,uuid) TO authenticated;
+
+
+-- Once the owner confirms "Create project" for a Won lead, the standard CRM
+-- conversion changes the existing quotation prospect into a real client and
+-- project in the same transaction, so invoices can select that client.
+CREATE FUNCTION private.crm_activate_won_project_on_conversion()
+RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path TO ''
+AS $$
+BEGIN
+  IF OLD.converted_at IS NULL AND NEW.converted_at IS NOT NULL
+     AND NEW.lifecycle='won' AND NEW.converted_project_id IS NOT NULL
+     AND NEW.converted_customer_id IS NOT NULL THEN
+    UPDATE public.customers c SET is_sales_prospect=false
+      WHERE c.organization_id=NEW.organization_id
+        AND c.id=NEW.converted_customer_id
+        AND c.is_sales_prospect=true;
+    UPDATE public.projects p SET is_sales_prospect=false
+      WHERE p.organization_id=NEW.organization_id
+        AND p.id=NEW.converted_project_id
+        AND p.customer_id=NEW.converted_customer_id
+        AND p.is_sales_prospect=true;
+  END IF;
+  RETURN NEW;
+END;
+$$;
+REVOKE ALL ON FUNCTION private.crm_activate_won_project_on_conversion() FROM PUBLIC,anon,authenticated;
+CREATE TRIGGER crm_activate_won_project_after_convert
+AFTER UPDATE OF converted_at ON public.leads
+FOR EACH ROW EXECUTE FUNCTION private.crm_activate_won_project_on_conversion();
