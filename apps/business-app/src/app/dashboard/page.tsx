@@ -332,6 +332,8 @@ export default async function Dashboard({
       href: '/dashboard/reports',
       icon: 'reports',
     });
+  if (has('team.manage'))
+    navigation.push({ label: 'Employees', href: '/dashboard/employees', icon: 'team' });
   if (canTeam || has('role.view'))
     navigation.push({
       label: 'Team',
@@ -550,6 +552,7 @@ export default async function Dashboard({
     { label: 'Dashboard', href: '/dashboard', icon: 'dashboard' as const },
     ...(canProjects ? [{ label: 'Projects', href: '/dashboard/projects', icon: 'projects' as const }] : []),
     ...(canBilling ? [{ label: 'Finance', href: '/dashboard/finance', icon: 'billing' as const }] : []),
+    ...(has('team.manage') ? [{ label: 'Employees', href: '/dashboard/employees', icon: 'team' as const }] : []),
     ...(canTeam ? [{ label: 'Team', href: '/dashboard/company/team', icon: 'team' as const }] : []),
     ...(canSettings ? [{ label: 'Settings', href: '/dashboard/settings', icon: 'settings' as const }] : []),
   ];
