@@ -256,8 +256,6 @@ export function ProjectCommandCentre({project,industry,customer,site,stages,stag
         <strong>{textValue(row,'completed_work')||'Daily site progress update'}</strong>
         <small>{friendlyDate(textValue(row,'report_date'))} · {textValue(row,'worker_count')||'—'} workers</small></div>
        <Pill status="recorded"/></>}/>:<Empty message="No execution work updates entered yet."/>}
-      {upcomingTask&&<div className="pcc-next"><small>Next scheduled activity</small><strong>{upcomingTask.title}</strong>
-       <span>{friendlyDate(upcomingTask.planned_start)}</span></div>}
      </Panel>
      <Panel id="checks" title="Checks & Quality" href={siteUrl+'#quality'}
       note="Multiple pass, fail and recheck records through the project">
