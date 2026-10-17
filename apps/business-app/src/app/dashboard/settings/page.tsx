@@ -44,7 +44,7 @@ const identitySchema=z.object({
  bankName:z.string().optional(),bankBranch:z.string().optional(),
 });
 function Field({name,label,value,required=false,type='text',maxLength=200,placeholder=''}:{
- name:string;label:string;value?:string|null;required?:boolean;
+ name:string;label:string;value?:string|null|undefined;required?:boolean;
  type?:string;maxLength?:number;placeholder?:string;
 }){
  return <label className="us-field"><span>{label}{required&&<em> *</em>}</span>
