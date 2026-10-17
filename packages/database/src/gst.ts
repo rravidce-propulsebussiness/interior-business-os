@@ -160,6 +160,7 @@ export function createGstRepository(client: SupabaseClient<Database>) {
         id:string;display_name:string;legal_name:string|null;phone:string|null;
         email:string|null;tax_identifier:string|null;billing_address:unknown;
         won_lead_id:string|null;won_lead_number:string|null;
+        selection_source:'customer'|'won_lead';
       }[]>('gst_invoice_customer_options',{p_org:organizationId}),
     wonLeadInvoiceContext: (organizationId: string, invoiceId: string) =>
       invoke<string | null>('gst_won_lead_invoice_context', {

@@ -172,9 +172,9 @@ export function PremiumSalesInvoice({
       <input type="hidden" name="version" value={existing.version}/></>}
     <input type="hidden" name="kind" value="sales_invoice"/>
     <input type="hidden" name="linesJson" value={JSON.stringify(safeLines)}/>
-    {customerId && !hasStage && !selectedClient?.wonLeadId &&
+    {customerId && !hasStage && selectedClient?.fromExistingCustomer &&
       <input type="hidden" name="customerId" value={customerId}/>}
-    {selectedClient?.wonLeadId && !hasStage &&
+    {selectedClient?.wonLeadId && !hasStage && !selectedClient.fromExistingCustomer &&
       <input type="hidden" name="wonLeadId" value={selectedClient.wonLeadId}/>}
 
     {hasStage && <><input type="hidden" name="leadId" value={choice!.leadId}/>
@@ -193,7 +193,7 @@ export function PremiumSalesInvoice({
     <div className="psi-columns">
       <div className="psi-left">
         <section className="psi-card">
-          <div className="psi-title"><span className="psi-step">1</span><h2>Select client &amp; project</h2></div>
+          <div className="psi-title"><span className="psi-step">1</span><h2>Select customer</h2></div>
           <div className="psi-fields">
             <label className="psi-field psi-wide"><span>Select existing client</span>
               <select aria-label="Select existing client" value={customerId}
@@ -216,7 +216,7 @@ export function PremiumSalesInvoice({
             <span className="psi-check">✓</span>
             <div><strong>Won lead · {selectedClient.leadNumber}</strong>
               <p>You can prepare an invoice now. Stage billing requires an accepted quotation and a saved payment plan.</p>
-              <Link href={'/dashboard/crm/leads/'+selectedClient.wonLeadId+'/convert'}>
+              <Link href={'/dashboard/crm/leads/'+selectedClient.wonLeadId}>
                 Create project from this lead →
               </Link>
             </div>
