@@ -151,7 +151,11 @@ export function EmployeeWorkspace({
    canViewSalary?String(x.salary??''):'',x.salaryType,x.status,
    !x.documents.length?'Missing':x.documents.every(d=>d.verification==='verified')?'Verified':'Pending',
   ]);
-  const escape=(v:string)=>'"'+v.replaceAll('"','""')+'"';
+  const escape=(v:string)=>{
+   // Spreadsheet tools interpret cells beginning with formula operators as code.
+   const guarded=/^[\\s\\u0000-\\u001f]*[=+\\-@]/.test(v)?"'"+v:v;
+   return '"'+guarded.replaceAll('"','""')+'"';
+  };
   const blob=new Blob(['\uFEFF'+[cols,...values].map(row=>row.map(escape).join(',')).join('\r\n')],
    {type:'text/csv;charset=utf-8;'});
   const url=URL.createObjectURL(blob),link=document.createElement('a');
