@@ -787,3 +787,13 @@
 @media(prefers-reduced-motion:reduce) {
   .crm-leads-root .crm-quote-summary .crm-quote-buttons * {transition:none!important;}
 }
+
+/* Clear one-time project action after a lead is marked Won. */
+.crm-won-project-prompt{margin-top:10px;padding:13px;border:1px solid #b7e6ca;background:#effbf3;border-radius:12px;min-width:0;box-shadow:0 5px 18px #17674312}
+.crm-won-project-prompt strong{color:#155736;display:block;font-size:13px}
+.crm-won-project-prompt p{font-size:12px;line-height:1.45;color:#436956;margin:6px 0 10px}
+.crm-won-project-prompt .crm-inline-confirm-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.crm-won-project-prompt a,.crm-create-project-link{display:inline-flex;justify-content:center;align-items:center;padding:9px 12px;border-radius:9px;background:#ff5b1b;color:#fff!important;font-size:12px;font-weight:800;text-decoration:none;line-height:1.45}
+.crm-won-project-prompt button{border:1px solid #c7d9d0;background:white;border-radius:9px;padding:9px 13px;color:#425b51}
+.crm-create-project-link{margin-top:9px;max-width:100%;white-space:normal;text-align:center}
+@media(max-width:600px){.crm-won-project-prompt .crm-inline-confirm-actions>*{flex:1}.crm-create-project-link{width:100%}}

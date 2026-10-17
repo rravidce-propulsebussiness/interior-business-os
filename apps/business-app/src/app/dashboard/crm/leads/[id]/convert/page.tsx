@@ -54,7 +54,8 @@ export default async function Convert({
   const linkedQuote = !leadQuoteResult.error && Array.isArray(leadQuoteResult.data)
     ? leadQuoteResult.data.find((item: unknown) =>
         !!item && typeof item === 'object' &&
-        typeof (item as Record<string, unknown>).project_id === 'string')
+        typeof (item as Record<string, unknown>).project_id === 'string' &&
+        (item as Record<string, unknown>).status !== 'cancelled')
     : null;
   const linkedProjectId = linkedQuote && typeof linkedQuote.project_id === 'string'
     ? linkedQuote.project_id : '';
@@ -74,10 +75,10 @@ export default async function Convert({
         <Link href={'/dashboard/crm/leads/' + id} className="text-blue-700 underline">
           ← Back to lead
         </Link>
-        <h1 className="text-2xl font-bold">Convert Closed-Won lead</h1>
+        <h1 className="text-2xl font-bold">Create project for Won lead</h1>
         <p className="text-slate-600">
           This enquiry already has a quotation-linked customer and sales reference.
-          Give the project a name now that the lead is Won. We will retain the quotation history.
+          Confirm a project name now that the lead is Won. The existing customer, quote, and provisional project will be linked without duplicates.
         </p>
         <div className="rounded-2xl border border-slate-200 bg-white p-5">
           <p><strong>Client:</strong> {quoteCustomerResponse.data.display_name}</p>
@@ -85,7 +86,7 @@ export default async function Convert({
           <p><strong>Quotation:</strong> {String(linkedQuote.quotation_number || 'Existing quotation')}</p>
         </div>
         <MasterForm
-          title="Confirm conversion — no duplicate records"
+          title="Create project & convert lead"
           submitAction={convertLead}
           successPath="/dashboard/projects/:id"
           initial={{

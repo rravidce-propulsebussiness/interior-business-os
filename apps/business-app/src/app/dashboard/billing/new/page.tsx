@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { canAccess } from '@business-os/auth';
 import { activeOrganization, pageServices } from '@business-os/auth/server';
 import { createGstRepository, type GstDocument } from '@business-os/database/gst';
 import { createMarketplaceRepository } from '@business-os/database/marketplace';
@@ -68,25 +67,11 @@ export default async function PrepareDocument({
   const choices = invoiceStageChoices(eligibleOptions,profile?.stateCode??'36');
   // The invoice picker must include ordinary CRM clients, not just the few
   // closed-won leads that have approved quotation payment plans.
-  const canViewCustomers = canAccess(context, {
-    organizationId: context.organizationId,
-    permission: 'customer.view',
-    moduleKey: 'customers',
-  });
-  const customerResponse = !purchase && !order && canViewCustomers
-    ? await client.from('customers')
-        .select('id,display_name,legal_name,phone,email,tax_identifier,billing_address')
-        .eq('organization_id',context.organizationId)
-        .eq('status','active')
-        .eq('is_sales_prospect',false)
-        .order('display_name',{ascending:true})
-        .limit(1000)
-    : { data:[], error:null };
-  if (customerResponse.error) {
-    throw new Error('Unable to load existing clients for invoices');
-  }
+  const clientRows = !purchase && !order
+    ? await gst.invoiceCustomers(context.organizationId)
+    : [];
   const customers = invoiceCustomerChoices(
-    customerResponse.data ?? [],choices,profile?.stateCode??'36',
+    clientRows,choices,profile?.stateCode??'36',
   );
   const existingCustomerId = existing && !purchase && !order
     ? await gst.customerContext(context.organizationId, existing.id)
@@ -124,7 +109,7 @@ export default async function PrepareDocument({
         requestedKind={purchase?'purchase_bill':'sales_invoice'}/>
     </main> : <PremiumSalesInvoice profile={profile} standard={standard}
       existing={existing} stageContext={stageContext} choices={choices}
-      customers={customers} customerAccess={canViewCustomers}
+      customers={customers} customerAccess={true}
       existingCustomerId={existingCustomerId}
       initialLead={params.lead??''}/>}
   </OwnerShell>;

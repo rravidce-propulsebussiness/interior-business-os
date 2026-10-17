@@ -11303,6 +11303,7 @@ export interface Database {
         Args: { p_org: string; p_from: string; p_to: string; p_kind?: string };
         Returns: Json;
       };
+      gst_invoice_customer_options: { Args: { p_org: string }; Returns: Json };
       gst_profile_read: { Args: { p_org: string }; Returns: Json };
       gst_profile_save: {
         Args: { p_org: string; p_input: Json };
