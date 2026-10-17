@@ -103,3 +103,25 @@ describe('Remove project only, keep quotation history',()=>{
     expect(button).toContain("Invoices, contracts or site work");
   });
 });
+
+
+describe('Removed project cannot return through quotation-linked CRM', () => {
+  const file=(path:string)=>readFileSync(new URL(path,import.meta.url),'utf8');
+  const migration=file('../../../../../../packages/database/supabase/migrations/20261017001300_keep_removed_projects_out_of_crm.sql');
+  const leads=file('../crm/leads/page.tsx');
+  const leadDetail=file('../crm/leads/[id]/page.tsx');
+  const leadProjectAction=file('../crm/leads/lead-project-actions.ts');
+  const projects=file('./page.tsx');
+
+  it('preserves the customer and quotation while blocking archived project reuse',()=>{
+    expect(migration).toContain('removed_from_workspace boolean NOT NULL DEFAULT false');
+    expect(migration).toContain('SET is_sales_prospect=true,removed_from_workspace=true,');
+    expect(migration).toContain('case when qp.removed_from_workspace then null::uuid else q.project_id end');
+    expect(migration).toContain("and not removed_from_workspace");
+    expect(migration).toContain("if project is null then");
+    expect(projects).toContain(".eq('is_sales_prospect', false)");
+    expect(leads).toContain(".eq('removed_from_workspace',false)");
+    expect(leadDetail).toContain(".eq('removed_from_workspace',false)");
+    expect(leadProjectAction).toContain(".eq('removed_from_workspace',false)");
+  });
+});
