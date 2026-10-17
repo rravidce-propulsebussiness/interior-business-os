@@ -485,6 +485,7 @@ export function WebsiteHome({
       )}
 
       <WebsiteCreate
+        key={startingTemplate + ':' + (createOpen ? 'open' : 'closed')}
         open={createOpen}
         onClose={closeCreation}
         initialTemplate={startingTemplate}
