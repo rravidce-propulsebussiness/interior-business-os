@@ -1,5 +1,6 @@
 import { afterEach, expect, test, vi } from 'vitest';
 import { PDFDocument } from 'pdf-lib';
+import { chromiumLaunchFailureCategory } from './pdf.node';
 import {
   cloudflarePdfRequest,
   configuredPdfProvider,
@@ -12,6 +13,21 @@ import {
 afterEach(() => {
   vi.unstubAllEnvs();
   vi.unstubAllGlobals();
+});
+
+test('classifies Chromium shared-host failures without including logs or paths', () => {
+  expect(chromiumLaunchFailureCategory(new Error('Executable doesn\'t exist at /private/path')))
+    .toBe('missing-binary');
+  expect(chromiumLaunchFailureCategory(new Error('error while loading shared libraries: libnss3.so')))
+    .toBe('missing-libraries');
+  expect(chromiumLaunchFailureCategory(new Error('Operation not permitted')))
+    .toBe('execution-blocked');
+  expect(chromiumLaunchFailureCategory(new Error('ENOMEM cannot allocate memory')))
+    .toBe('resource-exhausted');
+  expect(chromiumLaunchFailureCategory(new Error('browserType.launch: Timeout 15000ms exceeded')))
+    .toBe('launch-timeout');
+  expect(chromiumLaunchFailureCategory(new Error('unexpected browser crash')))
+    .toBe('unknown');
 });
 
 test('the Node hosting default selects Chromium without guessing a Workers provider', () => {
@@ -54,7 +70,7 @@ test('Cloudflare REST request disables scripts and blocks remote resource loadin
       CF_BROWSER_API_TOKEN: 'staging-token',
     },
   );
-  expect(request.url).toContain('/browser-rendering/pdf');
+  expect(request.url).toContain('/browser-run/pdf');
   expect(request.body.setJavaScriptEnabled).toBe(false);
   expect(request.body.rejectRequestPattern).toContain('^https?://');
   expect(request.body.pdfOptions.preferCSSPageSize).toBe(true);
