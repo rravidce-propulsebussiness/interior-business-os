@@ -397,6 +397,8 @@ export default async function Leads({
     });
   if (may('report.view'))
     nav.push({ label: 'Reports', href: '/dashboard/reports', icon: 'reports' });
+  if (may('team.manage'))
+    nav.push({ label: 'Employees', href: '/dashboard/employees', icon: 'team' });
   if (may('team.view'))
     nav.push({ label: 'Team', href: '/dashboard/company/team', icon: 'team' });
   if (may('organization.view'))
