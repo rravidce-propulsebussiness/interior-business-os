@@ -19,7 +19,7 @@ describe('Finance navigation and single-source billing',()=>{
   expect(finance).toContain('gst.list(orgId');
   expect(finance).toContain("orders(orgId, 'buyer')");
   expect(finance).toContain('createLabourDisbursementsRepository');
-  expect(finance).toContain('Receipts');
+  expect(finance).toContain('receipt allocations');
   expect(finance).toContain('SalaryPanel');
  });
  it('keeps invoice templates in Settings and outside bills on canonical record',()=>{

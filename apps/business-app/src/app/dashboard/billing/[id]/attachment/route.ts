@@ -1,7 +1,7 @@
 import { activeOrganization, pageServices } from '@business-os/auth/server';
 import { createGstRepository } from '@business-os/database/gst';
 import { idSchema } from '@business-os/shared';
-import { readSupplierBillAttachment } from '../../../supplier-bill-storage';
+import { readSupplierBillAttachment } from '../../supplier-bill-storage';
 
 export const dynamic = 'force-dynamic';
 export async function GET(

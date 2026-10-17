@@ -9,7 +9,7 @@ const money=(v:number)=>new Intl.NumberFormat('en-IN',{
 const currentMonth=()=>new Date().toISOString().slice(0,7);
 export async function SalaryPanel({
  organizationId,canRecord,canView,month,
-}:{organizationId:string;canRecord:boolean;canView:boolean;month?:string}) {
+}:{organizationId:string;canRecord:boolean;canView:boolean;month?:string | undefined}) {
  if(!canView)return <section className="fw-panel"><p>Salary access requires payment permissions.</p></section>;
  const selected=/^\d{4}-(0[1-9]|1[0-2])$/.test(month??'')?month!:currentMonth();
  const {client}=await pageServices();

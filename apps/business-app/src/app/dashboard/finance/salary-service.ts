@@ -1,6 +1,5 @@
 import 'server-only';
-import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '@business-os/database';
+import { createServerDatabase } from '@business-os/database/server';
 import { DomainError } from '@business-os/shared';
 
 export type SalaryRow = {
@@ -8,7 +7,7 @@ export type SalaryRow = {
  net:number;status:'pending'|'paid';paymentMethod:string|null;
  paymentReference:string;paidAt:string|null;notes:string;
 };
-export function salaryLedger(client:SupabaseClient<Database>) {
+export function salaryLedger(client:Awaited<ReturnType<typeof createServerDatabase>>) {
  const rpc=client.rpc.bind(client) as unknown as
   (name:string,args:Record<string,unknown>)=>Promise<{data:unknown;error:{code?:string}|null}>;
  async function invoke<T>(name:string,args:Record<string,unknown>):Promise<T> {
