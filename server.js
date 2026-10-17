@@ -37,7 +37,17 @@ validateDeploymentEnvironment(process.env, service);
 const deployedBrowserPath = resolve(root, '.playwright-browsers');
 if (service === 'business-app' && existsSync(deployedBrowserPath)) {
   process.env.PLAYWRIGHT_BROWSERS_PATH = deployedBrowserPath;
-  console.log('[Business OS] Premium PDF Chromium bundle is available.');
+  let executablePresent = false;
+  try {
+    const requireFromApp = createRequire(resolve(root, 'apps', service, 'package.json'));
+    const { chromium } = requireFromApp('playwright');
+    executablePresent = existsSync(chromium.executablePath());
+  } catch {
+    // No exceptions may prevent the CRM/other routes from starting.
+  }
+  console.log(executablePresent
+    ? '[Business OS] Chromium executable present; launch and Linux libraries unverified.'
+    : '[Business OS] Browser directory exists, but Playwright executable was not found.');
 } else if (service === 'business-app' &&
   process.env.PDF_RENDERER !== 'cloudflare-rest' &&
   !(process.env.CF_BROWSER_ACCOUNT_ID && process.env.CF_BROWSER_API_TOKEN)) {
