@@ -11309,6 +11309,14 @@ export interface Database {
         Args: { p_org: string; p_input: Json };
         Returns: undefined;
       };
+      gst_won_lead_invoice_context: {
+        Args: { p_org: string; p_invoice: string };
+        Returns: string;
+      };
+      gst_won_lead_invoice_save: {
+        Args: { p_org: string; p_input: Json; p_lead: string };
+        Returns: string;
+      };
       gst_stage_invoice_context: {
         Args: { p_org: string; p_invoice: string };
         Returns: Json;
