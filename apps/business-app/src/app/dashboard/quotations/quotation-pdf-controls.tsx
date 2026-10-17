@@ -2,8 +2,10 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
-const PDF_MAX_BYTES = 60 * 1024 * 1024;
-const PDF_HEADER = '%PDF-';
+import {
+  fetchQuotationPdfFile, supportsPdfFileSharing,
+  sharePdfFile, downloadQuotationPdfFile,
+} from './quotation-pdf-file';
 
 /** Three reliable PDF actions. Web Share shares a File (PDF attachment), not a
  * wa.me text link. Android's native share sheet lets the user choose WhatsApp.
@@ -26,31 +28,13 @@ export function QuotationPdfControls({
   const base = '/dashboard/quotations/' + revisionId + '/pdf';
   const route = base + '?view=1&version=' + version;
   const downloadRoute = base + '?version=' + version;
-  const filename = (quoteNumber.replace(/[^a-z0-9_-]/gi, '_') || 'Quotation') + '.pdf';
 
-  const loadPdf = useCallback(async (signal?: AbortSignal) => {
-    const response = await fetch(route, {
-      cache: 'no-store',
-      credentials: 'same-origin',
-      ...(signal ? { signal } : {}),
-    });
-    if (!response.ok) {
-      let detail = '';
-      try { detail = (await response.text()).slice(0, 160); } catch { /* ignore */ }
-      throw new Error(response.status === 503
-        ? 'PDF service is temporarily unavailable. Please try again.'
-        : detail && !detail.includes('<') ? detail
-          : 'Unable to generate the quotation PDF (HTTP ' + response.status + ').');
-    }
-    const blob = await response.blob();
-    if (blob.size < 5 || blob.size > PDF_MAX_BYTES ||
-      !blob.type.toLowerCase().includes('application/pdf')) {
-      throw new Error('The server did not return a valid PDF.');
-    }
-    const header = await blob.slice(0, 5).text();
-    if (header !== PDF_HEADER) throw new Error('The downloaded file is not a PDF.');
-    return new File([blob], filename, { type: 'application/pdf' });
-  }, [route, filename]);
+
+  const loadPdf = useCallback(
+    async (signal?: AbortSignal) =>
+      fetchQuotationPdfFile(revisionId, quoteNumber, signal),
+    [revisionId, quoteNumber],
+  );
 
   // Prepare once in advance so navigator.share() can be called synchronously
   // while Android still retains the user's tap activation.
@@ -65,17 +49,7 @@ export function QuotationPdfControls({
     return () => controller.abort();
   }, [loadPdf, version, dirty]);
 
-  const downloadFile = (file: File) => {
-    const href = URL.createObjectURL(file);
-    const link = document.createElement('a');
-    link.href = href;
-    link.download = file.name;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    // Allow mobile browsers to complete the download before revoking the blob.
-    window.setTimeout(() => URL.revokeObjectURL(href), 30_000);
-  };
+
   const sharePdf = () => {
     setMessage('');
     if (dirty) {
@@ -95,17 +69,15 @@ export function QuotationPdfControls({
       }).finally(() => setLoading(false));
       return;
     }
-    if (!navigator.share || !navigator.canShare?.({ files: [pdf] })) {
-      downloadFile(pdf);
+    if (!supportsPdfFileSharing(pdf)) {
+      downloadQuotationPdfFile(pdf);
       setMessage('File sharing is not supported in this browser. PDF downloaded — attach it in WhatsApp.');
       return;
     }
     // This call MUST happen directly inside the click callback, without
     // awaiting a server action or a fetch that would lose user activation.
-    void navigator.share({
-      files: [pdf],
-      title: 'Quotation ' + quoteNumber,
-    }).then(() => setMessage('PDF sent to the selected app.'))
+    void sharePdfFile(pdf, quoteNumber)
+      .then(() => setMessage('PDF handed to the selected app. Complete sending in WhatsApp.'))
       .catch(error => {
         if (error instanceof Error && error.name === 'AbortError') return;
         setMessage('Could not open the share sheet. Download the PDF and attach it in WhatsApp.');
