@@ -181,9 +181,9 @@ export default async function Quotations({
     const revision = revisions.get(row.id);
     const project = revision ? projectById.get(revision.project_id) : undefined;
     const industry = project?.industry_id ? industryById.get(project.industry_id) : null;
-    // View and Download must use the same saved premium PDF bytes, never an
-    // HTML-only preview that can differ from the downloaded attachment.
-    const preview = '/dashboard/quotations/' + row.id + '/pdf?view=1';
+    // Use the same premium, saved quotation HTML as Leads for every View action.
+    // Download/View PDF remain the real customer PDF route, with one renderer.
+    const preview = '/dashboard/quotations/' + row.id + '/preview';
     const editor = '/dashboard/quotations/' + row.id + '/studio';
     return {
       row,
