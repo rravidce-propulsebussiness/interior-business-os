@@ -1951,3 +1951,12 @@
   background:transparent;
 }
 .qs-layout.qs-unified-workspace .qs-main {max-width:1600px}
+
+
+/* Milestone's quote-derived stage associations, editable alongside percentage and name. */
+.qs-payment-linked{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:5px;
+font-size:10px;line-height:1.5;color:#70849c}
+.qs-payment-linked button{border:1px solid #ffd2b9;background:#fff6ee;color:#ce5b17;
+border-radius:7px;padding:5px 8px;font-size:10px;font-weight:800;cursor:pointer}
+.qs-payment-linked button:hover{background:#ffeadb}
+.qs-payment-stage-name{overflow-wrap:anywhere}
