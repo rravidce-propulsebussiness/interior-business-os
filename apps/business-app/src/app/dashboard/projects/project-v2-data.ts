@@ -254,6 +254,9 @@ async function assignedProjectWorkspace(id:string):Promise<WorkspaceData>{
  const stages:Stage[]=Array.isArray(stagesRaw.stages)?stagesRaw.stages.map(x=>{
   const a=obj(x);return {id:stringValue(a.id),title:stringValue(a.title),
    status:stringValue(a.status),phase:stringValue(a.phase),floor_code:stringValue(a.floor_code)||null,
+   instance_code:stringValue(a.instance_code),template_code:stringValue(a.template_code),
+   dependencies:Array.isArray(a.dependencies)?a.dependencies.map(stringValue).filter(Boolean):[],
+   inspectionTopics:Array.isArray(a.inspection_topics)?a.inspection_topics.map(stringValue).filter(Boolean):[],
    explanation:stringValue(a.explanation),
    activities:Array.isArray(a.activities)?a.activities.map(stringValue).filter(Boolean):[],
    task_count:Number(a.task_count)||0};
