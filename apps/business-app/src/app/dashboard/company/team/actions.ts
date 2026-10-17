@@ -137,7 +137,9 @@ export async function createCustomRole(_state: FormState, form: FormData) {
   try {
     const organizationId = String(form.get('organizationId') ?? '');
     const repository = await authorizedWorkspace(organizationId, 'role.manage');
+    const roleId = String(form.get('roleId') ?? '').trim();
     await repository.saveRole(organizationId, {
+      ...(roleId ? { id: roleId } : {}),
       key: String(form.get('key') ?? '').trim(),
       name: String(form.get('name') ?? '').trim(),
       permissions: form
