@@ -11818,6 +11818,15 @@ export interface Database {
         Args: { p_org: string; p_contract: string; p_input: Json };
         Returns: Json;
       };
+      project_remove_from_workspace: {
+        Args: {
+          p_org: string;
+          p_project: string;
+          p_version: number;
+          p_confirm: string;
+        };
+        Returns: string;
+      };
       project_site_command: {
         Args: {
           p_organization_id: string;

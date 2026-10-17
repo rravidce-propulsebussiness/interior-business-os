@@ -38,12 +38,12 @@ describe('Permanent project deletion safeguards',()=>{
   const sql=file('../../../../../../packages/database/supabase/migrations/20261017001000_project_permanent_delete.sql');
 
   it('does not archive or soft delete when permanently deleting',()=>{
-    expect(action).toContain("rpc('project_permanent_delete'");
+    expect(action).toContain("rpc('project_remove_from_workspace'");
     expect(action).not.toContain("status: 'inactive'");
     expect(action).not.toContain('setProjectArchived');
-    expect(button).toContain('Permanently Delete');
+    expect(button).toContain('Delete Project');
     expect(button).toContain("confirmation!=='DELETE'");
-    expect(button).toContain('Delete permanently');
+    expect(button).toContain('Delete Project');
     expect(page).toContain("has('organization.manage')");
     expect(page).toContain('version={project.version}');
   });
@@ -63,5 +63,43 @@ describe('Permanent project deletion safeguards',()=>{
     expect(sql).not.toContain('CASCADE');
     expect(sql).not.toContain('DISABLE TRIGGER');
     expect(sql).toContain('GRANT EXECUTE ON FUNCTION');
+  });
+});
+
+describe('Remove project only, keep quotation history',()=>{
+  const file=(p:string)=>readFileSync(new URL(p,import.meta.url),'utf8');
+  const sql=file('../../../../../../packages/database/supabase/migrations/20261017001200_project_remove_keep_quotations.sql');
+  const action=file('./project-removal-actions.ts');
+  const button=file('./project-removal-button.tsx');
+  const projects=file('./page.tsx');
+
+  it('removes a project from the workspace without deleting linked quotations',()=>{
+    expect(sql).toContain("v_quote_count=0");
+    expect(sql).toContain("public.project_permanent_delete");
+    expect(sql).toContain("SET is_sales_prospect=true");
+    expect(sql).not.toContain("SET is_sales_prospect=true,status='inactive'");
+    expect(projects).toContain(".eq('is_sales_prospect', false)");
+    expect(sql).toContain("converted_project_id=NULL");
+    expect(sql).toContain("'project.removed_quotation_history_retained'");
+    expect(sql).not.toContain("DELETE FROM public.quotations");
+    expect(sql).not.toContain("UPDATE public.quotations");
+    expect(sql).not.toContain("UPDATE public.quotation_revisions");
+    expect(sql).not.toContain("DELETE FROM public.quotation_items");
+  });
+
+  it('refuses unrelated site, invoice, payment and contract records and explains the outcome',()=>{
+    expect(sql).toContain("private.commercial_access(p_org,'project.manage','projects')");
+    expect(sql).toContain("private.has_permission(p_org,'organization.manage')");
+    expect(sql).toContain("p_confirm IS DISTINCT FROM 'DELETE'");
+    expect(sql).toContain("pg_catalog.pg_constraint fk");
+    expect(sql).toContain("v_table IN");
+    expect(sql).toContain("private.lead_quotation_links");
+    expect(sql).toContain("FROM pg_catalog.pg_class t");
+    expect(sql).toContain("IF v_has_children THEN");
+    expect(sql).toContain("RETURN 'removed_quotes_preserved'");
+    expect(action).toContain("data==='permanently_deleted'");
+    expect(action).toContain("Project removed from Projects. Linked quotation history was preserved.");
+    expect(button).toContain("will remain unchanged");
+    expect(button).toContain("Invoices, contracts or site work");
   });
 });
