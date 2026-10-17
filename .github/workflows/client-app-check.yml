@@ -7,6 +7,9 @@ on:
       - 'apps/business-app/src/app/dashboard/leads-navigation.ts'
       - 'apps/business-app/src/app/dashboard/quotations/**'
       - 'apps/business-app/src/app/dashboard/billing/**'
+      - 'packages/database/src/labour-disbursements.ts'
+      - 'packages/database/package.json'
+      - 'packages/database/supabase/migrations/20261017000300_labour_disbursement_register.sql'
       - 'apps/business-app/next.config.ts'
       - 'scripts/hostinger-build.mjs'
       - 'server.js'
@@ -18,6 +21,9 @@ on:
       - 'apps/business-app/src/app/dashboard/leads-navigation.ts'
       - 'apps/business-app/src/app/dashboard/quotations/**'
       - 'apps/business-app/src/app/dashboard/billing/**'
+      - 'packages/database/src/labour-disbursements.ts'
+      - 'packages/database/package.json'
+      - 'packages/database/supabase/migrations/20261017000300_labour_disbursement_register.sql'
       - 'apps/business-app/next.config.ts'
       - 'scripts/hostinger-build.mjs'
       - 'server.js'
@@ -36,7 +42,7 @@ jobs:
           node-version-file: .node-version
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec vitest run packages/core/src/custom-brand-quote.test.ts apps/business-app/src/app/dashboard/quotations/studio-ui.test.ts apps/business-app/src/app/dashboard/billing/billing-ui.test.ts
+      - run: pnpm exec vitest run packages/core/src/custom-brand-quote.test.ts apps/business-app/src/app/dashboard/quotations/studio-ui.test.ts apps/business-app/src/app/dashboard/billing/billing-ui.test.ts apps/business-app/src/app/dashboard/billing/labour/labour.test.ts
       - run: pnpm --filter @business-os/business-app typecheck
       - run: pnpm --filter @business-os/business-app build
 
