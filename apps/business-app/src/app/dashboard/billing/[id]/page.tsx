@@ -7,6 +7,7 @@ import { idSchema } from '@business-os/shared';
 import { ActionForm } from '@business-os/ui/action-form';
 import { finalizeGstDocument } from '../actions';
 import { PrintDocumentButton } from './print-button';
+import { readSupplierBillAttachment } from '../supplier-bill-storage';
 
 export const dynamic = 'force-dynamic';
 const money = (amount: number) =>
@@ -48,6 +49,10 @@ export default async function GstDocumentDetail({
       (g) =>
         g.permission === 'invoice.manage' && g.scope.kind === 'organization',
     );
+  const billAttachment =
+    doc.kind === 'purchase_bill' && doc.isOwner
+      ? await readSupplierBillAttachment(context.organizationId, id).catch(() => null)
+      : null;
   const snapshot = doc.snapshot;
   const issuer =
     snapshot && typeof snapshot.issuer === 'object' && snapshot.issuer !== null
@@ -80,6 +85,12 @@ export default async function GstDocumentDetail({
           <p className="text-sm capitalize text-slate-500">{doc.status}</p>
         </div>
         <div className="flex flex-wrap gap-2">
+          {doc.kind === 'purchase_bill' && billAttachment && (
+            <a href={'/dashboard/billing/' + id + '/attachment'}
+              className="rounded-xl border border-orange-200 bg-orange-50 px-4 py-2.5 text-sm font-semibold text-orange-700">
+              Download supplier bill
+            </a>
+          )}
           {doc.status !== 'draft' && <PrintDocumentButton />}
           {doc.status === 'draft' && canEdit && (
             <Link

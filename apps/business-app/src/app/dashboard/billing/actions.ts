@@ -1,5 +1,6 @@
 'use server';
 import { revalidatePath } from 'next/cache';
+import { saveSupplierBillAttachment } from './supplier-bill-storage';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { activeOrganization, serverServices } from '@business-os/auth/server';
@@ -97,6 +98,7 @@ export async function saveGstProfile(_state: State, form: FormData) {
 export async function saveGstDocument(form: FormData) {
   const path = '/dashboard/billing/new';
   let id: string;
+  let attachmentWarning = false;
   try {
     const { org, authorization, client } = await workspace();
     await authorization.requirePermission(org, 'invoice.create');
@@ -131,6 +133,11 @@ export async function saveGstDocument(form: FormData) {
       ...(marketplaceOrderId ? { marketplaceOrderId } : {}),
     });
     const input = parsed as GstDocumentInput;
+    const attachment = form.get('supplierBillFile');
+    const supplierFile = attachment instanceof File && attachment.size > 0 ? attachment : null;
+    if (supplierFile && (input.kind !== 'purchase_bill' || supplierFile.size > 8 * 1024 * 1024 ||
+        !['application/pdf','image/png','image/jpeg','image/webp'].includes(supplierFile.type)))
+      throw new DomainError('VALIDATION_FAILED');
     // Every tenant uses the same platform-admin-approved appearance.
     // The database ignores client-selected template IDs as a second check.
     const leadId = String(form.get('leadId') ?? '').trim();
@@ -164,11 +171,17 @@ export async function saveGstDocument(form: FormData) {
       // Supplier and marketplace bills continue through their original path.
       id = await createGstTemplatesRepository(client).saveDocument(org, input, null);
     }
+    // The GST bill is canonical. A failed attachment does not duplicate it.
+    if (input.kind === 'purchase_bill' && supplierFile) {
+      try { await saveSupplierBillAttachment(org, id, supplierFile); }
+      catch { attachmentWarning = true; }
+    }
     revalidatePath('/dashboard/billing');
+    revalidatePath('/dashboard/finance');
   } catch (error) {
     redirect(path + '?error=' + encodeURIComponent(safeFailure(error).message));
   }
-  redirect('/dashboard/billing/' + id + '?saved=1');
+  redirect('/dashboard/billing/' + id + (attachmentWarning ? '?attachment=failed' : '?saved=1'));
 }
 export async function finalizeGstDocument(_state: State, form: FormData) {
   try {

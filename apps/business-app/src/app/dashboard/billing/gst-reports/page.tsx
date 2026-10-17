@@ -90,8 +90,8 @@ export default async function GstReports({
       className="mx-auto max-w-6xl space-y-6 px-4 py-8 text-slate-950 sm:px-7"
     >
       <nav className="text-xs font-medium text-slate-500">
-        <Link href="/dashboard/billing" className="hover:text-blue-700">
-          ← Back to billing
+        <Link href="/dashboard/finance?tab=gst" className="hover:text-blue-700">
+          ← Back to Finance
         </Link>
       </nav>
       <header className="rounded-3xl bg-slate-950 px-6 py-8 text-white sm:px-9">
