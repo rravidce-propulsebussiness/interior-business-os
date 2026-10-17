@@ -81,6 +81,11 @@ export function configuredPdfProvider(
     navigator.userAgent === 'Cloudflare-Workers';
   if (value === 'cloudflare-rest') return 'cloudflare-rest';
   if (value === 'node' && !isWorker) return 'node';
+  // Hostinger may not have a Chromium binary, but can use the already
+  // provisioned Browser Rendering REST adapter to print the EXACT same
+  // premium quotation HTML seen in Leads, Quotations and Studio.
+  if (!value && env.CF_BROWSER_ACCOUNT_ID && env.CF_BROWSER_API_TOKEN)
+    return 'cloudflare-rest';
   if (!value && !isWorker) return 'node';
   throw new PdfServiceError('PDF_RENDERER_UNAVAILABLE');
 }
