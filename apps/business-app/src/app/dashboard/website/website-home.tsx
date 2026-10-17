@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import Link from 'next/link';
 import { OwnerIcon } from '../owner-shell';
 import { WebsiteCreate } from './website-create';
@@ -97,6 +97,7 @@ export function WebsiteHome({
   canManage, canCode, canDesign, canEdit, canForms, canSeo, canDomains,
 }: Props) {
   const [createOpen, setCreateOpen] = useState(false);
+  const closeCreation = useCallback(() => setCreateOpen(false), []);
   const [startingTemplate, setStartingTemplate] = useState('');
   const [showAllTemplates, setShowAllTemplates] = useState(false);
   const mainSite = sites[0];
@@ -294,7 +295,7 @@ export function WebsiteHome({
 
       <WebsiteCreate
         open={createOpen}
-        onClose={() => setCreateOpen(false)}
+        onClose={closeCreation}
         initialTemplate={startingTemplate}
         templates={templates}
         canCode={canCode}
