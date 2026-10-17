@@ -28,8 +28,15 @@ if (
 const port = Number(portText);
 const hostname = '0.0.0.0';
 console.log(
-  `[Business OS] Starting native Next.js server for ${service} on ${hostname}:${port} (Node ${process.version}).`,
+  `[Business OS] Starting native Next.js server for ${service} on ${hostname}:${port} (Node ${process.version}; pid ${process.pid}; ppid ${process.ppid}).`,
 );
+// Observability only: these hooks do not intercept signals or alter shutdown.
+process.on('uncaughtExceptionMonitor', (error, origin) => {
+  console.error(`[Business OS] Uncaught exception in pid ${process.pid} (${origin}):`, error);
+});
+process.on('exit', (code) => {
+  console.log(`[Business OS] Process ${process.pid} exited (code ${code}).`);
+});
 validateDeploymentEnvironment(process.env, service);
 
 // Keep Playwright pointed at the exact browser copied with the deployed

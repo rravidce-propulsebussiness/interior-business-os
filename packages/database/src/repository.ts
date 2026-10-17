@@ -15,6 +15,7 @@ import {
   platformRoleInputSchema,
 } from '@business-os/shared';
 import type { Database } from './generated/database.types';
+import { isAuthServiceFailure } from './auth-errors';
 
 function unwrap<T>({
   data,
@@ -53,7 +54,19 @@ export function createRepository(client: SupabaseClient<Database>) {
   return {
     async user() {
       const { data, error } = await client.auth.getUser();
-      if (error || !data.user) return null;
+      if (error) {
+        if (isAuthServiceFailure(error)) {
+          // Never log cookies, JWTs, email addresses or provider responses.
+          console.error('[Business OS] Supabase user verification failed.', {
+            status: error.status ?? 'unknown',
+            code: error.code ?? 'unknown',
+          });
+          throw new DomainError('INTERNAL_ERROR');
+        }
+        // An expired, invalid or missing session is legitimately signed out.
+        return null;
+      }
+      if (!data.user) return null;
       return { id: data.user.id, email: data.user.email };
     },
     async context(id: string) {

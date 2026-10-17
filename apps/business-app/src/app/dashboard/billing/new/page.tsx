@@ -19,9 +19,11 @@ export default async function PrepareDocument({
     kind?: string; lead?: string }>;
 }) {
   const params = await searchParams;
+  // Authenticate before selecting the company, preserving the login redirect
+  // for expired sessions instead of raising an unhandled DomainError.
+  const { authorization, client, user: account } = await pageServices();
   const context = await activeOrganization();
   if (!context) notFound();
-  const { authorization, client } = await pageServices();
   await authorization.requirePermission(context.organizationId, 'invoice.create');
   const gst = createGstRepository(client);
   const profile = await gst.profile(context.organizationId);
@@ -62,11 +64,8 @@ export default async function PrepareDocument({
     ? await gst.stageOptions(context.organizationId).catch(()=>[])
     : [];
   const choices = invoiceStageChoices(eligibleOptions,profile?.stateCode??'36');
-  const [company,account] = await Promise.all([
-    client.from('organizations').select('name')
-      .eq('id',context.organizationId).maybeSingle(),
-    authorization.requireAuthenticatedUser(),
-  ]);
+  const company = await client.from('organizations').select('name')
+    .eq('id', context.organizationId).maybeSingle();
   const navigation:OwnerNavItem[] = [
     {label:'Dashboard',href:'/dashboard',icon:'dashboard'},
     ...(hasGrant('lead.view')?[{label:'Leads',href:'/dashboard/crm/leads',icon:'leads' as const}]:[]),

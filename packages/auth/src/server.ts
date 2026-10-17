@@ -25,13 +25,16 @@ export async function pageServices() {
   if (!isSupabaseConfigured()) redirect('/login');
   const services = await serverServices();
   try {
-    await services.authorization.requireAuthenticatedUser();
+    // Return the verified user with the request-scoped services, so pages do
+    // not perform a second, potentially inconsistent authentication request.
+    const user = await services.authorization.requireAuthenticatedUser();
+    return { ...services, user };
   } catch (error) {
     if (error instanceof DomainError && error.code === 'UNAUTHENTICATED')
       redirect('/login');
+    // A provider outage is not an expired login. Preserve the real failure.
     throw error;
   }
-  return services;
 }
 /**
  * The proxy strips caller-supplied scope headers and repopulates them from
