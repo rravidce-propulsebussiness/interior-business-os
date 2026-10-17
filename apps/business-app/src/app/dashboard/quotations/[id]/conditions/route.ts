@@ -117,12 +117,12 @@ export async function POST(request:Request, {params}:{
         if(incoming.stages.some(row=>row.stageCodes?.some(key=>!validKeys.has(key))))
           return reply({message:'Payment milestone references a stage outside the quoted floor plan.',reference:ref},422);
       }
-      const mark='[STAGE_PAYMENT_PLAN]\\n'+incoming.stages
+      const mark='[STAGE_PAYMENT_PLAN]\n'+incoming.stages
         .map(row=>row.name.replaceAll('|','-')+'|'+Number(row.percent).toFixed(2))
-        .join('\\n')+'\\n[/STAGE_PAYMENT_PLAN]';
+        .join('\n')+'\n[/STAGE_PAYMENT_PLAN]';
       const hasLinks=incoming.stages.some(row=>row.stageCodes?.length);
       const links=hasLinks?encodeStagePaymentLinks(incoming.stages.map(row=>row.stageCodes??[])):'';
-      terms=joinQuotationTerms({...saved,paymentPlan:[mark,links].filter(Boolean).join('\\n')});
+      terms=joinQuotationTerms({...saved,paymentPlan:[mark,links].filter(Boolean).join('\n')});
       if(!savedStagePaymentPlan(terms)||
         (hasLinks&&!savedStagePaymentLinks(terms)))
         return reply({message:'Invalid payment schedule. Check all stages and percentages.',reference:ref},422);
