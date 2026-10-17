@@ -176,7 +176,7 @@ export default async function Finance({
           <Link href="/dashboard/marketplace/orders">View orders →</Link></div>
           {acceptedOrders.length ? <div className="fw-order-list">{acceptedOrders.map((o) => <div className="fw-order" key={o.id}>
             <span><strong>{o.productName}</strong><small>{o.sellerName} · {o.quantity} units · {fmtDate(o.createdAt)}</small></span>
-            <span><strong>{money(Number(o.total))}</strong><small>Accepted · Awaiting supplier bill</small></span>
+            <span><strong>{money(Number(o.total))}</strong><small>Accepted marketplace order · verify supplier bill separately</small></span>
           </div>)}</div> : <p className="fw-muted">No accepted marketplace orders match your search.</p>}</section>}
         {canPayments && <section className="fw-panel"><div className="fw-panel-head"><div><h2>Project labour expenses</h2>
           <p>Single source: project work and labour-payment records. Never enter the same payment twice.</p></div>
@@ -190,9 +190,10 @@ export default async function Finance({
       {tab === 'salaries' && <SalaryPanel organizationId={orgId}
         canRecord={grants.has('payment.record')} canView={canPayments}
         month={params.month}/>}
+      <h2 className="fw-quick-heading">Quick Actions</h2>
       <section className="fw-quick" aria-label="Quick actions">
-        {tab === 'invoices' && canCreate && <Link href="/dashboard/billing/new?kind=sales_invoice"><OwnerIcon name="billing" size={22}/><span><strong>Create invoice</strong><small>Customer invoice</small></span></Link>}
-        {tab === 'expenses' && canCreate && <Link href="/dashboard/billing/new?kind=purchase_bill"><OwnerIcon name="expenses" size={22}/><span><strong>Record expense</strong><small>Supplier bill</small></span></Link>}
+        {tab !== 'invoices' && canCreate && <Link href="/dashboard/billing/new?kind=sales_invoice"><OwnerIcon name="billing" size={22}/><span><strong>Create invoice</strong><small>Customer invoice</small></span></Link>}
+        {tab !== 'expenses' && canCreate && <Link href="/dashboard/billing/new?kind=purchase_bill"><OwnerIcon name="expenses" size={22}/><span><strong>Record expense</strong><small>Supplier bill</small></span></Link>}
         {tab !== 'gst' && <Link href={tabUrl('gst', period)}><OwnerIcon name="reports" size={22}/><span><strong>View GST</strong><small>Tax workpapers</small></span></Link>}
         <Link href="/dashboard/settings?tab=invoice"><OwnerIcon name="settings" size={22}/><span><strong>Invoice settings</strong><small>Company GST identity and templates</small></span></Link>
         {canManageBilling && <Link href="/dashboard/finance/payment_methods"><OwnerIcon name="expenses" size={22}/><span><strong>Payment methods</strong><small>Collection accounts</small></span></Link>}

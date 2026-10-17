@@ -39,3 +39,5 @@
 @media(prefers-reduced-motion:reduce){.fw-primary{transition:none}}
 
 .fw-salary-form{padding:13px;border:1px solid #f5dfd1;border-radius:11px;background:#fffcf9;margin-bottom:13px}.fw-salary-form>summary{font-size:12px;font-weight:800;color:#e85508;cursor:pointer}.fw-salary-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:12px 0}.fw-salary-fields label,.fw-salary-paid label{display:grid;gap:6px;font-size:11px;color:#526078}.fw-salary-fields input,.fw-salary-paid input,.fw-salary-paid select,.fw-period input{width:100%;padding:9px;border:1px solid #ecddd3;border-radius:9px;background:#fff;color:#273650;font:inherit;font-size:12px}.fw-salary-paid summary{font-size:10px;color:#eb5c11;font-weight:800;cursor:pointer}.fw-salary-paid form{min-width:210px;display:grid;gap:10px;margin-top:10px}@media(max-width:600px){.fw-salary-fields{grid-template-columns:1fr}.fw-salary-paid form{min-width:150px}}
+
+.fw-quick-heading{font-size:17px;margin:23px 0 11px;font-weight:850;letter-spacing:-.025em;color:#17213b}
