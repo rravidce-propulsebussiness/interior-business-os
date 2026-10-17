@@ -682,3 +682,28 @@ describe('streamlined quote, terms and payment Studio', () => {
   });
 
 });
+
+describe('tenant-priced calculated Custom Quote package', () => {
+  const selector = file('./construction-selector.tsx');
+  const actions = file('./construction-actions.ts');
+  const library = file('./packages/package-library.tsx');
+  const studio = file('./[id]/studio/page.tsx');
+  const quotePage = file('./packages/page.tsx');
+
+  it('keeps brand and consumption setup inside Packages and selects per category', () => {
+    expect(library).toContain('Manage Brand &amp; Unit Prices');
+    expect(library).toContain('<ConstructionRatesManager');
+    expect(quotePage).toContain('createConstructionRatesRepository');
+    expect(selector).toContain('Custom Quote · Choose customer brands');
+    expect(selector).toContain('consumptionPerSqft');
+    expect(selector).toContain('saveCustomBrandQuote');
+  });
+
+  it('saves price cards from PostgreSQL as one editable quotation line', () => {
+    expect(actions).toContain("const price = await createConstructionRatesRepository");
+    expect(actions).toContain('encodeCustomBrandQuote');
+    expect(actions).toContain("...(existing[0] ? { id: existing[0].id } : {})");
+    expect(actions).toContain('SFT_ESTIMATE_V2:%');
+    expect(studio).toContain('initialCustomQuote={existingCustomQuote}');
+  });
+});
