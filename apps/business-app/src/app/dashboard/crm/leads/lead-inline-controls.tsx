@@ -64,7 +64,7 @@ export function LeadStageSelect({
         onChange={(event) => {
           const selected = stages.find((s) => s.id === event.target.value);
           if (!selected) return;
-          if (selected.outcome === 'open' && lead.lifecycle === 'open') {
+          if (selected.outcome === 'won' || (selected.outcome === 'open' && lead.lifecycle === 'open')) {
             void change(selected.id);
           } else {
             setTargetId(selected.id);
@@ -78,7 +78,7 @@ export function LeadStageSelect({
           <option key={s.id} value={s.id}>{s.name}</option>
         ))}
       </select>
-      {target && (target.outcome !== 'open' || lead.lifecycle !== 'open') && (
+      {target && target.outcome !== 'won' && (target.outcome !== 'open' || lead.lifecycle !== 'open') && (
         <div className="crm-inline-confirm">
           <strong>{target.name}</strong>
           {target.outcome === 'lost' && (
@@ -90,7 +90,7 @@ export function LeadStageSelect({
           <textarea
             rows={2}
             aria-label="Stage outcome note"
-            placeholder={target.outcome === 'won' ? 'Why was this lead won?' : 'Optional details'}
+            placeholder="Optional details"
             value={note}
             maxLength={3000}
             onChange={(e)=>setNote(e.target.value)}
@@ -98,7 +98,6 @@ export function LeadStageSelect({
           <div className="crm-inline-confirm-actions">
             <button type="button" onClick={()=>setTargetId('')}>Cancel</button>
             <button type="button" disabled={pending ||
-              (target.outcome === 'won' && !note.trim()) ||
               (target.outcome === 'lost' && !reason)}
               onClick={()=>void change(target.id, target.outcome === 'lost' ? reason : null, note)}>
               Save
