@@ -639,7 +639,7 @@ describe('streamlined quote, terms and payment Studio', () => {
   const studio = file('./studio-editor.tsx');
   const page = file('./[id]/studio/page.tsx');
   const terms = file('./quotation-terms-editor.tsx');
-  const settings = file('./settings/page.tsx');
+  const settings = file('../settings/page.tsx');
   const css = file('./studio.css');
 
   it('keeps only three editing tabs and removes duplicate client and branding panels', () => {
