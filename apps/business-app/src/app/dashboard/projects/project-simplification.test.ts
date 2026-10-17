@@ -37,6 +37,17 @@ describe('simplified project workspace',()=>{
   expect(workspace).not.toContain('title="Procurement"');
   expect((workspace.match(/<Panel id="timeline"/g)??[]).length).toBe(1);
   expect((workspace.match(/<Panel id="materials"/g)??[]).length).toBe(1);
+  expect(workspace).toContain('className="pcc-workspaces"');
+  expect(workspace).not.toContain('className="pcc-section-columns"');
+  expect(styles).not.toContain('.pcc-section-columns');
+  for(const id of ['documents','designs','team','materials','labour','execution','checks','timeline']){
+   expect(workspace).toContain("selectedView==='"+id+"'");
+  }
+  expect(workspace).toContain("canFinance&&selectedView==='payments'");
+  expect(workspace).toContain("selectedView==='overview'&&");
+  expect(workspace).toContain("href={workspaceUrl(section.id)}");
+  expect(detail).toContain('searchParams');
+  expect(detail).toContain('view={view}');
   expect(site).not.toContain('<SiteActivity');
   expect(command).not.toContain('className="sc-metrics"');
   expect(journey).not.toContain('className="cj-activity"');
