@@ -271,7 +271,7 @@ export function EmployeeWorkspace({
      <nav className="emp-detail-tabs" aria-label="Employee detail sections">
       {(['overview','documents','payroll','attendance'] as Tab[]).map(t=><button key={t}
        type="button" className={tab===t?'active':''} onClick={()=>setTab(t)}>
-       {t[0].toUpperCase()+t.slice(1)}</button>)}
+       {t.charAt(0).toUpperCase()+t.slice(1)}</button>)}
      </nav>
      <div className="emp-detail-body">
       {tab==='overview'&&<>
