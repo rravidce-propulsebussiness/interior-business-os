@@ -1,5 +1,5 @@
 'use client';
-import { useActionState, useTransition, type ReactNode } from 'react';
+import { useActionState, useTransition, useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { saveProjectSite, uploadProjectSiteMedia } from './[id]/site/actions';
 import { syncConstructionFromProjectAgreement, assignConstructionRole } from './[id]/site/construction-actions';
@@ -25,17 +25,12 @@ export function ProjectForm({projectId,operation,label,children,media=false}:{
 export function SyncStages({id}:{id:string}){
  const router=useRouter();
  const [pending,start]=useTransition();
- const [message,setMessage]=useActionStateMessage();
+ const [message,setMessage]=useState('');
  return <div className="pv2-sync"><button className="pv2-button pv2-primary" disabled={pending} onClick={()=>{
   start(async()=>{const result=await syncConstructionFromProjectAgreement(id);
    setMessage(result.message);if(result.saved)router.refresh();});
  }}> {pending?'Checking quotation…':'Import stages from signed agreement'}</button>
  {message&&<p role="status">{message}</p>}</div>;
-}
-function useActionStateMessage(){
- // Local feedback remains visible until another action, unlike a toast that disappears.
- const [state,setState]=useActionState(async(_prev:string,value:string)=>value,'');
- return [state,(value:string)=>{setState(value);}] as const;
 }
 export function AssignRole({projectId,users}:{projectId:string;users:{id:string;label:string}[]}){
  const router=useRouter();
@@ -127,7 +122,7 @@ export function SiteMediaForm({id,category='daily'}:{id:string;category?:string}
   <label>File<input required type="file" name="file"
    accept="image/jpeg,image/png,image/webp,application/pdf,video/mp4"/></label>
   <label>Category<select name="category" defaultValue={category}>
-   {['daily','site','inspection','agreement','design','plan','curing','handover'].map(v=>
+   {['daily','site','inspection','agreement','design','curing'].map(v=>
     <option key={v} value={v}>{v}</option>)}</select></label>
   <label>Caption<input name="caption" maxLength={500} placeholder="Description of photo or file"/></label>
   <p className="pv2-hint">Private file · maximum 8 MB · access limited by project permissions</p>
