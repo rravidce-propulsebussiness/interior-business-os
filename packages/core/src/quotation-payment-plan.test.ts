@@ -27,7 +27,7 @@ describe('quote-stage payment mappings',()=>{
    +encodeStagePaymentLinks([['PRECONSTRUCTION'],['RCC/F_1ST_FLOOR']]);
   expect(savedStagePaymentPlan(terms)?.map(row=>row.name)).toEqual(['Advance','1st slab']);
   expect(savedStagePaymentLinks(terms)).toEqual([['PRECONSTRUCTION'],['RCC/F_1ST_FLOOR']]);
-  const customerSections=customerTermSections('Warranty:\\nFive years\\n'+terms);
+  const customerSections=customerTermSections('Warranty:\nFive years\n'+terms);
   expect(JSON.stringify(customerSections)).not.toContain('STAGE_PAYMENT_LINKS');
   expect(JSON.stringify(customerSections)).not.toContain('PRECONSTRUCTION');
   expect(customerSections[0]?.title).toBe('Warranty');
