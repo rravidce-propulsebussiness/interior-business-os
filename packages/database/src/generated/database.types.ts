@@ -11288,7 +11288,7 @@ export interface Database {
         Returns: Json;
       };
       gst_company_template_select: {
-        Args: { p_org: string; p_template_id: string };
+        Args: { p_org: string; p_template_id: string; p_style?: Json };
         Returns: undefined;
       };
       gst_customer_invoice_context: {
