@@ -1,4 +1,4 @@
-import { chromium } from 'playwright';
+import { chromium, type Browser } from 'playwright';
 import { existsSync } from 'node:fs';
 import type { PdfOptions } from './pdf';
 
@@ -23,7 +23,7 @@ export async function renderNodePdf(
     '/usr/bin/google-chrome',
     '/opt/google/chrome/chrome',
   ];
-  let browser;
+  let browser: Browser | undefined;
   try {
     browser = await chromium.launch({ headless: true, timeout: 15_000, args });
   } catch (initialError) {
@@ -40,12 +40,14 @@ export async function renderNodePdf(
     }
     if (!recovered) throw initialError;
   }
+  if (!browser) throw new Error('No installed Chromium browser available for PDF rendering');
+  const readyBrowser = browser;
   // Hard stop if the renderer hangs. Closing the browser fails the job closed.
   const watchdog = setTimeout(() => {
-    void browser.close().catch(() => {});
+    void readyBrowser.close().catch(() => {});
   }, 30_000);
   try {
-    const context = await browser.newContext({
+    const context = await readyBrowser.newContext({
       javaScriptEnabled: false,
       serviceWorkers: 'block',
       acceptDownloads: false,
@@ -97,6 +99,6 @@ export async function renderNodePdf(
     }
   } finally {
     clearTimeout(watchdog);
-    await browser.close().catch(() => {});
+    await readyBrowser.close().catch(() => {});
   }
 }
