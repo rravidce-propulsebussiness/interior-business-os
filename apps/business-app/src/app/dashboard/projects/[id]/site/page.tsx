@@ -1,6 +1,10 @@
 import { redirect } from 'next/navigation';
-
-// The obsolete Site Delivery UI has been retired, not its data or authorized APIs.
-export default function RetiredSiteDeliveryPage(): never {
- redirect('/dashboard/projects');
+import { z } from 'zod';
+import { notFound } from 'next/navigation';
+export default async function LegacyProjectSiteLink({params}:{
+ params:Promise<{id:string}>;
+}){
+ const {id}=await params;
+ if(!z.uuid().safeParse(id).success)notFound();
+ redirect('/dashboard/projects/'+id+'/timeline');
 }

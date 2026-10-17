@@ -1,6 +1,5 @@
 import { redirect } from 'next/navigation';
-
-// Former assigned-site list is retired with the Projects workspace.
-export default function RetiredAssignedSitesPage(): never {
+// One Projects directory, even when the user originally opened "My Sites".
+export default function FormerMySitesPage():never{
  redirect('/dashboard/projects');
 }
