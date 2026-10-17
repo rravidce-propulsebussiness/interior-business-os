@@ -81,19 +81,32 @@ function RateForm({
           placeholder="e.g. Tata Steel, Karimnagar Bricks"
         />
       </label>
+
       <label className="grid gap-1.5 text-xs font-bold text-slate-700">
-        Rate per built-up sq ft (₹)
-        <input
-          className={input}
-          name="ratePerSqft"
-          required
-          type="number"
-          min={0}
-          max={999999.99}
-          step=".01"
-          defaultValue={rate?.ratePerSqft ?? ''}
-          placeholder="Enter your rate"
-        />
+        Purchase unit
+        <select className={input} name="priceUnit" defaultValue={rate?.priceUnit ?? 'sqft'}>
+          {[
+            ['sqft','Square foot'],['kg','Kilogram (kg)'],['tonne','Tonne'],
+            ['bag','Bag'],['brick','Brick'],['piece','Piece'],['cft','Cubic foot'],
+            ['litre','Litre'],['meter','Metre'],['running_ft','Running foot'],
+            ['bathroom','Bathroom'],['door','Door'],['point','Electrical point'],
+            ['lumpsum','Lump sum']
+          ].map(([id,label]) => <option key={id} value={id}>{label}</option>)}
+        </select>
+      </label>
+      <label className="grid gap-1.5 text-xs font-bold text-slate-700">
+        Brand price per purchase unit (₹)
+        <input className={input} name="unitPrice" required type="number"
+          min="0" max="1000000" step=".01" defaultValue={rate?.unitPrice ?? rate?.ratePerSqft ?? ''}
+          placeholder="e.g. 80 for ₹80/kg"/>
+      </label>
+      <label className="grid gap-1.5 text-xs font-bold text-slate-700">
+        Quantity consumed per built-up SFT
+        <input className={input} name="consumptionPerSqft" required type="number"
+          min=".0001" max="1000" step=".0001"
+          defaultValue={rate?.consumptionPerSqft ?? '1'}
+          placeholder="e.g. 3 kilograms / SFT"/>
+        <small className="font-normal text-slate-500">Effective ₹/SFT = price per unit × quantity per SFT.</small>
       </label>
       <label className="grid gap-1.5 text-xs font-bold text-slate-700">
         Status
@@ -170,10 +183,9 @@ export function ConstructionRatesManager({
               Material &amp; brand rates
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-300">
-              Set company-specific construction component costs per square foot
-              of built-up area. In a quotation, choose one option from each
-              category: steel, bricks, cement, painting, mix ratio, or any
-              custom material.
+              Set brand prices by kilogram, bag, brick, piece or other unit.
+              The required quantity per built-up SFT converts each choice to a
+              comparable rate used by Custom Quote.
             </p>
           </div>
           {canManage && (
@@ -239,10 +251,15 @@ export function ConstructionRatesManager({
                         </p>
                       </div>
                       <div className="flex items-center gap-3">
-                        <p className="text-base font-black text-blue-700">
-                          ₹{Number(rate.ratePerSqft).toLocaleString('en-IN')}/sq
-                          ft
-                        </p>
+
+                        <div className="text-right">
+                          <p className="text-base font-black text-orange-700">
+                            ₹{Number(rate.unitPrice ?? rate.ratePerSqft).toLocaleString('en-IN')}/{rate.priceUnit ?? 'sqft'}
+                          </p>
+                          <p className="text-xs text-slate-500">
+                            {rate.consumptionPerSqft ?? '1'} / SFT = ₹{Number(rate.ratePerSqft).toLocaleString('en-IN')}/SFT
+                          </p>
+                        </div>
                         {canManage && (
                           <button
                             type="button"
