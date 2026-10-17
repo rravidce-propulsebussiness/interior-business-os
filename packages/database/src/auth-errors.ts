@@ -1,7 +1,11 @@
-/** Supabase Auth uses 4xx errors for expired/invalid sessions. Only
- * infrastructure failures must be surfaced as internal errors, never mistaken
- * for an unauthenticated user (which would unnecessarily log them out). */
-export function isAuthServiceFailure(error: { status?: number; code?: string }): boolean {
+/**
+ * Supabase Auth uses 4xx errors for expired or invalid sessions. Only
+ * infrastructure failures must surface as internal errors, never as a sign-out.
+ */
+export function isAuthServiceFailure(error: {
+  status?: number | undefined;
+  code?: string | undefined;
+}): boolean {
   const status = error.status;
   return (
     status === undefined ||

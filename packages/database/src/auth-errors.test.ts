@@ -19,7 +19,10 @@ describe('Supabase authentication failure classification', () => {
     { status: 503, code: 'server_error' },
     { code: 'network_error' },
     { status: 400, code: 'unexpected_failure' },
-  ])('does not mistake provider downtime for a signed-out user (%j)', (error) => {
-    expect(isAuthServiceFailure(error)).toBe(true);
-  });
+  ])(
+    'does not mistake provider downtime for a signed-out user (%j)',
+    (error) => {
+      expect(isAuthServiceFailure(error)).toBe(true);
+    },
+  );
 });
