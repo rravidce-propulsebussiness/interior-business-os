@@ -34,7 +34,7 @@ export function ownerWorkspaceNavigation(context: TenantAccessContext | null): O
   if (has('project.view','projects')) items.push({
     label:'Projects',href:'/dashboard/projects',icon:'projects',
   });
-  else if (has('site.view','projects')) items.push({
+  else if (context.entitlements.includes('projects')) items.push({
     label:'My Sites',href:'/dashboard/site-projects',icon:'projects',
   });
   if (has('customer.view','crm') || has('customer.view','quotation')) items.push({
