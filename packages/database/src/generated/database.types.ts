@@ -11274,6 +11274,10 @@ export interface Database {
         Args: { p_org: string; p_invoice: string };
         Returns: string;
       };
+      gst_invoice_customer_options: {
+        Args: { p_org: string };
+        Returns: Json;
+      };
       gst_customer_invoice_save: {
         Args: { p_org: string; p_input: Json; p_customer?: string };
         Returns: string;
