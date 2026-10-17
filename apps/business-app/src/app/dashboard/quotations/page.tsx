@@ -8,6 +8,7 @@ import { commercialServices } from '../commercial/service';
 import { QuotationStudioFrame } from './studio-frame';
 import { QuotationRemovalButton } from './quotation-removal-button';
 import { QuotationReviseButton } from './quotation-revise-button';
+import { QuotationFinalButton } from './quotation-final-button';
 import { QuotationMobileMore, QuotationMobileFooter } from './quotation-mobile-disclosures';
 import './quotations-list.css';
 
@@ -214,9 +215,28 @@ export default async function Quotations({
       quotes: [quote],
     });
   }
+  // A single Final choice per canonical customer, including quotations on
+  // different projects. If no one chose one, the newest active quote is Final.
+  const validCustomerIds = [...customerGroups.keys()].filter((id) =>
+    /^[0-9a-f]{8}-[0-9a-f-]{27,}$/.test(id));
+  const {data: finalChoices,error: finalChoiceError} = validCustomerIds.length
+    ? await s.client.rpc('quotation_final_choices',{
+        p_org:s.org,p_customer_ids:validCustomerIds,
+      })
+    : {data:{},error:null};
+  if(finalChoiceError) throw new Error('Could not load final quotation selections');
+  const finalByCustomer = new Map<string,string>(
+    finalChoices && typeof finalChoices==='object' && !Array.isArray(finalChoices)
+      ? Object.entries(finalChoices).filter((entry):entry is [string,string] =>
+          typeof entry[1]==='string')
+      : [],
+  );
   const mobileCustomers = [...customerGroups.values()].map((group) => ({
+
     ...group,
     quotes: group.quotes.sort((a, b) =>
+      Number(b.revision?.quotation_id===finalByCustomer.get(group.id)) -
+      Number(a.revision?.quotation_id===finalByCustomer.get(group.id)) ||
       (b.createdAt ?? '').localeCompare(a.createdAt ?? '') ||
       (b.row.quotation_number ?? '').localeCompare(a.row.quotation_number ?? '') ||
       b.row.id.localeCompare(a.row.id)),
@@ -227,13 +247,15 @@ export default async function Quotations({
   // One main card per customer. Their older quotations are preserved in the
   // expandable history and keep their own independent preview and editing actions.
   const renderMobileQuote = (
-    { row, revision, industry, createdAt, preview, editor, shared }: VisibleQuote,
+    { row, revision, customerId, industry, createdAt, preview, editor, shared }: VisibleQuote,
     history = false,
   ) => (
     <article className={'qs-quotes-mobile-quote' + (history ? ' qs-quotes-past-quote' : '')}
       key={row.id}>
       <div className="qs-quotes-mobile-top">
         <Link href={editor}>{row.quotation_number || 'Quotation'}</Link>
+        {revision?.quotation_id===finalByCustomer.get(customerId) &&
+          <span className="qs-final-label">★ Final</span>}
         {shared && <span className="qs-quotes-state qs-state-shared">Shared</span>}
       </div>
       <div className="qs-quotes-mobile-meta">
@@ -245,6 +267,9 @@ export default async function Quotations({
         <span>{row.project_name || 'Project'}</span>
         <span>{niceDate(createdAt)} · R{row.revision_number ?? 1}</span>
       </div>
+      {canEdit && revision && revision.quotation_id!==finalByCustomer.get(customerId) &&
+        <QuotationFinalButton quotationId={revision.quotation_id}
+          number={row.quotation_number||'Quotation'}/>}
       <div className="qs-quotes-mobile-actions">
         <Link className="qs-quotes-action qs-quotes-action-view"
           href={preview} target="_blank" rel="noopener noreferrer">
@@ -281,10 +306,12 @@ export default async function Quotations({
   );
 
   const renderTableRow = (
-    { row, revision, industry, createdAt, preview, editor, shared }: VisibleQuote,
+    { row, revision, customerId, industry, createdAt, preview, editor, shared }: VisibleQuote,
   ) => <tr key={row.id}>
     <td className="qs-quotes-no">
       <Link href={editor}>{row.quotation_number || 'Quotation'}</Link>
+      {revision?.quotation_id===finalByCustomer.get(customerId) &&
+        <span className="qs-final-label">★ Final</span>}
       <small>Revision {row.revision_number ?? 1}</small>
     </td>
     <td>
@@ -317,6 +344,9 @@ export default async function Quotations({
         {row.status === 'issued' && canCreate && revision &&
           <QuotationReviseButton revisionId={row.id} version={revision.version}
             number={row.quotation_number || 'Quotation'} />}
+        {canEdit && revision && revision.quotation_id!==finalByCustomer.get(customerId) &&
+          <QuotationFinalButton quotationId={revision.quotation_id}
+            number={row.quotation_number||'Quotation'}/>}
         <details className="qs-quotes-more">
           <summary aria-label={'More options for ' + (row.quotation_number || 'quotation')}>•••</summary>
           <div>

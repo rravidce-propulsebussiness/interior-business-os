@@ -470,3 +470,18 @@
   .qs-quotes-customer-card,.qs-quotes-mobile-expanded,.qs-quotes-mobile-more-panel {animation:none!important;}
   .qs-quotes-page * {transition:none!important;}
 }
+
+/* Distinguish the selected quotation, without changing issued/draft status. */
+.qs-final-label{display:inline-flex;align-items:center;white-space:nowrap;gap:4px;
+ color:#1b7352;background:#e7f7ee;border:1px solid #bce5cf;border-radius:9px;
+ padding:5px 8px;font-size:11px;font-weight:850;margin-left:7px;vertical-align:middle}
+.qs-mark-final-control{display:inline-flex;flex-direction:column;gap:4px;min-width:0}
+.qs-mark-final{font-size:11px;font-weight:800;border:1px solid #f3c7aa;
+ background:#fff8f0;color:#d35110;border-radius:10px;padding:9px 11px;
+ white-space:nowrap;cursor:pointer;transition:background .2s ease}
+.qs-mark-final:hover{background:#ffeee0}
+.qs-mark-final:disabled{opacity:.55;cursor:wait}
+.qs-mark-final-error{font-size:10px;color:#b42318;max-width:200px;overflow-wrap:anywhere}
+.qs-quotes-mobile-quote>.qs-mark-final-control{margin:10px 14px 1px}
+.qs-quotes-mobile-quote>.qs-mark-final-control .qs-mark-final{width:100%}
+.qs-quotes-mobile-top{flex-wrap:wrap}

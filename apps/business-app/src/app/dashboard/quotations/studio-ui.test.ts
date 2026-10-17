@@ -783,3 +783,36 @@ describe('mobile package library visual layout', () => {
     expect(library).not.toContain('qpl-features');
   });
 });
+
+describe('customer final quotation selection',()=>{
+  const quotes=file('./page.tsx');
+  const action=file('./final-quotation-actions.ts');
+  const button=file('./quotation-final-button.tsx');
+  const migration=file('../../../../../../packages/database/supabase/migrations/20261017001100_quotation_final_selection.sql');
+
+  it('defaults to latest active quotation and displays a manual Final selection first',()=>{
+    expect(migration).toContain("q.status IN ('draft','issued')");
+    expect(migration).toContain('ORDER BY q.created_at DESC,q.id DESC');
+    expect(migration).toContain('sel.selected_at>=newest.created_at');
+    expect(quotes).toContain("s.client.rpc('quotation_final_choices'");
+    expect(quotes).toContain('finalByCustomer.get(group.id)');
+    expect(quotes).toContain('qs-final-label');
+    expect(quotes).toContain('★ Final');
+    expect(quotes).toContain('QuotationFinalButton');
+    expect(quotes).toContain('quote.customerId');
+  });
+
+  it('securely selects one customer quote without changing draft, issue or PDF',()=>{
+    expect(migration).toContain('PRIMARY KEY(organization_id,customer_id)');
+    expect(migration).toContain("private.has_permission(p_org,'quotation.edit')");
+    expect(migration).toContain('pinned.customer_id=c.id');
+    expect(migration).toContain('FORCE ROW LEVEL SECURITY');
+    expect(migration).toContain('REVOKE ALL ON private.quotation_final_selections');
+    expect(migration).not.toContain('UPDATE public.quotation_revisions');
+    expect(migration).not.toContain('UPDATE public.quotations');
+    expect(action).toContain("commercialServices('quotation.edit','quotation')");
+    expect(action).toContain("s.client.rpc('quotation_mark_final'");
+    expect(button).toContain('Mark as Final');
+    expect(button).toContain('router.refresh()');
+  });
+});

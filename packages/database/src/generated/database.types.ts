@@ -11873,6 +11873,10 @@ export interface Database {
         Args: { p_message: string; p_signature: string };
         Returns: Json;
       };
+      quotation_final_choices: {
+        Args: { p_org: string; p_customer_ids: string[] };
+        Returns: Json;
+      };
       quotation_item_configuration: {
         Args: {
           p_organization_id: string;
@@ -11880,6 +11884,10 @@ export interface Database {
           p_branch_id?: string;
         };
         Returns: Json;
+      };
+      quotation_mark_final: {
+        Args: { p_org: string; p_quotation: string };
+        Returns: boolean;
       };
       quotation_package_delete: {
         Args: { p_org: string; p_package_id: string; p_version: number };
