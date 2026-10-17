@@ -143,6 +143,10 @@ BEGIN
     OR length(v_emergency_name)>120 OR length(v_emergency_phone)>30
     OR v_date>current_date OR v_birth>current_date
   THEN RAISE EXCEPTION 'Invalid employee information' USING ERRCODE='22023'; END IF;
+  IF v_id IS NOT NULL AND v_previous.salary IS NOT NULL
+    AND v_previous.salary_type<>v_salary_type THEN
+    PERFORM private.require_permission(p_org,'payment.record');
+  END IF;
   IF p_input ? 'salary' THEN
     PERFORM private.require_permission(p_org,'payment.record');
     v_salary:=NULLIF(p_input->>'salary','')::numeric;
