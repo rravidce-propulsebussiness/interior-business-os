@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { commercialServices } from '../../../commercial/service';
 import { documentHeaderSchema } from '@business-os/core/quotation-document';
 import { parseSftEstimate } from '@business-os/core/sft-quotation';
+import { parseCustomBrandQuote } from '@business-os/core/custom-brand-quote';
 import { lineSnapshotSchema } from '@business-os/quotation-engine';
 import { createConstructionRatesRepository } from '@business-os/database/construction-rates';
 import { createConstructionPackagesRepository } from '@business-os/database/construction-packages';
@@ -121,6 +122,8 @@ export default async function QuotationStudio({
   });
   const existingSft =
     items.map((row) => parseSftEstimate(row.description)).find(Boolean) ?? null;
+  const existingCustomQuote =
+    items.map((row) => parseCustomBrandQuote(row.description)).find(Boolean) ?? null;
   const canPriceConstruction =
     editable &&
     s.allowed('quotation.override_rate', 'quotation') &&
@@ -190,6 +193,7 @@ export default async function QuotationStudio({
               revisionId={revision.id}
               version={revision.version}
               initialSchedule={existingSft}
+              initialCustomQuote={existingCustomQuote}
               initialMode={mode === 'custom' ? 'custom' : 'sft'}
                initialPackageId={query.package ?? ''}
               canSharePdf={s.allowed('quotation.share', 'quotation')}
