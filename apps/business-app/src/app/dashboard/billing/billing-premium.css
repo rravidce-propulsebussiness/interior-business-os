@@ -169,6 +169,10 @@
   .billing-illustration{display:flex;}
   .billing-template-grid{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) minmax(100px,.5fr);}
 }
+/* Keep long company names and tabular rupee totals from expanding sidebar cards. */
+.billing-right,.billing-activity,.billing-activity-item{min-width:0;max-width:100%;}
+.billing-activity-meta{max-width:43%;min-width:0;}
+.billing-activity-meta strong{white-space:normal;overflow-wrap:anywhere;text-align:right;}
 @media(max-width:660px){
   .billing-v2{padding:14px 10px 36px;}
   .billing-heading{flex-direction:column;align-items:stretch;gap:13px;margin-bottom:14px;}
@@ -203,7 +207,13 @@
   .billing-register-footer{align-items:flex-start;flex-direction:column;gap:8px;}
   .billing-tools-grid{grid-template-columns:1fr;}
   .billing-tool{min-height:62px;}
-  .billing-right{display:flex;}
+  .billing-right{display:flex;width:100%;min-width:0;max-width:100%;}
+  .billing-right .billing-panel{width:100%;max-width:100%;min-width:0;}
+  .billing-activity-item{width:100%;min-width:0;flex-wrap:wrap;}
+  .billing-activity-info{flex:1 1 100px;min-width:0;}
+  .billing-activity-meta{flex:0 1 auto;max-width:46%;}
+  .billing-activity-meta strong{font-variant-numeric:tabular-nums;word-break:normal;overflow-wrap:anywhere;}
+
   .billing-form-grid{grid-template-columns:1fr;}
 }
 @media(min-width:660px) and (max-width:760px){
