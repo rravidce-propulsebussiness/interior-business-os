@@ -2,6 +2,7 @@ import 'server-only';
 import { notFound } from 'next/navigation';
 import { canAccess } from '@business-os/auth';
 import { commercialServices } from '../commercial/service';
+import { activeOrganization,pageServices } from '@business-os/auth/server';
 import { workCompletionByProject } from './work-progress';
 
 export type SiteRow = Record<string,unknown> & {id:string};
@@ -54,7 +55,8 @@ function decimals(value:unknown):number|null{
  const n=Number(value);return value===null||value===undefined||value===''||!Number.isFinite(n)?null:n;
 }
 export async function projectIndex(){
- const s=await commercialServices('project.view','projects',true);
+ const s=await commercialServices('project.view','projects',true).catch(()=>null);
+ if(!s)return assignedProjectIndex();
  const [org,user,projectResult,industryResult]=await Promise.all([
   s.repository.organization(s.org),s.authorization.requireAuthenticatedUser(),
   s.client.from('projects').select('id,name,code,status,project_type,site_address,created_at,customer_id,industry_id')
@@ -88,7 +90,8 @@ export async function projectIndex(){
  return {s,list,org, user};
 }
 export async function projectWorkspace(id:string):Promise<WorkspaceData>{
- const s=await commercialServices('project.view','projects',true);
+ const s=await commercialServices('project.view','projects',true).catch(()=>null);
+ if(!s)return assignedProjectWorkspace(id);
  const {data:project,error}=await s.client.from('projects')
  .select('id,name,code,status,project_type,site_address,created_at,customer_id,industry_id')
  .eq('organization_id',s.org).eq('id',id)
@@ -185,5 +188,82 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
   // There is no canonical all-in site cash-expense ledger yet.
   // A purchase order is only a commitment; labour entries cover just part of spend.
   expenditure:null,
+ };
+}
+
+/**
+ * Staff with an explicit site role are not automatically granted company-wide
+ * project.view. Reuse the original database-scoped site permissions instead of
+ * broadening project RLS or showing another duplicate "My Sites" module.
+ */
+async function assignedProjectIndex(){
+ const {client,repository,authorization,user}=await pageServices();
+ const context=await activeOrganization();
+ if(!context||!context.entitlements.includes('projects'))notFound();
+ await authorization.requireAuthenticatedUser();
+ const result=await client.rpc('project_site_my_projects',{p_organization_id:context.organizationId});
+ if(result.error)notFound();
+ const list:ProjectEntry[]=Array.isArray(result.data)?result.data.map(raw=>{
+  const p=obj(raw);return {
+   id:stringValue(p.id),name:stringValue(p.name),code:stringValue(p.code),
+   status:stringValue(p.stage)||'active',projectType:'',address:'Project site',
+   createdAt:stringValue(p.created_at),customerId:null,client:'Project team',
+   industry:prettyRole(stringValue(p.role)),progress:null,
+  };
+ }):[];
+ const org=await repository.organization(context.organizationId);
+ if(!org)notFound();
+ return {s:{context,org:context.organizationId},list,org,user};
+}
+function prettyRole(role:string){return role?role.replaceAll('_',' ').replace(/\\b\\w/g,c=>c.toUpperCase()):'Assigned site';}
+async function assignedProjectWorkspace(id:string):Promise<WorkspaceData>{
+ const {client,repository,authorization,user}=await pageServices();
+ const context=await activeOrganization();
+ if(!context||!context.entitlements.includes('projects'))notFound();
+ await authorization.requireAuthenticatedUser();
+ // This RPC rejects callers without explicit access to this exact project.
+ const read=await client.rpc('project_site_read',{
+  p_organization_id:context.organizationId,p_project_id:id,
+ });
+ if(read.error||!read.data)notFound();
+ const raw=obj(read.data),p=obj(raw.project);
+ if(stringValue(p.id)!==id)notFound();
+ const [org,stagesResult,tasksResult]=await Promise.all([
+  repository.organization(context.organizationId),
+  client.rpc('construction_project_read',{p_organization_id:context.organizationId,p_project_id:id}),
+  client.from('project_tasks').select('id,project_id,title,status,planned_start,completion_percentage,weight')
+   .eq('organization_id',context.organizationId).eq('project_id',id).limit(1200),
+ ]);
+ if(!org)notFound();
+ const stagesRaw=obj(stagesResult.error?null:stagesResult.data);
+ const stages:Stage[]=Array.isArray(stagesRaw.stages)?stagesRaw.stages.map(x=>{
+  const a=obj(x);return {id:stringValue(a.id),title:stringValue(a.title),
+   status:stringValue(a.status),phase:stringValue(a.phase),floor_code:stringValue(a.floor_code)||null,
+   explanation:stringValue(a.explanation),
+   activities:Array.isArray(a.activities)?a.activities.map(stringValue).filter(Boolean):[],
+   task_count:Number(a.task_count)||0};
+ }):[];
+ const tasks=tasksResult.error?null:tasksResult.data??[];
+ const site={
+  stage:stringValue(raw.stage)||'not_started',role:stringValue(raw.role),
+  canManage:raw.can_manage===true,
+  reports:rows(raw.reports),materials:rows(raw.materials),checks:rows(raw.checks),
+  media:rows(raw.media),designs:rows(raw.designs),team:rows(raw.team),
+  gate:rows(raw.gate),
+  memberOptions:Array.isArray(raw.member_options)?raw.member_options.filter((v):v is {id:string;label:string}=>{
+   const t=obj(v);return typeof t.id==='string'&&typeof t.label==='string';
+  }):[],
+ };
+ return {
+  org:context.organizationId,company:org.name,email:user.email??'',
+  permissions:{manage:site.canManage,finance:false,payments:false,purchases:false,team:site.canManage},
+  project:{id,name:stringValue(p.name),code:stringValue(p.code),status:stringValue(p.status)||'active',
+   projectType:'',address:'Project site',createdAt:'',client:'Project team',customerId:null,
+   industry:'Site Delivery',
+   progress:workCompletionByProject([id],tasks&&tasks.length<1200?tasks:null).get(id)??null},
+  site,stages,links:[],milestones:[],transactions:null,purchaseOrders:null,tasks:(tasks??[]).map(t=>({
+   id:t.id,title:t.title,planned_start:t.planned_start,status:t.status,
+  })),
+  contractValue:null,expenditure:null,agreement:null,
  };
 }
