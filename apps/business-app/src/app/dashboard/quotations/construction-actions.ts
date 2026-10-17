@@ -12,6 +12,7 @@ import { createConstructionPackagesRepository } from '@business-os/database/cons
 import { DomainError, idSchema, safeFailure } from '@business-os/shared';
 import { commercialServices } from '../commercial/service';
 import { snapshotConstructionPackagePdf } from '../pricing/construction/package-pdf-snapshot';
+import { encodeCustomBrandQuote } from '@business-os/core/custom-brand-quote';
 
 const selectionSchema = z
   .object({
@@ -129,6 +130,81 @@ export async function saveConstructionPackage(
       id,
       message:
         'Construction material selection added to the draft quotation. Review included components before issuing.',
+    };
+  } catch (error) {
+    return { message: safeFailure(error).message };
+  }
+}
+
+
+/** Save an entire Custom Quote as ONE versioned, re-editable quotation line.
+ * Authoritative prices and consumption are always re-read from company data.
+ * No duplicated lines or extra material charges on subsequent saves. */
+export async function saveCustomBrandQuote(
+  revisionId: string,
+  version: number,
+  input: unknown,
+): Promise<{ message: string; id?: string; version?: number; total?: string }> {
+  try {
+    const rid = idSchema.parse(revisionId);
+    const values = selectionSchema.parse(input);
+    if (!Number.isInteger(version) || version < 1) throw new DomainError('VALIDATION_FAILED');
+    const { s, revision } = await editable(rid, true);
+    if (revision.version !== version) throw new DomainError('CONFLICT');
+    const price = await createConstructionRatesRepository(s.client).preview(
+      s.org, values.ids, values.areaSqft,
+    );
+    if (Number(price.ratePerSqft) <= 0 || price.options.length !== values.ids.length)
+      throw new DomainError('VALIDATION_FAILED');
+    const description = encodeCustomBrandQuote({
+      areaSqft: price.areaSqft,
+      ratePerSqft: price.ratePerSqft,
+      total: price.total,
+      selections: price.options.map((option) => ({
+        id: option.id,
+        category: option.category,
+        name: option.name,
+        specification: option.specification,
+        unitPrice: option.unitPrice,
+        priceUnit: option.priceUnit,
+        consumptionPerSqft: option.consumptionPerSqft,
+        ratePerSqft: option.ratePerSqft,
+      })),
+    });
+    const { data: existing, error } = await s.client
+      .from('quotation_items')
+      .select('id')
+      .eq('organization_id', s.org)
+      .eq('revision_id', rid)
+      .like('description', 'CUSTOM_BRAND_QUOTE_V1:%')
+      .limit(2);
+    if (error || !existing || existing.length > 1)
+      throw new DomainError('VALIDATION_FAILED');
+    const id = await s.commercial.saveManualLine(s.org, rid, version, {
+      ...(existing[0] ? { id: existing[0].id } : {}),
+      area_id: null,
+      sort_order: 0,
+      optional: false,
+      name: 'Custom Quote — selected materials and brands',
+      description,
+      quantity: price.areaSqft,
+      unit: 'built-up sq ft',
+      rate: price.ratePerSqft,
+      reason: 'Tenant-authorized brand unit prices, SFT consumption and selections saved on this revision.',
+      discount: { kind: 'none', value: '0' },
+      estimated_cost_rate: null,
+    });
+    const { data: updated } = await s.client.from('quotation_revisions')
+      .select('version')
+      .eq('organization_id', s.org)
+      .eq('id', rid)
+      .maybeSingle();
+    revalidatePath('/dashboard/quotations', 'layout');
+    return {
+      id,
+      total: price.total,
+      ...(updated?.version ? { version: updated.version } : {}),
+      message: 'Custom package quotation saved with customer-selected brands and locked price snapshot.',
     };
   } catch (error) {
     return { message: safeFailure(error).message };
