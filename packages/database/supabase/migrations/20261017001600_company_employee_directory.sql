@@ -282,4 +282,51 @@ GRANT EXECUTE ON FUNCTION public.company_employee_list(uuid),
   public.company_employee_attendance_list(uuid,date),
   public.company_employee_attendance_save(uuid,uuid,date,text,text)
   TO authenticated;
+
+-- Salary entries created from HR records must use the stable employee UUID.
+-- Preserve old manually-entered Finance records and their name-based uniqueness.
+ALTER TABLE private.company_salary_entries
+  ADD COLUMN IF NOT EXISTS employee_id uuid;
+ALTER TABLE private.company_salary_entries
+  ADD CONSTRAINT employee_salary_directory_link
+  FOREIGN KEY (organization_id,employee_id)
+  REFERENCES private.company_employee_directory(organization_id,id);
+DROP INDEX IF EXISTS private.salary_once_per_month;
+CREATE UNIQUE INDEX salary_once_per_month ON private.company_salary_entries
+  (organization_id,lower(btrim(employee_name)),salary_month)
+  WHERE employee_id IS NULL;
+CREATE UNIQUE INDEX salary_employee_month_once ON private.company_salary_entries
+  (organization_id,employee_id,salary_month)
+  WHERE employee_id IS NOT NULL;
+
+CREATE FUNCTION public.company_employee_salary_create(p_org uuid,p_employee uuid,p_month text)
+RETURNS uuid LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $fn$
+DECLARE v_employee private.company_employee_directory;v_month date;v_id uuid;
+BEGIN
+  PERFORM private.require_permission(p_org,'team.manage');
+  PERFORM private.finance_require(p_org,'payment.record');
+  IF coalesce(p_month,'') !~ '^[0-9]{4}-(0[1-9]|1[0-2])$'
+  THEN RAISE EXCEPTION 'Invalid salary month' USING ERRCODE='22023';END IF;
+  v_month:=(p_month||'-01')::date;
+  IF v_month>date_trunc('month',current_date)::date + interval '1 month'
+  THEN RAISE EXCEPTION 'Future salary month invalid' USING ERRCODE='22023';END IF;
+  SELECT * INTO v_employee FROM private.company_employee_directory
+  WHERE organization_id=p_org AND id=p_employee FOR SHARE;
+  IF NOT FOUND OR v_employee.status<>'active'
+    OR v_employee.salary_type<>'monthly' OR v_employee.salary IS NULL
+    OR v_employee.salary<=0
+  THEN RAISE EXCEPTION 'Active monthly salary required' USING ERRCODE='22023';END IF;
+  INSERT INTO private.company_salary_entries(
+    organization_id,employee_id,employee_name,salary_month,gross,deductions,notes
+  ) VALUES (
+    p_org,p_employee,v_employee.name,v_month,v_employee.salary,0,
+    'Payroll entry for '||v_employee.employee_code||'. Confirm payment in Finance.'
+  ) RETURNING id INTO v_id;
+  INSERT INTO public.audit_logs(actor_user_id,organization_id,action,entity_type,entity_id)
+  VALUES(auth.uid(),p_org,'salary.entry.created','company_salary',v_id::text);
+  RETURN v_id;
+END $fn$;
+REVOKE ALL ON FUNCTION public.company_employee_salary_create(uuid,uuid,text) FROM PUBLIC,anon;
+GRANT EXECUTE ON FUNCTION public.company_employee_salary_create(uuid,uuid,text) TO authenticated;
+
 COMMIT;
