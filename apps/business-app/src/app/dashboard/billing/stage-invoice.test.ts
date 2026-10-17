@@ -3,6 +3,7 @@ vi.mock('server-only', () => ({}));
 import { readFileSync } from 'node:fs';
 import { savedStagePaymentPlan } from '@business-os/core/quotation-payment-plan';
 import { invoiceStageChoices } from './stage-choices';
+import { invoiceCustomerChoices } from './customer-choices';
 import type { GstStageInvoiceOption } from '@business-os/database/gst';
 
 const file = (p:string) => readFileSync(new URL(p,import.meta.url),'utf8');
@@ -10,6 +11,7 @@ const screen = file('./premium-sales-invoice.tsx');
 const page = file('./new/page.tsx');
 const actions = file('./actions.ts');
 const migrations = file('../../../../../../packages/database/supabase/migrations/20261017000500_stage_invoice_project_activation.sql');
+const customerMigration = file('../../../../../../packages/database/supabase/migrations/20261017000700_gst_existing_customer_link.sql');
 
 const sample: GstStageInvoiceOption = {
   leadId:'00000000-0000-4000-8000-000000000001',leadNumber:'L-001',
@@ -34,7 +36,7 @@ describe('lead-linked GST milestone invoicing',()=>{
   });
   it('shows one dropdown instead of 6 stages and keeps billing client and totals responsive',()=>{
     expect(screen).toContain('aria-label="Payment stage"');
-    expect(screen).toContain('choice!.stages.map(row=><option');
+    expect(screen).toContain('group.stages.map(row=><option');
     expect(screen).toContain('name="leadId"');
     expect(screen).toContain('name="stageNumber"');
     expect(screen).toContain('name="revisionId"');
@@ -44,6 +46,40 @@ describe('lead-linked GST milestone invoicing',()=>{
     expect(page).toContain("params.kind === 'purchase_bill'");
     expect(page).toContain('<DocumentEditor');
     expect(page).toContain('<PremiumSalesInvoice');
+  });
+  it('shows all active existing clients separately from eligible project stages',()=>{
+    const choices = invoiceStageChoices([sample], '36');
+    const clients = invoiceCustomerChoices([
+      {id:'c1',display_name:'Existing Customer',legal_name:null,
+        phone:'9999999999',email:null,tax_identifier:null,
+        billing_address:{line1:'Main Street',city:'Hyderabad',region:'Telangana',postal_code:'500001'}},
+      {id:'c2',display_name:'Existing Customer',legal_name:null,
+        phone:null,email:null,tax_identifier:null,billing_address:null},
+    ], choices, '36');
+    expect(clients).toHaveLength(3);
+    expect(clients.filter(c=>c.name==='Existing Customer')).toHaveLength(2);
+    expect(clients.find(c=>c.id==='c1')?.address).toContain('Hyderabad');
+    expect(clients.find(c=>c.id===sample.customerId)?.fromApprovedQuotation).toBe(true);
+    expect(screen).toContain('aria-label="Select existing client"');
+    expect(screen).toContain('customers.map(row=><option');
+    expect(screen).toContain('customerId');
+    expect(screen).toContain("eligibleStages.length>0");
+    expect(page).toContain(".from('customers')");
+    expect(page).toContain(".eq('is_sales_prospect',false)");
+    expect(page).toContain("permission: 'customer.view'");
+  });
+  it('saves tenant-scoped invoice/customer association without creating another client or project',()=>{
+    expect(customerMigration).toContain('private.gst_customer_invoice_links');
+    expect(customerMigration).toContain("private.commercial_access(p_org,'customer.view','customers')");
+    expect(customerMigration).toContain("c.organization_id=p_org");
+    expect(customerMigration).toContain("c.is_sales_prospect=false");
+    expect(customerMigration).toContain("public.gst_document_with_template_save(p_org,p_input,NULL)");
+    expect(customerMigration).toContain("ENABLE ROW LEVEL SECURITY");
+    expect(customerMigration).toContain("REVOKE ALL ON private.gst_customer_invoice_links");
+    expect(customerMigration).not.toContain('INSERT INTO public.customers');
+    expect(customerMigration).not.toContain('INSERT INTO public.projects');
+    expect(actions).toContain('.saveCustomerDocument(');
+    expect(actions).toContain("idSchema.parse(customerId)");
   });
   it('routes linked sales draft through the validated tenant RPC',()=>{
     expect(actions).toContain('idSchema.parse(leadId)');
