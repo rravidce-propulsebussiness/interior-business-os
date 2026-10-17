@@ -54,6 +54,7 @@ export async function GET(
       headers: {
         ...publicHeaders,
         'Content-Type': 'application/pdf',
+        'X-Quotation-PDF-Template': 'premium-html-v1',
         'Content-Disposition': 'attachment; filename="quotation.pdf"',
       },
     });
