@@ -10,6 +10,7 @@
     "./quotation-payment-plan": "./src/quotation-payment-plan.ts",
     "./quotation-terms": "./src/quotation-terms.ts",
     "./sft-quotation": "./src/sft-quotation.ts",
+    "./custom-brand-quote": "./src/custom-brand-quote.ts",
     "./crm": "./src/crm.ts",
     "./quotation-sharing": "./src/quotation-sharing.ts",
     "./finance": "./src/finance.ts",
