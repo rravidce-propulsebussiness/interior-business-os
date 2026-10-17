@@ -9,6 +9,9 @@ export type ConstructionRate = {
   name: string;
   specification: string;
   ratePerSqft: string;
+  unitPrice: string;
+  consumptionPerSqft: string;
+  priceUnit: string;
   status: 'active' | 'inactive';
   version: number;
 };
@@ -54,6 +57,9 @@ export function createConstructionRatesRepository(
         name: string;
         specification: string;
         ratePerSqft: string;
+        unitPrice: string;
+        consumptionPerSqft: string;
+        priceUnit: string;
         status: 'active' | 'inactive';
       },
     ) =>
