@@ -216,6 +216,7 @@ export function LeadsWorkspace({
   canConfigureCrm,
   canManage,
   canWin,
+  canConvert,
   canQuote,
   canShareQuote,
   canAssign,
@@ -725,7 +726,7 @@ export function LeadsWorkspace({
                                 stages={stages}
                                 lostReasons={lostReasons}
                                 canManage={canManage}
-                                canWin={canWin}
+                                canWin={canWin} canConvert={canConvert}
                               />
                             </td>
                             <td>
@@ -850,7 +851,7 @@ export function LeadsWorkspace({
                         <div className="crm-mobile-inline-grid">
                           <label>Stage
                             <LeadStageSelect lead={lead} stages={stages} lostReasons={lostReasons}
-                              canManage={canManage} canWin={canWin}/>
+                              canManage={canManage} canWin={canWin} canConvert={canConvert}/>
                           </label>
                           <label>Priority
                             <LeadPrioritySelect lead={lead} canManage={canManage}/>
@@ -1001,7 +1002,7 @@ export function LeadsWorkspace({
       {openedLead && <LeadDetailsDrawer
         lead={openedLead} onClose={() => setOpenedId(null)}
         stages={stages} lostReasons={lostReasons} assignees={assignees}
-        canManage={canManage} canWin={canWin}
+        canManage={canManage} canWin={canWin} canConvert={canConvert}
         canFollowUp={canFollowUp} canVisit={canVisit} canNote={canNote} canQuote={canQuote}
       />}
       <p className="crm-leads-scope">
