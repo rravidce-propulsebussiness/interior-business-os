@@ -27,7 +27,7 @@ describe('premium tenant GST billing dashboard', () => {
     expect(page).toContain("d.kind==='sales_invoice'&&d.status==='issued'");
     expect(page).toContain("d.kind==='purchase_bill'&&d.status==='recorded'");
     expect(page).toContain('gst.list(context.organizationId,kind)');
-    expect(page).toContain('Showing {docs.length} documents');
+    expect(page).toContain('Showing {docs.length} of the latest 100 documents');
   });
 
   it('keeps existing invoice actions, GST profile save, and finance navigation', () => {
@@ -36,6 +36,8 @@ describe('premium tenant GST billing dashboard', () => {
     expect(page).toContain('href="/dashboard/billing/gst-reports"');
     expect(page).toContain("href={'/dashboard/billing/'+d.id}");
     expect(page).toContain('action={saveGstProfile}');
+    expect(page).toContain('<BillingProfileEditButton/>');
+    expect(page).toContain('billing-coverage');
     expect(page).toContain('name="legalName"');
     expect(page).toContain('name="gstin"');
     expect(actions).toContain("authorization.requirePermission(org, 'billing.manage')");
