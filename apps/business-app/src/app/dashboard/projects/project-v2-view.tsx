@@ -9,6 +9,7 @@ import { projectWorkspace,formatMoney,pretty,shortDate,stringValue,
 import {
  SiteReportForm,SiteMediaForm,MaterialRequestForm,MaterialUpdateForm,
  QualityForm,ReviewCheck,DesignSubmitForm,GateForm,AssignRole,SyncStages,
+ ProjectLifecycle,SignedAgreementForm,
 } from './project-v2-forms';
 import '../owner-dashboard.css';
 import './project-v2.css';
@@ -165,6 +166,8 @@ function Timeline({d}:{d:WorkspaceData}){
  const all=timeline(d),site=d.site;
  const newReport=site?.reports[0];
  return <div className="pv2-content pv2-timeline">
+  {site&&<ProjectLifecycle id={d.project.id} stage={site.stage} canManage={site.canManage}
+   designs={site.designs.map(x=>({id:x.id,kind:stringValue(x.kind),status:stringValue(x.status)}))}/>}
   <section className="pv2-panel">
    <Title title="Project Timeline" detail="Daily progress, tomorrow's plan, photos, materials and quality checks"
     action={<span className="pv2-label">{all.length} recorded activities</span>}/>
@@ -220,6 +223,16 @@ function Documents({d}:{d:WorkspaceData}){
  </section>;
  return <div className="pv2-content">
   <section className="pv2-section-intro"><h2>Project Documents</h2><p>Agreements, PDF plans, approval evidence, drawings and site photos stay in the project's private record.</p></section>
+  {d.agreement&&<section className="pv2-panel pv2-agreement-status">
+   <div className="pv2-between"><div><h2>Agreement · {d.agreement.contractNumber}</h2>
+    <p className="pv2-muted">Execution clearance comes from the recorded signed agreement and advance.</p></div>
+    <Status value={d.agreement.authorized?'approved':d.agreement.status||'pending'}/></div>
+   {agreement.length>0&&d.site?.canManage&&<details className="pv2-edit-drawer">
+    <summary>Record signed agreement evidence</summary>
+    <SignedAgreementForm projectId={d.project.id} contractId={d.agreement.contractId}
+     media={agreement.filter(x=>x.mime==='application/pdf').map(x=>({id:x.id,name:stringValue(x.filename)}))}/>
+   </details>}
+  </section>}
   {group('Agreement',agreement)}{group('Plans & Drawings',plans)}{group('Site Photos & Documents',other)}
   {d.site&&<section className="pv2-panel"><Title title="Upload Document" detail="Secure upload to the existing project media store"/>
    <SiteMediaForm id={d.project.id} category="agreement"/></section>}
