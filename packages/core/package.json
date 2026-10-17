@@ -24,7 +24,8 @@
     "./operations-command": "./src/operations-command.ts",
     "./operations-document": "./src/operations-document.ts",
     "./automation": "./src/automation.ts",
-    "./report-document": "./src/report-document.ts"
+    "./report-document": "./src/report-document.ts",
+    "./construction-payment-schedule": "./src/construction-payment-schedule.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json"
