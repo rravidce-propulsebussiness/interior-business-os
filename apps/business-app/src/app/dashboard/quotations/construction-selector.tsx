@@ -38,7 +38,9 @@ function CustomizedQuote({
   }, [version]);
   const [area, setArea] = useState(initialQuote?.areaSqft ?? '');
   const [chosen, setChosen] = useState<Record<string, string>>(() =>
-    Object.fromEntries(initialQuote?.selections.map(item => [item.category, item.id]) ?? []));
+    Object.fromEntries(initialQuote?.selections.map(item => [item.category, item.id]) ??
+      rates.filter(rate => rate.status === 'active' && rate.isDefault)
+        .map(rate => [rate.category,rate.id])));
   const [dirty, setDirty] = useState(!initialQuote);
   const [message, setMessage] = useState('');
   const [verified, setVerified] = useState<{rate: string; total: string} | null>(null);
