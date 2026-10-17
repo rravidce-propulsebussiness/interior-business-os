@@ -55,6 +55,7 @@ export function TeamAccessWorkspace({members,branches,roles,permissions,grants,a
  const [roleFilter,setRoleFilter]=useState('all');
  const [inviteOpen,setInviteOpen]=useState(false);
  const [roleEditor,setRoleEditor]=useState(false);
+ const [editingRole,setEditingRole]=useState<Role|null>(null);
  const [presetOpen,setPresetOpen]=useState(false);
  const [detailTab,setDetailTab]=useState<'access'|'permissions'>('access');
  const [mobileDetail,setMobileDetail]=useState(false);
@@ -146,7 +147,7 @@ export function TeamAccessWorkspace({members,branches,roles,permissions,grants,a
      </>}
      {tab==='invitations'&&canInvite&&<button className="team-outline" onClick={()=>setInviteOpen(true)}>+ Invite</button>}
      {tab==='roles'&&canCreateRoles&&<button className="team-primary team-role-new"
-      onClick={()=>setRoleEditor(true)}><OwnerIcon name="plus" size={14}/> Create Role</button>}
+      onClick={()=>{setEditingRole(null);setRoleEditor(true);}}><OwnerIcon name="plus" size={14}/> Create Role</button>}
     </div>
     {tab==='members'&&canViewTeam&&<div className="team-panel">
      <div className="team-table-wrap"><table className="team-table">
@@ -208,13 +209,13 @@ export function TeamAccessWorkspace({members,branches,roles,permissions,grants,a
        {presetOpen?'Hide presets':'Role presets'}</button>}</div>
      {presetOpen&&canCreateRoles&&<div className="team-presets">
       <h3>Install a suggested role</h3>
-      <ActionPanel action={createRoleFromPreset} label="Install role preset">
+      {rolePresets.some(r=>!installed.has(r.key))&&<ActionPanel action={createRoleFromPreset} label="Install role preset">
        <input type="hidden" name="organizationId" value={organizationId}/>
        <Field label="Preset role"><select required name="presetKey">
         {rolePresets.filter(r=>!installed.has(r.key)).map(r=><option key={r.key} value={r.key}>
          {r.name} · {r.industries.join(' / ')}</option>)}
        </select></Field>
-      </ActionPanel>
+      </ActionPanel>}
       {!rolePresets.some(r=>!installed.has(r.key))&&<p>All suggested roles are already installed.</p>}
      </div>}
      <div className="team-role-grid">{shownRoles.map(r=>{
@@ -228,6 +229,8 @@ export function TeamAccessWorkspace({members,branches,roles,permissions,grants,a
        <div className="team-permission-pills">{granted.length?granted.slice(0,7).map(key=>
         <span key={key}>{key}</span>):<span>No extra permissions</span>}
         {granted.length>7&&<span>+{granted.length-7} more</span>}</div>
+       {canCreateRoles&&!r.is_owner&&<button className="team-role-edit" type="button"
+        onClick={()=>{setEditingRole(r);setRoleEditor(true);}}>Edit permissions</button>}
       </article>;
      })}</div>
      {!shownRoles.length&&<div className="team-empty">No matching roles.</div>}
@@ -262,7 +265,7 @@ export function TeamAccessWorkspace({members,branches,roles,permissions,grants,a
       <h3>Update member access</h3><ActionPanel action={changeMembershipStatus} label="Save access status">
        <input type="hidden" name="organizationId" value={organizationId}/>
        <input type="hidden" name="membershipId" value={person.id}/>
-       <Field label="Account status"><select name="status" defaultValue={person.status} key={person.id}>
+       <Field label="Account status"><select name="status" defaultValue={person.status} key={person.id+person.status}>
         <option value="active">Active</option><option value="suspended">Suspended</option>
         <option value="revoked" disabled={!canRemove}>Revoked</option>
        </select></Field>
@@ -321,18 +324,19 @@ export function TeamAccessWorkspace({members,branches,roles,permissions,grants,a
   </div>}
   {roleEditor&&<div className="team-modal-layer" onMouseDown={e=>{if(e.currentTarget===e.target)setRoleEditor(false);}}>
    <div className="team-modal team-modal-large" role="dialog" aria-modal="true" aria-labelledby="team-role-title">
-    <header><div><small>Permissions</small><h2 id="team-role-title">Create custom role</h2>
+    <header><div><small>Permissions</small><h2 id="team-role-title">{editingRole?'Edit role permissions':'Create custom role'}</h2>
      <p>Choose only the capabilities this role needs.</p></div>
-     <button type="button" aria-label="Close role creator" onClick={()=>setRoleEditor(false)}>×</button></header>
-    <ActionPanel action={createCustomRole} label="Save custom role">
+     <button type="button" aria-label="Close role creator" onClick={()=>{setRoleEditor(false);setEditingRole(null);}}>×</button></header>
+    <ActionPanel key={editingRole?.id??'new'} action={createCustomRole} label={editingRole?'Save role changes':'Save custom role'}>
      <input type="hidden" name="organizationId" value={organizationId}/>
      <div className="team-field-columns">
       <Field label="Role key"><input required name="key" minLength={2} maxLength={64}
-       pattern="[a-z][a-z0-9_]*" placeholder="project_coordinator"/></Field>
-      <Field label="Display name"><input required name="name" maxLength={100} placeholder="Project Coordinator"/></Field>
+       pattern="[a-z][a-z0-9_]*" defaultValue={editingRole?.key??''} placeholder="project_coordinator"/></Field>
+      <Field label="Display name"><input required name="name" maxLength={100} defaultValue={editingRole?.name??''} placeholder="Project Coordinator"/></Field>
      </div>
      <fieldset className="team-checkbox-group team-permission-checks"><legend>Allowed permissions</legend>
-      {permissions.map(p=><label key={p.id}><input name="permissions" type="checkbox" value={p.key}/>
+      {permissions.map(p=><label key={p.id}><input name="permissions" type="checkbox" value={p.key}
+        defaultChecked={Boolean(editingRole&&grants.some(g=>g.roleId===editingRole.id&&g.permissionId===p.id))}/>
        <span><strong>{p.key}</strong><small>{p.description}</small></span></label>)}
      </fieldset>
     </ActionPanel>
