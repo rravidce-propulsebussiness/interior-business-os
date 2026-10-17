@@ -910,3 +910,44 @@
 @media (prefers-reduced-motion:reduce) {
   .pd-progress-track > span { transition:none; }
 }
+
+/* Project mobile command centre: real image, recorded progress and actionable cards. */
+.pd-project-photo{position:relative;flex:0 0 100%;order:2;width:100%;height:250px;background:linear-gradient(125deg,#d4e6f0,#f2e7d9 65%,#dfd5c4);overflow:hidden;border-radius:15px}
+.pd-project-photo img{display:block;width:100%;height:100%;object-fit:cover}
+.pd-project-photo-placeholder{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;color:#a56b4c;font-size:11px;text-align:center;padding:20px}
+.pd-project-photo-placeholder span{max-width:220px}
+.pd-hero-main{order:1}
+.pd-hero-progress{order:3;background:#fff;border:1px solid #f0e5dd;padding:16px;border-radius:14px}
+.pd-hero-actions{order:4}
+.pd-mobile-snapshot{grid-template-columns:repeat(3,minmax(0,1fr))}
+.pd-snapshot-value{font-size:15px;line-height:1.4;letter-spacing:-.02em;color:#1c2b45;overflow-wrap:anywhere}
+.pd-mobile-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:17px}
+.pd-mobile-actions a{display:flex;flex-direction:column;align-items:center;gap:7px;text-align:center;padding:13px 7px;background:#fff;border:1px solid #f0e4db;border-radius:13px;color:#40516d;font-size:11px;font-weight:750;text-decoration:none;transition:transform .15s,border-color .15s}
+.pd-mobile-actions a:hover{transform:translateY(-2px);border-color:#ffcfb3}
+.pd-mobile-actions a svg{width:29px;height:29px;padding:7px;box-sizing:content-box;background:#fff0e6;color:#fe5105;border-radius:11px}
+.project-detail-dashboard .pd-side-column{min-width:0}
+@media(max-width:740px){
+ .project-detail-dashboard{padding:15px 12px 110px}
+ .pd-breadcrumb{display:none}
+ .pd-hero{gap:10px}
+ .pd-hero-main{gap:9px;flex:1 1 100%}
+ .pd-hero-symbol{display:none}
+ .pd-heading-line h1{font-size:24px}
+ .pd-hero-text p{font-size:10px}
+ .pd-project-photo{height:205px;border-radius:13px;order:2}
+ .pd-hero-progress{flex:1 1 100%;order:3;padding:13px 15px}
+ .pd-hero-progress>strong{font-size:26px}
+ .pd-hero-actions{order:4;flex:1 1 100%;margin:0;gap:7px}
+ .pd-hero-actions .pd-button{font-size:10px;min-height:37px}
+ .pd-quick-overview.pd-mobile-snapshot{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+ .pd-mobile-snapshot .pd-quick-card{min-width:0;min-height:130px;padding:12px;border-radius:12px}
+ .pd-mobile-snapshot .pd-quick-card:last-child{grid-column:1/-1;min-height:106px}
+ .pd-mobile-snapshot .pd-quick-card h2{font-size:11px;margin:0 0 7px}
+ .pd-mobile-snapshot .pd-snapshot-value{font-size:13px}
+ .pd-mobile-snapshot .pd-quick-label{font-size:10px;line-height:1.35;margin:8px 0}
+ .pd-mobile-snapshot .pd-quick-card>a{font-size:10px}
+ .pd-mobile-actions{gap:7px;margin:0 0 15px}
+ .pd-mobile-actions a{padding:10px 3px;gap:5px;font-size:9px;border-radius:11px;min-width:0}
+ .pd-mobile-actions a svg{padding:7px;width:20px;height:20px;border-radius:9px}
+}
+@media(prefers-reduced-motion:reduce){.pd-mobile-actions a{transition:none}}

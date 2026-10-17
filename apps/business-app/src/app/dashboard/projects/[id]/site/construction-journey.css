@@ -586,3 +586,29 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* Actual quote-derived stage timeline, SG Homes mobile visual treatment. */
+.cj-root{--cj-ink:#17223b;--cj-blue:#fe5105;--cj-soft:#fff1e8;--cj-line:#f3e6de;background:#fff;border-color:#f1e5dd;border-radius:15px;box-shadow:0 5px 17px #76391b0a}
+.cj-eyebrow{color:#f26316}
+.cj-count{background:#fff0e6;color:#e95b12}
+.cj-root a{color:#e75a12}
+.cj-track::before{border-left-color:#f8dfd0}
+.cj-node-primary{background:#fe5105}
+.cj-node-success{background:#159a60}
+.cj-stage-primary{border-color:#ffd5bc}
+.cj-stage-neutral{border-color:#eee6df}
+.cj-root .cj-stage-summary{border-radius:12px}
+.cj-root .cj-bottom a{background:#fe5105;color:#fff}
+@media(max-width:740px){
+ .cj-root{border-radius:13px;padding:14px 12px;margin:13px 0}
+ .cj-header h2{font-size:19px}
+ .cj-header p:not(.cj-eyebrow){font-size:11px;line-height:1.5}
+ .cj-count{padding:6px 9px;border-radius:8px;font-size:10px}
+ .cj-track{margin-left:15px}
+ .cj-track-item{padding-left:24px}
+ .cj-node{left:-18px;top:12px;width:34px;height:34px;font-size:11px}
+ .cj-stage-summary{padding:12px}
+ .cj-stage-name{font-size:13px}
+ .cj-stage-desc,.cj-stage-phase{font-size:10px;line-height:1.5}
+ .cj-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}

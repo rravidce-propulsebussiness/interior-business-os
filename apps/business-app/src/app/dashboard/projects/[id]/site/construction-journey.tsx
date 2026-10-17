@@ -324,22 +324,7 @@ export function ConstructionJourney({
             : `${certified} / ${stages.length} certified`}
         </span>
       </div>
-      <nav className="cj-nav" aria-label="Project workspace shortcuts">
-        <Link href={go('#construction-timeline')} className="cj-nav-active">
-          {isWatchman ? 'Curing timeline' : 'Timeline'}
-        </Link>
-        {isWatchman ? (
-          <Link href={go('#security')}>Curing &amp; security</Link>
-        ) : (
-          <>
-            <Link href={go('#daily-reports')}>Site updates</Link>
-            <Link href={go('#materials')}>Materials</Link>
-            {showCuring && <Link href={go('#security')}>Curing</Link>}
-            <Link href={go('#team')}>Team</Link>
-            {canSeeFinance && <Link href={paymentsUrl}>Payments</Link>}
-          </>
-        )}
-      </nav>
+
       {!stages.length ? (
         isWatchman ? (
           <div className="cj-empty cj-curing-panel">

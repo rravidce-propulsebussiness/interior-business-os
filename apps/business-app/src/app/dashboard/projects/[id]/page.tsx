@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import Image from 'next/image';
+import { ProjectMobileTabs } from './project-mobile-tabs';
 import { notFound } from 'next/navigation';
 import { z } from 'zod';
 import { canAccess } from '@business-os/auth';
@@ -191,6 +193,16 @@ export default async function Project({
     )
     .slice(0, 3);
   const recentMedia = (site?.media ?? []).slice(0, 4);
+  const heroPhoto = (site?.media ?? []).find((item) =>
+    field(item,'mime').startsWith('image/') &&
+    ['site','daily','inspection'].includes(field(item,'category')),
+  );
+  const photoId = heroPhoto ? field(heroPhoto,'id') : '';
+  const lastReport = recentReports[0];
+  const tomorrowPlan = lastReport ? field(lastReport,'tomorrow_plan') : '';
+  const pendingMaterials = site?.materials.filter((record) =>
+    !['received','rejected'].includes(field(record,'status'))) ?? [];
+  const attention = site ? pendingChecks.length + pendingMaterials.length : null;
   const taskResult = await s.client
     .from('project_tasks')
     .select('project_id,status,completion_percentage,weight,title,planned_start')
@@ -258,6 +270,16 @@ export default async function Project({
               </p>
             </div>
           </div>
+          <div className="pd-project-photo" aria-label={photoId?'Recorded project site photograph':'Project image placeholder'}>
+            {photoId ? (
+              <Image unoptimized width={960} height={390}
+                src={'/dashboard/projects/'+id+'/site/media/'+photoId}
+                alt={field(heroPhoto ?? {},'caption') || 'Recorded project site photograph'}/>
+            ) : <div className="pd-project-photo-placeholder">
+              <OwnerIcon name="projects" size={44}/>
+              <span>Project photographs will appear here after a site upload</span>
+            </div>}
+          </div>
           <div className="pd-hero-progress">
             <span>Overall work completed</span>
             <strong>{progress === null ? 'Not tracked' : progress + '%'}</strong>
@@ -288,117 +310,59 @@ export default async function Project({
           </div>
         </header>
 
-        <nav className="pd-tabs" aria-label="Project sections">
-          <a href="#overview"><OwnerIcon name="dashboard" size={16} /> Overview</a>
-          <Link href={deliveryUrl + '#daily-reports'}>
-            <OwnerIcon name="calendar" size={16} /> Site updates
-          </Link>
-          <a href="#team"><OwnerIcon name="team" size={16} /> Team</a>
-          <Link href={deliveryUrl + '#materials'}>
-            <OwnerIcon name="purchases" size={16} /> Materials
-          </Link>
-          <Link href="/dashboard/finance"><OwnerIcon name="billing" size={16} /> Invoices</Link>
-          <a href="#media"><OwnerIcon name="quotations" size={16} /> Documents</a>
-        </nav>
+        <ProjectMobileTabs projectId={id} active="overview"
+          allowTeam={Boolean(site)}
+          allowFinance={has('invoice.view','billing')}/>
 
-        <section className="pd-metrics" aria-label="Project summary">
-          <div className="pd-metric">
-            <span className="pd-metric-icon pd-icon-blue">
-              <OwnerIcon name="calendar" size={21} />
-            </span>
-            <div>
-              <small>Project created</small>
-              <strong>{formatDate(project.created_at)}</strong>
-              <span>Registered in Business OS</span>
-            </div>
-          </div>
-          <div className="pd-metric">
-            <span className="pd-metric-icon pd-icon-green">
-              <OwnerIcon name="projects" size={21} />
-            </span>
-            <div>
-              <small>Rooms & areas</small>
-              <strong>{areas.length}</strong>
-              <span>
-                {areas.length === 250
-                  ? 'Showing first 250 areas'
-                  : 'Areas recorded'}
-              </span>
-            </div>
-          </div>
-          <div className="pd-metric">
-            <span className="pd-metric-icon pd-icon-amber">
-              <OwnerIcon name="team" size={21} />
-            </span>
-            <div>
-              <small>Assigned team</small>
-              <strong>{site ? team.length : '—'}</strong>
-              <span>
-                {site
-                  ? 'Active project assignments'
-                  : 'Open site workspace for access'}
-              </span>
-            </div>
-          </div>
-          <div className="pd-metric">
-            <span className="pd-metric-icon pd-icon-purple">
-              <OwnerIcon name="check" size={21} />
-            </span>
-            <div>
-              <small>Open quality checks</small>
-              <strong>{site ? pendingChecks.length : '—'}</strong>
-              <span>
-                {site
-                  ? 'Awaiting a passed result'
-                  : 'Access through site delivery'}
-              </span>
-            </div>
-          </div>
-        </section>
 
-        <section className="pd-quick-overview" aria-label="Project at a glance">
+        <section className="pd-quick-overview pd-mobile-snapshot" aria-label="Current project status">
           <article className="pd-panel pd-quick-card">
-            <h2>Work progress</h2>
-            <strong className="pd-quick-number">
-              {progress === null ? '—' : progress + '%'}
+            <h2>Next activity</h2>
+            <strong className="pd-snapshot-value">
+              {upcomingTasks[0]?.title ?? 'Not scheduled'}
             </strong>
             <span className="pd-quick-label">
-              {progress === null
-                ? 'No measured work recorded yet'
-                : 'Based on actual weighted task completion'}
+              {upcomingTasks[0]?.planned_start
+                ? formatDate(upcomingTasks[0].planned_start)
+                : 'Add work tasks to build your upcoming schedule'}
             </span>
-            <div className="pd-progress-track">
-              {progress !== null && <span style={{ width: progress + '%' }} />}
-            </div>
+            <Link href={'/dashboard/operations?project='+id}>View task schedule →</Link>
           </article>
           <article className="pd-panel pd-quick-card">
-            <h2>Upcoming work</h2>
-            {upcomingTasks.length ? (
-              <div className="pd-quick-lines">
-                {upcomingTasks.map((task) => (
-                  <div key={task.title + task.planned_start}>
-                    <strong>{task.title}</strong>
-                    <small>{formatDate(task.planned_start)}</small>
-                  </div>
-                ))}
-              </div>
-            ) : <p>No scheduled work available.</p>}
-            <Link href={deliveryUrl}>Open site workspace →</Link>
+            <h2>Tomorrow's plan</h2>
+            <strong className="pd-snapshot-value">
+              {tomorrowPlan || 'Not entered'}
+            </strong>
+            <span className="pd-quick-label">From the latest recorded site report</span>
+            <Link href={deliveryUrl + '#daily-reports'}>Site updates →</Link>
           </article>
           <article className="pd-panel pd-quick-card">
-            <h2>Recent site update</h2>
-            {recentReports.length ? (
-              <div className="pd-quick-lines">
-                {recentReports.slice(0, 2).map((report, index) => (
-                  <div key={index}>
-                    <strong>{field(report, 'completed_work') || 'Site report recorded'}</strong>
-                    <small>{formatDate(field(report, 'report_date'))}</small>
-                  </div>
-                ))}
-              </div>
-            ) : <p>No daily reports yet.</p>}
-            <Link href={deliveryUrl + '#daily-reports'}>View site updates →</Link>
+            <h2>Attention required</h2>
+            <strong className="pd-quick-number">
+              {attention === null ? '—' : attention}
+            </strong>
+            <span className="pd-quick-label">
+              {attention === null ? 'Site data not available'
+                : 'Open quality checks and outstanding site material requests'}
+            </span>
+            <Link href={deliveryUrl + '#quality'}>Review site issues →</Link>
           </article>
+        </section>
+        <section className="pd-mobile-actions" aria-label="Project quick actions">
+          {has('invoice.create','billing') && <Link
+            href={'/dashboard/billing/new?kind=sales_invoice'+
+              (project.customer_id?'&customer='+encodeURIComponent(project.customer_id):'')}>
+            <OwnerIcon name="quotations" size={18}/><span>Create invoice</span>
+          </Link>}
+          <Link href={deliveryUrl + '#daily-reports'}>
+            <OwnerIcon name="calendar" size={18}/><span>Site update</span>
+          </Link>
+          <Link href={deliveryUrl + '#materials'}>
+            <OwnerIcon name="purchases" size={18}/><span>Materials</span>
+          </Link>
+          {has('invoice.create','billing') && <Link href="/dashboard/finance?tab=expenses">
+            <OwnerIcon name="billing" size={18}/><span>Expenses</span>
+          </Link>}
         </section>
         <div className="pd-content-grid" id="overview">
           <div className="pd-main-column">
@@ -750,44 +714,6 @@ export default async function Project({
                   have access.
                 </p>
               )}
-            </section>
-
-            <section className="pd-panel">
-              <div className="pd-panel-heading">
-                <div>
-                  <h2>
-                    <OwnerIcon name="arrow" size={18} /> Quick actions
-                  </h2>
-                </div>
-              </div>
-              <div className="pd-quick-actions">
-                <Link href={deliveryUrl}>
-                  <OwnerIcon name="calendar" size={18} /> View site updates{' '}
-                  <OwnerIcon name="arrow" size={15} />
-                </Link>
-                <Link href={deliveryUrl}>
-                  <OwnerIcon name="check" size={18} /> Quality & checks{' '}
-                  <OwnerIcon name="arrow" size={15} />
-                </Link>
-                {canQuotes && (
-                  <Link href={'/dashboard/quotations?project=' + id}>
-                    <OwnerIcon name="quotations" size={18} /> View quotations{' '}
-                    <OwnerIcon name="arrow" size={15} />
-                  </Link>
-                )}
-                {canExecution && (
-                  <Link href={'/dashboard/operations?project=' + id}>
-                    <OwnerIcon name="projects" size={18} /> Site operations{' '}
-                    <OwnerIcon name="arrow" size={15} />
-                  </Link>
-                )}
-                {canManage && (
-                  <a href="#settings">
-                    <OwnerIcon name="settings" size={18} /> Edit project details{' '}
-                    <OwnerIcon name="arrow" size={15} />
-                  </a>
-                )}
-              </div>
             </section>
 
             <section className="pd-panel">

@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { canAccess } from '@business-os/auth';
 import { OwnerShell } from '../../../owner-shell';
+import { OwnerMobileNav } from '../../../owner-mobile-nav';
+import { ProjectMobileTabs } from '../project-mobile-tabs';
 import { projectWorkspaceNavigation } from '../../project-workspace-navigation';
 import { SiteCommandOverview } from './command-overview';
 import { SiteAccessState } from './site-access-state';
@@ -472,17 +474,6 @@ export default async function ProjectDeliveryPage({
   const planLabel =
     plans.find((plan) => plan.id === organization.plan_id)?.name ??
     'Business plan';
-  let mobileUpdateHref = '#overview';
-  if (site.stage !== 'not_started' && isDesign) {
-    mobileUpdateHref = '#design';
-  }
-  if (open || site.stage === 'handover') {
-    if (isEngineer || isQuality) {
-      mobileUpdateHref = '#daily-reports';
-    } else if (isWatchman) {
-      mobileUpdateHref = '#security';
-    }
-  }
 
   return (
     <div className="site-command-theme">
@@ -495,6 +486,7 @@ export default async function ProjectDeliveryPage({
         currentHref="/dashboard/projects"
         notificationsEnabled={has('notification.view')}
         search=""
+        dashboardBrand
       >
         <main id="main-content" tabIndex={-1} className="site-command-page">
           <div className="site-command-container">
@@ -520,23 +512,13 @@ export default async function ProjectDeliveryPage({
               gate={site.gate}
               media={site.media}
             />
-            <nav aria-label="Project steps" className="mb-5 grid gap-2 rounded-2xl border border-slate-200 bg-white p-4 text-sm font-semibold shadow-sm sm:grid-cols-2 xl:grid-cols-5">
-              <a className="rounded-xl bg-blue-50 p-3 text-blue-900" href="/dashboard/quotations">
-                1 · Quotation
-              </a>
-              <a className="rounded-xl bg-slate-50 p-3 text-slate-800" href="#agreement-readiness">
-                2 · Agreement &amp; advance
-              </a>
-              <a className="rounded-xl bg-slate-50 p-3 text-slate-800" href="#design">
-                3 · Design revisions
-              </a>
-              <a className="rounded-xl bg-slate-50 p-3 text-slate-800" href="#design">
-                4 · Client design approval
-              </a>
-              <a className="rounded-xl bg-slate-50 p-3 text-slate-800" href="#overview">
-                5 · Site work &amp; handover
-              </a>
-            </nav>
+            <ProjectMobileTabs projectId={id} active="site"
+              allowFinance={has('invoice.view','billing')}
+              allowTeam={manager}
+              allowMaterials={isEngineer || isProcurement}
+              allowQuality={isQuality}
+              allowFiles={isDesign || isEngineer || isQuality || isWatchman}/>
+
             {agreement && (
               <AgreementReadinessPanel
                 projectId={id}
@@ -1753,23 +1735,20 @@ export default async function ProjectDeliveryPage({
             </footer>
           </div>
         </main>
-        <nav
-          className="sc-mobile-bottom"
-          aria-label="Mobile workspace navigation"
-        >
-          <Link href="/dashboard">
-            <span aria-hidden="true">⌂</span>Dashboard
-          </Link>
-          <Link href="/dashboard/projects" aria-current="page">
-            <span aria-hidden="true">▱</span>Projects
-          </Link>
-          <a href={mobileUpdateHref}>
-            <span aria-hidden="true">＋</span>Site updates
-          </a>
-          <a href="#overview">
-            <span aria-hidden="true">⋯</span>Overview
-          </a>
-        </nav>
+        <OwnerMobileNav
+          currentHref="/dashboard/projects"
+          navigation={[
+            {label:'Dashboard',href:'/dashboard',icon:'dashboard'},
+            {label:'Projects',href:'/dashboard/projects',icon:'projects'},
+            ...(has('invoice.view','billing')
+              ? [{label:'Finance',href:'/dashboard/finance',icon:'billing' as const}] : []),
+            ...(has('team.view')
+              ? [{label:'Team',href:'/dashboard/company/team',icon:'team' as const}] : []),
+            ...(has('organization.view')
+              ? [{label:'Settings',href:'/dashboard/settings',icon:'settings' as const}] : []),
+          ]}
+        />
+
       </OwnerShell>
     </div>
   );
