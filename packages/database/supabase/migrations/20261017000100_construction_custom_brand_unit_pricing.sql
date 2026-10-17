@@ -22,7 +22,7 @@ alter table private.construction_quote_rates
     check(consumption_per_sqft > 0 and consumption_per_sqft <= 1000);
 
 create or replace function public.construction_rate_list(p_org uuid)
-returns jsonb language plpgsql stable security definer set search_path='' as $fn$
+returns jsonb language plpgsql volatile security definer set search_path='' as $fn$
 begin
  perform private.require_permission(p_org,'pricing.view');
  if not private.entitled(p_org,'pricing') then
@@ -101,7 +101,7 @@ end $fn$;
 -- Quote cannot substitute client-supplied unit prices for company price cards.
 create or replace function public.construction_rate_quote_preview(
  p_org uuid,p_ids uuid[],p_area numeric)
-returns jsonb language plpgsql stable security definer set search_path='' as $fn$
+returns jsonb language plpgsql volatile security definer set search_path='' as $fn$
 declare v_rows jsonb; v_count integer; v_total numeric; v_rate numeric;
 begin
  perform private.require_permission(p_org,'pricing.view');
