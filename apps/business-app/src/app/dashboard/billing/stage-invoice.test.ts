@@ -127,7 +127,9 @@ describe('lead-linked GST milestone invoicing',()=>{
     expect(screen).toContain('Create Project');
     expect(screen).toContain('createWonLeadInvoiceProject');
     expect(screen).not.toContain('Create project from this lead');
-    expect(screen).toContain("'/dashboard/crm/leads/'+selectedClient.wonLeadId");
+    expect(screen).not.toContain("'/dashboard/crm/leads/'+selectedClient.wonLeadId");
+    expect(screen).toContain("type=\"button\" className=\"psi-project-create\"");
+    expect(screen).toContain("setProjectDialog(true)");
     expect(page).toContain('existingWonLeadId={existingWonLeadId}');
     expect(actions).toContain('.saveWonLeadDocument(');
     expect(wonLeadMigration).toContain("l.lifecycle='won'");
