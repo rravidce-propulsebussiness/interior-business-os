@@ -2,39 +2,37 @@
 
 import { useMemo, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { savedStagePaymentPlan } from '@business-os/core/quotation-payment-plan';
+import { savedStagePaymentPlan,savedStagePaymentLinks } from '@business-os/core/quotation-payment-plan';
+import { proposedConstructionPayments } from '@business-os/core/construction-payment-schedule';
 
-type Milestone = { name: string; percent: string };
+type Milestone = { name: string; percent: string; stageCodes: string[] };
 type Feedback = { type: 'success' | 'error'; text: string } | null;
 const MAX_STAGES = 40;
 
 const templates: Record<string, Milestone[]> = {
-  construction: [
-    { name: 'Agreement & advance', percent: '10' },
-    { name: 'Foundation & plinth', percent: '20' },
-    { name: 'RCC structure', percent: '25' },
-    { name: 'Brick work & block work', percent: '15' },
-    { name: 'Plastering & flooring', percent: '15' },
-    { name: 'Finishing & handover', percent: '15' },
-  ],
   interior: [
-    { name: 'Agreement & advance', percent: '20' },
-    { name: 'Design approval', percent: '20' },
-    { name: 'Material procurement', percent: '30' },
-    { name: 'Installation', percent: '20' },
-    { name: 'Handover', percent: '10' },
+    { name: 'Agreement & advance', percent: '20', stageCodes: [] },
+    { name: 'Design approval', percent: '20', stageCodes: [] },
+    { name: 'Material procurement', percent: '30', stageCodes: [] },
+    { name: 'Installation', percent: '20', stageCodes: [] },
+    { name: 'Handover', percent: '10', stageCodes: [] },
   ],
 };
 
-function suggestions(industry: string): Milestone[] {
-  return (templates[industry] ?? templates.interior)!.map((row) => ({ ...row }));
+function suggestions(industry: string, floors: readonly string[]): Milestone[] {
+  if(industry==='construction')
+    return floors.length?proposedConstructionPayments(floors).map(row=>({...row})):[];
+  return (templates[industry] ?? templates.interior)!.map(row=>({...row,stageCodes:[...row.stageCodes]}));
 }
 
-function readPlan(terms: string, industry: string, editable: boolean): Milestone[] {
-  const saved = savedStagePaymentPlan(terms);
-  if (saved) return saved.map((row) => ({ name: row.name, percent: String(row.percent) }));
-  // Suggested stages must not appear in customer PDFs until explicitly saved.
-  return editable ? suggestions(industry) : [];
+function readPlan(terms: string, industry: string, editable: boolean,floors: readonly string[]): Milestone[] {
+  const saved=savedStagePaymentPlan(terms);
+  const links=savedStagePaymentLinks(terms);
+  if(saved)return saved.map((row,index)=>({
+    name:row.name,percent:String(row.percent),stageCodes:links?.[index]??[],
+  }));
+  // Suggestions are editable only, never part of the PDF before explicitly saved.
+  return editable?suggestions(industry,floors):[];
 }
 
 function moveStage(rows: Milestone[], from: number, to: number): Milestone[] {
@@ -51,9 +49,10 @@ function formatPercent(value: number): string {
 }
 
 export function PaymentScheduleEditor({
-  industry, total, currency, editable, initial,
+  industry, total, currency, editable, initial, floorNames=[],
 }: {
   industry: string;
+  floorNames?: string[];
   total: string;
   currency: string;
   editable: boolean;
@@ -67,13 +66,13 @@ export function PaymentScheduleEditor({
     discount: unknown;
   };
 }) {
-  const [rows, setRows] = useState<Milestone[]>(() => readPlan(initial.terms, industry, editable));
+  const [rows, setRows] = useState<Milestone[]>(() => readPlan(initial.terms, industry, editable, floorNames));
   const [feedback, setFeedback] = useState<Feedback>(null);
   const [pending, start] = useTransition();
   const dragging = useRef<number | null>(null);
   const router = useRouter();
   const savedPlan = savedStagePaymentPlan(initial.terms);
-  const hasChanges = JSON.stringify(rows) !== JSON.stringify(readPlan(initial.terms, industry, editable));
+  const hasChanges = JSON.stringify(rows) !== JSON.stringify(readPlan(initial.terms, industry, editable, floorNames));
   const percentTotal = useMemo(
     () => rows.reduce((sum, row) => sum + (Number(row.percent) || 0), 0),
     [rows],
@@ -107,7 +106,7 @@ export function PaymentScheduleEditor({
   function addStage() {
     if (rows.length >= MAX_STAGES) return;
     setFeedback(null);
-    setRows((all) => [...all, { name: '', percent: '' }]);
+    setRows((all) => [...all, { name: '', percent: '', stageCodes: [] }]);
   }
 
   function save() {
@@ -149,6 +148,24 @@ export function PaymentScheduleEditor({
     });
   }
 
+  function combineBrickwork(index:number){
+    setRows(current=>{
+      const first=current[index],next=current[index+1];
+      if(!first||!next||!first.name.toLowerCase().includes('brickwork')||
+         !next.name.toLowerCase().includes('brickwork')||!first.stageCodes.length||
+         !next.stageCodes.length)return current;
+      const joined=[...new Set([...first.stageCodes,...next.stageCodes])];
+      if(joined.length>18)return current;
+      const before=first.name.replace(/ brickwork.*$/i,'');
+      const after=next.name.replace(/ brickwork.*$/i,'');
+      const name=(before+' + '+after+' brickwork & door frames payment').slice(0,100);
+      const merged={name,percent:(Number(first.percent)+Number(next.percent)).toFixed(2),
+        stageCodes:joined};
+      return [...current.slice(0,index),merged,...current.slice(index+2)];
+    });
+    setFeedback(null);
+  }
+
   const remaining = Math.abs(100 - percentTotal) < 0.001 ? 0 : 100 - percentTotal;
   const remainingLabel = formatPercent(remaining);
 
@@ -163,8 +180,8 @@ export function PaymentScheduleEditor({
         </span>
         <div>
           <h2>Payment Schedule</h2>
-          <p>Define stage-wise payments for this quotation.</p>
-          <p>Milestones appear in the customer PDF after saving.</p>
+          <p>Define stage-wise payments from the quoted work and floors.</p>
+          <p>Slabs and brickwork are floor-wise. Combine adjacent brickwork rows when agreed. Milestones appear in the PDF only after saving.</p>
         </div>
       </div>
 
@@ -183,7 +200,7 @@ export function PaymentScheduleEditor({
       {editable && (
         <div className="qs-payment-actions">
           <button type="button" className="qs-payment-reset" disabled={pending}
-            onClick={() => { setRows(suggestions(industry)); setFeedback(null); }}>
+            onClick={() => { setRows(suggestions(industry,floorNames)); setFeedback(null); }}>
             <span aria-hidden="true">↺</span> Reset suggestions
           </button>
           <button type="button" className="qs-payment-add" disabled={pending || rows.length >= MAX_STAGES}
@@ -193,6 +210,11 @@ export function PaymentScheduleEditor({
         </div>
       )}
 
+      {industry==='construction'&&!floorNames.length&&!savedPlan&&editable&&
+        <p className="qs-payment-footnote">
+          Save the floor-wise SFT quotation scope first to generate slab, brickwork and finishing payments for the actual floors.
+          You can still add a fully custom schedule using Add milestone.
+        </p>}
       <div className="qs-payment-stages">
         <div className="qs-payment-table-head" aria-hidden="true">
           <span>Stage / Milestone</span><span>%</span><span>Amount</span>
@@ -226,6 +248,14 @@ export function PaymentScheduleEditor({
                     value={row.name} maxLength={100} disabled={!editable}
                     placeholder="Enter milestone"
                     onChange={(event) => update(index, 'name', event.target.value)} />
+                  {row.stageCodes.length>0&&<div className="qs-payment-linked">
+                    Covers {row.stageCodes.length} quote-defined work stage{row.stageCodes.length===1?'':'s'}.
+                    {editable&&row.name.toLowerCase().includes('brickwork')&&
+                     rows[index+1]?.name.toLowerCase().includes('brickwork')&&
+                     <button type="button" disabled={pending} onClick={()=>combineBrickwork(index)}>
+                      Combine with next floor brickwork
+                     </button>}
+                  </div>}
                 </div>
                 <div className="qs-payment-percent">
                   <label className="qs-payment-mobile-label" htmlFor={'qs-pay-pct-' + index}>Percentage</label>

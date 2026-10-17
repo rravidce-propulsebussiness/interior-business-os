@@ -4,7 +4,7 @@
  */
 export type CustomerTermSection = { title: string; text: string };
 const sections = ['Inclusions', 'Exclusions', 'Warranty', 'Additional terms'] as const;
-const stageBlock = /\[STAGE_PAYMENT_PLAN\][\s\S]*?\[\/STAGE_PAYMENT_PLAN\]/g;
+const stageBlock = /\[STAGE_PAYMENT_(PLAN|LINKS)\][\s\S]*?\[\/STAGE_PAYMENT_\1\]/g;
 const headings = /^(Inclusions|Exclusions|Warranty|Additional terms):[ \t]*$/gim;
 
 export function customerTermSections(source: string): CustomerTermSection[] {

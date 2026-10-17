@@ -3,6 +3,8 @@ import Image from 'next/image';
 import { OwnerIcon, type OwnerIconName, OwnerShell } from '../owner-shell';
 import { ownerWorkspaceNavigation } from '../owner-workspace-navigation';
 import { canAccess } from '@business-os/auth';
+import { guidanceForConstructionStage } from '@business-os/core/construction-payment-schedule';
+import { ProjectStageLinker,type StageLinkOption } from './project-stage-linker';
 import { MasterForm } from '../commercial/master-form';
 import { activeOrganization } from '@business-os/auth/server';
 import { projectWorkspace,formatMoney,pretty,shortDate,stringValue,
@@ -184,6 +186,12 @@ function timeline(d:WorkspaceData):Activity[]{
 function Timeline({d}:{d:WorkspaceData}){
  const all=timeline(d),site=d.site;
  const newReport=site?.reports[0];
+ const associateOptions:StageLinkOption[]=[
+  ...(site?.reports??[]).map(r=>({kind:'report' as const,id:r.id,title:shortDate(r.report_date)+' — '+stringValue(r.completed_work)})),
+  ...(site?.materials??[]).map(r=>({kind:'material' as const,id:r.id,title:stringValue(r.item)})),
+  ...(site?.checks??[]).map(r=>({kind:'check' as const,id:r.id,title:stringValue(r.title)})),
+  ...(site?.media??[]).filter(r=>r.category!=='agreement').map(r=>({kind:'media' as const,id:r.id,title:stringValue(r.filename)})),
+ ];
  return <div className="pv2-content pv2-timeline">
   {site&&<ProjectLifecycle id={d.project.id} stage={site.stage} canManage={site.canManage}
    designs={site.designs.map(x=>({id:x.id,kind:stringValue(x.kind),status:stringValue(x.status)}))}/>}
@@ -203,10 +211,48 @@ function Timeline({d}:{d:WorkspaceData}){
       </div>
      </article>):<Blank title="No project events yet" detail="Site reports, inspection updates and material requests will appear here in date order."/>}
     </div>
-    <aside className="pv2-stage-side">
-     <h3>Execution Stages</h3>{d.stages.length?d.stages.map((st,i)=><div className="pv2-stage-step" key={st.id}>
-      <b>{i+1}</b><span><strong>{st.title}</strong><small>{pretty(st.status)}</small></span></div>):
-     <p className="pv2-muted">Stages are generated from the accepted quotation.</p>}
+    <aside className="pv2-stage-side pv2-stages-detail">
+     <h3>Floor-wise Work Stages</h3>
+     <p className="pv2-muted">Structural slabs follow floor dependencies. Brickwork and finishing on lower floors can overlap upper-floor slab construction. Open a stage to see its work, materials, tests and reports.</p>
+     {d.stages.length?d.stages.map((st,i)=>{
+      const guidance=guidanceForConstructionStage(st.template_code);
+      const checks=[...new Set([...st.inspectionTopics,...guidance.checks])];
+      const linkedPayments=d.quotePaymentTriggers.filter(p=>p.stageCodes.includes(st.instance_code));
+      const attached=d.links.filter(r=>r.stage_id===st.id);
+      return <details className="pv2-stage-detail" key={st.id}>
+       <summary><span className="pv2-stage-index">{i+1}</span>
+        <span className="pv2-stage-summary"><strong>{st.title}</strong>
+         <small>{st.floor_code?st.floor_code.replaceAll('_',' '):'Project-wide'} · {pretty(st.status)}</small></span>
+        <span className="pv2-stage-chevron" aria-hidden="true">⌄</span>
+       </summary>
+       <div className="pv2-stage-body">
+        <p>{st.explanation}</p>
+        {!!st.dependencies.length&&<p className="pv2-stage-dependencies">Prerequisite stages: {st.dependencies.join(' · ')}</p>}
+        <h4>Work activities</h4>
+        <ul>{st.activities.map((a,j)=><li key={j}>{a}</li>)}</ul>
+        {!!guidance.materials.length&&<><h4>Materials to plan</h4><ul>
+         {guidance.materials.map((m,j)=><li key={j}>{m}</li>)}</ul></>}
+        {!!checks.length&&<><h4>Checks & tests to arrange</h4><ul>
+         {checks.map((ch,j)=><li key={j}>{ch}</li>)}</ul></>}
+        {!!guidance.reports.length&&<><h4>Reports & evidence to capture</h4><ul>
+         {guidance.reports.map((r,j)=><li key={j}>{r}</li>)}</ul></>}
+        {!!linkedPayments.length&&d.permissions.finance&&<div className="pv2-stage-payment">
+         <strong>Quote payment association — not a payment request</strong>
+         {linkedPayments.map((p,j)=><span key={j}>{p.name} · {p.percent}% of quotation</span>)}
+        </div>}
+        <div className="pv2-stage-evidence">
+         <strong>{attached.length} explicitly linked site record{attached.length===1?'':'s'}</strong>
+         <p>Links refer to original site records; they do not certify work, testing or payment.</p>
+        </div>
+        {site?.canManage&&<ProjectStageLinker projectId={d.project.id} stageId={st.id} options={associateOptions}/>}
+        <div className="pv2-stage-links">
+         <NextLink href={cur(d.project.id,'checks')} label="Record check"/>
+         <NextLink href={cur(d.project.id,'procurement')} label="Request materials"/>
+         <NextLink href={cur(d.project.id,'execution')} label="Add progress"/>
+        </div>
+       </div>
+      </details>;
+     }):<p className="pv2-muted">Stages are generated only from the approved quotation and agreement.</p>}
      {!d.stages.length&&site?.canManage&&<SyncStages id={d.project.id}/>}
     </aside>
    </div>
@@ -275,6 +321,15 @@ function Payments({d}:{d:WorkspaceData}){
      <td><NextLink href={'/dashboard/finance/contracts?project_id='+d.project.id} label="View / Request"/></td></tr>)}</DataTable>:
     <Blank title="No payment milestones" detail="Payment schedules are managed in Finance from the signed contract."/>}
   </section>
+  {!!d.quotePaymentTriggers.length&&<section className="pv2-panel">
+    <Title title="Quoted Work-Linked Payments" detail="Quoted payment proposal; actual contract requests and receipts remain in Finance."/>
+    <DataTable head={['Quoted milestone','Percentage','Associated work','Status']}>
+      {d.quotePaymentTriggers.map((p,i)=><tr key={i}><td><strong>{p.name}</strong></td>
+       <td>{p.percent}%</td><td>{p.stageCodes.length
+        ?p.stageCodes.map(key=>d.stages.find(stage=>stage.instance_code===key)?.title??key).join(' · ')
+        :'Custom milestone'}</td><td><span className="pv2-label">Not a receipt</span></td></tr>)}
+    </DataTable>
+  </section>}
   <section className="pv2-panel"><Title title="Client Payment Transactions" detail="All recorded and voided payments stay in their canonical finance ledger"/>
    {paymentRows?.length?<DataTable head={['Receipt / Payment','Date','Amount','Status']}>
     {paymentRows.map(r=><tr key={r.id}><td><strong>{r.number}</strong></td><td><FieldDate value={r.date}/></td>

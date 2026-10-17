@@ -246,6 +246,7 @@ export default async function QuotationStudio({
           <PaymentScheduleEditor
             key={revision.id + ':' + revision.version}
             industry={industryKey}
+            floorNames={existingSft?.rows.filter(row=>row.kind!=='additional').map(row=>row.name)??[]}
             total={total}
             currency={revision.currency}
             editable={editable}

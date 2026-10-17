@@ -6,6 +6,7 @@ import {
   type ConstructionStageInstance,
 } from './construction-workflow';
 import { parseSftEstimate, type SftEstimateDetails } from './sft-quotation';
+import { milestoneConstructionStages } from './construction-payment-schedule';
 
 export interface QuotedConstructionPlan {
   readonly floors: ConstructionFloor[];
@@ -95,7 +96,7 @@ export function constructionPlanFromQuotedDescriptions(
   ];
   const template: ConstructionWorkflowTemplate = {
     ...defaultConstructionWorkflow,
-    version: '1.0.1',
+    version: '1.1.0',
     stages: [
       {
         code: 'QUOTED_SCOPE',
@@ -110,7 +111,7 @@ export function constructionPlanFromQuotedDescriptions(
         activities,
         inspectionTopics: [],
       },
-      ...defaultConstructionWorkflow.stages.map((stage) =>
+      ...milestoneConstructionStages().map((stage) =>
         stage.code === 'PRECONSTRUCTION'
           ? { ...stage, dependsOn: ['QUOTED_SCOPE'] }
           : stage,

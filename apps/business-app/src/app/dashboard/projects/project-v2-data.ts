@@ -5,11 +5,13 @@ import { commercialServices } from '../commercial/service';
 import { activeOrganization,pageServices } from '@business-os/auth/server';
 import { workCompletionByProject } from './work-progress';
 import type { ProjectEntry } from './project-v2-types';
+import { savedStagePaymentPlan,savedStagePaymentLinks } from '@business-os/core/quotation-payment-plan';
 export type { ProjectEntry } from './project-v2-types';
 
 export type SiteRow = Record<string,unknown> & {id:string};
 export type Stage = {id:string;title:string;status:string;phase:string;floor_code:string|null;
- explanation:string;activities:string[];task_count:number};
+ explanation:string;activities:string[];task_count:number;
+ instance_code:string;template_code:string;dependencies:string[];inspectionTopics:string[]};
 export type StageLink = {stage_id:string;kind:string;record_id:string};
 export type PaymentMilestone={id:string;label:string;amount:string;currency:string;contract_number:string;
  contract_id:string};
@@ -20,6 +22,7 @@ export type WorkspaceData = {
  checks:SiteRow[];media:SiteRow[];designs:SiteRow[];team:SiteRow[];gate:SiteRow[];
  memberOptions:{id:string;label:string}[]};
  stages:Stage[];links:StageLink[];milestones:PaymentMilestone[];
+ quotePaymentTriggers:{name:string;percent:number;stageCodes:string[]}[];
  transactions: {id:string;number:string;date:string;amount:number;status:string}[]|null;
  purchaseOrders:{id:string;number:string;status:string;date:string}[]|null;
  tasks:{id:string;title:string;planned_start:string|null;status:string}[];
@@ -120,7 +123,7 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
   permissions.purchases?s.client.from('purchase_orders').select('id,po_number,status,order_date')
     .eq('organization_id',s.org).eq('project_id',id).order('order_date',{ascending:false})
     .limit(200):Promise.resolve({data:null,error:null}),
-  permissions.finance?s.client.from('contracts').select('original_contract_value,status')
+  permissions.finance?s.client.from('contracts').select('original_contract_value,status,revision_id')
     .eq('organization_id',s.org).eq('project_id',id).order('created_at',{ascending:false})
     .limit(1):Promise.resolve({data:null,error:null}),
   permissions.manage&&permissions.finance?s.client.rpc('project_agreement_read',{
@@ -148,6 +151,9 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
   const a=obj(x);
   return {id:stringValue(a.id),title:stringValue(a.title),status:stringValue(a.status),phase:stringValue(a.phase),
    floor_code:stringValue(a.floor_code)||null,explanation:stringValue(a.explanation),
+    instance_code:stringValue(a.instance_code),template_code:stringValue(a.template_code),
+    dependencies:Array.isArray(a.dependencies)?a.dependencies.map(stringValue).filter(Boolean):[],
+    inspectionTopics:Array.isArray(a.inspection_topics)?a.inspection_topics.map(stringValue).filter(Boolean):[],
    activities:Array.isArray(a.activities)?a.activities.map(stringValue).filter(Boolean):[],
    task_count:Number(a.task_count)||0};
  }):[];
@@ -167,6 +173,16 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
  })):null;
  const contractValue=permissions.finance&&!contract.error?decimals(contract.data?.[0]?.original_contract_value):null;
  const agreement=agreementResult.error?{}:obj(agreementResult.data);
+ const contractedRevision=permissions.finance&&!contract.error?contract.data?.[0]?.revision_id:null;
+ const quoteResult=contractedRevision
+  ?await s.client.from('quotation_revisions').select('terms').eq('organization_id',s.org)
+    .eq('id',contractedRevision).maybeSingle():null;
+ const savedTerms=quoteResult&&!quoteResult.error?quoteResult.data?.terms:null;
+ const proposal=typeof savedTerms==='string'?savedStagePaymentPlan(savedTerms):null;
+ const bindings=typeof savedTerms==='string'?savedStagePaymentLinks(savedTerms):null;
+ const quotePaymentTriggers=(proposal??[]).map((row,index)=>({
+  name:row.name,percent:row.percent,stageCodes:bindings?.[index]??[],
+ }));
  return {
   org:s.org,company:org.name,email:user.email??'',permissions,
   project:{
@@ -176,7 +192,7 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
    client:customer.data?.display_name??'Not linked',
    industry:(project.industry_id?industriesById.get(project.industry_id):null)??'Project',progress
   },
-  site,stages:stageList,links:linkList,milestones,
+  site,stages:stageList,links:linkList,milestones,quotePaymentTriggers,
   transactions:trans,purchaseOrders:po,
   tasks:tasks.map(t=>({id:t.id,title:t.title,planned_start:t.planned_start,status:t.status})),
   contractValue,projectRaw:permissions.manage?project:null,
@@ -238,6 +254,9 @@ async function assignedProjectWorkspace(id:string):Promise<WorkspaceData>{
  const stages:Stage[]=Array.isArray(stagesRaw.stages)?stagesRaw.stages.map(x=>{
   const a=obj(x);return {id:stringValue(a.id),title:stringValue(a.title),
    status:stringValue(a.status),phase:stringValue(a.phase),floor_code:stringValue(a.floor_code)||null,
+   instance_code:stringValue(a.instance_code),template_code:stringValue(a.template_code),
+   dependencies:Array.isArray(a.dependencies)?a.dependencies.map(stringValue).filter(Boolean):[],
+   inspectionTopics:Array.isArray(a.inspection_topics)?a.inspection_topics.map(stringValue).filter(Boolean):[],
    explanation:stringValue(a.explanation),
    activities:Array.isArray(a.activities)?a.activities.map(stringValue).filter(Boolean):[],
    task_count:Number(a.task_count)||0};
@@ -260,7 +279,7 @@ async function assignedProjectWorkspace(id:string):Promise<WorkspaceData>{
    projectType:'',address:'Project site',createdAt:'',client:'Project team',customerId:null,
    industry:'Site Delivery',
    progress:workCompletionByProject([id],tasks&&tasks.length<1200?tasks:null).get(id)??null},
-  site,stages,links:[],milestones:[],transactions:null,purchaseOrders:null,tasks:(tasks??[]).map(t=>({
+  site,stages,links:[],milestones:[],quotePaymentTriggers:[],transactions:null,purchaseOrders:null,tasks:(tasks??[]).map(t=>({
    id:t.id,title:t.title,planned_start:t.planned_start,status:t.status,
   })),
   contractValue:null,expenditure:null,agreement:null,projectRaw:null,

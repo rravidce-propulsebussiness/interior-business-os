@@ -3,7 +3,8 @@ import { revalidatePath } from 'next/cache';
 import { commercialServices } from '../../../commercial/service';
 import { DomainError, idSchema, safeFailure } from '@business-os/shared';
 import { quotationCommandSchema } from '@business-os/core/commercial';
-import { savedStagePaymentPlan } from '@business-os/core/quotation-payment-plan';
+import { savedStagePaymentPlan, encodeStagePaymentLinks, savedStagePaymentLinks } from '@business-os/core/quotation-payment-plan';
+import { constructionPlanFromQuotedDescriptions } from '@business-os/core/quote-construction-handoff';
 import { joinQuotationTerms, splitQuotationTerms } from '../../quotation-terms-format';
 
 export const runtime = 'nodejs';
@@ -27,6 +28,7 @@ const payload = z.discriminatedUnion('kind',[
     stages: z.array(z.object({
       name: z.string().trim().min(2).max(100),
       percent: z.string().regex(/^\d+(?:\.\d{1,2})?$/),
+      stageCodes: z.array(z.string().regex(/^[A-Z][A-Z0-9_]*(?:\/[A-Z][A-Z0-9_]*)?$/).max(120)).max(18).optional(),
     }).strict()).min(1).max(40),
   }).strict(),
 ]);
@@ -99,11 +101,30 @@ export async function POST(request:Request, {params}:{
         incoming.stages.some(row=>Number(row.percent)<=0||Number(row.percent)>100))
         return reply({message:'Stage percentages must total exactly 100%.',reference:ref},422);
       const saved=splitQuotationTerms(current.terms);
+      if(incoming.stages.some(row=>row.stageCodes?.length)){
+        const items=await s.client.from('quotation_items').select('description')
+          .eq('organization_id',s.org).eq('revision_id',id).limit(250);
+        if(items.error||!items.data)
+          return reply({message:'Unable to verify quote floor scope.',reference:ref},422);
+        let planned;
+        try{
+          planned=constructionPlanFromQuotedDescriptions(items.data.map(item=>item.description));
+        }catch{
+          return reply({message:'Save a valid unique floor-wise construction quote first.',reference:ref},422);
+        }
+        if(!planned)return reply({message:'Save the quoted floors before linking payments to construction stages.',reference:ref},422);
+        const validKeys=new Set(planned.stages.map(stage=>stage.instanceCode));
+        if(incoming.stages.some(row=>row.stageCodes?.some(key=>!validKeys.has(key))))
+          return reply({message:'Payment milestone references a stage outside the quoted floor plan.',reference:ref},422);
+      }
       const mark='[STAGE_PAYMENT_PLAN]\n'+incoming.stages
         .map(row=>row.name.replaceAll('|','-')+'|'+Number(row.percent).toFixed(2))
         .join('\n')+'\n[/STAGE_PAYMENT_PLAN]';
-      terms=joinQuotationTerms({...saved,paymentPlan:mark});
-      if(!savedStagePaymentPlan(terms))
+      const hasLinks=incoming.stages.some(row=>row.stageCodes?.length);
+      const links=hasLinks?encodeStagePaymentLinks(incoming.stages.map(row=>row.stageCodes??[])):'';
+      terms=joinQuotationTerms({...saved,paymentPlan:[mark,links].filter(Boolean).join('\n')});
+      if(!savedStagePaymentPlan(terms)||
+        (hasLinks&&!savedStagePaymentLinks(terms)))
         return reply({message:'Invalid payment schedule. Check all stages and percentages.',reference:ref},422);
     }else{
       const saved=splitQuotationTerms(current.terms);
