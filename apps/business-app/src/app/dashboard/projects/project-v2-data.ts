@@ -25,6 +25,7 @@ export type WorkspaceData = {
  purchaseOrders:{id:string;number:string;status:string;date:string}[]|null;
  tasks:{id:string;title:string;planned_start:string|null;status:string}[];
  contractValue:number|null;expenditure:number|null;
+ agreement:{contractId:string;contractNumber:string;status:string;authorized:boolean}|null;
 };
 export function stringValue(v:unknown):string{return typeof v==='string'||typeof v==='number'?String(v):'';}
 export function formatMoney(value:number|null){return value===null?'—':new Intl.NumberFormat('en-IN',{
@@ -101,7 +102,7 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
   payments:has('payment.view'),purchases:has('purchase.view'),
   team:has('team.manage')||has('team.view'),
  };
- const [org,user,industries,customer,taskResult,siteResult,stageResult,stageLinkResult,receipts,orders,contract]=await Promise.all([
+ const [org,user,industries,customer,taskResult,siteResult,stageResult,stageLinkResult,receipts,orders,contract,agreementResult]=await Promise.all([
   s.repository.organization(s.org),s.authorization.requireAuthenticatedUser(),
   s.repository.industries(),
   project.customer_id?s.client.from('customers').select('id,display_name').eq('organization_id',s.org)
@@ -120,6 +121,9 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
   permissions.finance?s.client.from('contracts').select('original_contract_value,status')
     .eq('organization_id',s.org).eq('project_id',id).order('created_at',{ascending:false})
     .limit(1):Promise.resolve({data:null,error:null}),
+  permissions.manage&&permissions.finance?s.client.rpc('project_agreement_read',{
+    p_organization_id:s.org,p_project_id:id,
+  }):Promise.resolve({data:null,error:null}),
  ]);
  if(!org)notFound();
  const rawSite=siteResult.error?null:obj(siteResult.data);
@@ -160,6 +164,7 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
   id:x.id,number:x.po_number,date:x.order_date,status:x.status
  })):null;
  const contractValue=permissions.finance&&!contract.error?decimals(contract.data?.[0]?.original_contract_value):null;
+ const agreement=agreementResult.error?{}:obj(agreementResult.data);
  return {
   org:s.org,company:org.name,email:user.email??'',permissions,
   project:{
@@ -173,6 +178,10 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
   transactions:trans,purchaseOrders:po,
   tasks:tasks.map(t=>({id:t.id,title:t.title,planned_start:t.planned_start,status:t.status})),
   contractValue,
+  agreement:typeof agreement.contract_id==='string'?{
+   contractId:agreement.contract_id,contractNumber:stringValue(agreement.contract_number),
+   status:stringValue(agreement.contract_status),authorized:agreement.execution_authorized===true,
+  }:null,
   // There is no canonical all-in site cash-expense ledger yet.
   // A purchase order is only a commitment; labour entries cover just part of spend.
   expenditure:null,
