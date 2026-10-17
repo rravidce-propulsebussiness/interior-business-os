@@ -226,3 +226,12 @@
 @media(prefers-reduced-motion:reduce){
   .billing-v2 *{transition:none!important;animation:none!important;}
 }
+/* Totals on this screen come from the capped GST document register. */
+.billing-coverage{margin:-8px 0 18px;color:#77849a;font-size:10px;line-height:1.55;}
+.billing-v2 button.billing-edit-link{
+  background:#fff!important;box-shadow:none!important;min-height:32px;
+  color:#415473!important;padding:7px 10px;border:1px solid #e2e8f0!important;
+  cursor:pointer;
+}
+.billing-v2 button.billing-edit-link:hover{background:#fff7f0!important;}
+@media(max-width:660px){.billing-coverage{margin:-4px 0 12px;}}
