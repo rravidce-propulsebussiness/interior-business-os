@@ -63,6 +63,15 @@ test('premium billing layout has no clipped document controls or horizontal over
         scrollWidth:document.documentElement.scrollWidth,
         clientWidth:document.documentElement.clientWidth,
       }));
+      if(dimensions.scrollWidth>dimensions.clientWidth+1) {
+        const offenders=await page.evaluate(()=>
+          [...document.querySelectorAll('body *')].map(el=>{
+            const r=el.getBoundingClientRect();
+            return {tag:el.tagName,cls:String(el.className).slice(0,80),
+              x:Math.round(r.x),right:Math.round(r.right),width:Math.round(r.width)};
+          }).filter(x=>x.right>document.documentElement.clientWidth+1).slice(0,20));
+        console.log('Billing overflow at',width,'px:',JSON.stringify(offenders));
+      }
       expect(dimensions.scrollWidth, 'Horizontal overflow at '+width+'px')
         .toBeLessThanOrEqual(dimensions.clientWidth + 1);
       await expect(page.locator('.billing-stats .billing-stat')).toHaveCount(4);
