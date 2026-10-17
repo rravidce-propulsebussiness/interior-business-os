@@ -47,7 +47,7 @@ describe('simplified project workspace',()=>{
   expect(workspace).toContain("selectedView==='overview'&&");
   expect(workspace).toContain("href={workspaceUrl(section.id)}");
   expect(detail).toContain('searchParams');
-  expect(detail).toContain('view={view??'overview'}');
+  expect(detail).toContain("view={view??'overview'}");
   expect(site).not.toContain('<SiteActivity');
   expect(command).not.toContain('className="sc-metrics"');
   expect(journey).not.toContain('className="cj-activity"');
