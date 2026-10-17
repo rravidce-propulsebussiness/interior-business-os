@@ -382,6 +382,11 @@
     white-space:nowrap;cursor:pointer;box-shadow:0 3px 8px #763f1110;
     transition:background .18s,border-color .18s,box-shadow .18s,transform .18s;
   }
+  /* Two primary actions followed by one clear More row; no empty Share tile. */
+  .qs-quotes-mobile-actions > .qs-quotes-more-trigger {
+    grid-column:1 / -1;
+    background:#fff9f5;
+  }
   .qs-quotes-mobile-actions > .qs-quotes-action svg {width:20px;height:20px;flex:0 0 20px;}
   .qs-quotes-mobile-actions > .qs-quotes-action:hover,
   .qs-quotes-mobile-actions > .qs-quote-revise-wrap .qs-quote-edit:hover {
