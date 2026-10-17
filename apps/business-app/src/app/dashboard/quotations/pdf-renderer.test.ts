@@ -3,6 +3,7 @@ import { renderQuotationDocument } from '@business-os/core/quotation-document';
 import { validatePrintHtml } from '@business-os/shared/pdf';
 import { quotationDocumentFixture } from '../../../../../../packages/core/src/quotation-document.fixture';
 import { renderQuotationPdf, safeQuotationPrintHtml } from './pdf-renderer';
+import { inlinePremiumConceptImages } from './inline-premium-concepts';
 
 it('prints the exact premium quotation HTML, removing only external concept-image sources', () => {
   const saved = quotationDocumentFixture();
@@ -62,4 +63,27 @@ it('preserves saved stage payments and terms in the same premium preview/print m
   expect(printable).toContain('10 years');
   expect(printable).toContain('55,50,000');
   expect(validatePrintHtml(printable)).toContain('pb-payment-page');
+});
+
+
+it('uses the same embedded concept photography for preview and secure premium PDF output', async () => {
+  const sample = Buffer.alloc(32);
+  sample.write('RIFF', 0, 'ascii');
+  sample.write('WEBP', 8, 'ascii');
+  const stub = vi.fn(async () => new Response(new Uint8Array(sample), {
+    status: 200,
+    headers: { 'Content-Type': 'image/webp', 'Content-Length': String(sample.length) },
+  }));
+  vi.stubGlobal('fetch', stub);
+  try {
+    const html = renderQuotationDocument(quotationDocumentFixture());
+    const shared = await inlinePremiumConceptImages(html);
+    expect(shared).not.toContain('images.unsplash.com');
+    expect(shared).toContain('data:image/webp;base64,');
+    expect(validatePrintHtml(shared)).toContain('pb-cover');
+    expect(safeQuotationPrintHtml(shared)).toBe(shared);
+    expect(stub).toHaveBeenCalledTimes(2);
+  } finally {
+    vi.unstubAllGlobals();
+  }
 });
