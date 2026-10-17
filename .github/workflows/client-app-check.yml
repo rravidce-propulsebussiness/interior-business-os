@@ -54,7 +54,7 @@ jobs:
           node-version-file: .node-version
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec vitest run packages/core/src/custom-brand-quote.test.ts apps/business-app/src/app/dashboard/quotations/studio-ui.test.ts apps/business-app/src/app/dashboard/billing/billing-ui.test.ts apps/business-app/src/app/dashboard/billing/labour/labour.test.ts apps/business-app/src/app/dashboard/billing/stage-invoice.test.ts apps/business-app/src/app/dashboard/settings/settings.test.ts
+      - run: pnpm exec vitest run packages/core/src/custom-brand-quote.test.ts apps/business-app/src/app/dashboard/quotations/studio-ui.test.ts apps/business-app/src/app/dashboard/billing/billing-ui.test.ts apps/business-app/src/app/dashboard/billing/labour/labour.test.ts apps/business-app/src/app/dashboard/billing/stage-invoice.test.ts apps/business-app/src/app/dashboard/projects/work-progress.test.ts apps/business-app/src/app/dashboard/settings/settings.test.ts
       - run: pnpm --filter @business-os/business-app typecheck
       - run: pnpm --filter @business-os/business-app build
 
