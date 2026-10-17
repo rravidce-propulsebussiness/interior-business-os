@@ -30,14 +30,15 @@ const date=(value:string)=>new Intl.DateTimeFormat('en-IN',{
 export default async function LabourPayments({
   searchParams,
 }:{
-  searchParams:Promise<{month?:string}>;
+  searchParams:Promise<{month?:string;project?:string}>;
 }) {
   const ctx=await activeOrganization();
   if(!ctx)return <main className="labour-page"><h1>Labour payments</h1>
     <p>Choose a company workspace first.</p><Link href="/dashboard">Dashboard</Link></main>;
   const {authorization,client}=await pageServices();
   await authorization.requirePermission(ctx.organizationId,'payment.view');
-  const {month,from,to}=range((await searchParams).month??'');
+  const params=await searchParams;
+  const {month,from,to}=range(params.month??'');
   const canRecord=ctx.grants.some(g=>g.scope.kind==='organization'&&g.permission==='payment.record');
   const [rows,projectsResult]=await Promise.all([
     createLabourDisbursementsRepository(client).list(ctx.organizationId,from,to),
@@ -45,10 +46,14 @@ export default async function LabourPayments({
       .order('name',{ascending:true}).limit(250):Promise.resolve({data:[]}),
   ]);
   const projects=projectsResult.data??[];
-  const gross=rows.reduce((sum,r)=>sum+Number(r.grossAmount),0);
-  const paid=rows.filter(r=>r.status==='paid')
+  const projectId=params.project??'';
+  const selectedProject=projects.find(p=>p.id===projectId);
+  const displayedRows=projectId && (selectedProject || rows.some(row=>row.projectId===projectId))
+    ? rows.filter(row=>row.projectId===projectId) : rows;
+  const gross=displayedRows.reduce((sum,r)=>sum+Number(r.grossAmount),0);
+  const paid=displayedRows.filter(r=>r.status==='paid')
     .reduce((sum,r)=>sum+Number(r.netAmount),0);
-  const pending=rows.filter(r=>r.status==='pending')
+  const pending=displayedRows.filter(r=>r.status==='pending')
     .reduce((sum,r)=>sum+Number(r.netAmount),0);
 
   return <main className="labour-page" id="main-content">
@@ -56,10 +61,11 @@ export default async function LabourPayments({
       <div>
         <Link className="labour-back" href="/dashboard/billing">← Billing</Link>
         <p className="labour-eyebrow">SITE OPERATIONS / FINANCE</p>
-        <h1>Labour payments</h1>
+        <h1>{selectedProject ? selectedProject.name + ' · Labour payments' : 'Labour payments'}</h1>
         <p>Record site wages and contractor disbursements separately from customer receipts and GST invoices.</p>
       </div>
       <form action="/dashboard/billing/labour" method="get" className="labour-month">
+        {selectedProject && <input type="hidden" name="project" value={selectedProject.id}/>}
         <label htmlFor="work-month">Work month</label>
         <input id="work-month" name="month" type="month" defaultValue={month} required/>
         <button type="submit">View</button>
@@ -67,7 +73,7 @@ export default async function LabourPayments({
     </div>
 
     <section className="labour-summary" aria-label="Labour payment summary">
-      <div><span>Gross labour costs</span><strong>{money(gross)}</strong><small>{rows.length} entries this month</small></div>
+      <div><span>Gross labour costs</span><strong>{money(gross)}</strong><small>{displayedRows.length} entries this month</small></div>
       <div><span>Paid net amounts</span><strong>{money(paid)}</strong><small>Confirmed disbursements</small></div>
       <div><span>Pending net amounts</span><strong>{money(pending)}</strong><small>Not marked as paid</small></div>
     </section>
@@ -88,7 +94,7 @@ export default async function LabourPayments({
       <ActionForm action={createLabourDisbursement} label="Save pending labour entry">
         <div className="labour-form">
           <label>Worker / labour contractor <input name="payeeName" required minLength={2} maxLength={160} placeholder="Name or team" /></label>
-          <label>Project (optional)<select name="projectId" defaultValue="">
+          <label>Project (optional)<select name="projectId" defaultValue={selectedProject?.id??""}>
             <option value="">General company labour</option>
             {projects.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}
           </select></label>
@@ -105,7 +111,7 @@ export default async function LabourPayments({
     <section className="labour-card">
       <div className="labour-table-wrap">
         <table><thead><tr><th>Payee / Work</th><th>Project</th><th>Work period</th><th>Gross</th><th>Deductions</th><th>Net</th><th>Status / Action</th></tr></thead>
-          <tbody>{rows.map(r=><tr key={r.id}>
+          <tbody>{displayedRows.map(r=><tr key={r.id}>
             <td><strong>{r.payeeName}</strong><small>{r.workDescription}</small></td>
             <td>{r.projectName||'General'}</td>
             <td>{date(r.workFrom)} – {date(r.workTo)}</td>
@@ -116,7 +122,7 @@ export default async function LabourPayments({
                reference={r.paymentReference} canRecord={canRecord}/></td>
           </tr>)}</tbody></table>
       </div>
-      <div className="labour-mobile-list">{rows.map(r=><article className="labour-mobile-item" key={r.id}>
+      <div className="labour-mobile-list">{displayedRows.map(r=><article className="labour-mobile-item" key={r.id}>
         <div><strong>{r.payeeName}</strong><span className={'labour-pill '+r.status}>{r.status}</span></div>
         <p>{r.workDescription}</p>
         <small>{r.projectName||'General'} · {date(r.workTo)}</small>
@@ -124,7 +130,7 @@ export default async function LabourPayments({
         <PaymentStatus id={r.id} status={r.status} method={r.paymentMethod}
           reference={r.paymentReference} canRecord={canRecord}/>
       </article>)}</div>
-      {!rows.length&&<div className="labour-empty">No labour entries found for {month}. Add a work entry or choose another month.</div>}
+      {!displayedRows.length&&<div className="labour-empty">No labour entries found for {month}. Add a work entry or choose another month.</div>}
     </section>
     <p className="labour-footnote">CSV is an accountant's supporting workpaper, not a GST return, statutory payslip, or proof of bank transfer.</p>
   </main>;

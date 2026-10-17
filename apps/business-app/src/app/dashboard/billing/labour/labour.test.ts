@@ -8,7 +8,7 @@ const migration=read(new URL('../../../../../../../packages/database/supabase/mi
 const page=read(new URL('./page.tsx',import.meta.url));
 const actions=read(new URL('./actions.ts',import.meta.url));
 const route=read(new URL('./export/route.ts',import.meta.url));
-const billing=read(new URL('../page.tsx',import.meta.url));
+const finance=read(new URL('../../finance/page.tsx',import.meta.url));
 
 const row:LabourDisbursement={
   id:'00000000-0000-4000-8000-000000000001',projectId:null,projectName:null,
@@ -40,7 +40,7 @@ describe('labour register and accountant exports',()=>{
     expect(migration).toContain('private.labour_disbursements enable row level security');
     expect(migration).toContain('audit_logs');
     expect(migration).not.toContain('private.gst_business_documents');
-    expect(billing).toContain('href="/dashboard/billing/labour"');
+    expect(finance).toContain('href="/dashboard/billing/labour"');
   });
   it('validates payment creation and explicit settlement through server actions',()=>{
     expect(actions).toContain("authorization.requirePermission(ctx.organizationId,'payment.record')");

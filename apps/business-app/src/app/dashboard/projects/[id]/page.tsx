@@ -176,7 +176,7 @@ export default async function Project({
       ? [{ label: 'Projects', href: '/dashboard/projects', icon: 'projects' as const }]
       : []),
     ...(has('invoice.view', 'billing')
-      ? [{ label: 'Invoices', href: '/dashboard/billing', icon: 'billing' as const }]
+      ? [{ label: 'Finance', href: '/dashboard/finance', icon: 'billing' as const }]
       : []),
     ...(has('team.view')
       ? [{ label: 'Team', href: '/dashboard/company/team', icon: 'team' as const }]
@@ -279,6 +279,12 @@ export default async function Project({
             <Link href={deliveryUrl} className="pd-button pd-button-primary">
               <OwnerIcon name="arrow" size={17} /> Open Site Workspace
             </Link>
+            {has('payment.view', 'billing') && (
+              <Link href={'/dashboard/billing/labour?project=' + id}
+                className="pd-button pd-button-outline">
+                <OwnerIcon name="billing" size={16}/> Labour & wages
+              </Link>
+            )}
           </div>
         </header>
 
@@ -291,7 +297,7 @@ export default async function Project({
           <Link href={deliveryUrl + '#materials'}>
             <OwnerIcon name="purchases" size={16} /> Materials
           </Link>
-          <Link href="/dashboard/billing"><OwnerIcon name="billing" size={16} /> Invoices</Link>
+          <Link href="/dashboard/finance"><OwnerIcon name="billing" size={16} /> Invoices</Link>
           <a href="#media"><OwnerIcon name="quotations" size={16} /> Documents</a>
         </nav>
 

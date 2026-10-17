@@ -10,6 +10,7 @@ const dashboard=read('../page.tsx');
 const companyLegacy=read('../company/settings/page.tsx');
 const quotesLegacy=read('../quotations/settings/page.tsx');
 const billing=read('../billing/page.tsx');
+const finance=read('../finance/page.tsx');
 describe('unified company settings',()=>{
  it('contains the approved sections with responsive company and logo previews',()=>{
    expect(page).toContain("label:'Company Details'");
@@ -48,6 +49,7 @@ describe('unified company settings',()=>{
    expect(quotesLegacy).toContain("redirect('/dashboard/settings?tab=branding')");
    expect(dashboard).not.toContain("href: '/dashboard/quotations/settings'");
    expect(dashboard).not.toContain("href: '/dashboard/company/settings'");
-   expect(billing).toContain('/dashboard/settings?tab=invoice');
+   expect(billing).toContain('Billing & Plans');
+   expect(finance).toContain('/dashboard/settings?tab=invoice');
  });
 });

@@ -222,7 +222,7 @@ export default async function Projects({
       ? [{ label: 'Projects', href: '/dashboard/projects', icon: 'projects' as const }]
       : []),
     ...(has('invoice.view', 'billing')
-      ? [{ label: 'Invoices', href: '/dashboard/billing', icon: 'billing' as const }]
+      ? [{ label: 'Finance', href: '/dashboard/finance', icon: 'billing' as const }]
       : []),
     ...(has('team.view')
       ? [{ label: 'Team', href: '/dashboard/company/team', icon: 'team' as const }]

@@ -314,6 +314,21 @@ export function DocumentEditor({
           </label>
         </div>
       </section>
+      {kind === 'purchase_bill' && (
+        <section className="rounded-2xl border border-orange-100 bg-orange-50/30 p-5 sm:p-7">
+          <h2 className="mb-2 text-xl font-semibold">Supplier bill attachment</h2>
+          <p className="mb-4 text-sm text-slate-600">
+            Upload the original outside supplier invoice as evidence. Enter
+            the bill items and amount below; the file remains private.
+          </p>
+          <label className="grid gap-2 text-sm font-medium">
+            PDF or photo (optional, maximum 8 MB)
+            <input type="file" name="supplierBillFile"
+              accept="application/pdf,image/png,image/jpeg,image/webp"
+              className="block w-full rounded-xl border border-orange-200 bg-white p-3 text-sm"/>
+          </label>
+        </section>
+      )}
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
         <div className="mb-4 flex items-center justify-between gap-3 flex-wrap">
           <h2 className="text-xl font-semibold">Goods &amp; services</h2>
