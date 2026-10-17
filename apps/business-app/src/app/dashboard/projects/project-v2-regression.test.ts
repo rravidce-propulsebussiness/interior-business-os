@@ -23,7 +23,7 @@ describe('Projects v2 one screen per route',()=>{
   expect(loader).toContain("project_site_read");
   expect(loader).toContain("construction_project_read");
   expect(loader).toContain('workCompletionByProject');
-  expect(loader).toContain("status==='recorded'");
+  expect(ui).toContain("status==='recorded'");
   expect(loader).toContain('expenditure:null');
   expect(ui).toContain('Finance workspace');
  });
