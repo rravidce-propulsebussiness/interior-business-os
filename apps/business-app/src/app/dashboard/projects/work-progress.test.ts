@@ -103,3 +103,26 @@ describe('Remove project only, keep quotation history',()=>{
     expect(button).toContain("Invoices, contracts or site work");
   });
 });
+
+describe('Removed quotation reference does not resurrect a delivery project',()=>{
+  const file=(p:string)=>readFileSync(new URL(p,import.meta.url),'utf8');
+  const migration=file('../../../../../../packages/database/supabase/migrations/20261017001300_keep_removed_projects_out_of_crm.sql');
+  const leadPage=file('../crm/leads/page.tsx');
+  const leadDetail=file('../crm/leads/[id]/page.tsx');
+  const leadAction=file('../crm/leads/lead-project-actions.ts');
+
+  it('marks a hidden quotation-only reference and excludes it from CRM project reuse',()=>{
+    expect(migration).toContain('removed_from_workspace boolean NOT NULL DEFAULT false');
+    expect(migration).toContain('removed_from_workspace=true');
+    expect(migration).toContain('case when qp.removed_from_workspace then null::uuid else q.project_id end');
+    expect(migration).toContain('and not removed_from_workspace');
+    expect(migration).not.toContain('DELETE FROM public.quotations');
+  });
+
+  it('shows Create Project rather than Open Project for a removed quote project',()=>{
+    expect(leadPage).toContain("eq('removed_from_workspace',false)");
+    expect(leadDetail).toContain("eq('removed_from_workspace',false)");
+    expect(leadAction).toContain("eq('removed_from_workspace',false)");
+    expect(leadAction).toContain('project_name: projectName');
+  });
+});
