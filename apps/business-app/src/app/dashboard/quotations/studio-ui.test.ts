@@ -214,12 +214,14 @@ describe('single premium package library and working Custom Quote entry', () => 
     expect(page).toContain('other={configurable}');
     expect(library).toContain('Construction Packages');
     expect(library).toContain('Interior &amp; Other Packages');
-    expect(library).toContain('Custom Quote');
-    expect(library).toContain('Create Custom Quote');
-    expect(library).toContain('/dashboard/quotations/new?mode=custom');
+    expect(library).toContain('Custom Package Management');
+    expect(library).not.toContain('renderCustom()');
+    const customManager = file('./packages/custom-package-manager.tsx');
+    expect(customManager).toContain('Create Custom Quote');
+    expect(customManager).toContain('/dashboard/quotations/new?mode=custom');
     expect(stylesheet).toContain('.qpl-cards');
-    expect(stylesheet).toContain('grid-template-columns:repeat(3,minmax(0,1fr))');
-    expect(stylesheet).toContain('@media (max-width:740px)');
+    expect(stylesheet).toContain('grid-template-columns:repeat(2,minmax(0,1fr))');
+    expect(stylesheet).toContain('@media(max-width:600px)');
   });
 
   it('preserves editing, duplication, removal and company snapshot PDF previews', () => {
@@ -724,13 +726,28 @@ describe('screenshot-matched Package Library with real company pricing', () => {
   const action = file('../pricing/construction/actions.ts');
   const pdf = file('./packages/custom/preview/route.ts');
 
-  it('uses three top tabs and a compact custom package card, not an accordion', () => {
-    expect(library).toContain("tab === 'custom'");
+  it('shows exactly two industry tabs and only one Custom Package Management toolbar button', () => {
+    expect(library).toContain("useState<'construction' | 'other'>('construction')");
+    expect(library).toContain('Add Package');
+    expect(library).toContain('Compare');
     expect(library).toContain('Custom Package Management');
-    expect(library).toContain('Manage Custom Package');
+    expect(library).toContain('showCustomManagement && <CustomPackageManager');
+    expect(library).not.toContain("tab === 'custom'");
+    expect(library).not.toContain('renderCustom()');
+    expect(library).not.toContain('qpl-custom-cta');
+    expect(library).not.toContain('Manage Custom Package');
     expect(library).not.toContain('<details className="qpl-brand-pricing">');
-    expect(library).toContain('Compare Packages');
-    expect(library).toContain('Add New Package');
+  });
+  it('keeps functional edit duplicate and delete controls on each package card', () => {
+    expect(library).toContain('qpl-card-top');
+    expect(library).toContain('qpl-card-meta');
+    expect(library).toContain('qpl-manage');
+    expect(library).toContain('onClick={() => duplicate(entry)}');
+    expect(library).toContain('onClick={() => setRemove(entry)}');
+    expect(library).toContain("setEditing({kind:entry.kind,id:current.id})");
+    expect(library).toContain('PremiumPackageEditor');
+    expect(library).toContain('IndustryPackageEditor');
+    expect(library).toContain('Confirm Delete');
   });
   it('edits company units and brand options through authorized atomic persistence', () => {
     expect(manager).toContain('cpm-table');
@@ -747,5 +764,18 @@ describe('screenshot-matched Package Library with real company pricing', () => {
     expect(pdf).toContain('renderPdf(html');
     expect(pdf).toContain('renderConstructionPackageSamplePdf');
     expect(pdf).toContain("'Content-Type':'application/pdf'");
+  });
+});
+
+describe('mobile package library visual layout', () => {
+  const css = file('./packages/package-library.css');
+  const library = file('./packages/package-library.tsx');
+  it('keeps header actions compact and two tabs on small screens', () => {
+    expect(css).toContain('grid-template-columns:1.1fr .87fr 1.35fr');
+    expect(css).toContain('grid-template-columns:repeat(2,minmax(0,1fr))');
+    expect(css).toContain('@media(max-width:600px)');
+    expect(css).toContain('.qpl-card-top');
+    expect(css).toContain('.qpl-manage button');
+    expect(library).not.toContain('qpl-features');
   });
 });
