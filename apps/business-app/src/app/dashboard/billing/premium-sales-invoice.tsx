@@ -18,6 +18,7 @@ type Props = {
   customers: InvoiceCustomer[];
   customerAccess: boolean;
   existingCustomerId: string | null;
+  existingWonLeadId: string | null;
   initialLead: string;
 };
 const blank = (): GstLine => ({
@@ -34,18 +35,21 @@ const currencyTotal = (line: GstLine) =>
 
 export function PremiumSalesInvoice({
   profile, standard, existing, stageContext, choices,
-  customers, customerAccess, existingCustomerId, initialLead,
+  customers, customerAccess, existingCustomerId, existingWonLeadId, initialLead,
 }: Props) {
   const firstLead = choices.find((row) =>
     row.leadId === (stageContext?.leadId ?? initialLead));
+  const firstWon = customers.find((row) =>
+    row.wonLeadId === (existingWonLeadId ?? stageContext?.leadId ?? initialLead));
   const [customerId, setCustomerId] = useState(
-    firstLead?.customerId ?? existingCustomerId ?? '',
+    firstWon?.id ?? firstLead?.customerId ?? existingCustomerId ?? '',
   );
   const [leadId, setLeadId] = useState(firstLead?.leadId ?? '');
   const initialStage = stageContext?.stageNumber ?? (firstLead ? 1 : 0);
   const [stageNumber, setStageNumber] = useState(initialStage);
   const selectedClient = customers.find((row) => row.id === customerId);
-  const eligibleStages = choices.filter((row) => row.customerId === customerId);
+  const eligibleStages = choices.filter((row) =>
+    row.customerId === customerId || row.leadId === selectedClient?.wonLeadId);
   const choice = eligibleStages.find((row) => row.leadId === leadId);
   const stage = choice?.stages.find((row) => row.number === stageNumber);
   const [partyName, setPartyName] = useState(existing?.partyName ?? selectedClient?.name ?? '');
@@ -168,7 +172,11 @@ export function PremiumSalesInvoice({
       <input type="hidden" name="version" value={existing.version}/></>}
     <input type="hidden" name="kind" value="sales_invoice"/>
     <input type="hidden" name="linesJson" value={JSON.stringify(safeLines)}/>
-    {customerId && !hasStage && <input type="hidden" name="customerId" value={customerId}/>}
+    {customerId && !hasStage && !selectedClient?.wonLeadId &&
+      <input type="hidden" name="customerId" value={customerId}/>}
+    {selectedClient?.wonLeadId && !hasStage &&
+      <input type="hidden" name="wonLeadId" value={selectedClient.wonLeadId}/>}
+
     {hasStage && <><input type="hidden" name="leadId" value={choice!.leadId}/>
       <input type="hidden" name="revisionId" value={choice!.revisionId}/>
       <input type="hidden" name="stageNumber" value={stage!.number}/></>}
@@ -192,7 +200,9 @@ export function PremiumSalesInvoice({
                 onChange={e=>changeCustomer(e.target.value)} disabled={!canSwitchLead}>
                 <option value="">New / one-time customer (enter details below)</option>
                 {customers.map(row=><option key={row.id} value={row.id}>
-                  {row.name}{row.phone ? ' · '+row.phone : ''}{row.fromApprovedQuotation ? ' · Approved quote' : ''}
+                  {row.name}{row.phone ? ' · '+row.phone : ''}
+                  {row.wonLeadId ? ' · Won lead '+(row.leadNumber ?? '') :
+                    row.fromApprovedQuotation ? ' · Approved quote' : ''}
                 </option>)}
               </select></label>
           </div>
@@ -201,12 +211,21 @@ export function PremiumSalesInvoice({
               <p>Accepted quote {choice!.quoteNumber} · {choice!.projectType || 'Project'}</p>
               <small>On the first issued invoice, this existing quotation project becomes active. Saving a draft does not create it.</small></div>
             </div>}
-          {!customerAccess && !customers.length && <p className="psi-hint">Client directory access is required to select existing customers. Manual invoices remain available.</p>}
+          {!customerAccess && !customers.length && <p className="psi-hint">Invoice client options could not be loaded.</p>}
+          {selectedClient?.wonLeadId && !hasStage && <div className="psi-attached">
+            <span className="psi-check">✓</span>
+            <div><strong>Won lead · {selectedClient.leadNumber}</strong>
+              <p>You can prepare an invoice now. Stage billing requires an accepted quotation and a saved payment plan.</p>
+              <Link href={'/dashboard/crm/leads/'+selectedClient.wonLeadId+'/convert'}>
+                Create project from this lead →
+              </Link>
+            </div>
+          </div>}
           {!hasStage && <p className="psi-hint">{customerId
             ? eligibleStages.length
               ? 'This client has an approved quotation. Choose its payment stage below or prepare a normal invoice.'
               : 'Existing client selected. Their billing details are filled in; you can prepare a normal invoice.'
-            : 'Choose a saved customer or enter one-time billing details. No new client record is created automatically.'}</p>}
+            : 'Choose a saved customer or a Won lead. No new client or project is created automatically.'}</p>}
           <div className="psi-fields psi-party-fields">
             <label className="psi-field"><span>Client / company name *</span>
               <input required name="partyName" minLength={2} maxLength={200} value={partyName}
