@@ -22,7 +22,6 @@ const fixture = [
   '<div class="qs-quotes-mobile-actions">',
   '<a class="qs-quotes-action qs-quotes-action-view" href="#">View</a>',
   '<a class="qs-quotes-action qs-quote-edit" href="#">Edit</a>',
-  '<a class="qs-quotes-action qs-quotes-action-share" href="#">Share</a>',
   '<button class="qs-quotes-action qs-quotes-more-trigger" aria-expanded="false" type="button">More</button>',
   '<div class="qs-quotes-mobile-more-panel" hidden>',
   '<a href="#">Download PDF</a><button type="button" class="qs-btn">Delete</button></div></div></article>',
@@ -47,7 +46,7 @@ test('Quotation actions remain 49px tall and never overlap PDF or history at mob
   for (const width of [320, 360, 390, 430, 700]) {
     await page.setViewportSize({width,height:844});
     const buttons = page.locator('.qs-quotes-mobile-actions > .qs-quotes-action');
-    await expect(buttons).toHaveCount(4);
+    await expect(buttons).toHaveCount(3);
     const before = await buttons.evaluateAll(elements =>
       elements.map(element => {
         const rect = element.getBoundingClientRect();
@@ -59,13 +58,14 @@ test('Quotation actions remain 49px tall and never overlap PDF or history at mob
       expect(item.width).toBeGreaterThan(60);
       expect(item.right).toBeLessThanOrEqual(width+1);
     }
-    expect(Math.abs(before[0]!.height-before[2]!.height)).toBeLessThan(1);
+    expect(Math.abs(before[0]!.height-before[1]!.height)).toBeLessThan(1);
+    expect(before[2]!.width).toBeGreaterThan(before[0]!.width);
     expect(before[0]!.bottom).toBeLessThanOrEqual(before[2]!.y);
-    expect(before[1]!.bottom).toBeLessThanOrEqual(before[3]!.y);
+    expect(before[1]!.bottom).toBeLessThanOrEqual(before[2]!.y);
     const footer = await page.locator('.qs-quotes-footer-block').boundingBox();
     expect(footer).not.toBeNull();
     expect(before[2]!.bottom).toBeLessThan((footer?.y ?? 0));
-    await buttons.nth(3).click();
+    await buttons.nth(2).click();
     await expect(page.locator('.qs-quotes-mobile-more-panel')).toBeVisible();
     const after = await buttons.evaluateAll(elements => elements.map(e => e.getBoundingClientRect().height));
     expect(after.every(h=>h<=52)).toBe(true);
@@ -73,7 +73,7 @@ test('Quotation actions remain 49px tall and never overlap PDF or history at mob
     const pdf = await page.locator('.qs-quotes-mobile-pdf').boundingBox();
     expect(menu).not.toBeNull();
     expect(pdf).not.toBeNull();
-    const expandedMore = await buttons.nth(3).boundingBox();
+    const expandedMore = await buttons.nth(2).boundingBox();
     expect(expandedMore).not.toBeNull();
     expect(menu!.y).toBeGreaterThanOrEqual(expandedMore!.y + expandedMore!.height - 1);
     expect(menu!.y+menu!.height).toBeLessThanOrEqual(pdf!.y+1);
@@ -81,7 +81,7 @@ test('Quotation actions remain 49px tall and never overlap PDF or history at mob
       content: document.documentElement.scrollWidth, viewport: document.documentElement.clientWidth,
     }));
     expect(overflow.content).toBeLessThanOrEqual(overflow.viewport+1);
-    await buttons.nth(3).click();
+    await buttons.nth(2).click();
     await expect(page.locator('.qs-quotes-mobile-more-panel')).toBeHidden();
   }
   await page.locator('.qs-quotes-history-toggle').click();
