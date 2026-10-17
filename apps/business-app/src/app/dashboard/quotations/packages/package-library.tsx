@@ -61,7 +61,8 @@ export function PackageLibrary({
   canManage: boolean;
   currency: string;
 }) {
-  const [tab, setTab] = useState<'construction' | 'other' | 'custom'>('construction');
+  const [tab, setTab] = useState<'construction' | 'other'>('construction');
+  const [showCustomManagement, setShowCustomManagement] = useState(false);
   const [filter, setFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [search, setSearch] = useState('');
   const [editing, setEditing] = useState<EditorState>(null);
@@ -137,58 +138,57 @@ export function PackageLibrary({
       ? deleteConstructionPackage(entry.item.id, entry.item.version)
       : deleteQuotationPackage(entry.item.id, entry.item.version));
   }
-  const addAllowed = canManage && (tab === 'construction' || (tab === 'other' && activeIndustries.length > 0));
-  const addStarter = canManage && tab === 'construction' &&
+  const addAllowed = canManage && (tab === 'construction' || activeIndustries.length > 0);
+  const addStarter = canManage && tab === 'construction' && !showCustomManagement &&
     !['STANDARD','PREMIUM','LUXURY','ROYAL'].every((code) =>
       construction.some((item) => item.code === code));
 
   return (
     <div className="qpl">
       <div className="qpl-header">
-        <div>
+        <div className="qpl-heading">
           <span className="qpl-eyebrow">QUOTATIONS / PACKAGES</span>
           <h1>Package Library</h1>
-          <p>Use pre-defined packages or create a custom quote for your client.
-            Manage material brands, unit prices and consumption to generate accurate per-SFT rates.</p>
+          <p>Manage, edit and compare your company packages.</p>
         </div>
         <div className="qpl-header-actions">
-          {tab !== 'custom' && currentItems.filter(p=>p.item.status==='active').length>=2 &&
-            <button className="qpl-compare" type="button" onClick={()=>{
-              setCompareIds(['','']);setCompareOpen(true);}}>
-              ▢ Compare Packages
-            </button>}
-          {tab !== 'custom' && <button className="qpl-manage-custom-top" type="button"
-            onClick={()=>setTab('custom')}>⚙ Custom Package Management</button>}
           {addAllowed && <button className="qpl-add" type="button"
-            onClick={() => setEditing({kind:tab==='other'?'other':'construction',id:'new'})}>
-            <span aria-hidden="true">＋</span> Add New Package
+            onClick={() => setEditing({kind:tab,id:'new'})}>
+            <span className="qpl-action-icon" aria-hidden="true">＋</span> Add Package
           </button>}
+          <button className="qpl-compare" type="button"
+            disabled={currentItems.filter(p=>p.item.status==='active').length<2}
+            onClick={() => {setCompareIds(['','']);setCompareOpen(true);}}>
+            <span className="qpl-action-icon" aria-hidden="true">▥</span> Compare
+          </button>
+          <button className={'qpl-manage-custom-top' + (showCustomManagement?' is-selected':'')}
+            type="button" aria-pressed={showCustomManagement}
+            onClick={() => setShowCustomManagement(value=>!value)}>
+            <span className="qpl-action-icon" aria-hidden="true">⚙</span>
+            {showCustomManagement?'View Packages':'Custom Package Management'}
+          </button>
         </div>
       </div>
 
       <div className="qpl-tabs" role="tablist" aria-label="Package industry">
-        <button type="button" role="tab" aria-selected={tab === 'construction'}
-          className={tab === 'construction' ? 'is-active' : ''}
-          onClick={() => {setTab('construction');setFilter('all');setSearch('');}}>
-          <span aria-hidden="true">⌂</span> Construction Packages
+        <button type="button" role="tab" aria-selected={tab==='construction'}
+          className={tab==='construction'?'is-active':''}
+          onClick={() => {setTab('construction');setShowCustomManagement(false);setFilter('all');setSearch('');}}>
+          <span className="qpl-tab-symbol" aria-hidden="true">⌂</span>
+          <span>Construction Packages</span>
           <span className="qpl-count">{construction.length}</span>
         </button>
-        <button type="button" role="tab" aria-selected={tab === 'other'}
-          className={tab === 'other' ? 'is-active' : ''}
-          onClick={() => {setTab('other');setFilter('all');setSearch('');}}>
-          <span aria-hidden="true">▧</span> Interior &amp; Other Packages
-          <span className="qpl-count">{other?.length ?? 0}</span>
-        </button>
-        <button type="button" role="tab" aria-selected={tab === 'custom'}
-          className={tab === 'custom' ? 'is-active' : ''}
-          onClick={() => {setTab('custom');setSearch('');setFilter('all');}}>
-          <span aria-hidden="true">⚙</span> Custom Package Management
+        <button type="button" role="tab" aria-selected={tab==='other'}
+          className={tab==='other'?'is-active':''}
+          onClick={() => {setTab('other');setShowCustomManagement(false);setFilter('all');setSearch('');}}>
+          <span className="qpl-tab-symbol" aria-hidden="true">▧</span>
+          <span>Interior &amp; Other Packages</span>
+          <span className="qpl-count">{other?.length??0}</span>
         </button>
       </div>
 
-      {tab !== 'custom' && <div className="qpl-section-header">
-        <div><h2>{tab==='construction'?'Construction Packages':'Interior & Other Packages'}</h2>
-          <p>Select a package or choose Custom Quote to calculate material costs for a client.</p></div>
+      {!showCustomManagement && <div className="qpl-section-header">
+        <div className="qpl-section-title"><h2>{tab==='construction'?'Construction Packages':'Interior & Other Packages'}</h2></div>
         <div className="qpl-filters">
           <label className="qpl-search">
             <span aria-hidden="true">⌕</span>
@@ -214,25 +214,19 @@ export function PackageLibrary({
         </button>
       </div>}
 
-      {tab !== 'custom' && <>
+      {!showCustomManagement && <>
         <section className="qpl-cards" role="tabpanel"
           aria-label={tab==='construction'?'Construction package cards':'Interior package cards'}>
-          {visible.slice(0,3).map((entry,index)=>renderCard(entry,index))}
-          {tab==='construction'&&renderCustom()}
-          {visible.slice(3).map((entry,index)=>renderCard(entry,index+3))}
+          {visible.map((entry,index)=>renderCard(entry,index))}
         </section>
         {visible.length===0&&<p className="qpl-empty">
-          No matching saved packages. {tab==='construction'
-            ? 'You can still configure the Custom Package below.'
-            : 'Add an interior package to get started.'}
+          No matching saved packages. {canManage?'Use Add Package to create one.':'Try another filter.'}
         </p>}
         {other===null&&tab==='other'&&<p className="qpl-warning">
-          Interior package storage is not available yet. Contact the administrator
-          about the pending database migration.
+          Interior package storage is unavailable. Ask your administrator to apply the package migration.
         </p>}
       </>}
-      {tab!=='other'&&<CustomPackageManager rates={rates} canManage={canManage}
-        embedded={tab==='construction'}/>}
+      {showCustomManagement && <CustomPackageManager rates={rates} canManage={canManage}/>}
       {(editing || detail || remove || compareOpen) && <div className="qpl-overlay"
         onMouseDown={(event) => {
           if (event.target === event.currentTarget) {
@@ -333,67 +327,60 @@ export function PackageLibrary({
   function renderCard(entry: CatalogItem, index: number) {
     const current = entry.item;
     const active = current.status === 'active';
-    const rows = featureList(entry);
+    const specs = featureList(entry);
     const title = current.name;
-    const className = entry.kind === 'construction' ? 'construction' : 'interior';
-    return <article className={'qpl-card ' + (!active ? 'qpl-card-inactive' : '')}
-      key={entry.kind + ':' + current.id}>
-      <div className={'qpl-cover qpl-cover-' + className + ' qpl-photo-' + (index % 4 + 1)}>
+    const kind = entry.kind === 'construction' ? 'construction' : 'interior';
+    const price = entry.kind === 'construction'
+      ? cash(current.ratePerSqft) : cash(current.basePrice,current.currency);
+    const basis = entry.kind === 'construction' ? 'per SFT'
+      : entry.item.pricingBasis === 'fixed' ? 'fixed price'
+        : entry.item.pricingBasis === 'per_sqft' ? 'per SFT'
+          : entry.item.pricingBasis === 'per_bhk' ? 'per BHK' : 'per item';
+    return <article className={'qpl-card '+(!active?'qpl-card-inactive':'')}
+      key={entry.kind+':'+current.id}>
+      <button type="button" aria-label={'View '+title+' details'}
+        className={'qpl-cover qpl-cover-'+kind+' qpl-photo-'+(index%4+1)}
+        onClick={() => setDetail(entry)}>
         <span className="qpl-cover-label">{current.code}</span>
-        {!active && <span className="qpl-cover-inactive">Inactive</span>}
-      </div>
-      <div className="qpl-card-body">
-        <h3>{title}</h3>
-        <p className="qpl-description">
-          {current.description || 'Company-defined specifications and materials'}
-        </p>
-        <div className="qpl-price">{entry.kind === 'construction'
-          ? cash(entry.item.ratePerSqft) : cash(entry.item.basePrice,entry.item.currency)}
-          <span>{entry.kind === 'construction' ? 'per sq ft'
-            : entry.item.pricingBasis === 'fixed' ? 'fixed price'
-              : entry.item.pricingBasis === 'per_sqft' ? 'per sq ft'
-                : entry.item.pricingBasis === 'per_bhk' ? 'per BHK' : 'per item'}</span>
-        </div>
-        <ul className="qpl-specs">
-          {rows.length > 0 ? rows.map((line,i)=>
-            <li key={i}><span aria-hidden="true">✓</span>{line}</li>) :
-            <li><span aria-hidden="true">✓</span>Editable materials, brands and scope</li>}
-        </ul>
-        <div className="qpl-card-actions">
-          <button type="button" className="qpl-btn-secondary"
-            onClick={() => setDetail(entry)}>View Details</button>
-          {active
-            ? <Link className="qpl-btn-primary" href={quoteLink(entry)}>Use Package <span aria-hidden="true">→</span></Link>
-            : <span className="qpl-btn-disabled">Inactive Package</span>}
-        </div>
-        {canManage && <div className="qpl-manage">
-          <button type="button" onClick={() => setEditing({kind:entry.kind,id:current.id})}>Edit</button>
-          <button type="button" disabled={pending} onClick={() => duplicate(entry)}>Duplicate</button>
-          <button type="button" disabled={pending} onClick={() => setRemove(entry)}>Delete</button>
-        </div>}
-      </div>
-    </article>;
-  }
-
-  function renderCustom() {
-    return <article className="qpl-custom" key="custom">
-      <div className="qpl-custom-heading"><span aria-hidden="true">⚙</span>
-        <div><h3>Custom Package</h3><p>Tailored to every client</p></div>
-      </div>
-      <ul>
-        {['Manage material brands & rates',
-          'Choose brands for each category',
-          'Auto-calculate per SFT rate',
-          'Editable specifications',
-          'Generate premium PDF'].map(line=>
-            <li key={line}><span aria-hidden="true">✓</span>{line}</li>)}
-      </ul>
-      <button type="button" className="qpl-custom-cta"
-        onClick={()=>setTab('custom')}>
-        Manage Custom Package <span aria-hidden="true">→</span>
+        {!active&&<span className="qpl-cover-inactive">Inactive</span>}
       </button>
-      <Link className="qpl-custom-quote-link"
-        href="/dashboard/quotations/new?mode=custom">Create Custom Quote ↗</Link>
+      <div className="qpl-card-body">
+        <div className="qpl-card-top">
+          <div className="qpl-card-copy">
+            <button type="button" className="qpl-card-title"
+              onClick={() => setDetail(entry)}>{title}</button>
+            <p className="qpl-description">
+              {current.description || 'Company-defined construction and material specifications.'}
+            </p>
+          </div>
+          <div className="qpl-price">
+            <strong>{price}</strong><span>{basis}</span>
+          </div>
+        </div>
+        <div className="qpl-card-meta" aria-label="Package highlights">
+          <span><span aria-hidden="true">⌂</span> {specs[0]||'Project scope'}</span>
+          <span><span aria-hidden="true">▱</span> {specs[1]||'Material specifications'}</span>
+          <span><span aria-hidden="true">◺</span> {basis==='per SFT'
+            ? Number(entry.kind==='construction'?entry.item.ratePerSqft:entry.item.basePrice).toLocaleString('en-IN')+' / SFT'
+            : basis}</span>
+        </div>
+        {canManage
+          ? <div className="qpl-manage" aria-label={title+' package actions'}>
+            <button type="button" onClick={() => setEditing({kind:entry.kind,id:current.id})}>
+              <span aria-hidden="true">✎</span> Edit
+            </button>
+            <button type="button" disabled={pending} onClick={() => duplicate(entry)}>
+              <span aria-hidden="true">▢</span> Duplicate
+            </button>
+            <button type="button" disabled={pending} onClick={() => setRemove(entry)}>
+              <span aria-hidden="true">♜</span> Delete
+            </button>
+          </div>
+          : <div className="qpl-manage qpl-manage-viewer">
+            <button type="button" onClick={() => setDetail(entry)}>View Details</button>
+            {active&&<Link className="qpl-btn-primary" href={quoteLink(entry)}>Use Package →</Link>}
+          </div>}
+      </div>
     </article>;
   }
 }
