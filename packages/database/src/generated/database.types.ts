@@ -10906,6 +10906,44 @@ export interface Database {
         Args: { p_status?: string; p_page?: number };
         Returns: Json;
       };
+      company_employee_attendance_list: {
+        Args: { p_org: string; p_month: string };
+        Returns: Json;
+      };
+      company_employee_attendance_save: {
+        Args: {
+          p_org: string;
+          p_employee: string;
+          p_date: string;
+          p_status: string;
+          p_notes?: string;
+        };
+        Returns: undefined;
+      };
+      company_employee_document_get: {
+        Args: { p_org: string; p_id: string };
+        Returns: Json;
+      };
+      company_employee_document_register: {
+        Args: {
+          p_org: string;
+          p_employee: string;
+          p_kind: string;
+          p_name: string;
+          p_mime: string;
+          p_key: string;
+        };
+        Returns: string;
+      };
+      company_employee_document_verify: {
+        Args: { p_org: string; p_id: string; p_status: string };
+        Returns: undefined;
+      };
+      company_employee_list: { Args: { p_org: string }; Returns: Json };
+      company_employee_save: {
+        Args: { p_org: string; p_input: Json };
+        Returns: string;
+      };
       company_onboarding_policy: { Args: Record<string, never>; Returns: Json };
       company_onboarding_set_policy: {
         Args: { p_approval_required: boolean };
