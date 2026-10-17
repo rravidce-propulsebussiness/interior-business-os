@@ -6,9 +6,9 @@ const css=readFileSync(resolve(process.cwd(),
 const stats=['Current stage','Open quality checks','Material needs',
  'Labour on latest report','Payment milestones'];
 const modules=['Documents & Agreement','Client Payments','Designs','Team & Owner',
- 'Materials','Labour','Procurement','Execution','Checks & Quality','Timeline'];
+ 'Materials & Procurement','Labour','Execution','Checks & Quality','Timeline'];
 const panels=['Documents & Agreement','Client Payments','Designs & Approvals',
- 'Team & Owner Access','Materials','Labour','Procurement','Execution Updates','Checks & Quality'];
+ 'Team & Owner Access','Materials & Procurement','Labour','Execution Updates','Checks & Quality'];
 const markup=[
  '<!doctype html><html lang="en"><head><meta name="viewport" content="width=device-width,initial-scale=1">',
  '<style>html,body{margin:0;padding:0;font-family:Arial,sans-serif}',css,'</style></head><body>',
@@ -33,12 +33,13 @@ const markup=[
   '<div><small>'+label+'</small><strong>24</strong><p>Real project records</p></div></article>'),
  '</section><nav class="pcc-tabs">',
  ...['Overview',...modules].map(label=>'<a>'+label+'</a>'),
- '</nav><div class="pcc-layout"><div class="pcc-main"><section class="pcc-module-grid">',
- ...modules.map(label=>'<a class="pcc-module"><span class="pcc-module-icon orange">⊕</span>'+
- '<span class="pcc-module-copy"><strong>'+label+'</strong>'+
- '<small>Repeated site requirements and project progress approvals</small>'+
- '<em>24 recorded</em></span><span class="pcc-module-arrow">›</span></a>'),
- '</section><section class="pcc-section-columns">',
+ '</nav><div class="pcc-layout"><div class="pcc-main">',
+ '<section class="pcc-panel pcc-next-work"><header class="pcc-panel-heading">',
+ '<h2>Upcoming Work</h2></header>',
+ '<div class="pcc-next-work-items"><div><small>Next activity</small>',
+ '<strong>Foundation excavation tomorrow</strong></div><div><small>Tomorrow’s plan</small>',
+ '<strong>Inspect steel cover and curing</strong></div></div></section>',
+ '<section class="pcc-section-columns">',
  ...panels.map(label=>'<section class="pcc-panel"><header class="pcc-panel-heading">'+
  '<div><h2>'+label+'</h2><p>Actual project data and repeated records in one place</p></div>'+
  '<a>Open workspace ↗</a></header><div class="pcc-record-list"><div class="pcc-record">'+
@@ -55,13 +56,7 @@ const markup=[
  '<div class="pcc-stage-content"><p>Records repeat every day</p>'+
  '<div class="pcc-stage-tags"><span>4 material links</span><span>2 inspections</span></div>'+
  '</div></details>'),
- '</section></div><aside class="pcc-sidebar"><section class="pcc-panel pcc-timeline-aside">',
- '<header class="pcc-panel-heading"><h2>Project Timeline</h2></header>',
- '<ol class="pcc-aside-stages">',
- ...Array.from({length:10},(_,i)=>'<li><span class="pcc-aside-number">'+(i+1)+'</span>'+
- '<div><strong>Execution stage with long milestone label</strong><small>Structural</small></div>'+
- '<span class="pcc-pill pcc-pill-pending">Upcoming</span></li>'),
- '</ol></section></aside></div></main></body></html>',
+ '</section></div></div></main></body></html>',
 ].join('');
 
 test('project command centre has no horizontal overflow across phone and desktop widths',async({page})=>{
@@ -73,8 +68,14 @@ test('project command centre has no horizontal overflow across phone and desktop
   }));
   expect(dimensions.doc,'horizontal overflow at '+width).toBeLessThanOrEqual(dimensions.width+1);
   await expect(page.locator('.pcc-heading h1')).toBeVisible();
-  await expect(page.locator('.pcc-module-grid')).toBeVisible();
-  await expect(page.locator('.pcc-timeline-aside')).toBeVisible();
+  await expect(page.locator('.pcc-next-work')).toBeVisible();
+  await expect(page.locator('.pcc-section-columns')).toBeVisible();
+  expect(await page.locator('.pcc-module-grid').count()).toBe(0);
+  expect(await page.locator('.pcc-sidebar').count()).toBe(0);
+  expect(await page.locator('.pcc-panel-heading h2')
+   .filter({hasText:'Project Timeline & Work History'}).count()).toBe(1);
+  expect(await page.locator('.pcc-panel-heading h2')
+   .filter({hasText:'Materials & Procurement'}).count()).toBe(1);
  }
 });
 test('anonymous visitors cannot load project command centre',async({page})=>{
