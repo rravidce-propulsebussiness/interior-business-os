@@ -1,4 +1,4 @@
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { quotationDocument } from '../../document';
 import Link from 'next/link';
 import { commercialServices } from '../../../commercial/service';
@@ -13,13 +13,10 @@ import { QuotationStudioFrame } from '../../studio-frame';
 import { QuotationStudioEditor } from '../../studio-editor';
 import { ConstructionSelector } from '../../construction-selector';
 import { InteriorRoomBuilder } from '../../interior-room-builder';
-import { CommandForm } from '../../command-form';
-import { SharingSection } from '../../sharing-section';
 import { ContractHandoff } from '../../../finance/handoff';
 import { PaymentScheduleEditor } from '../../payment-schedule-editor';
 import { QuotationTermsEditor } from '../../quotation-terms-editor';
 import { CreateRevisionControl } from '../../create-revision-control';
-import { hasSavedStagePaymentPlan } from '@business-os/core/quotation-payment-plan';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,6 +28,11 @@ export default async function QuotationStudio({
   searchParams: Promise<{ mode?: string; step?: string; package?: string }>;
 }) {
   const [{ id }, query] = await Promise.all([params, searchParams]);
+  // Old studio deep links no longer open a duplicate Preview & Share page.
+  // The saved premium quotation view remains permission-protected.
+  if (query.step === 'preview') {
+    redirect('/dashboard/quotations/' + encodeURIComponent(id) + '/preview');
+  }
   const s = await commercialServices('quotation.view', 'quotation', true);
   const { data: revision, error: revisionError } = await s.client
     .from('quotation_revisions')
@@ -86,8 +88,7 @@ export default async function QuotationStudio({
         : 'custom';
   const step =
     query.step === 'files' ||
-    query.step === 'payments' ||
-    query.step === 'preview'
+    query.step === 'payments'
       ? query.step
       : 'quote';
 
@@ -95,7 +96,6 @@ export default async function QuotationStudio({
     revision.status === 'draft' &&
     root.status !== 'cancelled' &&
     s.allowed('quotation.edit', 'quotation');
-  const canIssue = s.allowed('quotation.issue', 'quotation');
   const canDiscount = s.allowed('quotation.discount', 'quotation');
 
   const saved = items.flatMap((item) => {
@@ -152,7 +152,6 @@ export default async function QuotationStudio({
   const previewHtml = await quotationDocument(revision.id)
     .then(({ html }) => html)
     .catch(() => undefined);
-  const command = { revision_id: revision.id, version: revision.version };
   const totals = revision.totals;
   const total =
     totals &&
@@ -173,17 +172,14 @@ export default async function QuotationStudio({
         revisionNumber={revision.revision_number}
         revisionVersion={revision.version}
         currency={revision.currency}
-        status={revision.status}
         industryKey={industryKey}
         industryName={industry?.name ?? 'Project'}
         header={header.data}
-        hasSavedPaymentPlan={hasSavedStagePaymentPlan(revision.terms)}
         previewHtml={previewHtml}
         lines={saved}
         total={total}
         initialStep={step}
         canEdit={editable}
-        canIssue={canIssue}
         constructionEditor={
           canPriceConstruction ? (
             <ConstructionSelector
@@ -264,19 +260,10 @@ export default async function QuotationStudio({
             }}
           />
         }
-        sharingEditor={
-          <SharingSection revisionId={revision.id} status={revision.status} />
-        }
         reviseEditor={['issued', 'superseded'].includes(revision.status) &&
           s.allowed('quotation.create', 'quotation')
           ? <CreateRevisionControl revisionId={revision.id} version={revision.version} />
           : null}
-        issueEditor={
-          <CommandForm
-            title="Confirm & Enable Customer Sharing"
-            initial={{ ...command, action: 'issue' }}
-          />
-        }
       />
       {revision.status === 'issued' && (
         <section className="qs-card" style={{ marginTop: 18 }}>
