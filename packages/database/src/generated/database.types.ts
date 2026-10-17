@@ -11270,6 +11270,14 @@ export interface Database {
         };
         Returns: Json;
       };
+      gst_customer_invoice_context: {
+        Args: { p_org: string; p_invoice: string };
+        Returns: string;
+      };
+      gst_customer_invoice_save: {
+        Args: { p_org: string; p_input: Json; p_customer?: string };
+        Returns: string;
+      };
       gst_document: { Args: { p_org: string; p_id: string }; Returns: Json };
       gst_document_finalize: {
         Args: { p_org: string; p_id: string; p_version: number };
