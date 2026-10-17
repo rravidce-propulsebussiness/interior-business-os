@@ -243,25 +243,36 @@ export function PremiumSalesInvoice({
           <label className="psi-toggle"><input type="checkbox" name="reverseCharge" value="true" checked={reverseCharge}
             onChange={e=>setReverseCharge(e.target.checked)}/> Reverse charge applies</label>
         </section>
-        {hasStage && <section className="psi-card">
+        {eligibleStages.length>0 && <section className="psi-card">
           <div className="psi-title"><span className="psi-step">3</span><h2>Select project stage &amp; payment</h2></div>
           <div className="psi-fields psi-three">
-            <label className="psi-field"><span>Payment stage</span><select aria-label="Payment stage"
-              value={stageNumber} onChange={e=>changeStage(Number(e.target.value))} disabled={!!existing}>
-              {choice!.stages.map(row=><option key={row.number} value={row.number}>
-                {row.number}. {row.name} ({row.percent}%)
-              </option>)}</select></label>
-            <div className="psi-field"><span>Scheduled percentage</span><output className="psi-readonly">{stage!.percent}%</output></div>
+            <label className="psi-field"><span>Payment stage</span>
+              <select aria-label="Payment stage"
+                value={hasStage ? leadId+':'+stageNumber : ''}
+                onChange={e=>changeStage(e.target.value)} disabled={!!existing}>
+                <option value="">{selectedClient?.fromApprovedQuotation
+                  ? 'Choose an approved payment stage' : 'One-time invoice (no stage)'}</option>
+                {eligibleStages.map(group=><optgroup key={group.leadId}
+                  label={'Quotation '+group.quoteNumber+' · '+group.projectName}>
+                  {group.stages.map(row=><option key={row.number}
+                    value={group.leadId+':'+row.number}>
+                    {row.number}. {row.name} ({row.percent}%)
+                  </option>)}
+                </optgroup>)}
+              </select></label>
+            <div className="psi-field"><span>Scheduled percentage</span>
+              <output className="psi-readonly">{stage ? stage.percent+'%' : '—'}</output></div>
             <label className="psi-field"><span>Stage amount (₹)</span>
-              <input aria-label="Stage amount" type="number" min="0.01" max={stage!.amount}
-                step="0.01" value={lines[0]?.unitPrice ?? 0}
+              <input aria-label="Stage amount" type="number" min="0.01"
+                max={stage?.amount} disabled={!hasStage} step="0.01"
+                value={hasStage ? lines[0]?.unitPrice ?? 0 : ''}
                 onChange={e=>updateLine(0,'unitPrice',e.target.value)}/></label>
           </div>
-          <p className="psi-hint">Suggested from the saved quotation ({money(choice!.quoteTotal)}). Partial stage billing is allowed up to {money(stage!.amount)} before applicable GST.</p>
+          {hasStage && <p className="psi-hint">Suggested from the saved quotation ({money(choice!.quoteTotal)}). Partial stage billing is allowed up to {money(stage!.amount)} before applicable GST.</p>}
           {stageInvalid && <p className="psi-alert" role="alert">Stage billing amount must be above zero and cannot exceed the agreed stage amount.</p>}
         </section>}
         <section className="psi-card">
-          <div className="psi-title psi-title-between"><div><span className="psi-step">{hasStage?4:3}</span>
+          <div className="psi-title psi-title-between"><div><span className="psi-step">{eligibleStages.length?4:3}</span>
             <h2>Items &amp; services</h2></div><button className="psi-add" type="button" disabled={lines.length>=50}
             onClick={()=>setLines(prev=>[...prev,blank()])}>＋ Add item</button></div>
           <div className="psi-table-wrap"><table className="psi-items-table"><thead><tr>
@@ -298,7 +309,7 @@ export function PremiumSalesInvoice({
           <p className="psi-hint">Use correct HSN/SAC and GST rates for each supply. The server calculates final taxes when saving.</p>
         </section>
         <section className="psi-card">
-          <div className="psi-title"><span className="psi-step">{hasStage?5:4}</span><h2>Notes &amp; terms</h2></div>
+          <div className="psi-title"><span className="psi-step">{eligibleStages.length?5:4}</span><h2>Notes &amp; terms</h2></div>
           <textarea className="psi-notes" name="notes" maxLength={2000} rows={3} value={notes}
             placeholder="Additional invoice notes..." onChange={e=>setNotes(e.target.value)}/>
         </section>
