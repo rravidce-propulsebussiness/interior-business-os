@@ -214,12 +214,14 @@ describe('single premium package library and working Custom Quote entry', () => 
     expect(page).toContain('other={configurable}');
     expect(library).toContain('Construction Packages');
     expect(library).toContain('Interior &amp; Other Packages');
-    expect(library).toContain('Custom Quote');
-    expect(library).toContain('Create Custom Quote');
-    expect(library).toContain('/dashboard/quotations/new?mode=custom');
+    expect(library).toContain('Custom Package Management');
+    expect(library).not.toContain('renderCustom()');
+    const customManager = file('./packages/custom-package-manager.tsx');
+    expect(customManager).toContain('Create Custom Quote');
+    expect(customManager).toContain('/dashboard/quotations/new?mode=custom');
     expect(stylesheet).toContain('.qpl-cards');
-    expect(stylesheet).toContain('grid-template-columns:repeat(3,minmax(0,1fr))');
-    expect(stylesheet).toContain('@media (max-width:740px)');
+    expect(stylesheet).toContain('grid-template-columns:repeat(2,minmax(0,1fr))');
+    expect(stylesheet).toContain('@media(max-width:600px)');
   });
 
   it('preserves editing, duplication, removal and company snapshot PDF previews', () => {
