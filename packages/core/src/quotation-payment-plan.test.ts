@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { customerTermSections } from './quotation-terms';
 import { savedStagePaymentPlan, hasSavedStagePaymentPlan, savedStagePaymentLinks,encodeStagePaymentLinks } from './quotation-payment-plan';
 
 describe('saved stage-wise payment milestones', () => {
@@ -26,6 +27,10 @@ describe('quote-stage payment mappings',()=>{
    +encodeStagePaymentLinks([['PRECONSTRUCTION'],['RCC/F_1ST_FLOOR']]);
   expect(savedStagePaymentPlan(terms)?.map(row=>row.name)).toEqual(['Advance','1st slab']);
   expect(savedStagePaymentLinks(terms)).toEqual([['PRECONSTRUCTION'],['RCC/F_1ST_FLOOR']]);
+  const customerSections=customerTermSections('Warranty:\\nFive years\\n'+terms);
+  expect(JSON.stringify(customerSections)).not.toContain('STAGE_PAYMENT_LINKS');
+  expect(JSON.stringify(customerSections)).not.toContain('PRECONSTRUCTION');
+  expect(customerSections[0]?.title).toBe('Warranty');
  });
  it('reads old payment schedules without requiring stage links',()=>{
   expect(savedStagePaymentLinks('[STAGE_PAYMENT_PLAN]\nAdvance|100.00\n[/STAGE_PAYMENT_PLAN]')).toBeNull();
