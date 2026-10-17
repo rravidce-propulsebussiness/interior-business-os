@@ -6,6 +6,7 @@ import {
 import { lineSnapshotSchema } from '@business-os/quotation-engine';
 import { DomainError, idSchema } from '@business-os/shared';
 import { commercialServices } from '../commercial/service';
+import { inlinePremiumConceptImages } from './inline-premium-concepts';
 export async function quotationDocument(id: string) {
   const s = await commercialServices('quotation.view', 'quotation');
   idSchema.parse(id);
@@ -73,5 +74,6 @@ export async function quotationDocument(id: string) {
       };
     }),
   });
-  return { document, html: renderQuotationDocument(document) };
+  const html = await inlinePremiumConceptImages(renderQuotationDocument(document));
+  return { document, html };
 }
