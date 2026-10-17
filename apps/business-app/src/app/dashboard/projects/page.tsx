@@ -212,7 +212,7 @@ export default async function Projects({
       permission,
       ...(moduleKey ? { moduleKey } : {}),
     });
-  const canRemove = has('project.manage', 'projects');
+  const canRemove = has('project.manage', 'projects') && has('organization.manage');
   const canClients =
     has('customer.view', 'crm') || has('customer.view', 'quotation');
   const navigation = projectWorkspaceNavigation(has);
@@ -268,7 +268,7 @@ export default async function Projects({
   let query = s.client
     .from('projects')
     .select(
-      'id,name,code,project_type,industry_id,customer_id,site_address,status,created_at',
+      'id,name,version,code,project_type,industry_id,customer_id,site_address,status,created_at',
       { count: 'exact' },
     )
     .eq('organization_id', s.org)
@@ -596,7 +596,7 @@ export default async function Projects({
                           <ProjectRemovalButton
                             id={project.id}
                             name={project.name}
-                            archived={project.status === 'inactive'}
+                            version={project.version}
                           />
                         )}
                       </div>

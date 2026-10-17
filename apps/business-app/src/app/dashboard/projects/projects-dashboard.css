@@ -152,3 +152,20 @@
 @media (prefers-reduced-motion:reduce) {
   .proj-card, .proj-work-rail > span { transition:none; }
 }
+
+/* Irreversible deletion is distinct from inactive/restore actions. */
+.proj-permanent-delete-wrap {position:relative;z-index:4;display:inline-flex}
+.proj-permanent-delete {font-size:11px;font-weight:800;border:1px solid #ffc3bf;background:#fff7f6;color:#b42318;border-radius:10px;padding:9px 12px;cursor:pointer;line-height:1.3}
+.proj-permanent-delete:hover {background:#ffe9e7}
+.proj-delete-dialog {border:1px solid #e5e8ef;border-radius:18px;padding:22px;width:min(92vw,460px);max-height:88dvh;overflow-y:auto;box-shadow:0 20px 60px #17263b30;color:#1a2b48;background:#fff;position:fixed;z-index:9999}
+.proj-delete-dialog::backdrop {background:#0c203d8a}
+.proj-delete-dialog h2 {font-size:19px;font-weight:800;margin:0 0 12px}
+.proj-delete-dialog p {font-size:13px;line-height:1.6;color:#50627b;margin:8px 0}
+.proj-delete-dialog label {font-size:13px;font-weight:700;display:block;margin:18px 0 8px}
+.proj-delete-dialog input {width:100%;padding:11px 12px;box-sizing:border-box;border:1px solid #b9c8da;border-radius:10px;font-size:15px}
+.proj-delete-dialog .proj-delete-error {color:#b42318;background:#fff0ef;border-radius:8px;padding:9px 10px}
+.proj-delete-dialog-actions {display:flex;justify-content:flex-end;flex-wrap:wrap;gap:10px;margin-top:20px}
+.proj-delete-dialog-actions button {padding:11px 14px;border:1px solid #d9e0e9;border-radius:10px;background:#fff;font-size:13px;font-weight:750;cursor:pointer}
+.proj-delete-dialog-actions .proj-delete-confirm {color:#fff;background:#bc2222;border-color:#bc2222}
+.proj-delete-dialog-actions button:disabled {opacity:.48;cursor:not-allowed}
+@media(max-width:600px){.proj-delete-dialog {padding:18px}.proj-permanent-delete {font-size:10px}}
