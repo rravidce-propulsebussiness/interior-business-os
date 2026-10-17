@@ -10940,6 +10940,10 @@ export interface Database {
         Returns: undefined;
       };
       company_employee_list: { Args: { p_org: string }; Returns: Json };
+      company_employee_salary_create: {
+        Args: { p_org: string; p_employee: string; p_month: string };
+        Returns: string;
+      };
       company_employee_save: {
         Args: { p_org: string; p_input: Json };
         Returns: string;
