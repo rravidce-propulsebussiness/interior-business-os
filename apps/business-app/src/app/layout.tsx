@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
 import './globals.css';
 // Per-request CSP nonces require dynamic HTML, including login and error shells.
@@ -9,6 +9,7 @@ export const metadata: Metadata = {
     'An isolated workspace for your organization and its enabled modules.',
   robots: { index: false, follow: false },
 };
+export const viewport: Viewport = { width: 'device-width', initialScale: 1 };
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
