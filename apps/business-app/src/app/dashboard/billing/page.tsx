@@ -124,7 +124,7 @@ export default async function BusinessBilling({
       <div>
         <p className="billing-eyebrow">FINANCE / BILLING</p>
         <h1>Billing</h1>
-        <p>Manage invoices, supplier bills, GST details and financial records.</p>
+        <p>After converting leads and agreeing quotations, manage customer invoices, supplier purchases, labour payments and GST workpapers.</p>
       </div>
       <form action="/dashboard/billing" method="get" className="billing-period" aria-label="Billing date range">
         {kind!=='all'&&<input type="hidden" name="kind" value={kind}/>}
@@ -197,7 +197,7 @@ export default async function BusinessBilling({
 
         <section className="billing-panel billing-register" id="documents">
           <div className="billing-panel-heading">
-            <div><h2>Invoices &amp; Bills</h2><p>Private company billing register</p></div>
+            <div><h2>Customer invoices &amp; purchase bills</h2><p>Private company GST billing register</p></div>
             {canCreate&&<Link className="billing-small-link" href="/dashboard/billing/new"><Icon name="plus"/> New document</Link>}
           </div>
           <nav className="billing-tabs" aria-label="Document category">
@@ -250,6 +250,9 @@ export default async function BusinessBilling({
             <Link href="/dashboard/finance" className="billing-tool">
               <span className="billing-tool-icon amber"><Icon name="list"/></span><span><strong>Finance overview</strong><small>Contracts and billing milestones</small></span><Icon name="arrow"/>
             </Link>
+            {canPayments&&<Link href="/dashboard/billing/labour" className="billing-tool">
+              <span className="billing-tool-icon green"><Icon name="bank"/></span><span><strong>Labour payments</strong><small>Site wages, deductions and paid / pending ledger</small></span><Icon name="arrow"/>
+            </Link>}
           </div>
         </section>
       </div>
@@ -286,7 +289,8 @@ export default async function BusinessBilling({
           <div className="billing-panel-heading"><div><h2>Quick actions</h2></div></div>
           {canCreate&&<Link href="/dashboard/billing/new?kind=sales_invoice"><span className="billing-quick-icon"><Icon name="invoice"/></span><span><strong>Create sales invoice</strong><small>Prepare a new customer invoice</small></span><Icon name="arrow"/></Link>}
           {canCreate&&<Link href="/dashboard/billing/new?kind=purchase_bill"><span className="billing-quick-icon"><Icon name="bill"/></span><span><strong>Record supplier bill</strong><small>Register a received bill</small></span><Icon name="arrow"/></Link>}
-          <Link href="/dashboard/billing/gst-reports"><span className="billing-quick-icon"><Icon name="report"/></span><span><strong>GST workpapers</strong><small>Review tax components</small></span><Icon name="arrow"/></Link>
+          <Link href="/dashboard/billing/gst-reports"><span className="billing-quick-icon"><Icon name="report"/></span><span><strong>GST workpapers</strong><small>Download sales, purchase and HSN/SAC CSVs</small></span><Icon name="arrow"/></Link>
+          {canPayments&&<Link href="/dashboard/billing/labour"><span className="billing-quick-icon"><Icon name="bank"/></span><span><strong>Labour payments</strong><small>Record site wages and export expenses</small></span><Icon name="arrow"/></Link>}
           {canPayments&&<Link href="/dashboard/finance/payment_methods"><span className="billing-quick-icon"><Icon name="bank"/></span><span><strong>Payment methods</strong><small>View existing finance settings</small></span><Icon name="arrow"/></Link>}
         </section>
 
