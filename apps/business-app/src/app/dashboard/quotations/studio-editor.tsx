@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState, type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { parseSftEstimate } from '@business-os/core/sft-quotation';
 
-type Tab = 'quote' | 'files' | 'payments' | 'preview';
+type Tab = 'quote' | 'files' | 'payments';
 
 type QuotationLine = {
   id: string;
@@ -46,23 +46,18 @@ export function QuotationStudioEditor({
   quoteNumber,
   revisionVersion,
   currency,
-  status,
   industryKey,
   industryName,
   header,
   lines,
   total,
-  hasSavedPaymentPlan,
   previewHtml,
   constructionEditor,
   interiorEditor,
   termsEditor,
   paymentEditor,
-  sharingEditor,
   initialStep,
   canEdit,
-  canIssue,
-  issueEditor,
   reviseEditor,
 }: {
   revisionId: string;
@@ -70,30 +65,21 @@ export function QuotationStudioEditor({
   revisionNumber: number;
   revisionVersion: number;
   currency: string;
-  status: string;
   industryKey: string;
   industryName: string;
   header: DocumentHeader;
   lines: QuotationLine[];
   total: string;
-  hasSavedPaymentPlan: boolean;
   previewHtml?: string | undefined;
   constructionEditor: ReactNode;
   interiorEditor: ReactNode;
   termsEditor: ReactNode;
   paymentEditor: ReactNode;
-  sharingEditor: ReactNode;
   initialStep: Tab;
   canEdit: boolean;
-  canIssue: boolean;
-  issueEditor: ReactNode;
   reviseEditor: ReactNode;
 }) {
   const [step, setStep] = useState<Tab>(initialStep);
-  const [message, setMessage] = useState('');
-  // A successful child save increments the version via the authoritative
-  // server action; clear transient 'Saving…' only after that acknowledgement.
-  useEffect(() => { setMessage(''); }, [revisionVersion]);
   const amount = Number(total);
   const price = Number.isFinite(amount)
     ? new Intl.NumberFormat('en-IN', {
@@ -111,16 +97,11 @@ export function QuotationStudioEditor({
           <button type="button" key={id}
             className={'qs-simple-tab' + (step === id ? ' active' : '')}
             aria-current={step === id ? 'page' : undefined}
-            onClick={() => { setStep(id); setMessage(''); }}>
+            onClick={() => setStep(id)}>
             {title}
           </button>
         ))}
       </nav>
-      {message && (
-        <div className="qs-message" role="status" style={{ marginBottom: 12 }}>
-          {message}
-        </div>
-      )}
       <div className={'qs-studio-grid' + (step === 'payments' ? ' qs-studio-grid-full' : '')}>
         <div className="qs-editor">
           {step === 'quote' && (
@@ -197,64 +178,7 @@ export function QuotationStudioEditor({
 
           {step === 'payments' && paymentEditor}
 
-          {step === 'preview' && (
-            <>
-              <section className="qs-card" id="qs-preview-share">
-                <h2>Preview &amp; Share</h2>
-                <p className="qs-muted" style={{ marginBottom: 14 }}>
-                  This is the actual PDF generated with{' '}
-                  <strong>{header.branding.name || industryName}</strong>{' '}
-                  branding and saved quotation values.
-                </p>
-                <p className="qs-muted" style={{marginBottom: 12}}>
-                  Preview contains saved amounts and specifications only.
-                  Save any edits before sharing.
-                </p>
-                <div className="qs-toolbar" aria-label="Saved quotation PDF">
-                  <a className="qs-btn primary"
-                    href={url + '/pdf?view=1&version=' + revisionVersion}
-                    target="_blank" rel="noopener noreferrer">
-                    ◉ View premium PDF
-                  </a>
-                  <a className="qs-btn"
-                    href={url + '/pdf?version=' + revisionVersion}>
-                    ↓ Download premium PDF
-                  </a>
-                </div>
-                {!hasSavedPaymentPlan && (
-                  <div className="qs-warning" style={{ marginTop: 16 }}>
-                    <strong>Stage-wise payments are missing from this quotation.</strong>
-                    <p className="mt-2 text-sm">
-                      The Payments tab has editable suggestions, but they are
-                      not included in the customer PDF until saved. Confirm the
-                      exact stages and percentages before issuing or sharing.
-                    </p>
-                    {status === 'draft' && canEdit && (
-                      <button type="button" className="qs-btn primary mt-3"
-                        onClick={() => setStep('payments')}>
-                        Set &amp; Save Stage-wise Payments
-                      </button>
-                    )}
-                  </div>
-                )}
-                {status === 'draft' && canIssue && lines.length > 0 &&
-                  hasSavedPaymentPlan && (
-                  <div className="qs-warning" style={{ marginTop: 16 }}>
-                    Check final amounts and attached annexures before sharing.
-                    Shared versions are preserved for your customer's records.
-                  </div>
-                )}
-                {status === 'draft' && canIssue && lines.length > 0 &&
-                  hasSavedPaymentPlan && issueEditor}
-                {status === 'draft' && lines.length === 0 && (
-                  <p className="qs-note" style={{ marginTop: 13 }}>
-                    Add at least one priced line before enabling customer sharing.
-                  </p>
-                )}
-              </section>
-              {sharingEditor}
-            </>
-          )}
+
         </div>
 
         {!isConstruction && step !== 'payments' && <aside className="qs-preview-pane">
@@ -282,14 +206,11 @@ export function QuotationStudioEditor({
           </div>
         </aside>}
       </div>
-      {step !== 'preview' && (step !== 'quote' || !isConstruction) && (
-        <div className="qs-studio-bottom-actions">
-          <button type="button" className="qs-btn primary"
-            onClick={() => { setStep('preview'); setMessage(''); }}>
-            Preview &amp; Share saved PDF →
-          </button>
-        </div>
-      )}
+      <div className="qs-studio-bottom-actions">
+        <a className="qs-btn" href={url + '/preview'} target="_blank" rel="noopener noreferrer">
+          View saved quotation ↗
+        </a>
+      </div>
     </>
   );
 }
