@@ -716,3 +716,35 @@ describe('tenant-priced calculated Custom Quote package', () => {
     expect(studio).toContain('initialCustomQuote={existingCustomQuote}');
   });
 });
+
+describe('screenshot-matched Package Library with real company pricing', () => {
+  const library = file('./packages/package-library.tsx');
+  const manager = file('./packages/custom-package-manager.tsx');
+  const css = file('./packages/custom-package-manager.css');
+  const action = file('../pricing/construction/actions.ts');
+  const pdf = file('./packages/custom/preview/route.ts');
+
+  it('uses three top tabs and a compact custom package card, not an accordion', () => {
+    expect(library).toContain("tab === 'custom'");
+    expect(library).toContain('Custom Package Management');
+    expect(library).toContain('Manage Custom Package');
+    expect(library).not.toContain('<details className="qpl-brand-pricing">');
+    expect(library).toContain('Compare Packages');
+    expect(library).toContain('Add New Package');
+  });
+  it('edits company units and brand options through authorized atomic persistence', () => {
+    expect(manager).toContain('cpm-table');
+    expect(manager).toContain('Manage brands');
+    expect(manager).toContain('Add Material');
+    expect(manager).toContain('Save Changes');
+    expect(manager).toContain('saveCustomPackageSettings');
+    expect(action).toContain('construction_custom_package_settings');
+    expect(css).toContain('@media(max-width:670px)');
+  });
+  it('provides a real authenticated Custom Package PDF instead of an inert CTA', () => {
+    expect(pdf).toContain('catalogPage(true)');
+    expect(pdf).toContain('renderPdf(html');
+    expect(pdf).toContain('renderConstructionPackageSamplePdf');
+    expect(pdf).toContain("'Content-Type':'application/pdf'");
+  });
+});
