@@ -1,4 +1,4 @@
-import { catalogPage } from '../../../catalog/access';
+import { catalogPage } from '../../../../catalog/access';
 import { pageServices } from '@business-os/auth/server';
 import { createConstructionRatesRepository } from '@business-os/database/construction-rates';
 import {
