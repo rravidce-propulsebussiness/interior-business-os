@@ -4,7 +4,6 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { activeOrganization, serverServices } from '@business-os/auth/server';
-import { safeFailure } from '@business-os/shared';
 import { companyCategoryOptions } from './company-categories';
 
 const inputSchema = z.object({
@@ -69,9 +68,8 @@ export async function saveCompanySettings(form: FormData): Promise<void> {
         }
       }
     }
-  } catch (error) {
-    const failure = safeFailure(error);
-    result = failure.code === 'FORBIDDEN' ? 'forbidden' : 'unavailable';
+  } catch {
+    result = 'unavailable';
   }
   redirect('/dashboard/settings?tab=company&status='+result);
 }
