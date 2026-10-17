@@ -57,6 +57,7 @@ export type LeadView = {
   updatedAt: string | null;
   expectedStartDate: string | null;
   convertedProjectId: string | null;
+  quotationProjectId: string | null;
   convertedCustomerId: string | null;
   quoteRevisionId: string | null;
   quoteStatus: string | null;
@@ -217,6 +218,7 @@ export function LeadsWorkspace({
   canManage,
   canWin,
   canConvert,
+  canViewProject,
   canQuote,
   canShareQuote,
   canAssign,
@@ -259,6 +261,7 @@ export function LeadsWorkspace({
   canFollowUp: boolean;
   canVisit: boolean;
   canConvert: boolean;
+  canViewProject: boolean;
   canQuote: boolean;
   canShareQuote: boolean;
   organizationName: string;
@@ -727,6 +730,7 @@ export function LeadsWorkspace({
                                 lostReasons={lostReasons}
                                 canManage={canManage}
                                 canWin={canWin} canConvert={canConvert}
+                                 canViewProject={canViewProject}
                               />
                             </td>
                             <td>
@@ -849,10 +853,12 @@ export function LeadsWorkspace({
                           </div>
                         </div>
                         <div className="crm-mobile-inline-grid">
-                          <label>Stage
+                          <div className="crm-mobile-stage">
+                            <span>Stage</span>
                             <LeadStageSelect lead={lead} stages={stages} lostReasons={lostReasons}
-                              canManage={canManage} canWin={canWin} canConvert={canConvert}/>
-                          </label>
+                              canManage={canManage} canWin={canWin} canConvert={canConvert}
+                              canViewProject={canViewProject}/>
+                          </div>
                           <label>Priority
                             <LeadPrioritySelect lead={lead} canManage={canManage}/>
                           </label>
@@ -1003,6 +1009,7 @@ export function LeadsWorkspace({
         lead={openedLead} onClose={() => setOpenedId(null)}
         stages={stages} lostReasons={lostReasons} assignees={assignees}
         canManage={canManage} canWin={canWin} canConvert={canConvert}
+                                 canViewProject={canViewProject}
         canFollowUp={canFollowUp} canVisit={canVisit} canNote={canNote} canQuote={canQuote}
       />}
       <p className="crm-leads-scope">

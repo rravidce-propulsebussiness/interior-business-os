@@ -2630,3 +2630,26 @@ body:has(.crm-leads-root) .crm-shared-navigation {
 .crm-board-latest p {font-size:12px;line-height:1.45;overflow-wrap:anywhere;margin:0}
 .crm-board-card > .crm-quote-summary {margin:10px 0;max-width:none;min-width:0}
 .crm-board-contact .crm-update-open {min-height:34px}
+
+/* One-step Won -> Project, shared by desktop, mobile and lead history. */
+.crm-project-inline {width:100%;min-width:0;margin-top:8px;display:grid;gap:8px;}
+.crm-project-open,.crm-project-create {
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  min-height:43px;width:100%;border-radius:11px;padding:10px 13px;
+  border:1px solid #ff691e;background:#ff691e;color:#fff!important;
+  font-weight:800;font-size:13px;line-height:1.35;text-align:center;
+  text-decoration:none;cursor:pointer;box-sizing:border-box;
+  transition:transform .15s ease,box-shadow .15s ease,opacity .15s ease;
+}
+.crm-project-open {background:#edf6ff;color:#145bb7!important;border-color:#bdd9f7;}
+.crm-project-open:hover,.crm-project-create:hover {transform:translateY(-1px);box-shadow:0 5px 16px #1a4a8717;}
+.crm-project-inline button:disabled {opacity:.6;cursor:wait;transform:none;}
+.crm-project-quick-form {display:grid;gap:7px;min-width:0;padding:12px;border:1px solid #e6eaf1;border-radius:12px;background:#fff;}
+.crm-project-quick-form label {font-weight:800;font-size:12px;color:#34506d;}
+.crm-project-quick-form input {width:100%;min-height:42px;border:1px solid #ccd7e7;border-radius:10px;padding:10px;font-size:14px;box-sizing:border-box;}
+.crm-project-quick-actions {display:flex;align-items:center;gap:8px;}
+.crm-project-quick-actions .crm-project-create {flex:1;}
+.crm-project-quick-actions > button:last-child {padding:11px;border:1px solid #dce5ef;background:#fff;border-radius:10px;color:#3f5b7c;cursor:pointer;}
+.crm-project-error {color:#b42318;font-size:12px;overflow-wrap:anywhere;}
+@media(max-width:640px){.crm-project-inline {grid-column:1 / -1;}.crm-project-open,.crm-project-create {min-height:46px;}}
+.crm-mobile-inline-grid > .crm-mobile-stage {display:grid;gap:5px;color:#657895;font-size:11px;font-weight:700;min-width:0;align-content:start;}

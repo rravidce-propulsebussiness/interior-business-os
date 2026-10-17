@@ -176,6 +176,8 @@ describe('lead-driven quotation creation', () => {
   });
 
   it('does not require a project name before the lead is Won', () => {
+    const inlineProject = file('../crm/leads/lead-project-action.tsx');
+    const linkAction = file('../crm/leads/lead-project-actions.ts');
     const convert = file('../crm/leads/[id]/convert/page.tsx');
     expect(form).toContain('Client &amp; Quotation Details');
     expect(form).not.toContain('Enter project name');
@@ -184,8 +186,10 @@ describe('lead-driven quotation creation', () => {
     expect(action).toContain('leadQuotationProjectIds');
     expect(action).toContain("'is_sales_prospect', true");
     expect(action).toContain("p_name: prospectName");
-    expect(convert).toContain("project_name: quoteProject.is_sales_prospect ? ''");
-    expect(convert).toContain("label: 'Project name'");
+    expect(inlineProject).toContain('Project name');
+    expect(inlineProject).toContain('quotationProjectId');
+    expect(linkAction).toContain("customer_id: null, project_id: null");
+    expect(convert).toContain("redirect('/dashboard/crm/leads/'");
   });
 
   it('derives category from the tenant lead and rejects unknown classifications', () => {

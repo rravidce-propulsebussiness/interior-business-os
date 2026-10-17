@@ -3,10 +3,11 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { runCrmCommand } from '../actions';
+import { LeadProjectAction } from './lead-project-action';
 import { scheduleLeadFollowUp, changeLeadPriority } from './lead-update-actions';
 import type { LeadOption, LeadStage, LeadView } from './workspace';
 
-type Row = Pick<LeadView, 'id' | 'version' | 'lifecycle' | 'stageId' | 'stageName' | 'assignedTo' | 'nextFollowUpAt'> & { convertedProjectId?: string | null };
+type Row = Pick<LeadView, 'id' | 'name' | 'version' | 'lifecycle' | 'stageId' | 'stageName' | 'assignedTo' | 'nextFollowUpAt' | 'convertedProjectId' | 'quotationProjectId'>;
 
 function localInput(date: string | null): string {
   if (!date) return '';
@@ -18,17 +19,16 @@ function localInput(date: string | null): string {
 }
 
 export function LeadStageSelect({
-  lead, stages, lostReasons, canManage, canWin, canConvert = false,
+  lead, stages, lostReasons, canManage, canWin, canConvert = false, canViewProject = false,
 }: {
   lead: Row; stages: LeadStage[]; lostReasons: LeadOption[];
-  canManage: boolean; canWin: boolean; canConvert?: boolean;
+  canManage: boolean; canWin: boolean; canConvert?: boolean; canViewProject?: boolean;
 }) {
   const [pending, setPending] = useState(false);
   const [targetId, setTargetId] = useState('');
   const [reason, setReason] = useState('');
   const [note, setNote] = useState('');
   const [error, setError] = useState('');
-  const [justWon, setJustWon] = useState(false);
   const router = useRouter();
   const target = stages.find((s) => s.id === targetId);
   const change = async (id: string, reasonId: string | null = null, message = '') => {
@@ -42,10 +42,6 @@ export function LeadStageSelect({
       if (!result.id) setError(result.message);
       else {
         setTargetId('');
-        const selectedStage = stages.find((stage) => stage.id === id);
-        if (selectedStage?.outcome === 'won' && lead.lifecycle !== 'won') {
-          setJustWon(true);
-        }
         router.refresh();
       }
     } catch {
@@ -54,7 +50,14 @@ export function LeadStageSelect({
       setPending(false);
     }
   };
-  if (!canManage || lead.lifecycle === 'archived') return <span>{lead.stageName}</span>;
+  if (!canManage || lead.lifecycle === 'archived') return <div className="crm-inline-field">
+    <span>{lead.stageName}</span>
+    <LeadProjectAction key={lead.id} leadId={lead.id} version={lead.version}
+        leadName={lead.name} lifecycle={lead.lifecycle}
+        convertedProjectId={lead.convertedProjectId}
+        quotationProjectId={lead.quotationProjectId}
+        canConvert={canConvert} canViewProject={canViewProject}/>
+  </div>;
   return (
     <div className="crm-inline-field">
       <select
@@ -105,22 +108,11 @@ export function LeadStageSelect({
           </div>
         </div>
       )}
-      {justWon && <div className="crm-won-project-prompt" role="status">
-        <strong>Lead marked Won. Create a project?</strong>
-        <p>Confirm the client and project using the existing quotation. No duplicate customer will be created.</p>
-        <div className="crm-inline-confirm-actions">
-          {canConvert
-            ? <a href={'/dashboard/crm/leads/'+encodeURIComponent(lead.id)+'/convert'}>
-                Create project →
-              </a>
-            : <small>Ask a manager with lead conversion access to create the project.</small>}
-          <button type="button" onClick={()=>setJustWon(false)}>Later</button>
-        </div>
-      </div>}
-      {!justWon && lead.lifecycle === 'won' && !lead.convertedProjectId && canConvert &&
-        <a className="crm-create-project-link" href={'/dashboard/crm/leads/'+encodeURIComponent(lead.id)+'/convert'}>
-          + Create project for this Won lead →
-        </a>}
+      <LeadProjectAction key={lead.id} leadId={lead.id} version={lead.version}
+        leadName={lead.name} lifecycle={lead.lifecycle}
+        convertedProjectId={lead.convertedProjectId}
+        quotationProjectId={lead.quotationProjectId}
+        canConvert={canConvert} canViewProject={canViewProject}/>
       {error && <small role="alert" className="crm-inline-error">{error}</small>}
     </div>
   );

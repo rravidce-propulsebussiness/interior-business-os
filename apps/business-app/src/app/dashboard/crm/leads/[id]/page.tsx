@@ -69,11 +69,12 @@ export default async function LeadDetail({
   }));
   const team:LeadOption[]=optionRows(choices.team);
   const reasons:LeadOption[]=optionRows(choices.reasons.rows);
-  const state:Pick<LeadView,'id'|'version'|'stageId'|'stageName'|'assignedTo'|'nextFollowUpAt'|'lifecycle'|'convertedProjectId'>={
-    id,version:l.version,stageId:l.stage_id,
+  const state:Pick<LeadView,'id'|'name'|'version'|'stageId'|'stageName'|'assignedTo'|'nextFollowUpAt'|'lifecycle'|'convertedProjectId'|'quotationProjectId'>={
+    id,name:l.name,version:l.version,stageId:l.stage_id,
     stageName:stages.find((x)=>x.id===l.stage_id)?.name||l.lifecycle,
     assignedTo:l.assigned_to||'',nextFollowUpAt:l.next_follow_up_at,lifecycle:l.lifecycle,
     convertedProjectId:l.converted_project_id,
+    quotationProjectId:null,
   };
   const enabled=new Set(memberships.error?[]:(memberships.data??[]).map((r)=>r.industry_id));
   const services=industries.filter((v)=>enabled.has(v.id)&&v.status==='active');
@@ -89,6 +90,7 @@ export default async function LeadDetail({
 
   type LeadQuote={
     revisionId:string;number:string;status:string;amount:string|null;shared:boolean;
+    projectId:string|null;
   };
   let quotes:LeadQuote[]=[];
   if(canViewQuote){
@@ -104,6 +106,7 @@ export default async function LeadDetail({
         if(typeof x.revision_id!=='string')return [];
         return [{
           revisionId:x.revision_id,
+          projectId:typeof x.project_id==='string'?x.project_id:null,
           number:typeof x.quotation_number==='string'?x.quotation_number:'Quotation',
           status:typeof x.status==='string'?x.status:'draft',
           amount:typeof x.amount==='string'?x.amount:null,
@@ -112,6 +115,7 @@ export default async function LeadDetail({
       }).filter((q)=>q.status!=='cancelled');
     }
   }
+  state.quotationProjectId=quotes.find(q=>q.projectId)?.projectId??null;
   const editing:Record<string,unknown>=Object.fromEntries(
     Object.keys(crmSchemas.leads.shape)
       .filter(k=>k in l&&!['assigned_to','stage_id'].includes(k))
@@ -176,7 +180,9 @@ export default async function LeadDetail({
           </div>
           <div className="crm-history-inline-grid">
             <div><strong>Stage</strong><LeadStageSelect lead={state} stages={stages} lostReasons={reasons}
-              canManage={canManage} canWin={s.allowed('lead.win')} canConvert={s.allowed('lead.convert')}/></div>
+              canManage={canManage} canWin={s.allowed('lead.win')}
+              canConvert={s.allowed('lead.convert')}
+              canViewProject={s.allowed('project.view','projects')}/></div>
             <div><strong>Assigned to</strong><LeadAssigneeSelect lead={state} assignees={team}
               canAssign={s.allowed('lead.assign')}/></div>
             <div><strong>Next follow-up</strong><LeadFollowUpSetter lead={state} canFollowUp={canFollowUp}/></div>
@@ -212,17 +218,6 @@ export default async function LeadDetail({
                 </div>
               ):<p className="crm-history-empty">No active quotation linked to this lead.</p>}
             </section>
-            {l.converted_project_id ? (
-              <section className="crm-history-related">
-                <strong>Converted client</strong>
-                <Link href={'/dashboard/projects/'+l.converted_project_id}>Open project →</Link>
-              </section>
-            ):l.lifecycle==='won'&&s.allowed('lead.convert')?(
-              <section className="crm-history-related">
-                <strong>Lead marked Won — project not yet created</strong>
-                <Link href={'/dashboard/crm/leads/'+id+'/convert'}>Create project &amp; convert to client →</Link>
-              </section>
-            ):null}
             {canManage&&l.lifecycle!=='archived'&&(
               <details className="crm-history-edit">
                 <summary>Edit customer details</summary>

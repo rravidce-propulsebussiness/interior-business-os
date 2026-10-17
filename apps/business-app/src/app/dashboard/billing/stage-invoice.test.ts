@@ -16,6 +16,8 @@ const billingCustomersMigration = file('../../../../../../packages/database/supa
 const wonLeadMigration = file('../../../../../../packages/database/supabase/migrations/20261017000900_won_lead_invoice_picker_no_reason.sql');
 const leadStage = file('../crm/leads/lead-inline-controls.tsx');
 const conversionPage = file('../crm/leads/[id]/convert/page.tsx');
+const inlineProject = file('../crm/leads/lead-project-action.tsx');
+const projectAction = file('../crm/leads/lead-project-actions.ts');
 
 const sample: GstStageInvoiceOption = {
   leadId:'00000000-0000-4000-8000-000000000001',leadNumber:'L-001',
@@ -89,14 +91,18 @@ describe('lead-linked GST milestone invoicing',()=>{
     expect(actions).toContain("idSchema.parse(customerId)");
   });
   it('offers project creation immediately after marking Won and never duplicates quote prospects',()=>{
-    expect(leadStage).toContain("setJustWon(true)");
-    expect(leadStage).toContain("Lead marked Won. Create a project?");
-    expect(leadStage).toContain("Create project for this Won lead");
-    expect(leadStage).toContain("lead.convertedProjectId");
-    expect(leadStage).toContain("canConvert");
-    expect(conversionPage).toContain("Create project for Won lead");
-    expect(conversionPage).toContain("project_id: quoteProject.id");
-    expect(conversionPage).toContain("customer_id: quoteCustomerResponse.data.id");
+    expect(leadStage).toContain("<LeadProjectAction");
+    expect(leadStage).toContain("canConvert={canConvert}");
+    expect(inlineProject).toContain("Open Project ↗");
+    expect(inlineProject).toContain("+ Create Project");
+    expect(inlineProject).toContain("convertedProjectId");
+    expect(inlineProject).toContain("quotationProjectId");
+    expect(projectAction).toContain("crmServices('lead.convert')");
+    expect(projectAction).toContain("lead_quotation_list");
+    expect(projectAction).toContain("customer_id: null, project_id: null");
+    expect(projectAction).toContain("acknowledge_duplicate: false");
+    expect(conversionPage).toContain("redirect('/dashboard/crm/leads/'");
+    expect(conversionPage).not.toContain("<MasterForm");
     expect(billingCustomersMigration).toContain("crm_activate_won_project_after_convert");
     expect(billingCustomersMigration).toContain("OLD.converted_at IS NULL");
     expect(billingCustomersMigration).toContain("p.customer_id=NEW.converted_customer_id");
@@ -133,7 +139,7 @@ describe('lead-linked GST milestone invoicing',()=>{
     expect(leadStage).toContain("selected.outcome === 'won'");
     expect(leadStage).not.toContain('Why was this lead won?');
     expect(leadStage).not.toContain("target.outcome === 'won' && !note.trim()");
-    expect(leadStage).toContain('Lead marked Won. Create a project?');
+    expect(leadStage).toContain('<LeadProjectAction');
     expect(wonLeadMigration).not.toContain('Won reason required');
     expect(wonLeadMigration).toContain('Lost reason required');
     expect(wonLeadMigration).toContain("private.crm_require(org,'lead.win')");
