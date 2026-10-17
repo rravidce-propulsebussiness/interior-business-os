@@ -3,6 +3,9 @@
 
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { signOut } from '@business-os/auth/actions';
+import { useCompanyNavigation } from './company-navigation-provider';
+import './owner-dashboard.css';
+import './command-centre.css';
 
 const iconPaths = {
   dashboard: 'M3 10.5 12 3l9 7.5M5 9v12h14V9M9 21v-8h6v8',
@@ -79,6 +82,8 @@ export function OwnerShell({
   notificationsEnabled,
   currentHref,
   dashboardBrand = false,
+  searchAction = '/dashboard',
+  searchPlaceholder = 'Search leads, projects, quotations...',
 }: {
   children: ReactNode;
   companyName: string;
@@ -90,7 +95,13 @@ export function OwnerShell({
   notificationsEnabled: boolean;
   currentHref?: string;
   dashboardBrand?: boolean;
+  searchAction?: string;
+  searchPlaceholder?: string;
 }) {
+  const sharedNavigation = useCompanyNavigation();
+  // When the shared dashboard layout is present, ignore short page-specific
+  // menus: permissions and menu order must remain stable across every route.
+  const displayedNavigation = sharedNavigation ?? navigation;
   const [menuOpen, setMenuOpen] = useState(false);
   const toggleRef = useRef<HTMLButtonElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -152,7 +163,7 @@ export function OwnerShell({
       .join('') || 'BO';
 
   return (
-    <div className="owner-layout">
+    <div className="owner-layout owner-layout-unified">
       {menuOpen && (
         <button
           className="owner-scrim"
@@ -198,7 +209,7 @@ export function OwnerShell({
           </button>
         </div>
         <nav className="owner-nav" aria-label="Your company's modules">
-          {navigation.map((item) => {
+          {displayedNavigation.map((item) => {
             const selected = currentHref
               ? item.href === currentHref
               : item.href === '/dashboard';
@@ -321,7 +332,7 @@ export function OwnerShell({
           </a>}
           <form
             className="owner-search"
-            action="/dashboard"
+            action={searchAction}
             method="GET"
             role="search"
           >
@@ -331,7 +342,7 @@ export function OwnerShell({
               name="q"
               defaultValue={search}
               maxLength={80}
-              placeholder="Search leads, projects, quotations..."
+              placeholder={searchPlaceholder}
               aria-label="Search within this company"
             />
           </form>

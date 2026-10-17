@@ -403,12 +403,13 @@ describe('premium mobile quotation actions and matching workspace navigation', (
     expect(css).toContain('@media (prefers-reduced-motion: reduce)');
   });
 
-  it('keeps a visible hamburger with Leads-style accessible drawer on scroll', () => {
-    expect(frame).toContain('qs-mobile-menu-button');
-    expect(frame).toContain('aria-controls="qs-sidebar-navigation"');
-    expect(frame).toContain("setMenuOpen(true)");
+  it('uses one company sidebar and header instead of a second studio drawer', () => {
+    expect(frame).toContain('<OwnerShell');
+    expect(frame).toContain('dashboardBrand');
+    expect(frame).toContain('searchAction="/dashboard/quotations"');
+    expect(frame).not.toContain('qs-sidebar-navigation');
+    expect(frame).not.toContain('qs-mobile-menu-button');
     expect(css).toContain('position: sticky;');
-    expect(css).toContain('.qs-layout:has(.qs-quotes-page) .qs-mobile-menu-button');
   });
 });
 
