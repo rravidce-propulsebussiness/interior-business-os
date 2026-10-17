@@ -25,20 +25,26 @@ describe('lead quotation preview and secure WhatsApp PDF sharing', () => {
     expect(preview).toContain("base + '/pdf?view=1'");
   });
 
-  it('protects draft issuance and hands WhatsApp a revocable customer PDF link', () => {
-    expect(preview).toContain("createWhatsAppPdfShare(revisionId)");
+  it('finalizes approved drafts but attaches PDF file bytes, never creates a customer link', () => {
+    const file = readFileSync(fileURLToPath(new URL('./quotation-pdf-file.ts', import.meta.url)), 'utf8');
+    expect(preview).toContain('authorizeWhatsAppPdfAttachment(revisionId)');
     expect(preview).toContain("status === 'draft' && !window.confirm(");
-    expect(preview).toContain("'/q/' + result.token + '/pdf'");
-    expect(preview).toContain('https://wa.me/');
-    expect(preview).toContain('https://api.whatsapp.com/send?text=');
-    expect(preview).toContain('window.location.assign(url)');
-    expect(preview).toContain('setShareError(');
-    expect(share).toContain('quotation_share_manage');
-    expect(share).toContain("p_action: 'create'");
-    expect(share).toContain('pdf_enabled: true');
+    expect(preview).toContain('fetchQuotationPdfFile(revisionId, number)');
+    expect(preview).toContain('supportsPdfFileSharing(preparedPdf)');
+    expect(preview).toContain('sharePdfFile(preparedPdf, number)');
+    expect(preview).toContain('downloadQuotationPdfFile(preparedPdf)');
+    expect(preview).not.toContain("'/q/' + result.token");
+    expect(preview).not.toContain('window.location.assign');
+    expect(share).not.toContain("export async function createWhatsAppPdfShare");
+    expect(share).toContain("commercialServices('quotation.share', 'quotation')");
     expect(share).toContain('hasSavedStagePaymentPlan(revision.terms)');
     expect(share).toContain("s.allowed('quotation.issue', 'quotation')");
-    expect(share).toContain("commercialServices('quotation.share', 'quotation')");
+    expect(share).not.toContain("p_action: 'create'");
+    expect(file).toContain("new File([blob], quotationPdfFilename(quoteNumber)");
+    expect(file).toContain("await blob.slice(0, 5).text() !== '%PDF-'");
+    expect(file).toContain('navigator.share({');
+    expect(file).toContain('files: [file]');
+    expect(file).toContain("credentials: 'same-origin'");
   });
 
   it('shows the share action only to permitted users on desktop and mobile', () => {
@@ -452,10 +458,10 @@ describe('PDF attachment sharing and reliable file operations', () => {
     expect(css).not.toContain('.qs-work-preview-grid');
   });
 
-  it('opens the very same PDF for list view and studio preview as for download', () => {
+  it('opens the same premium HTML preview in Leads and the quotations list, keeping PDF output separate', () => {
     const list = file('./page.tsx');
     const studio = file('./studio-editor.tsx');
-    expect(list).toContain("const preview = '/dashboard/quotations/' + row.id + '/pdf?view=1'");
+    expect(list).toContain("const preview = '/dashboard/quotations/' + row.id + '/preview'");
     expect(studio).toContain("'/pdf?view=1&version=' + revisionVersion");
     expect(studio).toContain("'/pdf?version=' + revisionVersion");
     expect(studio).not.toContain('Print A4 design / Save as PDF');
