@@ -12,6 +12,7 @@ export default defineConfig({
       'packages/*/src/**/*.test.ts',
       'apps/business-app/src/app/dashboard/website/cloudflare-domains.test.ts',
       'apps/business-app/src/app/dashboard/quotations/studio-ui.test.ts',
+      'apps/business-app/src/app/dashboard/billing/billing-ui.test.ts',
       'apps/business-app/src/app/dashboard/quotations/quotation-terms-format.test.ts',
       'apps/business-app/src/app/dashboard/quotations/construction-floor-inheritance.test.ts',
       'apps/business-app/src/app/dashboard/quotations/penthouse-floor-selection.test.ts',
