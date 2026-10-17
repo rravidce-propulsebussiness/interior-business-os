@@ -100,7 +100,7 @@ export function cloudflarePdfRequest(
   if (!accountId || !/^[a-f0-9]{32}$/i.test(accountId) || !token)
     throw new PdfServiceError('PDF_RENDERER_UNAVAILABLE');
   return {
-    url: `https://api.cloudflare.com/client/v4/accounts/${accountId}/browser-rendering/pdf`,
+    url: `https://api.cloudflare.com/client/v4/accounts/${accountId}/browser-run/pdf`,
     token,
     body: {
       html,
