@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import { PDFDocument } from 'pdf-lib';
 import { renderQuotationDocument } from '../../packages/core/src/quotation-document';
 import { quotationDocumentFixture } from '../../packages/core/src/quotation-document.fixture';
+import { renderQuotationPdf } from '../../apps/business-app/src/app/dashboard/quotations/pdf-renderer';
 
 test('premium quotation is a complete multi-page A4 PDF with a cover and closing page', async ({ page }) => {
   const document = quotationDocumentFixture();
@@ -49,4 +50,22 @@ test('premium quotation is a complete multi-page A4 PDF with a cover and closing
     expect(width).toBeGreaterThan(300);
     expect(width).toBeLessThanOrEqual(metrics.viewport);
   }
+});
+
+
+test('production quotation PDF is generated from the same premium brochure HTML as Preview', async () => {
+  const document = quotationDocumentFixture();
+  document.header.branding.accent = '#f5650b';
+  const html = renderQuotationDocument(document);
+  const pdfBytes = await renderQuotationPdf(html, document);
+  expect(pdfBytes.toString('ascii',0,5)).toBe('%PDF-');
+  const pdf = await PDFDocument.load(pdfBytes);
+  // The premium HTML always has cover, work, specifications, payment/terms
+  // and closing sections; the former fallback had an unrelated page design.
+  expect(pdf.getPageCount()).toBeGreaterThanOrEqual(4);
+  expect(pdf.getTitle()).toContain(document.number);
+  expect(pdf.getAuthor()).toContain(document.header.branding.name);
+  const first=pdf.getPage(0).getSize();
+  expect(first.width).toBeGreaterThan(594);
+  expect(first.height).toBeGreaterThan(841);
 });
