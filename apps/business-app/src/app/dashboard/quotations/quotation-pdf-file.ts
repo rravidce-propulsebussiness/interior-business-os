@@ -28,6 +28,11 @@ export async function fetchQuotationPdfFile(
         'Could not prepare the PDF (HTTP ' + response.status + ').',
     );
   }
+  // Do not forward a legacy fallback PDF to WhatsApp. This header is emitted
+  // only by the single premium-HTML browser print route.
+  if (response.headers.get('X-Quotation-PDF-Template') !== 'premium-html-v1') {
+    throw new Error('The website is serving an older PDF renderer. Deploy the latest Business OS build before sharing this quotation.');
+  }
   const blob = await response.blob();
   // Content type may be generic behind a hosting proxy. The magic header is
   // definitive; reject HTML login/503 responses even if the status is 200.
