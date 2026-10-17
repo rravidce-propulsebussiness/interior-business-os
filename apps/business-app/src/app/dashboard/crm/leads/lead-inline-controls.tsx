@@ -52,7 +52,7 @@ export function LeadStageSelect({
   };
   if (!canManage || lead.lifecycle === 'archived') return <div className="crm-inline-field">
     <span>{lead.stageName}</span>
-    <LeadProjectAction leadId={lead.id} version={lead.version}
+    <LeadProjectAction key={lead.id} leadId={lead.id} version={lead.version}
         leadName={lead.name} lifecycle={lead.lifecycle}
         convertedProjectId={lead.convertedProjectId}
         quotationProjectId={lead.quotationProjectId}
@@ -108,7 +108,7 @@ export function LeadStageSelect({
           </div>
         </div>
       )}
-      <LeadProjectAction leadId={lead.id} version={lead.version}
+      <LeadProjectAction key={lead.id} leadId={lead.id} version={lead.version}
         leadName={lead.name} lifecycle={lead.lifecycle}
         convertedProjectId={lead.convertedProjectId}
         quotationProjectId={lead.quotationProjectId}
