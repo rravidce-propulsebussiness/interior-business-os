@@ -20,7 +20,9 @@ export function workCompletionByProject(
   projectIds: string[],
   tasks: ProjectWorkTask[] | null,
 ): Map<string, number | null> {
-  const result = new Map(projectIds.map((id) => [id, null] as const));
+  const result = new Map<string, number | null>(
+    projectIds.map((id) => [id, null] as const),
+  );
   if (!tasks) return result;
   const totals = new Map<string, { sum: number; weight: number }>();
   for (const task of tasks) {
