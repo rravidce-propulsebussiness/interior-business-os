@@ -100,7 +100,7 @@ declare l public.leads;c public.customers;p public.projects;org uuid=p_organizat
  -- Reuse a uniquely matched ACTIVE customer by BOTH name and contact.
  -- Never guess when a phone is shared or customer identities are ambiguous.
  if customer is null then
-  select count(*),min(c2.id) into matched_count,matched_id
+  select count(*),(array_agg(c2.id))[1] into matched_count,matched_id
     from public.customers c2
    where c2.organization_id=org and c2.status='active'
      and c2.is_sales_prospect=false
