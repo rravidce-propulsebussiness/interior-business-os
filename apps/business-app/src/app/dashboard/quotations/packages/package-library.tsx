@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
+import type { ConstructionRate } from '@business-os/database/construction-rates';
+import { ConstructionRatesManager } from '../../pricing/construction/rates-manager';
 import type { ConstructionPackage } from '@business-os/database/construction-packages';
 import type { QuotationPackage } from '@business-os/database/quotation-packages';
 import { PremiumPackageEditor } from '../../pricing/construction/premium-package-editor';
@@ -56,9 +58,10 @@ function quoteLink(entry: CatalogItem): string {
 }
 
 export function PackageLibrary({
-  construction, other, industries, canManage, currency,
+  construction, rates, other, industries, canManage, currency,
 }: {
   construction: ConstructionPackage[];
+  rates: ConstructionRate[];
   other: QuotationPackage[] | null;
   industries: Industry[];
   canManage: boolean;
@@ -212,6 +215,16 @@ export function PackageLibrary({
         </button>
       </div>}
 
+      {tab === 'construction' && <details className="qpl-brand-pricing">
+        <summary>⚙ Custom Quote · Manage Brand &amp; Unit Prices
+          <span>{rates.filter(rate => rate.status === 'active').length} active options</span>
+        </summary>
+        <p className="qpl-brand-explainer">Set every steel, cement, brick and other brand price by kg, bag, brick or your chosen unit.
+          Enter how many units are used per SFT. Your customer can then select a brand for each material
+          and the Custom Quote automatically totals the selected unit costs.</p>
+        <ConstructionRatesManager rates={rates} canManage={canManage}/>
+      </details>}
+
       <section className="qpl-cards" role="tabpanel"
         aria-label={tab === 'construction' ? 'Construction package cards' : 'Interior package cards'}>
         {visible.slice(0, 3).map((entry,index) => renderCard(entry,index))}
@@ -340,18 +353,19 @@ export function PackageLibrary({
       <div className="qpl-custom-heading"><span aria-hidden="true">⚙</span>
         <div><h3>Custom Quote</h3><p>Tailored to every client</p></div>
       </div>
-      <p>Create a fully customized quote with your own specifications,
-        material brands, quantities and pricing.</p>
+      <p>Build a calculated Custom Quote: choose brands for steel, cement,
+        bricks and other materials. The final per-SFT rate is calculated from
+        each brand's price per unit and quantity consumed per SFT.</p>
       <ul>
-        {['Add or modify BOQ items','Choose your own brands',
-          'Set custom pricing','Use editable item descriptions',
-          'Generate a branded customer PDF'].map((line)=>
+        {['One brand per material category', 'Calculated cost per SFT',
+          'Automatic total for construction area', 'Editable customer selections',
+          'Generate the same premium quotation PDF'].map((line)=>
             <li key={line}><span aria-hidden="true">✓</span>{line}</li>)}
       </ul>
       <Link className="qpl-custom-cta" href="/dashboard/quotations/new?mode=custom">
         Create Custom Quote <span aria-hidden="true">→</span>
       </Link>
-      <small>Uses the existing quotation editor. No package is required.</small>
+      <small>Calculated using the material and brand rates saved above.</small>
     </article>;
   }
 }
