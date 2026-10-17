@@ -9,6 +9,8 @@ export type InvoiceCustomer = {
   address: string;
   stateCode: string;
   fromApprovedQuotation: boolean;
+  wonLeadId: string | null;
+  leadNumber: string | null;
 };
 export type CustomerRow = {
   id: string;
@@ -18,6 +20,8 @@ export type CustomerRow = {
   email: string | null;
   tax_identifier: string | null;
   billing_address: unknown;
+  won_lead_id?: string | null;
+  won_lead_number?: string | null;
 };
 
 function cleanAddress(value: unknown): { text: string; state: string } {
@@ -53,12 +57,15 @@ export function invoiceCustomerChoices(
       address: address.text,
       stateCode: /^[0-9]{2}$/.test(state) ? state : defaultStateCode,
       fromApprovedQuotation: false,
+      wonLeadId: row.won_lead_id ?? null,
+      leadNumber: row.won_lead_number ?? null,
     });
   }
   // A won lead's quotation can reference a provisional CRM customer which has
   // not yet appeared in the converted Clients directory.
   for (const stage of stages) {
-    if (clients.has(stage.customerId)) continue;
+    if (clients.has(stage.customerId) ||
+        [...clients.values()].some(client=>client.wonLeadId===stage.leadId)) continue;
     clients.set(stage.customerId, {
       id: stage.customerId,
       name: stage.clientName,
@@ -68,6 +75,8 @@ export function invoiceCustomerChoices(
       address: stage.clientAddress,
       stateCode: stage.clientState,
       fromApprovedQuotation: true,
+      wonLeadId: null,
+      leadNumber: null,
     });
   }
   return [...clients.values()].sort((a,b) => a.name.localeCompare(b.name));
