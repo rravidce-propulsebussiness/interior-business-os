@@ -5,7 +5,7 @@ import { OriginLeads } from '../../commercial/origin-leads';
 import { commercialServices } from '../../commercial/service';
 import { MasterForm } from '../../commercial/master-form';
 import { OwnerIcon, OwnerShell } from '../../owner-shell';
-import { projectWorkspaceNavigation } from '../../projects/project-workspace-navigation';
+import { ownerWorkspaceNavigation } from '../../owner-workspace-navigation';
 import { CustomerReference } from './reference';
 import { ClientAccess } from './client-access';
 import { leadServiceFromIndustryKey } from '../../crm/leads/lead-service-options';
