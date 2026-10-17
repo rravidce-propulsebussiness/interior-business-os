@@ -1,0 +1,36 @@
+name: Temporary Website UI formatter
+on:
+  push:
+    branches:
+      - feature/premium-website-dashboard-orange
+permissions:
+  contents: write
+jobs:
+  format:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/premium-website-dashboard-orange
+          persist-credentials: true
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Format the approved website UI files
+        run: |
+          pnpm exec prettier --write \
+            apps/business-app/src/app/dashboard/website/page.tsx \
+            apps/business-app/src/app/dashboard/website/website-create.tsx \
+            apps/business-app/src/app/dashboard/website/website-home.tsx \
+            apps/business-app/src/app/dashboard/website/website-home.css
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/business-app/src/app/dashboard/website
+          if ! git diff --cached --quiet; then
+            git commit -m "Format premium Website dashboard with repository Prettier rules"
+            git push origin HEAD:feature/premium-website-dashboard-orange
+          fi
