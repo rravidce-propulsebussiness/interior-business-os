@@ -31,6 +31,8 @@ describe('premium Team & Access replaces legacy page without duplicating HR',()=
   expect(ui).toContain('name="branchId"');
   expect(ui).toContain('name="roleIds"');
   expect(ui).toContain('name="permissions"');
+  expect(ui).toContain('name="roleId" value={editingRole.id}');
+  expect(server).toContain('...(roleId ? { id: roleId } : {})');
  });
  it('has premium responsive member table, invitations, roles and detail views',()=>{
   for(const label of ['Team Members','Active Access','Pending Invites','Company Roles',
