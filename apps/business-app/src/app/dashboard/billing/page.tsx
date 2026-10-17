@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import type { ReactNode } from 'react';
 import { pageServices, activeOrganization } from '@business-os/auth/server';
 import { createGstRepository, type GstDocumentRow } from '@business-os/database/gst';
 import { createGstTemplatesRepository } from '@business-os/database/gst-templates';
@@ -48,7 +49,7 @@ function documentLabel(d:GstDocumentRow) {
 }
 function Icon({name}:{name:'invoice'|'bill'|'gst'|'documents'|'plus'|'arrow'|'calendar'|'bank'|'report'|'check'|'clock'|'search'|'location'|'list'}) {
   const common={fill:'none',stroke:'currentColor',strokeWidth:1.8,strokeLinecap:'round' as const,strokeLinejoin:'round' as const};
-  const shape:Record<typeof name,React.ReactNode>={
+  const shape:Record<typeof name,ReactNode>={
     invoice:<><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z"/><path d="M9 8h6M9 12h6M9 16h4"/></>,
     bill:<><rect x="3" y="5" width="18" height="15" rx="3"/><path d="M3 10h18M7 15h6"/></>,
     gst:<><path d="M12 2 4 5v6c0 5 3.3 8.6 8 11 4.7-2.4 8-6 8-11V5l-8-3Z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></>,
