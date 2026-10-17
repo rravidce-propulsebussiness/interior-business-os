@@ -93,12 +93,14 @@ export default async function BusinessBilling({
   const period:Period=periods.some(p=>p.id===periodParam)?periodParam as Period:'all';
   const q=(qParam??'').trim().slice(0,80);
   const gst=createGstRepository(client);
-  const [profile,allDocs,selectedDocs,standard]=await Promise.all([
+  const [profile,allDocs,filteredDocs,standard]=await Promise.all([
     gst.profile(context.organizationId),
     gst.list(context.organizationId,'all'),
-    kind==='all'?gst.list(context.organizationId,'all'):gst.list(context.organizationId,kind),
+    kind==='all'?Promise.resolve(null):gst.list(context.organizationId,kind),
     createGstTemplatesRepository(client).standard(context.organizationId),
   ]);
+  // The overview already loaded the "all" register: avoid a duplicate RPC.
+  const selectedDocs=filteredDocs??allDocs;
   const grants=new Set(context.grants.filter(g=>g.scope.kind==='organization').map(g=>g.permission));
   const canCreate=grants.has('invoice.create');
   const canManage=grants.has('billing.manage');
