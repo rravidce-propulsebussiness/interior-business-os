@@ -87,6 +87,41 @@ test('Cloudflare REST adapter accepts only PDF bytes from an explicit provider',
   expect(request).toBeDefined();
 });
 
+test('invalid premium HTML fails with an actionable safe PDF error code', async () => {
+  await expect(renderPdf('<img src="https://unknown.example/private-image.png">'))
+    .rejects.toMatchObject({
+      code: 'PDF_PRINT_HTML_INVALID',
+      status: 503,
+    });
+});
+
+test('when Chromium cannot start, a configured browser PDF service prints identical HTML', async () => {
+  vi.stubEnv('PDF_RENDERER', 'node');
+  vi.stubEnv('CF_BROWSER_ACCOUNT_ID', 'c'.repeat(32));
+  vi.stubEnv('CF_BROWSER_API_TOKEN', 'secret-test-token');
+  const html = '<html><head></head><body><h1>Premium quote</h1></body></html>';
+  const nodeRenderer = await import('./pdf.node');
+  const chromium = vi.spyOn(nodeRenderer, 'renderNodePdf')
+    .mockRejectedValueOnce(new Error('PDF_CHROMIUM_UNAVAILABLE'));
+  const doc = await PDFDocument.create();
+  doc.addPage([595, 842]);
+  const sample = await doc.save();
+  const remote = vi.fn(async () => new Response(Uint8Array.from(sample).buffer, {
+    status: 200,
+    headers: { 'content-type': 'application/pdf' },
+  }));
+  vi.stubGlobal('fetch', remote);
+  try {
+    const result = await renderPdf(html, { title: 'Premium quote' });
+    expect(result.toString('ascii', 0, 5)).toBe('%PDF-');
+    expect((await PDFDocument.load(result)).getTitle()).toBe('Premium quote');
+    expect(chromium).toHaveBeenCalledOnce();
+    expect(remote).toHaveBeenCalledOnce();
+  } finally {
+    chromium.mockRestore();
+  }
+});
+
 test('a Cloudflare provider failure fails closed, never returns a text-only PDF', async () => {
   vi.stubEnv('PDF_RENDERER', 'cloudflare-rest');
   vi.stubEnv('CF_BROWSER_ACCOUNT_ID', 'b'.repeat(32));
