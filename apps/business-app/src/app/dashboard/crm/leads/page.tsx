@@ -235,6 +235,7 @@ export default async function Leads({
       updatedAt: optionalText(r.updated_at),
       expectedStartDate: optionalText(r.expected_start_date),
       convertedProjectId: optionalText(r.converted_project_id),
+      quotationProjectId: null,
       convertedCustomerId: optionalText(r.converted_customer_id),
       quoteRevisionId: null,
       quoteStatus: null,
@@ -258,6 +259,21 @@ export default async function Leads({
       p_lead_ids: rows.map((row) => row.id),
     });
     if (!linked.error && Array.isArray(linked.data)) {
+      const quoteIds = linked.data.flatMap((item: unknown) => {
+        if (!item || typeof item !== 'object') return [];
+        const q = item as Record<string,unknown>;
+        return typeof q.quotation_id === 'string' && q.status !== 'cancelled'
+          ? [q.quotation_id] : [];
+      });
+      const projectByQuote = new Map<string,string>();
+      if (quoteIds.length) {
+        const {data: quoteProjects} = await s.client.from('quotations')
+          .select('id,project_id').eq('organization_id',s.org)
+          .in('id',[...new Set(quoteIds)]);
+        for (const quote of quoteProjects ?? []) {
+          if (quote.project_id) projectByQuote.set(quote.id,quote.project_id);
+        }
+      }
       const byId = new Map(rows.map((row) => [row.id, row]));
       for (const item of linked.data) {
         if (!item || typeof item !== 'object') continue;
@@ -267,6 +283,8 @@ export default async function Leads({
         const row = byId.get(quote.lead_id);
         if (!row || row.quoteRevisionId || quote.status === 'cancelled') continue;
         row.quoteRevisionId = quote.revision_id;
+        row.quotationProjectId = typeof quote.quotation_id === 'string'
+          ? projectByQuote.get(quote.quotation_id) ?? null : null;
         row.quoteStatus = typeof quote.status === 'string' ? quote.status : null;
         row.quoteAmount = typeof quote.amount === 'string' ? quote.amount : null;
         row.quoteShared = quote.shared === true;
@@ -497,6 +515,7 @@ export default async function Leads({
         canFollowUp={s.allowed('crm.followup.manage')}
         canVisit={s.allowed('crm.site_visit.manage')}
         canConvert={s.allowed('lead.convert')}
+        canViewProject={s.allowed('project.view','projects')}
         canQuote={s.allowed('quotation.create', 'quotation')}
         canShareQuote={s.allowed('quotation.share', 'quotation')}
         organizationName={organization.name}
