@@ -1,4 +1,5 @@
 import { pageServices } from '@business-os/auth/server';
+import { DomainError } from '@business-os/shared';
 import { ActionForm } from '@business-os/ui/action-form';
 import { salaryLedger } from './salary-service';
 import { payEmployeeSalary, saveEmployeeSalary } from './salary-actions';
@@ -13,9 +14,18 @@ export async function SalaryPanel({
  if(!canView)return <section className="fw-panel"><p>Salary access requires payment permissions.</p></section>;
  const selected=/^\d{4}-(0[1-9]|1[0-2])$/.test(month??'')?month!:currentMonth();
  const {client}=await pageServices();
- const rows=await salaryLedger(client).list(organizationId,selected+'-01').catch(()=>null);
- if(!rows)return <section className="fw-panel"><h2>Salaries</h2>
-   <p>Salary ledger is unavailable. Apply the employee salary migration before recording payments.</p></section>;
+ let rows: Awaited<ReturnType<ReturnType<typeof salaryLedger>['list']>> | null = null;
+ let errorMessage: string | null = null;
+ try { rows = await salaryLedger(client).list(organizationId,selected+'-01'); }
+ catch (error) {
+   const code = error instanceof DomainError ? error.code : 'INTERNAL_ERROR';
+   console.error('[Business OS] salary list failed', {code});
+   errorMessage = code === 'FORBIDDEN'
+     ? 'This company does not have permission to view employee salary records.'
+     : 'Unable to load the salary ledger. Please refresh or contact the administrator.';
+ }
+ if (!rows) return <section className="fw-panel"><h2>Salaries</h2>
+   <p role="alert">{errorMessage}</p></section>;
  const gross=rows.reduce((sum,r)=>sum+Number(r.gross),0);
  const paid=rows.filter(r=>r.status==='paid').reduce((s,r)=>s+Number(r.net),0);
  const pending=rows.filter(r=>r.status==='pending').reduce((s,r)=>s+Number(r.net),0);

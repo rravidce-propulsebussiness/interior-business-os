@@ -10,6 +10,7 @@ import { invoiceStageChoices } from '../stage-choices';
 import { invoiceCustomerChoices } from '../customer-choices';
 import { OwnerShell, type OwnerNavItem } from '../../owner-shell';
 import '../../owner-dashboard.css';
+import '../../command-centre.css';
 
 export const dynamic = 'force-dynamic';
 
@@ -87,14 +88,14 @@ export default async function PrepareDocument({
     ...(hasGrant('quotation.view')?[{label:'Quotations',href:'/dashboard/quotations',icon:'quotations' as const}]:[]),
     ...(hasGrant('project.view')?[{label:'Projects',href:'/dashboard/projects',icon:'projects' as const}]:[]),
     {label:'Finance',href:'/dashboard/finance',icon:'billing'},
-    ...(hasGrant('payment.view')?[{label:'Finance',href:'/dashboard/finance',icon:'expenses' as const}]:[]),
     {label:'Settings',href:'/dashboard/settings',icon:'settings'},
   ];
   return <OwnerShell companyName={company.data?.name??profile?.legalName??'Business OS'}
     accountLabel={(account.email??'Account').split('@')[0]??'Account'}
     accountEmail={account.email??''} planLabel="Business workspace"
     navigation={navigation} search="" currentHref="/dashboard/finance"
-    notificationsEnabled={hasGrant('notification.view')}>
+    notificationsEnabled={hasGrant('notification.view')} dashboardBrand>
+    <div className="finance-document-workspace">
     {params.error && <div role="alert" style={{
       background:'#fff1f2',border:'1px solid #fecdd3',padding:14,
       margin:'15px 24px',borderRadius:12,color:'#9f1239',fontSize:13,
@@ -116,5 +117,6 @@ export default async function PrepareDocument({
       existingCustomerId={existingCustomerId}
       existingWonLeadId={existingWonLeadId}
       initialLead={params.lead??''}/>}
+    </div>
   </OwnerShell>;
 }

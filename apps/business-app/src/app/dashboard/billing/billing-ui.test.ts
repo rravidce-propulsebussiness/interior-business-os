@@ -33,4 +33,16 @@ describe('Finance navigation and single-source billing',()=>{
   expect(css).toContain('fe5105');
   expect(css).toContain('@media(max-width:760px)');
  });
+
+ it('uses one set of Finance tabs without repeating them in the sidebar or Quick Actions',()=>{
+  expect(finance).toContain("<GstInline");
+  expect(finance).not.toContain("Open GST workpapers");
+  expect(finance).not.toContain("Quick Actions");
+  expect(finance).not.toContain("children: [\n      ...tabs.map");
+ });
+ it('sends create links through full-document navigation on Hostinger',()=>{
+  expect(finance).toContain('<a className="fw-primary" href={headlineAction.href}>');
+  expect(finance).toContain('<a href="/dashboard/billing/new?kind=purchase_bill">');
+  expect(finance).toContain("/dashboard/billing/new?kind=sales_invoice");
+ });
 });

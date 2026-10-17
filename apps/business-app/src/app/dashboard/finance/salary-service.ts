@@ -12,7 +12,7 @@ export function salaryLedger(client:Awaited<ReturnType<typeof createServerDataba
   (name:string,args:Record<string,unknown>)=>Promise<{data:unknown;error:{code?:string}|null}>;
  async function invoke<T>(name:string,args:Record<string,unknown>):Promise<T> {
    const {data,error}=await rpc(name,args);
-   if(error)throw new DomainError(error.code==='42501'?'FORBIDDEN':
+   if(error)throw new DomainError(error.code==='42501'||error.code==='PGRST301'?'FORBIDDEN':
      ['23505','40001'].includes(error.code??'')?'CONFLICT':
      ['22023','22P02','23514'].includes(error.code??'')?'VALIDATION_FAILED':'INTERNAL_ERROR');
    return data as T;

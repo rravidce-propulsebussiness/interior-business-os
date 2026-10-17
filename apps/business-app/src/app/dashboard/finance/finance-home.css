@@ -31,13 +31,33 @@
 .fw-order-list{display:grid;gap:0}.fw-order{display:flex;align-items:center;justify-content:space-between;gap:14px;border-top:1px solid #f0e9e4;padding:12px 0}.fw-order>span{display:flex;flex-direction:column;gap:5px}.fw-order strong{font-size:12px;color:#27354d}.fw-order small{color:#8290a2;font-size:10px}
 .fw-muted{font-size:12px;color:#79869a;line-height:1.6}
 .fw-feature{display:flex;flex-direction:column;align-items:flex-start;gap:12px;padding:27px}.fw-feature>svg{color:#fe5105}.fw-feature h2{font-size:20px;margin:0}.fw-feature p{font-size:12px;line-height:1.65;max-width:680px;color:#718199;margin:0}.fw-feature small{font-size:11px;color:#8190a2}
-.fw-quick{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:18px}.fw-quick a{display:flex;align-items:center;gap:12px;min-width:0;border:1px solid #f1e4dc;border-radius:13px;background:#fff;padding:13px;box-shadow:0 5px 16px #5b281008;color:#27344e}.fw-quick a:hover{border-color:#ffc6a4}
-.fw-quick a>svg{flex-shrink:0;padding:8px;width:43px;height:43px;background:#fff0e5;border-radius:10px;color:#fa5710}.fw-quick a span{display:flex;flex-direction:column;min-width:0;gap:5px}.fw-quick strong{font-size:11px;font-weight:850}.fw-quick small{font-size:10px;color:#8b95a6;line-height:1.4}
-@media(max-width:1200px){.fw-page{padding:20px 16px 105px}.fw-metric{padding:13px 10px}.fw-metric-icon{flex-basis:37px;width:37px;height:37px}.fw-quick{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:760px){.fw-page{padding:17px 12px 108px}.fw-crumb{display:none}.fw-heading{margin-bottom:16px}.fw-heading h1{font-size:23px}.fw-heading p{font-size:11px;max-width:280px}.fw-heading .fw-primary{font-size:10px;padding:10px}.fw-tabs a{font-size:10px;min-height:46px;gap:4px}.fw-tabs svg{width:14px;height:14px}.fw-metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.fw-metric{min-height:97px}.fw-metric div>span{font-size:10px}.fw-metric strong{font-size:18px}.fw-metric small{font-size:9px}.fw-toolbar{padding:9px}.fw-period{flex:0 0 auto}.fw-period select{max-width:99px;padding:7px;font-size:10px}.fw-period button{display:none}.fw-search input{font-size:10px}.fw-search button{padding:8px;font-size:10px}.fw-table-wrap{display:none}.fw-mobile-rows{display:block}.fw-mobile-row{display:flex;justify-content:space-between;align-items:center;gap:13px;padding:13px 12px;border-top:1px solid #f1e8e2;color:#17233b}.fw-mobile-row>span{display:flex;flex-direction:column;gap:5px;min-width:0}.fw-mobile-row>span:last-child{text-align:right;flex-shrink:0}.fw-mobile-row strong{font-size:12px}.fw-mobile-row small{font-size:10px;color:#8490a1}.fw-panel{padding:14px}.fw-panel-head h2{font-size:14px}.fw-panel-head p{font-size:10px}.fw-panel-head>a{font-size:10px}.fw-feature{padding:19px}.fw-quick{gap:9px}.fw-quick a{padding:11px;gap:8px}.fw-quick a>svg{width:35px;height:35px;padding:7px}.fw-quick strong{font-size:10px}.fw-quick small{font-size:9px}}
+
+
+@media(max-width:1200px){.fw-page{padding:20px 16px 105px}.fw-metric{padding:13px 10px}.fw-metric-icon{flex-basis:37px;width:37px;height:37px}}
+@media(max-width:760px){.fw-page{padding:17px 12px 108px}.fw-crumb{display:none}.fw-heading{margin-bottom:16px}.fw-heading h1{font-size:23px}.fw-heading p{font-size:11px;max-width:280px}.fw-heading .fw-primary{font-size:10px;padding:10px}.fw-tabs a{font-size:10px;min-height:46px;gap:4px}.fw-tabs svg{width:14px;height:14px}.fw-metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.fw-metric{min-height:97px}.fw-metric div>span{font-size:10px}.fw-metric strong{font-size:18px}.fw-metric small{font-size:9px}.fw-toolbar{padding:9px}.fw-period{flex:0 0 auto}.fw-period select{max-width:99px;padding:7px;font-size:10px}.fw-period button{display:none}.fw-search input{font-size:10px}.fw-search button{padding:8px;font-size:10px}.fw-table-wrap{display:none}.fw-mobile-rows{display:block}.fw-mobile-row{display:flex;justify-content:space-between;align-items:center;gap:13px;padding:13px 12px;border-top:1px solid #f1e8e2;color:#17233b}.fw-mobile-row>span{display:flex;flex-direction:column;gap:5px;min-width:0}.fw-mobile-row>span:last-child{text-align:right;flex-shrink:0}.fw-mobile-row strong{font-size:12px}.fw-mobile-row small{font-size:10px;color:#8490a1}.fw-panel{padding:14px}.fw-panel-head h2{font-size:14px}.fw-panel-head p{font-size:10px}.fw-panel-head>a{font-size:10px}.fw-feature{padding:19px}}
 @media(max-width:400px){.fw-heading{flex-wrap:wrap}.fw-heading .fw-primary{margin-top:2px}.fw-metric-icon{flex:0 0 30px;width:30px;height:30px}.fw-metric-icon svg{width:18px;height:18px}.fw-metric strong{font-size:16px}.fw-tabs a{flex-direction:column}.fw-period select{max-width:79px}}
 @media(prefers-reduced-motion:reduce){.fw-primary{transition:none}}
 
 .fw-salary-form{padding:13px;border:1px solid #f5dfd1;border-radius:11px;background:#fffcf9;margin-bottom:13px}.fw-salary-form>summary{font-size:12px;font-weight:800;color:#e85508;cursor:pointer}.fw-salary-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:12px 0}.fw-salary-fields label,.fw-salary-paid label{display:grid;gap:6px;font-size:11px;color:#526078}.fw-salary-fields input,.fw-salary-paid input,.fw-salary-paid select,.fw-period input{width:100%;padding:9px;border:1px solid #ecddd3;border-radius:9px;background:#fff;color:#273650;font:inherit;font-size:12px}.fw-salary-paid summary{font-size:10px;color:#eb5c11;font-weight:800;cursor:pointer}.fw-salary-paid form{min-width:210px;display:grid;gap:10px;margin-top:10px}@media(max-width:600px){.fw-salary-fields{grid-template-columns:1fr}.fw-salary-paid form{min-width:150px}}
 
-.fw-quick-heading{font-size:17px;margin:23px 0 11px;font-weight:850;letter-spacing:-.025em;color:#17213b}
+
+
+/* GST is now an in-place Finance tab; its former second landing page is not
+   needed to view periods, totals or CSV downloads. */
+.fw-gst-panel{padding:19px}
+.fw-gst-period{display:flex;align-items:flex-end;flex-wrap:wrap;gap:12px;margin:0 0 18px}
+.fw-gst-period label{display:grid;gap:6px;min-width:130px;flex:1;font-size:11px;font-weight:750;color:#58677e}
+.fw-gst-period input{height:41px;width:100%;border:1px solid #f1e0d7;border-radius:9px;background:white;color:#25334d;padding:8px;font:inherit}
+.fw-gst-period button{height:41px;padding:0 14px;border:0;border-radius:9px;background:#fe5105;color:white;font-size:11px;font-weight:800;cursor:pointer}
+.fw-gst-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px;margin-bottom:15px}
+.fw-gst-stats>div{display:grid;gap:6px;background:#fffaf6;border:1px solid #f5e3d6;border-radius:11px;padding:15px}
+.fw-gst-stats span{font-size:11px;color:#728097}
+.fw-gst-stats strong{font-size:18px;font-weight:850;color:#1a2842}
+.fw-gst-registers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.fw-gst-registers article{min-width:0;border:1px solid #f1e8e2;border-radius:12px;padding:17px}
+.fw-gst-registers h3{font-size:14px;color:#15233e;margin:0 0 9px}
+.fw-gst-registers p{font-size:11px;color:#768299;margin:0 0 15px}
+.fw-gst-registers a{font-size:11px;margin-right:8px;margin-bottom:7px}
+.fw-gst-secondary{display:inline-flex;border:1px solid #ffcbb0;border-radius:9px;padding:11px 13px;color:#e9550e;font-weight:750}
+.fw-gst-panel .fw-footnote{padding:17px 0 0}
+@media(max-width:760px){.fw-gst-registers{grid-template-columns:1fr}.fw-gst-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.fw-gst-stats strong{font-size:16px}.fw-gst-panel{padding:14px}.fw-gst-period{gap:8px}.fw-gst-period input{font-size:10px}.fw-gst-registers a{font-size:10px}}

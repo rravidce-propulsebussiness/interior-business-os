@@ -1,82 +1,81 @@
-/* The orange dashboard skin is scoped to this page only. Other workspace
-   routes continue using their existing navigation and styles. */
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard)) {
+/* One SG Homes orange workspace style across dashboard, projects, finance and documents. */
+.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace)) {
   --owner-blue: #fe5105;
   --owner-text: #111c34;
   --owner-muted: #66758b;
   --owner-line: #f1e8e2;
   background: #fffaf7;
 }
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard)) .owner-workspace {
+.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace)) .owner-workspace {
   background: radial-gradient(circle at 80% 2%, #fff3eb 0%, transparent 550px), #fffaf7;
 }
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard)) .owner-sidebar {
+.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace)) .owner-sidebar {
   background: #fff;
   border-right: 1px solid #f2e8e2;
   color: #17243e;
   padding: 18px 14px;
 }
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard)) .owner-brand {
+.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace)) .owner-brand {
   color: #13203b !important;
   padding: 2px 8px 24px;
 }
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard)) .owner-brand-icon {
+.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace)) .owner-brand-icon {
   background: linear-gradient(140deg, #ff791c, #ff4e02);
   color: #fff;
   box-shadow: 0 5px 15px #ff700c20;
 }
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard)) .owner-brand strong {
+.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace)) .owner-brand strong {
   font-size: 18px;
 }
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard)) .owner-brand small {
+.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace)) .owner-brand small {
   color: #64748b;
 }
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard)) .owner-nav-item {
+.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace)) .owner-nav-item {
   color: #37455f !important;
   font-size: 13px;
   font-weight: 600;
 }
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard)) .owner-nav-item:hover,
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard)) .owner-nav-group-toggle:hover {
+.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace)) .owner-nav-item:hover,
+.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace)) .owner-nav-group-toggle:hover {
   background: #fff0e6;
   color: #fd520a !important;
 }
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard)) .owner-nav-item.owner-nav-active {
+.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace)) .owner-nav-item.owner-nav-active {
   background: linear-gradient(120deg, #ff6a0b, #ff4600);
   box-shadow: 0 8px 18px #ff691b28;
   color: #fff !important;
 }
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard)) .owner-subnav {
+.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace)) .owner-subnav {
   border-left-color: #ffe0ca;
 }
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard)) .owner-subnav-link {
+.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace)) .owner-subnav-link {
   color: #68758a !important;
 }
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard)) .owner-subnav-link:hover,
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard)) .owner-subnav-active {
+.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace)) .owner-subnav-link:hover,
+.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace)) .owner-subnav-active {
   background: #fff3ea;
   color: #ed530b !important;
 }
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard)) .owner-sidebar-bottom,
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard)) .owner-plan-card {
+.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace)) .owner-sidebar-bottom,
+.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace)) .owner-plan-card {
   display: none;
 }
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard)) .owner-topbar {
+.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace)) .owner-topbar {
   min-height: 70px;
   border-color: #f3eae5;
 }
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard)) .owner-search {
+.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace)) .owner-search {
   background: #fcf8f7;
   border: 1px solid #f1e8e4;
 }
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard)) .owner-profile-avatar {
+.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace)) .owner-profile-avatar {
   background: #47556c;
 }
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard)) .owner-mobile-heading,
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard)) .owner-mobile-heading button {
+.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace)) .owner-mobile-heading,
+.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace)) .owner-mobile-heading button {
   color: #24344f;
 }
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard)) .owner-no-company { color: #111c34; }
+.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace)) .owner-no-company { color: #111c34; }
 
 .owner-layout .command-dashboard {
   padding: 24px 22px 96px;
@@ -357,7 +356,7 @@
 }
 @media(max-width: 740px) {
   .owner-layout .command-dashboard { padding: 17px 12px 105px; }
-  .owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard)) .owner-topbar { min-height: 61px; padding: 8px 12px; }
+  .owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace)) .owner-topbar { min-height: 61px; padding: 8px 12px; }
   .command-welcome { align-items: flex-start; gap: 7px; margin-bottom: 16px; }
   .command-welcome-text { gap: 8px; }
   .command-welcome h1 { font-size: 19px; }
@@ -413,7 +412,7 @@
 
 .owner-command-mobile-brand { display: none; }
 @media(max-width: 740px) {
-  .owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard)) .owner-command-mobile-brand {
+  .owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace)) .owner-command-mobile-brand {
     display: flex; align-items: center; gap: 9px;
     min-width: 0; flex: 1; color: #18223b; font-size: 13px;
   }
@@ -429,5 +428,5 @@
     color: #fff;
     font-size: 16px; font-weight: 850;
   }
-  .owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard)) .owner-search { display: none; }
+  .owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace)) .owner-search { display: none; }
 }

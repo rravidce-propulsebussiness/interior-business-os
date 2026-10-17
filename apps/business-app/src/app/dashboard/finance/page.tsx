@@ -5,6 +5,7 @@ import { createMarketplaceRepository, type MarketplaceOrder } from '@business-os
 import { createLabourDisbursementsRepository, type LabourDisbursement } from '@business-os/database/labour-disbursements';
 import { OwnerShell, type OwnerNavItem, OwnerIcon } from '../owner-shell';
 import { OwnerMobileNav } from '../owner-mobile-nav';
+import { createGstTemplatesRepository, type GstFilingDocument } from '@business-os/database/gst-templates';
 import { SalaryPanel } from './salary-panel';
 import '../owner-dashboard.css';
 import '../command-centre.css';
@@ -47,9 +48,62 @@ function Metric({ title, value, detail, icon }: { title: string; value: string; 
 function Empty({ title, detail }: { title: string; detail: string }) {
   return <div className="fw-empty"><OwnerIcon name="billing" size={24}/><strong>{title}</strong><p>{detail}</p></div>;
 }
+function indianToday() {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone:'Asia/Kolkata', year:'numeric',month:'2-digit',day:'2-digit',
+  }).formatToParts(new Date());
+  const value = (key: string) => parts.find(p => p.type === key)?.value ?? '01';
+  return { today: value('year')+'-'+value('month')+'-'+value('day'),
+    first: value('year')+'-'+value('month')+'-01' };
+}
+function GstInline({from,to,rows,invalid}:{
+  from:string;to:string;
+  rows:{sales:GstFilingDocument[];purchases:GstFilingDocument[]}|null;
+  invalid:boolean;
+}) {
+  const total = (list:GstFilingDocument[], key:'taxable'|'cgst'|'sgst'|'igst'|'total') =>
+    list.reduce((sum,item)=>sum+Number(item[key]),0);
+  const link = (kind:'sales_invoice'|'purchase_bill', format:'summary'|'items') =>
+    '/dashboard/billing/gst-reports/export?'+
+    new URLSearchParams({from,to,kind,format}).toString();
+  const sales=rows?.sales??[];
+  const purchases=rows?.purchases??[];
+  return <section className="fw-panel fw-gst-panel" aria-label="GST reports">
+    <div className="fw-panel-head"><div><h2>GST reports & reconciliation</h2>
+      <p>GST records and export workpapers are here—no second GST page to open.</p></div></div>
+    <form className="fw-gst-period" action="/dashboard/finance" method="get">
+      <input type="hidden" name="tab" value="gst"/>
+      <label>From<input type="date" name="from" defaultValue={from} required/></label>
+      <label>To<input type="date" name="to" defaultValue={to} required/></label>
+      <button type="submit">Apply dates</button>
+    </form>
+    {invalid ? <p role="alert" className="fw-muted">Choose valid dates in order, up to 366 days apart.</p> :
+      rows === null ? <p role="alert" className="fw-muted">GST reports could not be loaded. Please try again later.</p> :
+      <>
+        <div className="fw-gst-stats">
+          <div><span>Issued sales invoices</span><strong>{sales.length}</strong></div>
+          <div><span>Output GST</span><strong>{money(total(sales,'cgst')+total(sales,'sgst')+total(sales,'igst'))}</strong></div>
+          <div><span>Recorded purchases</span><strong>{purchases.length}</strong></div>
+        </div>
+        <div className="fw-gst-registers">
+          <article><h3>Sales GST register</h3>
+            <p>Taxable sales: <strong>{money(total(sales,'taxable'))}</strong></p>
+            <a className="fw-primary" href={link('sales_invoice','summary')}>Download sales CSV</a>
+            <a className="fw-gst-secondary" href={link('sales_invoice','items')}>HSN/SAC details</a>
+          </article>
+          <article><h3>Purchase reconciliation</h3>
+            <p>Recorded purchases: <strong>{money(total(purchases,'total'))}</strong></p>
+            <a className="fw-primary" href={link('purchase_bill','summary')}>Download purchase CSV</a>
+            <a className="fw-gst-secondary" href={link('purchase_bill','items')}>Purchase items</a>
+          </article>
+        </div>
+      </>}
+    <p className="fw-footnote">These are accountant workpapers, not GSTN filing or GSTR-2B verification. Confirm eligibility before claiming input tax credit.</p>
+  </section>;
+}
 export default async function Finance({
   searchParams,
-}: { searchParams: Promise<{ tab?: string; period?: string; q?: string; month?: string }> }) {
+}: { searchParams: Promise<{ tab?: string; period?: string; q?: string; month?: string; from?: string; to?: string }> }) {
   const { authorization, repository, client, user } = await pageServices();
   const ctx = await activeOrganization();
   if (!ctx) return <main className="fw-empty"><h1>Select a company to open Finance.</h1><Link href="/dashboard">Dashboard</Link></main>;
@@ -64,7 +118,6 @@ export default async function Finance({
   const canCreate = grants.has('invoice.create');
   const canPayments = grants.has('payment.view');
   const canMarketplace = grants.has('purchase.view');
-  const canManageBilling = grants.has('billing.manage');
   const orgId = ctx.organizationId;
   const gst = createGstRepository(client);
   const [all, marketplace, labour] = await Promise.all([
@@ -92,11 +145,23 @@ export default async function Finance({
   const acceptedOrders = marketplace.filter((order) =>
     order.status === 'accepted' && (!q || [order.productName, order.sellerName].join(' ').toLowerCase().includes(q)));
   const paidLabour = labour.filter((row) => row.status === 'paid');
+  const india = indianToday();
+  const gstFrom = params.from ?? india.first;
+  const gstTo = params.to ?? india.today;
+  const validIso = (value:string) => /^\d{4}-\d{2}-\d{2}$/.test(value) &&
+    !Number.isNaN(Date.parse(value)) &&
+    new Date(value).toISOString().slice(0,10) === value;
+  const gstInvalid = !validIso(gstFrom) || !validIso(gstTo) ||
+    gstFrom > gstTo || Date.parse(gstTo)-Date.parse(gstFrom)>366*86400000;
+  const gstReports = tab === 'gst' && !gstInvalid
+    ? await Promise.all([
+      createGstTemplatesRepository(client).filingRows(orgId,gstFrom,gstTo,'sales_invoice'),
+      createGstTemplatesRepository(client).filingRows(orgId,gstFrom,gstTo,'purchase_bill'),
+    ]).then(([sales,purchases])=>({sales,purchases})).catch(()=>null)
+    : null;
   const nav: OwnerNavItem[] = [
     { label: 'Dashboard', href: '/dashboard', icon: 'dashboard' },
-    { label: 'Finance', href: '/dashboard/finance', icon: 'billing', children: [
-      ...tabs.map((t) => ({ label: t.label, href: tabUrl(t.id, 'all') })),
-    ] },
+    { label: 'Finance', href: '/dashboard/finance', icon: 'billing' },
     { label: 'Projects', href: '/dashboard/projects', icon: 'projects' },
     { label: 'Settings', href: '/dashboard/settings', icon: 'settings' },
     { label: 'Billing & Plans', href: '/dashboard/billing', icon: 'billing' },
@@ -120,7 +185,7 @@ export default async function Finance({
     <main className="fw-page" id="main-content" tabIndex={-1}>
       <div className="fw-crumb"><Link href="/dashboard">Dashboard</Link><span>/</span><strong>Finance</strong></div>
       <header className="fw-heading"><div><h1>Finance</h1><p>Manage invoices, expenses, GST and salaries. Keep your business finances organized.</p></div>
-        {headlineAction && canCreate && <Link className="fw-primary" href={headlineAction.href}>＋ {headlineAction.label}</Link>}
+        {headlineAction && canCreate && <a className="fw-primary" href={headlineAction.href}>＋ {headlineAction.label}</a>}
       </header>
       <nav className="fw-tabs" aria-label="Finance sections">{tabs.map((t) =>
         <Link href={tabUrl(t.id, period)} key={t.id} aria-current={tab === t.id ? 'page' : undefined}
@@ -163,7 +228,7 @@ export default async function Finance({
           <Metric title="Bills" value={String(bills.length)} detail="Company purchase documents" icon="expenses"/>
         </div>
         <div className="fw-panel"><div className="fw-panel-head"><div><h2>Expenses & supplier bills</h2><p>Marketplace purchases appear automatically. Add outside supplier bills once.</p></div>
-          {canCreate && <Link href="/dashboard/billing/new?kind=purchase_bill">＋ Add outside purchase</Link>}</div>
+          {canCreate && <a href="/dashboard/billing/new?kind=purchase_bill">＋ Add outside purchase</a>}</div>
           <div className="fw-table-wrap"><table><thead><tr><th>Supplier</th><th>Reference</th><th>Date</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead><tbody>
           {expenseRows.map((d) => <tr key={d.id}><td><strong>{d.partyName}</strong></td><td>{d.number ?? 'Draft'}</td><td>{fmtDate(d.date)}</td><td>{money(Number(d.total))}</td>
             <td><span className={'fw-status fw-' + d.status}>{d.status === 'recorded' ? 'Recorded' : 'Draft'}</span></td><td><Link href={'/dashboard/billing/' + d.id}>View →</Link></td></tr>)}
@@ -183,21 +248,10 @@ export default async function Finance({
           <Link href="/dashboard/billing/labour">View labour ledger →</Link></div>
           <p className="fw-muted">Site wages and curing/security-related labour are managed from Projects; this is a read-only finance summary.</p></section>}
       </>}
-      {tab === 'gst' && <section className="fw-panel fw-feature"><OwnerIcon name="reports" size={30}/>
-        <h2>GST reports & reconciliation</h2><p>Prepare GST filing workpapers from issued sales invoices and recorded supplier bills, with CGST, SGST, IGST and HSN/SAC details.</p>
-        <Link className="fw-primary" href="/dashboard/billing/gst-reports">Open GST workpapers →</Link>
-        <small>Exports support accountant review; they do not file tax returns.</small></section>}
+      {tab === 'gst' && <GstInline from={gstFrom} to={gstTo} rows={gstReports} invalid={gstInvalid}/>} 
       {tab === 'salaries' && <SalaryPanel organizationId={orgId}
         canRecord={grants.has('payment.record')} canView={canPayments}
         month={params.month}/>}
-      <h2 className="fw-quick-heading">Quick Actions</h2>
-      <section className="fw-quick" aria-label="Quick actions">
-        {tab !== 'invoices' && canCreate && <Link href="/dashboard/billing/new?kind=sales_invoice"><OwnerIcon name="billing" size={22}/><span><strong>Create invoice</strong><small>Customer invoice</small></span></Link>}
-        {tab !== 'expenses' && canCreate && <Link href="/dashboard/billing/new?kind=purchase_bill"><OwnerIcon name="expenses" size={22}/><span><strong>Record expense</strong><small>Supplier bill</small></span></Link>}
-        {tab !== 'gst' && <Link href={tabUrl('gst', period)}><OwnerIcon name="reports" size={22}/><span><strong>View GST</strong><small>Tax workpapers</small></span></Link>}
-        <Link href="/dashboard/settings?tab=invoice"><OwnerIcon name="settings" size={22}/><span><strong>Invoice settings</strong><small>Company GST identity and templates</small></span></Link>
-        {canManageBilling && <Link href="/dashboard/finance/payment_methods"><OwnerIcon name="expenses" size={22}/><span><strong>Payment methods</strong><small>Collection accounts</small></span></Link>}
-      </section>
       <OwnerMobileNav navigation={bottomNav} currentHref="/dashboard/finance"/>
     </main>
   </OwnerShell>;
