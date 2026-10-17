@@ -12,6 +12,9 @@ const page = file('./new/page.tsx');
 const actions = file('./actions.ts');
 const migrations = file('../../../../../../packages/database/supabase/migrations/20261017000500_stage_invoice_project_activation.sql');
 const customerMigration = file('../../../../../../packages/database/supabase/migrations/20261017000700_gst_existing_customer_link.sql');
+const billingCustomersMigration = file('../../../../../../packages/database/supabase/migrations/20261017000800_invoice_client_options_and_save.sql');
+const leadStage = file('../crm/leads/lead-inline-controls.tsx');
+const conversionPage = file('../crm/leads/[id]/convert/page.tsx');
 
 const sample: GstStageInvoiceOption = {
   leadId:'00000000-0000-4000-8000-000000000001',leadNumber:'L-001',
@@ -64,9 +67,12 @@ describe('lead-linked GST milestone invoicing',()=>{
     expect(screen).toContain('customers.map(row=><option');
     expect(screen).toContain('customerId');
     expect(screen).toContain("eligibleStages.length>0");
-    expect(page).toContain(".from('customers')");
-    expect(page).toContain(".eq('is_sales_prospect',false)");
-    expect(page).toContain("permission: 'customer.view'");
+    expect(page).toContain("gst.invoiceCustomers(context.organizationId)");
+    expect(page).not.toContain("canViewCustomers = canAccess");
+    expect(billingCustomersMigration).toContain("private.finance_require_read(p_org,'invoice.create')");
+    expect(billingCustomersMigration).toContain("c.is_sales_prospect=false");
+    expect(billingCustomersMigration).toContain("REVOKE ALL ON FUNCTION public.gst_invoice_customer_options");
+    expect(billingCustomersMigration).toContain("c.organization_id=p_org");
   });
   it('saves tenant-scoped invoice/customer association without creating another client or project',()=>{
     expect(customerMigration).toContain('private.gst_customer_invoice_links');
@@ -80,6 +86,21 @@ describe('lead-linked GST milestone invoicing',()=>{
     expect(customerMigration).not.toContain('INSERT INTO public.projects');
     expect(actions).toContain('.saveCustomerDocument(');
     expect(actions).toContain("idSchema.parse(customerId)");
+  });
+  it('offers project creation immediately after marking Won and never duplicates quote prospects',()=>{
+    expect(leadStage).toContain("setJustWon(true)");
+    expect(leadStage).toContain("Lead marked Won. Create a project?");
+    expect(leadStage).toContain("Create project for this Won lead");
+    expect(leadStage).toContain("lead.convertedProjectId");
+    expect(leadStage).toContain("canConvert");
+    expect(conversionPage).toContain("Create project for Won lead");
+    expect(conversionPage).toContain("project_id: quoteProject.id");
+    expect(conversionPage).toContain("customer_id: quoteCustomerResponse.data.id");
+    expect(billingCustomersMigration).toContain("crm_activate_won_project_after_convert");
+    expect(billingCustomersMigration).toContain("OLD.converted_at IS NULL");
+    expect(billingCustomersMigration).toContain("p.customer_id=NEW.converted_customer_id");
+    expect(billingCustomersMigration).not.toContain("INSERT INTO public.customers");
+    expect(billingCustomersMigration).not.toContain("INSERT INTO public.projects");
   });
   it('routes linked sales draft through the validated tenant RPC',()=>{
     expect(actions).toContain('idSchema.parse(leadId)');
