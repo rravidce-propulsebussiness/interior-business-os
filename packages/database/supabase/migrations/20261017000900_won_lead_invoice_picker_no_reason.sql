@@ -175,7 +175,7 @@ begin
    select * into s from public.crm_pipeline_stages where organization_id=org and id=(p_input->>'stage_id')::uuid and active;
    if s.id is null then raise exception 'Unavailable stage' using errcode='22023';end if;
    if s.outcome='lost' and not exists(select 1 from public.crm_lost_reasons where organization_id=org and id=(p_input->>'lost_reason_id')::uuid and active) then raise exception 'Lost reason required' using errcode='22023';end if;
-   if s.outcome='won' then perform private.crm_require(org,'lead.win');-- Won status is not gated on a reason; an optional note may still be recorded.end if;
+   if s.outcome='won' then perform private.crm_require(org,'lead.win');end if;
    update public.leads set stage_id=s.id,stage_entered_at=now(),lifecycle=s.outcome,version=version+1,outcome_note=coalesce(p_input->>'note',''),lost_reason_id=case when s.outcome='lost' then (p_input->>'lost_reason_id')::uuid end,lost_at=case when s.outcome='lost' then now() else lost_at end,lost_by=case when s.outcome='lost' then auth.uid() else lost_by end,won_at=case when s.outcome='won' then now() else won_at end,won_by=case when s.outcome='won' then auth.uid() else won_by end where id=l.id;
    perform private.crm_event(org,l.id,case when s.outcome='lost' then 'lost_reason' else 'stage_change' end,'Stage changed to '||s.name,jsonb_build_object('stage_id',s.id,'outcome',s.outcome,'reason_id',p_input->>'lost_reason_id','note',left(coalesce(p_input->>'note',''),1000)));
   end if;
@@ -201,5 +201,4 @@ begin
   perform private.crm_event(org,v.lead_id,'site_visit','Site visit '||status,jsonb_build_object('visit_id',v.id));perform private.crm_audit(org,'site_visit.'||status,'site_visits',v.id);
  end if;
  return target;
-end$function$
-
+end$function$;
