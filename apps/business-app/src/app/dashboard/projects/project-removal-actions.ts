@@ -1,5 +1,6 @@
 'use server';
 import { revalidatePath } from 'next/cache';
+import { canAccess } from '@business-os/auth';
 import { idSchema, safeFailure } from '@business-os/shared';
 import { commercialServices } from '../commercial/service';
 
@@ -12,7 +13,7 @@ export async function permanentlyDeleteProject(
     if (!Number.isInteger(version) || version < 1 || confirmation !== 'DELETE')
       return {ok:false,message:'Type DELETE to confirm permanent deletion.'};
     const s = await commercialServices('project.manage','projects');
-    if (!s.allowed('organization.manage'))
+    if (!canAccess(s.context,{organizationId:s.org,permission:'organization.manage'}))
       return {ok:false,message:'Only a company administrator can permanently delete a project.'};
     const {data,error}=await s.client.rpc('project_permanent_delete',{
       p_org:s.org, p_project:projectId, p_version:version,p_confirm:confirmation,
