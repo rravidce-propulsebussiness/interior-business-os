@@ -139,7 +139,7 @@ describe('lead-linked GST milestone invoicing',()=>{
     expect(leadStage).toContain("selected.outcome === 'won'");
     expect(leadStage).not.toContain('Why was this lead won?');
     expect(leadStage).not.toContain("target.outcome === 'won' && !note.trim()");
-    expect(leadStage).toContain('Lead marked Won. Create a project?');
+    expect(leadStage).toContain('<LeadProjectAction');
     expect(wonLeadMigration).not.toContain('Won reason required');
     expect(wonLeadMigration).toContain('Lost reason required');
     expect(wonLeadMigration).toContain("private.crm_require(org,'lead.win')");
