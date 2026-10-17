@@ -1,6 +1,11 @@
 import { refreshSessionWithRewrite } from '@business-os/database/proxy';
 import { NextResponse, type NextRequest } from 'next/server';
 import {
+  requestErrorName,
+  requestLogCategory,
+  requestLogMethod,
+} from './request-log';
+import {
   WORKSPACE_COOKIE,
   WORKSPACE_HOST_HEADER,
   WORKSPACE_SLUG_HEADER,
@@ -25,6 +30,18 @@ function centralHosts(): string[] {
 }
 
 export async function proxy(request: NextRequest) {
+  // Record a safe request category before checking the session so even
+  // hung or failed dashboard navigations leave evidence on stdout.
+  const category = requestLogCategory(request.nextUrl.pathname);
+  const requestId = crypto.randomUUID();
+  const start = Date.now();
+  if (category)
+    console.log(
+      '[Business OS] http.request.start id=' + requestId +
+      ' category=' + category +
+      ' method=' + requestLogMethod(request.method) +
+      ' pid=' + process.pid,
+    );
   // A visitor must not be allowed to supply internal tenant-scope headers.
   request.headers.delete(WORKSPACE_SLUG_HEADER);
   request.headers.delete(WORKSPACE_HOST_HEADER);
@@ -59,7 +76,18 @@ export async function proxy(request: NextRequest) {
   const rewrite = routing.rewrite
     ? new URL(routing.rewrite + request.nextUrl.search, request.nextUrl.origin)
     : undefined;
-  const response = await refreshSessionWithRewrite(request, rewrite);
+  let response: NextResponse;
+  try {
+    response = await refreshSessionWithRewrite(request, rewrite);
+  } catch (error) {
+    console.error(
+      '[Business OS] http.proxy.error id=' + requestId +
+      ' category=' + (category ?? 'other') +
+      ' name=' + requestErrorName(error) +
+      ' duration_ms=' + (Date.now() - start),
+    );
+    throw error;
+  }
   if (routing.setSlugCookie) {
     response.cookies.set(WORKSPACE_COOKIE, routing.setSlugCookie, {
       path: '/',
@@ -71,6 +99,12 @@ export async function proxy(request: NextRequest) {
       maxAge: 60 * 60 * 24 * 30,
     });
   }
+  if (category)
+    console.log(
+      '[Business OS] http.proxy.complete id=' + requestId +
+      ' category=' + category +
+      ' duration_ms=' + (Date.now() - start),
+    );
   return response;
 }
 
