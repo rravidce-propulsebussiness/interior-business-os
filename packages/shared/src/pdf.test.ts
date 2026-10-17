@@ -22,6 +22,17 @@ test('the Node hosting default selects Chromium without guessing a Workers provi
   );
 });
 
+test('provisioned Cloudflare Browser Rendering produces the same premium HTML PDF on hosts without Chromium', () => {
+  const cloudflare = {
+    CF_BROWSER_ACCOUNT_ID: 'a'.repeat(32),
+    CF_BROWSER_API_TOKEN: 'token',
+  };
+  expect(configuredPdfProvider(cloudflare)).toBe('cloudflare-rest');
+  expect(configuredPdfProvider({ ...cloudflare, PDF_RENDERER: 'node' })).toBe('node');
+  expect(configuredPdfProvider({ ...cloudflare, PDF_RENDERER: 'cloudflare-rest' }))
+    .toBe('cloudflare-rest');
+});
+
 test('Cloudflare backend requires explicit provisioned account and token', async () => {
   vi.stubEnv('PDF_RENDERER', 'cloudflare-rest');
   vi.stubEnv('CF_BROWSER_ACCOUNT_ID', '');
