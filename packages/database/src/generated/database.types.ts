@@ -11292,6 +11292,21 @@ export interface Database {
         Args: { p_org: string; p_input: Json };
         Returns: undefined;
       };
+      gst_stage_invoice_context: {
+        Args: { p_org: string; p_invoice: string };
+        Returns: Json;
+      };
+      gst_stage_invoice_options: { Args: { p_org: string }; Returns: Json };
+      gst_stage_invoice_save: {
+        Args: {
+          p_org: string;
+          p_input: Json;
+          p_lead: string;
+          p_revision: string;
+          p_stage: number;
+        };
+        Returns: string;
+      };
       gst_standard_invoice_format: { Args: { p_org?: string }; Returns: Json };
       gst_standard_invoice_select: {
         Args: { p_template_id: string };
