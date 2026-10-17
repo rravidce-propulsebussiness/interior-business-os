@@ -155,6 +155,14 @@ export function createGstRepository(client: SupabaseClient<Database>) {
       }),
     document: (organizationId: string, id: string) =>
       invoke<GstDocument>('gst_document', { p_org: organizationId, p_id: id }),
+    customerContext: (organizationId: string, invoiceId: string) =>
+      invoke<string | null>('gst_customer_invoice_context', {
+        p_org: organizationId, p_invoice: invoiceId,
+      }),
+    saveCustomerDocument: (organizationId: string, input: GstDocumentInput, customerId: string | null) =>
+      invoke<string>('gst_customer_invoice_save', {
+        p_org: organizationId, p_input: input, p_customer: customerId,
+      }),
     stageOptions: (organizationId: string) =>
       invoke<GstStageInvoiceOption[]>('gst_stage_invoice_options', {
         p_org: organizationId,
