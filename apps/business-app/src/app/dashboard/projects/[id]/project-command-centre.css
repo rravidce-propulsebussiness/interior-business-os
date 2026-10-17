@@ -229,7 +229,9 @@
  .pcc-next-work-items{grid-template-columns:minmax(0,1fr)}
  .pcc-overview-actions{grid-template-columns:repeat(2,minmax(0,1fr))}
  .pcc-workspaces{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;padding:7px}
- .pcc-workspaces>a,.pcc-more-menu>summary{min-height:39px;padding:8px 5px;font-size:10px}
+ .pcc-workspaces>a,.pcc-more-menu>summary{min-height:39px;padding:8px 5px;font-size:10px;
+  min-width:0;white-space:normal;overflow-wrap:anywhere;text-align:center}
+ .pcc-more-menu{min-width:0}
  .pcc-more-menu>summary{width:100%}
  .pcc-more-links{right:0;min-width:min(245px,85vw)}
  .pcc-focused-panel>.pcc-panel{padding:14px}
