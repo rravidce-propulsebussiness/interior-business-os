@@ -54,6 +54,7 @@ export async function GET(
     return new Response(new Uint8Array(bytes), {
       headers: {
         'Content-Type': 'application/pdf',
+        'X-Quotation-PDF-Template': 'premium-html-v1',
         'Content-Disposition': `${new URL(request.url).searchParams.get('view') === '1' ? 'inline' : 'attachment'}; filename="${document.number.replaceAll(/[^A-Za-z0-9-]/g, '_')}-R${document.revision}.pdf"`,
         'Cache-Control': 'private, no-store',
         'X-Content-Type-Options': 'nosniff',
@@ -77,9 +78,11 @@ export async function GET(
     const failure = safeFailure(error);
     return new Response(
       denied ? failure.message :
-        'Quotation PDF unavailable (' + stage + '). Reference ' + requestId.slice(0, 8) + '.',
+        error instanceof PdfServiceError
+          ? 'Premium quotation PDF renderer unavailable. Install Chromium or configure Cloudflare Browser Rendering. Reference ' + requestId.slice(0, 8) + '.'
+          : 'Quotation PDF unavailable (' + stage + '). Reference ' + requestId.slice(0, 8) + '.',
       {
-        status: denied ? 403 : 500,
+        status: denied ? 403 : error instanceof PdfServiceError ? error.status : 500,
         headers: {
           'Cache-Control': 'private, no-store',
           'X-Quotation-PDF-Stage': stage,
