@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { canAccess } from '@business-os/auth';
 import { operationsPermissions } from '@business-os/core/operations';
 import { OwnerIcon, OwnerShell, type OwnerIconName } from '../owner-shell';
-import { projectWorkspaceNavigation } from '../projects/project-workspace-navigation';
+import { ownerWorkspaceNavigation } from '../owner-workspace-navigation';
 import { operationsServices } from './service';
 import '../owner-dashboard.css';
 import './operations-dashboard.css';
