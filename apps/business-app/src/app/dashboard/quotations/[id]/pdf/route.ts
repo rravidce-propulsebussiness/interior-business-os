@@ -76,10 +76,22 @@ export async function GET(
     // Unexpected server PDF failures are 500, with sanitized error text.
     // Never leak quotation details or storage credentials in responses.
     const failure = safeFailure(error);
+    const pdfCode = error instanceof PdfServiceError ? error.code : null;
+    const pdfHelp = pdfCode === 'PDF_CHROMIUM_UNAVAILABLE'
+      ? 'Premium PDF browser missing on the server. Install Chromium and its Linux dependencies or enable Cloudflare Browser Rendering.'
+      : pdfCode === 'PDF_RENDERER_UNAVAILABLE'
+        ? 'Premium PDF service is not configured. Install the browser renderer or configure Cloudflare Browser Rendering.'
+        : pdfCode === 'PDF_PRINT_HTML_INVALID'
+          ? 'Quotation contains unsupported remote media for secure PDF printing. Update the quotation branding images.'
+          : pdfCode === 'PDF_RENDERER_BUSY'
+            ? 'Premium PDF engine is busy. Please retry.'
+            : pdfCode === 'PDF_PRINT_OVERFLOW'
+              ? 'Premium document contains a section that does not fit on the printed page.'
+              : 'Premium PDF generation failed on the server. Check the Hostinger runtime PDF logs.';
     return new Response(
       denied ? failure.message :
-        error instanceof PdfServiceError
-          ? 'Premium quotation PDF renderer unavailable. Install Chromium or configure Cloudflare Browser Rendering. Reference ' + requestId.slice(0, 8) + '.'
+        pdfCode
+          ? pdfHelp + ' Reference ' + requestId.slice(0, 8) + '.'
           : 'Quotation PDF unavailable (' + stage + '). Reference ' + requestId.slice(0, 8) + '.',
       {
         status: denied ? 403 : error instanceof PdfServiceError ? error.status : 500,
@@ -87,6 +99,7 @@ export async function GET(
           'Cache-Control': 'private, no-store',
           'X-Quotation-PDF-Stage': stage,
           'X-Quotation-PDF-Request': requestId,
+          ...(pdfCode ? { 'X-Quotation-PDF-Error': pdfCode } : {}),
           'X-Content-Type-Options': 'nosniff',
         },
       },
