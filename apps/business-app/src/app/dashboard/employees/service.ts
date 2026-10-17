@@ -61,6 +61,10 @@ export function employeeRepository(client: Client) {
       call<ProtectedEmployeeDocument|null>('company_employee_document_get',{
         p_org:org,p_id:id,
       }),
+    createSalary: (org:string,employeeId:string,month:string) =>
+      call<string>('company_employee_salary_create',{
+        p_org:org,p_employee:employeeId,p_month:month,
+      }),
     verifyProof: (org:string,id:string,status:string) =>
       call<void>('company_employee_document_verify',{
         p_org:org,p_id:id,p_status:status,
