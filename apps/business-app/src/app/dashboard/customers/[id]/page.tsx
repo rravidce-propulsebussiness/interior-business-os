@@ -275,7 +275,7 @@ export default async function Customer({
         accountLabel={accountEmail.split('@')[0] || 'Team member'}
         accountEmail={accountEmail}
         planLabel={planLabel}
-        navigation={projectWorkspaceNavigation(has)}
+        navigation={ownerWorkspaceNavigation(s.context)}
         search=""
         notificationsEnabled={has('notification.view')}
         currentHref="/dashboard/customers"
