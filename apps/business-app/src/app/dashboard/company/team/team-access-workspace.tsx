@@ -329,6 +329,7 @@ export function TeamAccessWorkspace({members,branches,roles,permissions,grants,a
      <button type="button" aria-label="Close role creator" onClick={()=>{setRoleEditor(false);setEditingRole(null);}}>×</button></header>
     <ActionPanel key={editingRole?.id??'new'} action={createCustomRole} label={editingRole?'Save role changes':'Save custom role'}>
      <input type="hidden" name="organizationId" value={organizationId}/>
+     {editingRole&&<input type="hidden" name="roleId" value={editingRole.id}/>}
      <div className="team-field-columns">
       <Field label="Role key"><input required name="key" minLength={2} maxLength={64}
        pattern="[a-z][a-z0-9_]*" defaultValue={editingRole?.key??''} placeholder="project_coordinator"/></Field>
