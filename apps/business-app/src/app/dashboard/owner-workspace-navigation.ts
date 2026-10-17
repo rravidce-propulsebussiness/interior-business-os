@@ -55,6 +55,9 @@ export function ownerWorkspaceNavigation(context: TenantAccessContext | null): O
       has('financial_report.view','billing')) items.push({
     label:'Reports',href:'/dashboard/reports',icon:'reports',
   });
+  if (has('team.manage')) items.push({
+    label:'Employees',href:'/dashboard/employees',icon:'team',
+  });
   if (has('team.view') || has('role.view')) items.push({
     label:'Team',href:'/dashboard/company/team',icon:'team',
   });

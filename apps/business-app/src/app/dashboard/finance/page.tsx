@@ -163,6 +163,7 @@ export default async function Finance({
     { label: 'Dashboard', href: '/dashboard', icon: 'dashboard' },
     { label: 'Finance', href: '/dashboard/finance', icon: 'billing' },
     { label: 'Projects', href: '/dashboard/projects', icon: 'projects' },
+    ...(grants.has('team.manage') ? [{ label:'Employees', href:'/dashboard/employees',icon:'team' as const }] : []),
     { label: 'Settings', href: '/dashboard/settings', icon: 'settings' },
     { label: 'Billing & Plans', href: '/dashboard/billing', icon: 'billing' },
   ];
@@ -170,6 +171,7 @@ export default async function Finance({
     { label: 'Dashboard', href: '/dashboard', icon: 'dashboard' as const },
     { label: 'Projects', href: '/dashboard/projects', icon: 'projects' as const },
     { label: 'Finance', href: '/dashboard/finance', icon: 'billing' as const },
+    ...(grants.has('team.manage') ? [{ label:'Employees', href:'/dashboard/employees', icon:'team' as const }] : []),
     { label: 'Team', href: '/dashboard/company/team', icon: 'team' as const },
     { label: 'Settings', href: '/dashboard/settings', icon: 'settings' as const },
   ];

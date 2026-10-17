@@ -153,6 +153,7 @@ export default async function SettingsPage({searchParams}:{
   ...(has('quotation.view','quotation')?[{label:'Quotations',href:'/dashboard/quotations',icon:'quotations' as const}]:[]),
   ...(has('project.view','projects')?[{label:'Projects',href:'/dashboard/projects',icon:'projects' as const}]:[]),
   ...(has('billing.view')?[{label:'Finance',href:'/dashboard/finance',icon:'billing' as const}]:[]),
+  ...(has('team.manage')?[{label:'Employees',href:'/dashboard/employees',icon:'team' as const}]:[]),
   ...((has('team.view')||has('role.view'))?[{label:'Team',href:'/dashboard/company/team',icon:'team' as const}]:[]),
   {label:'Settings',href:'/dashboard/settings',icon:'settings'},
  ];
