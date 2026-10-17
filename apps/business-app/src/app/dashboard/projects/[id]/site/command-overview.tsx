@@ -201,52 +201,6 @@ export function SiteCommandOverview(props: SiteCommandOverviewProps) {
           </div>
         </div>
 
-        <div className="sc-stage-label">
-          <span>Project workflow</span>
-          <strong>
-            {currentStage < 0
-              ? 'Awaiting initialization'
-              : 'Stage ' + (currentStage + 1) + ' of 4'}
-          </strong>
-        </div>
-        <div
-          className="sc-milestones"
-          aria-label="Project workflow stages, not physical completion"
-        >
-          {milestones.map((milestone, index) => (
-            <div
-              className={
-                'sc-milestone' +
-                (index < currentStage
-                  ? ' sc-completed'
-                  : index === currentStage
-                    ? ' sc-current'
-                    : '')
-              }
-              key={milestone.key}
-            >
-              <span className="sc-step-number">
-                {index < currentStage ? (
-                  <OwnerIcon name="check" size={16} />
-                ) : (
-                  index + 1
-                )}
-              </span>
-              <strong>{milestone.name}</strong>
-              <small>
-                {index < currentStage
-                  ? 'Completed'
-                  : index === currentStage
-                    ? 'Current stage'
-                    : 'Upcoming'}
-              </small>
-            </div>
-          ))}
-        </div>
-        <p className="sc-disclaimer">
-          Stages reflect workflow status, not measured physical progress or
-          budget completion.
-        </p>
       </header>
 
       <section className="sc-metrics" aria-label="Project record counts">
@@ -312,44 +266,7 @@ export function SiteCommandOverview(props: SiteCommandOverviewProps) {
         )}
       </section>
 
-      <nav className="sc-tabs" aria-label="Site delivery sections">
-        <a className="sc-tab-current" href="#construction-timeline">
-          <OwnerIcon name="calendar" size={16} /> Timeline
-        </a>
-        <a href="#overview">
-          <OwnerIcon name="dashboard" size={16} /> Overview
-        </a>
-        {reportSection && (
-          <a href="#daily-reports">
-            <OwnerIcon name="quotations" size={16} /> Daily reports
-          </a>
-        )}
-        {materialSection && (
-          <a href="#materials">
-            <OwnerIcon name="purchases" size={16} /> Materials
-          </a>
-        )}
-        {qualitySection && (
-          <a href="#quality">
-            <OwnerIcon name="check" size={16} /> Quality
-          </a>
-        )}
-        {securitySection && (
-          <a href="#security">
-            <OwnerIcon name="calendar" size={16} /> Security &amp; curing
-          </a>
-        )}
-        {canUploadEvidence && (
-          <a href="#media">
-            <OwnerIcon name="projects" size={16} /> Evidence
-          </a>
-        )}
-        {isManager && (
-          <a href="#team">
-            <OwnerIcon name="team" size={16} /> Team
-          </a>
-        )}
-      </nav>
+
     </>
   );
 }

@@ -1,0 +1,7 @@
+/* One shared, thumb-friendly project navigation bar for Overview/Timeline/Site. */
+.pm-tabs{display:flex;align-items:stretch;gap:4px;overflow-x:auto;scrollbar-width:thin;overscroll-behavior-x:contain;scroll-snap-type:x proximity;white-space:nowrap;border-bottom:1px solid #f4e3da;background:#fff;border-radius:14px 14px 0 0;margin:10px 0 19px;padding:0 7px}
+.pm-tabs .pm-tab{flex:0 0 auto;display:flex;align-items:center;justify-content:center;gap:6px;scroll-snap-align:start;min-height:50px;padding:12px 11px;color:#66738a;font-size:11px;font-weight:750;text-decoration:none;border-bottom:3px solid transparent}
+.pm-tabs .pm-tab:hover{color:#ec580e;background:#fff6f0}
+.pm-tabs .pm-tab-selected{color:#fe5105;border-color:#fe5105}
+.pm-tabs .pm-tab-selected svg{color:#fe5105}
+@media(max-width:740px){.pm-tabs{margin:8px -3px 15px;padding:0 3px;border-radius:10px 10px 0 0}.pm-tabs .pm-tab{min-height:46px;padding:10px 11px;font-size:10px;gap:4px}}

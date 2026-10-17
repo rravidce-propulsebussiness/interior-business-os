@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { OwnerIcon } from '../../../owner-shell';
 
 type RecordRow = Record<string, unknown>;
@@ -70,6 +71,11 @@ export function SiteActivity(props: SiteActivityProps) {
   const latest = [...reports].sort((a, b) =>
     field(b, 'report_date').localeCompare(field(a, 'report_date')),
   )[0];
+  const reportPhotos = media.filter(item =>
+    ['site','daily'].includes(field(item,'category')) &&
+    field(item,'mime').startsWith('image/') &&
+    Boolean(field(item,'id')),
+  ).slice(0,3);
   const latestManager = [...updates].sort((a, b) =>
     field(b, 'report_date').localeCompare(field(a, 'report_date')),
   )[0];
@@ -237,6 +243,20 @@ export function SiteActivity(props: SiteActivityProps) {
                     {field(latest, 'worker_count') || '—'} workers reported
                   </span>
                 </div>
+                {reportPhotos.length>0 && (
+                  <div className="sc-report-photos" aria-label="Recent recorded site photographs">
+                    {reportPhotos.map((photo)=>(
+                      <a key={field(photo,'id')}
+                        href={'/dashboard/projects/'+projectId+'/site/media/'+field(photo,'id')}
+                        target="_blank" rel="noopener noreferrer"
+                        aria-label={field(photo,'caption')||'Open site photograph'}>
+                        <Image unoptimized width={200} height={150}
+                          src={'/dashboard/projects/'+projectId+'/site/media/'+field(photo,'id')}
+                          alt={field(photo,'caption')||'Recorded site work'}/>
+                      </a>
+                    ))}
+                  </div>
+                )}
                 <div className="sc-report-split">
                   <div>
                     <strong>Tomorrow&apos;s plan</strong>

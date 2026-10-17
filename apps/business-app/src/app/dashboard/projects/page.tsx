@@ -378,6 +378,22 @@ export default async function Projects({
           </Link>
         </header>
 
+        <nav className="proj-mobile-filters" aria-label="Project status quick filters">
+          <Link href={urlFor({status:'',page:''})} className={!status?'proj-filter-current':''}
+            aria-current={!status?'page':undefined}>
+            All <span>{totalResult.count ?? '—'}</span>
+          </Link>
+          <Link href={urlFor({status:'active',page:''})}
+            className={status==='active'?'proj-filter-current':''}
+            aria-current={status==='active'?'page':undefined}>
+            Active <span>{activeResult.count ?? '—'}</span>
+          </Link>
+          <Link href={urlFor({status:'inactive',page:''})}
+            className={status==='inactive'?'proj-filter-current':''}
+            aria-current={status==='inactive'?'page':undefined}>
+            Inactive <span>{inactiveResult.count ?? '—'}</span>
+          </Link>
+        </nav>
         <section className="proj-stats" aria-label="Project overview">
           <Stat
             icon="projects"
@@ -537,6 +553,9 @@ export default async function Projects({
                           {project.name}
                         </Link>
                       </h3>
+                      <p className="proj-card-kind">
+                        {industry?.name ?? displayName(project.project_type || 'Project')}
+                      </p>
                       <dl className="proj-meta">
                         <div>
                           <dt>
@@ -570,7 +589,7 @@ export default async function Projects({
                       </dl>
                       <div className="proj-progress">
                         <div className="proj-progress-heading">
-                          <span>Overall work completed</span>
+                          <span>Work completed</span>
                           <strong>{percent === null ? 'Not tracked' : percent + '%'}</strong>
                         </div>
                         <div className="proj-work-rail"
@@ -590,7 +609,7 @@ export default async function Projects({
                             : 'Company project'}
                         </span>
                         <span className="proj-open-label">
-                          Open project <OwnerIcon name="arrow" size={16} />
+                          View project <OwnerIcon name="arrow" size={16} />
                         </span>
                         {canRemove && (
                           <ProjectRemovalButton
@@ -612,8 +631,8 @@ export default async function Projects({
               </span>
               <h3>No matching projects</h3>
               <p>
-                Try a different project name or filter. New projects appear
-                here after the approved quotation and first invoice.
+                Try changing the filters. Projects appear here after you
+                create or link them from a Won lead or accepted quotation.
               </p>
               <Link href="/dashboard/projects">Clear filters →</Link>
             </div>
