@@ -32,9 +32,6 @@ const amount = (n: string) => Number(n);
 const qtyValid = (value: string) =>
   /^(0|[1-9][0-9]{0,3})(\.[0-9]{1,4})?$/.test(value) &&
     Number(value) > 0 && Number(value) <= 1000;
-const displayedNumber = (value: number) => value.toLocaleString('en-IN', {
-  minimumFractionDigits:0,maximumFractionDigits:2,
-});
 const groupForCategory = (category: string) =>
   GROUPS.find(group => group.categories.includes(category))?.key ?? 'other';
 
