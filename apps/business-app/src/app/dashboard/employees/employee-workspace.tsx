@@ -240,7 +240,7 @@ export function EmployeeWorkspace({
      </div>
      <div className="emp-mobile-cards">{visible.map((x,i)=><button type="button"
       className={'emp-mobile-card '+(person?.id===x.id?'selected':'')} key={x.id} onClick={()=>choose(x.id)}>
-      <span className={'emp-avatar color-'+i%5}>{initials(x.name)}</span>
+      <span className={'emp-avatar color-'+(i%5)}>{initials(x.name)}</span>
       <span className="emp-mobile-data"><b>{x.name}</b><small>{x.code} · {x.role}</small>
        <small>{x.phone||'No phone'} · {x.workLocation||x.city||'No location'}</small>
        <span className="emp-mobile-tags"><span className={'emp-chip kyc-'+status(x)}>{status(x)}</span>
