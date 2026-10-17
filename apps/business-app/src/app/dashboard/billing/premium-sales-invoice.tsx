@@ -217,7 +217,7 @@ export function PremiumSalesInvoice({
             <div><strong>Won lead · {selectedClient.leadNumber}</strong>
               <p>You can prepare an invoice now. Stage billing requires an accepted quotation and a saved payment plan.</p>
               <Link href={'/dashboard/crm/leads/'+selectedClient.wonLeadId}>
-                View lead · Create or open project →
+                Create project from this lead →
               </Link>
             </div>
           </div>}
