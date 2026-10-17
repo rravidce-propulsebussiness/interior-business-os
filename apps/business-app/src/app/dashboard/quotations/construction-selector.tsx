@@ -50,7 +50,7 @@ function CustomizedQuote({
   const ids = selected.map(r => r.id);
   const calculatedRate = selected.reduce((total, r) => total + Number(r.ratePerSqft), 0);
   const estimatedTotal = Number(area) * calculatedRate;
-  const valid = /^([1-9]\\d{0,5}|0)(\\.\\d{1,2})?$/.test(area) &&
+  const valid = /^([1-9]\d{0,5}|0)(\.\d{1,2})?$/.test(area) &&
     Number(area) > 0 && Number(area) <= 1000000;
   // Show calculations as guidance, but save always re-prices using tenant DB rows.
   const eligible = valid && selected.length > 0 && selected.length <= 20 && calculatedRate > 0;
