@@ -26,6 +26,7 @@ export type WorkspaceData = {
  purchaseOrders:{id:string;number:string;status:string;date:string}[]|null;
  tasks:{id:string;title:string;planned_start:string|null;status:string}[];
  contractValue:number|null;expenditure:number|null;
+ projectRaw:Record<string,unknown>|null;
  agreement:{contractId:string;contractNumber:string;status:string;authorized:boolean}|null;
 };
 export function stringValue(v:unknown):string{return typeof v==='string'||typeof v==='number'?String(v):'';}
@@ -93,7 +94,7 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
  const s=await commercialServices('project.view','projects',true).catch(()=>null);
  if(!s)return assignedProjectWorkspace(id);
  const {data:project,error}=await s.client.from('projects')
- .select('id,name,code,status,project_type,site_address,created_at,customer_id,industry_id')
+ .select('*')
  .eq('organization_id',s.org).eq('id',id)
  .eq('is_sales_prospect',false).eq('removed_from_workspace',false).maybeSingle();
  if(error||!project)notFound();
@@ -180,7 +181,7 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
   site,stages:stageList,links:linkList,milestones,
   transactions:trans,purchaseOrders:po,
   tasks:tasks.map(t=>({id:t.id,title:t.title,planned_start:t.planned_start,status:t.status})),
-  contractValue,
+  contractValue,projectRaw:permissions.manage?project:null,
   agreement:typeof agreement.contract_id==='string'?{
    contractId:agreement.contract_id,contractNumber:stringValue(agreement.contract_number),
    status:stringValue(agreement.contract_status),authorized:agreement.execution_authorized===true,
@@ -264,6 +265,6 @@ async function assignedProjectWorkspace(id:string):Promise<WorkspaceData>{
   site,stages,links:[],milestones:[],transactions:null,purchaseOrders:null,tasks:(tasks??[]).map(t=>({
    id:t.id,title:t.title,planned_start:t.planned_start,status:t.status,
   })),
-  contractValue:null,expenditure:null,agreement:null,
+  contractValue:null,expenditure:null,agreement:null,projectRaw:null,
  };
 }
