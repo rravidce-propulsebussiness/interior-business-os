@@ -6,6 +6,53 @@ const file = (name: string) => readFileSync(
   fileURLToPath(new URL(name, import.meta.url)), 'utf8',
 );
 
+describe('lead quotation preview and secure WhatsApp PDF sharing', () => {
+  const preview = file('../crm/leads/lead-quote-preview.tsx');
+  const workspace = file('../crm/leads/workspace.tsx');
+  const leadsPage = file('../crm/leads/page.tsx');
+  const styles = file('../crm/leads/leads-premium.css');
+  const share = file('./sharing-actions.ts');
+
+  it('fetches authenticated HTML instead of embedding the blocked preview route as iframe URL', () => {
+    expect(preview).toContain("fetch(base + '/preview'");
+    expect(preview).toContain("credentials: 'same-origin'");
+    expect(preview).toContain("cache: 'no-store'");
+    expect(preview).toContain('iframe srcDoc={html} sandbox=""');
+    expect(preview).not.toContain("iframe src={base+'/preview'}");
+    expect(preview).toContain('Preview unavailable');
+    expect(preview).toContain('Try again');
+    expect(preview).toContain("base + '/preview'");
+    expect(preview).toContain("base + '/pdf?view=1'");
+  });
+
+  it('protects draft issuance and hands WhatsApp a revocable customer PDF link', () => {
+    expect(preview).toContain("createWhatsAppPdfShare(revisionId)");
+    expect(preview).toContain("status === 'draft' && !window.confirm(");
+    expect(preview).toContain("'/q/' + result.token + '/pdf'");
+    expect(preview).toContain('https://wa.me/');
+    expect(preview).toContain('https://api.whatsapp.com/send?text=');
+    expect(preview).toContain('window.location.assign(url)');
+    expect(preview).toContain('setShareError(');
+    expect(share).toContain('quotation_share_manage');
+    expect(share).toContain("p_action: 'create'");
+    expect(share).toContain('pdf_enabled: true');
+    expect(share).toContain('hasSavedStagePaymentPlan(revision.terms)');
+    expect(share).toContain("s.allowed('quotation.issue', 'quotation')");
+    expect(share).toContain("commercialServices('quotation.share', 'quotation')");
+  });
+
+  it('shows the share action only to permitted users on desktop and mobile', () => {
+    expect(leadsPage).toContain("canShareQuote={s.allowed('quotation.share', 'quotation')}");
+    expect(workspace).toContain('canShareQuote: boolean;');
+    expect(workspace.match(/canShare=\{canShareQuote\}/g)?.length).toBe(2);
+    expect(preview).toContain('canShare &&');
+    expect(styles).toContain('.crm-quote-whatsapp');
+    expect(styles).toContain('grid-template-columns:repeat(2,minmax(0,1fr))');
+    expect(styles).toContain('grid-column:1/-1');
+    expect(styles).toContain('.crm-quote-dialog[open]');
+  });
+});
+
 describe('minimal quotation studio navigation', () => {
   const studio = file('./studio-editor.tsx');
   const sft = file('./premium-sft-builder.tsx');
