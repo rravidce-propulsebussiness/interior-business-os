@@ -30,8 +30,6 @@ export function WebsiteCreate({
 
   useEffect(() => {
     if (!open) return;
-    setTemplate(initialTemplate);
-    setMessage('');
     nameRef.current?.focus();
     const onEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onClose();
@@ -43,7 +41,7 @@ export function WebsiteCreate({
       document.body.style.overflow = scroll;
       document.removeEventListener('keydown', onEscape);
     };
-  }, [open, initialTemplate, onClose]);
+  }, [open, onClose]);
 
   if (!open) return null;
 
