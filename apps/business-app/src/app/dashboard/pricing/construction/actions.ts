@@ -14,7 +14,11 @@ const schema = z
     category: z.string().trim().min(2).max(50),
     name: z.string().trim().min(2).max(120),
     specification: z.string().trim().max(250),
-    ratePerSqft: z.string().regex(/^(0|[1-9]\d{0,5})(\.\d{1,2})?$/),
+    unitPrice: z.string().regex(/^(0|[1-9]\d{0,6})(\.\d{1,2})?$/),
+    consumptionPerSqft: z.string().regex(/^(0|[1-9]\d{0,3})(\.\d{1,4})?$/)
+      .refine(value => Number(value) > 0),
+    priceUnit: z.enum(['sqft','kg','tonne','bag','piece','brick','cft',
+      'litre','meter','running_ft','bathroom','door','point','lumpsum']),
     status: z.enum(['active', 'inactive']),
   })
   .strict();
@@ -43,12 +47,17 @@ export async function saveConstructionRate(
       category: String(form.get('category') ?? ''),
       name: String(form.get('name') ?? ''),
       specification: String(form.get('specification') ?? ''),
-      ratePerSqft: String(form.get('ratePerSqft') ?? ''),
+      unitPrice: String(form.get('unitPrice') ?? ''),
+      consumptionPerSqft: String(form.get('consumptionPerSqft') ?? ''),
+      priceUnit: String(form.get('priceUnit') ?? 'sqft'),
       status: form.get('status') === 'inactive' ? 'inactive' : 'active',
     });
+    const effectiveRate = Number(validated.unitPrice) * Number(validated.consumptionPerSqft);
+    if (!Number.isFinite(effectiveRate) || effectiveRate > 1000000)
+      throw new DomainError('VALIDATION_FAILED');
     await createConstructionRatesRepository(client).save(
       context.organizationId,
-      validated,
+      { ...validated, ratePerSqft: effectiveRate.toFixed(2) },
     );
     revalidatePath('/dashboard/pricing/construction');
     revalidatePath('/dashboard/quotations', 'layout');
