@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { OwnerIcon, type OwnerIconName, OwnerShell } from '../owner-shell';
 import { ownerWorkspaceNavigation } from '../owner-workspace-navigation';
 import { canAccess } from '@business-os/auth';
+import { MasterForm } from '../commercial/master-form';
 import { activeOrganization } from '@business-os/auth/server';
 import { projectWorkspace,formatMoney,pretty,shortDate,stringValue,
  type WorkspaceData,type SiteRow } from './project-v2-data';
@@ -77,7 +78,10 @@ function ProjectHeader({data,active}:{data:WorkspaceData;active:ProjectPageSlug}
    </div></div><Status value={p.status}/>
   </div>
   <div className="pv2-project-header-actions">
-   <Link href={cur(p.id,'overview')} className="pv2-button pv2-outline">Project overview</Link>
+   {data.permissions.manage&&data.projectRaw&&<Link href={cur(p.id,'overview')+'#project-settings'}
+    className="pv2-button pv2-outline">✎ Edit Project</Link>}
+   {p.customerId&&<Link href={'/dashboard/customers/'+p.customerId+'#client-portal-access'}
+    className="pv2-button pv2-outline">Share with client</Link>}
    <Link href="/dashboard/projects" className="pv2-button pv2-outline">All projects</Link>
   </div>
   <LinkTabs data={data} active={active}/>
@@ -145,6 +149,21 @@ function Overview({d}:{d:WorkspaceData}){
      <OwnerIcon name={a.icon} size={18}/>{a.label}<span>↗</span></Link>)}
    </div>
   </section>
+  {d.permissions.manage&&d.projectRaw&&<details className="pv2-panel pv2-project-settings" id="project-settings">
+   <summary>Edit Project Details</summary>
+   <MasterForm entity="projects" title="Save project" initial={d.projectRaw}
+    fields={[
+     {key:'name',label:'Project name',required:true},
+     {key:'code',label:'Project code',required:true},
+     {key:'site_address.line1',label:'Site address'},
+     {key:'site_address.city',label:'City'},
+     {key:'site_address.region',label:'State'},
+     {key:'notes',label:'Internal project notes',type:'textarea' as const},
+     {key:'status',label:'Project status',options:[
+      {value:'active',label:'Active'},{value:'inactive',label:'Inactive'},
+     ]},
+    ]}/>
+  </details>}
  </div>;
 }
 type Activity={id:string;date:string;title:string;kind:string;description:string;media?:SiteRow};
