@@ -6,7 +6,7 @@ import { activeOrganization, serverServices } from '@business-os/auth/server';
 import { DomainError, idSchema, safeFailure } from '@business-os/shared';
 import { employeeRepository } from './service';
 import { employeeProofKey, uploadEmployeeProof, removeEmployeeProof, MAX_PROOF_BYTES, PROOF_MIME } from './proof-storage';
-import { salaryLedger } from '../finance/salary-service';
+
 
 export type EmployeeActionResult = { ok:boolean; message:string; id?:string };
 
