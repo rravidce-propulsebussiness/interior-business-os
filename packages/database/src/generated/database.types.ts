@@ -11793,6 +11793,10 @@ export interface Database {
         };
         Returns: boolean;
       };
+      project_quote_timeline_create: {
+        Args: { p_org: string; p_contract: string; p_input: Json };
+        Returns: Json;
+      };
       project_remove_from_workspace: {
         Args: {
           p_org: string;
@@ -11801,10 +11805,6 @@ export interface Database {
           p_confirm: string;
         };
         Returns: string;
-      };
-      project_quote_timeline_create: {
-        Args: { p_org: string; p_contract: string; p_input: Json };
-        Returns: Json;
       };
       project_site_command: {
         Args: {
