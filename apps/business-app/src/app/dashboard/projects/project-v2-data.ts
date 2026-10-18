@@ -30,7 +30,7 @@ export type WorkspaceData = {
  contractValue:number|null;expenditure:number|null;
  projectRaw:Record<string,unknown>|null;
  agreement:{contractId:string;contractNumber:string;status:string;authorized:boolean;revisionId:string|null;clearanceType:string|null}|null;
- preflight:{inspectionDone:boolean;measurementsDone:boolean;inspectionDetails:string;measurementDetails:string}|null;
+ preflight:{inspectionDone:boolean;measurementsDone:boolean;inspectionDetails:string;measurementDetails:string;signedReady:boolean}|null;
  advance:{invoiceId:string|null;invoiceNumber:string|null;invoiceStatus:string|null;invoiceTotal:number;percent:number|null;received:number;scheduleActive:boolean}|null;
 };
 export function stringValue(v:unknown):string{return typeof v==='string'||typeof v==='number'?String(v):'';}
@@ -186,6 +186,7 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
   measurementsDone:preflightRaw.measurements_done===true,
   inspectionDetails:stringValue(preflightRaw.inspection_details),
   measurementDetails:stringValue(preflightRaw.measurement_details),
+  signedReady:preflightRaw.signed_ready===true,
  };
  const advance=advanceResult.error?null:{
   invoiceId:typeof advanceRaw.invoice_id==='string'?advanceRaw.invoice_id:null,
