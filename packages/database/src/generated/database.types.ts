@@ -11874,6 +11874,29 @@ export interface Database {
         Args: { p_organization_id: string; p_project_id: string };
         Returns: Json;
       };
+      project_client_request_create: {
+        Args: {
+          p_project_id: string;
+          p_kind: string;
+          p_details: string;
+          p_requested_date?: string;
+        };
+        Returns: string;
+      };
+      project_client_request_list: {
+        Args: { p_project_id: string };
+        Returns: Json;
+      };
+      project_client_request_respond: {
+        Args: {
+          p_org: string;
+          p_project_id: string;
+          p_request_id: string;
+          p_status: string;
+          p_response: string;
+        };
+        Returns: undefined;
+      };
       project_permanent_delete: {
         Args: {
           p_org: string;
