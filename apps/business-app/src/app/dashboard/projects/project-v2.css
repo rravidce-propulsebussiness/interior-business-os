@@ -297,3 +297,46 @@ border:1px solid #d7e0e9;background:#fff}
 .pv2-stage-body{padding:11px}.pv2-stage-detail>summary{padding:10px;gap:7px}
 .pv2-stage-links{gap:8px;flex-direction:column;align-items:flex-start}
 }
+
+
+/* Floor-specific stage plan: one expandable section per stage instead of
+   displaying every checklist permanently in the Project Timeline. */
+.pv2-stages-detail{min-width:0;max-width:100%;overflow-wrap:anywhere}
+.pv2-stages-detail>.pv2-muted{margin-bottom:12px;line-height:1.65}
+.pv2-stage-detail{border:1px solid #e6eaf1;background:#fff;border-radius:10px;
+ margin-bottom:8px;overflow:hidden}
+.pv2-stage-detail>summary{list-style:none;cursor:pointer;display:flex;align-items:center;
+ gap:9px;min-height:58px;padding:10px 9px}
+.pv2-stage-detail>summary::-webkit-details-marker{display:none}
+.pv2-stage-detail[open]>summary{background:#fff5ef}
+.pv2-stage-index{width:28px;height:28px;flex:0 0 28px;display:grid;place-items:center;
+ border-radius:999px;background:#f2f5f9;color:#6e7d96;font-size:10px;font-weight:800}
+.pv2-stage-summary{min-width:0;flex:1;display:grid;gap:6px}
+.pv2-stage-summary strong{font-size:11px;overflow-wrap:anywhere;color:#233751;line-height:1.35}
+.pv2-stage-summary small{font-size:9px;color:#8493a8;overflow-wrap:anywhere}
+.pv2-stage-chevron{font-size:16px;color:#df6b2b}
+.pv2-stage-detail[open] .pv2-stage-chevron{transform:rotate(180deg)}
+.pv2-stage-body{display:grid;gap:10px;padding:12px 11px 15px;border-top:1px solid #edf0f4}
+.pv2-stage-body p{font-size:10px;color:#677d99;line-height:1.6;overflow-wrap:anywhere}
+.pv2-stage-body h4{margin:6px 0 0;font-size:11px;color:#243a5c}
+.pv2-stage-body ul{list-style:disc;display:grid;gap:6px;padding-left:17px;margin:0}
+.pv2-stage-body li{font-size:10px;color:#687b94;line-height:1.55}
+.pv2-stage-dependencies{background:#f3f6fa;padding:9px;border-radius:8px}
+.pv2-stage-payment,.pv2-stage-evidence{border:1px solid #f4dbc8;background:#fff9f4;
+ border-radius:9px;padding:10px;display:grid;gap:7px}
+.pv2-stage-payment strong,.pv2-stage-evidence strong{font-size:10px;color:#b95b20}
+.pv2-stage-payment span{font-size:10px;color:#61718c;line-height:1.5}
+.pv2-stage-links{display:flex;gap:10px;flex-wrap:wrap;line-height:1.5}
+.pv2-stage-links .pv2-action-link{white-space:normal;font-size:10px}
+.pv2-stage-associate>summary{font-size:10px;color:#dc641c;cursor:pointer;
+ font-weight:800;line-height:1.5}
+.pv2-stage-associate-form{display:grid;gap:8px;padding:10px 0}
+.pv2-stage-associate-form label{font-size:10px;color:#5c718b;display:grid;gap:6px}
+.pv2-stage-associate-form select{max-width:100%;min-width:0;width:100%;
+ border:1px solid #d9e3ee;background:#fff;padding:10px;border-radius:8px;color:#293c57}
+@media(max-width:700px){
+ .pv2-stages-detail{padding:11px}
+ .pv2-stage-body{padding:10px 9px}
+ .pv2-stage-summary strong{font-size:10px}
+ .pv2-stage-index{width:25px;height:25px;flex-basis:25px}
+}
