@@ -117,6 +117,14 @@ begin
   end if;
   return existing;
  end if;
+ if exists(
+  select 1 from public.invoices i
+  join public.invoice_items line on line.invoice_id=i.id and line.organization_id=i.organization_id
+  where i.organization_id=p_org and i.contract_id=c.id
+    and i.invoice_type='proforma' and i.status in ('issued','draft')
+    and (i.notes ilike '%advance%' or line.description ilike '%advance%')
+ ) then raise exception 'An advance proforma already exists for this agreement. Review the existing invoice in Finance instead of creating another.'
+  using errcode='23505';end if;
  amount=round(private.contract_value(c.id)*p_percent/100,c.precision);
  if amount<=0 then raise exception 'Advance amount is too small' using errcode='22023';end if;
  payload=jsonb_build_object('invoice_type','proforma',
