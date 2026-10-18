@@ -21,7 +21,12 @@ export async function prepareAgreementFromProjectQuote(
   if(!org)throw new Error('Select a company');
   const services=await serverServices();
   await services.authorization.requireAuthenticatedUser();
-  const result=await services.client.rpc('contract_create_for_project_quote',{
+  // The new RPC is deployed by the accompanying migration; existing
+  // generated database types will be regenerated in a later schema sync.
+  const rpc=services.client.rpc.bind(services.client) as unknown as (
+   name:string,args:{p_org:string;p_project:string;p_revision:string}
+  )=>Promise<{data:unknown;error:{code?:string;message:string}|null}>;
+  const result=await rpc('contract_create_for_project_quote',{
    p_org:org.organizationId,p_project:projectId,p_revision:revisionId,
   });
   if(result.error){
