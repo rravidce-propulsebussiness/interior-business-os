@@ -133,4 +133,33 @@ revoke all on function public.project_advance_proforma_prepare(uuid,uuid,numeric
 grant execute on function public.project_preflight_read(uuid,uuid) to authenticated;
 grant execute on function public.project_preflight_save(uuid,uuid,text,text) to authenticated;
 grant execute on function public.project_advance_proforma_prepare(uuid,uuid,numeric) to authenticated;
+create function public.project_advance_read(p_org uuid,p_project uuid)
+returns jsonb language plpgsql stable security definer set search_path='' as $read$
+declare c public.contracts; i public.invoices; m private.project_advance_proformas;
+ received numeric=0;
+begin
+ if not private.site_access(p_org,p_project)
+   or not private.finance_access(p_org,'invoice.view')
+ then raise exception 'Project finance access required' using errcode='42501';end if;
+ select * into c from public.contracts where organization_id=p_org and project_id=p_project
+ and status in ('pending','active','on_hold') order by created_at desc limit 1;
+ if c.id is null then return jsonb_build_object('available',false,'received','0');end if;
+ select * into m from private.project_advance_proformas
+  where organization_id=p_org and contract_id=c.id;
+ if m.invoice_id is not null then
+  select * into i from public.invoices where organization_id=p_org and id=m.invoice_id;
+ end if;
+ select coalesce(sum(private.finance_decimal(amount)),0) into received
+ from public.payments where organization_id=p_org and contract_id=c.id and status='recorded';
+ return jsonb_build_object('available',true,'contract_id',c.id,
+   'invoice_id',i.id,'invoice_number',i.invoice_number,'invoice_status',i.status,
+   'invoice_total',coalesce(i.total,'0'),'advance_percent',m.advance_percent,
+   'received',trim_scale(received)::text,
+   'schedule_active',exists(select 1 from public.payment_schedules ps
+     where ps.organization_id=p_org and ps.contract_id=c.id and ps.status='active'));
+end $read$;
+
+revoke all on function public.project_advance_read(uuid,uuid) from public,anon;
+grant execute on function public.project_advance_read(uuid,uuid) to authenticated;
+
 commit;
