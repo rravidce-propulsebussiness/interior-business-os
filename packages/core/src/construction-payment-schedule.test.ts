@@ -36,6 +36,9 @@ describe('quoted construction milestone payments',()=>{
   expect(rcc3.dependsOn).toContain('RCC/SECOND');
   expect(stages.find(s=>s.instanceCode==='INTERNAL_PLASTER/FIRST')?.dependsOn).toEqual(['MASONRY/FIRST']);
   expect(stages.find(s=>s.instanceCode==='DOORS/FIRST')?.dependsOn).toContain('TILES/FIRST');
+  expect(masonry.activities).not.toContain('Electrical conduits and plumbing concealed runs');
+  expect(stages.find(s=>s.instanceCode==='INTERNAL_PLASTER/FIRST')?.activities.join(' '))
+    .toMatch(/electrical conduit and plumbing provision/i);
  });
  it('adds suggested QC tests, materials and report lists but no artificial results or material quantities',()=>{
   const foundation=guidanceForConstructionStage('FOUNDATION');
