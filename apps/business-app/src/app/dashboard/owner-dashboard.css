@@ -2,7 +2,7 @@
    with the admin shell and legacy tenant detail pages. */
 .owner-layout {
   --owner-blue: #fe5105;
-  --owner-text: #111c34;
+  --owner-text: #342e30;
   --owner-muted: #65738c;
   --owner-line: #f1e8e2;
   --owner-shadow: 0 6px 22px rgba(25, 43, 78, 0.035);
@@ -35,7 +35,7 @@
   flex: 0 0 248px;
   background: #fff;
   border-right: 1px solid #f1e8e2;
-  color: #111c34;
+  color: #342e30;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -51,7 +51,7 @@
   align-items: center;
   gap: 13px;
   padding: 1px 12px 29px;
-  color: #111c34 !important;
+  color: #342e30 !important;
 }
 .owner-brand-icon {
   display: grid;
@@ -92,7 +92,7 @@
   min-height: 44px;
   padding: 11px 13px;
   border-radius: 10px;
-  color: #37455f !important;
+  color: #342e30 !important;
   font-size: 13px;
   font-weight: 500;
   transition:
@@ -120,7 +120,7 @@
 }
 .owner-plan-card {
   border: 1px solid #135b5060;
-  background: linear-gradient(110deg, #073a3b, #0a303c);
+  background: linear-gradient(110deg, #073a3b, #342e30);
   display: flex;
   align-items: center;
   gap: 11px;
@@ -142,7 +142,7 @@
   font-size: 10px;
 }
 .owner-sidebar-company {
-  color: #91a5bf;
+  color: #fca567;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -167,12 +167,12 @@
   gap: 20px;
   padding: 11px 29px;
   background: rgba(255, 255, 255, 0.94);
-  border-bottom: 1px solid #e5eaf2;
+  border-bottom: 1px solid #fff2e9;
   z-index: 10;
 }
 .owner-menu-button {
   border: 0 !important;
-  color: #243652;
+  color: #342e30;
   background: transparent;
   width: 32px;
   height: 36px;
@@ -200,7 +200,7 @@
   border: 0 !important;
   height: 100%;
   background: transparent !important;
-  color: #182b49;
+  color: #342e30;
   font-size: 12px;
   border-radius: 0 !important;
   box-shadow: none !important;
@@ -217,7 +217,7 @@
 .owner-topbar-icon {
   display: grid;
   place-items: center;
-  color: #263b5e !important;
+  color: #342e30 !important;
   width: 34px;
   height: 34px;
 }
@@ -230,7 +230,7 @@
   gap: 10px;
   list-style: none;
   cursor: pointer;
-  color: #18243c;
+  color: #342e30;
 }
 .owner-profile summary::-webkit-details-marker {
   display: none;
@@ -269,8 +269,8 @@
   width: 252px;
   padding: 14px;
   background: white;
-  border: 1px solid #e1e7f0;
-  box-shadow: 0 22px 60px #1b31521f;
+  border: 1px solid #fff2e9;
+  box-shadow: 0 22px 60px #342e301f;
   border-radius: 13px;
   z-index: 40;
 }
@@ -318,7 +318,7 @@
 }
 .owner-eyebrow {
   font-size: 10px !important;
-  color: #5576a4 !important;
+  color: #fe5105 !important;
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -330,7 +330,7 @@
   letter-spacing: -0.9px;
   line-height: 1.3;
   margin: 0;
-  color: #0b162c;
+  color: #342e30;
 }
 .owner-welcome h1 span {
   font-size: 23px;
@@ -353,8 +353,8 @@
   min-width: 0;
 }
 .owner-company-art {
-  background: linear-gradient(140deg, #1b3d6f, #437bc6 70%, #92bbfa);
-  color: #eff7ff;
+  background: linear-gradient(140deg, #342e30, #fe5105 70%, #ffe3cf);
+  color: #fffaf7;
   width: 82px;
   height: 67px;
   flex: 0 0 82px;
@@ -372,7 +372,7 @@
   position: absolute;
   right: -45px;
   bottom: -13px;
-  background: #aecbfc40;
+  background: #ffe3cf40;
 }
 .owner-company-details {
   min-width: 0;
@@ -393,7 +393,7 @@
 }
 .owner-company-action {
   flex-shrink: 0;
-  border: 1px solid #ccd6e5;
+  border: 1px solid #ffe3cf;
   border-radius: 10px;
   min-height: 37px;
   padding: 0 12px;
@@ -401,13 +401,13 @@
   align-items: center;
   gap: 6px;
   font-size: 11px;
-  color: #41546f !important;
+  color: #fe5105 !important;
 }
 .owner-search-summary {
   margin: 0 0 17px;
   border-radius: 12px;
-  background: #edf4ff;
-  border: 1px solid #d7e7ff;
+  background: #fffaf7;
+  border: 1px solid #fff2e9;
   padding: 15px 18px;
   display: flex;
   align-items: center;
@@ -420,13 +420,13 @@
 }
 .owner-search-summary p {
   font-size: 11px;
-  color: #49617f;
+  color: #fe5105;
   margin-top: 4px;
 }
 .owner-search-summary > a {
   font-size: 12px;
   font-weight: 700;
-  color: #1765e5;
+  color: #fe5105;
 }
 .owner-search-empty {
   flex-basis: 100%;
@@ -450,7 +450,7 @@
   box-shadow: var(--owner-shadow);
 }
 a.owner-stat:hover {
-  border-color: #b9cfff;
+  border-color: #fff2e9;
   transform: translateY(-1px);
 }
 .owner-stat-icon {
@@ -462,15 +462,15 @@ a.owner-stat:hover {
   place-items: center;
 }
 .owner-tone-blue {
-  color: #126bed;
-  background: #e7f1ff;
+  color: #fe5105;
+  background: #fffaf7;
 }
 .owner-tone-green {
   color: #08a860;
   background: #e2fbec;
 }
 .owner-tone-purple {
-  color: #874be9;
+  color: #fca567;
   background: #f3eafa;
 }
 .owner-tone-orange {
@@ -488,7 +488,7 @@ a.owner-stat:hover {
   font-weight: 550;
 }
 .owner-stat-text strong {
-  color: #111a30;
+  color: #342e30;
   font-size: clamp(20px, 2.2vw, 26px);
   letter-spacing: -0.6px;
   line-height: 1.5;
@@ -536,26 +536,26 @@ a.owner-stat:hover {
   justify-content: center;
   padding: 12px 13px;
   min-height: 44px;
-  border: 1px solid #e0e7f0;
+  border: 1px solid #fff2e9;
   border-radius: 10px;
   background: white;
-  color: #3f5474 !important;
+  color: #fe5105 !important;
   font-size: 11px;
   font-weight: 700;
   white-space: nowrap;
 }
 .owner-quick-button:hover,
 .owner-quick-invite:hover {
-  background: #f4f8ff;
+  background: #fffaf7;
 }
 .owner-quick-primary {
-  background: linear-gradient(110deg, #277cf8, #0960ee);
+  background: linear-gradient(110deg, #fca567, #fe5105);
   color: #fff !important;
-  border-color: #2678f5;
-  box-shadow: 0 8px 19px #2563eb2b;
+  border-color: #fca567;
+  box-shadow: 0 8px 19px #fe51052b;
 }
 .owner-quick-primary:hover {
-  background: #135de3;
+  background: #fe5105;
   color: white !important;
 }
 .owner-quick-invite {
@@ -591,11 +591,11 @@ a.owner-stat:hover {
   font-size: 15px;
   font-weight: 800;
   letter-spacing: -0.25px;
-  color: #121c31;
+  color: #342e30;
   margin: 0;
 }
 .owner-panel-heading > a {
-  color: #1673fa !important;
+  color: #fe5105 !important;
   font-size: 11px;
   font-weight: 700;
   display: inline-flex;
@@ -615,7 +615,7 @@ a.owner-stat:hover {
   text-align: left;
 }
 .owner-leads-table thead {
-  background: #f3f6fa;
+  background: #fffaf7;
 }
 .owner-leads-table th {
   padding: 12px 9px;
@@ -633,12 +633,12 @@ a.owner-stat:hover {
   height: 44px;
   padding: 11px 9px;
   color: #455570;
-  border-bottom: 1px solid #edf1f6;
+  border-bottom: 1px solid #fffaf7;
   overflow-wrap: anywhere;
   max-width: 180px;
 }
 .owner-leads-table td:first-child {
-  color: #22324f;
+  color: #342e30;
   font-weight: 700;
 }
 .owner-leads-table td:first-child a:hover {
@@ -652,19 +652,19 @@ a.owner-stat:hover {
   font-size: 10px;
   white-space: nowrap;
   font-weight: 700;
-  background: #eff2f6;
+  background: #fffaf7;
   color: #5d6c82;
 }
 .owner-status-blue {
-  background: #e9f1ff;
-  color: #1566e4;
+  background: #fffaf7;
+  color: #fe5105;
 }
 .owner-status-green {
   background: #e0f8ed;
   color: #02834d;
 }
 .owner-status-neutral {
-  background: #f2f4f8;
+  background: #fffaf7;
   color: #65738a;
 }
 .owner-project-list {
@@ -676,14 +676,14 @@ a.owner-stat:hover {
   align-items: center;
   gap: 12px;
   padding: 10px 2px;
-  border-bottom: 1px solid #eef1f6;
+  border-bottom: 1px solid #fffaf7;
   min-width: 0;
 }
 .owner-project-row:last-child {
   border-bottom: none;
 }
 .owner-project-row:hover {
-  background: #f8faff;
+  background: #fffaf7;
   border-radius: 9px;
 }
 .owner-project-thumbnail {
@@ -693,15 +693,15 @@ a.owner-stat:hover {
   border-radius: 8px;
   display: grid;
   place-items: center;
-  background: linear-gradient(135deg, #dbebff, #e8effb 55%, #cadbf4);
-  color: #2864b6;
+  background: linear-gradient(135deg, #fff2e9, #fffaf7 55%, #fff2e9);
+  color: #fe5105;
 }
 .owner-project-row:nth-child(2n) .owner-project-thumbnail {
   background: linear-gradient(135deg, #fff2de, #f2e6d6);
   color: #b78546;
 }
 .owner-project-row:nth-child(3n) .owner-project-thumbnail {
-  background: linear-gradient(135deg, #e5f6eb, #d7e6ef);
+  background: linear-gradient(135deg, #e5f6eb, #fff2e9);
   color: #318c77;
 }
 .owner-project-info {
@@ -709,7 +709,7 @@ a.owner-stat:hover {
   flex: 1;
 }
 .owner-project-info strong {
-  color: #22304b;
+  color: #342e30;
   font-size: 12px;
   font-weight: 750;
   display: block;
@@ -747,16 +747,16 @@ a.owner-stat:hover {
   transform: translateY(-2px);
 }
 .owner-tile-blue {
-  background: #e7f0ff;
-  color: #146aef !important;
+  background: #fffaf7;
+  color: #fe5105 !important;
 }
 .owner-tile-green {
   background: #e3f9eb;
   color: #14995e !important;
 }
 .owner-tile-purple {
-  background: #f1eafd;
-  color: #824ee6 !important;
+  background: #fffaf7;
+  color: #fca567 !important;
 }
 .owner-tile-orange {
   background: #fff0e3;
@@ -767,15 +767,15 @@ a.owner-stat:hover {
   color: #d94873 !important;
 }
 .owner-tile-cyan {
-  background: #e1f5fc;
-  color: #1788bf !important;
+  background: #fff2e9;
+  color: #fe5105 !important;
 }
 .owner-team-content {
   display: flex;
   align-items: flex-start;
   gap: 14px;
   border-radius: 11px;
-  background: #f3f7ff;
+  background: #fffaf7;
   padding: 15px;
   min-height: 128px;
 }
@@ -786,12 +786,12 @@ a.owner-stat:hover {
   display: grid;
   place-items: center;
   border-radius: 12px;
-  background: #e0edff;
-  color: #1671eb;
+  background: #fff2e9;
+  color: #fe5105;
 }
 .owner-team-content strong {
   display: block;
-  color: #192b47;
+  color: #342e30;
   font-size: 12px;
   line-height: 1.4;
 }
@@ -819,16 +819,16 @@ a.owner-stat:hover {
 }
 .owner-team-primary {
   color: white !important;
-  background: linear-gradient(120deg, #1d78fa, #0760e7);
-  box-shadow: 0 4px 12px #1e6dfb25;
+  background: linear-gradient(120deg, #fe5105, #fe5105);
+  box-shadow: 0 4px 12px #fca56725;
 }
 .owner-team-primary:hover {
   color: white !important;
 }
 .owner-team-secondary {
-  color: #536c8f !important;
+  color: #fe5105 !important;
   background: #fff;
-  border: 1px solid #d9e3f2;
+  border: 1px solid #fff2e9;
 }
 .owner-empty,
 .owner-empty-state p {
@@ -855,8 +855,8 @@ a.owner-stat:hover {
   width: 51px;
   height: 51px;
   border-radius: 13px;
-  background: #edf4ff;
-  color: #2970e6;
+  background: #fffaf7;
+  color: #fe5105;
 }
 .owner-empty-state strong {
   font-size: 13px;
@@ -864,7 +864,7 @@ a.owner-stat:hover {
 .owner-empty-state a {
   font-size: 12px;
   font-weight: 700;
-  color: #176be7 !important;
+  color: #fe5105 !important;
 }
 .owner-dashboard-note {
   margin-top: 20px;
@@ -960,7 +960,7 @@ a.owner-stat:hover {
     visibility: hidden;
     pointer-events: none;
     transition: transform 0.2s ease, visibility 0.2s ease;
-    box-shadow: 8px 0 40px #07111f33;
+    box-shadow: 8px 0 40px #342e3033;
   }
   .owner-sidebar-open {
     transform: translateX(0);
@@ -974,7 +974,7 @@ a.owner-stat:hover {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    color: #b5c4dc;
+    color: #ffe3cf;
     font-size: 11px;
     padding: 2px 10px 12px;
   }
@@ -991,7 +991,7 @@ a.owner-stat:hover {
     width: 100%;
     height: 100%;
     z-index: 25;
-    background: #0916299f;
+    background: #342e309f;
     border: 0 !important;
     border-radius: 0 !important;
   }
@@ -1125,7 +1125,7 @@ a.owner-stat:hover {
   flex-direction: column;
   margin: 3px 0 8px 23px;
   padding: 4px 0 4px 13px;
-  border-left: 1px solid #3a506a;
+  border-left: 1px solid #fe5105;
   gap: 2px;
 }
 .owner-subnav-link {
@@ -1135,7 +1135,7 @@ a.owner-stat:hover {
   min-height: 37px;
   padding: 8px 9px;
   border-radius: 8px;
-  color: #bdcbe0 !important;
+  color: #ffe3cf !important;
   font-size: 12px;
   text-decoration: none;
 }
@@ -1148,7 +1148,7 @@ a.owner-stat:hover {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #8097b6;
+  background: #fca567;
   flex: 0 0 auto;
 }
 .owner-subnav-active .owner-subnav-dot {
@@ -1161,7 +1161,7 @@ a.owner-stat:hover {
  */
 .owner-layout.owner-layout-unified {
   --owner-blue:#fe5105;
-  --owner-text:#111c34;
+  --owner-text:#342e30;
   --owner-muted:#66758b;
   --owner-line:#f1e8e2;
   background:#fffaf7;
@@ -1172,11 +1172,11 @@ a.owner-stat:hover {
 .owner-layout.owner-layout-unified .owner-sidebar {
   background:#fff;
   border-right:1px solid #f2e8e2;
-  color:#17243e;
+  color:#342e30;
   padding:18px 14px;
 }
 .owner-layout.owner-layout-unified .owner-brand {
-  color:#13203b!important;
+  color:#342e30!important;
   padding:2px 8px 24px;
 }
 .owner-layout.owner-layout-unified .owner-brand-icon {
@@ -1187,7 +1187,7 @@ a.owner-stat:hover {
 .owner-layout.owner-layout-unified .owner-brand strong {font-size:18px}
 .owner-layout.owner-layout-unified .owner-brand small {color:#64748b}
 .owner-layout.owner-layout-unified .owner-nav-item {
-  color:#37455f!important;
+  color:#342e30!important;
   font-size:13px;
   font-weight:650;
 }
@@ -1213,14 +1213,14 @@ a.owner-stat:hover {
 .owner-layout.owner-layout-unified .owner-search {background:#fcf8f7;border:1px solid #f1e8e4}
 .owner-layout.owner-layout-unified .owner-profile-avatar {background:#47556c}
 .owner-layout.owner-layout-unified .owner-mobile-heading,
-.owner-layout.owner-layout-unified .owner-mobile-heading button {color:#24344f}
+.owner-layout.owner-layout-unified .owner-mobile-heading button {color:#342e30}
 @media(max-width:740px) {
   .owner-layout.owner-layout-unified .owner-topbar {
     min-height:61px;padding:8px 12px;
   }
   .owner-layout.owner-layout-unified .owner-command-mobile-brand {
     display:flex;align-items:center;gap:9px;flex:1;min-width:0;
-    color:#18223b;font-size:13px;
+    color:#342e30;font-size:13px;
   }
   .owner-layout.owner-layout-unified .owner-command-mobile-brand strong {
     min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
