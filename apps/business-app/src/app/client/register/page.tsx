@@ -4,9 +4,9 @@ import { AuthForm } from '@business-os/ui/auth-form';
 
 export default function ClientRegistration() {
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-12">
+    <main className="min-h-screen bg-orange-50/40 px-4 py-12">
       <div className="mx-auto max-w-lg rounded-3xl border border-slate-200 bg-white p-7 shadow-lg">
-        <p className="text-sm font-bold tracking-widest text-blue-700">
+        <p className="text-sm font-bold tracking-widest text-orange-700">
           CLIENT APP
         </p>
         <h1 className="mt-3 text-2xl font-bold">
@@ -19,7 +19,7 @@ export default function ClientRegistration() {
         </p>
         <AuthForm action={signUp} registerAccount />
         <div className="mt-6 space-y-2 text-sm">
-          <Link href="/client/login" className="block text-blue-700 underline">
+          <Link href="/client/login" className="block text-orange-700 underline">
             Already registered? Client sign in
           </Link>
         </div>

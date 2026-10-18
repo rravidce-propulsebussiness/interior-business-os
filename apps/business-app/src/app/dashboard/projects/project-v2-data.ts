@@ -16,6 +16,10 @@ export type StageLink = {stage_id:string;kind:string;record_id:string};
 export type PaymentMilestone={id:string;label:string;amount:string;currency:string;contract_number:string;
  contract_id:string};
 export type ProjectQuotation={id:string;number:string;revisionId:string;status:string;createdAt:string};
+export type ClientRequestRow={
+ id:string;kind:string;details:string;status:string;
+ requested_date:string|null;response:string;created_at:string;responded_at:string|null;
+};
 export type WorkspaceData = {
  project:ProjectEntry;org:string;company:string;email:string;
  permissions:{manage:boolean;finance:boolean;payments:boolean;purchases:boolean;team:boolean;quotation:boolean};
@@ -27,7 +31,7 @@ export type WorkspaceData = {
  transactions: {id:string;number:string;date:string;amount:number;status:string}[]|null;
  purchaseOrders:{id:string;number:string;status:string;date:string}[]|null;
  tasks:{id:string;title:string;planned_start:string|null;status:string}[];
- contractValue:number|null;expenditure:number|null;
+ contractValue:number|null;expenditure:number|null;requests:ClientRequestRow[]|null;
  projectRaw:Record<string,unknown>|null;
  agreement:{contractId:string;contractNumber:string;status:string;authorized:boolean;revisionId:string|null;clearanceType:string|null}|null;
  preflight:{inspectionDone:boolean;measurementsDone:boolean;inspectionDetails:string;measurementDetails:string;signedReady:boolean}|null;
@@ -263,6 +267,17 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
  const savedTerms=quoteResult&&!quoteResult.error?quoteResult.data?.terms:null;
  const proposal=typeof savedTerms==='string'?savedStagePaymentPlan(savedTerms):null;
  const bindings=typeof savedTerms==='string'?savedStagePaymentLinks(savedTerms):null;
+ const requestResult=permissions.manage
+  ?await s.client.rpc('project_client_request_list',{p_project_id:id}):null;
+ const requests:ClientRequestRow[]|null=requestResult&&Array.isArray(requestResult.data)&&!requestResult.error
+  ?requestResult.data.map((raw:unknown)=>{
+    const x=obj(raw);return {
+      id:stringValue(x.id),kind:stringValue(x.kind),details:stringValue(x.details),
+      status:stringValue(x.status),requested_date:stringValue(x.requested_date)||null,
+      response:stringValue(x.response),created_at:stringValue(x.created_at),
+      responded_at:stringValue(x.responded_at)||null,
+    };
+   }):null;
  const quotePaymentTriggers=(proposal??[]).map((row,index)=>({
   name:row.name,percent:row.percent,stageCodes:bindings?.[index]??[],
  }));
@@ -276,7 +291,7 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
    industry:(project.industry_id?industriesById.get(project.industry_id):null)??'Project',progress
   },
   site,stages:stageList,links:linkList,milestones,quotations,quotePaymentTriggers,
-  preflight,advance,
+  preflight,advance,requests,
   transactions:trans,purchaseOrders:po,
   tasks:tasks.map(t=>({id:t.id,title:t.title,planned_start:t.planned_start,status:t.status})),
   contractValue,projectRaw:permissions.manage?project:null,
@@ -368,7 +383,7 @@ async function assignedProjectWorkspace(id:string):Promise<WorkspaceData>{
   site,stages,links:[],milestones:[],quotations:[],quotePaymentTriggers:[],transactions:null,purchaseOrders:null,tasks:(tasks??[]).map(t=>({
    id:t.id,title:t.title,planned_start:t.planned_start,status:t.status,
   })),
-  contractValue:null,expenditure:null,agreement:null,projectRaw:null,
+  contractValue:null,expenditure:null,requests:null,agreement:null,projectRaw:null,
   preflight:null,advance:null,
  };
 }

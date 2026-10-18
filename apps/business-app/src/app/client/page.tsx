@@ -33,11 +33,11 @@ export default async function ClientHome() {
   if (projects.length === 1) redirect('/client/projects/' + projects[0]!.id);
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900">
+    <main className="min-h-screen bg-orange-50/40 text-slate-900">
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-5 py-5">
           <div>
-            <p className="text-xs font-bold tracking-widest text-blue-700">
+            <p className="text-xs font-bold tracking-widest text-orange-700">
               PRO PULSE · CLIENT APP
             </p>
             <h1 className="mt-1 text-2xl font-bold">My projects</h1>
@@ -72,18 +72,18 @@ export default async function ClientHome() {
               <Link
                 href={'/client/projects/' + project.id}
                 key={project.id}
-                className="group rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-blue-300 hover:shadow-md"
+                className="group rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-orange-300 hover:shadow-md"
               >
-                <p className="text-xs font-bold uppercase tracking-widest text-blue-700">
+                <p className="text-xs font-bold uppercase tracking-widest text-orange-700">
                   {project.company_name}
                 </p>
                 <h2 className="mt-4 text-xl font-bold">{project.name}</h2>
                 <p className="mt-2 text-sm text-slate-500">{project.code}</p>
                 <div className="mt-6 flex items-center justify-between">
-                  <span className="rounded-full bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-800">
+                  <span className="rounded-full bg-orange-50 px-3 py-1.5 text-xs font-semibold text-orange-800">
                     {display(project.stage)}
                   </span>
-                  <span className="font-semibold text-blue-700 group-hover:underline">
+                  <span className="font-semibold text-orange-700 group-hover:underline">
                     View updates →
                   </span>
                 </div>

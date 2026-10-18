@@ -28,10 +28,10 @@ export default async function ClientLoginPage({
       redirect(projectId ? '/client/projects/' + projectId : '/client');
   }
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-12 text-slate-900">
+    <main className="min-h-screen bg-orange-50/40 px-4 py-12 text-slate-900">
       <div className="mx-auto max-w-md overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl">
         <div className="bg-slate-950 p-7 text-white">
-          <p className="text-sm font-bold tracking-widest text-blue-300">
+          <p className="text-sm font-bold tracking-widest text-orange-300">
             PRO PULSE · CLIENT APP
           </p>
           <h1 className="mt-5 text-3xl font-bold">
