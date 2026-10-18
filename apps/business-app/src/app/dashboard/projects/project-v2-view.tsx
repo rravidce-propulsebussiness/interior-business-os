@@ -314,7 +314,7 @@ function Documents({d}:{d:WorkspaceData}){
         {!d.agreement&&q.status==='issued'&&d.permissions.manage&&d.permissions.finance&&
          <PrepareAgreement projectId={d.project.id} revisionId={q.revisionId}/>}
        </div>
-       {q.status==='draft'&&<p className="pv2-muted">Saved and editable. Issue the final version before preparing an agreement; no separate client approval is needed.</p>}
+       {q.status==='draft'&&<p className="pv2-muted">Saved and editable. Sharing/finalizing this quotation locks the agreed version before preparing an agreement; no separate client approval is needed.</p>}
       </div>)}</div>:
       <Blank title="No saved final quotation found"
        detail="No active quotation was found for this project or its converted Won lead."
@@ -326,7 +326,9 @@ function Documents({d}:{d:WorkspaceData}){
      {d.agreement?<div>
       <div className="pv2-between"><strong>{d.agreement.contractNumber}</strong>
        <Status value={d.agreement.authorized?'approved':d.agreement.status||'pending'}/></div>
-      <p className="pv2-muted">This agreement is tied to its recorded issued quotation revision. Confirm that it matches the current Final quotation before signing. Payment schedule, signed evidence and advance remain required for execution.</p>
+      {d.quotations[0]&&d.agreement.revisionId&&d.quotations[0].revisionId!==d.agreement.revisionId?
+       <p role="alert" className="pv2-form-feedback bad">This agreement was prepared from an earlier quotation, not the currently selected Final quotation. Review the agreement scope before signing or starting work.</p>:
+       <p className="pv2-muted">The agreement is tied to its saved quotation version. Payment schedule, signed evidence and advance remain required for execution.</p>}
       <NextLink href={'/dashboard/finance/contracts/'+d.agreement.contractId} label="Open agreement & schedule"/>
       {agreement.some(x=>x.mime==='application/pdf')&&d.site?.canManage&&<details className="pv2-edit-drawer">
        <summary>Record signed agreement evidence</summary>
