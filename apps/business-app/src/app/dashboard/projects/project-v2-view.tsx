@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { OwnerIcon, type OwnerIconName, OwnerShell } from '../owner-shell';
 import { ownerWorkspaceNavigation } from '../owner-workspace-navigation';
 import { OwnerMobileNav } from '../owner-mobile-nav';
+import { OwnerProjectRequests } from '../../project-request-widgets';
 import { canAccess } from '@business-os/auth';
 import { guidanceForConstructionStage } from '@business-os/core/construction-payment-schedule';
 import { ProjectStageLinker,type StageLinkOption } from './project-stage-linker';
@@ -275,10 +276,11 @@ function ProjectCommandSidebar({d,showHistory=false}:{d:WorkspaceData;showHistor
  const needsAdvance=signed&&d.advance!==null&&(!d.advance?.invoiceId||
     (d.advance.invoiceTotal>0&&d.advance.received<d.advance.invoiceTotal));
  const incompleteChecks=d.site?.checks.filter(r=>!['passed','approved'].includes(stringValue(r.status)))??[];
+ const openRequests=(d.requests??[]).filter(request=>!['resolved','declined'].includes(request.status));
  return <aside className="pv2-command-sidebar">
   <section className="pv2-panel pv2-attention">
    <div className="pv2-command-head"><h2>Needs your attention</h2><span className="pv2-timeline-counter">
-     {(needsAdvance?1:0)+incompleteChecks.length+(d.preflight&&!d.preflight.inspectionDone?1:0)} pending</span></div>
+     {(needsAdvance?1:0)+incompleteChecks.length+(d.preflight&&!d.preflight.inspectionDone?1:0)+openRequests.length} pending</span></div>
    {needsAdvance&&<div className="pv2-attention-item">
      <span className="pv2-attention-symbol"><OwnerIcon name="billing" size={20}/></span>
      <div><strong>Advance payment pending</strong><p>{d.advance?.invoiceId?'Record a verified client receipt before treating the advance as paid.':'Issue the advance invoice from the next action below.'}</p></div>
@@ -292,6 +294,10 @@ function ProjectCommandSidebar({d,showHistory=false}:{d:WorkspaceData;showHistor
     <div><strong>Site inspection needed</strong><p>Record the survey and measurements before floor planning.</p></div></div>}
    {!needsAdvance&&!incompleteChecks.length&&(!d.preflight||d.preflight.inspectionDone)&&
     <p className="pv2-muted">No outstanding project alerts from the available records.</p>}
+   {d.permissions.manage&&<div className="pv2-owner-requests">
+      <h3>Client questions & requests</h3>
+      <OwnerProjectRequests projectId={d.project.id} requests={d.requests??[]}/>
+    </div>}
    <ProjectPriority d={d}/>
   </section>
   <section className="pv2-panel">
