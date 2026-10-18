@@ -15,13 +15,14 @@ export type Stage = {id:string;title:string;status:string;phase:string;floor_cod
 export type StageLink = {stage_id:string;kind:string;record_id:string};
 export type PaymentMilestone={id:string;label:string;amount:string;currency:string;contract_number:string;
  contract_id:string};
+export type ProjectQuotation={id:string;number:string;revisionId:string;status:string;createdAt:string};
 export type WorkspaceData = {
  project:ProjectEntry;org:string;company:string;email:string;
- permissions:{manage:boolean;finance:boolean;payments:boolean;purchases:boolean;team:boolean};
+ permissions:{manage:boolean;finance:boolean;payments:boolean;purchases:boolean;team:boolean;quotation:boolean};
  site:null|{stage:string;role:string;canManage:boolean;reports:SiteRow[];materials:SiteRow[];
  checks:SiteRow[];media:SiteRow[];designs:SiteRow[];team:SiteRow[];gate:SiteRow[];
  memberOptions:{id:string;label:string}[]};
- stages:Stage[];links:StageLink[];milestones:PaymentMilestone[];
+ stages:Stage[];links:StageLink[];milestones:PaymentMilestone[];quotations:ProjectQuotation[];
  quotePaymentTriggers:{name:string;percent:number;stageCodes:string[]}[];
  transactions: {id:string;number:string;date:string;amount:number;status:string}[]|null;
  purchaseOrders:{id:string;number:string;status:string;date:string}[]|null;
@@ -105,7 +106,7 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
  const permissions={
   manage:has('project.manage','projects'),finance:has('contract.view','billing'),
   payments:has('payment.view'),purchases:has('purchase.view'),
-  team:has('team.manage')||has('team.view'),
+  team:has('team.manage')||has('team.view'),quotation:has('quotation.view','quotation'),
  };
  const [org,user,industries,customer,taskResult,siteResult,stageResult,stageLinkResult,receipts,orders,contract,agreementResult]=await Promise.all([
   s.repository.organization(s.org),s.authorization.requireAuthenticatedUser(),
@@ -123,7 +124,7 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
   permissions.purchases?s.client.from('purchase_orders').select('id,po_number,status,order_date')
     .eq('organization_id',s.org).eq('project_id',id).order('order_date',{ascending:false})
     .limit(200):Promise.resolve({data:null,error:null}),
-  permissions.finance?s.client.from('contracts').select('original_contract_value,status,revision_id')
+  permissions.finance?s.client.from('contracts').select('id,contract_number,original_contract_value,status,revision_id')
     .eq('organization_id',s.org).eq('project_id',id).order('created_at',{ascending:false})
     .limit(1):Promise.resolve({data:null,error:null}),
   permissions.manage&&permissions.finance?s.client.rpc('project_agreement_read',{
@@ -173,10 +174,31 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
  })):null;
  const contractValue=permissions.finance&&!contract.error?decimals(contract.data?.[0]?.original_contract_value):null;
  const agreement=agreementResult.error?{}:obj(agreementResult.data);
+ // Read only project-linked quotations: another project for the same client
+ // is not an acceptable source for this project's agreement or payment plan.
+ const quoteRoots=permissions.quotation?await s.client.from('quotations')
+   .select('id,quotation_number,current_revision_id,status,created_at')
+   .eq('organization_id',s.org).eq('project_id',id).neq('status','cancelled')
+   .order('created_at',{ascending:false}).limit(25):null;
+ const revisionIds=[...new Set((quoteRoots?.error?[]:quoteRoots?.data??[])
+   .map(q=>q.current_revision_id).filter((v):v is string=>typeof v==='string'))];
+ const quoteRevisions=revisionIds.length?await s.client.from('quotation_revisions')
+   .select('id,status').eq('organization_id',s.org).eq('project_id',id)
+   .in('id',revisionIds):null;
+ const revisionsById=new Map((quoteRevisions?.error?[]:quoteRevisions?.data??[])
+   .map(r=>[r.id,r.status]));
+ const quotations:ProjectQuotation=(quoteRoots?.error?[]:quoteRoots?.data??[])
+   .filter(q=>q.current_revision_id&&revisionsById.has(q.current_revision_id))
+   .map(q=>({id:q.id,number:q.quotation_number??'Quotation',
+     revisionId:q.current_revision_id,status:revisionsById.get(q.current_revision_id)??'',
+     createdAt:q.created_at??''}));
  const contractedRevision=permissions.finance&&!contract.error?contract.data?.[0]?.revision_id:null;
- const quoteResult=contractedRevision
+ // Read only a saved planning proposal before the agreement exists.
+ // This never activates milestones or invents payment receipts.
+ const paymentRevision=contractedRevision??quotations[0]?.revisionId??null;
+ const quoteResult=paymentRevision
   ?await s.client.from('quotation_revisions').select('terms').eq('organization_id',s.org)
-    .eq('id',contractedRevision).maybeSingle():null;
+    .eq('id',paymentRevision).maybeSingle():null;
  const savedTerms=quoteResult&&!quoteResult.error?quoteResult.data?.terms:null;
  const proposal=typeof savedTerms==='string'?savedStagePaymentPlan(savedTerms):null;
  const bindings=typeof savedTerms==='string'?savedStagePaymentLinks(savedTerms):null;
@@ -192,7 +214,7 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
    client:customer.data?.display_name??'Not linked',
    industry:(project.industry_id?industriesById.get(project.industry_id):null)??'Project',progress
   },
-  site,stages:stageList,links:linkList,milestones,quotePaymentTriggers,
+  site,stages:stageList,links:linkList,milestones,quotations,quotePaymentTriggers,
   transactions:trans,purchaseOrders:po,
   tasks:tasks.map(t=>({id:t.id,title:t.title,planned_start:t.planned_start,status:t.status})),
   contractValue,projectRaw:permissions.manage?project:null,
@@ -274,12 +296,12 @@ async function assignedProjectWorkspace(id:string):Promise<WorkspaceData>{
  };
  return {
   org:context.organizationId,company:org.name,email:user.email??'',
-  permissions:{manage:site.canManage,finance:false,payments:false,purchases:false,team:site.canManage},
+  permissions:{manage:site.canManage,finance:false,payments:false,purchases:false,team:site.canManage,quotation:false},
   project:{id,name:stringValue(p.name),code:stringValue(p.code),status:stringValue(p.status)||'active',
    projectType:'',address:'Project site',createdAt:'',client:'Project team',customerId:null,
    industry:'Site Delivery',
    progress:workCompletionByProject([id],tasks&&tasks.length<1200?tasks:null).get(id)??null},
-  site,stages,links:[],milestones:[],quotePaymentTriggers:[],transactions:null,purchaseOrders:null,tasks:(tasks??[]).map(t=>({
+  site,stages,links:[],milestones:[],quotations:[],quotePaymentTriggers:[],transactions:null,purchaseOrders:null,tasks:(tasks??[]).map(t=>({
    id:t.id,title:t.title,planned_start:t.planned_start,status:t.status,
   })),
   contractValue:null,expenditure:null,agreement:null,projectRaw:null,
