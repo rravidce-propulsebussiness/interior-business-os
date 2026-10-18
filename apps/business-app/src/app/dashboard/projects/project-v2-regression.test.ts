@@ -21,7 +21,7 @@ describe('Projects v2 one screen per route',()=>{
   expect(ui).toContain("Connect its approved floor-wise quotation and create the agreement");
   expect(ui).toContain("d.agreement?<SyncStages");
   expect(ui).toContain('Open quotations & agreement');
-  expect(ui).toContain('Floor-wise Work Stages');
+  expect(ui).toContain('Project Stages & Quality Checks');
   expect(ui).toContain('guidanceForConstructionStage');
   expect(ui).toContain('ProjectStageLinker');
   expect(loader).toContain('quotePaymentTriggers');
@@ -74,4 +74,22 @@ it('uses one agreement upload and signing-evidence action without duplicate proj
  expect(action).toContain("p_action: 'record_signed_pdf'");
  expect(action).toContain("p_category: 'agreement'");
  expect(action).toContain("uploaded: true");
+});
+
+it('starts at a real floor plan action after signed agreement, before final design confirmation',()=>{
+ const drawing=read('./project-design-actions.ts');
+ const styles=read('./project-v2.css');
+ expect(forms).toContain('Floor Plan Preparation');
+ expect(forms).toContain('ProjectDrawingForm');
+ expect(forms).toContain("first?.status==='approved'");
+ expect(forms).toContain("const allApproved=required.every");
+ expect(forms).toContain("if(stage==='client_approved')");
+ expect(forms).toContain("submitProjectDrawing(id,form)");
+ expect(ui).toContain("agreementSigned={d.agreement?.clearanceType==='signed_copy_recorded'}");
+ expect(ui).toContain('The recorded agreement references an earlier quotation');
+ expect(drawing).toContain("p_action:'design_submit'");
+ expect(drawing).toContain("p_category:'design'");
+ expect(drawing).toContain('if(uploaded)revalidatePath');
+ expect(styles).toContain('.pv2-project-header-actions{min-width:0;max-width:100%;flex-wrap:wrap');
+ expect(ui).not.toContain('>All projects</Link>');
 });
