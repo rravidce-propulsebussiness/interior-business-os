@@ -8,6 +8,7 @@ import { OwnerIcon, OwnerShell } from '../../owner-shell';
 import { ownerWorkspaceNavigation } from '../../owner-workspace-navigation';
 import { CustomerReference } from './reference';
 import { ClientAccess } from './client-access';
+import { NewClientProject } from './new-client-project';
 import { leadServiceFromIndustryKey } from '../../crm/leads/lead-service-options';
 import '../../owner-dashboard.css';
 import './customer-profile.css';
@@ -146,8 +147,10 @@ export default async function Customer({
           .select('id,name,status,created_at,industry_id', { count: 'exact' })
           .eq('organization_id', s.org)
           .eq('customer_id', id)
+          .eq('is_sales_prospect', false)
+          .eq('removed_from_workspace', false)
           .order('created_at', { ascending: false })
-          .limit(3)
+          .limit(100)
       : Promise.resolve({ data: [], count: null }),
     canSeeQuotes
       ? s.client
@@ -155,8 +158,9 @@ export default async function Customer({
           .select('id,created_at', { count: 'exact' })
           .eq('organization_id', s.org)
           .eq('customer_id', id)
+          .neq('status', 'cancelled')
           .order('created_at', { ascending: false })
-          .limit(3)
+          .limit(6)
       : Promise.resolve({ data: [], count: null }),
     s.repository.industries(),
   ]);
@@ -245,6 +249,9 @@ export default async function Customer({
         ? whatsappDigits
         : '';
   const projectHref = '/dashboard/projects?customer=' + encodeURIComponent(id);
+  const customerCity = typeof customer.billing_address === 'object' &&
+    customer.billing_address && !Array.isArray(customer.billing_address)
+    ? String((customer.billing_address as Record<string,unknown>).city ?? '') : '';
   const timelineHref =
     '/dashboard/customers/' + encodeURIComponent(id) + '/activity';
   const statementHref =
@@ -279,6 +286,7 @@ export default async function Customer({
         search=""
         notificationsEnabled={has('notification.view')}
         currentHref="/dashboard/customers"
+        dashboardBrand
       >
         <main id="main-content" tabIndex={-1} className="cp-page">
           <nav className="cp-breadcrumb" aria-label="Breadcrumb">
@@ -294,7 +302,7 @@ export default async function Customer({
               {customer.display_name?.trim().charAt(0).toUpperCase() || 'C'}
             </span>
             <div className="cp-hero-content">
-              <p className="cp-account-eyebrow">Customer account</p>
+              <p className="cp-account-eyebrow">Client account · One customer, many projects</p>
               <h1>{customer.display_name}</h1>
               <span
                 className={
@@ -324,9 +332,6 @@ export default async function Customer({
               )}
             </div>
           </header>
-          <div className="cp-origin-leads cp-origin-near-header">
-            <OriginLeads customerId={id} />
-          </div>
 
           <div className="cp-stats" aria-label="Customer summary">
             <Stat
@@ -375,11 +380,8 @@ export default async function Customer({
                 <OwnerIcon name="quotations" size={18} /> New quote
               </Link>
             )}
-            {canCreateProject && (
-              <Link className="cp-action" href={projectHref + '&new=1'}>
-                <OwnerIcon name="projects" size={18} /> New project
-              </Link>
-            )}
+            {canCreateProject && customer.status === 'active' &&
+              <NewClientProject customerId={id} city={customerCity}/>} 
           </div>
 
           <nav className="cp-tabs" aria-label="Customer record sections">
@@ -491,7 +493,7 @@ export default async function Customer({
                   </div>
                 ) : (
                   <p className="cp-muted">
-                    No projects linked to this customer yet.
+                    No delivery projects yet. Create a new project for this client.
                   </p>
                 )}
               </section>
@@ -574,6 +576,9 @@ export default async function Customer({
             )}
           </section>
 
+          <div className="cp-origin-leads cp-origin-near-header">
+            <OriginLeads customerId={id} />
+          </div>
           {canManage && (
             <details id="edit-customer" className="cp-edit-panel cp-panel">
               <summary>
