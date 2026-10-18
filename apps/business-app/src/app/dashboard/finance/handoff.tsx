@@ -37,7 +37,21 @@ export async function ContractHandoff({ revisionId }: { revisionId: string }) {
     .eq('organization_id', context.organizationId)
     .eq('revision_id', revisionId)
     .maybeSingle();
-  if (data?.action !== 'approved') return null;
+  if (data?.action !== 'approved') return (
+    <section className="my-5 rounded border p-4">
+      <h2 className="text-lg font-semibold">Next: prepare signed agreement</h2>
+      <p className="mt-2 text-sm">
+        No separate online customer approval is required. Once the owner has finalized
+        and issued this quotation, open the converted Won lead&apos;s project,
+        choose <strong>Quote &amp; Agreement</strong>, and select
+        <strong> Prepare agreement</strong> for the correct issued quotation.
+        Then upload the signed PDF as the customer&apos;s acceptance evidence.
+      </p>
+      <Link className="mt-3 inline-block underline" href="/dashboard/projects">
+        Open Projects
+      </Link>
+    </section>
+  );
   return (
     <section className="my-5 rounded border p-4">
       <h2 className="text-xl">Quotation accepted — prepare agreement</h2>
