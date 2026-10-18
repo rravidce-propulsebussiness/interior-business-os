@@ -11888,7 +11888,12 @@ export interface Database {
         Returns: Json;
       };
       project_preflight_save: {
-        Args: { p_org: string; p_project: string; p_kind: string; p_details: string };
+        Args: {
+          p_org: string;
+          p_project: string;
+          p_kind: string;
+          p_details: string;
+        };
         Returns: Json;
       };
       project_quote_timeline_create: {
