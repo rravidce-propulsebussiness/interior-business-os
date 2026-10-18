@@ -56,3 +56,22 @@ it('does not imply an old agreement automatically covers a newer final quote',()
   expect(ui).toContain("not the currently selected Final quotation");
   expect(loader).toContain("revisionId:contract.data?.find");
 });
+
+
+it('uses one agreement upload and signing-evidence action without duplicate project controls',()=>{
+ const action=read('./[id]/site/agreement-actions.ts');
+ expect(ui).toContain('SignedAgreementUploadForm');
+ expect(ui).toContain("signedRecorded?'Replace signed agreement':'＋ Save signed agreement'");
+ expect(ui).not.toContain('<SignedAgreementForm');
+ expect(ui).not.toContain('<AgreementPdfUpload');
+ expect(ui).toContain("!canSeeCommercial&&group('Agreement',agreement)");
+ expect(forms).toContain('export function SignedAgreementUploadForm');
+ expect(forms).toContain('saveSignedAgreement(projectId,contractId,form)');
+ expect(forms).not.toContain('export function AgreementPdfUpload');
+ expect(forms).not.toContain('export function SignedAgreementForm');
+ expect(forms).not.toContain("'inspection','agreement','design'");
+ expect(action).toContain("export async function saveSignedAgreement(");
+ expect(action).toContain("p_action: 'record_signed_pdf'");
+ expect(action).toContain("p_category: 'agreement'");
+ expect(action).toContain("uploaded: true");
+});
