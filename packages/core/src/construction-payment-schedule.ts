@@ -220,7 +220,12 @@ export function milestoneConstructionStages(): ConstructionStageTemplate[] {
       'Floor stair flight, slab electrical conduiting and beam/slab pre-pour record',
     ];
     if (base.code === 'MASONRY') updates.activities = [
-      ...base.activities,
+      // Keep concealed MEP installation and pressure tests in INTERNAL_PLASTER,
+      // not in both masonry and plastering milestones.
+      ...base.activities.filter(activity=>![
+        'Electrical conduits and plumbing concealed runs',
+        'Pressure and leakage tests',
+      ].includes(activity)),
       'Door frames and frame-anchor inspection per quoted floor',
     ];
     // The old combined FINISHES stage is replaced with individually tracked
