@@ -424,3 +424,23 @@ it('shows both structured saved warranty and stage payment schedule after legacy
   expect(html).toContain('Proposed stage-wise payment schedule');
   expect(html).toContain('33,30,000');
 });
+
+
+it('prints quality and material requirements only for saved construction stage links', () => {
+  const d=quotationDocumentFixture();
+  d.lines[0]!.description=encodeSftEstimate(calculateSftEstimate({
+    rows:[{name:'Ground Floor',kind:'floor',lengthFeet:'20',widthFeet:'30',ratePerSqft:'1850'}],
+    materialIds:[],
+  },[]));
+  d.terms='[STAGE_PAYMENT_PLAN]\nGround slab|70.00\nGround masonry|30.00\n[/STAGE_PAYMENT_PLAN]\n'+
+    '[STAGE_PAYMENT_LINKS]\n[["RCC/GROUND_FLOOR"],["MASONRY/GROUND_FLOOR"]]\n[/STAGE_PAYMENT_LINKS]';
+  const html=renderQuotationDocument(d);
+  expect(html).toContain('pb-quality-page');
+  expect(html).toContain('Stage-wise quality &amp; material plan');
+  expect(html).toContain('MASONRY');
+  expect(html).toContain('RCC');
+  expect(html).toContain('Slump/workability and concrete cube tests');
+  expect(html).not.toContain('[STAGE_PAYMENT_LINKS]');
+  d.terms=d.terms.replace(/\[STAGE_PAYMENT_LINKS\][\s\S]*?\[\/STAGE_PAYMENT_LINKS\]/,'');
+  expect(renderQuotationDocument(d)).not.toContain('pb-quality-page');
+});

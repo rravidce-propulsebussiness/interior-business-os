@@ -1960,3 +1960,16 @@ font-size:10px;line-height:1.5;color:#70849c}
 border-radius:7px;padding:5px 8px;font-size:10px;font-weight:800;cursor:pointer}
 .qs-payment-linked button:hover{background:#ffeadb}
 .qs-payment-stage-name{overflow-wrap:anywhere}
+
+
+/* Contract-linked stage guidance remains collapsed in the quotation editor. */
+.qs-payment-stage-guidance{margin-top:10px;padding:10px 12px;border:1px solid #e4eaf2;border-radius:12px;background:#fbfcff;color:#334155;font-size:12px}
+.qs-payment-stage-guidance>summary{cursor:pointer;font-weight:750;color:#254169;display:flex;justify-content:space-between;gap:8px;align-items:center}
+.qs-payment-stage-guidance[open]>summary{padding-bottom:9px}
+.qs-payment-stage-checklist{padding:10px 0;border-top:1px solid #e7ecf3}
+.qs-payment-stage-checklist h4{font-size:12px;color:#192e4b;font-weight:800;margin:0 0 7px}
+.qs-payment-stage-checklist strong{display:block;margin:9px 0 4px;font-size:11px}
+.qs-payment-stage-checklist ul{list-style:disc;margin:4px 0 8px;padding-left:18px}
+.qs-payment-stage-checklist li{padding:2px 0;line-height:1.55}
+.qs-payment-stage-guidance p{line-height:1.5;color:#64748b;margin:6px 0 0}
+@media (max-width:640px){.qs-payment-stage-guidance{padding:10px;font-size:11px}.qs-payment-stage-checklist ul{padding-left:17px}}

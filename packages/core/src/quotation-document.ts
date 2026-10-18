@@ -3,7 +3,8 @@ import { addressSchema, brandingSchema } from './commercial';
 import { parseSftEstimate } from './sft-quotation';
 import { parseCustomBrandQuote } from './custom-brand-quote';
 import { premiumCss, premiumSections } from './premium-quotation';
-import { savedStagePaymentPlan } from './quotation-payment-plan';
+import { savedStagePaymentPlan,savedStagePaymentLinks } from './quotation-payment-plan';
+import { guidanceForConstructionStage } from './construction-payment-schedule';
 import { customerTermSections } from './quotation-terms';
 const money = z.string().regex(/^(0|[1-9]\d{0,79})(\.\d{1,100})?$/);
 export const documentHeaderSchema = z.object({
@@ -89,6 +90,7 @@ export function renderQuotationDocument(input: unknown): string {
   // customer-facing terms. Print a readable table without exposing markers.
   const savedTerms = customerTermSections(d.terms);
   const paymentRows = savedStagePaymentPlan(d.terms) ?? [];
+  const paymentStageLinks = savedStagePaymentLinks(d.terms);
   const paymentValid = paymentRows.length > 0;
   const fullCents = Math.round(Number(d.totals.final_amount) * 100);
   let paidCents = 0;
@@ -357,6 +359,33 @@ export function renderQuotationDocument(input: unknown): string {
         '<p class="text muted">No additional quotation-specific conditions have been saved.</p>') +
       '</section>' +
     brochure.pageFooter('Payments / terms') + '</section>';
+  // Only saved quote-stage associations produce this proposed QA annexure.
+  // Never infer test completion, certification or material quantities.
+  const qualityCodes=[...new Set((paymentStageLinks??[]).flatMap(row=>
+    row.map(code=>code.split('/')[0]!)))].filter(code=>{
+      const info=guidanceForConstructionStage(code);
+      return info.checks.length>0||info.reports.length>0;
+    });
+  const qualityPage=isFloorQuote&&qualityCodes.length>0
+    ? '<section class="pb-page pb-quality-page">' +
+      brochure.pageHeader('Construction quality plan') +
+      '<div class="pb-section-title"><h2>Stage-wise quality &amp; material plan</h2></div>' +
+      '<p class="pb-section-subtitle">Proposed checks and records for work associated with saved payment milestones. Tests and material requirements follow approved drawings, specifications and the engineer\'s QA plan. No results or payments are automatically certified.</p>' +
+      '<div class="pb-terms-panel">' +
+      qualityCodes.map(code=>{
+        const info=guidanceForConstructionStage(code);
+        const detail=(label:string,entries:readonly string[])=>
+          entries.length?'<p class="text"><strong>'+label+':</strong> '+
+            entries.map(escape).join(' · ')+'</p>':'';
+        return '<div class="pb-term-section" style="break-inside:avoid;page-break-inside:avoid">' +
+          '<h3>'+escape(code.replaceAll('_',' '))+'</h3>' +
+          detail('Materials',info.materials) +
+          detail('Checks and tests',info.checks) +
+          detail('Reports and evidence',info.reports) + '</div>';
+      }).join('')+'</div>' +
+      '<p class="pb-section-subtitle">Lower-floor brickwork may proceed while upper-floor RCC continues, after required lower-floor structural and safety clearances.</p>' +
+      brochure.pageFooter('Construction quality plan')+'</section>'
+    : '';
   const amountLabel = isFloorQuote ? 'Total proposed construction cost' : 'Total quotation amount';
   const total = '<div class="pb-final-total"><span>' + amountLabel +
     '</span><strong>' + money(d.totals.final_amount) + '</strong></div>';
@@ -373,7 +402,7 @@ export function renderQuotationDocument(input: unknown): string {
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>${escape(d.number)} R${d.revision}</title>
     ${premiumCss.replaceAll('__ACCENT__', packageAccent)}</head><body><main>
-    ${brochure.cover}${pricingPage}${specificationPage}${schedulePage}${brochure.close}
+    ${brochure.cover}${pricingPage}${specificationPage}${schedulePage}${qualityPage}${brochure.close}
     </main></body></html>`;
 
 }
