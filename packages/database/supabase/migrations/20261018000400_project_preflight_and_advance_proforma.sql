@@ -39,7 +39,19 @@ begin
   'measurements_done',v.measurement_at is not null,
   'inspection_details',coalesce(v.inspection_details,''),
   'measurement_details',coalesce(v.measurement_details,''),
-  'inspection_at',v.inspection_at,'measurement_at',v.measurement_at);
+  'inspection_at',v.inspection_at,'measurement_at',v.measurement_at,
+  'signed_ready',exists(
+   select 1 from public.contracts c
+   join private.project_agreement_events ev on ev.organization_id=c.organization_id
+     and ev.project_id=c.project_id and ev.contract_id=c.id
+   where c.organization_id=p_org and c.project_id=p_project
+     and c.status in ('pending','active','on_hold')
+     and ev.event_kind='signed_copy_recorded'
+     and ev.scope_fingerprint=private.project_agreement_scope(c.id)
+     and ev.sequence=(select max(e2.sequence) from private.project_agreement_events e2
+       where e2.organization_id=c.organization_id and e2.project_id=c.project_id
+         and e2.contract_id=c.id)
+  ));
 end $read$;
 
 create function public.project_preflight_save(
