@@ -256,7 +256,7 @@ export default async function Quotations({
         <Link href={editor}>{row.quotation_number || 'Quotation'}</Link>
         {revision?.quotation_id===finalByCustomer.get(customerId) &&
           <span className="qs-final-label">★ Final</span>}
-        {shared && <span className="qs-quotes-state qs-state-shared">Shared</span>}
+        {shared ? <span className="qs-quotes-state qs-state-shared">Shared</span> : row.status === 'draft' ? <span className="qs-quotes-state">Saved</span> : null}
       </div>
       <div className="qs-quotes-mobile-meta">
         <span className="qs-quotes-service">{industry}</span>
