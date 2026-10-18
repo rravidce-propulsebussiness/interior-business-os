@@ -190,7 +190,7 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
  const quotations:ProjectQuotation=(quoteRoots?.error?[]:quoteRoots?.data??[])
    .filter(q=>q.current_revision_id&&revisionsById.has(q.current_revision_id))
    .map(q=>({id:q.id,number:q.quotation_number??'Quotation',
-     revisionId:q.current_revision_id,status:revisionsById.get(q.current_revision_id)??'',
+     revisionId:q.current_revision_id!,status:revisionsById.get(q.current_revision_id!)??'',
      createdAt:q.created_at??''}));
  const contractedRevision=permissions.finance&&!contract.error?contract.data?.[0]?.revision_id:null;
  // Read only a saved planning proposal before the agreement exists.
