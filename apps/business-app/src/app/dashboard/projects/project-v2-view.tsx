@@ -5,6 +5,7 @@ import { ownerWorkspaceNavigation } from '../owner-workspace-navigation';
 import { canAccess } from '@business-os/auth';
 import { guidanceForConstructionStage } from '@business-os/core/construction-payment-schedule';
 import { ProjectStageLinker,type StageLinkOption } from './project-stage-linker';
+import { ProjectClientAccess } from './project-client-access';
 import { MasterForm } from '../commercial/master-form';
 import { activeOrganization } from '@business-os/auth/server';
 import { projectWorkspace,formatMoney,pretty,shortDate,stringValue,
@@ -82,7 +83,7 @@ function ProjectHeader({data,active}:{data:WorkspaceData;active:ProjectPageSlug}
   <div className="pv2-project-header-actions">
    {data.permissions.manage&&data.projectRaw&&<Link href={cur(p.id,'overview')+'#project-settings'}
     className="pv2-button pv2-outline">✎ Edit Project</Link>}
-   {p.customerId&&<Link href={'/dashboard/customers/'+p.customerId+'#client-portal-access'}
+   {p.customerId&&<Link href={cur(p.id,'team')+'#client-portal-access'}
     className="pv2-button pv2-outline">Share with client</Link>}
   </div>
   <LinkTabs data={data} active={active}/>
@@ -515,11 +516,7 @@ function Team({d}:{d:WorkspaceData}){
   {d.site?.canManage&&users.length>0&&<details className="pv2-edit-drawer">
    <summary>＋ Add Project Team Member</summary><AssignRole projectId={d.project.id} users={users}/></details>}
  </section>
- <section className="pv2-panel"><Title title="Client / Owner Invitation" detail="Grant verified-email access to only this client's project"/>
-  <p className="pv2-muted">Client project invitations are managed from the existing linked client profile, after signed agreement and advance verification.</p>
-  {d.project.customerId&&<NextLink href={'/dashboard/customers/'+d.project.customerId+'#client-portal-access'}
-   label="Manage client invitation"/>}
- </section></div>;
+ <ProjectClientAccess projectId={d.project.id} customerId={d.project.customerId}/></div>;
 }
 const pages:{[key in ProjectPageSlug]:(p:{d:WorkspaceData})=>React.ReactNode}={
  overview:Overview,timeline:Timeline,documents:Documents,payments:Payments,

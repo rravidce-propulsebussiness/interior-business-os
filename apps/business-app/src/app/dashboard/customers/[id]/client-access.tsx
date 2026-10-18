@@ -62,10 +62,10 @@ export function ClientAccess({
   }
 
   return (
-    <section id="client-portal-access" className="cp-panel cp-wide-panel">
-      <div className="cp-section-heading">
+    <section id="client-portal-access" className="pv2-panel">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <h2>Client App Access</h2>
-        <span className="cp-muted">Private project sharing</span>
+        <span className="text-xs text-slate-500">Private project sharing</span>
       </div>
       <p className="mb-4 text-sm text-slate-600">
         Only confirmed projects with a signed agreement and recorded advance
@@ -97,7 +97,7 @@ export function ClientAccess({
               placeholder="client@example.com"
               onChange={(event) => setEmail(event.target.value)} />
           </label>
-          <button className="min-h-11 rounded-xl bg-blue-700 px-5 font-semibold text-white disabled:opacity-50"
+          <button className="min-h-11 rounded-xl bg-orange-600 px-5 font-semibold text-white disabled:opacity-50"
             disabled={pending} type="submit">
             {pending ? 'Saving…' : 'Grant access'}
           </button>
@@ -109,10 +109,10 @@ export function ClientAccess({
       )}
       {projects.length > 0 && <div className="mt-4 flex flex-wrap items-center gap-3 rounded-xl bg-orange-50 p-3 text-sm">
         <span className="font-semibold">Selected project link:</span>
-        <a className="break-all text-blue-800 underline" href={portalUrl} target="_blank" rel="noreferrer">
+        <a className="break-all text-orange-700 underline" href={portalUrl} target="_blank" rel="noreferrer">
           {portalUrl}
         </a>
-        <button className="rounded-lg border border-blue-200 bg-white px-3 py-1.5 font-semibold"
+        <button className="rounded-lg border border-orange-200 bg-white px-3 py-1.5 font-semibold"
           type="button" onClick={async () => {
             try {
               await navigator.clipboard.writeText(window.location.origin + portalUrl);
@@ -135,7 +135,7 @@ export function ClientAccess({
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 {item.active && (
-                  <button type="button" className="rounded-lg border border-blue-200 px-3 py-2 text-sm font-semibold text-blue-700"
+                  <button type="button" className="rounded-lg border border-blue-200 px-3 py-2 text-sm font-semibold text-orange-700"
                     onClick={async () => {
                       try {
                         await navigator.clipboard.writeText(

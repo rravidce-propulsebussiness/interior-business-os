@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import { commercialServices } from '../../commercial/service';
+import { commercialServices } from '../commercial/service';
 
 export type NewCustomerProjectResult = { ok: boolean; message: string; projectId?: string };
 
@@ -42,8 +42,7 @@ export async function createExistingClientProject(
      :result.error.message.slice(0,230)};
   }
   const projectId=z.uuid().parse(result.data);
-  revalidatePath('/dashboard/customers/'+fields.customerId);
-  revalidatePath('/dashboard/customers');
+  revalidatePath('/dashboard/projects?customer='+fields.customerId);
   revalidatePath('/dashboard/projects');
   return {ok:true,projectId,message:'Project created for this client.'};
  }catch(error){

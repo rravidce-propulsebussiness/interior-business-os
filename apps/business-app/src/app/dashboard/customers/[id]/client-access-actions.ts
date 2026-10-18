@@ -31,7 +31,8 @@ export async function setClientProjectAccess(input: unknown): Promise<{
       p_active: fields.active,
     });
     if (error) return { ok: false, message: error.message.slice(0, 220) };
-    revalidatePath('/dashboard/customers/' + fields.customerId);
+    revalidatePath('/dashboard/projects');
+    revalidatePath('/dashboard/projects/' + fields.projectId + '/team');
     return {
       ok: true,
       message: fields.active

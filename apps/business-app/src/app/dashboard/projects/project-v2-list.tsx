@@ -3,9 +3,11 @@ import Link from 'next/link';
 import { useMemo,useState } from 'react';
 import { OwnerIcon } from '../owner-shell';
 import { type ProjectEntry,pretty } from './project-v2-types';
+import { NewProjectForCustomer } from './new-project-for-customer';
 
-export function ProjectsDirectory({projects,clientName='',clientId=''}:{
- projects:ProjectEntry[];clientName?:string;clientId?:string;
+export function ProjectsDirectory({projects,customers=[],canCreateProject=false,clientName='',clientId=''}:{
+ projects:ProjectEntry[];customers?:{id:string;name:string}[];canCreateProject?:boolean;
+ clientName?:string;clientId?:string;
 }){
  const [search,setSearch]=useState('');
  const [filter,setFilter]=useState('all');
@@ -28,10 +30,9 @@ export function ProjectsDirectory({projects,clientName='',clientId=''}:{
  return <main id="main-content" className="pv2-page pv2-list-page">
   <div className="pv2-list-heading"><div><h1>{clientId?clientName+' · Projects':'Projects'}</h1>
    <p>{clientId?'All delivery projects for this one customer account. Open a project for execution.':'Manage all ongoing and completed projects'}</p></div>
-   {clientId?<Link href={'/dashboard/customers/'+clientId} className="pv2-button pv2-primary">
-    <OwnerIcon name="plus" size={17}/> New project for this client</Link>:
-   <Link href="/dashboard/crm/leads?status=won" className="pv2-button pv2-primary">
-    <OwnerIcon name="plus" size={17}/> New Project from Won Lead</Link>}</div>
+   {canCreateProject?<NewProjectForCustomer customers={customers} initialCustomerId={clientId}/>:
+    <Link href="/dashboard/crm/leads?status=won" className="pv2-button pv2-outline">
+     <OwnerIcon name="plus" size={17}/> Open Won Leads</Link>}</div>
   <label className="pv2-search"><OwnerIcon name="search" size={18}/>
    <input type="search" value={search} placeholder="Search projects, client or location…"
     onChange={e=>setSearch(e.target.value)} aria-label="Search projects"/></label>
@@ -52,7 +53,9 @@ export function ProjectsDirectory({projects,clientName='',clientId=''}:{
    </Link>)}</div>:
    <div className="pv2-blank pv2-directory-empty"><OwnerIcon name="projects" size={36}/>
     <h2>{projects.length?'No matching projects':'No projects yet'}</h2>
-    <p>{projects.length?'Try another status or search term.':'Convert a Won lead to create the first project.'}</p>
+    <p>{projects.length?'Try another status or search term.':
+     clientId?'This customer has no delivery projects yet. Use New Project above.':
+     'Start from a Won lead, or choose an existing customer in New Project above.'}</p>
     <Link href="/dashboard/crm/leads" className="pv2-button pv2-primary">Open Leads</Link>
    </div>}
  </main>;
