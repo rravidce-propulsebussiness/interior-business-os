@@ -350,7 +350,7 @@ export async function createStudioQuotation(input: unknown): Promise<{
     revalidatePath('/dashboard/crm/leads');
     return {
       ok: true,
-      message: 'Branded quotation draft created.' + linkWarning,
+      message: 'Quotation saved. You can edit, preview or share it.' + linkWarning,
       revisionId,
     };
   } catch (error) {
