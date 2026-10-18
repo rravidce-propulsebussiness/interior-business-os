@@ -106,8 +106,18 @@ begin
  then raise exception 'Record signed agreement before issuing advance request' using errcode='23514';end if;
  select invoice_id into existing from private.project_advance_proformas
   where organization_id=p_org and contract_id=c.id;
- if existing is not null then return existing;end if;
- amount=round(private.finance_decimal(c.original_contract_value)*p_percent/100,c.precision);
+ if existing is not null then
+  if not exists (
+   select 1 from private.project_advance_proformas ap
+   join public.invoices invoice on invoice.organization_id=ap.organization_id and invoice.id=ap.invoice_id
+   where ap.organization_id=p_org and ap.contract_id=c.id
+    and invoice.status='issued' and ap.advance_percent=p_percent
+  ) then
+   raise exception 'Advance proforma already exists with a different percentage or has been voided. Review in Finance.' using errcode='23514';
+  end if;
+  return existing;
+ end if;
+ amount=round(private.contract_value(c.id)*p_percent/100,c.precision);
  if amount<=0 then raise exception 'Advance amount is too small' using errcode='22023';end if;
  payload=jsonb_build_object('invoice_type','proforma',
    'issue_date',to_char(current_date,'YYYY-MM-DD'),'due_date',null,
