@@ -376,3 +376,32 @@
  .pv2-card-progress{width:auto;min-width:76px;display:flex;align-items:center;gap:7px}
  .pv2-card-progress .pv2-bar{width:55px;flex:0 0 55px}
 }
+
+
+/* The sole project-creation form belongs to Projects, never Clients. */
+.pv2-new-project{position:relative;min-width:0;flex-shrink:0}
+.pv2-new-project-panel{position:absolute;z-index:30;right:0;top:calc(100% + 12px);
+ width:min(440px,calc(100vw - 36px));padding:18px;border:1px solid #eddfd4;
+ border-radius:16px;background:#fff;box-shadow:0 18px 45px #1f314027}
+.pv2-new-project-panel h2{font-size:18px;line-height:1.35;font-weight:850;color:#1d304a;margin:0 0 5px}
+.pv2-new-project-panel>.pv2-muted{font-size:12px;line-height:1.6;margin-bottom:13px}
+.pv2-new-project-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;min-width:0}
+.pv2-new-project-form label{display:grid;gap:5px;font-size:12px;font-weight:750;color:#334862;min-width:0}
+.pv2-new-project-form label:first-child,.pv2-new-project-form label:nth-child(2){grid-column:1/-1}
+.pv2-new-project-form input,.pv2-new-project-form select{width:100%;min-width:0;min-height:43px;
+ border:1px solid #dfdfe8;background:white;border-radius:10px;padding:9px 11px;color:#1e3350;
+ font:inherit;font-weight:550}
+.pv2-new-project-form input:focus,.pv2-new-project-form select:focus{outline:2px solid #fa9a65;outline-offset:1px}
+.pv2-new-project-footer{grid-column:1/-1;display:flex;gap:11px;flex-wrap:wrap;align-items:center;justify-content:space-between;padding-top:5px}
+.pv2-new-project-footer>a{color:#52647a;font-size:12px;text-decoration:underline}
+.pv2-new-project-form>.pv2-form-feedback{grid-column:1/-1}
+@media(max-width:700px){
+ .pv2-list-heading{flex-wrap:wrap;gap:12px}
+ .pv2-new-project{width:100%}
+ .pv2-new-project>button{width:100%;justify-content:center}
+ .pv2-new-project-panel{position:relative;top:auto;right:auto;width:100%;margin-top:10px;padding:14px}
+ .pv2-new-project-form{grid-template-columns:1fr}
+ .pv2-new-project-form label{grid-column:1/-1}
+ .pv2-new-project-footer{flex-direction:column;align-items:stretch}
+ .pv2-new-project-footer>button{width:100%;justify-content:center}
+}
