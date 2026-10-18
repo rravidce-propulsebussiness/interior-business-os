@@ -409,7 +409,7 @@
 
 /* Project command surface: one primary action, clear payment state and two
  * inline controls instead of redirect-heavy project navigation. */
-.pv2-project-header{border:1px solid #ecebf0;box-shadow:0 10px 30px #1c324010}
+.pv2-project-header{border:1px solid #ecebf0;box-shadow:0 10px 30px #1c324010;overflow:visible}
 .pv2-project-header-actions{position:relative;gap:10px}
 .pv2-header-drawer{min-width:0;max-width:100%}
 .pv2-header-drawer>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:center;min-height:43px;gap:6px}
