@@ -29,7 +29,7 @@ export type WorkspaceData = {
  tasks:{id:string;title:string;planned_start:string|null;status:string}[];
  contractValue:number|null;expenditure:number|null;
  projectRaw:Record<string,unknown>|null;
- agreement:{contractId:string;contractNumber:string;status:string;authorized:boolean}|null;
+ agreement:{contractId:string;contractNumber:string;status:string;authorized:boolean;revisionId:string|null}|null;
 };
 export function stringValue(v:unknown):string{return typeof v==='string'||typeof v==='number'?String(v):'';}
 export function formatMoney(value:number|null){return value===null?'—':new Intl.NumberFormat('en-IN',{
@@ -259,6 +259,7 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
   agreement:typeof agreement.contract_id==='string'?{
    contractId:agreement.contract_id,contractNumber:stringValue(agreement.contract_number),
    status:stringValue(agreement.contract_status),authorized:agreement.execution_authorized===true,
+   revisionId:contract.data?.find(c=>c.id===agreement.contract_id)?.revision_id??null,
   }:null,
   // There is no canonical all-in site cash-expense ledger yet.
   // A purchase order is only a commitment; labour entries cover just part of spend.
