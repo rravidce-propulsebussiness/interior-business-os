@@ -325,6 +325,12 @@ function ProjectCommandSidebar({d,showHistory=false}:{d:WorkspaceData;showHistor
 function ProjectWorkHub({d,showHistory=false}:{d:WorkspaceData;showHistory?:boolean}){
  return <div className="pv2-content pv2-command-workspace">
   <ProjectFinancialSummary d={d}/>
+  {d.site&&['not_started','design','client_approved'].includes(d.site.stage)&&
+   <section className="pv2-command-delivery"><ProjectLifecycle id={d.project.id}
+    stage={d.site.stage} canManage={d.site.canManage}
+    agreementSigned={d.agreement?.clearanceType==='signed_copy_recorded'||d.preflight?.signedReady===true}
+    industry={d.project.industry}
+    designs={d.site.designs.map(row=>({id:row.id,kind:stringValue(row.kind),status:stringValue(row.status)}))}/></section>}
   <div className="pv2-command-layout">
    <ProjectStageBoard d={d}/>
    <ProjectCommandSidebar d={d} showHistory={showHistory}/>
