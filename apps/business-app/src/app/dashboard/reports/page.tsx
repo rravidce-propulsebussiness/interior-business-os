@@ -127,7 +127,7 @@ function Trend({ documents }: { documents: GstDocumentRow[] | null }) {
 
 function Metric({ title, value, description, icon, href, tone = 'orange' }: {
   title: string; value: string; description: string; icon: OwnerIconName;
-  href?: string; tone?: 'orange' | 'green';
+  href?: string | undefined; tone?: 'orange' | 'green';
 }) {
   const children = <>
     <span className={'rp-metric-icon rp-icon-' + tone}><OwnerIcon name={icon} size={23}/></span>
@@ -207,7 +207,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
   }));
   if (available.has('receivables')) insights.push({ title: 'Review payments due', detail: 'Check receivables and invoice aging', href: periodUrl('receivables', from, to, queryProjectId), icon: 'billing' });
   if (available.has('execution')) insights.push({ title: 'Review project checks', detail: 'Tasks, inspections and site issues', href: periodUrl('execution', from, to, queryProjectId), icon: 'projects' });
-  if (saved.length) insights.push({ title: countFormat.format(saved.length) + ' recent saved reports', detail: 'Download PDF or CSV snapshots', href: '/dashboard/reports/snapshots/' + saved[0].id, icon: 'reports' });
+  if (saved[0]) insights.push({ title: countFormat.format(saved.length) + ' recent saved reports', detail: 'Download PDF or CSV snapshots', href: '/dashboard/reports/snapshots/' + saved[0].id, icon: 'reports' });
   const visibleFamilies = families.map((family) => ({
     ...family, kinds: family.kinds.filter((kind) => available.has(kind)),
   })).filter((family) => family.kinds.length > 0);
@@ -287,7 +287,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
         <div className="rp-panel-head"><div><h2>Explore Reports</h2><p>Choose a category to view detailed reports</p></div></div>
         {visibleFamilies.length ? <div className="rp-family-grid">
           {visibleFamilies.map((family) => <article className="rp-family" key={family.title}>
-            <Link className="rp-family-primary" href={periodUrl(family.kinds[0], from, to, queryProjectId)}>
+            <Link className="rp-family-primary" href={periodUrl(family.kinds[0]!, from, to, queryProjectId)}>
               <span className="rp-family-icon"><OwnerIcon name={family.icon} size={23}/></span>
               <span><strong>{family.title}</strong><small>{family.description}</small></span>
               <span className="rp-family-arrow" aria-hidden="true">›</span>
