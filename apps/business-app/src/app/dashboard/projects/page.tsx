@@ -12,10 +12,10 @@ export default async function ProjectsPage({searchParams}:{
  const {s,list,org,user}=await projectIndex();
  const {customer}=await searchParams;
  const validId=typeof customer==='string'&&/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(customer);
- const selectedCustomer=validId?await s.client.from('customers')
-   .select('id,display_name').eq('organization_id',s.org).eq('id',customer).maybeSingle():null;
- const client=selectedCustomer&&!selectedCustomer.error?selectedCustomer.data:null;
- const scoped=client?list.filter(p=>p.customerId===client.id):list;
+ const client=validId?list.find(p=>p.customerId===customer):undefined;
+ // The canonical directory contains only projects that are authorized for
+ // this company; do not introduce a new customer record query or leak others.
+ const scoped=validId?list.filter(p=>p.customerId===customer):list;
  const email=user.email??'';
  return <OwnerShell companyName={org.name} accountLabel={email.split('@')[0]||'Company member'}
   accountEmail={email} planLabel="Business workspace" navigation={ownerWorkspaceNavigation(s.context)}
