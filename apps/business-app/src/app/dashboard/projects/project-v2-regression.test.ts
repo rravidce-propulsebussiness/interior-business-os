@@ -37,3 +37,14 @@ describe('Projects v2 one screen per route',()=>{
   expect(ui).toContain('Finance workspace');
  });
 });
+
+ 
+it('shows an authorized project-specific quote, payment plan and agreement without adding a duplicate workspace',()=>{
+  expect(ui).toContain("slug:'documents',title:'Quote & Agreement'");
+  expect(ui).toContain("ContractHandoff revisionId={latestIssued.revisionId}");
+  expect(ui).toContain("label=\"Quote & payment plan\"");
+  expect(ui).toContain("label=\"Open agreement & schedule\"");
+  expect(loader).toContain("quotation:has('quotation.view','quotation')");
+  expect(loader).toContain(".eq('project_id',id)");
+  expect(loader).toContain("quotations:[]");
+});
