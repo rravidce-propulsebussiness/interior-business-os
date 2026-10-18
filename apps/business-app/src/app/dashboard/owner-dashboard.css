@@ -1,14 +1,14 @@
 /* One-company Owner workspace. All rules are scoped to prevent collisions
    with the admin shell and legacy tenant detail pages. */
 .owner-layout {
-  --owner-blue: #2563eb;
+  --owner-blue: #fe5105;
   --owner-text: #111c34;
   --owner-muted: #65738c;
-  --owner-line: #e8edf5;
+  --owner-line: #f1e8e2;
   --owner-shadow: 0 6px 22px rgba(25, 43, 78, 0.035);
   display: flex;
   min-height: 100vh;
-  background: #f6f8fc;
+  background: #fffaf7;
   color: var(--owner-text);
   color-scheme: light;
 }
@@ -33,8 +33,9 @@
 .owner-sidebar {
   width: 248px;
   flex: 0 0 248px;
-  background: linear-gradient(180deg, #101e35 0%, #101b2f 55%, #0a1628 100%);
-  color: #eef5ff;
+  background: #fff;
+  border-right: 1px solid #f1e8e2;
+  color: #111c34;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -50,7 +51,7 @@
   align-items: center;
   gap: 13px;
   padding: 1px 12px 29px;
-  color: #fff !important;
+  color: #111c34 !important;
 }
 .owner-brand-icon {
   display: grid;
@@ -58,8 +59,8 @@
   width: 41px;
   height: 42px;
   border-radius: 10px;
-  background: linear-gradient(135deg, #1a4b92, #243554 55%, #11233e);
-  color: #e8f3ff;
+  background: linear-gradient(135deg, #ff8024, #ff4d00);
+  color: #fff;
 }
 .owner-brand strong {
   font-size: 20px;
@@ -71,7 +72,7 @@
   display: block;
   font-size: 11px;
   margin-top: 2px;
-  color: #b7c3d5;
+  color: #66758b;
 }
 .owner-nav {
   display: flex;
@@ -91,7 +92,7 @@
   min-height: 44px;
   padding: 11px 13px;
   border-radius: 10px;
-  color: #c9d4e3 !important;
+  color: #37455f !important;
   font-size: 13px;
   font-weight: 500;
   transition:
@@ -103,18 +104,19 @@
 }
 .owner-nav-item:hover,
 .owner-nav-active {
-  background: rgba(91, 139, 225, 0.13);
-  color: white !important;
+  background: #fff0e6;
+  color: #ef5209 !important;
 }
 .owner-nav-active {
-  background: linear-gradient(110deg, #2b7df4, #195de2);
-  box-shadow: 0 5px 15px #0a3cab35;
+  background: linear-gradient(110deg, #ff791c, #ff4d00);
+  box-shadow: 0 5px 15px #ff691b28;
+  color: white !important;
   font-weight: 650;
 }
 .owner-sidebar-bottom {
   flex: 0 0 auto;
   padding: 13px 4px 0;
-  border-top: 1px solid #263a56;
+  border-top: 1px solid #f1e8e2;
 }
 .owner-plan-card {
   border: 1px solid #135b5060;
@@ -154,8 +156,7 @@
 .owner-workspace {
   min-width: 0;
   flex: 1;
-  background:
-    radial-gradient(ellipse at 72% 0%, #e9f1ff 0%, transparent 36rem), #f6f8fc;
+  background: radial-gradient(ellipse at 72% 0%, #fff0e6 0%, transparent 36rem), #fffaf7;
 }
 .owner-topbar {
   position: relative;
@@ -186,12 +187,12 @@
   gap: 12px;
   align-items: center;
   padding: 0 15px;
-  background: #f1f4f9;
+  background: #fcf8f7;
   border-radius: 12px;
   color: #687995;
 }
 .owner-search:focus-within {
-  outline: 2px solid #b5d0ff;
+  outline: 2px solid #ffad79;
 }
 .owner-layout .owner-search input {
   width: 100%;
@@ -241,7 +242,7 @@
   width: 37px;
   flex: 0 0 37px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #273c65, #0f1b31);
+  background: #47556c;
   color: #fff;
   font-size: 12px;
   font-weight: 750;
