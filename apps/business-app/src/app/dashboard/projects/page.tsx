@@ -21,5 +21,5 @@ export default async function ProjectsPage({searchParams}:{
   accountEmail={email} planLabel="Business workspace" navigation={ownerWorkspaceNavigation(s.context)}
   currentHref="/dashboard/projects" search="" searchPlaceholder="Search projects, client or location…"
   notificationsEnabled={canAccess(s.context,{organizationId:s.org,permission:'notification.view'})}
-  dashboardBrand><ProjectsDirectory projects={scoped} clientName={client?.display_name||''} clientId={client?.id||''}/></OwnerShell>;
+  dashboardBrand><ProjectsDirectory projects={scoped} clientName={client?.client||'Client'} clientId={validId?customer:''}/></OwnerShell>;
 }
