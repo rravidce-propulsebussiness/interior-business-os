@@ -64,7 +64,7 @@ export function ClientDesignReview({
         <button
           disabled={pending}
           type="submit"
-          className="min-h-11 w-full rounded-xl bg-blue-700 px-4 font-semibold text-white disabled:opacity-50"
+          className="min-h-11 w-full rounded-xl bg-orange-700 px-4 font-semibold text-white disabled:opacity-50"
         >
           {pending ? 'Recording…' : 'Approve final designs'}
         </button>
