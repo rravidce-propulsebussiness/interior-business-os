@@ -39,6 +39,7 @@ describe('Customer Profile uses one navigation and one copy of related actions',
 });
 
 
+const directory = readFileSync(new URL('../page.tsx',import.meta.url),'utf8');
 const newProject = readFileSync(new URL('./new-client-project.tsx',import.meta.url),'utf8');
 const createAction = readFileSync(new URL('./customer-project-actions.ts',import.meta.url),'utf8');
 const light = readFileSync(new URL('./client-profile-light.css',import.meta.url),'utf8');
@@ -47,6 +48,7 @@ describe('Client account canonical projects and shared dashboard UI',()=>{
  it('excludes retired quotation prospects without deleting their quote history',()=>{
   expect(page).toContain(".eq('is_sales_prospect', false)");
   expect(page).toContain(".eq('removed_from_workspace', false)");
+  expect(directory).toContain(".eq('removed_from_workspace', false)");
   expect(page).toContain(".neq('status', 'cancelled')");
   expect(page).toContain("const projectHref = '/dashboard/projects?customer='");
   expect(page).toContain("projects.map((project)");
