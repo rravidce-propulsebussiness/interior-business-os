@@ -177,14 +177,14 @@ function Overview({d}:{d:WorkspaceData}){
   <section className="pv2-stat-grid" aria-label="Project financial and progress summary">
    {[
     {name:'Client Payments Received',amount:formatMoney(received),detail:d.transactions===null?'Finance access required':'Verified recorded receipts',kind:'green',icon:'billing' as OwnerIconName},
-    {name:'Site Expenditure',amount:formatMoney(d.expenditure),detail:'Full site expense ledger not available',kind:'orange',icon:'expenses' as OwnerIconName},
-    {name:'Net Site Cash Position',amount:formatMoney(net),detail:'Receipts minus confirmed site spending',kind:'blue',icon:'billing' as OwnerIconName},
-    {name:'Project Completion',amount:progress===null?'Not tracked':progress+'%',detail:'Weighted physical work tasks',kind:'purple',icon:'projects' as OwnerIconName}
+    ...(d.expenditure!==null?[{name:'Site Expenditure',amount:formatMoney(d.expenditure),detail:'Confirmed site spending',kind:'orange',icon:'expenses' as OwnerIconName}]:[]),
+    ...(net!==null?[{name:'Net Site Cash Position',amount:formatMoney(net),detail:'Receipts less recorded site spending',kind:'blue',icon:'billing' as OwnerIconName}]:[]),
+    ...(progress!==null?[{name:'Project Completion',amount:progress+'%',detail:'Weighted physical work tasks',kind:'purple',icon:'projects' as OwnerIconName}]:[])
    ].map(card=><article className="pv2-stat" key={card.name}><span className={'pv2-stat-icon '+card.kind}>
     <OwnerIcon name={card.icon} size={22}/></span><div><small>{card.name}</small>
     <strong>{card.amount}</strong><p>{card.detail}</p></div></article>)}
   </section>
-  <div className="pv2-overview-split">
+  {site?.stage==='execution'&&<div className="pv2-overview-split">
    <section className="pv2-panel pv2-current-stage">
     <Title title="Current Stage" detail="Approved quote-based execution milestones"
      action={<NextLink href={cur(d.project.id,'timeline')} label="Open Timeline"/>}/>
@@ -216,9 +216,7 @@ function Overview({d}:{d:WorkspaceData}){
      <p>{newest?'Workers required: '+(stringValue(newest.tomorrow_workers)||'Not set'):'Open Timeline to plan upcoming work.'}</p>
     </div>
    </section>
-  </div>
-
-
+  </div>}
  </div>;
 }
 type Activity={id:string;date:string;title:string;kind:string;description:string;media?:SiteRow};
