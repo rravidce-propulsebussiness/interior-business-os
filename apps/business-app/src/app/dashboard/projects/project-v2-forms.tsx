@@ -3,7 +3,7 @@ import { useActionState, useTransition, useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { saveProjectSite, uploadProjectSiteMedia } from './[id]/site/actions';
 import { syncConstructionFromProjectAgreement, assignConstructionRole } from './[id]/site/construction-actions';
-import { recordSignedAgreement } from './[id]/site/agreement-actions';
+import { saveSignedAgreement } from './[id]/site/agreement-actions';
 import { prepareAgreementFromProjectQuote } from './project-agreement-actions';
 
 type Result={saved:boolean;message:string};
@@ -44,18 +44,6 @@ export function PrepareAgreement({projectId,revisionId}:{projectId:string;revisi
  </div>;
 }
 
-export function AgreementPdfUpload({projectId}:{projectId:string}){
- return <ProjectForm projectId={projectId} operation="upload" label="Upload signed agreement" media>
-  <input type="hidden" name="category" value="agreement"/>
-  <label>Signed agreement PDF
-   <input type="file" required name="file" accept="application/pdf"/>
-  </label>
-  <label>Reference / notes
-   <input name="caption" maxLength={500} placeholder="Agreement signed date or reference"/>
-  </label>
-  <p className="pv2-hint">Private signed PDF, maximum 8 MB. Once uploaded, record its signing evidence below.</p>
- </ProjectForm>;
-}
 export function SyncStages({id}:{id:string}){
  const router=useRouter();
  const [pending,start]=useTransition();
@@ -125,24 +113,39 @@ export function ProjectLifecycle({id,stage,canManage,designs}:{
  </section>;
  return null;
 }
-export function SignedAgreementForm({projectId,contractId,media}:{
- projectId:string;contractId:string;media:{id:string;name:string}[];
+/** One form handles either a new signed PDF or a previously uploaded copy. */
+export function SignedAgreementUploadForm({projectId,contractId,media,recorded=false}:{
+ projectId:string;contractId:string;media:{id:string;name:string}[];recorded?:boolean;
 }){
  const router=useRouter();
  const [state,submit,pending]=useActionState(async(_prev:Result,form:FormData)=>{
-  const result=await recordSignedAgreement(projectId,contractId,form);
-  if(result.saved)router.refresh();
+  const result=await saveSignedAgreement(projectId,contractId,form);
+  if(result.saved||result.uploaded)router.refresh();
   return result;
  },initial);
- return <form action={submit} className="pv2-form">
-  <label>Uploaded signed agreement PDF<select name="media_id" required defaultValue="">
-   <option value="" disabled>Select uploaded agreement</option>
-   {media.map(m=><option key={m.id} value={m.id}>{m.name}</option>)}
-  </select></label>
-  <label>Signed agreement evidence<textarea name="note" minLength={12} maxLength={3000}
-   rows={2} required placeholder="Who signed, date, and how the signed copy was received"/></label>
-  <button className="pv2-button pv2-primary" disabled={pending}>Record signed agreement</button>
-  {state.message&&<p role="status" className="pv2-form-feedback">{state.message}</p>}
+ return <form action={submit} className="pv2-form pv2-signed-agreement-form">
+  <label>Upload signed agreement PDF
+   <input type="file" name="file" accept="application/pdf"/>
+  </label>
+  {media.length>0&&<label>Or use a signed PDF already uploaded
+   <select name="media_id" defaultValue="">
+    <option value="">Select existing signed PDF (optional)</option>
+    {media.map(m=><option key={m.id} value={m.id}>{m.name}</option>)}
+   </select>
+  </label>}
+  <label>Signing details
+   <textarea name="note" rows={3} required minLength={12} maxLength={3000}
+    placeholder="Who signed, signing date, and how the signed copy was received"/>
+  </label>
+  <p className="pv2-hint">
+   Choose one PDF option only. Select an existing file only if it contains the actual signatures.
+   A PDF by itself is not evidence of signing until you save these details.
+   Maximum upload size 8 MB.
+  </p>
+  <button type="submit" className="pv2-button pv2-primary" disabled={pending}>
+   {pending?'Saving signed agreement…':recorded?'Save replacement signed agreement':'Save signed agreement'}
+  </button>
+  {state.message&&<p role="status" className={'pv2-form-feedback '+(state.saved?'good':'bad')}>{state.message}</p>}
  </form>;
 }
 export function SiteReportForm({id}:{id:string}){
