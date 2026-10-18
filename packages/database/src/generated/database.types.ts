@@ -11108,6 +11108,18 @@ export interface Database {
         };
         Returns: Json;
       };
+      customer_project_create: {
+        Args: {
+          p_org: string;
+          p_customer: string;
+          p_name: string;
+          p_industry_key: string;
+          p_project_type: string;
+          p_site_city: string;
+          p_request_id: string;
+        };
+        Returns: string;
+      };
       deployment_readiness: { Args: Record<string, never>; Returns: boolean };
       employee_invitation_accept: {
         Args: { p_invitation_id: string };
