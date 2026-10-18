@@ -303,28 +303,32 @@ function Documents({d}:{d:WorkspaceData}){
     <section className="pv2-section-intro"><h2>Quotation & Agreement</h2>
      <p>Review and finalize the quotation, then prepare and upload the signed agreement. No separate online quotation approval is required.</p></section>
     <section className="pv2-panel pv2-quote-links">
-     <Title title="Project Quotations" detail="Quotations for this Won lead, including original immutable quotation history"/>
+     <Title title="Final Quotation" detail="Only the selected Final quotation is shown. Previous saved quotations remain in Quotations history."/>
      {d.quotations.length?<div className="pv2-file-list">{d.quotations.map(q=>
       <div className="pv2-commercial-row" key={q.id}>
        <div className="pv2-commercial-details"><strong>{q.number}</strong>
-        <span><Status value={q.status}/><small>{shortDate(q.createdAt)}</small></span></div>
+        <span><Status value={q.status==='draft'?'Saved':q.status}/><small>{shortDate(q.createdAt)}</small></span></div>
        <div className="pv2-commercial-actions">
         <NextLink href={'/dashboard/quotations/'+q.revisionId+'/preview'} label="Preview PDF"/>
-        <NextLink href={'/dashboard/quotations/'+q.revisionId+'/studio?step=quote'} label="Quote & payment plan"/>
+        <NextLink href={'/dashboard/quotations/'+q.revisionId+'/studio?step=quote'} label={q.status==='draft'?'Edit saved quote':'Quote & payment plan'}/>
         {!d.agreement&&q.status==='issued'&&d.permissions.manage&&d.permissions.finance&&
          <PrepareAgreement projectId={d.project.id} revisionId={q.revisionId}/>}
        </div>
+       {q.status==='draft'&&<p className="pv2-muted">Saved and editable. Sharing/finalizing this quotation locks the agreed version before preparing an agreement; no separate client approval is needed.</p>}
       </div>)}</div>:
-      <Blank title="No quotation linked to this project"
+      <Blank title="No saved final quotation found"
        detail="No active quotation was found for this project or its converted Won lead."
        action={d.permissions.quotation?<NextLink href="/dashboard/quotations" label="Open Quotations"/>:undefined}/>}
+     {d.permissions.quotation&&<NextLink href="/dashboard/quotations" label="View earlier quotations / change Final"/>}
     </section>
     <section className="pv2-panel pv2-agreement-status">
      <Title title="Agreement" detail="Prepare agreement, upload signed PDF and record the evidence"/>
      {d.agreement?<div>
       <div className="pv2-between"><strong>{d.agreement.contractNumber}</strong>
        <Status value={d.agreement.authorized?'approved':d.agreement.status||'pending'}/></div>
-      <p className="pv2-muted">This agreement is prepared from the final issued quotation. Recorded signing, payment schedule, and advance are still required before site execution.</p>
+      {d.quotations[0]&&d.agreement.revisionId&&d.quotations[0].revisionId!==d.agreement.revisionId?
+       <p role="alert" className="pv2-form-feedback bad">This agreement was prepared from an earlier quotation, not the currently selected Final quotation. Review the agreement scope before signing or starting work.</p>:
+       <p className="pv2-muted">The agreement is tied to its saved quotation version. Payment schedule, signed evidence and advance remain required for execution.</p>}
       <NextLink href={'/dashboard/finance/contracts/'+d.agreement.contractId} label="Open agreement & schedule"/>
       {agreement.some(x=>x.mime==='application/pdf')&&d.site?.canManage&&<details className="pv2-edit-drawer">
        <summary>Record signed agreement evidence</summary>

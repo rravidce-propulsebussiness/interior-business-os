@@ -29,7 +29,7 @@ export type WorkspaceData = {
  tasks:{id:string;title:string;planned_start:string|null;status:string}[];
  contractValue:number|null;expenditure:number|null;
  projectRaw:Record<string,unknown>|null;
- agreement:{contractId:string;contractNumber:string;status:string;authorized:boolean}|null;
+ agreement:{contractId:string;contractNumber:string;status:string;authorized:boolean;revisionId:string|null}|null;
 };
 export function stringValue(v:unknown):string{return typeof v==='string'||typeof v==='number'?String(v):'';}
 export function formatMoney(value:number|null){return value===null?'—':new Intl.NumberFormat('en-IN',{
@@ -212,11 +212,24 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
    .select('id,status').eq('organization_id',s.org).in('id',revisionIds):null;
  const revisionsById=new Map((quoteRevisions?.error?[]:quoteRevisions?.data??[])
    .map(r=>[r.id,r.status]));
- const quotations:ProjectQuotation[]=quoteRoots
-   .filter(q=>q.current_revision_id&&revisionsById.has(q.current_revision_id))
-   .map(q=>({id:q.id,number:q.quotation_number??'Quotation',
-     revisionId:q.current_revision_id!,status:revisionsById.get(q.current_revision_id!)??'',
-     createdAt:q.created_at??''}));
+ // Reuse the same customer-level Final choice as the Quotations workspace.
+ // A lead may have quote alternatives stored under retired prospect project IDs;
+ // display only a Final quote that belongs to this verified project/lead set.
+ const choice=permissions.quotation&&quoteRoots.length
+   ?await s.client.rpc('quotation_final_choices',{
+      p_org:s.org,p_customer_ids:[project.customer_id],
+    }):null;
+ const choiceObject=choice&&!choice.error?obj(choice.data):{};
+ const finalQuoteId=typeof choiceObject[project.customer_id]==='string'
+   ?choiceObject[project.customer_id] as string:null;
+ const finalRoot=quoteRoots.find(q=>q.id===finalQuoteId
+   &&q.current_revision_id&&revisionsById.has(q.current_revision_id))
+   ??quoteRoots.find(q=>q.current_revision_id&&revisionsById.has(q.current_revision_id));
+ const quotations:ProjectQuotation[]=finalRoot&&finalRoot.current_revision_id
+   ?[{id:finalRoot.id,number:finalRoot.quotation_number??'Quotation',
+      revisionId:finalRoot.current_revision_id,
+      status:revisionsById.get(finalRoot.current_revision_id)??'',
+      createdAt:finalRoot.created_at}]:[];
  const contractedRevision=permissions.finance&&!contract.error?contract.data?.[0]?.revision_id:null;
  // Read only a saved planning proposal before the agreement exists.
  // This never activates milestones or invents payment receipts.
@@ -246,6 +259,7 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
   agreement:typeof agreement.contract_id==='string'?{
    contractId:agreement.contract_id,contractNumber:stringValue(agreement.contract_number),
    status:stringValue(agreement.contract_status),authorized:agreement.execution_authorized===true,
+   revisionId:contract.data?.find(c=>c.id===agreement.contract_id)?.revision_id??null,
   }:null,
   // There is no canonical all-in site cash-expense ledger yet.
   // A purchase order is only a commitment; labour entries cover just part of spend.
