@@ -34,7 +34,7 @@ export const projectPages=[
 export type ProjectPageSlug=(typeof projectPages)[number]['slug'];
 const cur=(id:string,view:string)=>'/dashboard/projects/'+id+(view==='overview'?'':'/'+view);
 function Status({value}:{value:string}) {
- return <span className={'pv2-status '+(['active','ongoing','paid','passed','approved','received','completed'].includes(value)
+ return <span className={'pv2-status '+(['active','ongoing','paid','passed','approved','received','completed','signed'].includes(value)
   ?'good':['pending','in_progress','requested','submitted','ordered'].includes(value)?'warn':'neutral')}>
   {pretty(value)||'Not recorded'}</span>;
 }
@@ -246,7 +246,9 @@ function Timeline({d}:{d:WorkspaceData}){
   ...(site?.media??[]).filter(r=>r.category!=='agreement').map(r=>({kind:'media' as const,id:r.id,title:stringValue(r.filename)})),
  ];
  return <div className="pv2-content pv2-timeline">
-  {site&&<ProjectLifecycle id={d.project.id} stage={site.stage} canManage={site.canManage}
+  <ProjectPriority d={d}/>
+  {site&&(site.stage!=='design'||(d.preflight?.inspectionDone&&d.preflight?.measurementsDone))&&
+   <ProjectLifecycle id={d.project.id} stage={site.stage} canManage={site.canManage}
    agreementSigned={d.agreement?.clearanceType==='signed_copy_recorded'}
    industry={d.project.industry}
    designs={site.designs.map(x=>({id:x.id,kind:stringValue(x.kind),status:stringValue(x.status)}))}/>}
@@ -358,9 +360,9 @@ function Documents({d}:{d:WorkspaceData}){
    {canSeeCommercial&&<>
     <ProjectPriority d={d}/>
     <section className="pv2-section-intro"><h2>Quotation & Agreement</h2>
-     <p>Review and finalize the quotation, then prepare and upload the signed agreement. No separate online quotation approval is required.</p></section>
+     <p>One final quotation, one agreement, and a clear next action.</p></section>
     <section className="pv2-panel pv2-quote-links">
-     <Title title="Final Quotation" detail="Only the selected Final quotation is shown. Previous saved quotations remain in Quotations history."/>
+     <Title title="Final Quotation" detail="The quotation linked to this project's agreed scope."/>
      {d.quotations.length?<div className="pv2-file-list">{d.quotations.map(q=>
       <div className="pv2-commercial-row" key={q.id}>
        <div className="pv2-commercial-details"><strong>{q.number}</strong>
@@ -376,7 +378,9 @@ function Documents({d}:{d:WorkspaceData}){
       <Blank title="No saved final quotation found"
        detail="No active quotation was found for this project or its converted Won lead."
        action={d.permissions.quotation?<NextLink href="/dashboard/quotations" label="Open Quotations"/>:undefined}/>}
-     {d.permissions.quotation&&<NextLink href="/dashboard/quotations" label="View earlier quotations / change Final"/>}
+     {d.permissions.quotation&&<details className="pv2-secondary-more"><summary>Quotation history / change Final</summary>
+      <NextLink href="/dashboard/quotations" label="Manage quotation history"/>
+     </details>}
     </section>
     <section className="pv2-panel pv2-agreement-status">
      <Title title="Agreement" detail="One step to upload or select a signed PDF and save its evidence"/>
