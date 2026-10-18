@@ -66,7 +66,7 @@ function LinkTabs({data,active}:{data:WorkspaceData;active:ProjectPageSlug}){
   {projectPages.filter(p=>p.slug!=='payments'||data.permissions.payments).map(p=>
    <Link key={p.slug} href={cur(data.project.id,p.slug)}
     aria-current={active===p.slug?'page':undefined} className={active===p.slug?'selected':''}>
-    <OwnerIcon name={p.icon} size={16}/>{p.title}</Link>)}
+    <OwnerIcon name={p.icon} size={16}/>{p.slug==='documents'&&!data.permissions.quotation&&!data.permissions.finance?'Documents':p.title}</Link>)}
  </nav>;
 }
 function ProjectHeader({data,active}:{data:WorkspaceData;active:ProjectPageSlug}){
@@ -288,6 +288,7 @@ function Timeline({d}:{d:WorkspaceData}){
 }
 function Documents({d}:{d:WorkspaceData}){
  const latestIssued=d.quotations.find(q=>q.status==='issued');
+ const canSeeCommercial=d.permissions.quotation||d.permissions.finance;
  const photos=d.site?.media??[],agreement=photos.filter(r=>stringValue(r.category)==='agreement');
  const plans=photos.filter(r=>['plan','design'].includes(stringValue(r.category)));
  const other=photos.filter(r=>!['agreement','plan','design'].includes(stringValue(r.category)));
@@ -300,41 +301,41 @@ function Documents({d}:{d:WorkspaceData}){
    <b>View / Download</b></a>)}</div>:<Blank title="No files in this category" detail="Upload an authorized document to keep it on this project."/>}
  </section>;
  return <div className="pv2-content">
-  <section className="pv2-section-intro"><h2>Quotation & Agreement</h2>
-    <p>One approved quotation supplies the scope, payment plan and agreement. Site documents are retained below.</p></section>
-   <section className="pv2-panel pv2-quote-links">
-    <Title title="Project Quotations" detail="Only quotations linked to this project are shown here."/>
-    {d.quotations.length?<div className="pv2-file-list">{d.quotations.map(q=>
-     <div className="pv2-commercial-row" key={q.id}>
-      <div className="pv2-commercial-details"><strong>{q.number}</strong>
-       <span><Status value={q.status}/><small>{shortDate(q.createdAt)}</small></span></div>
-      <div className="pv2-commercial-actions">
-       <NextLink href={'/dashboard/quotations/'+q.revisionId+'/preview'} label="Preview PDF"/>
-       <NextLink href={'/dashboard/quotations/'+q.revisionId+'/studio?step=quote'} label="Quote & payment plan"/>
-      </div>
-     </div>)}</div>:
-     <Blank title="No quotation linked to this project"
-      detail="Locate the approved quotation for this project. An unrelated customer quotation will not be attached automatically."
-      action={d.permissions.quotation?<NextLink href="/dashboard/quotations" label="Open Quotations"/>:undefined}/>}
-    {latestIssued&&!d.agreement&&<ContractHandoff revisionId={latestIssued.revisionId}/>}
-   </section>
-   <section className="pv2-panel pv2-agreement-status">
-    <Title title="Agreement" detail="Prepare the contract from an accepted quotation and record signed evidence."/>
-    {!d.agreement&&<p className="pv2-muted">No linked agreement is available yet. Open an issued, customer-approved quotation to create the agreement. Timeline stages cannot be activated from a draft quote.</p>}
-    {d.agreement&&<NextLink href={'/dashboard/finance/contracts/'+d.agreement.contractId} label="Open agreement & schedule"/>}
-    {d.agreement&&<p className="pv2-muted">Execution requires the signed agreement and advance. Proposed payment milestones are not receipts.</p>}
-   </section>
-  {d.agreement&&<section className="pv2-panel pv2-agreement-status">
-   <div className="pv2-between"><div><h2>Agreement · {d.agreement.contractNumber}</h2>
-    <p className="pv2-muted">Execution clearance comes from the recorded signed agreement and advance.</p></div>
-    <Status value={d.agreement.authorized?'approved':d.agreement.status||'pending'}/></div>
-   {agreement.length>0&&d.site?.canManage&&<details className="pv2-edit-drawer">
-    <summary>Record signed agreement evidence</summary>
-    <SignedAgreementForm projectId={d.project.id} contractId={d.agreement.contractId}
-     media={agreement.filter(x=>x.mime==='application/pdf').map(x=>({id:x.id,name:stringValue(x.filename)}))}/>
-   </details>}
-  </section>}
-  <div className="pv2-section-intro"><h2>Project Documents</h2><p>Signed PDFs, approved drawings, site photos and revisions.</p></div>
+   {canSeeCommercial&&<>
+    <section className="pv2-section-intro"><h2>Quotation & Agreement</h2>
+     <p>Use the approved quote once for scope, payment stages and contract. Signed files remain in this project.</p></section>
+    <section className="pv2-panel pv2-quote-links">
+     <Title title="Project Quotations" detail="Current revisions linked to this exact project"/>
+     {d.quotations.length?<div className="pv2-file-list">{d.quotations.map(q=>
+      <div className="pv2-commercial-row" key={q.id}>
+       <div className="pv2-commercial-details"><strong>{q.number}</strong>
+        <span><Status value={q.status}/><small>{shortDate(q.createdAt)}</small></span></div>
+       <div className="pv2-commercial-actions">
+        <NextLink href={'/dashboard/quotations/'+q.revisionId+'/preview'} label="Preview PDF"/>
+        <NextLink href={'/dashboard/quotations/'+q.revisionId+'/studio?step=quote'} label="Quote & payment plan"/>
+       </div>
+      </div>)}</div>:
+      <Blank title="No quotation linked to this project"
+       detail="Open Quotations to locate the approved quote. Another project's quotation is not automatically attached here."
+       action={d.permissions.quotation?<NextLink href="/dashboard/quotations" label="Open Quotations"/>:undefined}/>}
+     {latestIssued&&!d.agreement&&<ContractHandoff revisionId={latestIssued.revisionId}/>}
+    </section>
+    <section className="pv2-panel pv2-agreement-status">
+     <Title title="Agreement" detail="Contract status, signed evidence and approved commercial schedule"/>
+     {d.agreement?<div>
+      <div className="pv2-between"><strong>{d.agreement.contractNumber}</strong>
+       <Status value={d.agreement.authorized?'approved':d.agreement.status||'pending'}/></div>
+      <p className="pv2-muted">Recorded signing and advance verification are required for execution. Proposed quotation milestones are not receipts.</p>
+      <NextLink href={'/dashboard/finance/contracts/'+d.agreement.contractId} label="Open agreement & schedule"/>
+      {agreement.length>0&&d.site?.canManage&&<details className="pv2-edit-drawer">
+       <summary>Record signed agreement evidence</summary>
+       <SignedAgreementForm projectId={d.project.id} contractId={d.agreement.contractId}
+        media={agreement.filter(x=>x.mime==='application/pdf').map(x=>({id:x.id,name:stringValue(x.filename)}))}/>
+      </details>}
+     </div>:<p className="pv2-muted">No linked agreement is available yet. Open a customer-approved quotation to create it. A draft quote cannot unlock execution stages.</p>}
+    </section>
+   </>}
+   <div className="pv2-section-intro"><h2>Project Documents</h2><p>Signed PDFs, approved drawings, site photos and revisions.</p></div>
    {group('Agreement',agreement)}{group('Plans & Drawings',plans)}{group('Site Photos & Documents',other)}
   {d.site&&<section className="pv2-panel"><Title title="Upload Document" detail="Secure upload to the existing project media store"/>
    <SiteMediaForm id={d.project.id} category="agreement"/></section>}
