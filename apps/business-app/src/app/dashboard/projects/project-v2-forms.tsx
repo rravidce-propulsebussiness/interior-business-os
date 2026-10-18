@@ -80,7 +80,7 @@ export function AssignRole({projectId,users}:{projectId:string;users:{id:string;
 /** Primary next action after recording signed agreement: a floor plan,
  * followed by technical review, structural/3D drawings and final client
  * design confirmation. Not a physical construction authorization. */
-export function ProjectDrawingForm({id,kind,label}:{id:string;kind:string;label:string}){
+export function ProjectDrawingForm({id,kind,label}:{id:string;kind?:string;label:string}){
  const router=useRouter();
  const [state,submit,pending]=useActionState(async(_prev:Result,form:FormData):Promise<Result>=>{
   const result=await submitProjectDrawing(id,form);
@@ -88,7 +88,11 @@ export function ProjectDrawingForm({id,kind,label}:{id:string;kind:string;label:
   return result;
  },initial);
  return <form action={submit} className="pv2-form pv2-drawing-form">
-  <input type="hidden" name="kind" value={kind}/>
+  {kind?<input type="hidden" name="kind" value={kind}/>:
+   <label>Drawing type<select name="kind" defaultValue="architectural_plan">
+    {['architectural_plan','3d_design','structural_design','interior_layout','electrical_plan','plumbing_plan']
+     .map(k=><option key={k} value={k}>{k.replaceAll('_',' ')}</option>)}
+   </select></label>}
   <label>Upload drawing (PDF or image, up to 8 MB)
    <input name="file" type="file" accept="application/pdf,image/png,image/jpeg,image/webp"/>
   </label>
@@ -278,16 +282,6 @@ export function SiteMediaForm({id,category='daily'}:{id:string;category?:string}
     <option key={v} value={v}>{v}</option>)}</select></label>
   <label>Caption<input name="caption" maxLength={500} placeholder="Description of photo or file"/></label>
   <p className="pv2-hint">Private file · maximum 8 MB · access limited by project permissions</p>
- </ProjectForm>;
-}
-export function DesignSubmitForm({id}:{id:string}){
- return <ProjectForm projectId={id} operation="design_submit" label="Submit new revision">
-  <label>Design type<select name="kind">
-   {['architectural_plan','3d_design','structural_design','interior_layout','electrical_plan','plumbing_plan']
-    .map(v=><option key={v} value={v}>{v.replaceAll('_',' ')}</option>)}</select></label>
-  <label>Drawing reference<input name="reference" minLength={6} required maxLength={1500}
-   placeholder="Drawing number or uploaded file reference"/></label>
-  <label>Revision notes<textarea name="notes" rows={2}/></label>
  </ProjectForm>;
 }
 export function GateForm({id}:{id:string}){
