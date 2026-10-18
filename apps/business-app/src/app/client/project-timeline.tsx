@@ -57,7 +57,7 @@ export function ClientProjectTimeline({
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-bold uppercase tracking-wider text-blue-700">
+          <p className="text-xs font-bold uppercase tracking-wider text-orange-700">
             Project delivery
           </p>
           <h2 className="mt-1 text-2xl font-bold text-slate-950">
@@ -69,7 +69,7 @@ export function ClientProjectTimeline({
           </p>
         </div>
         {stages.length > 0 && (
-          <span className="rounded-full bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-800">
+          <span className="rounded-full bg-orange-50 px-4 py-2 text-sm font-semibold text-orange-800">
             {done} of {stages.length} completed
           </span>
         )}
@@ -85,7 +85,7 @@ export function ClientProjectTimeline({
             aria-valuenow={done}
           >
             <div
-              className="h-full rounded-full bg-blue-600 transition-all"
+              className="h-full rounded-full bg-orange-600 transition-all"
               style={{ width: `${(done / stages.length) * 100}%` }}
             />
           </div>
@@ -112,7 +112,7 @@ export function ClientProjectTimeline({
                       (complete
                         ? 'bg-emerald-600 text-white'
                         : selected || inProgress
-                          ? 'bg-blue-700 text-white'
+                          ? 'bg-orange-700 text-white'
                           : 'bg-slate-100 text-slate-500')
                     }
                   >
@@ -122,7 +122,7 @@ export function ClientProjectTimeline({
                     className={
                       'min-w-0 flex-1 rounded-2xl border p-4 ' +
                       (selected
-                        ? 'border-blue-200 bg-blue-50/50'
+                        ? 'border-orange-200 bg-orange-50/50'
                         : 'border-slate-200 bg-white')
                     }
                   >
@@ -136,9 +136,9 @@ export function ClientProjectTimeline({
                           (complete
                             ? 'bg-emerald-50 text-emerald-800'
                             : inProgress
-                              ? 'bg-blue-100 text-blue-800'
+                              ? 'bg-orange-100 text-orange-800'
                               : selected
-                                ? 'bg-blue-50 text-blue-700'
+                                ? 'bg-orange-50 text-orange-700'
                                 : 'bg-slate-100 text-slate-600')
                         }
                       >
@@ -173,7 +173,7 @@ export function ClientProjectTimeline({
                     )}
                     {stage.activities.length > 0 && (
                       <details className="mt-3 text-sm text-slate-600">
-                        <summary className="cursor-pointer font-semibold text-blue-700">
+                        <summary className="cursor-pointer font-semibold text-orange-700">
                           Work included ({stage.activities.length})
                         </summary>
                         <ul className="ml-4 mt-2 list-disc space-y-1">
@@ -190,7 +190,7 @@ export function ClientProjectTimeline({
           </ol>
         </>
       ) : (
-        <p className="mt-6 rounded-2xl bg-slate-50 p-5 text-sm leading-6 text-slate-600">
+        <p className="mt-6 rounded-2xl bg-orange-50/40 p-5 text-sm leading-6 text-slate-600">
           {unavailable
             ? 'The project timeline could not be loaded right now.'
             : 'Your project team has not prepared the detailed work timeline yet. Once the approved quotation becomes a project plan, its stages will appear here.'}
