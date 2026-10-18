@@ -121,8 +121,11 @@ function Overview({d}:{d:WorkspaceData}){
        <p>{stage.explanation||'Work scope derived from approved quotation.'}</p>
        <ul>{stage.activities.slice(0,3).map((x,i)=><li key={i}>{x}</li>)}</ul>
        <NextLink href={cur(d.project.id,'execution')} label="Update Work"/></div></div>;
-    })():<Blank title="Timeline not initialized" detail="Stages appear only after an approved quotation and agreement are connected."
-      action={site?.canManage?<SyncStages id={d.project.id}/>:null}/>}
+    })():<Blank title="Timeline not initialized"
+      detail={d.agreement?'The signed-agreement construction stages have not been imported yet.':'This project has no linked agreement. Connect its approved floor-wise quotation and create the agreement before importing execution stages.'}
+      action={site?.canManage
+       ?d.agreement?<SyncStages id={d.project.id}/>:<NextLink href="/dashboard/quotations" label="Open quotations & agreement"/>
+       :null}/>}
    </section>
    <section className="pv2-panel">
     <Title title="Today & Next Work" detail="Daily work and tomorrow's requirements"
@@ -253,7 +256,12 @@ function Timeline({d}:{d:WorkspaceData}){
        </div>
       </details>;
      }):<p className="pv2-muted">Stages are generated only from the approved quotation and agreement.</p>}
-     {!d.stages.length&&site?.canManage&&<SyncStages id={d.project.id}/>}
+     {!d.stages.length&&site?.canManage&&
+      (d.agreement?<SyncStages id={d.project.id}/>:
+       <div className="pv2-stage-setup-notice">
+        <p>A signed agreement linked to this project is required before the construction timeline can be imported. Quotation milestones are planning proposals, not verified site progress.</p>
+        <NextLink href="/dashboard/quotations" label="Open quotations & agreement"/>
+       </div>)}}
     </aside>
    </div>
   </section>
