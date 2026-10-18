@@ -35,6 +35,11 @@ begin
  end;
  perform public.project_site_command(org,project,'assign',jsonb_build_object('user_id','33333333-3333-4333-8333-333333333333','role','architect','active',true));
  perform public.project_site_command(org,project,'assign',jsonb_build_object('user_id','22222222-2222-4222-8222-222222222222','role','watchman','active',true));
+ -- Signing can precede the design phase; unlike physical execution, the
+ -- contract's recorded advance is not a prerequisite for drawing preparation.
+ contract=pg_temp.site_signed_agreement(org,project,agreement_media);
+ if (public.project_agreement_read(org,project)->>'execution_authorized')<>'false'
+ then raise exception 'FAIL: signed agreement bypassed recorded advance';end if;
  foreach kind in array array['architectural_plan','3d_design','structural_design'] loop
    result=public.project_site_command(org,project,'design_submit',jsonb_build_object('kind',kind,'reference','Approved reference drawing '||kind));
    design_id=(result->>'id')::uuid;
@@ -52,9 +57,6 @@ begin
    perform public.project_site_command(org,project,'execution_start','{}');
    raise exception 'FAIL: no agreement permitted site work';
  exception when check_violation then null;end;
- contract=pg_temp.site_signed_agreement(org,project,agreement_media);
- if (public.project_agreement_read(org,project)->>'execution_authorized')<>'false'
- then raise exception 'FAIL: signed agreement bypassed recorded advance';end if;
  perform pg_temp.site_record_advance(org,contract);
  if (public.project_agreement_read(org,project)->>'execution_authorized')<>'true'
  then raise exception 'Signed agreement and active schedule not recognized';end if;

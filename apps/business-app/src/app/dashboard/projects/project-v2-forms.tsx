@@ -5,6 +5,7 @@ import { saveProjectSite, uploadProjectSiteMedia } from './[id]/site/actions';
 import { syncConstructionFromProjectAgreement, assignConstructionRole } from './[id]/site/construction-actions';
 import { saveSignedAgreement } from './[id]/site/agreement-actions';
 import { prepareAgreementFromProjectQuote } from './project-agreement-actions';
+import { submitProjectDrawing } from './project-design-actions';
 
 type Result={saved:boolean;message:string};
 const initial:Result={saved:false,message:''};
@@ -76,39 +77,100 @@ export function AssignRole({projectId,users}:{projectId:string;users:{id:string;
   {state.message&&<p role="status" className="pv2-form-feedback">{state.message}</p>}
  </form>;
 }
-export function ProjectLifecycle({id,stage,canManage,designs}:{
- id:string;stage:string;canManage:boolean;designs:{id:string;kind:string;status:string}[];
+/** Primary next action after recording signed agreement: a floor plan,
+ * followed by technical review, structural/3D drawings and final client
+ * design confirmation. Not a physical construction authorization. */
+export function ProjectDrawingForm({id,kind,label}:{id:string;kind?:string;label:string}){
+ const router=useRouter();
+ const [state,submit,pending]=useActionState(async(_prev:Result,form:FormData):Promise<Result>=>{
+  const result=await submitProjectDrawing(id,form);
+  if(result.saved||result.uploaded)router.refresh();
+  return result;
+ },initial);
+ return <form action={submit} className="pv2-form pv2-drawing-form">
+  {kind?<input type="hidden" name="kind" value={kind}/>:
+   <label>Drawing type<select name="kind" defaultValue="architectural_plan">
+    {['architectural_plan','3d_design','structural_design','interior_layout','electrical_plan','plumbing_plan']
+     .map(k=><option key={k} value={k}>{k.replaceAll('_',' ')}</option>)}
+   </select></label>}
+  <label>Upload drawing (PDF or image, up to 8 MB)
+   <input name="file" type="file" accept="application/pdf,image/png,image/jpeg,image/webp"/>
+  </label>
+  <label>Drawing number or existing file reference
+   <input name="reference" maxLength={1500} placeholder="Optional when uploading a new PDF"/>
+  </label>
+  <label>Revision notes
+   <textarea name="notes" rows={2} maxLength={3000} placeholder="Floor, requested layout and revision details"/>
+  </label>
+  <p className="pv2-hint">Upload a new drawing or enter its existing reference. The same submission appears in the project drawing history.</p>
+  <button className="pv2-button pv2-primary" type="submit" disabled={pending}>
+   {pending?'Saving drawing…':label}
+  </button>
+  {state.message&&<p role="status" className={'pv2-form-feedback '+(state.saved?'good':'bad')}>{state.message}</p>}
+ </form>;
+}
+export function ProjectLifecycle({id,stage,canManage,designs,agreementSigned,industry}:{
+ id:string;stage:string;canManage:boolean;agreementSigned:boolean;industry:string;
+ designs:{id:string;kind:string;status:string}[];
 }){
  if(!canManage)return null;
  if(stage==='not_started')return <section className="pv2-panel pv2-lifecycle">
-  <h2>Start project delivery</h2><p>Initialize the existing project delivery workspace. This does not create another project.</p>
+  <h2>Start project delivery</h2>
+  <p>Initialize the existing project delivery workspace. This does not create another project.</p>
   <InitializeSite id={id}/>
  </section>;
- if(stage==='design')return <section className="pv2-panel pv2-lifecycle">
-  <h2>Design Review & Client Confirmation</h2>
-  <p>Review the latest plan revisions before recording client acknowledgement.</p>
-  {designs.filter(x=>x.status==='submitted').map(x=><details className="pv2-edit-drawer" key={x.id}>
-   <summary>Review {x.kind.replaceAll('_',' ')}</summary>
-   <ProjectForm projectId={id} operation="design_decide" label="Save design review">
-    <input type="hidden" name="id" value={x.id}/>
-    <label>Decision<select name="decision"><option value="approved">Approve</option>
-     <option value="changes_requested">Request changes</option></select></label>
-    <label>Review note<textarea name="note" rows={2}/></label>
-   </ProjectForm>
-  </details>)}
-  <details className="pv2-edit-drawer"><summary>Record client design confirmation</summary>
-   <ProjectForm projectId={id} operation="client_approve" label="Record client confirmation">
-    <label>Confirmation evidence<textarea name="evidence" required minLength={10} maxLength={3000}
-     placeholder="Client approval reference, date and communication or signed reference"/></label>
-    <p className="pv2-hint">A manager-recorded confirmation is not a verified digital customer signature.</p>
-   </ProjectForm>
-  </details>
- </section>;
+ if(stage==='design'){
+  const interior=/interior/i.test(industry);
+  const initialKind=interior?'interior_layout':'architectural_plan';
+  const required=interior?['interior_layout','3d_design']:['architectural_plan','3d_design','structural_design'];
+  const latest=(kind:string)=>designs.find(x=>x.kind===kind);
+  const first=latest(initialKind);
+  const nextKind=required.find(kind=>kind!==initialKind&&latest(kind)?.status!=='approved');
+  const submitted=designs.filter(x=>x.status==='submitted');
+  const allApproved=required.every(kind=>latest(kind)?.status==='approved');
+  const canSubmitPrimary=!first||first.status==='changes_requested';
+  return <section className="pv2-panel pv2-lifecycle pv2-design-workflow">
+   <div className="pv2-design-step-head">
+    <span className="pv2-design-step-index">01</span>
+    <div><h2>{canSubmitPrimary?'Floor Plan Preparation':first?.status==='submitted'?'Floor Plan Under Review':'Floor Plan & Design Revisions'}</h2>
+     <p>Prepare the floor plan, review the drawing, and capture the client’s design changes before progressing to structural and 3D plans.</p></div>
+   </div>
+   {!agreementSigned?<p className="pv2-stage-setup-notice">
+    A recorded signed agreement is required before submitting drawings. Open Quote &amp; Agreement to confirm signing.</p>:
+    <>
+     {canSubmitPrimary?<ProjectDrawingForm id={id} kind={initialKind} label="Submit floor plan for review"/>:
+      <p className="pv2-design-step-state">Floor plan: <strong>{first?.status==='approved'?'Technically approved':'Submitted for technical review'}</strong></p>}
+     {submitted.map(x=><details className="pv2-edit-drawer" key={x.id}>
+      <summary>Review {x.kind.replaceAll('_',' ')} drawing</summary>
+      <ProjectForm projectId={id} operation="design_decide" label="Save technical review">
+       <input type="hidden" name="id" value={x.id}/>
+       <label>Technical decision<select name="decision"><option value="approved">Approve</option>
+        <option value="changes_requested">Request changes</option></select></label>
+       <label>Review note<textarea name="note" rows={2}/></label>
+      </ProjectForm>
+     </details>)}
+     {first?.status==='approved'&&nextKind&&!submitted.some(x=>x.kind===nextKind)&&
+      <div className="pv2-design-next">
+       <h3>Next drawing: {nextKind.replaceAll('_',' ')}</h3>
+       <ProjectDrawingForm id={id} kind={nextKind} label="Submit next design for review"/>
+      </div>}
+     {allApproved?<details className="pv2-edit-drawer">
+      <summary>Record final client design confirmation</summary>
+      <ProjectForm projectId={id} operation="client_approve" label="Record client design confirmation">
+       <label>Client confirmation reference<textarea name="evidence" required minLength={10} maxLength={3000}
+        placeholder="Date and recorded approval of latest plans"/></label>
+       <p className="pv2-hint">A manager-recorded approval is not an authenticated digital signature.</p>
+      </ProjectForm>
+     </details>:
+      <p className="pv2-hint">Client design confirmation becomes available after all required floor plan, structural and 3D revisions pass technical review. Design work may be prepared while financial execution checks remain pending.</p>}
+    </>}
+  </section>;
+ }
  if(stage==='client_approved')return <section className="pv2-panel pv2-lifecycle">
-  <h2>Ready to Begin Execution</h2>
-  <p>The latest required designs have been approved. Start the site execution stage when the team is ready.</p>
+  <h2>Designs Approved — Site Readiness</h2>
+  <p>Before physical construction, activate the payment schedule, record the applicable advance and satisfy site quality and safety gates.</p>
   <ProjectForm projectId={id} operation="execution_start" label="Start site execution">
-   <p className="pv2-hint">Only authorized project managers can start work after client approval.</p>
+   <p className="pv2-hint">Construction start is blocked until the existing agreement and financial checks are satisfied.</p>
   </ProjectForm>
  </section>;
  return null;
@@ -220,16 +282,6 @@ export function SiteMediaForm({id,category='daily'}:{id:string;category?:string}
     <option key={v} value={v}>{v}</option>)}</select></label>
   <label>Caption<input name="caption" maxLength={500} placeholder="Description of photo or file"/></label>
   <p className="pv2-hint">Private file · maximum 8 MB · access limited by project permissions</p>
- </ProjectForm>;
-}
-export function DesignSubmitForm({id}:{id:string}){
- return <ProjectForm projectId={id} operation="design_submit" label="Submit new revision">
-  <label>Design type<select name="kind">
-   {['architectural_plan','3d_design','structural_design','interior_layout','electrical_plan','plumbing_plan']
-    .map(v=><option key={v} value={v}>{v.replaceAll('_',' ')}</option>)}</select></label>
-  <label>Drawing reference<input name="reference" minLength={6} required maxLength={1500}
-   placeholder="Drawing number or uploaded file reference"/></label>
-  <label>Revision notes<textarea name="notes" rows={2}/></label>
  </ProjectForm>;
 }
 export function GateForm({id}:{id:string}){
