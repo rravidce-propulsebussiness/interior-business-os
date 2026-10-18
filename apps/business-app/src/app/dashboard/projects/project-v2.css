@@ -308,3 +308,14 @@
  .pv2-stage-summary strong{font-size:10px}
  .pv2-stage-index{width:25px;height:25px;flex-basis:25px}
 }
+
+
+/* Project-specific quotation and agreement links reuse the existing file panel. */
+.pv2-commercial-row{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:14px 4px;border-bottom:1px solid #e9eef4}
+.pv2-commercial-details{display:grid;gap:9px;min-width:0}
+.pv2-commercial-details>strong{color:#162746;font-size:14px;overflow-wrap:anywhere}
+.pv2-commercial-details>span{display:flex;align-items:center;gap:10px;flex-wrap:wrap;color:#64748b}
+.pv2-commercial-details small{font-size:11px;color:#71839a}
+.pv2-commercial-actions{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.pv2-quote-links .pv2-blank{padding:22px 12px}
+@media(max-width:640px){.pv2-commercial-row{align-items:flex-start;flex-direction:column;gap:9px}.pv2-commercial-actions{gap:12px}}
