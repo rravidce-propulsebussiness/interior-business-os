@@ -85,7 +85,7 @@ it('starts at a real floor plan action after signed agreement, before final desi
  expect(forms).toContain("const allApproved=required.every");
  expect(forms).toContain("if(stage==='client_approved')");
  expect(forms).toContain("submitProjectDrawing(id,form)");
- expect(ui).toContain("agreementSigned={d.agreement?.clearanceType==='signed_copy_recorded'}");
+ expect(ui).toContain("agreementSigned={d.agreement?.clearanceType==='signed_copy_recorded'||d.preflight?.signedReady===true}");
  expect(ui).toContain('The recorded agreement references an earlier quotation');
  expect(drawing).toContain("p_action:'design_submit'");
  expect(drawing).toContain("p_category:'design'");
