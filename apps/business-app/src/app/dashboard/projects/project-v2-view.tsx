@@ -261,7 +261,7 @@ function Timeline({d}:{d:WorkspaceData}){
        <div className="pv2-stage-setup-notice">
         <p>A signed agreement linked to this project is required before the construction timeline can be imported. Quotation milestones are planning proposals, not verified site progress.</p>
         <NextLink href="/dashboard/quotations" label="Open quotations & agreement"/>
-       </div>)}}
+       </div>)}
     </aside>
    </div>
   </section>
