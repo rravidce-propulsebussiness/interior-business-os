@@ -495,7 +495,7 @@ function Designs({d}:{d:WorkspaceData}){
   {designFiles.length>0&&<div className="pv2-file-list">{designFiles.map(f=><a key={f.id}
    href={'/dashboard/projects/'+d.project.id+'/site/media/'+f.id} className="pv2-file">
    <OwnerIcon name="quotations" size={20}/><strong>{stringValue(f.filename)}</strong><span>Download</span></a>)}</div>}
-  {d.site?.stage==='design'&&d.site.canManage&&
+  {d.site?.stage==='design'&&
    <details className="pv2-edit-drawer">
     <summary>＋ Upload drawing and submit revision</summary>
     <ProjectDrawingForm id={d.project.id} label="Save drawing revision"/>
