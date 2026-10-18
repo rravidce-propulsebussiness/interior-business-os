@@ -499,3 +499,203 @@
  .pv2-priority-wrap,.pv2-priority-main,.pv2-priority-payment{min-width:0}
  .pv2-next-primary{width:100%;justify-self:stretch}
 }
+
+/* Unified SG Homes / ProPulse orange command workspace.
+ * Uses the SAME palette as command-centre.css instead of a second blue theme.
+ * White cards are deliberate, as in the approved dashboard reference. */
+.pv2-page {
+ --pv2-orange:#fe5105;
+ --pv2-ink:#111c34;
+ --pv2-muted:#66758b;
+ --pv2-line:#f1e8e2;
+ background:radial-gradient(circle at 80% 0,#fff2e8 0,transparent 530px),#fffaf7;
+ color:var(--pv2-ink);
+ padding:20px 22px 108px;
+ max-width:1640px;
+ margin:0 auto;
+}
+.pv2-page .pv2-primary,.pv2-page .pv2-next-primary{
+ background:linear-gradient(125deg,#ff7719,#ff4b00);
+ border-color:#fe5105;color:#fff;
+ box-shadow:0 5px 12px #ff6b1b1c;
+}
+.pv2-page .pv2-primary:hover,.pv2-page .pv2-next-primary:hover{background:#ec4b07;color:#fff}
+.pv2-page .pv2-action-link,.pv2-page .pv2-next-secondary{color:#ed540d}
+.pv2-page .pv2-button:hover{border-color:#ffb17d}
+.pv2-project-header{
+ border:1px solid #f3e6dc;border-radius:17px;background:#fff;
+ box-shadow:0 6px 22px #7a3d1b0a;padding:17px 19px 0;margin-bottom:13px;
+}
+.pv2-project-thumb{background:linear-gradient(140deg,#ffead7,#fff7ec);color:#ff5a0a}
+.pv2-project-identity h1{font-size:clamp(18px,2vw,25px);color:#111c34}
+.pv2-project-meta span{font-size:11px;color:#66758b}
+.pv2-project-tabs{gap:3px;margin-top:13px;border-top:1px solid #f6ebe2}
+.pv2-project-tabs a{font-size:11px;color:#46546b;padding:13px 12px;border-radius:0;border-bottom:3px solid transparent}
+.pv2-project-tabs a:hover{background:#fff4eb;color:#fe5105}
+.pv2-project-tabs a.selected{background:#fff9f5;color:#fa5106;border-color:transparent;border-bottom-color:#fe5105}
+.pv2-header-progress{margin:11px 0 6px;max-width:240px;margin-left:auto}
+.pv2-header-progress>span{display:flex;justify-content:space-between;gap:10px;
+ color:#67768e;font-size:11px;font-weight:650}
+.pv2-header-progress strong{color:#f45109}
+.pv2-header-progress .pv2-bar{margin-top:7px;height:7px;background:#ffebe0}
+.pv2-header-progress .pv2-bar>span{background:linear-gradient(90deg,#ff8b31,#fe5105)}
+.pv2-project-header-actions{justify-content:flex-end}
+.pv2-panel{border:1px solid #f4e7df;background:#fff;border-radius:16px;
+ box-shadow:0 5px 18px #65361309}
+.pv2-crumb{font-size:11px;color:#7c8797}
+.pv2-command-workspace{gap:13px}
+.pv2-financial-cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.pv2-financial-card{min-width:0;background:#fff;border:1px solid #f4e9e2;
+ border-radius:15px;padding:12px;display:flex;gap:11px;align-items:flex-start;
+ min-height:111px;box-shadow:0 4px 16px #71351808}
+.pv2-financial-card>div{display:flex;flex-direction:column;gap:6px;min-width:0;flex:1;padding-top:3px}
+.pv2-money-title{font-size:12px;color:#303c51;font-weight:750}
+.pv2-financial-card strong{font-size:clamp(17px,1.8vw,25px);letter-spacing:-.035em;color:#131e38;
+ white-space:nowrap;font-variant-numeric:tabular-nums}
+.pv2-financial-card small{font-size:10px;color:#8090a4;line-height:1.4}
+.pv2-money-icon{width:47px;height:47px;flex:0 0 47px;display:grid;place-items:center;
+ border-radius:13px;color:#f65c0b;background:#fff0e6}
+.pv2-money-green .pv2-money-icon{background:#e6fbef;color:#12a768}
+.pv2-money-red .pv2-money-icon{background:#fff0e9;color:#f05618}
+.pv2-money-purple .pv2-money-icon{background:#f5efff;color:#7c55d5}
+.pv2-money-red strong{color:#be3d21}
+.pv2-money-purple strong{color:#673fbd}
+.pv2-command-layout{display:grid;grid-template-columns:minmax(0,1.9fr) minmax(280px,.96fr);
+ gap:14px;align-items:start;min-width:0}
+.pv2-command-sidebar{display:grid;gap:13px;min-width:0}
+.pv2-command-stages{min-width:0;padding:18px 15px}
+.pv2-command-head{display:flex;align-items:flex-start;justify-content:space-between;
+ gap:9px;margin:0 0 15px;min-width:0}
+.pv2-command-head h2{font-size:17px;font-weight:850;letter-spacing:-.025em;color:#17213a;margin:0}
+.pv2-command-head p{font-size:11px;line-height:1.6;color:#748198;margin-top:5px}
+.pv2-timeline-counter{color:#f2570d;font-size:10px;font-weight:850;background:#fff2ea;
+ border:1px solid #ffdfcb;padding:6px 9px;border-radius:8px;white-space:nowrap}
+.pv2-stage-empty{padding:20px 12px;border:1px dashed #f5d8c4;background:#fffaf5;
+ border-radius:10px;display:grid;gap:12px;color:#6b7182;line-height:1.6;font-size:12px}
+.pv2-command-stage-list{position:relative;display:grid;gap:8px;padding-left:19px}
+.pv2-command-stage-list:before{content:"";position:absolute;top:21px;bottom:20px;left:13px;width:2px;background:#ffdcc7}
+.pv2-command-stage{border:1px solid #f0e8e2;background:#fff;border-radius:13px;
+ position:relative;min-width:0;box-shadow:0 2px 8px #78371306}
+.pv2-command-stage[open]{border-color:#ffdcc2;box-shadow:0 5px 17px #ff681914}
+.pv2-command-stage-summary{display:flex;align-items:center;gap:12px;list-style:none;
+ cursor:pointer;min-height:63px;padding:10px 12px;min-width:0}
+.pv2-command-stage-summary::-webkit-details-marker{display:none}
+.pv2-command-stage-summary>svg{color:#8e99a9;flex:0 0 auto;transition:transform .18s}
+.pv2-command-stage[open]>.pv2-command-stage-summary>svg{transform:rotate(90deg);color:#f7570d}
+.pv2-stage-number{width:33px;height:33px;flex:0 0 33px;border-radius:50%;
+ display:grid;place-items:center;font-weight:900;font-size:13px;color:#fff;
+ background:#a9b3c2;position:relative;margin-left:-32px;margin-right:5px;
+ box-shadow:0 0 0 4px #fff}
+.pv2-command-stage.is-current .pv2-stage-number{background:linear-gradient(135deg,#ff8731,#ff4b00)}
+.pv2-command-stage.is-complete .pv2-stage-number{background:#0ab46b}
+.pv2-stage-title-block{display:flex;flex-direction:column;gap:5px;flex:1;min-width:0}
+.pv2-stage-title-block strong{color:#18213a;font-size:12px;line-height:1.35;overflow-wrap:anywhere}
+.pv2-stage-title-block small{color:#8c97a7;font-size:10px;line-height:1.4}
+.pv2-stage-meta{font-size:10px;color:#68758b;background:#fff5ee;border-radius:7px;
+ padding:7px 8px;white-space:nowrap}
+.pv2-command-stage-inner{display:grid;gap:12px;padding:12px 12px 14px 21px;
+ border-top:1px solid #f2eae4;background:#fffdfa;border-radius:0 0 13px 13px}
+.pv2-command-work-list{display:grid;border:1px solid #f0e5db;border-radius:11px;
+ overflow:hidden;background:#fff}
+.pv2-command-work-item{min-height:40px;display:flex;align-items:center;gap:10px;
+ padding:9px 11px;border-bottom:1px solid #f6eee8;color:#3e4a60;font-size:11px}
+.pv2-command-work-item:last-child{border-bottom:0}
+.pv2-command-work-item>span:nth-child(2){flex:1;min-width:0}
+.pv2-work-bullet{width:22px;height:22px;flex:0 0 22px;color:#f35b13;
+ background:#fff1e6;display:grid;place-items:center;border-radius:7px}
+.pv2-command-payments{display:flex;align-items:flex-start;gap:11px;padding:12px;
+ border:1px solid #fbd5b9;border-radius:10px;background:#fff5eb;color:#d75918}
+.pv2-command-payments>div{display:grid;gap:5px;min-width:0}
+.pv2-command-payments strong{font-size:11px;color:#a84916}
+.pv2-command-payments p,.pv2-command-payments small{font-size:10px;line-height:1.5;color:#926a53}
+.pv2-stage-secondary{padding:11px 12px;border-radius:10px;border:1px solid #f0e8df;background:#fff}
+.pv2-stage-secondary>summary{font-size:11px;font-weight:750;color:#e55a12;cursor:pointer}
+.pv2-stage-secondary ul{margin:10px 0 0;padding-left:18px;font-size:11px;line-height:1.7;color:#56647c}
+.pv2-stage-hint,.pv2-stage-attachment-count{font-size:10px;color:#8990a1;line-height:1.6}
+.pv2-command-stage-actions{display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap;min-width:0}
+.pv2-command-stage-actions>details{position:relative;max-width:100%;min-width:0}
+.pv2-command-stage-actions>details>summary,.pv2-command-quick-actions>details>summary,
+.pv2-command-quick-actions>a{display:flex;align-items:center;justify-content:center;gap:6px;
+ list-style:none;cursor:pointer;padding:10px 12px;min-height:37px;font-size:10px;
+ font-weight:800;color:#ea550f;border:1px solid #ffceb1;border-radius:9px;background:#fff}
+.pv2-command-stage-actions>details>summary::-webkit-details-marker,
+.pv2-command-quick-actions>details>summary::-webkit-details-marker{display:none}
+.pv2-command-stage-actions>details[open]{width:100%;border:1px solid #f6ddcb;
+ border-radius:10px;background:#fff9f4;padding:9px}
+.pv2-command-stage-actions>details[open]>summary{justify-content:flex-start}
+.pv2-command-stage-actions>details>.pv2-form{padding:12px 0}
+.pv2-command-stage-actions>details>summary:hover,
+.pv2-command-quick-actions>details>summary:hover{background:#fff1e6}
+.pv2-command-sidebar .pv2-panel{padding:17px 15px}
+.pv2-attention-item{display:flex;gap:11px;border:1px solid #f3e9e1;border-radius:12px;
+ margin-top:9px;padding:12px 9px;background:#fff}
+.pv2-attention-symbol,.pv2-activity-icon{height:35px;width:35px;flex:0 0 35px;
+ display:grid;place-items:center;background:#fff0e6;color:#ff5c0e;border-radius:10px}
+.pv2-attention-item>div{min-width:0;flex:1}
+.pv2-attention-item strong,.pv2-activity-row strong{font-size:11px;color:#1d2b43}
+.pv2-attention-item p,.pv2-activity-row p{font-size:10px;color:#758297;margin-top:5px;
+ line-height:1.55;overflow-wrap:anywhere}
+.pv2-command-sidebar .pv2-priority-wrap{margin-top:12px;grid-template-columns:minmax(0,1fr);
+ box-shadow:none;border:1px solid #ffe0ca;border-radius:13px}
+.pv2-command-sidebar .pv2-priority-main{padding:13px 12px;border-radius:13px 13px 0 0;background:#fffaf6}
+.pv2-command-sidebar .pv2-priority-main>h2{font-size:16px;margin:7px 0}
+.pv2-command-sidebar .pv2-priority-description{font-size:11px}
+.pv2-command-sidebar .pv2-priority-payment{border:0;border-top:1px solid #f1e1d5;padding:12px}
+.pv2-command-sidebar .pv2-priority-amount{font-size:19px;margin:8px 0}
+.pv2-command-sidebar .pv2-checklist-inline{margin:10px 0 0}
+.pv2-command-sidebar .pv2-checklist-inline>span{font-size:9px;padding:5px 7px}
+.pv2-activity-row{display:flex;align-items:flex-start;gap:11px;padding:11px 0;
+ border-bottom:1px solid #f6eee9}
+.pv2-activity-row:last-child{border-bottom:0}
+.pv2-activity-icon{height:32px;width:32px;flex-basis:32px}
+.pv2-activity-row>div{flex:1;min-width:0}
+.pv2-activity-row small{font-size:9px;color:#9ba4b2;display:block;margin-top:5px}
+.pv2-command-quick-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.pv2-command-quick-actions>details{min-width:0}
+.pv2-command-quick-actions>a{min-width:0;white-space:normal}
+.pv2-command-quick-actions>details[open]{grid-column:1/-1;padding:8px;border-radius:10px;
+ background:#fff9f4;border:1px solid #f6dac4}
+.pv2-command-quick-actions>details[open]>summary{margin-bottom:10px}
+.pv2-command-quick-actions>details:not([open])>summary{height:100%;white-space:normal;text-align:center}
+.pv2-page .pv2-status.good{background:#e1f9ed;color:#0c9860}
+.pv2-page .pv2-status.warn{background:#fff0e4;color:#d85b14}
+.pv2-page .pv2-label{background:#fff2ea;color:#df5b16}
+@media(max-width:1200px){
+ .pv2-financial-cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .pv2-command-layout{grid-template-columns:minmax(0,1fr)}
+ .pv2-command-sidebar{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .pv2-command-sidebar .pv2-attention{grid-row:span 2}
+}
+@media(max-width:740px){
+ .pv2-page{padding:13px 11px 100px}
+ .pv2-financial-cards{gap:9px}
+ .pv2-financial-card{padding:12px 9px;gap:8px;min-height:116px}
+ .pv2-money-icon{width:33px;height:33px;flex-basis:33px;border-radius:10px}
+ .pv2-money-icon svg{width:18px;height:18px}
+ .pv2-financial-card strong{font-size:clamp(15px,4.3vw,21px);white-space:normal;overflow-wrap:anywhere}
+ .pv2-money-title{font-size:10px}
+ .pv2-financial-card small{font-size:9px}
+ .pv2-command-sidebar{grid-template-columns:1fr}
+ .pv2-command-sidebar .pv2-attention{grid-row:auto}
+ .pv2-command-stages{padding:14px 10px}
+ .pv2-command-stage-list{padding-left:17px}
+ .pv2-command-stage-summary{gap:6px;padding:10px 6px}
+ .pv2-stage-number{width:29px;height:29px;flex-basis:29px;margin-left:-26px;margin-right:2px}
+ .pv2-stage-title-block strong{font-size:11px}
+ .pv2-stage-title-block small{font-size:9px}
+ .pv2-stage-meta{display:none}
+ .pv2-command-stage-inner{padding:11px 8px 13px 13px}
+ .pv2-command-stage-summary .pv2-status{font-size:9px;padding:6px}
+ .pv2-project-header{padding:13px 12px 0}
+ .pv2-project-header-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+ .pv2-header-progress{margin:14px 0 5px;max-width:100%}
+ .pv2-project-tabs a{padding:11px 10px;font-size:10px}
+ .pv2-command-stage-actions>details>summary{padding:9px;font-size:10px}
+ .pv2-command-head h2{font-size:15px}
+}
+@media(max-width:390px){
+ .pv2-financial-card{align-items:flex-start;flex-direction:column}
+ .pv2-financial-card>div{gap:5px}
+ .pv2-financial-card strong{font-size:17px}
+ .pv2-command-quick-actions{grid-template-columns:1fr}
+}
