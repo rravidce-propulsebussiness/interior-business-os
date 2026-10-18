@@ -17,6 +17,15 @@ describe('Projects v2 one screen per route',()=>{
   expect(ui).not.toContain('pcc-module-grid');
   expect(ui).not.toContain('pcc-section-columns');
  });
+ it('explains the missing agreement instead of allowing an invalid stage import',()=>{
+  expect(ui).toContain("Connect its approved floor-wise quotation and create the agreement");
+  expect(ui).toContain("d.agreement?<SyncStages");
+  expect(ui).toContain('Open quotations & agreement');
+  expect(ui).toContain('Floor-wise Work Stages');
+  expect(ui).toContain('guidanceForConstructionStage');
+  expect(ui).toContain('ProjectStageLinker');
+  expect(loader).toContain('quotePaymentTriggers');
+ });
  it('writes once through existing permission-checked actions',()=>{
   for(const name of ['saveProjectSite','uploadProjectSiteMedia','assignConstructionRole'])
    expect(forms).toContain(name);
