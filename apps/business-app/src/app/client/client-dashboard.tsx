@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { signOut } from '@business-os/auth/actions';
 import { ClientDesignReview } from './client-design-review';
 import { ClientProjectTimeline } from './project-timeline';
+import { ClientProjectRequests, type ProjectClientRequest } from '../project-request-widgets';
 
 export type ClientStage = {
   id: string;
@@ -86,6 +87,7 @@ export type ClientDashboardData = {
     local_date: string;
   };
   metricsUnavailable: boolean;
+  requests: ProjectClientRequest[];
   clientEmail: string;
 };
 
@@ -291,6 +293,7 @@ export function ClientDashboard({
   timelineUnavailable,
   metrics,
   metricsUnavailable,
+  requests,
   clientEmail,
 }: ClientDashboardData) {
   const [search, setSearch] = useState('');
@@ -878,6 +881,7 @@ export function ClientDashboard({
               </section>
             </div>
 
+            <ClientProjectRequests projectId={project.id} requests={requests}/>
             <details id="full-timeline" className="pc-details-panel">
               <summary>
                 <Icon name="layers" size={19} /> Full project work timeline{' '}
