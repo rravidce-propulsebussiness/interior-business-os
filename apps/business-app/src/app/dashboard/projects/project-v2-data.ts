@@ -30,6 +30,8 @@ export type WorkspaceData = {
  contractValue:number|null;expenditure:number|null;
  projectRaw:Record<string,unknown>|null;
  agreement:{contractId:string;contractNumber:string;status:string;authorized:boolean;revisionId:string|null;clearanceType:string|null}|null;
+ preflight:{inspectionDone:boolean;measurementsDone:boolean;inspectionDetails:string;measurementDetails:string}|null;
+ advance:{invoiceId:string|null;invoiceNumber:string|null;invoiceStatus:string|null;invoiceTotal:number;percent:number|null;received:number;scheduleActive:boolean}|null;
 };
 export function stringValue(v:unknown):string{return typeof v==='string'||typeof v==='number'?String(v):'';}
 export function formatMoney(value:number|null){return value===null?'—':new Intl.NumberFormat('en-IN',{
@@ -108,7 +110,7 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
   payments:has('payment.view'),purchases:has('purchase.view'),
   team:has('team.manage')||has('team.view'),quotation:has('quotation.view','quotation'),
  };
- const [org,user,industries,customer,taskResult,siteResult,stageResult,stageLinkResult,receipts,orders,contract,agreementResult]=await Promise.all([
+ const [org,user,industries,customer,taskResult,siteResult,stageResult,stageLinkResult,receipts,orders,contract,agreementResult,preflightResult,advanceResult]=await Promise.all([
   s.repository.organization(s.org),s.authorization.requireAuthenticatedUser(),
   s.repository.industries(),
   project.customer_id?s.client.from('customers').select('id,display_name').eq('organization_id',s.org)
@@ -130,6 +132,9 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
   permissions.manage&&permissions.finance?s.client.rpc('project_agreement_read',{
     p_organization_id:s.org,p_project_id:id,
   }):Promise.resolve({data:null,error:null}),
+  s.client.rpc('project_preflight_read',{p_org:s.org,p_project:id}),
+  permissions.finance?s.client.rpc('project_advance_read',{p_org:s.org,p_project:id}):
+    Promise.resolve({data:null,error:null}),
  ]);
  if(!org)notFound();
  const rawSite=siteResult.error?null:obj(siteResult.data);
@@ -174,6 +179,23 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
  })):null;
  const contractValue=permissions.finance&&!contract.error?decimals(contract.data?.[0]?.original_contract_value):null;
  const agreement=agreementResult.error?{}:obj(agreementResult.data);
+ const preflightRaw=preflightResult.error?{}:obj(preflightResult.data);
+ const advanceRaw=advanceResult.error?{}:obj(advanceResult.data);
+ const preflight=preflightResult.error?null:{
+  inspectionDone:preflightRaw.inspection_done===true,
+  measurementsDone:preflightRaw.measurements_done===true,
+  inspectionDetails:stringValue(preflightRaw.inspection_details),
+  measurementDetails:stringValue(preflightRaw.measurement_details),
+ };
+ const advance=advanceResult.error?null:{
+  invoiceId:typeof advanceRaw.invoice_id==='string'?advanceRaw.invoice_id:null,
+  invoiceNumber:typeof advanceRaw.invoice_number==='string'?advanceRaw.invoice_number:null,
+  invoiceStatus:typeof advanceRaw.invoice_status==='string'?advanceRaw.invoice_status:null,
+  invoiceTotal:Number(advanceRaw.invoice_total)||0,
+  percent:typeof advanceRaw.advance_percent==='number'?advanceRaw.advance_percent:null,
+  received:Number(advanceRaw.received)||0,
+  scheduleActive:advanceRaw.schedule_active===true,
+ };
  // An issued quote remains attached to its original sales-prospect project.
  // The converted Won lead supplies the secure, non-destructive association.
  const directQuotes=permissions.quotation?await s.client.from('quotations')
@@ -253,6 +275,7 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
    industry:(project.industry_id?industriesById.get(project.industry_id):null)??'Project',progress
   },
   site,stages:stageList,links:linkList,milestones,quotations,quotePaymentTriggers,
+  preflight,advance,
   transactions:trans,purchaseOrders:po,
   tasks:tasks.map(t=>({id:t.id,title:t.title,planned_start:t.planned_start,status:t.status})),
   contractValue,projectRaw:permissions.manage?project:null,
@@ -345,5 +368,6 @@ async function assignedProjectWorkspace(id:string):Promise<WorkspaceData>{
    id:t.id,title:t.title,planned_start:t.planned_start,status:t.status,
   })),
   contractValue:null,expenditure:null,agreement:null,projectRaw:null,
+  preflight:null,advance:null,
  };
 }
