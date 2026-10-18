@@ -11,7 +11,7 @@ import { projectWorkspace,formatMoney,pretty,shortDate,stringValue,
  type WorkspaceData,type SiteRow } from './project-v2-data';
 import {
  SiteReportForm,SiteMediaForm,MaterialRequestForm,MaterialUpdateForm,
- QualityForm,ReviewCheck,DesignSubmitForm,GateForm,AssignRole,SyncStages,
+ QualityForm,ReviewCheck,ProjectDrawingForm,GateForm,AssignRole,SyncStages,
  ProjectLifecycle,PrepareAgreement,SignedAgreementUploadForm,
 } from './project-v2-forms';
 import '../owner-dashboard.css';
@@ -495,10 +495,11 @@ function Designs({d}:{d:WorkspaceData}){
   {designFiles.length>0&&<div className="pv2-file-list">{designFiles.map(f=><a key={f.id}
    href={'/dashboard/projects/'+d.project.id+'/site/media/'+f.id} className="pv2-file">
    <OwnerIcon name="quotations" size={20}/><strong>{stringValue(f.filename)}</strong><span>Download</span></a>)}</div>}
-  {d.site?.stage==='design'&&
-   <details className="pv2-edit-drawer"><summary>＋ Submit Design Revision</summary><DesignSubmitForm id={d.project.id}/></details>}
-  {d.site&&<details className="pv2-edit-drawer"><summary>＋ Upload Drawing PDF</summary>
-   <SiteMediaForm id={d.project.id} category="design"/></details>}
+  {d.site?.stage==='design'&&d.site.canManage&&
+   <details className="pv2-edit-drawer">
+    <summary>＋ Upload drawing and submit revision</summary>
+    <ProjectDrawingForm id={d.project.id} label="Save drawing revision"/>
+   </details>}
  </section></div>;
 }
 function Team({d}:{d:WorkspaceData}){
