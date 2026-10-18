@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { OwnerIcon, type OwnerIconName, OwnerShell } from '../owner-shell';
 import { ownerWorkspaceNavigation } from '../owner-workspace-navigation';
+import { OwnerMobileNav } from '../owner-mobile-nav';
 import { canAccess } from '@business-os/auth';
 import { guidanceForConstructionStage } from '@business-os/core/construction-payment-schedule';
 import { ProjectStageLinker,type StageLinkOption } from './project-stage-linker';
@@ -81,6 +82,10 @@ function ProjectHeader({data,active}:{data:WorkspaceData;active:ProjectPageSlug}
     <span><OwnerIcon name="globe" size={13}/>{p.address}</span>
    </div></div><Status value={p.status}/>
   </div>
+  {p.progress!==null&&<div className="pv2-header-progress">
+   <span>Overall progress <strong>{p.progress}%</strong></span>
+   <div className="pv2-bar"><span style={{width:p.progress+'%'}}/></div>
+  </div>}
   <div className="pv2-project-header-actions">
    {data.permissions.manage&&data.projectRaw&&<details className="pv2-header-drawer">
     <summary className="pv2-button pv2-outline">✎ Edit project</summary>
@@ -164,62 +169,170 @@ function ProjectPriority({d}:{d:WorkspaceData}){
   </aside>
  </section>;
 }
-function Overview({d}:{d:WorkspaceData}){
+
+/** One actionable project surface. Detail modules keep the original records,
+ * while project stages and inline forms give the owner a single place to work. */
+function ProjectFinancialSummary({d}:{d:WorkspaceData}){
+ const received=d.transactions===null?null:d.transactions.filter(x=>x.status==='recorded')
+  .reduce((sum,x)=>sum+x.amount,0);
+ const balance=received===null||d.expenditure===null?null:received-d.expenditure;
+ const cards=[
+  {title:'Project Total Cost',amount:d.contractValue,detail:'Agreed contract value',tone:'orange',icon:'billing' as OwnerIconName},
+  {title:'Payment Received',amount:received,detail:'Recorded client receipts',tone:'green',icon:'billing' as OwnerIconName},
+  {title:'Expenses',amount:d.expenditure,detail:d.expenditure===null?'Project expense ledger unavailable':'Actual recorded project costs',tone:'red',icon:'expenses' as OwnerIconName},
+  {title:'Balance from Received',amount:balance,detail:'Received minus actual expenses',tone:'purple',icon:'billing' as OwnerIconName},
+ ];
+ return <section className="pv2-financial-cards" aria-label="Project financial summary">
+  {cards.map(card=><article className={'pv2-financial-card pv2-money-'+card.tone} key={card.title}>
+    <span className="pv2-money-icon"><OwnerIcon name={card.icon} size={23}/></span>
+    <div><span className="pv2-money-title">{card.title}</span>
+     <strong>{formatMoney(card.amount)}</strong><small>{card.detail}</small></div>
+   </article>)}
+ </section>;
+}
+function ProjectStageBoard({d}:{d:WorkspaceData}){
  const site=d.site;
- const progress=d.project.progress;
- const reports=site?.reports??[];
- const newest=reports[0],planned=d.tasks.find(t=>t.status!=='done'&&t.status!=='cancelled'&&t.planned_start);
- const photo=site?.media.find(r=>stringValue(r.mime).startsWith('image/'));
- const recorded=d.transactions?.filter(x=>x.status==='recorded')??[];
- const received=d.transactions===null?null:recorded.reduce((sum,r)=>sum+r.amount,0);
- const net=received===null||d.expenditure===null?null:received-d.expenditure;
- return <div className="pv2-content">
-  <ProjectPriority d={d}/>
-  <section className="pv2-stat-grid" aria-label="Project financial and progress summary">
-   {[
-    {name:'Client Payments Received',amount:formatMoney(received),detail:d.transactions===null?'Finance access required':'Verified recorded receipts',kind:'green',icon:'billing' as OwnerIconName},
-    ...(d.expenditure!==null?[{name:'Site Expenditure',amount:formatMoney(d.expenditure),detail:'Confirmed site spending',kind:'orange',icon:'expenses' as OwnerIconName}]:[]),
-    ...(net!==null?[{name:'Net Site Cash Position',amount:formatMoney(net),detail:'Receipts less recorded site spending',kind:'blue',icon:'billing' as OwnerIconName}]:[]),
-    ...(progress!==null?[{name:'Project Completion',amount:progress+'%',detail:'Weighted physical work tasks',kind:'purple',icon:'projects' as OwnerIconName}]:[])
-   ].map(card=><article className="pv2-stat" key={card.name}><span className={'pv2-stat-icon '+card.kind}>
-    <OwnerIcon name={card.icon} size={22}/></span><div><small>{card.name}</small>
-    <strong>{card.amount}</strong><p>{card.detail}</p></div></article>)}
+ const done=(status:string)=>['completed','certified','done','skipped'].includes(status);
+ const active=d.stages.findIndex(stage=>!done(stage.status));
+ const current=active<0?d.stages.length-1:active;
+ const allowWork=site?.stage==='execution'&&
+  (site.canManage||['manager','project_manager','site_engineer','supervisor'].includes(site.role));
+ const allowMaterials=site?.stage==='execution'&&
+  (site.canManage||['manager','project_manager','procurement','site_engineer'].includes(site.role));
+ const allowChecks=site?.stage==='execution'&&
+  (site.canManage||['manager','project_manager','quality_inspector','site_engineer'].includes(site.role));
+ return <section className="pv2-panel pv2-command-stages" id="project-timeline">
+  <div className="pv2-command-head">
+   <div><h2>Project timeline</h2>
+    <p>Manage stages, work, payments, materials, labour, photos and checks in one place.</p></div>
+   <span className="pv2-timeline-counter">{d.stages.length} stages</span>
+  </div>
+  {!d.stages.length?<div className="pv2-stage-empty">
+    <p>Stages are created from the signed agreement and its approved quotation; no generic stages are inserted.</p>
+    {d.site?.canManage&&d.agreement&&<SyncStages id={d.project.id}/>}
+    {!d.agreement&&<p>Complete the quotation and agreement first.</p>}
+   </div>:<div className="pv2-command-stage-list">
+    {d.stages.map((stage,index)=>{
+      const complete=done(stage.status);
+      const guidance=guidanceForConstructionStage(stage.template_code);
+      const checks=[...new Set([...stage.inspectionTopics,...guidance.checks])];
+      const payment=d.quotePaymentTriggers.filter(p=>p.stageCodes.includes(stage.instance_code));
+      const linked=d.links.filter(x=>x.stage_id===stage.id);
+      const availableRecords:StageLinkOption[]=[
+       ...(site?.reports??[]).map(x=>({kind:'report' as const,id:x.id,title:shortDate(x.report_date)+' — '+stringValue(x.completed_work)})),
+       ...(site?.materials??[]).map(x=>({kind:'material' as const,id:x.id,title:stringValue(x.item)})),
+       ...(site?.checks??[]).map(x=>({kind:'check' as const,id:x.id,title:stringValue(x.title)})),
+       ...(site?.media??[]).filter(x=>x.category!=='agreement').map(x=>({kind:'media' as const,id:x.id,title:stringValue(x.filename)})),
+      ];
+      return <details className={'pv2-command-stage '+(complete?'is-complete':'')+
+       (index===current?' is-current':'')} key={stage.id} open={index===current}>
+       <summary className="pv2-command-stage-summary">
+        <span className="pv2-stage-number">{complete?'✓':index+1}</span>
+        <span className="pv2-stage-title-block"><strong>{stage.title}</strong>
+         <small>{stage.floor_code?pretty(stage.floor_code)+' · ':''}{stage.phase?pretty(stage.phase)+' · ':''}{stage.activities.length} work items</small></span>
+        <Status value={stage.status}/>
+        <span className="pv2-stage-meta">{payment.length} payment milestone{payment.length===1?'':'s'}</span>
+        <OwnerIcon name="arrow" size={15}/>
+       </summary>
+       <div className="pv2-command-stage-inner">
+        {stage.explanation&&<p className="pv2-muted">{stage.explanation}</p>}
+        {!!stage.dependencies.length&&<p className="pv2-stage-hint">Dependent on: {stage.dependencies.join(' · ')}</p>}
+        <div className="pv2-command-work-list">
+         {stage.activities.map((work,i)=><div className="pv2-command-work-item" key={i}>
+           <span className="pv2-work-bullet"><OwnerIcon name={complete?'check':'projects'} size={15}/></span>
+           <span>{work}</span>
+           {complete&&<span className="pv2-label">Stage completed</span>}
+          </div>)}
+        </div>
+        {payment.length>0&&d.permissions.finance&&<div className="pv2-command-payments">
+         <OwnerIcon name="billing" size={17}/><div><strong>Linked quotation payments</strong>
+          <p>{payment.map(p=>p.name+' ('+p.percent+'%)').join(' · ')}</p>
+          <small>Milestones are not receipts until payments are recorded.</small></div>
+         </div>}
+        {!!checks.length&&<details className="pv2-stage-secondary"><summary>Checks & tests ({checks.length})</summary>
+         <ul>{checks.map((name,i)=><li key={i}>{name}</li>)}</ul></details>}
+        {!!guidance.materials.length&&<details className="pv2-stage-secondary"><summary>Materials to plan</summary>
+         <ul>{guidance.materials.map((name,i)=><li key={i}>{name}</li>)}</ul></details>}
+        <div className="pv2-stage-attachment-count">{linked.length} linked site record{linked.length===1?'':'s'} · Linked evidence is not an approval.</div>
+        <div className="pv2-command-stage-actions">
+         {allowWork&&<details><summary><OwnerIcon name="projects" size={16}/> Update work</summary><SiteReportForm id={d.project.id}/></details>}
+         {site?.stage==='execution'&&<details><summary><OwnerIcon name="projects" size={16}/> Upload photos</summary><SiteMediaForm id={d.project.id}/></details>}
+         {allowMaterials&&<details><summary><OwnerIcon name="purchases" size={16}/> Request materials</summary><MaterialRequestForm id={d.project.id}/></details>}
+         {allowChecks&&<details><summary><OwnerIcon name="check" size={16}/> Quality check</summary><QualityForm id={d.project.id}/></details>}
+         {site?.canManage&&!!site.memberOptions.length&&<details><summary><OwnerIcon name="team" size={16}/> Assign team</summary><AssignRole projectId={d.project.id} users={site.memberOptions}/></details>}
+        </div>
+        {site?.canManage&&availableRecords.length>0&&<details className="pv2-stage-secondary"><summary>Attach existing site evidence</summary>
+         <ProjectStageLinker projectId={d.project.id} stageId={stage.id} options={availableRecords}/></details>}
+       </div>
+      </details>;
+    })}
+   </div>}
+ </section>;
+}
+function ProjectCommandSidebar({d,showHistory=false}:{d:WorkspaceData;showHistory?:boolean}){
+ const recent=timeline(d).slice(0,5);
+ const signed=d.agreement?.clearanceType==='signed_copy_recorded'||d.preflight?.signedReady===true;
+ const needsAdvance=signed&&d.advance!==null&&(!d.advance?.invoiceId||
+    (d.advance.invoiceTotal>0&&d.advance.received<d.advance.invoiceTotal));
+ const incompleteChecks=d.site?.checks.filter(r=>!['passed','approved'].includes(stringValue(r.status)))??[];
+ return <aside className="pv2-command-sidebar">
+  <section className="pv2-panel pv2-attention">
+   <div className="pv2-command-head"><h2>Needs your attention</h2><span className="pv2-timeline-counter">
+     {(needsAdvance?1:0)+incompleteChecks.length+(d.preflight&&!d.preflight.inspectionDone?1:0)} pending</span></div>
+   {needsAdvance&&<div className="pv2-attention-item">
+     <span className="pv2-attention-symbol"><OwnerIcon name="billing" size={20}/></span>
+     <div><strong>Advance payment pending</strong><p>{d.advance?.invoiceId?'Record a verified client receipt before treating the advance as paid.':'Issue the advance invoice from the next action below.'}</p></div>
+    </div>}
+   {incompleteChecks.slice(0,2).map(ch=><div className="pv2-attention-item" key={ch.id}>
+    <span className="pv2-attention-symbol"><OwnerIcon name="check" size={20}/></span>
+    <div><strong>{stringValue(ch.title)||'Quality check'}</strong><p>{pretty(ch.status)||'Pending review'}</p></div>
+   </div>)}
+   {d.preflight&&!d.preflight.inspectionDone&&<div className="pv2-attention-item">
+    <span className="pv2-attention-symbol"><OwnerIcon name="calendar" size={20}/></span>
+    <div><strong>Site inspection needed</strong><p>Record the survey and measurements before floor planning.</p></div></div>}
+   {!needsAdvance&&!incompleteChecks.length&&(!d.preflight||d.preflight.inspectionDone)&&
+    <p className="pv2-muted">No outstanding project alerts from the available records.</p>}
+   <ProjectPriority d={d}/>
   </section>
-  {site?.stage==='execution'&&<div className="pv2-overview-split">
-   <section className="pv2-panel pv2-current-stage">
-    <Title title="Current Stage" detail="Approved quote-based execution milestones"
-     action={<NextLink href={cur(d.project.id,'timeline')} label="Open Timeline"/>}/>
-    {d.stages.length?(()=>{
-     const stage=d.stages.find(s=>!['completed','certified','skipped'].includes(s.status))??d.stages[d.stages.length-1]!;
-     return <div className="pv2-stage-preview">{photo&&<Image unoptimized width={205} height={155}
-      src={'/dashboard/projects/'+d.project.id+'/site/media/'+photo.id} alt="Site progress"/>}
-      <div><div className="pv2-between"><h3>{stage.title}</h3><Status value={stage.status}/></div>
-       <p>{stage.explanation||'Work scope derived from approved quotation.'}</p>
-       <ul>{stage.activities.slice(0,3).map((x,i)=><li key={i}>{x}</li>)}</ul>
-       <NextLink href={cur(d.project.id,'execution')} label="Update Work"/></div></div>;
-    })():<Blank title="Timeline not initialized"
-      detail={d.agreement?'The signed-agreement construction stages have not been imported yet.':'This project has no linked agreement. Connect its approved floor-wise quotation and create the agreement before importing execution stages.'}
-      action={site?.canManage
-       ?d.agreement?<SyncStages id={d.project.id}/>:<NextLink href={cur(d.project.id,'documents')} label="Open quotations & agreement"/>
-       :null}/>}
-   </section>
-   <section className="pv2-panel">
-    <Title title="Today & Next Work" detail="Daily work and tomorrow's requirements"
-     action={<NextLink href={cur(d.project.id,'timeline')} label="Open Timeline"/>}/>
-    <div className="pv2-work-day"><span className="pv2-day-tag">Today</span>
-     <strong>{stringValue(newest?.completed_work)||'No site work update yet'}</strong>
-     <small>{newest?shortDate(newest.report_date):'No report submitted'}</small>
-     <p>{newest?'Workers: '+stringValue(newest.worker_count)+' · Checks: '+(stringValue(newest.checks_required)||'Not noted'):'Record site activity to see today’s work.'}</p>
-    </div>
-    <div className="pv2-work-day"><span className="pv2-day-tag future">Tomorrow</span>
-     <strong>{stringValue(newest?.tomorrow_plan)||planned?.title||'No planned work'}</strong>
-     <small>{planned?shortDate(planned.planned_start):'Planning required'}</small>
-     <p>{newest?'Workers required: '+(stringValue(newest.tomorrow_workers)||'Not set'):'Open Timeline to plan upcoming work.'}</p>
-    </div>
-   </section>
-  </div>}
+  <section className="pv2-panel">
+   <div className="pv2-command-head"><h2>{showHistory?'Project activity':'Recent updates'}</h2>
+     <span className="pv2-timeline-counter">{recent.length} updates</span></div>
+   {recent.length?recent.map(entry=><div className="pv2-activity-row" key={entry.kind+entry.id}>
+    <span className="pv2-activity-icon"><OwnerIcon name={entry.kind==='check'?'check':entry.kind==='material'?'purchases':'projects'} size={16}/></span>
+    <div><strong>{entry.title}</strong><p>{entry.description}</p>
+      <small>{shortDate(entry.date)}</small></div></div>):
+    <p className="pv2-muted">No project activity recorded yet.</p>}
+  </section>
+  <section className="pv2-panel pv2-command-quick">
+   <div className="pv2-command-head"><h2>Quick actions</h2></div>
+   <div className="pv2-command-quick-actions">
+    {d.site?.stage==='execution'&&
+     <details><summary><OwnerIcon name="projects" size={16}/> Add work update</summary><SiteReportForm id={d.project.id}/></details>}
+    {d.site?.stage==='execution'&&
+     <details><summary><OwnerIcon name="projects" size={16}/> Add photo</summary><SiteMediaForm id={d.project.id}/></details>}
+    {d.site?.stage==='execution'&&
+     <details><summary><OwnerIcon name="purchases" size={16}/> Request material</summary><MaterialRequestForm id={d.project.id}/></details>}
+    {d.site?.canManage&&
+     <details><summary><OwnerIcon name="team" size={16}/> Assign labour / team</summary>
+      <p className="pv2-hint">Assign existing employees to this project. Daily labour counts are recorded with work updates.</p>
+      <AssignRole projectId={d.project.id} users={d.site.memberOptions}/></details>}
+    <Link href={cur(d.project.id,'documents')}><OwnerIcon name="quotations" size={16}/> Documents</Link>
+    {d.permissions.finance&&<Link href={cur(d.project.id,'payments')}><OwnerIcon name="billing" size={16}/> Payment history</Link>}
+   </div>
+  </section>
+ </aside>;
+}
+function ProjectWorkHub({d,showHistory=false}:{d:WorkspaceData;showHistory?:boolean}){
+ return <div className="pv2-content pv2-command-workspace">
+  <ProjectFinancialSummary d={d}/>
+  <div className="pv2-command-layout">
+   <ProjectStageBoard d={d}/>
+   <ProjectCommandSidebar d={d} showHistory={showHistory}/>
+  </div>
  </div>;
 }
+function Overview({d}:{d:WorkspaceData}){return <ProjectWorkHub d={d}/>;}
+
 type Activity={id:string;date:string;title:string;kind:string;description:string;media?:SiteRow};
 function timeline(d:WorkspaceData):Activity[]{
  const site=d.site,all:Activity[]=[];
@@ -235,112 +348,7 @@ function timeline(d:WorkspaceData):Activity[]{
   description:stringValue(row.description)});
  return all.sort((a,b)=>b.date.localeCompare(a.date));
 }
-function Timeline({d}:{d:WorkspaceData}){
- const all=timeline(d),site=d.site;
- const newReport=site?.reports[0];
- const associateOptions:StageLinkOption[]=[
-  ...(site?.reports??[]).map(r=>({kind:'report' as const,id:r.id,title:shortDate(r.report_date)+' — '+stringValue(r.completed_work)})),
-  ...(site?.materials??[]).map(r=>({kind:'material' as const,id:r.id,title:stringValue(r.item)})),
-  ...(site?.checks??[]).map(r=>({kind:'check' as const,id:r.id,title:stringValue(r.title)})),
-  ...(site?.media??[]).filter(r=>r.category!=='agreement').map(r=>({kind:'media' as const,id:r.id,title:stringValue(r.filename)})),
- ];
- return <div className="pv2-content pv2-timeline">
-  <ProjectPriority d={d}/>
-  {site&&(site.stage!=='design'||(d.preflight?.inspectionDone&&d.preflight?.measurementsDone))&&
-   <ProjectLifecycle id={d.project.id} stage={site.stage} canManage={site.canManage}
-   agreementSigned={d.agreement?.clearanceType==='signed_copy_recorded'||d.preflight?.signedReady===true}
-   industry={d.project.industry}
-   designs={site.designs.map(x=>({id:x.id,kind:stringValue(x.kind),status:stringValue(x.status)}))}/>}
-  {site?.stage==='design'&&d.quotations[0]&&d.agreement?.revisionId&&
-   d.agreement.revisionId!==d.quotations[0].revisionId&&
-   <section className="pv2-design-mismatch" role="alert">
-    The recorded agreement references an earlier quotation. Floor plans can be prepared, but reconcile the agreement and chosen Final quotation before final design confirmation and construction.
-    <NextLink href={cur(d.project.id,'documents')} label="Review agreement"/>
-   </section>}
-  <section className="pv2-panel">
-   <Title title="Project Activity" detail="Latest drawing updates, daily progress, materials and quality checks"
-    action={<span className="pv2-label">{all.length} recorded activities</span>}/>
-   <div className="pv2-timeline-grid">
-    <div className="pv2-timeline-main">
-     {all.length?all.map(a=><article className="pv2-timeline-entry" key={a.kind+a.id}>
-      <div className="pv2-time-column"><span>{shortDate(a.date)}</span><b className={'pv2-time-dot '+a.kind}/></div>
-      <div className="pv2-timeline-details"><div className="pv2-between">
-       <strong>{a.title}</strong><span className="pv2-label">{pretty(a.kind)}</span></div>
-       <p>{a.description||'Project activity recorded'}</p>
-       {a.kind==='execution'&&<PhotoStrip projectId={d.project.id} rows={site?.media??[]}/>}
-       {a.media&&stringValue(a.media.mime).startsWith('image/')&&
-        <PhotoStrip projectId={d.project.id} rows={[a.media]}/>}
-      </div>
-     </article>):<Blank title="No project events yet" detail="Site reports, inspection updates and material requests will appear here in date order."/>}
-    </div>
-    <aside className="pv2-stage-side pv2-stages-detail">
-     <h3>Project Stages & Quality Checks</h3>
-     <p className="pv2-muted">Start with architectural floor plans and structural design, then site preparation. Later, lower-floor brickwork may overlap upper-floor slabs after structural and safety clearances.</p>
-     {d.stages.length?d.stages.map((st,i)=>{
-      const guidance=guidanceForConstructionStage(st.template_code);
-      const checks=[...new Set([...st.inspectionTopics,...guidance.checks])];
-      const linkedPayments=d.quotePaymentTriggers.filter(p=>p.stageCodes.includes(st.instance_code));
-      const attached=d.links.filter(r=>r.stage_id===st.id);
-      return <details className="pv2-stage-detail" key={st.id}>
-       <summary><span className="pv2-stage-index">{i+1}</span>
-        <span className="pv2-stage-summary"><strong>{st.title}</strong>
-         <small>{st.floor_code?st.floor_code.replaceAll('_',' '):'Project-wide'} · {pretty(st.status)}</small></span>
-        <span className="pv2-stage-chevron" aria-hidden="true">⌄</span>
-       </summary>
-       <div className="pv2-stage-body">
-        <p>{st.explanation}</p>
-        {!!st.dependencies.length&&<p className="pv2-stage-dependencies">Prerequisite stages: {st.dependencies.join(' · ')}</p>}
-        <h4>Work activities</h4>
-        <ul>{st.activities.map((a,j)=><li key={j}>{a}</li>)}</ul>
-        {!!guidance.materials.length&&<><h4>Materials to plan</h4><ul>
-         {guidance.materials.map((m,j)=><li key={j}>{m}</li>)}</ul></>}
-        {!!checks.length&&<><h4>Checks & tests to arrange</h4><ul>
-         {checks.map((ch,j)=><li key={j}>{ch}</li>)}</ul></>}
-        {!!guidance.reports.length&&<><h4>Reports & evidence to capture</h4><ul>
-         {guidance.reports.map((r,j)=><li key={j}>{r}</li>)}</ul></>}
-        {!!linkedPayments.length&&d.permissions.finance&&<div className="pv2-stage-payment">
-         <strong>Quote payment association — not a payment request</strong>
-         {linkedPayments.map((p,j)=><span key={j}>{p.name} · {p.percent}% of quotation</span>)}
-        </div>}
-        <div className="pv2-stage-evidence">
-         <strong>{attached.length} explicitly linked site record{attached.length===1?'':'s'}</strong>
-         <p>Links refer to original site records; they do not certify work, testing or payment.</p>
-        </div>
-        {site?.canManage&&<ProjectStageLinker projectId={d.project.id} stageId={st.id} options={associateOptions}/>}
-        <div className="pv2-stage-links">
-         <NextLink href={cur(d.project.id,'checks')} label="Record check"/>
-         <NextLink href={cur(d.project.id,'procurement')} label="Request materials"/>
-         <NextLink href={cur(d.project.id,'execution')} label="Add progress"/>
-        </div>
-       </div>
-      </details>;
-     }):<p className="pv2-muted">Stages are generated only from the approved quotation and agreement.</p>}
-     {!d.stages.length&&site?.canManage&&
-      (d.agreement?<SyncStages id={d.project.id}/>:
-       <div className="pv2-stage-setup-notice">
-        <p>A signed agreement linked to this project is required before the construction timeline can be imported. Quotation milestones are planning proposals, not verified site progress.</p>
-        <NextLink href={cur(d.project.id,'documents')} label="Open quotations & agreement"/>
-       </div>)}
-    </aside>
-   </div>
-  </section>
-  {site&&<section className="pv2-panel">
-   <Title title="Today & Tomorrow" detail="One update goes into the shared execution and timeline history"/>
-   <div className="pv2-two-col"><article className="pv2-snapshot"><span className="pv2-day-tag">Today</span>
-    <strong>{stringValue(newReport?.completed_work)||'No work update'}</strong>
-    <p>{newReport?stringValue(newReport.worker_count)+' workers on site':'Add the day’s work and site photos.'}</p>
-   </article><article className="pv2-snapshot"><span className="pv2-day-tag future">Next work</span>
-    <strong>{stringValue(newReport?.tomorrow_plan)||'No plan recorded'}</strong>
-    <p>{newReport?stringValue(newReport.tomorrow_workers)+' workers planned':'Record tomorrow’s requirements.'}</p>
-   </article></div>
-   {site.stage==='execution'&&['manager','site_engineer'].includes(site.role)&&
-    <details className="pv2-edit-drawer"><summary>＋ Add daily work update</summary><SiteReportForm id={d.project.id}/></details>}
-   {site.stage==='execution'&&
-    <details className="pv2-edit-drawer"><summary>＋ Upload site photos</summary>
-     <SiteMediaForm id={d.project.id}/></details>}
-  </section>}
- </div>;
-}
+function Timeline({d}:{d:WorkspaceData}){return <ProjectWorkHub d={d} showHistory/>;}
 function Documents({d}:{d:WorkspaceData}){
  const canSeeCommercial=d.permissions.quotation||d.permissions.finance;
  const photos=d.site?.media??[],agreement=photos.filter(r=>stringValue(r.category)==='agreement');
@@ -592,5 +600,8 @@ export async function ProjectV2Page({id,view}:{id:string;view:ProjectPageSlug}){
    <ProjectHeader data={data} active={view}/>
    <section className="pv2-view">{Component&&<Component d={data}/>}</section>
   </main>
+  <OwnerMobileNav currentHref="/dashboard/projects"
+   navigation={nav.filter(item=>['Dashboard','Projects','My Sites','Finance','Team','Settings'].includes(item.label))
+    .filter(item=>item.label!=='My Sites'||!nav.some(x=>x.label==='Projects')).slice(0,5)}/>
  </OwnerShell>;
 }
