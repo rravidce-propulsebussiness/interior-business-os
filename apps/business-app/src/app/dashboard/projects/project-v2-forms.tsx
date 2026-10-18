@@ -216,7 +216,7 @@ export function SiteMediaForm({id,category='daily'}:{id:string;category?:string}
   <label>File<input required type="file" name="file"
    accept="image/jpeg,image/png,image/webp,application/pdf,video/mp4"/></label>
   <label>Category<select name="category" defaultValue={category}>
-   {['daily','site','inspection','agreement','design','curing'].map(v=>
+   {['daily','site','inspection','design','curing'].map(v=>
     <option key={v} value={v}>{v}</option>)}</select></label>
   <label>Caption<input name="caption" maxLength={500} placeholder="Description of photo or file"/></label>
   <p className="pv2-hint">Private file · maximum 8 MB · access limited by project permissions</p>
