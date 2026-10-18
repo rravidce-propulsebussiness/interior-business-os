@@ -21,7 +21,7 @@ describe('one authorized company navigation on every dashboard page',()=>{
   });
   it('keeps every approved module in one source with canonical destinations',()=>{
     for (const name of [
-      'Dashboard','Leads','Quotations','Projects','Clients',
+      'Dashboard','Leads','Quotations','Projects',
       'Marketplace','Purchases','Finance','Billing & Plans',
       'Reports','Team','Website','Settings'
     ]) expect(canonical).toContain("label:'"+name+"'");
@@ -30,6 +30,8 @@ describe('one authorized company navigation on every dashboard page',()=>{
     expect(canonical).not.toContain("href:'/dashboard/company/settings'");
     expect(dashboard).toContain("label: 'Billing & Plans',\n      href: '/dashboard/billing'");
     expect(canonical).toContain("has('invoice.view','billing')");
+    expect(canonical).not.toContain("label:'Clients'");
+    expect(canonical).not.toContain("href:'/dashboard/customers'");
   });
   it('avoids a second Quotation Studio menu and preserves its search',()=>{
     expect(studio).toContain('<OwnerShell');
