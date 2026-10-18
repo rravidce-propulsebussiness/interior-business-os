@@ -1302,18 +1302,18 @@ export interface Database {
         };
         Relationships: [
           {
-            foreignKeyName: 'contracts_org_revision_source_fk';
-            columns: ['organization_id', 'revision_id'];
-            isOneToOne: false;
-            referencedRelation: 'quotation_revisions';
-            referencedColumns: ['organization_id', 'id'];
-          },
-          {
             foreignKeyName: 'contracts_created_by_fkey';
             columns: ['created_by'];
             isOneToOne: false;
             referencedRelation: 'profiles';
             referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'contracts_org_revision_source_fk';
+            columns: ['organization_id', 'revision_id'];
+            isOneToOne: false;
+            referencedRelation: 'quotation_revisions';
+            referencedColumns: ['organization_id', 'id'];
           },
           {
             foreignKeyName: 'contracts_organization_id_acceptance_id_fkey';
