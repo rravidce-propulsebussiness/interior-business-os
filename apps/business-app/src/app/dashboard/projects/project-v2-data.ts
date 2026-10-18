@@ -212,11 +212,24 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
    .select('id,status').eq('organization_id',s.org).in('id',revisionIds):null;
  const revisionsById=new Map((quoteRevisions?.error?[]:quoteRevisions?.data??[])
    .map(r=>[r.id,r.status]));
- const quotations:ProjectQuotation[]=quoteRoots
-   .filter(q=>q.current_revision_id&&revisionsById.has(q.current_revision_id))
-   .map(q=>({id:q.id,number:q.quotation_number??'Quotation',
-     revisionId:q.current_revision_id!,status:revisionsById.get(q.current_revision_id!)??'',
-     createdAt:q.created_at??''}));
+ // Reuse the same customer-level Final choice as the Quotations workspace.
+ // A lead may have quote alternatives stored under retired prospect project IDs;
+ // display only a Final quote that belongs to this verified project/lead set.
+ const choice=permissions.quotation&&quoteRoots.length
+   ?await s.client.rpc('quotation_final_choices',{
+      p_org:s.org,p_customer_ids:[project.customer_id],
+    }):null;
+ const choiceObject=choice&&!choice.error?obj(choice.data):{};
+ const finalQuoteId=typeof choiceObject[project.customer_id]==='string'
+   ?choiceObject[project.customer_id] as string:null;
+ const finalRoot=quoteRoots.find(q=>q.id===finalQuoteId
+   &&q.current_revision_id&&revisionsById.has(q.current_revision_id))
+   ??quoteRoots.find(q=>q.current_revision_id&&revisionsById.has(q.current_revision_id));
+ const quotations:ProjectQuotation[]=finalRoot&&finalRoot.current_revision_id
+   ?[{id:finalRoot.id,number:finalRoot.quotation_number??'Quotation',
+      revisionId:finalRoot.current_revision_id,
+      status:revisionsById.get(finalRoot.current_revision_id)??'',
+      createdAt:finalRoot.created_at}]:[];
  const contractedRevision=permissions.finance&&!contract.error?contract.data?.[0]?.revision_id:null;
  // Read only a saved planning proposal before the agreement exists.
  // This never activates milestones or invents payment receipts.
