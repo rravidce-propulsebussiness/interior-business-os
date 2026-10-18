@@ -23,7 +23,8 @@ export async function ProjectClientAccess({
   .eq('organization_id',context.organizationId).eq('id',projectId)
   .eq('customer_id',customerId).eq('removed_from_workspace',false)
   .eq('is_sales_prospect',false).maybeSingle();
- if(scope.error||!scope.data)return null;
+ const project=scope.data;
+ if(scope.error||!project)return null;
  const [customer,grantable,access]=await Promise.all([
   client.from('customers').select('id,email').eq('organization_id',context.organizationId)
     .eq('id',customerId).maybeSingle(),
@@ -41,11 +42,11 @@ export async function ProjectClientAccess({
   const item=value as Record<string,unknown>;
   if(item.project_id!==projectId||typeof item.email!=='string')return [];
   return [{
-   project_id:projectId,project_name:scope.data.name,
+   project_id:projectId,project_name:project.name,
    email:item.email,active:item.active===true,
    created_at:typeof item.created_at==='string'?item.created_at:'',
   }];
  });
  return <ClientAccess customerId={customerId} customerEmail={customer.data?.email??''}
-  projects={canShare?[{id:projectId,name:scope.data.name}]:[]} existing={rows}/>;
+  projects={canShare?[{id:projectId,name:project.name}]:[]} existing={rows}/>;
 }
