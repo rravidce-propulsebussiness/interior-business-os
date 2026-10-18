@@ -120,12 +120,14 @@ export default async function Customers({
           .select('id', { count: 'exact', head: true })
           .eq('organization_id', s.org)
           .eq('is_sales_prospect', false)
+          .eq('removed_from_workspace', false)
       : Promise.resolve({ count: null }),
     canQuotes
       ? s.client
           .from('quotations')
           .select('id', { count: 'exact', head: true })
           .eq('organization_id', s.org)
+          .neq('status', 'cancelled')
       : Promise.resolve({ count: null }),
     s.repository.industries(),
   ]);
@@ -144,6 +146,7 @@ export default async function Customers({
         .select('customer_id')
         .eq('organization_id', s.org)
         .eq('is_sales_prospect', false)
+        .eq('removed_from_workspace', false)
         .in('industry_id', industryIds)
         .limit(10000);
       if (matches.error) throw new Error('Could not filter client services');
@@ -193,6 +196,7 @@ export default async function Customers({
           .select('id,customer_id,industry_id,created_at')
           .eq('organization_id', s.org)
           .eq('is_sales_prospect', false)
+          .eq('removed_from_workspace', false)
           .in('customer_id', ids)
           .limit(5000)
       : Promise.resolve({ data: [] }),
@@ -201,6 +205,7 @@ export default async function Customers({
           .from('quotations')
           .select('id,customer_id,created_at')
           .eq('organization_id', s.org)
+          .neq('status', 'cancelled')
           .in('customer_id', ids)
           .limit(5000)
       : Promise.resolve({ data: [] }),
