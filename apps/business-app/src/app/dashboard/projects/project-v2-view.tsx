@@ -84,9 +84,6 @@ function ProjectHeader({data,active}:{data:WorkspaceData;active:ProjectPageSlug}
     className="pv2-button pv2-outline">✎ Edit Project</Link>}
    {p.customerId&&<Link href={'/dashboard/customers/'+p.customerId+'#client-portal-access'}
     className="pv2-button pv2-outline">Share with client</Link>}
-   {(data.permissions.quotation||data.permissions.finance)&&
-    <Link href={cur(p.id,'documents')} className="pv2-button pv2-outline">Quote & Agreement</Link>}
-   <Link href="/dashboard/projects" className="pv2-button pv2-outline">All projects</Link>
   </div>
   <LinkTabs data={data} active={active}/>
  </div>;
@@ -200,9 +197,17 @@ function Timeline({d}:{d:WorkspaceData}){
  ];
  return <div className="pv2-content pv2-timeline">
   {site&&<ProjectLifecycle id={d.project.id} stage={site.stage} canManage={site.canManage}
+   agreementSigned={d.agreement?.clearanceType==='signed_copy_recorded'}
+   industry={d.project.industry}
    designs={site.designs.map(x=>({id:x.id,kind:stringValue(x.kind),status:stringValue(x.status)}))}/>}
+  {site?.stage==='design'&&d.quotations[0]&&d.agreement?.revisionId&&
+   d.agreement.revisionId!==d.quotations[0].revisionId&&
+   <section className="pv2-design-mismatch" role="alert">
+    The recorded agreement references an earlier quotation. Floor plans can be prepared, but reconcile the agreement and chosen Final quotation before final design confirmation and construction.
+    <NextLink href={cur(d.project.id,'documents')} label="Review agreement"/>
+   </section>}
   <section className="pv2-panel">
-   <Title title="Project Timeline" detail="Daily progress, tomorrow's plan, photos, materials and quality checks"
+   <Title title="Project Activity" detail="Latest drawing updates, daily progress, materials and quality checks"
     action={<span className="pv2-label">{all.length} recorded activities</span>}/>
    <div className="pv2-timeline-grid">
     <div className="pv2-timeline-main">
@@ -218,8 +223,8 @@ function Timeline({d}:{d:WorkspaceData}){
      </article>):<Blank title="No project events yet" detail="Site reports, inspection updates and material requests will appear here in date order."/>}
     </div>
     <aside className="pv2-stage-side pv2-stages-detail">
-     <h3>Floor-wise Work Stages</h3>
-     <p className="pv2-muted">Structural slabs follow floor dependencies. Brickwork and finishing on lower floors can overlap upper-floor slab construction. Open a stage to see its work, materials, tests and reports.</p>
+     <h3>Project Stages & Quality Checks</h3>
+     <p className="pv2-muted">Start with architectural floor plans and structural design, then site preparation. Later, lower-floor brickwork may overlap upper-floor slabs after structural and safety clearances.</p>
      {d.stages.length?d.stages.map((st,i)=>{
       const guidance=guidanceForConstructionStage(st.template_code);
       const checks=[...new Set([...st.inspectionTopics,...guidance.checks])];
