@@ -16,7 +16,10 @@ BEGIN
     raise exception 'Record signed agreement and received advance before starting design'
       using errcode='23514';
   end if;$before$;
-  design_guard := $after$if not exists(
+  design_guard := $after$if exists(
+    select 1 from private.project_advance_requirements req
+     where req.organization_id=p_organization_id and req.project_id=p_project_id
+  ) and not exists(
     select 1 from public.contracts c
     join private.project_agreement_events event
       on event.organization_id=c.organization_id
