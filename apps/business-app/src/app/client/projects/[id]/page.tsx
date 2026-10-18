@@ -57,6 +57,11 @@ const timelineSchema = z.array(
     activities: z.array(z.string()),
   }),
 );
+const requestsSchema=z.array(z.object({
+ id:z.uuid(),kind:z.string(),details:z.string(),status:z.string(),
+ requested_date:z.string().nullable(),response:z.string(),created_at:z.string(),
+ responded_at:z.string().nullable(),
+}));
 const dashboardSchema = z.object({
   materials: z
     .array(
@@ -120,16 +125,18 @@ export default async function ClientProjectPage({
     name: string,
     args: Record<string, string>,
   ) => Promise<{ data: unknown; error: { message: string } | null }>;
-  const [projectResult, timelineResult, dashboardResult] = await Promise.all([
+  const [projectResult, timelineResult, dashboardResult, requestsResult] = await Promise.all([
     rpc('client_portal_project', { p_project_id: id }),
     rpc('client_portal_timeline', { p_project_id: id }),
     rpc('client_portal_dashboard', { p_project_id: id }),
+    rpc('project_client_request_list', { p_project_id: id }),
   ]);
   const project = projectSchema.safeParse(projectResult.data);
   if (projectResult.error || !project.success) notFound();
 
   const parsedTimeline = timelineSchema.safeParse(timelineResult.data);
   const parsedDashboard = dashboardSchema.safeParse(dashboardResult.data);
+  const parsedRequests=requestsSchema.safeParse(requestsResult.data);
   const latest = parsedDashboard.success ? parsedDashboard.data : null;
 
   return (
@@ -157,6 +164,7 @@ export default async function ClientProjectPage({
       metricsUnavailable={Boolean(
         dashboardResult.error || !parsedDashboard.success,
       )}
+      requests={parsedRequests.success&&!requestsResult.error?parsedRequests.data:[]}
       clientEmail={auth.user.email ?? ''}
     />
   );
