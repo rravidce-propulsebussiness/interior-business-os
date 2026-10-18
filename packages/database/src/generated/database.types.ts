@@ -1311,7 +1311,7 @@ export interface Database {
           {
             foreignKeyName: 'contracts_org_revision_source_fk';
             columns: ['organization_id', 'revision_id'];
-            isOneToOne: false;
+            isOneToOne: true;
             referencedRelation: 'quotation_revisions';
             referencedColumns: ['organization_id', 'id'];
           },
