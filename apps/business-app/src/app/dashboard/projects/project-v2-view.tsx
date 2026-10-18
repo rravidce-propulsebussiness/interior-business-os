@@ -107,6 +107,7 @@ function ProjectHeader({data,active}:{data:WorkspaceData;active:ProjectPageSlug}
 }
 function ProjectPriority({d}:{d:WorkspaceData}){
  const signed=d.agreement?.clearanceType==='signed_copy_recorded';
+ const canSurvey=d.permissions.manage||['manager','site_engineer'].includes(d.site?.role??'');
  const inspection=d.preflight?.inspectionDone===true;
  const measurement=d.preflight?.measurementsDone===true;
  const invoice=d.advance;
@@ -131,11 +132,11 @@ function ProjectPriority({d}:{d:WorkspaceData}){
     <span className={measurement?'done':'waiting'}>{measurement?'✓':'○'} Measurements</span>
    </div>
    {!signed?<p className="pv2-next-notice">The agreement is not yet confirmed as signed. Uploading a PDF alone does not complete signing.</p>:
-    !inspection&&d.permissions.manage?<details className="pv2-next-drawer" open>
+    !inspection&&canSurvey?<details className="pv2-next-drawer" open>
       <summary>Record site inspection</summary>
       <ProjectSiteSurvey projectId={d.project.id} kind="inspection" previous={d.preflight?.inspectionDetails}/>
      </details>:
-    inspection&&!measurement&&d.permissions.manage?<details className="pv2-next-drawer" open>
+    inspection&&!measurement&&canSurvey?<details className="pv2-next-drawer" open>
       <summary>Record site measurements</summary>
       <ProjectSiteSurvey projectId={d.project.id} kind="measurements" previous={d.preflight?.measurementDetails}/>
      </details>:
