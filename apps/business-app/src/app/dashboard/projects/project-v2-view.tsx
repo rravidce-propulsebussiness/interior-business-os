@@ -66,7 +66,7 @@ function PhotoStrip({projectId,rows}:{projectId:string;rows:SiteRow[]}){
 function FieldDate({value}:{value:unknown}){return <time>{shortDate(value)}</time>;}
 function LinkTabs({data,active}:{data:WorkspaceData;active:ProjectPageSlug}){
  return <nav className="pv2-project-tabs" aria-label="Project workspace pages">
-  {projectPages.filter(p=>p.slug!=='payments'||data.permissions.payments).map(p=>
+  {projectPages.filter(p=>p.slug!=='timeline'&&(p.slug!=='payments'||data.permissions.payments)).map(p=>
    <Link key={p.slug} href={cur(data.project.id,p.slug)}
     aria-current={active===p.slug?'page':undefined} className={active===p.slug?'selected':''}>
     <OwnerIcon name={p.icon} size={16}/>{p.slug==='documents'&&!data.permissions.quotation&&!data.permissions.finance?'Documents':p.title}</Link>)}
