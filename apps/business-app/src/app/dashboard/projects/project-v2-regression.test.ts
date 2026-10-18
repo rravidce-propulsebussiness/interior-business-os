@@ -93,3 +93,24 @@ it('starts at a real floor plan action after signed agreement, before final desi
  expect(styles).toContain('.pv2-project-header-actions{min-width:0;max-width:100%;flex-wrap:wrap');
  expect(ui).not.toContain('>All projects</Link>');
 });
+
+it('keeps project edit and sharing inline and shows one evidence-backed next action',()=>{
+ const finance=read('./project-next-actions.ts');
+ const nextForms=read('./project-next-forms.tsx');
+ const drawing=read('./project-design-actions.ts');
+ expect(ui).toContain('ProjectPriority d={d}');
+ expect(ui).toContain('Edit project</summary>');
+ expect(ui).toContain('Share with client</summary>');
+ expect(ui).toContain('<ProjectClientAccess projectId={p.id} customerId={p.customerId}/>');
+ expect(ui).not.toContain('href={cur(p.id,\'overview\')+\'#project-settings\'}');
+ expect(ui).toContain("!inspection?'Site inspection'");
+ expect(ui).toContain("!measurement?'Site measurements'");
+ expect(ui).toContain("'Floor plan preparation'");
+ expect(ui).toContain("invoice.invoiceTotal>0 && advanceDue===0");
+ expect(finance).toContain("'project_preflight_save'");
+ expect(finance).toContain("'project_advance_proforma_prepare'");
+ expect(nextForms).toContain('Issue advance proforma');
+ expect(drawing).toContain("readiness.inspection_done!==true||readiness.measurements_done!==true");
+ expect(loader).toContain("'project_preflight_read'");
+ expect(loader).toContain("'project_advance_read'");
+});
