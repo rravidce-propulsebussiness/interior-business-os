@@ -292,7 +292,7 @@ function ProjectCommandSidebar({d,showHistory=false}:{d:WorkspaceData;showHistor
    {d.preflight&&!d.preflight.inspectionDone&&<div className="pv2-attention-item">
     <span className="pv2-attention-symbol"><OwnerIcon name="calendar" size={20}/></span>
     <div><strong>Site inspection needed</strong><p>Record the survey and measurements before floor planning.</p></div></div>}
-   {!needsAdvance&&!incompleteChecks.length&&(!d.preflight||d.preflight.inspectionDone)&&
+   {!needsAdvance&&!incompleteChecks.length&&!openRequests.length&&(!d.preflight||d.preflight.inspectionDone)&&
     <p className="pv2-muted">No outstanding project alerts from the available records.</p>}
    {d.permissions.manage&&<div className="pv2-owner-requests">
       <h3>Client questions & requests</h3>
