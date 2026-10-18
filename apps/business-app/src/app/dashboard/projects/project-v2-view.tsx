@@ -146,19 +146,19 @@ function ProjectPriority({d}:{d:WorkspaceData}){
   </div>
   <aside className="pv2-priority-payment">
    <div className="pv2-next-payment-heading"><span className="pv2-priority-coin">₹</span>
-    <div><strong>Advance payment</strong><small>{paid?'Verified receipt recorded':invoice?.invoiceId?'Payment requested':'Not yet requested'}</small></div></div>
-   <strong className="pv2-priority-amount">{invoice?.invoiceId?formatMoney(invoice.invoiceTotal):'Not invoiced'}</strong>
+    <div><strong>Advance payment</strong><small>{invoice===null?'Finance status unavailable':paid?'Verified receipt recorded':invoice?.invoiceId?'Payment requested':'Not yet requested'}</small></div></div>
+   <strong className="pv2-priority-amount">{invoice===null?'—':invoice?.invoiceId?formatMoney(invoice.invoiceTotal):'Not invoiced'}</strong>
    {invoice?.invoiceId?<div className="pv2-priority-payment-meta">
      <span>{invoice.invoiceNumber||'Advance proforma'}</span><Status value={paid?'paid':invoice.invoiceStatus||'pending'}/>
      <p>{formatMoney(received)} received · {formatMoney(advanceDue)} remaining</p>
     </div>:<p className="pv2-next-subtle">A signed agreement does not mean payment has arrived.</p>}
-   {signed&&!invoice?.invoiceId&&d.permissions.finance&&d.permissions.manage&&
+   {signed&&invoice!==null&&!invoice.invoiceId&&d.permissions.finance&&d.permissions.manage&&
     <details className="pv2-next-drawer"><summary>Issue advance invoice</summary>
      <ProjectAdvanceAction projectId={d.project.id} defaultPercent={guess}/>
     </details>}
    {invoice?.invoiceId&&<a className="pv2-next-secondary" href={'/dashboard/finance/invoices/'+invoice.invoiceId}>
     View invoice <OwnerIcon name="arrow" size={13}/></a>}
-   {!invoice?.scheduleActive&&signed&&<p className="pv2-next-subtle">
+   {invoice!==null&&!invoice.scheduleActive&&signed&&<p className="pv2-next-subtle">
     Payment schedule still needs activation before physical construction.</p>}
   </aside>
  </section>;
