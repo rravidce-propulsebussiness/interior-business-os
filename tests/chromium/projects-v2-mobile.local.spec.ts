@@ -64,3 +64,38 @@ test('all project detail pages require authentication',async({page})=>{
  await page.goto('/dashboard/projects/00000000-0000-4000-8000-000000000001/checks');
  await expect(page).toHaveURL(/\/login(?:\?|$)/);
 });
+
+
+const nextAction=shell('<section class="pv2-project-header"><div class="pv2-project-identity">'+
+ '<span class="pv2-project-thumb">⌂</span><div><h1>Ramya Dream Home</h1></div></div>'+
+ '<div class="pv2-project-header-actions">'+
+ '<details class="pv2-header-drawer"><summary class="pv2-button pv2-outline">Edit project</summary>'+
+ '<div class="pv2-header-drawer-body"><form><label>Project name<input value="Ramya Dream Home"/></label></form></div></details>'+
+ '<details class="pv2-header-drawer" open><summary class="pv2-button pv2-outline">Share with client</summary>'+
+ '<div class="pv2-header-drawer-body"><h2>Client App access</h2><input placeholder="Client email"/></div></details></div>'+
+ '<nav class="pv2-project-tabs"><a class="selected">Overview</a><a>Timeline</a><a>Quote & Agreement</a></nav></section>'+
+ '<div class="pv2-content"><section class="pv2-priority-wrap">'+
+ '<div class="pv2-priority-main"><div class="pv2-priority-eyebrow"><span class="pv2-next-pulse"></span> NEXT ACTION</div>'+
+ '<h2>Site inspection</h2><p class="pv2-priority-description">Confirm boundaries and levels.</p>'+
+ '<div class="pv2-checklist-inline"><span class="done">Signed agreement</span>'+
+ '<span>Site inspection</span><span>Measurements</span></div>'+
+ '<details class="pv2-next-drawer" open><summary>Record site inspection</summary>'+
+ '<form class="pv2-inline-work-form"><label>Site inspection report'+
+ '<textarea>Survey details</textarea></label><button class="pv2-next-primary">Complete site inspection</button></form>'+
+ '</details></div><aside class="pv2-priority-payment">'+
+ '<div class="pv2-next-payment-heading"><span class="pv2-priority-coin">₹</span>'+
+ '<div><strong>Advance payment</strong><small>Not yet requested</small></div></div>'+
+ '<strong class="pv2-priority-amount">Not invoiced</strong>'+
+ '<details class="pv2-next-drawer" open><summary>Issue advance invoice</summary>'+
+ '<form class="pv2-inline-work-form"><label>Advance percentage<input type="number" value="10"/></label>'+
+ '<button class="pv2-next-primary">Issue advance proforma</button></form></details></aside></section></div>');
+test('project inline edit/share and next-action forms fit narrow mobile widths',async({page})=>{
+ await page.setContent(nextAction);
+ for(const width of [320,360,390,430,600,768,1024]){
+  await page.setViewportSize({width,height:900});
+  const size=await page.evaluate(()=>({width:document.documentElement.clientWidth,
+   scroll:document.documentElement.scrollWidth}));
+  expect(size.scroll,'inline project action overflow at '+width).toBeLessThanOrEqual(size.width+1);
+  await expect(page.getByRole('heading',{name:'Site inspection'})).toBeVisible();
+ }
+});

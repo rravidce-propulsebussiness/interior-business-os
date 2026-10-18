@@ -9,7 +9,7 @@ do $$
 declare
  org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
  project uuid;
- design_id uuid;need_id uuid;check_id uuid;agreement_media uuid;contract uuid;
+ design_id uuid;need_id uuid;check_id uuid;agreement_media uuid;contract uuid;advance_doc uuid;
  kind text;
  result jsonb;
 begin
@@ -38,6 +38,24 @@ begin
  -- Signing can precede the design phase; unlike physical execution, the
  -- contract's recorded advance is not a prerequisite for drawing preparation.
  contract=pg_temp.site_signed_agreement(org,project,agreement_media);
+ -- A recorded signature permits site inspection and measurements, not
+ -- physical execution or falsely confirmed advance receipt.
+ if (public.project_preflight_read(org,project)->>'inspection_done')<>'false'
+  then raise exception 'FAIL: site inspection was falsely recorded';end if;
+ perform public.project_preflight_save(org,project,'inspection',
+   'Checked road access, plot corners, utilities and adjacent building conditions.');
+ perform public.project_preflight_save(org,project,'measurements',
+   'Recorded site dimensions, plot width 42 ft, length 62 ft and road level.');
+ if (public.project_preflight_read(org,project)->>'measurements_done')<>'true'
+   then raise exception 'FAIL: site measurements missing';end if;
+ advance_doc=public.project_advance_proforma_prepare(org,project,10);
+ if advance_doc is distinct from public.project_advance_proforma_prepare(org,project,10)
+   then raise exception 'FAIL: duplicate advance invoice on retry';end if;
+ if (public.project_advance_read(org,project)->>'received')::numeric<>0
+   then raise exception 'FAIL: advance proforma marked payment received';end if;
+ if (select count(*) from public.invoices where project_id=project
+   and id=advance_doc and status='issued' and invoice_type='proforma')<>1
+ then raise exception 'FAIL: advance invoice not issued';end if;
  if (public.project_agreement_read(org,project)->>'execution_authorized')<>'false'
  then raise exception 'FAIL: signed agreement bypassed recorded advance';end if;
  foreach kind in array array['architectural_plan','3d_design','structural_design'] loop

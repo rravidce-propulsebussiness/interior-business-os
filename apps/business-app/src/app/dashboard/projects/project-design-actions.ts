@@ -28,6 +28,16 @@ export async function submitProjectDrawing(projectId:string,form:FormData):Promi
   const active=await activeOrganization();
   if(!active)throw new Error('Choose an active company');
   const org=active.organizationId;
+  // Inspection and site measurements are required before the first drawing.
+  // Check before uploading media to avoid orphaned drawings on a blocked step.
+  const survey=await service.client.rpc('project_preflight_read',{
+   p_org:org,p_project:id,
+  });
+  if(survey.error)throw new Error(survey.error.message.slice(0,220));
+  const readiness=survey.data&&typeof survey.data==='object'&&!Array.isArray(survey.data)
+   ?survey.data as Record<string,unknown>:{};
+  if(readiness.inspection_done!==true||readiness.measurements_done!==true)
+   throw new Error('Complete site inspection and measurements in Project Overview before uploading floor plans.');
   let reference=manual;
   if(hasFile){
    if(!(file instanceof File)||file.size>8*1024*1024)

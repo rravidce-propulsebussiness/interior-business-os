@@ -11852,6 +11852,14 @@ export interface Database {
         Args: { p_user_id: string; p_status: string };
         Returns: undefined;
       };
+      project_advance_proforma_prepare: {
+        Args: { p_org: string; p_project: string; p_percent: number };
+        Returns: string;
+      };
+      project_advance_read: {
+        Args: { p_org: string; p_project: string };
+        Returns: Json;
+      };
       project_agreement_command: {
         Args: {
           p_organization_id: string;
@@ -11874,6 +11882,19 @@ export interface Database {
           p_confirm: string;
         };
         Returns: boolean;
+      };
+      project_preflight_read: {
+        Args: { p_org: string; p_project: string };
+        Returns: Json;
+      };
+      project_preflight_save: {
+        Args: {
+          p_org: string;
+          p_project: string;
+          p_kind: string;
+          p_details: string;
+        };
+        Returns: Json;
       };
       project_quote_timeline_create: {
         Args: { p_org: string; p_contract: string; p_input: Json };
