@@ -55,7 +55,7 @@ export function NewClientProject({customerId,city=''}:{customerId:string;city?:s
     </label>
     <p className="cp-new-project-hint">After creating the project, prepare its quotation and signed agreement before starting execution. Existing projects and quotes remain unchanged.</p>
     <button type="submit" className="cp-new-project-submit" disabled={pending}>
-     {pending?'Creating…':'Create & open project'} <OwnerIcon name="arrow-right" size={17}/>
+     {pending?'Creating…':'Create & open project'} <span aria-hidden="true">→</span>
     </button>
     {state.message&&<p role="status" className={'cp-new-project-message '+(state.ok?'good':'bad')}>{state.message}</p>}
    </form>
