@@ -332,7 +332,7 @@ export default async function Quotations({
       row.currency || organization.default_currency || 'INR', row.amount)}</td>
     <td>{shared
       ? <span className="qs-quotes-state qs-state-shared">Shared</span>
-      : <span className="qs-quotes-unshared">Not shared</span>}</td>
+      : <span className="qs-quotes-unshared">{row.status === 'draft' ? 'Saved' : 'Not shared'}</span>}</td>
     <td className="qs-quotes-created">{niceDate(createdAt)}</td>
     <td>
       <div className="qs-quotes-actions">
