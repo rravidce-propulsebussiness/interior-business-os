@@ -6,6 +6,7 @@ import { canAccess } from '@business-os/auth';
 import { guidanceForConstructionStage } from '@business-os/core/construction-payment-schedule';
 import { ProjectStageLinker,type StageLinkOption } from './project-stage-linker';
 import { ProjectClientAccess } from './project-client-access';
+import { ProjectSiteSurvey,ProjectAdvanceAction } from './project-next-forms';
 import { MasterForm } from '../commercial/master-form';
 import { activeOrganization } from '@business-os/auth/server';
 import { projectWorkspace,formatMoney,pretty,shortDate,stringValue,
@@ -81,13 +82,86 @@ function ProjectHeader({data,active}:{data:WorkspaceData;active:ProjectPageSlug}
    </div></div><Status value={p.status}/>
   </div>
   <div className="pv2-project-header-actions">
-   {data.permissions.manage&&data.projectRaw&&<Link href={cur(p.id,'overview')+'#project-settings'}
-    className="pv2-button pv2-outline">✎ Edit Project</Link>}
-   {p.customerId&&<Link href={cur(p.id,'team')+'#client-portal-access'}
-    className="pv2-button pv2-outline">Share with client</Link>}
+   {data.permissions.manage&&data.projectRaw&&<details className="pv2-header-drawer">
+    <summary className="pv2-button pv2-outline">✎ Edit project</summary>
+    <div className="pv2-header-drawer-body">
+     <MasterForm entity="projects" title="Save project" initial={data.projectRaw}
+      fields={[
+       {key:'name',label:'Project name',required:true},
+       {key:'site_address.line1',label:'Site address'},
+       {key:'site_address.city',label:'City'},
+       {key:'site_address.region',label:'State'},
+       {key:'notes',label:'Internal notes',type:'textarea' as const},
+      ]}/>
+    </div>
+   </details>}
+   {p.customerId&&<details className="pv2-header-drawer">
+    <summary className="pv2-button pv2-outline">Share with client</summary>
+    <div className="pv2-header-drawer-body">
+     <ProjectClientAccess projectId={p.id} customerId={p.customerId}/>
+    </div>
+   </details>}
   </div>
   <LinkTabs data={data} active={active}/>
  </div>;
+}
+function ProjectPriority({d}:{d:WorkspaceData}){
+ const signed=d.agreement?.clearanceType==='signed_copy_recorded';
+ const inspection=d.preflight?.inspectionDone===true;
+ const measurement=d.preflight?.measurementsDone===true;
+ const invoice=d.advance;
+ const received=invoice?.received??0;
+ const advanceDue=invoice?.invoiceId?Math.max(0,(invoice.invoiceTotal||0)-received):null;
+ const paid=Boolean(invoice?.invoiceId && invoice.invoiceTotal>0 && advanceDue===0);
+ const next=!signed?'Confirm signed agreement':
+   !inspection?'Site inspection':
+   !measurement?'Site measurements':'Floor plan preparation';
+ const notes=!signed?'Upload the signed agreement and record signing evidence once.':
+   !inspection?'Inspect access, boundaries, utilities, existing structures and site levels before design.':
+   !measurement?'Record dimensions, plot levels, road reference and setbacks before floor planning.':
+   'The pre-design survey is recorded. Prepare the floor plan and send it for review.';
+ const guess=d.quotePaymentTriggers.find(x=>/advance|booking/i.test(x.name))?.percent??10;
+ return <section className="pv2-priority-wrap" aria-label="Project next actions">
+  <div className="pv2-priority-main">
+   <div className="pv2-priority-eyebrow"><span className="pv2-next-pulse"/> NEXT ACTION <span className="pv2-next-stage">{signed?'Design preparation':'Agreement'}</span></div>
+   <h2>{next}</h2><p className="pv2-priority-description">{notes}</p>
+   <div className="pv2-checklist-inline">
+    <span className={signed?'done':'waiting'}>{signed?'✓':'○'} Signed agreement</span>
+    <span className={inspection?'done':'waiting'}>{inspection?'✓':'○'} Site inspection</span>
+    <span className={measurement?'done':'waiting'}>{measurement?'✓':'○'} Measurements</span>
+   </div>
+   {!signed?<p className="pv2-next-notice">The agreement is not yet confirmed as signed. Uploading a PDF alone does not complete signing.</p>:
+    !inspection&&d.permissions.manage?<details className="pv2-next-drawer" open>
+      <summary>Record site inspection</summary>
+      <ProjectSiteSurvey projectId={d.project.id} kind="inspection" previous={d.preflight?.inspectionDetails}/>
+     </details>:
+    inspection&&!measurement&&d.permissions.manage?<details className="pv2-next-drawer" open>
+      <summary>Record site measurements</summary>
+      <ProjectSiteSurvey projectId={d.project.id} kind="measurements" previous={d.preflight?.measurementDetails}/>
+     </details>:
+    inspection&&measurement&&d.site?.stage==='design'&&d.site.canManage?
+     <details className="pv2-next-drawer" open><summary>Prepare floor plan</summary>
+      <ProjectDrawingForm id={d.project.id} kind={/interior/i.test(d.project.industry)?'interior_layout':'architectural_plan'} label="Submit floor plan for review"/>
+     </details>:null}
+  </div>
+  <aside className="pv2-priority-payment">
+   <div className="pv2-next-payment-heading"><span className="pv2-priority-coin">₹</span>
+    <div><strong>Advance payment</strong><small>{paid?'Verified receipt recorded':invoice?.invoiceId?'Payment requested':'Not yet requested'}</small></div></div>
+   <strong className="pv2-priority-amount">{invoice?.invoiceId?formatMoney(invoice.invoiceTotal):'Not invoiced'}</strong>
+   {invoice?.invoiceId?<div className="pv2-priority-payment-meta">
+     <span>{invoice.invoiceNumber||'Advance proforma'}</span><Status value={paid?'paid':invoice.invoiceStatus||'pending'}/>
+     <p>{formatMoney(received)} received · {formatMoney(advanceDue)} remaining</p>
+    </div>:<p className="pv2-next-subtle">A signed agreement does not mean payment has arrived.</p>}
+   {signed&&!invoice?.invoiceId&&d.permissions.finance&&d.permissions.manage&&
+    <details className="pv2-next-drawer"><summary>Issue advance invoice</summary>
+     <ProjectAdvanceAction projectId={d.project.id} defaultPercent={guess}/>
+    </details>}
+   {invoice?.invoiceId&&<a className="pv2-next-secondary" href={'/dashboard/finance/invoices/'+invoice.invoiceId}>
+    View invoice <OwnerIcon name="arrow" size={13}/></a>}
+   {!invoice?.scheduleActive&&signed&&<p className="pv2-next-subtle">
+    Payment schedule still needs activation before physical construction.</p>}
+  </aside>
+ </section>;
 }
 function Overview({d}:{d:WorkspaceData}){
  const site=d.site;
@@ -99,6 +173,7 @@ function Overview({d}:{d:WorkspaceData}){
  const received=d.transactions===null?null:recorded.reduce((sum,r)=>sum+r.amount,0);
  const net=received===null||d.expenditure===null?null:received-d.expenditure;
  return <div className="pv2-content">
+  <ProjectPriority d={d}/>
   <section className="pv2-stat-grid" aria-label="Project financial and progress summary">
    {[
     {name:'Client Payments Received',amount:formatMoney(received),detail:d.transactions===null?'Finance access required':'Verified recorded receipts',kind:'green',icon:'billing' as OwnerIconName},
@@ -142,34 +217,8 @@ function Overview({d}:{d:WorkspaceData}){
     </div>
    </section>
   </div>
-  <section className="pv2-panel">
-   <Title title="Quick Actions" detail="Work once; see the same record everywhere"/>
-   <div className="pv2-actions-grid">
-    {[
-     {label:'Add work update',href:'timeline',icon:'plus' as OwnerIconName},
-     {label:'Add photos',href:'execution',icon:'projects' as OwnerIconName},
-     {label:'Request materials',href:'procurement',icon:'purchases' as OwnerIconName},
-     {label:'Request inspection',href:'checks',icon:'check' as OwnerIconName},
-     {label:'Quote & Agreement',href:'documents',icon:'quotations' as OwnerIconName},
-    ].map(a=><Link href={cur(d.project.id,a.href)} className="pv2-action-tile" key={a.href}>
-     <OwnerIcon name={a.icon} size={18}/>{a.label}<span>↗</span></Link>)}
-   </div>
-  </section>
-  {d.permissions.manage&&d.projectRaw&&<details className="pv2-panel pv2-project-settings" id="project-settings">
-   <summary>Edit Project Details</summary>
-   <MasterForm entity="projects" title="Save project" initial={d.projectRaw}
-    fields={[
-     {key:'name',label:'Project name',required:true},
-     {key:'code',label:'Project code',required:true},
-     {key:'site_address.line1',label:'Site address'},
-     {key:'site_address.city',label:'City'},
-     {key:'site_address.region',label:'State'},
-     {key:'notes',label:'Internal project notes',type:'textarea' as const},
-     {key:'status',label:'Project status',options:[
-      {value:'active',label:'Active'},{value:'inactive',label:'Inactive'},
-     ]},
-    ]}/>
-  </details>}
+
+
  </div>;
 }
 type Activity={id:string;date:string;title:string;kind:string;description:string;media?:SiteRow};
@@ -307,6 +356,7 @@ function Documents({d}:{d:WorkspaceData}){
  </section>;
  return <div className="pv2-content">
    {canSeeCommercial&&<>
+    <ProjectPriority d={d}/>
     <section className="pv2-section-intro"><h2>Quotation & Agreement</h2>
      <p>Review and finalize the quotation, then prepare and upload the signed agreement. No separate online quotation approval is required.</p></section>
     <section className="pv2-panel pv2-quote-links">
@@ -332,7 +382,7 @@ function Documents({d}:{d:WorkspaceData}){
      <Title title="Agreement" detail="One step to upload or select a signed PDF and save its evidence"/>
      {d.agreement?<div>
       <div className="pv2-between"><strong>{d.agreement.contractNumber}</strong>
-       <Status value={d.agreement.authorized?'approved':d.agreement.status||'pending'}/></div>
+       <Status value={signedRecorded?'signed':d.agreement.authorized?'approved':d.agreement.status||'pending'}/></div>
       {d.quotations[0]&&d.agreement.revisionId&&d.quotations[0].revisionId!==d.agreement.revisionId?
        <p role="alert" className="pv2-form-feedback bad">This agreement was prepared from an earlier quotation, not the currently selected Final quotation. Review the agreement scope before signing or starting work.</p>:
        <p className="pv2-muted">The agreement is tied to its saved quotation version. Payment schedule, signed evidence and advance remain required for execution.</p>}
@@ -366,6 +416,7 @@ function Payments({d}:{d:WorkspaceData}){
  const paymentRows=d.transactions;
  const total=paymentRows?.filter(x=>x.status==='recorded').reduce((sum,x)=>sum+x.amount,0)??null;
  return <div className="pv2-content">
+  <ProjectPriority d={d}/>
   <section className="pv2-stat-grid pv2-finance-metrics">
    <article className="pv2-stat"><small>Contract Value</small><strong>{formatMoney(d.contractValue)}</strong></article>
    <article className="pv2-stat"><small>Received</small><strong>{formatMoney(total)}</strong></article>
@@ -516,7 +567,7 @@ function Team({d}:{d:WorkspaceData}){
   {d.site?.canManage&&users.length>0&&<details className="pv2-edit-drawer">
    <summary>＋ Add Project Team Member</summary><AssignRole projectId={d.project.id} users={users}/></details>}
  </section>
- <ProjectClientAccess projectId={d.project.id} customerId={d.project.customerId}/></div>;
+ <p className="pv2-muted">Use “Share with client” in the project header to invite or revoke access for this exact project.</p></div>;
 }
 const pages:{[key in ProjectPageSlug]:(p:{d:WorkspaceData})=>React.ReactNode}={
  overview:Overview,timeline:Timeline,documents:Documents,payments:Payments,
