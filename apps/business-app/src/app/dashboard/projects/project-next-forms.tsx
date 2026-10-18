@@ -8,7 +8,7 @@ type State={ok:boolean;message:string};
 const initial:State={ok:false,message:''};
 
 export function ProjectSiteSurvey({projectId,kind,previous=''}:{
- projectId:string;kind:'inspection'|'measurements';previous?:string;
+ projectId:string;kind:'inspection'|'measurements';previous?:string|undefined;
 }){
  const router=useRouter();
  const [state,run,pending]=useActionState(async(_old:State,data:FormData)=>{
