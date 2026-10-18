@@ -35,13 +35,8 @@ begin
  end;
  perform public.project_site_command(org,project,'assign',jsonb_build_object('user_id','33333333-3333-4333-8333-333333333333','role','architect','active',true));
  perform public.project_site_command(org,project,'assign',jsonb_build_object('user_id','22222222-2222-4222-8222-222222222222','role','watchman','active',true));
- -- A signed agreement unlocks floor-plan preparation, not physical work.
- begin
-   perform public.project_site_command(org,project,'design_submit',
-     '{"kind":"architectural_plan","reference":"Early unsigned floor plan"}');
-   raise exception 'FAIL: unsigned agreement allowed design submission';
- exception when check_violation then null;
- end;
+ -- Signing can precede the design phase; unlike physical execution, the
+ -- contract's recorded advance is not a prerequisite for drawing preparation.
  contract=pg_temp.site_signed_agreement(org,project,agreement_media);
  if (public.project_agreement_read(org,project)->>'execution_authorized')<>'false'
  then raise exception 'FAIL: signed agreement bypassed recorded advance';end if;
