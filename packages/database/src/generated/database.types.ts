@@ -1228,7 +1228,7 @@ export interface Database {
           customer_id: string;
           project_id: string;
           revision_id: string;
-          acceptance_id: string;
+          acceptance_id: string | null;
           lead_id: string | null;
           branch_id: string | null;
           contract_number: string;
@@ -1238,7 +1238,7 @@ export interface Database {
           source_snapshot: Json;
           status: string;
           version: number;
-          accepted_at: string;
+          accepted_at: string | null;
           started_at: string | null;
           completed_at: string | null;
           closed_at: string | null;
@@ -1254,7 +1254,7 @@ export interface Database {
           customer_id: string;
           project_id: string;
           revision_id: string;
-          acceptance_id: string;
+          acceptance_id?: string | null;
           lead_id?: string | null;
           branch_id?: string | null;
           contract_number: string;
@@ -1264,7 +1264,7 @@ export interface Database {
           source_snapshot: Json;
           status?: string;
           version?: number;
-          accepted_at: string;
+          accepted_at?: string | null;
           started_at?: string | null;
           completed_at?: string | null;
           closed_at?: string | null;
@@ -1280,7 +1280,7 @@ export interface Database {
           customer_id?: string;
           project_id?: string;
           revision_id?: string;
-          acceptance_id?: string;
+          acceptance_id?: string | null;
           lead_id?: string | null;
           branch_id?: string | null;
           contract_number?: string;
@@ -1290,7 +1290,7 @@ export interface Database {
           source_snapshot?: Json;
           status?: string;
           version?: number;
-          accepted_at?: string;
+          accepted_at?: string | null;
           started_at?: string | null;
           completed_at?: string | null;
           closed_at?: string | null;
@@ -1307,6 +1307,13 @@ export interface Database {
             isOneToOne: false;
             referencedRelation: 'profiles';
             referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'contracts_org_revision_source_fk';
+            columns: ['organization_id', 'revision_id'];
+            isOneToOne: true;
+            referencedRelation: 'quotation_revisions';
+            referencedColumns: ['organization_id', 'id'];
           },
           {
             foreignKeyName: 'contracts_organization_id_acceptance_id_fkey';
@@ -1342,13 +1349,6 @@ export interface Database {
             isOneToOne: false;
             referencedRelation: 'leads';
             referencedColumns: ['organization_id', 'id'];
-          },
-          {
-            foreignKeyName: 'contracts_organization_id_revision_id_project_id_fkey';
-            columns: ['organization_id', 'revision_id', 'project_id'];
-            isOneToOne: false;
-            referencedRelation: 'quotation_revisions';
-            referencedColumns: ['organization_id', 'id', 'project_id'];
           },
         ];
       };
@@ -11051,6 +11051,10 @@ export interface Database {
       };
       contract_create: {
         Args: { p_organization_id: string; p_revision_id: string };
+        Returns: string;
+      };
+      contract_create_for_project_quote: {
+        Args: { p_org: string; p_project: string; p_revision: string };
         Returns: string;
       };
       contract_transition: {

@@ -174,20 +174,45 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
  })):null;
  const contractValue=permissions.finance&&!contract.error?decimals(contract.data?.[0]?.original_contract_value):null;
  const agreement=agreementResult.error?{}:obj(agreementResult.data);
- // Read only project-linked quotations: another project for the same client
- // is not an acceptable source for this project's agreement or payment plan.
- const quoteRoots=permissions.quotation?await s.client.from('quotations')
-   .select('id,quotation_number,current_revision_id,status,created_at')
+ // An issued quote remains attached to its original sales-prospect project.
+ // The converted Won lead supplies the secure, non-destructive association.
+ const directQuotes=permissions.quotation?await s.client.from('quotations')
+   .select('id,quotation_number,current_revision_id,status,created_at,project_id,customer_id')
    .eq('organization_id',s.org).eq('project_id',id).neq('status','cancelled')
    .order('created_at',{ascending:false}).limit(25):null;
- const revisionIds=[...new Set((quoteRoots?.error?[]:quoteRoots?.data??[])
-   .map(q=>q.current_revision_id).filter((v):v is string=>typeof v==='string'))];
+ let leadQuoteIds:string[]=[];
+ if(permissions.quotation&&has('lead.view')){
+   const leadRows=await s.client.from('leads').select('id')
+     .eq('organization_id',s.org).eq('converted_project_id',id).limit(4);
+   if(!leadRows.error&&leadRows.data?.length===1){
+     const linked=await s.client.rpc('lead_quotation_list',{
+       p_organization_id:s.org,p_lead_id:leadRows.data[0]!.id,
+     });
+     if(!linked.error&&Array.isArray(linked.data)){
+       leadQuoteIds=[...new Set(linked.data.map((row:unknown)=>stringValue(obj(row).quotation_id))
+         .filter(Boolean))].slice(0,100);
+     }
+   }
+ }
+ const historical=leadQuoteIds.length?await s.client.from('quotations')
+   .select('id,quotation_number,current_revision_id,status,created_at,project_id,customer_id')
+   .eq('organization_id',s.org).eq('customer_id',project.customer_id)
+   .in('id',leadQuoteIds).neq('status','cancelled').limit(100):null;
+ type QuoteRoot={id:string;quotation_number:string|null;current_revision_id:string|null;
+   status:string;created_at:string;project_id:string;customer_id:string};
+ const byQuote=new Map<string,QuoteRoot>();
+ for(const q of [...(directQuotes?.error?[]:directQuotes?.data??[]),
+   ...(historical?.error?[]:historical?.data??[])]){
+   if(q.customer_id===project.customer_id)byQuote.set(q.id,q);
+ }
+ const quoteRoots=[...byQuote.values()].sort((a,b)=>b.created_at.localeCompare(a.created_at));
+ const revisionIds=[...new Set(quoteRoots.map(q=>q.current_revision_id)
+   .filter((v):v is string=>typeof v==='string'))];
  const quoteRevisions=revisionIds.length?await s.client.from('quotation_revisions')
-   .select('id,status').eq('organization_id',s.org).eq('project_id',id)
-   .in('id',revisionIds):null;
+   .select('id,status').eq('organization_id',s.org).in('id',revisionIds):null;
  const revisionsById=new Map((quoteRevisions?.error?[]:quoteRevisions?.data??[])
    .map(r=>[r.id,r.status]));
- const quotations:ProjectQuotation[]=(quoteRoots?.error?[]:quoteRoots?.data??[])
+ const quotations:ProjectQuotation[]=quoteRoots
    .filter(q=>q.current_revision_id&&revisionsById.has(q.current_revision_id))
    .map(q=>({id:q.id,number:q.quotation_number??'Quotation',
      revisionId:q.current_revision_id!,status:revisionsById.get(q.current_revision_id!)??'',

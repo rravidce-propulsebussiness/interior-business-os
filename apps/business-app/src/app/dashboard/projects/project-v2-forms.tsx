@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { saveProjectSite, uploadProjectSiteMedia } from './[id]/site/actions';
 import { syncConstructionFromProjectAgreement, assignConstructionRole } from './[id]/site/construction-actions';
 import { recordSignedAgreement } from './[id]/site/agreement-actions';
+import { prepareAgreementFromProjectQuote } from './project-agreement-actions';
 
 type Result={saved:boolean;message:string};
 const initial:Result={saved:false,message:''};
@@ -22,6 +23,38 @@ export function ProjectForm({projectId,operation,label,children,media=false}:{
   <button className="pv2-button pv2-primary" type="submit" disabled={pending}>{pending?'Saving…':label}</button>
   {state.message&&<p role="status" className={'pv2-form-feedback '+(state.saved?'good':'bad')}>{state.message}</p>}
  </form>;
+}
+/** Does not claim digital customer acceptance. Signed agreement is uploaded next. */
+export function PrepareAgreement({projectId,revisionId}:{projectId:string;revisionId:string}){
+ const router=useRouter();
+ const [pending,start]=useTransition();
+ const [message,setMessage]=useState('');
+ const [prepared,setPrepared]=useState(false);
+ return <div className="pv2-prepare-agreement">
+  <button type="button" disabled={pending||prepared}
+   className="pv2-button pv2-primary"
+   onClick={()=>start(async()=>{
+    const result=await prepareAgreementFromProjectQuote(projectId,revisionId);
+    setMessage(result.message);
+    if(result.saved){setPrepared(true);router.refresh();}
+   })}>
+   {pending?'Preparing…':prepared?'Agreement prepared':'Prepare agreement'}
+  </button>
+  {message&&<p role="status" className={'pv2-form-feedback '+(prepared?'good':'')}>{message}</p>}
+ </div>;
+}
+
+export function AgreementPdfUpload({projectId}:{projectId:string}){
+ return <ProjectForm projectId={projectId} operation="upload" label="Upload signed agreement" media>
+  <input type="hidden" name="category" value="agreement"/>
+  <label>Signed agreement PDF
+   <input type="file" required name="file" accept="application/pdf"/>
+  </label>
+  <label>Reference / notes
+   <input name="caption" maxLength={500} placeholder="Agreement signed date or reference"/>
+  </label>
+  <p className="pv2-hint">Private signed PDF, maximum 8 MB. Once uploaded, record its signing evidence below.</p>
+ </ProjectForm>;
 }
 export function SyncStages({id}:{id:string}){
  const router=useRouter();

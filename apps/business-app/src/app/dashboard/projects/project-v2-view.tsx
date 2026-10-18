@@ -7,13 +7,12 @@ import { guidanceForConstructionStage } from '@business-os/core/construction-pay
 import { ProjectStageLinker,type StageLinkOption } from './project-stage-linker';
 import { MasterForm } from '../commercial/master-form';
 import { activeOrganization } from '@business-os/auth/server';
-import { ContractHandoff } from '../finance/handoff';
 import { projectWorkspace,formatMoney,pretty,shortDate,stringValue,
  type WorkspaceData,type SiteRow } from './project-v2-data';
 import {
  SiteReportForm,SiteMediaForm,MaterialRequestForm,MaterialUpdateForm,
  QualityForm,ReviewCheck,DesignSubmitForm,GateForm,AssignRole,SyncStages,
- ProjectLifecycle,SignedAgreementForm,
+ ProjectLifecycle,SignedAgreementForm,PrepareAgreement,AgreementPdfUpload,
 } from './project-v2-forms';
 import '../owner-dashboard.css';
 import './project-v2.css';
@@ -287,7 +286,6 @@ function Timeline({d}:{d:WorkspaceData}){
  </div>;
 }
 function Documents({d}:{d:WorkspaceData}){
- const latestIssued=d.quotations.find(q=>q.status==='issued');
  const canSeeCommercial=d.permissions.quotation||d.permissions.finance;
  const photos=d.site?.media??[],agreement=photos.filter(r=>stringValue(r.category)==='agreement');
  const plans=photos.filter(r=>['plan','design'].includes(stringValue(r.category)));
@@ -303,9 +301,9 @@ function Documents({d}:{d:WorkspaceData}){
  return <div className="pv2-content">
    {canSeeCommercial&&<>
     <section className="pv2-section-intro"><h2>Quotation & Agreement</h2>
-     <p>Use the approved quote once for scope, payment stages and contract. Signed files remain in this project.</p></section>
+     <p>Review and finalize the quotation, then prepare and upload the signed agreement. No separate online quotation approval is required.</p></section>
     <section className="pv2-panel pv2-quote-links">
-     <Title title="Project Quotations" detail="Current revisions linked to this exact project"/>
+     <Title title="Project Quotations" detail="Quotations for this Won lead, including original immutable quotation history"/>
      {d.quotations.length?<div className="pv2-file-list">{d.quotations.map(q=>
       <div className="pv2-commercial-row" key={q.id}>
        <div className="pv2-commercial-details"><strong>{q.number}</strong>
@@ -313,32 +311,37 @@ function Documents({d}:{d:WorkspaceData}){
        <div className="pv2-commercial-actions">
         <NextLink href={'/dashboard/quotations/'+q.revisionId+'/preview'} label="Preview PDF"/>
         <NextLink href={'/dashboard/quotations/'+q.revisionId+'/studio?step=quote'} label="Quote & payment plan"/>
+        {!d.agreement&&q.status==='issued'&&d.permissions.manage&&d.permissions.finance&&
+         <PrepareAgreement projectId={d.project.id} revisionId={q.revisionId}/>}
        </div>
       </div>)}</div>:
       <Blank title="No quotation linked to this project"
-       detail="Open Quotations to locate the approved quote. Another project's quotation is not automatically attached here."
+       detail="No active quotation was found for this project or its converted Won lead."
        action={d.permissions.quotation?<NextLink href="/dashboard/quotations" label="Open Quotations"/>:undefined}/>}
-     {latestIssued&&!d.agreement&&<ContractHandoff revisionId={latestIssued.revisionId}/>}
     </section>
     <section className="pv2-panel pv2-agreement-status">
-     <Title title="Agreement" detail="Contract status, signed evidence and approved commercial schedule"/>
+     <Title title="Agreement" detail="Prepare agreement, upload signed PDF and record the evidence"/>
      {d.agreement?<div>
       <div className="pv2-between"><strong>{d.agreement.contractNumber}</strong>
        <Status value={d.agreement.authorized?'approved':d.agreement.status||'pending'}/></div>
-      <p className="pv2-muted">Recorded signing and advance verification are required for execution. Proposed quotation milestones are not receipts.</p>
+      <p className="pv2-muted">This agreement is prepared from the final issued quotation. Recorded signing, payment schedule, and advance are still required before site execution.</p>
       <NextLink href={'/dashboard/finance/contracts/'+d.agreement.contractId} label="Open agreement & schedule"/>
-      {agreement.length>0&&d.site?.canManage&&<details className="pv2-edit-drawer">
+      {agreement.some(x=>x.mime==='application/pdf')&&d.site?.canManage&&<details className="pv2-edit-drawer">
        <summary>Record signed agreement evidence</summary>
        <SignedAgreementForm projectId={d.project.id} contractId={d.agreement.contractId}
         media={agreement.filter(x=>x.mime==='application/pdf').map(x=>({id:x.id,name:stringValue(x.filename)}))}/>
       </details>}
-     </div>:<p className="pv2-muted">No linked agreement is available yet. Open a customer-approved quotation to create it. A draft quote cannot unlock execution stages.</p>}
+     </div>:<p className="pv2-muted">Finalize the quotation first, then use Prepare agreement next to its issued version. The client's acceptance is recorded with the signed agreement PDF, not a separate online approval.</p>}
+     {d.site?.canManage&&d.permissions.finance&&<details className="pv2-edit-drawer">
+       <summary>＋ Upload signed agreement PDF</summary>
+       <AgreementPdfUpload projectId={d.project.id}/>
+     </details>}
     </section>
    </>}
    <div className="pv2-section-intro"><h2>Project Documents</h2><p>Signed PDFs, approved drawings, site photos and revisions.</p></div>
    {group('Agreement',agreement)}{group('Plans & Drawings',plans)}{group('Site Photos & Documents',other)}
-  {d.site&&<section className="pv2-panel"><Title title="Upload Document" detail="Secure upload to the existing project media store"/>
-   <SiteMediaForm id={d.project.id} category="agreement"/></section>}
+  {d.site&&<section className="pv2-panel"><Title title="Upload Site Document" detail="Attach approved plans or other permitted project files"/>
+   <SiteMediaForm id={d.project.id} category="design"/></section>}
  </div>;
 }
 function Payments({d}:{d:WorkspaceData}){
