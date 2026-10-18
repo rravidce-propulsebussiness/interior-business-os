@@ -12,7 +12,7 @@ import { projectWorkspace,formatMoney,pretty,shortDate,stringValue,
 import {
  SiteReportForm,SiteMediaForm,MaterialRequestForm,MaterialUpdateForm,
  QualityForm,ReviewCheck,DesignSubmitForm,GateForm,AssignRole,SyncStages,
- ProjectLifecycle,SignedAgreementForm,PrepareAgreement,AgreementPdfUpload,
+ ProjectLifecycle,PrepareAgreement,SignedAgreementUploadForm,
 } from './project-v2-forms';
 import '../owner-dashboard.css';
 import './project-v2.css';
@@ -288,6 +288,7 @@ function Timeline({d}:{d:WorkspaceData}){
 function Documents({d}:{d:WorkspaceData}){
  const canSeeCommercial=d.permissions.quotation||d.permissions.finance;
  const photos=d.site?.media??[],agreement=photos.filter(r=>stringValue(r.category)==='agreement');
+ const signedRecorded=d.agreement?.clearanceType==='signed_copy_recorded';
  const plans=photos.filter(r=>['plan','design'].includes(stringValue(r.category)));
  const other=photos.filter(r=>!['agreement','plan','design'].includes(stringValue(r.category)));
  const group=(title:string,list:SiteRow[])=> <section className="pv2-panel" key={title}>
@@ -322,7 +323,7 @@ function Documents({d}:{d:WorkspaceData}){
      {d.permissions.quotation&&<NextLink href="/dashboard/quotations" label="View earlier quotations / change Final"/>}
     </section>
     <section className="pv2-panel pv2-agreement-status">
-     <Title title="Agreement" detail="Prepare agreement, upload signed PDF and record the evidence"/>
+     <Title title="Agreement" detail="One step to upload or select a signed PDF and save its evidence"/>
      {d.agreement?<div>
       <div className="pv2-between"><strong>{d.agreement.contractNumber}</strong>
        <Status value={d.agreement.authorized?'approved':d.agreement.status||'pending'}/></div>
@@ -330,20 +331,26 @@ function Documents({d}:{d:WorkspaceData}){
        <p role="alert" className="pv2-form-feedback bad">This agreement was prepared from an earlier quotation, not the currently selected Final quotation. Review the agreement scope before signing or starting work.</p>:
        <p className="pv2-muted">The agreement is tied to its saved quotation version. Payment schedule, signed evidence and advance remain required for execution.</p>}
       <NextLink href={'/dashboard/finance/contracts/'+d.agreement.contractId} label="Open agreement & schedule"/>
-      {agreement.some(x=>x.mime==='application/pdf')&&d.site?.canManage&&<details className="pv2-edit-drawer">
-       <summary>Record signed agreement evidence</summary>
-       <SignedAgreementForm projectId={d.project.id} contractId={d.agreement.contractId}
-        media={agreement.filter(x=>x.mime==='application/pdf').map(x=>({id:x.id,name:stringValue(x.filename)}))}/>
-      </details>}
-     </div>:<p className="pv2-muted">Finalize the quotation first, then use Prepare agreement next to its issued version. The client's acceptance is recorded with the signed agreement PDF, not a separate online approval.</p>}
-     {d.site?.canManage&&d.permissions.finance&&<details className="pv2-edit-drawer">
-       <summary>＋ Upload signed agreement PDF</summary>
-       <AgreementPdfUpload projectId={d.project.id}/>
-     </details>}
+      {signedRecorded&&<p className="pv2-form-feedback good">Signed agreement recorded. No second upload or confirmation is needed.</p>}
+      {agreement.length>0&&<div className="pv2-file-list" aria-label="Agreement PDFs">{agreement.map(row=>
+       <a key={row.id} className="pv2-file"
+        href={'/dashboard/projects/'+d.project.id+'/site/media/'+row.id}>
+        <span className="pv2-file-icon"><OwnerIcon name="quotations" size={23}/></span>
+        <span><strong>{stringValue(row.filename)}</strong><small>{shortDate(row.created_at)}</small></span>
+        <b>View / Download</b>
+       </a>)}</div>}
+      {d.site?.canManage&&d.permissions.finance&&
+       <details className="pv2-edit-drawer">
+        <summary>{signedRecorded?'Replace signed agreement':'＋ Save signed agreement'}</summary>
+        <SignedAgreementUploadForm projectId={d.project.id} contractId={d.agreement.contractId}
+         recorded={signedRecorded}
+         media={agreement.filter(x=>x.mime==='application/pdf').map(x=>({id:x.id,name:stringValue(x.filename)}))}/>
+       </details>}
+     </div>:<p className="pv2-muted">Prepare an agreement from the issued final quotation before uploading or recording a signed copy.</p>}
     </section>
    </>}
-   <div className="pv2-section-intro"><h2>Project Documents</h2><p>Signed PDFs, approved drawings, site photos and revisions.</p></div>
-   {group('Agreement',agreement)}{group('Plans & Drawings',plans)}{group('Site Photos & Documents',other)}
+   <div className="pv2-section-intro"><h2>Project Documents</h2><p>Approved drawings, site photos and supporting records.</p></div>
+   {!canSeeCommercial&&group('Agreement',agreement)}{group('Plans & Drawings',plans)}{group('Site Photos & Documents',other)}
   {d.site&&<section className="pv2-panel"><Title title="Upload Site Document" detail="Attach approved plans or other permitted project files"/>
    <SiteMediaForm id={d.project.id} category="design"/></section>}
  </div>;
