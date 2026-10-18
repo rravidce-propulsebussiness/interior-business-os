@@ -187,7 +187,7 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
    .in('id',revisionIds):null;
  const revisionsById=new Map((quoteRevisions?.error?[]:quoteRevisions?.data??[])
    .map(r=>[r.id,r.status]));
- const quotations:ProjectQuotation=(quoteRoots?.error?[]:quoteRoots?.data??[])
+ const quotations:ProjectQuotation[]=(quoteRoots?.error?[]:quoteRoots?.data??[])
    .filter(q=>q.current_revision_id&&revisionsById.has(q.current_revision_id))
    .map(q=>({id:q.id,number:q.quotation_number??'Quotation',
      revisionId:q.current_revision_id!,status:revisionsById.get(q.current_revision_id!)??'',
