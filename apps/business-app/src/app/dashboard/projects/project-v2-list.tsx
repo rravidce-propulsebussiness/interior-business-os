@@ -4,7 +4,9 @@ import { useMemo,useState } from 'react';
 import { OwnerIcon } from '../owner-shell';
 import { type ProjectEntry,pretty } from './project-v2-types';
 
-export function ProjectsDirectory({projects}:{projects:ProjectEntry[]}){
+export function ProjectsDirectory({projects,clientName='',clientId=''}:{
+ projects:ProjectEntry[];clientName?:string;clientId?:string;
+}){
  const [search,setSearch]=useState('');
  const [filter,setFilter]=useState('all');
  const completed=(status:string)=>['completed','handover','closed'].includes(status);
@@ -24,10 +26,12 @@ export function ProjectsDirectory({projects}:{projects:ProjectEntry[]}){
   {id:'on_hold',label:'On Hold',value:projects.filter(p=>['on_hold','held','inactive'].includes(p.status)).length},
  ];
  return <main id="main-content" className="pv2-page pv2-list-page">
-  <div className="pv2-list-heading"><div><h1>Projects</h1>
-   <p>Manage all ongoing and completed projects</p></div>
+  <div className="pv2-list-heading"><div><h1>{clientId?clientName+' · Projects':'Projects'}</h1>
+   <p>{clientId?'All delivery projects for this one customer account. Open a project for execution.':'Manage all ongoing and completed projects'}</p></div>
+   {clientId?<Link href={'/dashboard/customers/'+clientId} className="pv2-button pv2-primary">
+    <OwnerIcon name="plus" size={17}/> New project for this client</Link>:
    <Link href="/dashboard/crm/leads?status=won" className="pv2-button pv2-primary">
-    <OwnerIcon name="plus" size={17}/> New Project from Won Lead</Link></div>
+    <OwnerIcon name="plus" size={17}/> New Project from Won Lead</Link>}</div>
   <label className="pv2-search"><OwnerIcon name="search" size={18}/>
    <input type="search" value={search} placeholder="Search projects, client or location…"
     onChange={e=>setSearch(e.target.value)} aria-label="Search projects"/></label>
