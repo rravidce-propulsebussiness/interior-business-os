@@ -106,7 +106,7 @@ function ProjectHeader({data,active}:{data:WorkspaceData;active:ProjectPageSlug}
  </div>;
 }
 function ProjectPriority({d}:{d:WorkspaceData}){
- const signed=d.agreement?.clearanceType==='signed_copy_recorded';
+ const signed=d.agreement?.clearanceType==='signed_copy_recorded'||d.preflight?.signedReady===true;
  const canSurvey=d.permissions.manage||['manager','site_engineer'].includes(d.site?.role??'');
  const inspection=d.preflight?.inspectionDone===true;
  const measurement=d.preflight?.measurementsDone===true;
@@ -248,7 +248,7 @@ function Timeline({d}:{d:WorkspaceData}){
   <ProjectPriority d={d}/>
   {site&&(site.stage!=='design'||(d.preflight?.inspectionDone&&d.preflight?.measurementsDone))&&
    <ProjectLifecycle id={d.project.id} stage={site.stage} canManage={site.canManage}
-   agreementSigned={d.agreement?.clearanceType==='signed_copy_recorded'}
+   agreementSigned={d.agreement?.clearanceType==='signed_copy_recorded'||d.preflight?.signedReady===true}
    industry={d.project.industry}
    designs={site.designs.map(x=>({id:x.id,kind:stringValue(x.kind),status:stringValue(x.status)}))}/>}
   {site?.stage==='design'&&d.quotations[0]&&d.agreement?.revisionId&&
