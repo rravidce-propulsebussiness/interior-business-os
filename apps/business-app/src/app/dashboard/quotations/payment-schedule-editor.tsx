@@ -3,7 +3,7 @@
 import { useMemo, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { savedStagePaymentPlan,savedStagePaymentLinks } from '@business-os/core/quotation-payment-plan';
-import { proposedConstructionPayments } from '@business-os/core/construction-payment-schedule';
+import { proposedConstructionPayments,guidanceForConstructionStage } from '@business-os/core/construction-payment-schedule';
 
 type Milestone = { name: string; percent: string; stageCodes: string[] };
 type Feedback = { type: 'success' | 'error'; text: string } | null;
@@ -256,6 +256,24 @@ export function PaymentScheduleEditor({
                       Combine with next floor brickwork
                      </button>}
                   </div>}
+                  {industry==='construction'&&row.stageCodes.length>0&&
+                   <details className="qs-payment-stage-guidance">
+                    <summary>Work checks, materials & reports <span aria-hidden="true">⌄</span></summary>
+                    {[...new Set(row.stageCodes.map(code=>code.split('/')[0]!))].map(code=>{
+                     const info=guidanceForConstructionStage(code);
+                     return <div key={code} className="qs-payment-stage-checklist">
+                      <h4>{code.replaceAll('_',' ')}</h4>
+                      {info.materials.length>0&&<><strong>Materials to arrange</strong><ul>
+                       {info.materials.map(x=><li key={x}>{x}</li>)}</ul></>}
+                      {info.checks.length>0&&<><strong>Quality checks & tests</strong><ul>
+                       {info.checks.map(x=><li key={x}>{x}</li>)}</ul></>}
+                      {info.reports.length>0&&<><strong>Evidence & reports</strong><ul>
+                       {info.reports.map(x=><li key={x}>{x}</li>)}</ul></>}
+                     </div>;
+                    })}
+                    <p>Inspection requirements follow approved designs, specifications and the engineer's site QA plan.
+                      This checklist does not certify any test or make payment due automatically.</p>
+                   </details>}
                 </div>
                 <div className="qs-payment-percent">
                   <label className="qs-payment-mobile-label" htmlFor={'qs-pay-pct-' + index}>Percentage</label>
