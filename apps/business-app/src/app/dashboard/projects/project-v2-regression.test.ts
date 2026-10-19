@@ -123,3 +123,14 @@ it('renders exactly one action location per agreement and design workflow',()=>{
  expect(ui).not.toContain('＋ Upload drawing and submit revision');
  expect(ui).toContain('effectiveProjectStageStatus(stage,evidence)');
 });
+
+it('keeps site readiness and quotation completion inside the actual project timeline',()=>{
+ expect(ui).toContain("quotedScopeImported:d.stages.some(stage=>stage.template_code==='QUOTED_SCOPE')");
+ expect(ui).toContain("['design','client_approved'].includes(d.site?.stage??'')");
+ expect(ui).toContain('Site execution requirements');
+ expect(ui).toContain('Agreement &amp; Preconstruction stage');
+ expect(ui).not.toContain('<section className="pv2-command-delivery">');
+ const hub=ui.slice(ui.indexOf('function ProjectWorkHub('),ui.indexOf('function Overview('));
+ expect(hub).not.toContain('<ProjectLifecycle');
+ expect(hub).toContain('<ProjectStageBoard d={d}/>');
+});

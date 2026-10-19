@@ -200,6 +200,16 @@ function ProjectStageWorkflow({d,code}:{d:WorkspaceData;code:string}){
     <ProjectSiteSurvey projectId={d.project.id} kind="measurements" previous={d.preflight?.measurementDetails}/>
    </details>}
   </div>}
+  {designStep&&d.site?.stage==='client_approved'&&<div className="pv2-execution-readiness" aria-label="Site execution requirements">
+   <h3>Construction start readiness</h3>
+   <div className="pv2-execution-readiness-grid">
+    <span>Active contract <strong>{d.agreement?.status==='active'?'Ready':d.agreement?'Pending activation':'Not available'}</strong></span>
+    <span>Signed agreement <strong>{signed?'Recorded':'Not confirmed'}</strong></span>
+    <span>Payment schedule <strong>{d.advance===null?'Unavailable':d.advance.scheduleActive?'Active':'Not active'}</strong></span>
+    <span>Verified advance <strong>{d.advance===null?'Unavailable':formatMoney(d.advance.received)}</strong></span>
+   </div>
+   <p className="pv2-hint">Agreement and payment actions are in the Agreement &amp; Preconstruction stage. An invoice alone is not a payment receipt.</p>
+  </div>}
   {designStep&&d.site&&['design','client_approved'].includes(d.site.stage)&&
    <ProjectLifecycle id={d.project.id} stage={d.site.stage} canManage={d.site.canManage}
     agreementSigned={signed} industry={d.project.industry}
@@ -210,7 +220,9 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
  const site=d.site;
  const done=(status:string)=>['completed','certified','done','skipped'].includes(status);
  const evidence={
-  approvedQuotation:d.quotations.some(q=>['issued','approved','accepted'].includes(q.status)),
+  approvedQuotation:d.quotations.some(q=>['issued','approved','accepted'].includes(q.status))||
+   Boolean(d.agreement?.revisionId),
+  quotedScopeImported:d.stages.some(stage=>stage.template_code==='QUOTED_SCOPE'),
   agreementPrepared:Boolean(d.agreement),
   inspectionDone:d.preflight?.inspectionDone===true,
   measurementsDone:d.preflight?.measurementsDone===true,
@@ -220,7 +232,10 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
  const visualStatuses=d.stages.map(stage=>effectiveProjectStageStatus(stage,evidence));
  const active=visualStatuses.findIndex(status=>!done(status));
  const designIndex=d.stages.findIndex(stage=>['DESIGN','DESIGN_APPROVAL'].includes(stage.template_code));
- const current=d.site?.stage==='design'&&designIndex>=0?designIndex:
+ // The active client-approved design stage contains the final execution gate.
+ // Keep that action visible in the timeline instead of hiding it behind
+ // an older preconstruction stage whose financial details remain accessible.
+ const current=['design','client_approved'].includes(d.site?.stage??'')&&designIndex>=0?designIndex:
   active<0?d.stages.length-1:active;
  const allowWork=site?.stage==='execution'&&
   (site.canManage||['manager','project_manager','site_engineer','supervisor'].includes(site.role));
