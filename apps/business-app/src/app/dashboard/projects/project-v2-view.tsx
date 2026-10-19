@@ -397,13 +397,13 @@ function Documents({d}:{d:WorkspaceData}){
    href={'/dashboard/projects/'+d.project.id+'/site/media/'+row.id} className="pv2-file">
    <span className="pv2-file-icon"><OwnerIcon name="quotations" size={23}/></span>
    <span><strong>{stringValue(row.filename)}</strong><small>{shortDate(row.created_at)} · {stringValue(row.caption)||pretty(row.category)}</small></span>
-   <b>View / Download</b></a>)}</div>:<Blank title="No files in this category" detail="Upload an authorized document to keep it on this project."/>}
+   <b>View / Download</b></a>)}</div>:<Blank title="No files in this category" detail="Evidence uploaded through the project timeline appears here."/>}
  </section>;
  return <div className="pv2-content">
    {canSeeCommercial&&<>
     
     <section className="pv2-section-intro"><h2>Quotation & Agreement</h2>
-     <p>One final quotation, one agreement, and a clear next action.</p></section>
+     <p>Approved quotation and signed-contract archive. Continue tasks in the project timeline.</p></section>
     <section className="pv2-panel pv2-quote-links">
      <Title title="Final Quotation" detail="The quotation linked to this project's agreed scope."/>
      {d.quotations.length?<div className="pv2-file-list">{d.quotations.map(q=>
@@ -413,8 +413,7 @@ function Documents({d}:{d:WorkspaceData}){
        <div className="pv2-commercial-actions">
         <NextLink href={'/dashboard/quotations/'+q.revisionId+'/preview'} label="Preview PDF"/>
         <NextLink href={'/dashboard/quotations/'+q.revisionId+'/studio?step=quote'} label={q.status==='draft'?'Edit saved quote':'Quote & payment plan'}/>
-        {!d.agreement&&q.status==='issued'&&d.permissions.manage&&d.permissions.finance&&
-         <PrepareAgreement projectId={d.project.id} revisionId={q.revisionId}/>}
+
        </div>
        {q.status==='draft'&&<p className="pv2-muted">Saved and editable. Sharing/finalizing this quotation locks the agreed version before preparing an agreement; no separate client approval is needed.</p>}
       </div>)}</div>:
@@ -426,7 +425,7 @@ function Documents({d}:{d:WorkspaceData}){
      </details>}
     </section>
     <section className="pv2-panel pv2-agreement-status">
-     <Title title="Agreement" detail="One step to upload or select a signed PDF and save its evidence"/>
+     <Title title="Agreement" detail="Recorded contract and signed-document history"/>
      {d.agreement?<div>
       <div className="pv2-between"><strong>{d.agreement.contractNumber}</strong>
        <Status value={signedRecorded?'signed':d.agreement.authorized?'approved':d.agreement.status||'pending'}/></div>
@@ -442,20 +441,12 @@ function Documents({d}:{d:WorkspaceData}){
         <span><strong>{stringValue(row.filename)}</strong><small>{shortDate(row.created_at)}</small></span>
         <b>View / Download</b>
        </a>)}</div>}
-      {d.site?.canManage&&d.permissions.finance&&
-       <details className="pv2-edit-drawer">
-        <summary>{signedRecorded?'Replace signed agreement':'＋ Save signed agreement'}</summary>
-        <SignedAgreementUploadForm projectId={d.project.id} contractId={d.agreement.contractId}
-         recorded={signedRecorded}
-         media={agreement.filter(x=>x.mime==='application/pdf').map(x=>({id:x.id,name:stringValue(x.filename)}))}/>
-       </details>}
      </div>:<p className="pv2-muted">Prepare an agreement from the issued final quotation before uploading or recording a signed copy.</p>}
     </section>
    </>}
    <div className="pv2-section-intro"><h2>Project Documents</h2><p>Approved drawings, site photos and supporting records.</p></div>
    {!canSeeCommercial&&group('Agreement',agreement)}{group('Plans & Drawings',plans)}{group('Site Photos & Documents',other)}
-  {d.site&&<section className="pv2-panel"><Title title="Upload Site Document" detail="Attach approved plans or other permitted project files"/>
-   <SiteMediaForm id={d.project.id} category="design"/></section>}
+
  </div>;
 }
 function Payments({d}:{d:WorkspaceData}){
@@ -594,11 +585,7 @@ function Designs({d}:{d:WorkspaceData}){
   {designFiles.length>0&&<div className="pv2-file-list">{designFiles.map(f=><a key={f.id}
    href={'/dashboard/projects/'+d.project.id+'/site/media/'+f.id} className="pv2-file">
    <OwnerIcon name="quotations" size={20}/><strong>{stringValue(f.filename)}</strong><span>Download</span></a>)}</div>}
-  {d.site?.stage==='design'&&
-   <details className="pv2-edit-drawer">
-    <summary>＋ Upload drawing and submit revision</summary>
-    <ProjectDrawingForm id={d.project.id} label="Save drawing revision"/>
-   </details>}
+  <p className="pv2-muted">Drawing uploads and approvals are handled in the project's design timeline stage.</p>
  </section></div>;
 }
 function Team({d}:{d:WorkspaceData}){
