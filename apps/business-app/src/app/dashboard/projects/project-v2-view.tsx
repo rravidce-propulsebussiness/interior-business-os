@@ -16,7 +16,7 @@ import { projectWorkspace,formatMoney,pretty,shortDate,stringValue,
  type WorkspaceData,type SiteRow } from './project-v2-data';
 import {
  SiteReportForm,SiteMediaForm,MaterialRequestForm,MaterialUpdateForm,
- QualityForm,ReviewCheck,ProjectDrawingForm,GateForm,AssignRole,SyncStages,
+ QualityForm,ReviewCheck,GateForm,AssignRole,SyncStages,
  ProjectLifecycle,PrepareAgreement,SignedAgreementUploadForm,
 } from './project-v2-forms';
 import '../owner-dashboard.css';
