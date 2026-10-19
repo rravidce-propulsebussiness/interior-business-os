@@ -22,7 +22,7 @@ describe('Client auth uses one readable, mobile friendly design',()=>{
   expect(css).toContain('color:#19293c!important');
   expect(css).toContain('-webkit-text-fill-color:#19293c!important');
   expect(css).toContain('@media(max-width:540px)');
-  expect(existsSync(new URL('../../../../public/client-auth-room.webp',import.meta.url))).toBe(true);
+  expect(existsSync(new URL('../../../public/client-auth-room.webp',import.meta.url))).toBe(true);
  });
  it('preserves password handling and specific project navigation',()=>{
   expect(form).toContain('autoComplete={register?\'new-password\':\'current-password\'}');
