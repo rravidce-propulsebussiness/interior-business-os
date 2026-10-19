@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './client-dashboard.css';
+import './client-auth.css';
 import type { ReactNode } from 'react';
 
 export const metadata: Metadata = {
