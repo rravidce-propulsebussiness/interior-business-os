@@ -13,9 +13,10 @@ import {
 export async function providerStart(
   request: Request,
   provider: 'google' | 'propulse',
+  audience: 'business' | 'client' = 'business',
 ) {
   const origin = publicAuthOrigin(request.url);
-  const fallback = new URL('/login', origin);
+  const fallback = new URL(audience === 'client' ? '/client/login' : '/login', origin);
   fallback.searchParams.set('provider_error', 'unavailable');
 
   if (!isSupabaseConfigured()) {
@@ -36,7 +37,9 @@ export async function providerStart(
 
   try {
     const client = await createServerDatabase();
-    const redirectTo = new URL('/auth/callback', origin).toString();
+    const callback = new URL('/auth/callback', origin);
+    if (audience === 'client') callback.searchParams.set('audience', 'client');
+    const redirectTo = callback.toString();
     const response =
       provider === 'google'
         ? await client.auth.signInWithOAuth({
