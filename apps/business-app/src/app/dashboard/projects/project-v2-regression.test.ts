@@ -18,10 +18,10 @@ describe('Projects v2 one screen per route',()=>{
   expect(ui).not.toContain('pcc-section-columns');
  });
  it('explains the missing agreement instead of allowing an invalid stage import',()=>{
-  expect(ui).toContain("Connect its approved floor-wise quotation and create the agreement");
-  expect(ui).toContain("d.agreement?<SyncStages");
-  expect(ui).toContain('Open quotations & agreement');
-  expect(ui).toContain('Project Stages & Quality Checks');
+  expect(ui).toContain("Prepare the agreement from the issued Final quotation");
+  expect(ui).toContain("d.agreement&&<SyncStages");
+  expect(ui).toContain('Agreement & advance');
+  expect(ui).toContain('Project timeline');
   expect(ui).toContain('guidanceForConstructionStage');
   expect(ui).toContain('ProjectStageLinker');
   expect(loader).toContain('quotePaymentTriggers');
@@ -43,7 +43,7 @@ it('shows only the selected Final saved quotation on a converted project',()=>{
   expect(ui).toContain("slug:'documents',title:'Quote & Agreement'");
   expect(ui).toContain('title="Final Quotation"');
   expect(ui).toContain("q.status==='draft'?'Saved':q.status");
-  expect(ui).toContain("View earlier quotations / change Final");
+  expect(ui).toContain("Quotation history / change Final");
   expect(ui).toContain('label="Open agreement & schedule"');
   expect(loader).toContain("quotation:has('quotation.view','quotation')");
   expect(loader).toContain("'quotation_final_choices'");
@@ -61,7 +61,7 @@ it('does not imply an old agreement automatically covers a newer final quote',()
 it('uses one agreement upload and signing-evidence action without duplicate project controls',()=>{
  const action=read('./[id]/site/agreement-actions.ts');
  expect(ui).toContain('SignedAgreementUploadForm');
- expect(ui).toContain("signedRecorded?'Replace signed agreement':'＋ Save signed agreement'");
+ expect(ui).toContain("Upload or record signed agreement");
  expect(ui).not.toContain('<SignedAgreementForm');
  expect(ui).not.toContain('<AgreementPdfUpload');
  expect(ui).toContain("!canSeeCommercial&&group('Agreement',agreement)");
@@ -85,8 +85,8 @@ it('starts at a real floor plan action after signed agreement, before final desi
  expect(forms).toContain("const allApproved=required.every");
  expect(forms).toContain("if(stage==='client_approved')");
  expect(forms).toContain("submitProjectDrawing(id,form)");
- expect(ui).toContain("agreementSigned={d.agreement?.clearanceType==='signed_copy_recorded'||d.preflight?.signedReady===true}");
- expect(ui).toContain('The recorded agreement references an earlier quotation');
+ expect(ui).toContain("agreementSigned={signed}");
+ expect(ui).toContain('This agreement was prepared from an earlier quotation');
  expect(drawing).toContain("p_action:'design_submit'");
  expect(drawing).toContain("p_category:'design'");
  expect(drawing).toContain('if(uploaded)revalidatePath');
@@ -98,19 +98,28 @@ it('keeps project edit and sharing inline and shows one evidence-backed next act
  const finance=read('./project-next-actions.ts');
  const nextForms=read('./project-next-forms.tsx');
  const drawing=read('./project-design-actions.ts');
- expect(ui).toContain('ProjectPriority d={d}');
+ expect(ui).toContain('ProjectStageWorkflow d={d} code={stage.template_code}');
  expect(ui).toContain('Edit project</summary>');
  expect(ui).toContain('Share with client</summary>');
  expect(ui).toContain('<ProjectClientAccess projectId={p.id} customerId={p.customerId}/>');
  expect(ui).not.toContain('href={cur(p.id,\'overview\')+\'#project-settings\'}');
- expect(ui).toContain("!inspection?'Site inspection'");
- expect(ui).toContain("!measurement?'Site measurements'");
- expect(ui).toContain("'Floor plan preparation'");
- expect(ui).toContain("invoice.invoiceTotal>0 && advanceDue===0");
+ expect(ui).toContain("!inspection&&canSurvey");
+ expect(ui).toContain("inspection&&!measured&&canSurvey");
+ expect(ui).toContain("'Site inspection & measurements'");
+ expect(ui).toContain("invoice.invoiceTotal>0&&due===0");
  expect(finance).toContain("'project_preflight_save'");
  expect(finance).toContain("'project_advance_proforma_prepare'");
  expect(nextForms).toContain('Issue advance proforma');
  expect(drawing).toContain("readiness.inspection_done!==true||readiness.measurements_done!==true");
  expect(loader).toContain("'project_preflight_read'");
  expect(loader).toContain("'project_advance_read'");
+});
+
+it('renders exactly one action location per agreement and design workflow',()=>{
+ const block=ui.slice(ui.indexOf('function ProjectStageBoard('),ui.indexOf('function ProjectCommandSidebar('));
+ expect(block).toContain('<ProjectStageWorkflow d={d} code={stage.template_code}/>');
+ expect(ui).not.toContain('<ProjectPriority d={d}/>');
+ expect(ui).not.toContain('<ProjectLifecycle id={d.project.id}\n    stage={d.site.stage}');
+ expect(ui).not.toContain('＋ Upload drawing and submit revision');
+ expect(ui).toContain('effectiveProjectStageStatus(stage,evidence)');
 });
