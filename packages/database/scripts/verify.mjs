@@ -51,6 +51,7 @@ assertionFile('catalog');
 psql(['-f', file('supabase/seed-commercial.sql')]);
 psql(['-f', file('supabase/seed-commercial.sql')]);
 console.log('Commercial demo seed is repeatable.');
+assertionFile('client-portal-active-project');
 assertionFile('project-delivery');
 assertionFile('project-manager');
 assertionFile('project-agreement');
