@@ -24,6 +24,17 @@ const config: NextConfig = {
   // but multipart Server Action posts need some additional framing room.
   experimental: {
     serverActions: { bodySizeLimit: '10mb' },
+    // Hostinger exposes the host's CPU count but limits process/thread creation.
+    // Without this cap, Next.js attempted 63 page-data workers and SIGABRT'd
+    // in Rust/Tokio with 'Resource temporarily unavailable (os error 11)'.
+    // Only the hosted Next build enables this; normal CI/dev builds are unchanged.
+    ...(process.env.BUSINESS_OS_HOSTED_BUILD === '1'
+      ? {
+          cpus: 2,
+          workerThreads: false,
+          staticGenerationMaxConcurrency: 2,
+        }
+      : {}),
   },
   outputFileTracingIncludes: {
     '/*': ['../../packages/industry-interior/assets/*.webp'],

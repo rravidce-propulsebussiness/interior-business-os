@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { randomBytes } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import {
   resolveDeploymentId,
   validateServerActionsEncryptionKey,
@@ -60,4 +61,19 @@ test('Server Action key validation is optional and never exposes key contents', 
       /NEXT_SERVER_ACTIONS_ENCRYPTION_KEY/.test(error.message) &&
       !error.message.includes('not-a-valid-key'),
   );
+});
+
+test('Hostinger builds bound both Next.js and Rust worker concurrency', () => {
+  const nextConfig = readFileSync(
+    new URL('../apps/business-app/next.config.ts', import.meta.url), 'utf8',
+  );
+  const buildScript = readFileSync(
+    new URL('./hostinger-build.mjs', import.meta.url), 'utf8',
+  );
+  assert.match(nextConfig, /BUSINESS_OS_HOSTED_BUILD === '1'/);
+  assert.match(nextConfig, /cpus: 2/);
+  assert.match(nextConfig, /staticGenerationMaxConcurrency: 2/);
+  assert.match(buildScript, /BUSINESS_OS_HOSTED_BUILD: '1'/);
+  assert.match(buildScript, /TOKIO_WORKER_THREADS: '2'/);
+  assert.match(buildScript, /RAYON_NUM_THREADS: '2'/);
 });
