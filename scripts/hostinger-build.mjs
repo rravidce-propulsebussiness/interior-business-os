@@ -74,7 +74,14 @@ console.log(
 );
 runPnpm(
   ['--filter', `@business-os/${service}`, 'exec', 'next', 'build', '--webpack'],
-  { NEXT_DEPLOYMENT_ID: nextDeploymentId },
+  {
+    NEXT_DEPLOYMENT_ID: nextDeploymentId,
+    // Keep Node workers and native Rust runtimes within shared-host process limits.
+    // The flags apply only to the build subprocess, never the running app.
+    BUSINESS_OS_HOSTED_BUILD: '1',
+    TOKIO_WORKER_THREADS: '2',
+    RAYON_NUM_THREADS: '2',
+  },
 );
 
 const verify = spawnSync(
