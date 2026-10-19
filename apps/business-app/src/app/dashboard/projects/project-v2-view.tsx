@@ -9,6 +9,7 @@ import { guidanceForConstructionStage } from '@business-os/core/construction-pay
 import { ProjectStageLinker,type StageLinkOption } from './project-stage-linker';
 import { ProjectClientAccess } from './project-client-access';
 import { ProjectSiteSurvey,ProjectAdvanceAction } from './project-next-forms';
+import { effectiveProjectStageStatus } from './project-stage-status';
 import { MasterForm } from '../commercial/master-form';
 import { activeOrganization } from '@business-os/auth/server';
 import { projectWorkspace,formatMoney,pretty,shortDate,stringValue,
@@ -111,66 +112,6 @@ function ProjectHeader({data,active}:{data:WorkspaceData;active:ProjectPageSlug}
   <LinkTabs data={data} active={active}/>
  </div>;
 }
-function ProjectPriority({d}:{d:WorkspaceData}){
- const signed=d.agreement?.clearanceType==='signed_copy_recorded'||d.preflight?.signedReady===true;
- const canSurvey=d.permissions.manage||['manager','site_engineer'].includes(d.site?.role??'');
- const inspection=d.preflight?.inspectionDone===true;
- const measurement=d.preflight?.measurementsDone===true;
- const invoice=d.advance;
- const received=invoice?.received??0;
- const advanceDue=invoice?.invoiceId?Math.max(0,(invoice.invoiceTotal||0)-received):null;
- const paid=Boolean(invoice?.invoiceId && invoice.invoiceTotal>0 && advanceDue===0);
- const next=!signed?'Confirm signed agreement':
-   !inspection?'Site inspection':
-   !measurement?'Site measurements':'Floor plan preparation';
- const notes=!signed?'Upload the signed agreement and record signing evidence once.':
-   !inspection?'Inspect access, boundaries, utilities, existing structures and site levels before design.':
-   !measurement?'Record dimensions, plot levels, road reference and setbacks before floor planning.':
-   'The pre-design survey is recorded. Prepare the floor plan and send it for review.';
- const guess=d.quotePaymentTriggers.find(x=>/advance|booking/i.test(x.name))?.percent??10;
- return <section className="pv2-priority-wrap" aria-label="Project next actions">
-  <div className="pv2-priority-main">
-   <div className="pv2-priority-eyebrow"><span className="pv2-next-pulse"/> NEXT ACTION <span className="pv2-next-stage">{signed?'Design preparation':'Agreement'}</span></div>
-   <h2>{next}</h2><p className="pv2-priority-description">{notes}</p>
-   <div className="pv2-checklist-inline">
-    <span className={signed?'done':'waiting'}>{signed?'✓':'○'} Signed agreement</span>
-    <span className={inspection?'done':'waiting'}>{inspection?'✓':'○'} Site inspection</span>
-    <span className={measurement?'done':'waiting'}>{measurement?'✓':'○'} Measurements</span>
-   </div>
-   {!signed?<p className="pv2-next-notice">The agreement is not yet confirmed as signed. Uploading a PDF alone does not complete signing.</p>:
-    !inspection&&canSurvey?<details className="pv2-next-drawer" open>
-      <summary>Record site inspection</summary>
-      <ProjectSiteSurvey projectId={d.project.id} kind="inspection" previous={d.preflight?.inspectionDetails}/>
-     </details>:
-    inspection&&!measurement&&canSurvey?<details className="pv2-next-drawer" open>
-      <summary>Record site measurements</summary>
-      <ProjectSiteSurvey projectId={d.project.id} kind="measurements" previous={d.preflight?.measurementDetails}/>
-     </details>:
-    inspection&&measurement&&d.site?.stage==='design'&&d.site.canManage?
-     <details className="pv2-next-drawer" open><summary>Prepare floor plan</summary>
-      <ProjectDrawingForm id={d.project.id} kind={/interior/i.test(d.project.industry)?'interior_layout':'architectural_plan'} label="Submit floor plan for review"/>
-     </details>:null}
-  </div>
-  <aside className="pv2-priority-payment">
-   <div className="pv2-next-payment-heading"><span className="pv2-priority-coin">₹</span>
-    <div><strong>Advance payment</strong><small>{invoice===null?'Finance status unavailable':paid?'Verified receipt recorded':invoice?.invoiceId?'Payment requested':'Not yet requested'}</small></div></div>
-   <strong className="pv2-priority-amount">{invoice===null?'—':invoice?.invoiceId?formatMoney(invoice.invoiceTotal):'Not invoiced'}</strong>
-   {invoice?.invoiceId?<div className="pv2-priority-payment-meta">
-     <span>{invoice.invoiceNumber||'Advance proforma'}</span><Status value={paid?'paid':invoice.invoiceStatus||'pending'}/>
-     <p>{formatMoney(received)} received · {formatMoney(advanceDue)} remaining</p>
-    </div>:<p className="pv2-next-subtle">A signed agreement does not mean payment has arrived.</p>}
-   {signed&&invoice!==null&&!invoice.invoiceId&&d.permissions.finance&&d.permissions.manage&&
-    <details className="pv2-next-drawer"><summary>Issue advance invoice</summary>
-     <ProjectAdvanceAction projectId={d.project.id} defaultPercent={guess}/>
-    </details>}
-   {invoice?.invoiceId&&<a className="pv2-next-secondary" href={'/dashboard/finance/invoices/'+invoice.invoiceId}>
-    View invoice <OwnerIcon name="arrow" size={13}/></a>}
-   {invoice!==null&&!invoice.scheduleActive&&signed&&<p className="pv2-next-subtle">
-    Payment schedule still needs activation before physical construction.</p>}
-  </aside>
- </section>;
-}
-
 /** One actionable project surface. Detail modules keep the original records,
  * while project stages and inline forms give the owner a single place to work. */
 function ProjectFinancialSummary({d}:{d:WorkspaceData}){
@@ -191,11 +132,96 @@ function ProjectFinancialSummary({d}:{d:WorkspaceData}){
    </article>)}
  </section>;
 }
+/** Stage-specific forms share the canonical records used by the document and
+ * finance archives. There is no second agreement or design workflow above
+ * this quotation-derived timeline. */
+function ProjectStageWorkflow({d,code}:{d:WorkspaceData;code:string}){
+ const hasPrecon=d.stages.some(x=>x.template_code==='PRECONSTRUCTION');
+ const agreementStep=code==='PRECONSTRUCTION'||(code==='SITE_SURVEY'&&!hasPrecon);
+ const surveyStep=code==='PRECONSTRUCTION'||code==='SITE_SURVEY';
+ const designStep=code==='DESIGN'||code==='DESIGN_APPROVAL';
+ if(!agreementStep&&!surveyStep&&!designStep)return null;
+ const signed=d.agreement?.clearanceType==='signed_copy_recorded'||d.preflight?.signedReady===true;
+ const quote=d.quotations[0];
+ const sameRevision=!d.agreement?.revisionId||!quote||d.agreement.revisionId===quote.revisionId;
+ const inspection=d.preflight?.inspectionDone===true;
+ const measured=d.preflight?.measurementsDone===true;
+ const canSurvey=d.permissions.manage||['manager','site_engineer'].includes(d.site?.role??'');
+ const pdfs=(d.site?.media??[]).filter(x=>x.category==='agreement'&&x.mime==='application/pdf');
+ const invoice=d.advance;
+ const due=invoice?.invoiceId?Math.max(0,invoice.invoiceTotal-invoice.received):null;
+ const paid=Boolean(invoice?.invoiceId&&invoice.invoiceTotal>0&&due===0);
+ const defaultPercent=d.quotePaymentTriggers.find(x=>/advance|booking/i.test(x.name))?.percent??10;
+ return <div className="pv2-stage-workflow">
+  {agreementStep&&<>
+   <h3>Agreement & advance</h3>
+   {!d.agreement?<>
+    <p className="pv2-muted">The project exists from its approved quotation. Prepare its agreement here; do not create another project.</p>
+    {quote?.status==='issued'&&d.permissions.manage&&d.permissions.finance&&
+     <PrepareAgreement projectId={d.project.id} revisionId={quote.revisionId}/>}
+    {(!quote||quote.status!=='issued')&&<p className="pv2-muted">Issue the final quotation before preparing the agreement.</p>}
+   </>:<>
+    <div className="pv2-stage-workflow-status"><strong>{d.agreement.contractNumber}</strong>
+     <Status value={signed?'signed':d.agreement.status||'pending'}/></div>
+    {d.permissions.finance&&<NextLink href={'/dashboard/finance/contracts/'+d.agreement.contractId} label="View agreement & schedule"/>}
+    {!sameRevision&&<p role="alert" className="pv2-form-feedback bad">This agreement belongs to an earlier Final quotation. Check the linked revision before proceeding.</p>}
+    {!signed&&sameRevision&&d.site?.canManage&&d.permissions.finance&&
+     <details className="pv2-edit-drawer"><summary>Upload or record signed agreement</summary>
+      <SignedAgreementUploadForm projectId={d.project.id} contractId={d.agreement.contractId}
+       media={pdfs.map(x=>({id:x.id,name:stringValue(x.filename)}))}/>
+     </details>}
+    {signed&&<p className="pv2-form-feedback good">Signed agreement recorded. No repeat approval or upload is required.</p>}
+    {signed&&invoice!==null&&<div className="pv2-stage-workflow-payment">
+     <strong>Advance payment</strong>
+     <p>{invoice.invoiceId?formatMoney(invoice.received)+' received · '+formatMoney(due)+' pending':'Advance invoice not yet requested'}</p>
+     <Status value={paid?'paid':invoice.invoiceStatus||'pending'}/>
+     {!invoice.invoiceId&&d.permissions.finance&&d.permissions.manage&&
+      <details className="pv2-edit-drawer"><summary>Issue advance proforma</summary>
+       <ProjectAdvanceAction projectId={d.project.id} defaultPercent={defaultPercent}/>
+      </details>}
+     {invoice.invoiceId&&d.permissions.finance&&<NextLink href={'/dashboard/finance/invoices/'+invoice.invoiceId} label="View advance invoice"/>}
+     {!invoice.scheduleActive&&<p className="pv2-hint">The payment schedule and verified receipts are required before physical construction.</p>}
+    </div>}
+   </>}
+   {d.site?.stage==='not_started'&&signed&&sameRevision&&d.site.canManage&&
+    <ProjectLifecycle id={d.project.id} stage="not_started" canManage
+     agreementSigned={signed} industry={d.project.industry} designs={[]}/>}
+  </>}
+  {surveyStep&&signed&&<div className="pv2-stage-workflow-survey">
+   <h3>Site inspection & measurements</h3>
+   <div className="pv2-checklist-inline">
+    <span className={inspection?'done':'waiting'}>{inspection?'✓':'○'} Site inspection</span>
+    <span className={measured?'done':'waiting'}>{measured?'✓':'○'} Measurements</span>
+   </div>
+   {!inspection&&canSurvey&&<details className="pv2-edit-drawer"><summary>Record site inspection</summary>
+    <ProjectSiteSurvey projectId={d.project.id} kind="inspection" previous={d.preflight?.inspectionDetails}/>
+   </details>}
+   {inspection&&!measured&&canSurvey&&<details className="pv2-edit-drawer"><summary>Record site measurements</summary>
+    <ProjectSiteSurvey projectId={d.project.id} kind="measurements" previous={d.preflight?.measurementDetails}/>
+   </details>}
+  </div>}
+  {designStep&&d.site&&['design','client_approved'].includes(d.site.stage)&&
+   <ProjectLifecycle id={d.project.id} stage={d.site.stage} canManage={d.site.canManage}
+    agreementSigned={signed} industry={d.project.industry}
+    designs={d.site.designs.map(x=>({id:x.id,kind:stringValue(x.kind),status:stringValue(x.status)}))}/>}
+ </div>;
+}
 function ProjectStageBoard({d}:{d:WorkspaceData}){
  const site=d.site;
  const done=(status:string)=>['completed','certified','done','skipped'].includes(status);
- const active=d.stages.findIndex(stage=>!done(stage.status));
- const current=active<0?d.stages.length-1:active;
+ const evidence={
+  approvedQuotation:d.quotations.some(q=>['issued','approved','accepted'].includes(q.status)),
+  agreementPrepared:Boolean(d.agreement),
+  inspectionDone:d.preflight?.inspectionDone===true,
+  measurementsDone:d.preflight?.measurementsDone===true,
+  designRevisionStarted:Boolean(d.site?.designs.length),
+  designClientApproved:['client_approved','execution'].includes(d.site?.stage??''),
+ };
+ const visualStatuses=d.stages.map(stage=>effectiveProjectStageStatus(stage,evidence));
+ const active=visualStatuses.findIndex(status=>!done(status));
+ const designIndex=d.stages.findIndex(stage=>['DESIGN','DESIGN_APPROVAL'].includes(stage.template_code));
+ const current=d.site?.stage==='design'&&designIndex>=0?designIndex:
+  active<0?d.stages.length-1:active;
  const allowWork=site?.stage==='execution'&&
   (site.canManage||['manager','project_manager','site_engineer','supervisor'].includes(site.role));
  const allowMaterials=site?.stage==='execution'&&
@@ -211,10 +237,13 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
   {!d.stages.length?<div className="pv2-stage-empty">
     <p>Stages are created from the signed agreement and its approved quotation; no generic stages are inserted.</p>
     {d.site?.canManage&&d.agreement&&<SyncStages id={d.project.id}/>}
-    {!d.agreement&&<p>Complete the quotation and agreement first.</p>}
+    {!d.agreement&&d.quotations[0]?.status==='issued'&&d.permissions.manage&&d.permissions.finance&&
+    <PrepareAgreement projectId={d.project.id} revisionId={d.quotations[0].revisionId}/>}
+   {!d.agreement&&<p>Prepare the agreement from the issued Final quotation before importing stages.</p>}
    </div>:<div className="pv2-command-stage-list">
     {d.stages.map((stage,index)=>{
-      const complete=done(stage.status);
+      const visualStatus=visualStatuses[index]??stage.status;
+      const complete=done(visualStatus);
       const guidance=guidanceForConstructionStage(stage.template_code);
       const checks=[...new Set([...stage.inspectionTopics,...guidance.checks])];
       const payment=d.quotePaymentTriggers.filter(p=>p.stageCodes.includes(stage.instance_code));
@@ -231,13 +260,14 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
         <span className="pv2-stage-number">{complete?'✓':index+1}</span>
         <span className="pv2-stage-title-block"><strong>{stage.title}</strong>
          <small>{stage.floor_code?pretty(stage.floor_code)+' · ':''}{stage.phase?pretty(stage.phase)+' · ':''}{stage.activities.length} work items</small></span>
-        <Status value={stage.status}/>
+        <Status value={visualStatus}/>
         <span className="pv2-stage-meta">{payment.length} payment milestone{payment.length===1?'':'s'}</span>
         <OwnerIcon name="arrow" size={15}/>
        </summary>
        <div className="pv2-command-stage-inner">
         {stage.explanation&&<p className="pv2-muted">{stage.explanation}</p>}
         {!!stage.dependencies.length&&<p className="pv2-stage-hint">Dependent on: {stage.dependencies.join(' · ')}</p>}
+        <ProjectStageWorkflow d={d} code={stage.template_code}/>
         <div className="pv2-command-work-list">
          {stage.activities.map((work,i)=><div className="pv2-command-work-item" key={i}>
            <span className="pv2-work-bullet"><OwnerIcon name={complete?'check':'projects'} size={15}/></span>
@@ -298,7 +328,7 @@ function ProjectCommandSidebar({d,showHistory=false}:{d:WorkspaceData;showHistor
       <h3>Client questions & requests</h3>
       <OwnerProjectRequests projectId={d.project.id} requests={d.requests??[]}/>
     </div>}
-   <ProjectPriority d={d}/>
+   
   </section>
   <section className="pv2-panel">
    <div className="pv2-command-head"><h2>{showHistory?'Project activity':'Recent updates'}</h2>
@@ -331,12 +361,6 @@ function ProjectCommandSidebar({d,showHistory=false}:{d:WorkspaceData;showHistor
 function ProjectWorkHub({d,showHistory=false}:{d:WorkspaceData;showHistory?:boolean}){
  return <div className="pv2-content pv2-command-workspace">
   <ProjectFinancialSummary d={d}/>
-  {d.site&&['not_started','design','client_approved'].includes(d.site.stage)&&
-   <section className="pv2-command-delivery"><ProjectLifecycle id={d.project.id}
-    stage={d.site.stage} canManage={d.site.canManage}
-    agreementSigned={d.agreement?.clearanceType==='signed_copy_recorded'||d.preflight?.signedReady===true}
-    industry={d.project.industry}
-    designs={d.site.designs.map(row=>({id:row.id,kind:stringValue(row.kind),status:stringValue(row.status)}))}/></section>}
   <div className="pv2-command-layout">
    <ProjectStageBoard d={d}/>
    <ProjectCommandSidebar d={d} showHistory={showHistory}/>
@@ -377,7 +401,7 @@ function Documents({d}:{d:WorkspaceData}){
  </section>;
  return <div className="pv2-content">
    {canSeeCommercial&&<>
-    <ProjectPriority d={d}/>
+    
     <section className="pv2-section-intro"><h2>Quotation & Agreement</h2>
      <p>One final quotation, one agreement, and a clear next action.</p></section>
     <section className="pv2-panel pv2-quote-links">
@@ -439,7 +463,7 @@ function Payments({d}:{d:WorkspaceData}){
  const paymentRows=d.transactions;
  const total=paymentRows?.filter(x=>x.status==='recorded').reduce((sum,x)=>sum+x.amount,0)??null;
  return <div className="pv2-content">
-  <ProjectPriority d={d}/>
+  
   <section className="pv2-stat-grid pv2-finance-metrics">
    <article className="pv2-stat"><small>Contract Value</small><strong>{formatMoney(d.contractValue)}</strong></article>
    <article className="pv2-stat"><small>Received</small><strong>{formatMoney(total)}</strong></article>
