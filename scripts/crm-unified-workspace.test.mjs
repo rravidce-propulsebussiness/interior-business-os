@@ -289,7 +289,14 @@ test('invited clients can open only explicitly granted project records', () => {
     /not private\.client_portal_accessible\(m\.project_id\)/,
   );
   assert.match(inviteUi, /'\/client\/projects\/' \+ item\.project_id/);
-  assert.match(loginPage, /'\/client\/projects\/' \+ projectId/);
+  const clientForm = readFileSync(
+    fileURLToPath(
+      new URL('../apps/business-app/src/app/client/client-auth-form.tsx', import.meta.url),
+    ),
+    'utf8',
+  );
+  assert.match(loginPage, /z\.uuid\(\)\.safeParse\(query\.project\)/);
+  assert.match(clientForm, /'\/client\/projects\/'\+projectId/);
   assert.match(projectPage, /client_portal_project/);
   assert.match(projectPage, /'\/client\/login\?project=' \+ id/);
   assert.match(home, /if \(projects\.length === 1\) redirect/);

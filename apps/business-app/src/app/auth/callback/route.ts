@@ -8,10 +8,14 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const code = url.searchParams.get('code');
   const hash = url.searchParams.get('token_hash');
+  const clientAudience = url.searchParams.get('audience') === 'client';
   const client = await createServerDatabase();
   if (code) {
     const { data, error } = await client.auth.exchangeCodeForSession(code);
     if (!error && data.session?.user) {
+      // Client users return to their scoped portal, never the owner dashboard.
+      // The portal RPC verifies their invited email and exact project.
+      if (clientAudience) return NextResponse.redirect(new URL('/client', url.origin));
       // Session login succeeds even if the external company API is unavailable.
       // A subsequent "Continue with ProPulse" can retry safe, idempotent sync.
       try {
@@ -33,6 +37,7 @@ export async function GET(request: Request) {
       type: 'email',
     });
     if (!error) {
+      if (clientAudience) return NextResponse.redirect(new URL('/client', url.origin));
       // A verified invited client has no company membership. Their portal is
       // selected by permission-checked RPC, not a caller-controlled redirect.
       const rpc = client.rpc.bind(client) as unknown as (
@@ -47,6 +52,6 @@ export async function GET(request: Request) {
     }
   }
   return NextResponse.redirect(
-    new URL('/login?confirmation=failed', url.origin),
+    new URL(clientAudience ? '/client/login?provider_error=callback' : '/login?confirmation=failed', url.origin),
   );
 }
