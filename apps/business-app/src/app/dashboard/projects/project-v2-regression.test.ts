@@ -105,7 +105,7 @@ it('keeps project edit and sharing inline and shows one evidence-backed next act
  expect(ui).not.toContain('href={cur(p.id,\'overview\')+\'#project-settings\'}');
  expect(ui).toContain("!inspection&&canSurvey");
  expect(ui).toContain("inspection&&!measured&&canSurvey");
- expect(ui).toContain("'Site inspection & measurements'");
+ expect(ui).toContain('<h3>Site inspection & measurements</h3>');
  expect(ui).toContain("invoice.invoiceTotal>0&&due===0");
  expect(finance).toContain("'project_preflight_save'");
  expect(finance).toContain("'project_advance_proforma_prepare'");
