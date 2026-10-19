@@ -115,8 +115,8 @@ export function ProjectLifecycle({id,stage,canManage,designs,agreementSigned,ind
 }){
  if(!canManage)return null;
  if(stage==='not_started')return <section className="pv2-panel pv2-lifecycle">
-  <h2>Start project delivery</h2>
-  <p>Initialize the existing project delivery workspace. This does not create another project.</p>
+  <h2>Enable project design workspace</h2>
+  <p>This project already exists from its approved quotation. Enable its drawing and site registers without creating a second project.</p>
   <InitializeSite id={id}/>
  </section>;
  if(stage==='design'){
