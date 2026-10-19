@@ -27,7 +27,9 @@ describe('Clients workspace retired without removing customer data or client app
  it('keeps client app sharing inside the same project Team workspace',()=>{
   expect(view).toContain("cur(p.id,'team')+'#client-portal-access'");
   expect(view).toContain('<ProjectClientAccess projectId={d.project.id} customerId={d.project.customerId}/>');
-  expect(access).toContain('client_portal_grantable_projects');
+  expect(access).not.toContain('client_portal_grantable_projects');
+  expect(access).toContain(".eq('status','active')");
+  expect(access).toContain('lockedProject/>');
   expect(access).toContain('client_portal_access_list');
   expect(access).toContain(".eq('id',projectId)");
  });
