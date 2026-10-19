@@ -1,7 +1,7 @@
 import {describe,it,expect} from 'vitest';
 import {effectiveProjectStageStatus,type ProjectStageEvidence} from './project-stage-status';
 const baseline:ProjectStageEvidence={
- approvedQuotation:false,agreementPrepared:false,inspectionDone:false,
+ approvedQuotation:false,quotedScopeImported:false,agreementPrepared:false,inspectionDone:false,
  measurementsDone:false,designRevisionStarted:false,designClientApproved:false,
 };
 const status=(code:string,changes:Partial<ProjectStageEvidence>={},stored='not_started')=>
@@ -13,6 +13,11 @@ describe('quote-derived project stage status',()=>{
  it('marks approved quotation scope complete without certifying any site work',()=>{
   expect(status('QUOTED_SCOPE',{approvedQuotation:true})).toBe('completed');
   expect(status('FOUNDATION',{approvedQuotation:true})).toBe('not_started');
+ });
+ it('recognizes a contracted quoted-scope snapshot even when quotation lookup is missing',()=>{
+  expect(status('QUOTED_SCOPE',{quotedScopeImported:true})).toBe('completed');
+  expect(status('FOUNDATION',{quotedScopeImported:true})).toBe('not_started');
+  expect(status('PRECONSTRUCTION',{quotedScopeImported:true})).toBe('not_started');
  });
  it('does not show a prepared agreement as not started',()=>{
   expect(status('PRECONSTRUCTION',{agreementPrepared:true})).toBe('in_progress');
