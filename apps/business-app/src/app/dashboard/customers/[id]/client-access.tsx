@@ -17,11 +17,13 @@ export function ClientAccess({
   customerEmail,
   projects,
   existing,
+  lockedProject = false,
 }: {
   customerId: string;
   customerEmail: string;
   projects: Project[];
   existing: Access[];
+  lockedProject?: boolean;
 }) {
   const [projectId, setProjectId] = useState(projects[0]?.id ?? '');
   const [email, setEmail] = useState(customerEmail ?? '');
@@ -64,23 +66,24 @@ export function ClientAccess({
   return (
     <section id="client-portal-access" className="pv2-panel">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <h2>Client App Access</h2>
-        <span className="text-xs text-slate-500">Private project sharing</span>
+        <h2>Share with client</h2>
+        <span className="text-xs text-slate-500">Private project access</span>
       </div>
       <p className="mb-4 text-sm text-slate-600">
-        Only confirmed projects with a signed agreement and recorded advance
-        can be shared. Invite the verified client email to that specific project;
-        access never extends to the internal business dashboard.
+        Invite the client's email to see this project's approved plans, updates and requests.
+        They cannot view your company's dashboard or other projects.
       </p>
       {projects.length ? (
         <form
-          className="grid gap-3 md:grid-cols-[1fr_1fr_auto] md:items-end"
+          className={lockedProject
+            ? 'grid gap-3 md:grid-cols-[1fr_auto] md:items-end'
+            : 'grid gap-3 md:grid-cols-[1fr_1fr_auto] md:items-end'}
           onSubmit={(event) => {
             event.preventDefault();
             if (projectId && email.trim()) update(true, projectId, email.trim().toLowerCase());
           }}
         >
-          <label className="flex flex-col gap-1 text-sm font-semibold">
+          {!lockedProject && <label className="flex flex-col gap-1 text-sm font-semibold">
             Project
             <select className="min-h-11 rounded-xl border border-slate-300 bg-white px-3"
               value={projectId} onChange={(event) => setProjectId(event.target.value)}
@@ -89,7 +92,7 @@ export function ClientAccess({
                 <option key={project.id} value={project.id}>{project.name}</option>
               ))}
             </select>
-          </label>
+          </label>}
           <label className="flex flex-col gap-1 text-sm font-semibold">
             Client email
             <input type="email" required value={email} maxLength={254}
@@ -99,16 +102,17 @@ export function ClientAccess({
           </label>
           <button className="min-h-11 rounded-xl bg-orange-600 px-5 font-semibold text-white disabled:opacity-50"
             disabled={pending} type="submit">
-            {pending ? 'Saving…' : 'Grant access'}
+            {pending ? 'Saving…' : 'Share project'}
           </button>
         </form>
       ) : (
         <p className="text-sm text-slate-600">
-          Complete the project agreement and record the required advance before granting client app access.
+          Project sharing is available for active projects linked to an active client.
+          Check that the project and client are active.
         </p>
       )}
       {projects.length > 0 && <div className="mt-4 flex flex-wrap items-center gap-3 rounded-xl bg-orange-50 p-3 text-sm">
-        <span className="font-semibold">Selected project link:</span>
+        <span className="font-semibold">Client project link:</span>
         <a className="break-all text-orange-700 underline" href={portalUrl} target="_blank" rel="noreferrer">
           {portalUrl}
         </a>
