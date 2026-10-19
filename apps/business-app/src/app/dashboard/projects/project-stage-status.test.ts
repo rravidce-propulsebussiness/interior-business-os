@@ -1,0 +1,33 @@
+import {describe,it,expect} from 'vitest';
+import {effectiveProjectStageStatus,type ProjectStageEvidence} from './project-stage-status';
+const baseline:ProjectStageEvidence={
+ approvedQuotation:false,agreementPrepared:false,inspectionDone:false,
+ measurementsDone:false,designRevisionStarted:false,designClientApproved:false,
+};
+const status=(code:string,changes:Partial<ProjectStageEvidence>={},stored='not_started')=>
+ effectiveProjectStageStatus({template_code:code,status:stored},{...baseline,...changes});
+describe('quote-derived project stage status',()=>{
+ it('does not claim an unsent quotation was approved',()=>{
+  expect(status('QUOTED_SCOPE')).toBe('not_started');
+ });
+ it('marks approved quotation scope complete without certifying any site work',()=>{
+  expect(status('QUOTED_SCOPE',{approvedQuotation:true})).toBe('completed');
+  expect(status('FOUNDATION',{approvedQuotation:true})).toBe('not_started');
+ });
+ it('does not show a prepared agreement as not started',()=>{
+  expect(status('PRECONSTRUCTION',{agreementPrepared:true})).toBe('in_progress');
+ });
+ it('requires recorded site evidence for a completed survey',()=>{
+  expect(status('SITE_SURVEY',{inspectionDone:true})).toBe('in_progress');
+  expect(status('SITE_SURVEY',{inspectionDone:true,measurementsDone:true})).toBe('completed');
+ });
+ it('reflects design revisions and final client approval',()=>{
+  expect(status('DESIGN',{designRevisionStarted:true})).toBe('in_progress');
+  expect(status('DESIGN',{designClientApproved:true})).toBe('completed');
+  expect(status('DESIGN_APPROVAL',{designRevisionStarted:true})).toBe('in_progress');
+ });
+ it('preserves manually recorded stage states',()=>{
+  expect(status('QUOTED_SCOPE',{approvedQuotation:true},'blocked')).toBe('blocked');
+  expect(status('DESIGN',{designClientApproved:true},'completed')).toBe('completed');
+ });
+});

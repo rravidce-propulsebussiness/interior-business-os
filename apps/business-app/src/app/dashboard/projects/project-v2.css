@@ -699,3 +699,15 @@
  .pv2-financial-card strong{font-size:17px}
  .pv2-command-quick-actions{grid-template-columns:1fr}
 }
+
+/* Contract/design actions belong to their quotation-derived timeline stages. */
+.pv2-stage-workflow{display:grid;gap:12px;min-width:0;padding:14px;border:1px solid #f0dfd2;border-radius:14px;background:#fffaf6}
+.pv2-stage-workflow h3{margin:0;color:#1e293b;font-size:15px;font-weight:750}
+.pv2-stage-workflow>p{margin:0}
+.pv2-stage-workflow-status{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.pv2-stage-workflow-payment,.pv2-stage-workflow-survey{display:grid;gap:8px;min-width:0}
+.pv2-stage-workflow-payment p{margin:0;color:#66758c}
+.pv2-command-stage-inner .pv2-stage-workflow .pv2-lifecycle{margin:0;padding:0;border:0;box-shadow:none;background:transparent}
+.pv2-stage-workflow .pv2-edit-drawer{max-width:100%;min-width:0}
+.pv2-stage-workflow .pv2-form{min-width:0}
+@media(max-width:680px){.pv2-stage-workflow{padding:10px;gap:10px}.pv2-stage-workflow-status{align-items:flex-start}}
