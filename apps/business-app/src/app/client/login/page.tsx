@@ -20,7 +20,7 @@ export default async function ClientLoginPage({searchParams}:{
   const db=await createServerDatabase();
   const {data}=await db.auth.getUser();
   if(data.user){
-   const destination=await resolveLoginDestination(db,{preferClient:true});
+   const destination=await resolveLoginDestination(db,data.user.id,{preferClient:true});
    const path=destination==='/client'&&projectId?'/client/projects/'+projectId:destination;
    redirect(new URL(path,publicAuthOrigin('http://localhost:3000/client/login')).toString());
   }

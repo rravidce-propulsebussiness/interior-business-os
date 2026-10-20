@@ -11,6 +11,7 @@ type AuthClient = Awaited<ReturnType<typeof createServerDatabase>>;
  */
 export async function resolveLoginDestination(
   client: AuthClient,
+  authenticatedUserId: string,
   options: { preferClient?: boolean } = {},
 ): Promise<LoginDestination> {
   const preferClient = options.preferClient === true;
@@ -18,6 +19,7 @@ export async function resolveLoginDestination(
     const [memberships, portal] = await Promise.all([
       client.from('organization_memberships')
         .select('id')
+        .eq('user_id', authenticatedUserId)
         .eq('status', 'active')
         .limit(1),
       (client.rpc.bind(client) as unknown as (
