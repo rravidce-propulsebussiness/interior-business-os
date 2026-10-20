@@ -97,7 +97,7 @@ export default async function GstDocumentDetail({
               href={'/dashboard/billing/new?edit=' + id}
               className="rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold"
             >
-              Edit draft
+              Edit
             </Link>
           )}
         </div>
