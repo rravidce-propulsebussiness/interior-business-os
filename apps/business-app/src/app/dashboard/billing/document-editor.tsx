@@ -502,7 +502,7 @@ export function DocumentEditor({
             type="submit"
             className="rounded-xl bg-slate-900 px-6 py-3 font-semibold text-white hover:bg-slate-800"
           >
-            Save draft
+            Save
           </button>
           <p className="text-xs text-slate-500">
             Documents receive a final number only on issuance. GST filing and
