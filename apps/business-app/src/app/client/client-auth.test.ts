@@ -12,6 +12,8 @@ const action=load('./client-auth-actions.ts');
 const google=load('../auth/google/route.ts');
 const start=load('../auth/provider-start.ts');
 const callback=load('../auth/callback/route.ts');
+const signIn=load('../../../../../packages/auth/src/actions.ts');
+const landing=load('../../../../../packages/auth/src/login-destination.ts');
 
 describe('Client auth uses one readable, mobile friendly design',()=>{
  it('uses one matching card and high contrast fields for both entry pages',()=>{
@@ -45,9 +47,16 @@ describe('Client auth uses one readable, mobile friendly design',()=>{
   expect(shell).toContain('/auth/google?audience=client');
   expect(google).toContain("providerStart(request,'google',audience)");
   expect(start).toContain("callback.searchParams.set('audience', 'client')");
-  expect(callback).toContain("if (clientAudience) return NextResponse.redirect(new URL('/client', origin));");
-  expect(callback).toContain('if (clientAudience)');
-  expect(callback).toContain("new URL('/dashboard', origin)");
+  expect(callback).toContain('resolveLoginDestination(client, {');
+  expect(callback).toContain('preferClient: clientAudience');
+  expect(callback).toContain('new URL(destination, origin)');
+  expect(ownerLogin).toContain('resolveLoginDestination(db)');
+  expect(login).toContain('resolveLoginDestination(db,{preferClient:true})');
+  expect(signIn).toContain("form.get('loginAudience') === 'client'");
+  expect(landing).toContain("'client_portal_projects'");
+  expect(landing).toContain("'organization_memberships'");
+  expect(form).toContain('name="loginAudience" value="client"');
+  expect(form).toContain('state.clientPortal');
   expect(callback).toContain('publicAuthOrigin(request.url)');
   expect(callback).not.toContain('url.origin');
  });
