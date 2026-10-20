@@ -93,11 +93,13 @@ async function request(
       ', SignedHeaders=' + signedHeaders + ', Signature=' + signature,
   };
   if (method === 'PUT' && mime) headers['Content-Type'] = mime;
-  return fetch('https://' + host + uri, {
-    method, headers, body: bytes ? new Uint8Array(bytes) : undefined,
+  const init: RequestInit = {
+    method, headers,
     cache: 'no-store', redirect: 'error',
     signal: AbortSignal.timeout(30000),
-  });
+  };
+  if (bytes) init.body = new Uint8Array(bytes);
+  return fetch('https://' + host + uri, init);
 }
 export async function r2MediaPut(key: string, bytes: Buffer, mime: string) {
   validateR2MediaBytes(bytes, mime);
