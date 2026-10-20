@@ -30,6 +30,16 @@ describe('OAuth public URL selection behind Hostinger', () => {
     expect(publicAuthOrigin(internal, invalid)).toBe(expected);
   });
 
+  it('uses local APP_ORIGIN for an explicit development app built by Next in production mode', () => {
+    const fixture = {
+      APP_ENV: 'development',
+      NODE_ENV: 'production',
+      APP_ORIGIN: 'http://127.0.0.1:3131',
+    };
+    expect(publicAuthOrigin('http://127.0.0.1:3131/login', fixture))
+      .toBe('http://127.0.0.1:3131');
+  });
+
   it('supports local development but rejects proxy-internal staging', () => {
     const development = { NODE_ENV: 'development' };
     const local = 'http://localhost:3333/auth/google';
