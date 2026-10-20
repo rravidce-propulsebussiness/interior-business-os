@@ -11,6 +11,8 @@ import './premium-login.css';
 export const dynamic = 'force-dynamic';
 
 const notices: Record<string, string> = {
+  google_disabled:
+    'Google sign-in is not enabled in Business OS Supabase Authentication. Please use email and password until an administrator activates the Google provider.',
   google:
     'Google sign-in could not be completed. Try again or use your email and password.',
   propulse:
