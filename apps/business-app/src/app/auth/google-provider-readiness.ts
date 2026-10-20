@@ -10,7 +10,10 @@ export async function googleProviderEnabled(
   env: {
     NEXT_PUBLIC_SUPABASE_URL?: string;
     NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY?: string;
-  } = process.env,
+  } = {
+    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+  },
   fetcher: typeof fetch = fetch,
 ): Promise<boolean | null> {
   const base = env.NEXT_PUBLIC_SUPABASE_URL?.trim();
