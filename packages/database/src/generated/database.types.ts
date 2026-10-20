@@ -11970,6 +11970,24 @@ export interface Database {
         };
         Returns: string;
       };
+      project_site_media_put_r2: {
+        Args: {
+          p_organization_id: string;
+          p_project_id: string;
+          p_category: string;
+          p_filename: string;
+          p_mime: string;
+          p_caption: string;
+          p_r2_key: string;
+          p_byte_size: number;
+          p_sha256: string;
+        };
+        Returns: string;
+      };
+      project_site_media_r2_key: {
+        Args: { p_organization_id: string; p_project_id: string; p_id: string };
+        Returns: string;
+      };
       project_site_my_projects: {
         Args: { p_organization_id: string };
         Returns: Json;
