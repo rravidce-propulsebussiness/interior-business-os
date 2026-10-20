@@ -11437,6 +11437,13 @@ export interface Database {
         };
         Returns: string;
       };
+      invoice_bank_payee_read: { Args: { p_org: string }; Returns: Json };
+      invoice_bank_payee_save: { Args: { p_org: string; p_name: string; p_bank: string; p_account: string; p_ifsc: string; p_upi: string }; Returns: undefined };
+      invoice_payment_claim_list: { Args: { p_org: string; p_invoice: string }; Returns: Json };
+      invoice_payment_claim_review: { Args: { p_org: string; p_claim: string; p_approve: boolean; p_bank_credit_confirmed: boolean; p_notes?: string }; Returns: undefined };
+      invoice_payment_claim_submit: { Args: { p_org: string; p_request: string; p_amount: number; p_utr: string }; Returns: string };
+      invoice_payment_request_create: { Args: { p_org: string; p_invoice: string; p_amount: number; p_message?: string }; Returns: string };
+      invoice_payment_request_list: { Args: { p_org: string; p_invoice: string }; Returns: Json };
       invoice_issue: {
         Args: { p_organization_id: string; p_id: string; p_version: number };
         Returns: string;
