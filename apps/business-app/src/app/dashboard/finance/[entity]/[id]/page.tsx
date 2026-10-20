@@ -8,6 +8,12 @@ import {
 import { financeServices } from '../../service';
 import { FinanceForm } from '../../form';
 import { titles, text, RecordList, Metrics } from '../../presentation';
+function redirectLegacyInvoiceDetail(entity: string, invoiceNumber: string) {
+  // Keep Finance invoice routes backward compatible without rendering
+  // a second invoice screen. Caller has already checked invoice permission.
+  if (entity === 'invoices') redirect('/dashboard/finance?tab=invoices' +
+    (invoiceNumber ? '&q=' + encodeURIComponent(invoiceNumber) : ''));
+}
 export default async function FinanceDetail({
   params,
   searchParams,
@@ -25,13 +31,9 @@ export default async function FinanceDetail({
     contractId = entity === 'contracts' ? id : text(r, 'contract_id'),
     status = text(r, 'status'),
     version = r.version;
-  // Finance is the single invoice workspace. This legacy URL redirects there
-  // after the existing invoice-specific authorization and lookup have passed.
-  if (entity === 'invoices') {
-    const number = text(r, 'invoice_number');
-    redirect('/dashboard/finance?tab=invoices' +
-      (number ? '&q=' + encodeURIComponent(number) : ''));
-  }
+  // Route only legacy invoice details to the Finance register; other
+  // entity detail pages (contracts, receipts, schedules) remain available.
+  redirectLegacyInvoiceDetail(entity, text(r, 'invoice_number'));
   const items = Array.isArray(r.items)
     ? (r.items as Record<string, unknown>[])
     : [];
