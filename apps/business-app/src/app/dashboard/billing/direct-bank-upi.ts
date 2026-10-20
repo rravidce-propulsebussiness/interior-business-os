@@ -19,7 +19,7 @@ export function createUpiPaymentUri(
       !invoiceReference || invoiceReference.length > 80 ||
       !Number.isFinite(amountRupees) || amountRupees <= 0 ||
       amountRupees > 100000000 ||
-      Math.round(amountRupees * 100) !== amountRupees * 100) {
+      Math.abs(Math.round(amountRupees * 100) - amountRupees * 100) > 0.000001) {
     throw new Error('Invalid direct-bank payment instruction');
   }
   const params = new URLSearchParams({
