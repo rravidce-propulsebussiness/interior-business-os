@@ -30,11 +30,17 @@ export function ClientAuthForm({mode,action,projectId}:{
  useEffect(()=>{
   if(state.authenticated){
    // After cookies change, use a fresh page to avoid stale RSC on Hostinger.
-   window.location.replace(projectId?'/client/projects/'+projectId:'/client');
+   // Owners, employees and homeowners share the same authentication system.
+   // The server selected the destination using active membership and project
+   // invitation checks, not the login screen the person happened to open.
+   window.location.replace(state.clientPortal
+    ? (projectId?'/client/projects/'+projectId:'/client')
+    : '/dashboard');
   }
  },[state.authenticated,projectId]);
  const register=mode==='register';
  return <form action={dispatch} className="client-auth-fields">
+  {!register&&<input type="hidden" name="loginAudience" value="client"/>}
   {register&&<div className="client-auth-field">
    <label htmlFor="client-auth-name">Full name</label>
    <div className="client-auth-input">
