@@ -22,6 +22,7 @@ export async function GET(request: Request) {
       // organization membership. Google/ProPulse logins use the same rules as
       // password login, including clients signing in from the main /login.
       const destination = await resolveLoginDestination(client, {
+        userId: data.session.user.id,
         preferClient: clientAudience,
       });
       if (destination === '/client')
@@ -42,12 +43,15 @@ export async function GET(request: Request) {
   }
   // Preserve email confirmation behavior, without trusting arbitrary OTP types.
   if (hash && url.searchParams.get('type') === 'email') {
-    const { error } = await client.auth.verifyOtp({
+    const { data: verified, error } = await client.auth.verifyOtp({
       token_hash: hash,
       type: 'email',
     });
     if (!error) {
+      const user = verified.user ?? (await client.auth.getUser()).data.user;
+      if (!user) return NextResponse.redirect(new URL('/login?confirmation=failed', origin));
       const destination = await resolveLoginDestination(client, {
+        userId: user.id,
         preferClient: clientAudience,
       });
       return NextResponse.redirect(new URL(destination, origin));
