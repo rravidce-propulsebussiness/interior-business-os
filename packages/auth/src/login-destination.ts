@@ -15,9 +15,12 @@ export async function resolveLoginDestination(
 ): Promise<LoginDestination> {
   const preferClient = options.preferClient === true;
   try {
+    const { data: auth, error: authError } = await client.auth.getUser();
+    if (authError || !auth.user) return preferClient ? '/client' : '/dashboard';
     const [memberships, portal] = await Promise.all([
       client.from('organization_memberships')
         .select('id')
+        .eq('user_id', auth.user.id)
         .eq('status', 'active')
         .limit(1),
       (client.rpc.bind(client) as unknown as (
