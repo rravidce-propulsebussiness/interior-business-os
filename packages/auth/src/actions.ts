@@ -12,6 +12,7 @@ import {
   DomainError,
 } from '@business-os/shared';
 import { serverServices, workspaceScope } from './server';
+import { resolveLoginDestination } from './login-destination';
 
 export async function signIn(_state: { message: string }, form: FormData) {
   try {
@@ -26,30 +27,12 @@ export async function signIn(_state: { message: string }, form: FormData) {
       return {
         message: 'Sign-in failed. Check your credentials or contact support.',
       };
-    // A client-only account should never land in the staff organization
-    // dashboard. Database authorization still controls which projects appear.
-    let clientPortal = false;
-    try {
-      const { data: authUser } = await client.auth.getUser();
-      if (authUser.user) {
-        const [member, accessible] = await Promise.all([
-          client.from('organization_memberships')
-            .select('id')
-            .eq('user_id', authUser.user.id)
-            .eq('status', 'active')
-            .limit(1),
-          (client.rpc.bind(client) as unknown as (
-            name: string,
-          ) => Promise<{ data: unknown; error: unknown }>)('client_portal_projects'),
-        ]);
-        clientPortal = !(member.data?.length) &&
-          !accessible.error && Array.isArray(accessible.data) &&
-          accessible.data.length > 0;
-      }
-    } catch {
-      // Portal discovery cannot turn a successful sign-in into a failure.
-    }
-    return { message: '', authenticated: true, clientPortal };
+    // Same account and credentials can enter the owner dashboard or a
+    // separately shared homeowner project; never choose by email text alone.
+    const destination = await resolveLoginDestination(client, {
+      preferClient: form.get('loginAudience') === 'client',
+    });
+    return { message: '', authenticated: true, clientPortal: destination === '/client' };
   } catch (error) {
     return { message: safeFailure(error).message };
   }
