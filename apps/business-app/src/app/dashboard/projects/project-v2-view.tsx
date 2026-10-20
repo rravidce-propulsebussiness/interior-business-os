@@ -152,6 +152,34 @@ function ProjectStageWorkflow({d,code}:{d:WorkspaceData;code:string}){
  const due=invoice?.invoiceId?Math.max(0,invoice.invoiceTotal-invoice.received):null;
  const paid=Boolean(invoice?.invoiceId&&invoice.invoiceTotal>0&&due===0);
  const defaultPercent=d.quotePaymentTriggers.find(x=>/advance|booking/i.test(x.name))?.percent??10;
+ // The database is authoritative for clearance; guide the user to just one
+ // required finance action at a time, rather than sending them backward.
+ const contractHref=d.agreement?'/dashboard/finance/contracts/'+d.agreement.contractId:
+  cur(d.project.id,'documents');
+ const readinessStep=!d.agreement
+  ?{title:'Prepare the contract',detail:'A contract is required before work can start.',
+    href:cur(d.project.id,'documents'),action:'Review quotation & agreement'}
+  :!sameRevision
+  ?{title:'Review signed contract revision',detail:'The signed agreement refers to an older final quotation. Resolve the revision before site work.',
+    href:contractHref,action:'Review agreement'}
+  :!signed
+  ?{title:'Confirm signed agreement',detail:'Record the currently signed agreement before starting construction.',
+    href:cur(d.project.id,'timeline'),action:'Review signing'}
+  :d.agreement.status!=='active'
+  ?{title:'Activate the contract',detail:'The signed contract is pending commercial activation.',
+    href:contractHref,action:'Activate contract in Finance'}
+  :!d.advance?.scheduleActive
+  ?{title:'Activate the payment schedule',detail:'Create the agreed stage-wise milestones, save, then activate the schedule.',
+    href:'/dashboard/finance/payment_schedules/new?contract_id='+d.agreement.contractId,
+    action:'Prepare payment schedule'}
+  :!d.advance?.received
+  ?{title:'Record advance actually received',detail:'The advance invoice is issued, but no payment has been verified. Record a receipt only after receiving funds.',
+    href:'/dashboard/finance/payments/new?contract_id='+d.agreement.contractId,
+    action:'Record received payment'}
+  :!d.agreement.authorized
+  ?{title:'Review site-start clearance',detail:'Finance must confirm current signed evidence and required payment records.',
+    href:contractHref,action:'Review contract in Finance'}
+  :null;
  return <div className="pv2-stage-workflow">
   {agreementStep&&<>
    <h3>Agreement & advance</h3>
@@ -208,11 +236,20 @@ function ProjectStageWorkflow({d,code}:{d:WorkspaceData;code:string}){
     <span>Payment schedule <strong>{d.advance===null?'Unavailable':d.advance.scheduleActive?'Active':'Not active'}</strong></span>
     <span>Verified advance <strong>{d.advance===null?'Unavailable':formatMoney(d.advance.received)}</strong></span>
    </div>
-   <p className="pv2-hint">Agreement and payment actions are in the Agreement &amp; Preconstruction stage. An invoice alone is not a payment receipt.</p>
+   {d.agreement?.authorized?
+    <p className="pv2-hint">Commercial and agreement clearance confirmed. Review site readiness and start execution below.</p>:
+    <div className="pv2-readiness-next" role="status">
+     <strong>Next action: {readinessStep?.title??'Confirm execution clearance'}</strong>
+     <p>{readinessStep?.detail??'Confirm the project financial records before physical site work.'}</p>
+     {readinessStep&&d.permissions.finance?
+      <NextLink href={readinessStep.href} label={readinessStep.action}/>:
+      <p className="pv2-hint">Ask a company owner or finance manager to complete this step.</p>}
+    </div>}
   </div>}
   {designStep&&d.site&&['design','client_approved'].includes(d.site.stage)&&
    <ProjectLifecycle id={d.project.id} stage={d.site.stage} canManage={d.site.canManage}
     agreementSigned={signed} industry={d.project.industry}
+    executionReady={d.agreement?.authorized===true}
     designs={d.site.designs.map(x=>({id:x.id,kind:stringValue(x.kind),status:stringValue(x.status)}))}/>}
  </div>;
 }

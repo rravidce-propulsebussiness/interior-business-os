@@ -109,8 +109,8 @@ export function ProjectDrawingForm({id,kind,label}:{id:string;kind?:string;label
   {state.message&&<p role="status" className={'pv2-form-feedback '+(state.saved?'good':'bad')}>{state.message}</p>}
  </form>;
 }
-export function ProjectLifecycle({id,stage,canManage,designs,agreementSigned,industry}:{
- id:string;stage:string;canManage:boolean;agreementSigned:boolean;industry:string;
+export function ProjectLifecycle({id,stage,canManage,designs,agreementSigned,industry,executionReady=false}:{
+ id:string;stage:string;canManage:boolean;agreementSigned:boolean;industry:string;executionReady?:boolean;
  designs:{id:string;kind:string;status:string}[];
 }){
  if(!canManage)return null;
@@ -166,13 +166,15 @@ export function ProjectLifecycle({id,stage,canManage,designs,agreementSigned,ind
     </>}
   </section>;
  }
- if(stage==='client_approved')return <section className="pv2-panel pv2-lifecycle">
-  <h2>Designs Approved — Site Readiness</h2>
-  <p>Before physical construction, activate the payment schedule, record the applicable advance and satisfy site quality and safety gates.</p>
-  <ProjectForm projectId={id} operation="execution_start" label="Start site execution">
-   <p className="pv2-hint">Construction start is blocked until the existing agreement and financial checks are satisfied.</p>
-  </ProjectForm>
- </section>;
+ // The backend is the authority for signed current contract, active schedule,
+ // actual recorded receipt where required and any owner-authorized exception.
+ // Do not present a clickable Start button until Finance reports clearance.
+ if(stage==='client_approved')
+  return executionReady?<div className="pv2-ready-to-execute">
+   <ProjectForm projectId={id} operation="execution_start" label="Start site execution">
+    <p className="pv2-hint">Financial clearance confirmed. Start physical work when the site and safety team are ready.</p>
+   </ProjectForm>
+  </div>:null;
  return null;
 }
 /** One form handles either a new signed PDF or a previously uploaded copy. */
