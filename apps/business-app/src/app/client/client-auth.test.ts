@@ -3,6 +3,8 @@ import {readFileSync,existsSync} from 'node:fs';
 const load=(path:string)=>readFileSync(new URL(path,import.meta.url),'utf8');
 const register=load('./register/page.tsx');
 const login=load('./login/page.tsx');
+const ownerLogin=load('../login/page.tsx');
+const proxy=load('../../proxy.ts');
 const shell=load('./client-auth-shell.tsx');
 const form=load('./client-auth-form.tsx');
 const css=load('./client-auth.css');
@@ -31,6 +33,13 @@ describe('Client auth uses one readable, mobile friendly design',()=>{
   expect(login).toContain('z.uuid().safeParse(query.project)');
   expect(action).toContain('emailRedirectTo:confirm.toString()');
   expect(action).not.toContain('createOrganization');
+ });
+ it('uses the trusted public URL after initial login and workspace routing on Hostinger',()=>{
+  expect(ownerLogin).toContain("publicAuthOrigin('http://localhost:3000/login')");
+  expect(login).toContain("publicAuthOrigin('http://localhost:3000/client/login')");
+  expect(proxy).toContain('new URL(routing.redirect, publicAuthOrigin(request.url))');
+  expect(proxy).not.toContain('request.nextUrl.clone()');
+  expect(callback).toContain('const origin = publicAuthOrigin(request.url)');
  });
  it('returns client Google sign in and email verification to /client only',()=>{
   expect(shell).toContain('/auth/google?audience=client');
