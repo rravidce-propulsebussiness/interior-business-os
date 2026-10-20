@@ -8,8 +8,8 @@
  */
 export async function googleProviderEnabled(
   env: {
-    NEXT_PUBLIC_SUPABASE_URL?: string;
-    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY?: string;
+    NEXT_PUBLIC_SUPABASE_URL?: string | undefined;
+    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY?: string | undefined;
   } = {
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
