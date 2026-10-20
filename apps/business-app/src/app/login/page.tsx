@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-html-link-for-pages -- Use fresh document navigations on Hostinger to avoid interrupted RSC Flight streams. */
 import { redirect } from 'next/navigation';
+import { publicAuthOrigin } from '@business-os/auth/origin';
 import {
   createServerDatabase,
   isSupabaseConfigured,
@@ -78,7 +79,10 @@ export default async function Login({
   const recoveryComplete = params.recovery === 'complete';
   if (!recoveryComplete && isSupabaseConfigured()) {
     const { data } = await (await createServerDatabase()).auth.getUser();
-    if (data.user) redirect('/dashboard');
+    // Next.js can resolve relative redirects against 0.0.0.0:3000 behind
+    // Hostinger. Never expose the private listener after a successful login.
+    if (data.user)
+      redirect(new URL('/dashboard', publicAuthOrigin('http://localhost:3000/login')).toString());
   }
 
   const configured = isSupabaseConfigured();
