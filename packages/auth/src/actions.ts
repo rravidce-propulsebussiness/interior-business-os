@@ -22,14 +22,17 @@ export async function signIn(_state: { message: string }, form: FormData) {
       };
     const input = loginSchema.parse(Object.fromEntries(form));
     const client = await createServerDatabase();
-    const { error } = await client.auth.signInWithPassword(input);
+    const { data: loginData, error } = await client.auth.signInWithPassword(input);
     if (error)
       return {
         message: 'Sign-in failed. Check your credentials or contact support.',
       };
     // Same account and credentials can enter the owner dashboard or a
     // separately shared homeowner project; never choose by email text alone.
+    if (!loginData.user?.id)
+      return { message: 'Could not verify the signed-in account. Please try again.' };
     const destination = await resolveLoginDestination(client, {
+      userId: loginData.user.id,
       preferClient: form.get('loginAudience') === 'client',
     });
     return { message: '', authenticated: true, clientPortal: destination === '/client' };
