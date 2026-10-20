@@ -172,14 +172,14 @@ function ProjectStageWorkflow({d,code}:{d:WorkspaceData;code:string}){
      </details>}
     {signed&&<p className="pv2-form-feedback good">Signed agreement recorded. No repeat approval or upload is required.</p>}
     {signed&&invoice!==null&&<div className="pv2-stage-workflow-payment">
-     <strong>Advance payment</strong>
+     <strong>Advance payment — required before site execution</strong>
      <p>{invoice.invoiceId?formatMoney(invoice.received)+' received · '+formatMoney(due)+' pending':'Advance invoice not yet requested'}</p>
      <Status value={paid?'paid':invoice.invoiceStatus||'pending'}/>
      {!invoice.invoiceId&&d.permissions.finance&&d.permissions.manage&&
       <details className="pv2-edit-drawer"><summary>Issue advance proforma</summary>
        <ProjectAdvanceAction projectId={d.project.id} defaultPercent={defaultPercent}/>
       </details>}
-     {invoice.invoiceId&&d.permissions.finance&&<NextLink href={'/dashboard/finance/invoices/'+invoice.invoiceId} label="View advance invoice"/>}
+     {invoice.invoiceId&&d.permissions.finance&&<NextLink href={'/dashboard/finance?tab=invoices'+(invoice.invoiceNumber?'&q='+encodeURIComponent(invoice.invoiceNumber):'')} label="View advance in Finance"/>}
      {!invoice.scheduleActive&&<p className="pv2-hint">The payment schedule and verified receipts are required before physical construction.</p>}
     </div>}
    </>}
@@ -224,6 +224,7 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
    Boolean(d.agreement?.revisionId),
   quotedScopeImported:d.stages.some(stage=>stage.template_code==='QUOTED_SCOPE'),
   agreementPrepared:Boolean(d.agreement),
+  agreementSigned:d.agreement?.clearanceType==='signed_copy_recorded'||d.preflight?.signedReady===true,
   inspectionDone:d.preflight?.inspectionDone===true,
   measurementsDone:d.preflight?.measurementsDone===true,
   designRevisionStarted:Boolean(d.site?.designs.length),
