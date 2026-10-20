@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { publicAuthOrigin } from '@business-os/auth/origin';
+import { resolveLoginDestination } from '@business-os/auth/login-destination';
 import { createServerDatabase } from '@business-os/database/server';
 import { syncCompanyFromPropulse } from './propulse-company-sync';
 
@@ -17,9 +18,14 @@ export async function GET(request: Request) {
   if (code) {
     const { data, error } = await client.auth.exchangeCodeForSession(code);
     if (!error && data.session?.user) {
-      // Client users return to their scoped portal, never the owner dashboard.
-      // The portal RPC verifies their invited email and exact project.
-      if (clientAudience) return NextResponse.redirect(new URL('/client', origin));
+      // Determine the landing area from trusted project sharing and active
+      // organization membership. Google/ProPulse logins use the same rules as
+      // password login, including clients signing in from the main /login.
+      const destination = await resolveLoginDestination(client, {
+        preferClient: clientAudience,
+      });
+      if (destination === '/client')
+        return NextResponse.redirect(new URL(destination, origin));
       // Session login succeeds even if the external company API is unavailable.
       // A subsequent "Continue with ProPulse" can retry safe, idempotent sync.
       try {
@@ -31,7 +37,7 @@ export async function GET(request: Request) {
         // Do not expose provider tokens, company information or backend
         // errors to the browser. Sign-in is separate from company sync.
       }
-      return NextResponse.redirect(new URL('/dashboard', origin));
+      return NextResponse.redirect(new URL(destination, origin));
     }
   }
   // Preserve email confirmation behavior, without trusting arbitrary OTP types.
@@ -41,18 +47,10 @@ export async function GET(request: Request) {
       type: 'email',
     });
     if (!error) {
-      if (clientAudience) return NextResponse.redirect(new URL('/client', origin));
-      // A verified invited client has no company membership. Their portal is
-      // selected by permission-checked RPC, not a caller-controlled redirect.
-      const rpc = client.rpc.bind(client) as unknown as (
-        name: string,
-      ) => Promise<{ data: unknown; error: unknown }>;
-      const { data: projects, error: portalError } = await rpc(
-        'client_portal_projects',
-      );
-      if (!portalError && Array.isArray(projects) && projects.length > 0)
-        return NextResponse.redirect(new URL('/client', origin));
-      return NextResponse.redirect(new URL('/dashboard', origin));
+      const destination = await resolveLoginDestination(client, {
+        preferClient: clientAudience,
+      });
+      return NextResponse.redirect(new URL(destination, origin));
     }
   }
   return NextResponse.redirect(
