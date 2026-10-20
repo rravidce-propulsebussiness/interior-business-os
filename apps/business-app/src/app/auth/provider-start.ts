@@ -1,6 +1,7 @@
 import 'server-only';
 import { NextResponse } from 'next/server';
 import { publicAuthOrigin } from '@business-os/auth/origin';
+import { googleProviderEnabled } from './google-provider-readiness';
 import {
   createServerDatabase,
   isSupabaseConfigured,
@@ -20,6 +21,14 @@ export async function providerStart(
   fallback.searchParams.set('provider_error', 'unavailable');
 
   if (!isSupabaseConfigured()) {
+    return NextResponse.redirect(fallback, 303);
+  }
+
+  // The Supabase Auth settings endpoint reveals enabled public providers.
+  // Prevent navigation to a raw 400 JSON response while Google is disabled.
+  // If settings are unavailable, preserve the normal OAuth attempt.
+  if (provider === 'google' && (await googleProviderEnabled()) === false) {
+    fallback.searchParams.set('provider_error', 'google_disabled');
     return NextResponse.redirect(fallback, 303);
   }
 

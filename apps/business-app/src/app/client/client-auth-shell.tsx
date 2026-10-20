@@ -23,6 +23,9 @@ export function ClientAuthShell({mode,projectId,providerError,children}:{
  const register=mode==='register';
  const query=projectId?'?project='+encodeURIComponent(projectId):'';
  const googleHref='/auth/google?audience=client';
+ const providerMessage=providerError==='google_disabled'
+  ? 'Google sign-in is not yet enabled in Business OS Supabase Authentication. Please use email and password until the administrator activates Google.'
+  : 'Google sign-in could not be completed. Please try again or use your email and password.';
  const switchHref=(register?'/client/login':'/client/register')+query;
  return <main className="client-auth-page" id="main-content">
   <div className="client-auth-backdrop" aria-hidden="true"/>
@@ -47,7 +50,7 @@ export function ClientAuthShell({mode,projectId,providerError,children}:{
     </div>
    </div>
    {providerError&&<p className="client-auth-notice" role="alert">
-    Google sign-in could not be completed. Please try again or use your email and password.
+    {providerMessage}
    </p>}
    <a className="client-auth-google" href={googleHref}>
     <GoogleMark/><strong>Continue with Google</strong>
