@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { activeOrganization, serverServices } from '@business-os/auth/server';
+import { r2MediaEnabled, r2MediaKey, r2MediaHash, r2MediaPut, r2MediaDelete } from './r2-media';
 
 const uuid = z.uuid();
 const allowedActions = new Set([
@@ -156,6 +157,36 @@ export async function uploadProjectSiteMedia(
     if (caption.length > 500) throw new Error('Caption too long');
     const bytes = Buffer.from(await file.arrayBuffer());
     if (bytes.length > 8 * 1024 * 1024) throw new Error('File too large');
+    // R2 is opt-in until the private bucket, credentials and SQL are verified.
+    // Legacy bytes remain in PostgreSQL during the safe migration.
+    if (r2MediaEnabled()) {
+      const key = r2MediaKey(org, project);
+      await r2MediaPut(key, bytes, file.type);
+      try {
+        const response = await client.rpc(
+          'project_site_media_put_r2' as never,
+          {
+            p_organization_id: org,
+            p_project_id: project,
+            p_category: category,
+            p_filename: filename || 'media',
+            p_mime: file.type,
+            p_caption: caption,
+            p_r2_key: key,
+            p_byte_size: bytes.length,
+            p_sha256: r2MediaHash(bytes),
+          } as never,
+        );
+        if (response.error) throw new Error(response.error.message);
+      } catch (error) {
+        await r2MediaDelete(key).catch(() => {
+          console.error('[Business OS] R2 orphan cleanup failed');
+        });
+        throw error;
+      }
+      revalidatePath(pathFor(project));
+      return { saved: true, message: 'Media saved privately to this project.' };
+    }
     const { error } = await client.rpc('project_site_media_put', {
       p_organization_id: org,
       p_project_id: project,
