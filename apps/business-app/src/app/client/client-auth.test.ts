@@ -73,6 +73,7 @@ describe('Client auth uses one readable, mobile friendly design',()=>{
   expect(signIn).toContain("form.get('loginAudience') === 'client'");
   expect(landing).toContain("'client_portal_projects'");
   expect(landing).toContain("'organization_memberships'");
+  expect(landing).toContain(".eq('user_id', options.userId)");
   expect(landing).toContain(".eq('user_id', auth.user.id)");
   expect(form).toContain('name="loginAudience" value="client"');
   expect(form).toContain('state.clientPortal');
