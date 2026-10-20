@@ -140,7 +140,14 @@ it('keeps site readiness and quotation completion inside the actual project time
  expect(ui).toContain("quotedScopeImported:d.stages.some(stage=>stage.template_code==='QUOTED_SCOPE')");
  expect(ui).toContain("['design','client_approved'].includes(d.site?.stage??'')");
  expect(ui).toContain('Site execution requirements');
- expect(ui).toContain('Agreement &amp; Preconstruction stage');
+ expect(ui).toContain('Next action: {readinessStep?.title');
+ expect(ui).toContain("d.agreement?.authorized===true");
+ expect(ui).toContain("'/dashboard/finance/payments/new?contract_id='");
+ expect(ui).toContain("'/dashboard/finance/payment_schedules/new?contract_id='");
+ expect(ui).toContain("Activate contract in Finance");
+ expect(forms).toContain("return executionReady?");
+ expect(forms).toContain("operation=\"execution_start\"");
+ expect(ui).not.toContain('Agreement and payment actions are in the Agreement &amp; Preconstruction stage');
  expect(ui).not.toContain('<section className="pv2-command-delivery">');
  const hub=ui.slice(ui.indexOf('function ProjectWorkHub('),ui.indexOf('function Overview('));
  expect(hub).not.toContain('<ProjectLifecycle');
