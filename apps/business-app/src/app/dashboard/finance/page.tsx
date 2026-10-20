@@ -247,7 +247,7 @@ export default async function Finance({
             <span><strong>{money(Number(d.total))}</strong><small>{d.detail} ›</small></span>
           </Link>)}</div>
           {!invoiceRows.length && <Empty title="No sales invoices" detail="Create an invoice or change your search filters."/>}
-          <p className="fw-footnote">Sales invoices and project advance proformas appear in one register. Proformas are payment requests, not GST invoices or proof of payment. Verified receipts determine what has actually been received.</p>
+          <p className="fw-footnote">Sales invoices and project advance proformas appear in one register. Proformas are payment requests, not GST invoices or proof of payment. Only verified receipt allocations determine what has actually been received.</p>
         </div>
       </>}
       {tab === 'expenses' && <>
