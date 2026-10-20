@@ -1,4 +1,5 @@
 import { refreshSessionWithRewrite } from '@business-os/database/proxy';
+import { publicAuthOrigin } from '@business-os/auth/origin';
 import { NextResponse, type NextRequest } from 'next/server';
 import {
   requestErrorName,
@@ -61,8 +62,11 @@ export async function proxy(request: NextRequest) {
     });
   }
   if (routing.redirect) {
-    const url = request.nextUrl.clone();
-    url.pathname = routing.redirect;
+    // Hostinger may expose the internal Next listener as request.nextUrl.origin.
+    // Workspace redirects are for the central platform host, so always use
+    // its validated public origin instead of the reverse-proxy listener.
+    const url = new URL(routing.redirect, publicAuthOrigin(request.url));
+    url.search = request.nextUrl.search;
     return NextResponse.redirect(url, 307);
   }
   if (routing.scope) {
