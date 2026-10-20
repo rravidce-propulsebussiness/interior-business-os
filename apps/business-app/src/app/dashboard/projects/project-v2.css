@@ -719,4 +719,11 @@
 .pv2-execution-readiness-grid>span{display:flex;justify-content:space-between;align-items:center;gap:7px;min-width:0;padding:9px 11px;background:#fff8f4;border-radius:9px;color:#687386;font-size:11px}
 .pv2-execution-readiness-grid strong{font-size:11px;color:#263245;font-weight:750;text-align:right}
 .pv2-execution-readiness>.pv2-hint{margin:0}
+.pv2-readiness-next{display:grid;gap:7px;padding:11px 12px;border:1px solid #f5ddcb;
+ background:#fff8f3;border-radius:10px}
+.pv2-readiness-next>strong{font-size:12px;font-weight:800;color:#a44a17}
+.pv2-readiness-next>p{font-size:11px;color:#64748b;line-height:1.55;margin:0}
+.pv2-readiness-next .pv2-action-link{justify-self:start;display:inline-flex;align-items:center;gap:6px;font-size:12px}
+.pv2-ready-to-execute .pv2-form{padding:0;border:0;min-width:0}
+.pv2-ready-to-execute .pv2-hint{margin:0 0 8px;color:#637a6d}
 @media(max-width:680px){.pv2-execution-readiness-grid{grid-template-columns:1fr}}
