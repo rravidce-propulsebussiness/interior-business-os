@@ -5,6 +5,7 @@ export type ProjectStageEvidence = {
  approvedQuotation:boolean;
  quotedScopeImported:boolean;
  agreementPrepared:boolean;
+ agreementSigned:boolean;
  inspectionDone:boolean;
  measurementsDone:boolean;
  designRevisionStarted:boolean;
@@ -15,7 +16,14 @@ export function effectiveProjectStageStatus(
  evidence:ProjectStageEvidence,
 ):string{
  const stored=stage.status||'not_started';
- // Explicit execution statuses always win over derived presentation.
+ // Display the completed *design handoff*, without bypassing unpaid advances,
+ // payment schedules or physical construction readiness gates.
+ // Honor explicit blocked/hold states and final recorded stage states.
+ if(stage.template_code==='PRECONSTRUCTION'&&
+   ['not_started','in_progress'].includes(stored)&&
+   evidence.agreementSigned&&evidence.inspectionDone&&evidence.measurementsDone&&
+   (evidence.designRevisionStarted||evidence.designClientApproved))return 'completed';
+ // Explicit execution statuses always win over other derived presentation.
  if(stored!=='not_started')return stored;
  // QUOTED_SCOPE can only be imported from a verified contracted quotation.
  // It is a scope snapshot, not physical work. The quote lookup can be empty

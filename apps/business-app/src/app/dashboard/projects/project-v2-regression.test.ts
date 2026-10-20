@@ -124,6 +124,18 @@ it('renders exactly one action location per agreement and design workflow',()=>{
  expect(ui).toContain('effectiveProjectStageStatus(stage,evidence)');
 });
 
+it('keeps project advance in the single Finance invoice register',()=>{
+  const finance=read('../finance/page.tsx');
+  const oldDetail=read('../finance/[entity]/[id]/page.tsx');
+  expect(ui).toContain('label="View advance in Finance"');
+  expect(ui).toContain("'/dashboard/finance?tab=invoices'");
+  expect(ui).not.toContain('label="View advance invoice"');
+  expect(finance).toContain(".eq('invoice_type', 'proforma')");
+  expect(finance).toContain('advanceProformas.data');
+  expect(finance).toContain('Proforma · Not a receipt');
+  expect(oldDetail).toContain("if (entity === 'invoices')");
+  expect(oldDetail).toContain("redirect('/dashboard/finance?tab=invoices'");
+});
 it('keeps site readiness and quotation completion inside the actual project timeline',()=>{
  expect(ui).toContain("quotedScopeImported:d.stages.some(stage=>stage.template_code==='QUOTED_SCOPE')");
  expect(ui).toContain("['design','client_approved'].includes(d.site?.stage??'')");

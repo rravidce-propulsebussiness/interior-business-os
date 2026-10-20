@@ -1,7 +1,7 @@
 import {describe,it,expect} from 'vitest';
 import {effectiveProjectStageStatus,type ProjectStageEvidence} from './project-stage-status';
 const baseline:ProjectStageEvidence={
- approvedQuotation:false,quotedScopeImported:false,agreementPrepared:false,inspectionDone:false,
+ approvedQuotation:false,quotedScopeImported:false,agreementPrepared:false,agreementSigned:false,inspectionDone:false,
  measurementsDone:false,designRevisionStarted:false,designClientApproved:false,
 };
 const status=(code:string,changes:Partial<ProjectStageEvidence>={},stored='not_started')=>
@@ -21,6 +21,16 @@ describe('quote-derived project stage status',()=>{
  });
  it('does not show a prepared agreement as not started',()=>{
   expect(status('PRECONSTRUCTION',{agreementPrepared:true})).toBe('in_progress');
+ });
+ it('shows completed preconstruction handoff after the signed agreement, survey and design start',()=>{
+  const handoff={agreementPrepared:true,agreementSigned:true,inspectionDone:true,measurementsDone:true,designRevisionStarted:true};
+  expect(status('PRECONSTRUCTION',handoff)).toBe('completed');
+  expect(status('PRECONSTRUCTION',handoff,'in_progress')).toBe('completed');
+  expect(status('PRECONSTRUCTION',handoff,'blocked')).toBe('blocked');
+  expect(status('PRECONSTRUCTION',{...handoff,agreementSigned:false})).toBe('in_progress');
+  expect(status('PRECONSTRUCTION',{...handoff,measurementsDone:false})).toBe('in_progress');
+  expect(status('PRECONSTRUCTION',{...handoff,designRevisionStarted:false})).toBe('in_progress');
+  expect(status('FOUNDATION',handoff)).toBe('not_started');
  });
  it('requires recorded site evidence for a completed survey',()=>{
   expect(status('SITE_SURVEY',{inspectionDone:true})).toBe('in_progress');

@@ -120,8 +120,16 @@ export default async function Finance({
   const canMarketplace = grants.has('purchase.view');
   const orgId = ctx.organizationId;
   const gst = createGstRepository(client);
-  const [all, marketplace, labour] = await Promise.all([
+  const [all, advanceProformas, marketplace, labour] = await Promise.all([
     gst.list(orgId, 'all'),
+    tab === 'invoices'
+      ? client.from('invoices')
+          .select('id,invoice_number,status,total,issue_date,created_at,project_id')
+          .eq('organization_id', orgId)
+          .eq('invoice_type', 'proforma')
+          .order('created_at', { ascending: false })
+          .limit(100)
+      : Promise.resolve({ data: [], error: null }),
     tab === 'expenses' && canMarketplace
       ? createMarketplaceRepository(client).orders(orgId, 'buyer')
       : Promise.resolve([] as MarketplaceOrder[]),
@@ -140,7 +148,27 @@ export default async function Finance({
   const filterRows = (rows: GstDocumentRow[]) =>
     rows.filter((doc) => !q || [doc.number ?? '', doc.partyName, doc.status].join(' ').toLowerCase().includes(q))
       .sort((a, b) => b.date.localeCompare(a.date) || b.createdAt.localeCompare(a.createdAt));
-  const invoiceRows = filterRows(sales);
+  // Show advance proformas alongside GST sales invoices in one Finance register.
+  // A proforma is not proof of payment and is not a GST tax invoice.
+  const invoiceRows = [
+    ...filterRows(sales).map((d) => ({
+      id:d.id, number:d.number ?? 'Draft', partyName:d.partyName,
+      date:d.date, total:Number(d.total), status:d.status,
+      detail:d.status === 'issued' ? 'Issued' : 'Draft',
+      href:'/dashboard/billing/' + d.id,
+    })),
+    ...(advanceProformas.data ?? [])
+      .filter((d) => (!cutoff || (d.issue_date ?? d.created_at.slice(0,10)) >= cutoff) &&
+        (!q || [d.invoice_number ?? '', d.status, 'project advance', 'proforma']
+          .join(' ').toLowerCase().includes(q)))
+      .map((d) => ({
+        id:d.id, number:d.invoice_number ?? 'Project advance',
+        partyName:'Project advance · Proforma',
+        date:d.issue_date ?? d.created_at.slice(0,10),
+        total:Number(d.total), status:d.status, detail:'Proforma · Not a receipt',
+        href:'/dashboard/finance/invoices/'+d.id+'/pdf',
+      })),
+  ].sort((a,b)=>b.date.localeCompare(a.date) || b.number.localeCompare(a.number));
   const expenseRows = filterRows(bills);
   const acceptedOrders = marketplace.filter((order) =>
     order.status === 'accepted' && (!q || [order.productName, order.sellerName].join(' ').toLowerCase().includes(q)));
@@ -198,7 +226,7 @@ export default async function Finance({
           <Metric title="Total invoiced" value={money(issued.reduce((sum, d) => sum + Number(d.total), 0))} detail="Issued invoices in selected period" icon="billing"/>
           <Metric title="Paid" value="—" detail="Reconcile recorded customer receipts" icon="reports"/>
           <Metric title="Payment Pending" value="—" detail="Available after receipts are allocated" icon="expenses"/>
-          <Metric title="Invoices" value={String(sales.length)} detail="Sales documents in selected period" icon="billing"/>
+          <Metric title="Invoices" value={String(invoiceRows.length)} detail="Sales invoices and project advance proformas" icon="billing"/>
         </div>
         <div className="fw-register">
           <div className="fw-toolbar"><form action="/dashboard/finance" className="fw-search">
@@ -210,16 +238,16 @@ export default async function Finance({
             </select><button>Apply</button>
           </form></div>
           <div className="fw-table-wrap"><table><thead><tr><th>Invoice No.</th><th>Client</th><th>Date</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead>
-            <tbody>{invoiceRows.map((d) => <tr key={d.id}><td><strong>{d.number ?? 'Draft'}</strong></td>
+            <tbody>{invoiceRows.map((d) => <tr key={d.id}><td><strong>{d.number}</strong></td>
               <td>{d.partyName}</td><td>{fmtDate(d.date)}</td><td className="fw-money">{money(Number(d.total))}</td>
-              <td><span className={'fw-status fw-' + d.status}>{d.status === 'issued' ? 'Issued' : 'Draft'}</span></td>
-              <td><Link href={'/dashboard/billing/' + d.id}>View →</Link></td></tr>)}</tbody></table></div>
-          <div className="fw-mobile-rows">{invoiceRows.map((d) => <Link key={d.id} className="fw-mobile-row" href={'/dashboard/billing/' + d.id}>
-            <span><strong>{d.number ?? 'Draft'}</strong><small>{d.partyName} · {fmtDate(d.date)}</small></span>
-            <span><strong>{money(Number(d.total))}</strong><small>{d.status === 'issued' ? 'Issued' : 'Draft'} ›</small></span>
+              <td><span className={'fw-status fw-' + d.status}>{d.detail}</span></td>
+              <td><Link href={d.href}>{d.partyName.startsWith('Project advance')?'PDF →':'View →'}</Link></td></tr>)}</tbody></table></div>
+          <div className="fw-mobile-rows">{invoiceRows.map((d) => <Link key={d.id} className="fw-mobile-row" href={d.href}>
+            <span><strong>{d.number}</strong><small>{d.partyName} · {fmtDate(d.date)}</small></span>
+            <span><strong>{money(Number(d.total))}</strong><small>{d.detail} ›</small></span>
           </Link>)}</div>
           {!invoiceRows.length && <Empty title="No sales invoices" detail="Create an invoice or change your search filters."/>}
-          <p className="fw-footnote">Figures reflect the latest 100 billing documents. Issued does not mean paid; customer payment totals require verified receipt allocations.</p>
+          <p className="fw-footnote">Sales invoices and project advance proformas appear in one register. Proformas are payment requests, not GST invoices or proof of payment. Only verified receipt allocations determine what has actually been received.</p>
         </div>
       </>}
       {tab === 'expenses' && <>
