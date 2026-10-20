@@ -22,14 +22,14 @@ export async function signIn(_state: { message: string }, form: FormData) {
       };
     const input = loginSchema.parse(Object.fromEntries(form));
     const client = await createServerDatabase();
-    const { error } = await client.auth.signInWithPassword(input);
-    if (error)
+    const { data: signedIn, error } = await client.auth.signInWithPassword(input);
+    if (error || !signedIn.user)
       return {
         message: 'Sign-in failed. Check your credentials or contact support.',
       };
     // Same account and credentials can enter the owner dashboard or a
     // separately shared homeowner project; never choose by email text alone.
-    const destination = await resolveLoginDestination(client, {
+    const destination = await resolveLoginDestination(client, signedIn.user.id, {
       preferClient: form.get('loginAudience') === 'client',
     });
     return { message: '', authenticated: true, clientPortal: destination === '/client' };
