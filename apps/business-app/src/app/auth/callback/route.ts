@@ -21,7 +21,7 @@ export async function GET(request: Request) {
       // Determine the landing area from trusted project sharing and active
       // organization membership. Google/ProPulse logins use the same rules as
       // password login, including clients signing in from the main /login.
-      const destination = await resolveLoginDestination(client, {
+      const destination = await resolveLoginDestination(client, data.session.user.id, {
         preferClient: clientAudience,
       });
       if (destination === '/client')
@@ -42,12 +42,12 @@ export async function GET(request: Request) {
   }
   // Preserve email confirmation behavior, without trusting arbitrary OTP types.
   if (hash && url.searchParams.get('type') === 'email') {
-    const { error } = await client.auth.verifyOtp({
+    const { data, error } = await client.auth.verifyOtp({
       token_hash: hash,
       type: 'email',
     });
-    if (!error) {
-      const destination = await resolveLoginDestination(client, {
+    if (!error && data.user) {
+      const destination = await resolveLoginDestination(client, data.user.id, {
         preferClient: clientAudience,
       });
       return NextResponse.redirect(new URL(destination, origin));
