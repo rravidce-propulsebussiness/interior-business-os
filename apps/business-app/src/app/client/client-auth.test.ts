@@ -1,5 +1,6 @@
 import {describe,expect,it} from 'vitest';
 import {readFileSync,existsSync} from 'node:fs';
+import { chooseLoginDestination } from '../../../../../packages/auth/src/login-destination-policy';
 const load=(path:string)=>readFileSync(new URL(path,import.meta.url),'utf8');
 const register=load('./register/page.tsx');
 const login=load('./login/page.tsx');
@@ -43,6 +44,23 @@ describe('Client auth uses one readable, mobile friendly design',()=>{
   expect(proxy).not.toContain('request.nextUrl.clone()');
   expect(callback).toContain('const origin = publicAuthOrigin(request.url)');
  });
+ it('routes verified shared projects to Client App from either login page',()=>{
+  expect(chooseLoginDestination({
+   hasActiveCompanyMembership:false,hasSharedClientProjects:true,
+  })).toBe('/client');
+  expect(chooseLoginDestination({
+   hasActiveCompanyMembership:true,hasSharedClientProjects:false,
+  })).toBe('/dashboard');
+  expect(chooseLoginDestination({
+   hasActiveCompanyMembership:true,hasSharedClientProjects:true,
+  })).toBe('/dashboard');
+  expect(chooseLoginDestination({
+   hasActiveCompanyMembership:true,hasSharedClientProjects:true,preferClient:true,
+  })).toBe('/client');
+  expect(chooseLoginDestination({
+   hasActiveCompanyMembership:false,hasSharedClientProjects:false,
+  })).toBe('/dashboard');
+ });
  it('returns client Google sign in and email verification to /client only',()=>{
   expect(shell).toContain('/auth/google?audience=client');
   expect(google).toContain("providerStart(request,'google',audience)");
@@ -55,6 +73,7 @@ describe('Client auth uses one readable, mobile friendly design',()=>{
   expect(signIn).toContain("form.get('loginAudience') === 'client'");
   expect(landing).toContain("'client_portal_projects'");
   expect(landing).toContain("'organization_memberships'");
+  expect(landing).toContain(".eq('user_id', auth.user.id)");
   expect(form).toContain('name="loginAudience" value="client"');
   expect(form).toContain('state.clientPortal');
   expect(callback).toContain('publicAuthOrigin(request.url)');
