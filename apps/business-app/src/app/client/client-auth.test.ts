@@ -36,8 +36,10 @@ describe('Client auth uses one readable, mobile friendly design',()=>{
   expect(shell).toContain('/auth/google?audience=client');
   expect(google).toContain("providerStart(request,'google',audience)");
   expect(start).toContain("callback.searchParams.set('audience', 'client')");
-  expect(callback).toContain("if (clientAudience) return NextResponse.redirect(new URL('/client', url.origin));");
+  expect(callback).toContain("if (clientAudience) return NextResponse.redirect(new URL('/client', origin));");
   expect(callback).toContain('if (clientAudience)');
-  expect(callback).toContain("new URL('/dashboard', url.origin)");
+  expect(callback).toContain("new URL('/dashboard', origin)");
+  expect(callback).toContain('publicAuthOrigin(request.url)');
+  expect(callback).not.toContain('url.origin');
  });
 });
