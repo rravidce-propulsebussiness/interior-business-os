@@ -21,8 +21,12 @@ export function publicAuthOrigin(
   requestUrl: string,
   env: AuthEnv = process.env,
 ): string {
+  // A Next.js production build is also used by isolated development
+  // recovery tests. Explicit APP_ENV=development must retain the configured
+  // loopback origin; on real hosting APP_ENV=production remains authoritative.
   const production =
-    env.APP_ENV === 'production' || env.NODE_ENV === 'production';
+    env.APP_ENV === 'production' ||
+    (env.APP_ENV !== 'development' && env.NODE_ENV === 'production');
   const configured = env.APP_ORIGIN?.trim();
   if (configured) {
     try {
