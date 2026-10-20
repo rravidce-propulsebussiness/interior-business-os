@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { publicAuthOrigin } from '@business-os/auth/origin';
+import { resolveLoginDestination } from '@business-os/auth/login-destination';
 import { z } from 'zod';
 import { createServerDatabase,isSupabaseConfigured } from '@business-os/database/server';
 import { signIn } from '@business-os/auth/actions';
@@ -18,8 +19,11 @@ export default async function ClientLoginPage({searchParams}:{
  if(isSupabaseConfigured()){
   const db=await createServerDatabase();
   const {data}=await db.auth.getUser();
-  if(data.user)redirect(new URL(projectId?'/client/projects/'+projectId:'/client',
-   publicAuthOrigin('http://localhost:3000/client/login')).toString());
+  if(data.user){
+   const destination=await resolveLoginDestination(db,{preferClient:true});
+   const path=destination==='/client'&&projectId?'/client/projects/'+projectId:destination;
+   redirect(new URL(path,publicAuthOrigin('http://localhost:3000/client/login')).toString());
+  }
  }
  return <ClientAuthShell mode="login" {...(projectId?{projectId}:{})}
   {...(query.provider_error?{providerError:query.provider_error}:{})}>
