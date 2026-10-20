@@ -7,6 +7,7 @@ import { idSchema } from '@business-os/shared';
 import { ActionForm } from '@business-os/ui/action-form';
 import { finalizeGstDocument } from '../actions';
 import { PrintDocumentButton } from './print-button';
+import { RequestInvoicePayment } from './request-invoice-payment';
 import { readSupplierBillAttachment } from '../supplier-bill-storage';
 
 export const dynamic = 'force-dynamic';
@@ -123,6 +124,9 @@ export default async function GstDocumentDetail({
           </ActionForm>
         </section>
       )}
+      {doc.kind === 'sales_invoice' && doc.status === 'issued' && doc.isOwner &&
+        context.grants.some((g) => g.permission === 'payment.manage' && g.scope.kind === 'organization') &&
+        <RequestInvoicePayment invoiceId={doc.id} outstanding={doc.total} />}
       <article
         className="rounded-2xl border border-slate-200 bg-white p-7 shadow-sm sm:p-10 print:border-0 print:p-0 print:shadow-none"
         style={{ borderTop: '6px solid ' + accent }}
