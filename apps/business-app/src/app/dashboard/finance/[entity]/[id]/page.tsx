@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { randomUUID } from 'node:crypto';
 import {
   financeEntitySchema,
@@ -25,6 +25,13 @@ export default async function FinanceDetail({
     contractId = entity === 'contracts' ? id : text(r, 'contract_id'),
     status = text(r, 'status'),
     version = r.version;
+  // Finance is the single invoice workspace. This legacy URL redirects there
+  // after the existing invoice-specific authorization and lookup have passed.
+  if (entity === 'invoices') {
+    const number = text(r, 'invoice_number');
+    redirect('/dashboard/finance?tab=invoices' +
+      (number ? '&q=' + encodeURIComponent(number) : ''));
+  }
   const items = Array.isArray(r.items)
     ? (r.items as Record<string, unknown>[])
     : [];
