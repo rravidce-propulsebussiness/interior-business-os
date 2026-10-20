@@ -231,7 +231,7 @@ export function PremiumSalesInvoice({
       </div>
       <div className="psi-header-actions"><Link href="/dashboard/finance?tab=invoices" className="psi-muted-button">Cancel</Link>
         <button type="button" className="psi-outline-button" onClick={()=>setPreview(true)}>Preview invoice</button>
-        <button type="submit" className="psi-orange-button" disabled={disabledSave}>Save &amp; preview</button></div>
+        <button type="submit" className="psi-orange-button" disabled={disabledSave}>Save</button></div>
     </header>
     <div className="psi-columns">
       <div className="psi-left">
@@ -399,7 +399,7 @@ export function PremiumSalesInvoice({
             <strong>Project activates after invoice issuance</strong>
             <p>Quote: {choice!.quoteNumber} · Stage: {stage!.name}. Drafts never start execution or record payment.</p>
           </div>}
-          <button className="psi-orange-button psi-full" disabled={disabledSave} type="submit">Save &amp; preview</button>
+          <button className="psi-orange-button psi-full" disabled={disabledSave} type="submit">Save</button>
           <p className="psi-hint psi-centered">After saving, review the official draft and choose <b>Issue sales invoice</b>. Final issuance assigns the number and activates the linked project.</p>
         </section>
       </aside>
