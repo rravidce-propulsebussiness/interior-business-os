@@ -117,7 +117,8 @@ begin
  select * into v_request from private.invoice_payment_requests
  where organization_id=p_org and id=p_request and status='open' for update;
  if not found or p_amount is null or p_amount<=0 or p_amount>v_request.amount
- or btrim(coalesce(p_utr,'')) !~ '^[A-Za-z0-9/-]{6,64}  raise exception 'Invalid payment claim' using errcode='22023';
+ or btrim(coalesce(p_utr,'')) !~ '^[A-Za-z0-9/-]{6,64}$' then
+  raise exception 'Invalid payment claim' using errcode='22023';
  end if;
  insert into private.invoice_payment_claims(organization_id,request_id,amount,utr,submitted_by)
  values(p_org,p_request,p_amount,btrim(p_utr),auth.uid()) returning id into v_id;
