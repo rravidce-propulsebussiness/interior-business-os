@@ -28,6 +28,19 @@ export function r2MediaKey(org: string, project: string) {
 export function r2MediaHash(bytes: Buffer) {
   return createHash('sha256').update(bytes).digest('hex');
 }
+export function validateR2MediaBytes(bytes: Buffer, mime: string) {
+  if (bytes.length < 1 || bytes.length > MAX_BYTES) throw new Error('File too large');
+  const isPrefix = (hex: string) => bytes.subarray(0, hex.length / 2).equals(Buffer.from(hex, 'hex'));
+  const valid = mime === 'image/jpeg' ? isPrefix('ffd8') :
+    mime === 'image/png' ? isPrefix('89504e47') :
+    mime === 'image/webp' ? bytes.length >= 12 &&
+      bytes.toString('ascii', 0, 4) === 'RIFF' &&
+      bytes.toString('ascii', 8, 12) === 'WEBP' :
+    mime === 'video/mp4' ? bytes.length >= 8 &&
+      bytes.toString('ascii', 4, 8) === 'ftyp' :
+    mime === 'application/pdf' ? isPrefix('25504446') : false;
+  if (!valid) throw new Error('File content does not match the selected type');
+}
 function sha256(bytes: Buffer | string) {
   return createHash('sha256').update(bytes).digest('hex');
 }
@@ -87,11 +100,17 @@ async function request(
   });
 }
 export async function r2MediaPut(key: string, bytes: Buffer, mime: string) {
+  validateR2MediaBytes(bytes, mime);
   const response = await request('PUT', key, bytes, mime);
   if (!response.ok) throw new Error('R2 upload failed: ' + response.status);
-  const check = await request('HEAD', key);
-  if (!check.ok || Number(check.headers.get('content-length')) !== bytes.length)
-    throw new Error('R2 upload verification failed');
+  try {
+    const check = await request('HEAD', key);
+    if (!check.ok || Number(check.headers.get('content-length')) !== bytes.length)
+      throw new Error('R2 upload verification failed');
+  } catch (error) {
+    await r2MediaDelete(key).catch(() => undefined);
+    throw error;
+  }
 }
 export async function r2MediaGet(key: string) {
   const response = await request('GET', key);
