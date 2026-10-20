@@ -16,11 +16,11 @@ export async function resolveLoginDestination(
   const preferClient = options.preferClient === true;
   try {
     const { data: auth, error: authError } = await client.auth.getUser();
-    if (authError || !auth.user) return preferClient ? '/client' : '/dashboard';
+    if (authError || !auth.user || auth.user.id !== options.userId)
+      return preferClient ? '/client' : '/dashboard';
     const [memberships, portal] = await Promise.all([
       client.from('organization_memberships')
         .select('id')
-        .eq('user_id', auth.user.id)
         .eq('user_id', options.userId)
         .eq('status', 'active')
         .limit(1),
