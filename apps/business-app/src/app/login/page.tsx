@@ -220,8 +220,8 @@ export default async function Login({
             <div className="pp-login-intro">
               <h1 id="login-title">Sign in</h1>
               <p>
-                Access your business account and continue managing your
-                projects, leads and marketplace.
+                Business owners, employees and invited homeowners use
+                this login. We’ll open the right workspace for your account.
               </p>
             </div>
 
@@ -274,8 +274,8 @@ export default async function Login({
               <span>
                 <strong>Secure &amp; Trusted</strong>
                 <small>
-                  Business and employee access is protected by account
-                  authentication and company permissions.
+                  Owners, employees and invited homeowners can use this login.
+                  Each company and project checks its own permissions.
                 </small>
               </span>
             </div>
