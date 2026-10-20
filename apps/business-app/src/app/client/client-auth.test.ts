@@ -50,11 +50,12 @@ describe('Client auth uses one readable, mobile friendly design',()=>{
   expect(callback).toContain('resolveLoginDestination(client, {');
   expect(callback).toContain('preferClient: clientAudience');
   expect(callback).toContain('new URL(destination, origin)');
-  expect(ownerLogin).toContain('resolveLoginDestination(db)');
-  expect(login).toContain('resolveLoginDestination(db,{preferClient:true})');
+  expect(ownerLogin).toContain('resolveLoginDestination(db, { userId: data.user.id })');
+  expect(login).toContain('resolveLoginDestination(db,{userId:data.user.id,preferClient:true})');
   expect(signIn).toContain("form.get('loginAudience') === 'client'");
   expect(landing).toContain("'client_portal_projects'");
   expect(landing).toContain("'organization_memberships'");
+  expect(landing).toContain(".eq('user_id', options.userId)");
   expect(form).toContain('name="loginAudience" value="client"');
   expect(form).toContain('state.clientPortal');
   expect(callback).toContain('publicAuthOrigin(request.url)');
