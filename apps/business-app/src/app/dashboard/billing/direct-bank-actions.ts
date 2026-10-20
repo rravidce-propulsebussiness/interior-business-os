@@ -65,3 +65,29 @@ export async function createInvoicePaymentRequest(_previous: Result, form: FormD
     return { ok: false, message: safeFailure(error).message };
   }
 }
+
+export async function reviewInvoicePaymentClaim(_previous: Result, form: FormData): Promise<Result> {
+  try {
+    const { org, authorization, client } = await context();
+    await authorization.requirePermission(org, 'payment.manage');
+    const claim = idSchema.parse(form.get('claimId'));
+    const invoice = idSchema.parse(form.get('invoiceId'));
+    const approve = form.get('decision') === 'approve';
+    const reject = form.get('decision') === 'reject';
+    if (!approve && !reject) throw new DomainError('VALIDATION_FAILED');
+    const confirmed = form.get('bankCreditConfirmed') === 'on';
+    if (approve && !confirmed) return { ok: false, message: 'Confirm the credit in the company bank account before approving.' };
+    const notes = z.string().max(1000).parse(form.get('notes') ?? '');
+    const rpc = client.rpc.bind(client) as unknown as (name: string, args: Record<string, unknown>) =>
+      Promise<{ error: { message: string } | null }>;
+    const result = await rpc('invoice_payment_claim_review', {
+      p_org: org, p_claim: claim, p_approve: approve,
+      p_bank_credit_confirmed: confirmed, p_notes: notes,
+    });
+    if (result.error) throw new Error('Unable to review payment claim');
+    revalidatePath('/dashboard/billing/' + invoice);
+    return { ok: true, message: approve ? 'Bank credit verified and payment approved.' : 'Payment claim rejected.' };
+  } catch (error) {
+    return { ok: false, message: safeFailure(error).message };
+  }
+}
