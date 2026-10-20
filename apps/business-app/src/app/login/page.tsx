@@ -84,7 +84,7 @@ export default async function Login({
     // Next.js can resolve relative redirects against 0.0.0.0:3000 behind
     // Hostinger. Never expose the private listener after a successful login.
     if (data.user) {
-      const destination = await resolveLoginDestination(db);
+      const destination = await resolveLoginDestination(db, { userId: data.user.id });
       redirect(new URL(destination, publicAuthOrigin('http://localhost:3000/login')).toString());
     }
   }
