@@ -3,7 +3,7 @@
 -- an invoice, invent a receipt, or certify work based on payment terms.
 BEGIN;
 
-CREATE FUNCTION private.sync_signed_quotation_schedule(
+CREATE OR REPLACE FUNCTION private.sync_signed_quotation_schedule(
   p_org uuid, p_contract uuid
 ) RETURNS uuid
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = ''
@@ -145,7 +145,7 @@ REVOKE ALL ON FUNCTION private.sync_signed_quotation_schedule(uuid,uuid)
   FROM PUBLIC,anon,authenticated;
 
 -- A contract activated after signing inherits the already agreed schedule.
-CREATE FUNCTION private.auto_signed_quote_schedule_on_contract()
+CREATE OR REPLACE FUNCTION private.auto_signed_quote_schedule_on_contract()
 RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path=''
 AS $trigger$
 BEGIN
@@ -155,12 +155,13 @@ BEGIN
   RETURN new;
 END;
 $trigger$;
+DROP TRIGGER IF EXISTS auto_signed_quote_schedule_on_contract ON public.contracts;
 CREATE TRIGGER auto_signed_quote_schedule_on_contract
   AFTER UPDATE OF status ON public.contracts
   FOR EACH ROW EXECUTE FUNCTION private.auto_signed_quote_schedule_on_contract();
 
 -- Also support the legitimate order: activate contract, then record signing.
-CREATE FUNCTION private.auto_signed_quote_schedule_on_signing()
+CREATE OR REPLACE FUNCTION private.auto_signed_quote_schedule_on_signing()
 RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path=''
 AS $trigger$
 BEGIN
@@ -170,6 +171,7 @@ BEGIN
   RETURN new;
 END;
 $trigger$;
+DROP TRIGGER IF EXISTS auto_signed_quote_schedule_on_signing ON private.project_agreement_events;
 CREATE TRIGGER auto_signed_quote_schedule_on_signing
   AFTER INSERT ON private.project_agreement_events
   FOR EACH ROW EXECUTE FUNCTION private.auto_signed_quote_schedule_on_signing();
