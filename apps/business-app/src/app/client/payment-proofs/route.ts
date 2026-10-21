@@ -13,8 +13,12 @@ const inputSchema=z.object({
 });
 export async function POST(request:Request){
  const origin=request.headers.get('origin');
- if(origin&&new URL(origin).host!==request.headers.get('host'))
-  return Response.json({message:'Invalid origin'},{status:403});
+ if(origin){
+  const allowedHosts=[new URL(request.url).host,request.headers.get('host'),
+   request.headers.get('x-forwarded-host')];
+  if(!allowedHosts.includes(new URL(origin).host))
+   return Response.json({message:'Invalid origin'},{status:403});
+ }
  const db=await createServerDatabase();
  const {data:auth}=await db.auth.getUser();
  if(!auth.user)return Response.json({message:'Sign in to your client portal'},{status:401});
