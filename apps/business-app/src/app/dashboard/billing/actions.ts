@@ -180,37 +180,44 @@ export async function saveGstDocument(form: FormData) {
     // may optionally reference an existing tenant customer without conversion.
     if ((stageRequested && (customerId || wonLeadId)) || (customerId && wonLeadId))
       throw new DomainError('VALIDATION_FAILED');
-    if (stageRequested) {
-      const checkedLead = idSchema.parse(leadId);
-      const checkedRevision = idSchema.parse(revisionId);
-      const checkedStage = z.coerce.number().int().min(1).max(40).parse(stageNumber);
-      if (input.kind !== 'sales_invoice') throw new DomainError('VALIDATION_FAILED');
-      const choice=invoiceStageChoices(await gst.stageOptions(org),profile?.stateCode??'36')
-        .find(item=>item.leadId===checkedLead&&item.revisionId===checkedRevision);
-      const stage=choice?.stages.find(item=>item.number===checkedStage);
-      if(!stage||!input.lines.length)throw new DomainError('VALIDATION_FAILED');
-      const primary=input.lines[0]!;
-      const amount=Math.round((primary.quantity*primary.unitPrice-primary.discount)*100);
-      const full=Math.round(stage.amount*100);
-      if(!Number.isSafeInteger(amount)||amount<=0||amount>full)
+    if(input.kind==='sales_invoice'){
+      // Owner-facing Save is an atomic "save + issue", never a draft.
+      // The database commits the saved invoice, original customer/stage link,
+      // official invoice number, and issuance together or not at all.
+      await authorization.requirePermission(org,'invoice.issue');
+      const checkedLead=stageRequested?idSchema.parse(leadId):null;
+      const checkedRevision=stageRequested?idSchema.parse(revisionId):null;
+      const checkedStage=stageRequested?
+        z.coerce.number().int().min(1).max(40).parse(stageNumber):null;
+      if(stageRequested){
+        const choice=invoiceStageChoices(await gst.stageOptions(org),profile?.stateCode??'36')
+          .find(item=>item.leadId===checkedLead&&item.revisionId===checkedRevision);
+        const stage=choice?.stages.find(item=>item.number===checkedStage);
+        if(!stage||!input.lines.length)throw new DomainError('VALIDATION_FAILED');
+        const primary=input.lines[0]!;
+        const amount=Math.round((primary.quantity*primary.unitPrice-primary.discount)*100);
+        const full=Math.round(stage.amount*100);
+        if(!Number.isSafeInteger(amount)||amount<=0||amount>full)
+          throw new DomainError('VALIDATION_FAILED');
+        if(amount<full&&(form.get('allowPartialStage')!=='true'||!owner))
+          throw new DomainError('FORBIDDEN');
+      }
+      const issued=await client.rpc('gst_sales_invoice_save_and_issue',{
+        p_org:org,p_input:input,
+        p_customer:customerId?idSchema.parse(customerId):null,
+        p_won_lead:wonLeadId?idSchema.parse(wonLeadId):null,
+        p_stage_lead:checkedLead,p_revision:checkedRevision,
+        p_stage:checkedStage,
+      });
+      if(issued.error||!issued.data){
+        throw new Error(issued.error?.message??'Could not issue invoice');
+      }
+      id=issued.data;
+    }else{
+      if(stageRequested||customerId||wonLeadId)
         throw new DomainError('VALIDATION_FAILED');
-      if(amount<full&&(form.get('allowPartialStage')!=='true'||!owner))
-        throw new DomainError('FORBIDDEN');
-      id = await createGstRepository(client).saveStageDocument(
-        org, input, checkedLead, checkedRevision, checkedStage,
-      );
-    } else if (input.kind === 'sales_invoice' && !marketplaceOrderId && wonLeadId) {
-      id = await createGstRepository(client).saveWonLeadDocument(
-        org, input, idSchema.parse(wonLeadId),
-      );
-    } else if (input.kind === 'sales_invoice' && !marketplaceOrderId) {
-      id = await createGstRepository(client).saveCustomerDocument(
-        org, input, customerId ? idSchema.parse(customerId) : null,
-      );
-    } else {
-      if (customerId || wonLeadId) throw new DomainError('VALIDATION_FAILED');
-      // Supplier and marketplace bills continue through their original path.
-      id = await createGstTemplatesRepository(client).saveDocument(org, input, null);
+      // Supplier purchase bills retain the existing draft/review workflow.
+      id=await createGstTemplatesRepository(client).saveDocument(org,input,null);
     }
     // The GST bill is canonical. A failed attachment does not duplicate it.
     if (input.kind === 'purchase_bill' && supplierFile) {
@@ -219,6 +226,7 @@ export async function saveGstDocument(form: FormData) {
     }
     revalidatePath('/dashboard/billing');
     revalidatePath('/dashboard/finance');
+    if(input.kind==='sales_invoice')revalidatePath('/client','layout');
   } catch (error) {
     redirect(path + '?error=' + encodeURIComponent(safeFailure(error).message));
   }
