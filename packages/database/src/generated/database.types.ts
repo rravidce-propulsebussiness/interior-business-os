@@ -12233,7 +12233,7 @@ export interface Database {
           p_org: string;
           p_proof: string;
           p_action: string;
-          p_method?: string | null;
+          p_method?: string;
           p_confirm_bank_credit?: boolean;
           p_allow_partial?: boolean;
           p_note?: string;
@@ -12241,7 +12241,7 @@ export interface Database {
         Returns: Json;
       };
       staff_payment_proof_list: {
-        Args: { p_org: string; p_contract?: string | null };
+        Args: { p_org: string; p_contract?: string };
         Returns: Json;
       };
       staff_payment_proof_media: {
