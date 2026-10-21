@@ -7,7 +7,7 @@ import { OwnerProjectRequests } from '../../project-request-widgets';
 import { canAccess } from '@business-os/auth';
 import { guidanceForConstructionStage } from '@business-os/core/construction-payment-schedule';
 import { ProjectStageLinker,type StageLinkOption } from './project-stage-linker';
-import { ProjectStagePaymentLinker } from './project-stage-payment-linker';
+import { StageChecklistItem } from './project-stage-checklist-item';
 import { ProjectClientAccess } from './project-client-access';
 import { ProjectSiteSurvey,ProjectAdvanceAction } from './project-next-forms';
 import { effectiveProjectStageStatus } from './project-stage-status';
@@ -311,6 +311,14 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
       const checks=[...new Set([...stage.inspectionTopics,...guidance.checks])];
       const payment=d.quotePaymentTriggers.filter(p=>p.stageCodes.includes(stage.instance_code));
       const linked=d.links.filter(x=>x.stage_id===stage.id);
+      const stageWork=d.stageProgress.work.filter(x=>stringValue(x.stage_id)===stage.id);
+      const stageChecks=d.stageProgress.checks.filter(x=>stringValue(x.stage_id)===stage.id);
+      const passed=checks.filter(title=>stageChecks.some(x=>
+       stringValue(x.title).toLowerCase()===title.toLowerCase()&&stringValue(x.status)==='passed')).length;
+      const finishedActivities=stage.activities.filter((_,i)=>stageWork.some(x=>
+       Number(x.index)===i&&stringValue(x.status)==='completed')).length;
+      const photos=(site?.media??[]).filter(x=>stringValue(x.mime).startsWith('image/'))
+       .map(x=>({id:x.id,filename:stringValue(x.filename)}));
       const availableRecords:StageLinkOption[]=[
        ...(site?.reports??[]).map(x=>({kind:'report' as const,id:x.id,title:shortDate(x.report_date)+' — '+stringValue(x.completed_work)})),
        ...(site?.materials??[]).map(x=>({kind:'material' as const,id:x.id,title:stringValue(x.item)})),
@@ -333,20 +341,38 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
         {(!complete||(['DESIGN','DESIGN_APPROVAL'].includes(stage.template_code)&&site?.stage==='client_approved'))&&
          <ProjectStageWorkflow d={d} code={stage.template_code}/>}
 
-        <div className="pv2-command-work-list">
-         {stage.activities.map((work,i)=><div className="pv2-command-work-item" key={i}>
-           <span className="pv2-work-bullet"><OwnerIcon name={complete?'check':'projects'} size={15}/></span>
-           <span>{work}</span>
-           {complete&&<span className="pv2-label">Stage completed</span>}
-          </div>)}
-        </div>
+        {!!stage.activities.length&&<div className="pv2-stage-task-group">
+         <h4>Work checklist <small>{finishedActivities}/{stage.activities.length} completed</small></h4>
+         <p className="pv2-hint">Mark each activity separately as work progresses. This does not certify or close the whole stage.</p>
+         <div className="pv2-stage-task-entries">
+          {stage.activities.map((work,i)=>{
+           const record=stageWork.find(x=>Number(x.index)===i);
+           return <StageChecklistItem key={i} projectId={d.project.id} stageId={stage.id}
+             kind="work" index={i} title={work} status={stringValue(record?.status)||'pending'}
+             notes={stringValue(record?.notes)} photoId={stringValue(record?.photo_id)}
+             photos={photos} canEdit={allowWork&&!complete}/>;
+          })}
+         </div>
+        </div>}
         {payment.length>0&&d.permissions.finance&&<div className="pv2-command-payments">
          <OwnerIcon name="billing" size={17}/><div><strong>Linked quotation payments</strong>
           <p>{payment.map(p=>p.name+' ('+p.percent+'%)').join(' · ')}</p>
           <small>After linked stages pass QC, one agreed payment request is issued. Payment is only recorded in Finance.</small></div>
          </div>}
-        {!!checks.length&&<details className="pv2-stage-secondary"><summary>Checks & tests ({checks.length})</summary>
-         <ul>{checks.map((name,i)=><li key={i}>{name}</li>)}</ul></details>}
+        {!!checks.length&&<div className="pv2-stage-task-group">
+         <h4>Checks & tests <small>{passed}/{checks.length} passed</small></h4>
+         <p className="pv2-hint">Complete checks one by one, with photo evidence. A passed checklist item does not replace formal independent QC approval.</p>
+         <div className="pv2-stage-task-entries">
+          {checks.map((name,i)=>{
+           const existing=stageChecks.find(x=>stringValue(x.title).toLowerCase()===name.toLowerCase())??
+             (site?.checks??[]).find(x=>stringValue(x.title).toLowerCase()===name.toLowerCase());
+           return <StageChecklistItem key={name} projectId={d.project.id} stageId={stage.id}
+             kind="check" index={i} title={name} status={stringValue(existing?.status)||'pending'}
+             notes={stringValue(existing?.notes)} photoId={stringValue(existing?.photo_id)}
+             photos={photos} canEdit={allowChecks&&!complete}/>;
+          })}
+         </div>
+        </div>
         {!!guidance.materials.length&&<details className="pv2-stage-secondary"><summary>Materials to plan</summary>
          <ul>{guidance.materials.map((name,i)=><li key={i}>{name}</li>)}</ul></details>}
         <div className="pv2-stage-attachment-count">{linked.length} linked site record{linked.length===1?'':'s'} · Linked evidence is not an approval.</div>
@@ -354,12 +380,10 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
          {allowWork&&<details><summary><OwnerIcon name="projects" size={16}/> Update work</summary><SiteReportForm id={d.project.id}/></details>}
          {site?.stage==='execution'&&<details><summary><OwnerIcon name="projects" size={16}/> Upload photos</summary><SiteMediaForm id={d.project.id}/></details>}
          {allowMaterials&&<details><summary><OwnerIcon name="purchases" size={16}/> Request materials</summary><MaterialRequestForm id={d.project.id}/></details>}
-         {allowChecks&&<details><summary><OwnerIcon name="check" size={16}/> Quality check</summary><QualityForm id={d.project.id}/></details>}
+
          {site?.canManage&&!!site.memberOptions.length&&<details><summary><OwnerIcon name="team" size={16}/> Assign team</summary><AssignRole projectId={d.project.id} users={site.memberOptions}/></details>}
         </div>
-        {site?.canManage&&d.permissions.finance&&d.milestones.length>0&&
-         <ProjectStagePaymentLinker projectId={d.project.id} stageId={stage.id}
-          milestones={d.milestones}/>}
+
         {site?.canManage&&availableRecords.length>0&&<details className="pv2-stage-secondary"><summary>Attach existing site evidence</summary>
          <ProjectStageLinker projectId={d.project.id} stageId={stage.id} options={availableRecords}/></details>}
        </div>
