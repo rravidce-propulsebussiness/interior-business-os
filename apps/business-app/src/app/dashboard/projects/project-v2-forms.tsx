@@ -2,6 +2,7 @@
 import { useActionState, useTransition, useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { saveProjectSite, uploadProjectSiteMedia } from './[id]/site/actions';
+import { saveProjectMaterials } from './[id]/site/stage-checklist-actions';
 import { syncConstructionFromProjectAgreement, assignConstructionRole } from './[id]/site/construction-actions';
 import { saveSignedAgreement } from './[id]/site/agreement-actions';
 import { prepareAgreementFromProjectQuote } from './project-agreement-actions';
@@ -255,16 +256,57 @@ export function SiteReportForm({id}:{id:string}){
   </div>
  </ProjectForm>;
 }
+type MaterialLine={item:string;quantity:string;unit:string;notes:string};
+const newMaterial=():MaterialLine=>({item:'',quantity:'',unit:'kg',notes:''});
+const materialUnits=[
+ {value:'kg',label:'Kilograms (kg)'},{value:'tonnes',label:'Metric tonnes'},
+ {value:'bags',label:'Bags'},{value:'nos',label:'Pieces / numbers'},
+ {value:'litres',label:'Litres'},{value:'sqft',label:'Square feet'},
+ {value:'sqm',label:'Square metres'},{value:'cft',label:'Cubic feet'},
+ {value:'cum',label:'Cubic metres'},{value:'yards',label:'Yards'},
+ {value:'metres',label:'Metres'},{value:'feet',label:'Feet'},
+];
 export function MaterialRequestForm({id}:{id:string}){
- return <ProjectForm projectId={id} operation="material_add" label="Request material">
-  <div className="pv2-two"><label>Material<input required name="item" minLength={2} maxLength={200}
-   placeholder="TMT steel 12mm"/></label>
-   <label>Quantity<input type="number" required name="quantity" min=".001" step=".001" max="100000000"/></label></div>
-  <label>Unit<select name="unit" defaultValue="bags">
-   {['bags','kg','ton','MT','pieces','nos','sqft','sqm','cum','cft','liters','loads'].map(u=><option key={u}>{u}</option>)}
-  </select></label>
-  <label>Need / instructions<textarea name="notes" rows={2} maxLength={3000}/></label>
- </ProjectForm>;
+ const router=useRouter();
+ const [items,setItems]=useState<MaterialLine[]>([newMaterial()]);
+ const [state,submit,pending]=useActionState(async(_prev:Result,form:FormData)=>{
+  const result=await saveProjectMaterials(id,form);
+  if(result.saved){setItems([newMaterial()]);router.refresh();}
+  return result;
+ },initial);
+ const edit=(index:number,key:keyof MaterialLine,value:string)=>
+  setItems(current=>current.map((row,i)=>index===i?{...row,[key]:value}:row));
+ return <form action={submit} className="pv2-form pv2-batch-material-form">
+  <p className="pv2-hint">Add all materials needed for this work. Each line is tracked separately for procurement.</p>
+  {items.map((row,i)=><div className="pv2-material-line" key={i}>
+   <div className="pv2-material-line-head"><strong>Material {i+1}</strong>
+    {items.length>1&&<button type="button" className="pv2-button pv2-outline"
+     onClick={()=>setItems(v=>v.filter((_,n)=>i!==n))}>Remove</button>}
+   </div>
+   <div className="pv2-two">
+    <label>Material / size<input required minLength={2} maxLength={200} value={row.item}
+     onChange={e=>edit(i,'item',e.target.value)} placeholder="Example: TMT steel 8 mm, cement"/></label>
+    <label>Quantity<input type="number" required min=".001" step=".001" max="100000000"
+     value={row.quantity} onChange={e=>edit(i,'quantity',e.target.value)}/></label>
+   </div>
+   <label>Unit<select value={row.unit} onChange={e=>edit(i,'unit',e.target.value)}>
+    {materialUnits.map(unit=><option value={unit.value} key={unit.value}>{unit.label}</option>)}
+   </select></label>
+   <label>Instructions (optional)<input maxLength={3000} value={row.notes}
+    onChange={e=>edit(i,'notes',e.target.value)} placeholder="Grade, brand, delivery instructions"/></label>
+  </div>)}
+  <input type="hidden" name="items" value={JSON.stringify(items.map(row=>({
+   item:row.item,quantity:row.quantity,unit:row.unit,notes:row.notes,
+  })))}/>
+  <div className="pv2-material-line-controls">
+   {items.length<12&&<button type="button" className="pv2-button pv2-outline"
+    onClick={()=>setItems(v=>[...v,newMaterial()])}>+ Add another material</button>}
+   <button type="submit" className="pv2-button pv2-primary" disabled={pending}>
+    {pending?'Requesting…':'Request '+items.length+' material'+(items.length===1?'':'s')}
+   </button>
+  </div>
+  {state.message&&<p role="status" className={'pv2-form-feedback '+(state.saved?'good':'bad')}>{state.message}</p>}
+ </form>;
 }
 export function MaterialUpdateForm({id,material}:{id:string;material:{id:string;status:string}}){
  const next=material.status==='requested'?['approved','rejected']:
