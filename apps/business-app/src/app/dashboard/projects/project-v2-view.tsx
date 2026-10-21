@@ -317,6 +317,11 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
        stringValue(x.title).toLowerCase()===title.toLowerCase()&&stringValue(x.status)==='passed')).length;
       const finishedActivities=stage.activities.filter((_,i)=>stageWork.some(x=>
        Number(x.index)===i&&stringValue(x.status)==='completed')).length;
+      const formalQc=d.stageProgress.qualityStages.find(x=>stringValue(x.stage_id)===stage.id);
+      const formalInspections=Array.isArray(formalQc?.inspections)?formalQc.inspections as Record<string,unknown>[]:[];
+      const formalReviews=Array.isArray(formalQc?.reviews)?formalQc.reviews as Record<string,unknown>[]:[];
+      const displayStatus=!complete && finishedActivities>0&&['not_started','pending'].includes(visualStatus)?
+        'in_progress':visualStatus;
       const photos=(site?.media??[]).filter(x=>stringValue(x.mime).startsWith('image/'))
        .map(x=>({id:x.id,filename:stringValue(x.filename)}));
       const availableRecords:StageLinkOption[]=[
@@ -331,7 +336,7 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
         <span className="pv2-stage-number">{complete?'✓':index+1}</span>
         <span className="pv2-stage-title-block"><strong>{stage.title}</strong>
          <small>{stage.floor_code?pretty(stage.floor_code)+' · ':''}{stage.phase?pretty(stage.phase)+' · ':''}{stage.activities.length} work items</small></span>
-        <Status value={visualStatus}/>
+        <Status value={displayStatus}/>
         <span className="pv2-stage-meta">{payment.length} payment milestone{payment.length===1?'':'s'}</span>
         <OwnerIcon name="arrow" size={15}/>
        </summary>
@@ -373,6 +378,21 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
           })}
          </div>
         </div>}
+        {(formalInspections.length>0||formalReviews.length>0)&&<details className="pv2-stage-secondary pv2-formal-quality">
+         <summary>Recorded QC inspections & approvals ({formalInspections.length} inspections)</summary>
+         <p className="pv2-hint">Official inspection results and structural / quality approvals already recorded for this stage.</p>
+         {formalInspections.map((record,i)=><div className="pv2-qc-history-row" key={stringValue(record.id)||i}>
+          <strong>Inspection {stringValue(record.number)||String(i+1)}</strong>
+          <Status value={stringValue(record.status)}/>
+          {record.current===true&&<span className="pv2-label">Current</span>}
+         </div>)}
+         {formalReviews.map((record,i)=><div className="pv2-qc-history-row" key={stringValue(record.id)||i}>
+          <strong>{pretty(record.review_kind)} review</strong>
+          <Status value={stringValue(record.decision)}/>
+          <small>{shortDate(record.reviewed_at)}</small>
+          {!!stringValue(record.notes)&&<p className="pv2-hint">{stringValue(record.notes)}</p>}
+         </div>)}
+        </details>}
         {!!guidance.materials.length&&<details className="pv2-stage-secondary"><summary>Materials to plan</summary>
          <ul>{guidance.materials.map((name,i)=><li key={i}>{name}</li>)}</ul></details>}
         <div className="pv2-stage-attachment-count">{linked.length} linked site record{linked.length===1?'':'s'} · Linked evidence is not an approval.</div>
