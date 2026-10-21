@@ -70,7 +70,6 @@ export async function CustomerPaymentsPanel({
  }
  const activeContract=selected&&contracts.some(c=>value(c,'id')===selected);
  const contractNumber=contracts.find(c=>value(c,'id')===selected);
- const canSubmit=canRecord&&activeContract&&methods.length>0&&!loadError;
  const received=payments.filter(row=>row.status==='recorded')
   .reduce((sum,row)=>sum+(Number(value(row,'amount'))||0),0);
  const url=financeUrl(selected);
