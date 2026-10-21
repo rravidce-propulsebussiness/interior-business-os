@@ -149,8 +149,16 @@ export async function saveGstDocument(form: FormData) {
       if(input.documentType==='commercial_invoice'&&
         (profile?.gstin?reason!=='non_taxable':reason!=='unregistered'))
         throw new DomainError('VALIDATION_FAILED');
-      if(input.documentType!=='tax_invoice'&&input.lines.some(line=>line.gstRate!==0))
+      if(input.documentType!=='tax_invoice'&&
+        (input.reverseCharge||input.lines.some(line=>line.gstRate!==0)))
         throw new DomainError('VALIDATION_FAILED');
+      if(input.documentType!=='tax_invoice'){
+        // Keep the classification on the saved document for future audit.
+        const clean=input.notes.replace(/^Non-GST category: [a-z_]+\\n/,'');
+        const memo='Non-GST category: '+reason+'\\n'+clean;
+        if(memo.length>3000)throw new DomainError('VALIDATION_FAILED');
+        input.notes=memo;
+      }
     }
 
     const attachment = form.get('supplierBillFile');
