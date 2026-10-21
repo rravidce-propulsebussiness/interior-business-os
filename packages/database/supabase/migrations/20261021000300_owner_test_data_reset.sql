@@ -41,6 +41,7 @@ AS $f$ SELECT ARRAY[
   'private.project_advance_proformas'::regclass,
   'private.project_advance_requirements'::regclass,
   'private.project_agreement_events'::regclass,
+  'private.project_client_requests'::regclass,
   'private.project_preflight'::regclass,
   'private.project_quote_timeline_sources'::regclass,
   'private.project_stage_owner_history'::regclass,
