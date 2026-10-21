@@ -142,7 +142,7 @@ export async function CustomerPaymentsPanel({
      <details className="fw-payment-inline" key={selected}>
       <summary>Record received amount</summary>
       <FinanceForm title="Save received payment" successHref={url}
-       fullPaymentAmount={due?.amount} ownerCanEnablePartial={owner}
+       fullPaymentAmount={due?.amount??''} ownerCanEnablePartial={owner}
        initial={{action:'record_payment',contract_id:selected,input:{
         idempotency_key:randomUUID(),payment_date:todayInIndia(),amount:due?.amount??'',
         method_id:value(methods[0]??{},'id'),external_reference:'',notes:'',allocations:[]}}}
