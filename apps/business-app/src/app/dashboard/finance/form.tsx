@@ -73,6 +73,8 @@ export function FinanceForm({
   itemDefaults = {},
   maxItems = 100,
   successHref,
+  fullPaymentAmount,
+  ownerCanEnablePartial = false,
 }: {
   initial: Values;
   title: string;
@@ -82,6 +84,8 @@ export function FinanceForm({
   itemDefaults?: Values;
   maxItems?: number;
   successHref?: string;
+  fullPaymentAmount?: string;
+  ownerCanEnablePartial?: boolean;
 }) {
   const input =
     initial.input && typeof initial.input === 'object'
@@ -95,6 +99,7 @@ export function FinanceForm({
     ),
     [nextKey, setNextKey] = useState(initialRows.length),
     [message, setMessage] = useState(''),
+    [partialEnabled,setPartialEnabled] = useState(false),
     [pending, start] = useTransition(),
     router = useRouter();
   const read = (form: FormData, field: FinanceField, name: string) =>
@@ -134,7 +139,10 @@ export function FinanceForm({
             }
             return value;
           });
-        const command = initial.input ? { ...initial, input: values } : values;
+        const command = initial.input
+          ? { ...initial, input: values,
+              ...(initial.action==='record_payment' ? {allow_partial:partialEnabled} : {}) }
+          : values;
         start(async () => {
           try {
             const result = await financeCommand(command);
@@ -149,10 +157,30 @@ export function FinanceForm({
         });
       }}
     >
+      {fullPaymentAmount&&initial.action==='record_payment'&&<div
+        className="rounded border p-3 text-sm">
+        <strong>Full milestone: ₹{new Intl.NumberFormat('en-IN',{
+          maximumFractionDigits:2}).format(Number(fullPaymentAmount))}</strong>
+        {ownerCanEnablePartial&&<label className="mt-3 flex gap-2 items-center">
+          <input type="checkbox" checked={partialEnabled}
+            onChange={event=>setPartialEnabled(event.target.checked)}/>
+          Owner exception: allow a smaller partial payment
+        </label>}
+      </div>}
       <div className="grid gap-4 sm:grid-cols-2">
-        {fields.map((f) => (
-          <Field key={f.key} field={f} name={f.key} value={input[f.key]} />
-        ))}
+        {fields.map(f=>
+          f.key==='amount'&&initial.action==='record_payment'&&fullPaymentAmount
+            ? <label key={f.key} className="grid gap-1">{f.label}
+               <input type="number" name="amount" required min="0.01" step="0.01"
+                 key={partialEnabled?'owner-partial':'full-milestone'}
+                 readOnly={!partialEnabled} defaultValue={fullPaymentAmount}
+                 className="rounded border bg-background p-2"/>
+               {!partialEnabled&&<span className="text-sm text-muted-foreground">
+                 Full current milestone due. Partial payment is off by default.
+               </span>}
+              </label>
+            : <Field key={f.key} field={f} name={f.key} value={input[f.key]}/>
+        )}
       </div>
       {itemFields &&
         rows.map((row, index) => (
