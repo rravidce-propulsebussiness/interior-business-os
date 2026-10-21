@@ -11437,12 +11437,7 @@ export interface Database {
         };
         Returns: string;
       };
-      invoice_bank_payee_read: {
-        Args: {
-          p_org: string;
-        };
-        Returns: Json;
-      };
+      invoice_bank_payee_read: { Args: { p_org: string }; Returns: Json };
       invoice_bank_payee_save: {
         Args: {
           p_org: string;
