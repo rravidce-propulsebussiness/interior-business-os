@@ -6,7 +6,7 @@ import { createGstTemplatesRepository } from '@business-os/database/gst-template
 import { idSchema } from '@business-os/shared';
 import { ActionForm } from '@business-os/ui/action-form';
 import { finalizeGstDocument } from '../actions';
-import { PrintDocumentButton } from './print-button';
+import { PrintDocumentButton, ShareInvoiceWhatsAppButton } from './print-button';
 import { readSupplierBillAttachment } from '../supplier-bill-storage';
 
 export const dynamic = 'force-dynamic';
@@ -107,6 +107,14 @@ export default async function GstDocumentDetail({
             </a>
           )}
           {doc.status !== 'draft' && <PrintDocumentButton />}
+          {doc.kind === 'sales_invoice' && doc.status !== 'draft' && (
+            <ShareInvoiceWhatsAppButton
+              invoiceNumber={doc.number ?? 'Invoice'}
+              customerName={doc.partyName}
+              total={doc.total}
+              dueDate={doc.dueDate}
+            />
+          )}
           {doc.status === 'draft' && canEdit && (
             <Link
               href={'/dashboard/billing/new?edit=' + id}
