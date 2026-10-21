@@ -117,6 +117,7 @@ export default async function PrepareDocument({
       existingCustomerId={existingCustomerId}
       existingWonLeadId={existingWonLeadId}
       canCreateProject={hasGrant('lead.convert') && hasGrant('project.view')}
+      ownerCanAllowPartial={context.roles.some(role=>role.name.toLowerCase()==='owner')}
       initialLead={params.lead??''}/>}
     </div>
   </OwnerShell>;

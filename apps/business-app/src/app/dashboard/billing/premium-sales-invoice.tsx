@@ -22,6 +22,7 @@ type Props = {
   existingWonLeadId: string | null;
   initialLead: string;
   canCreateProject: boolean;
+  ownerCanAllowPartial: boolean;
 };
 const blank = (): GstLine => ({
   description: '', hsnSac: '', unit: 'Nos', quantity: 1,
@@ -38,7 +39,7 @@ const currencyTotal = (line: GstLine) =>
 export function PremiumSalesInvoice({
   profile, standard, existing, stageContext, choices,
   customers, customerAccess, existingCustomerId, existingWonLeadId, initialLead,
-  canCreateProject,
+  canCreateProject,ownerCanAllowPartial,
 }: Props) {
   const firstLead = choices.find((row) =>
     row.leadId === (stageContext?.leadId ?? initialLead));
@@ -61,7 +62,11 @@ export function PremiumSalesInvoice({
   const [partyAddress, setPartyAddress] = useState(existing?.partyAddress ?? selectedClient?.address ?? '');
   const [deliveryAddress, setDeliveryAddress] = useState(existing?.deliveryAddress ?? '');
   const [type, setType] = useState<GstDocument['documentType']>(
-    existing?.documentType ?? 'tax_invoice');
+    existing?.documentType ?? (profile.gstin?'tax_invoice':'commercial_invoice'));
+  const [nonGstReason,setNonGstReason] = useState(
+    existing?.documentType==='bill_of_supply'?'exempt':
+    profile.gstin?'non_taxable':'unregistered');
+  const [allowPartialStage,setAllowPartialStage] = useState(false);
   const [date, setDate] = useState(existing?.date ?? dateIndia());
   const [dueDate, setDueDate] = useState(existing?.dueDate ?? '');
   const [placeOfSupply, setPlaceOfSupply] = useState(existing?.placeOfSupply ?? selectedClient?.stateCode ?? profile.stateCode);
@@ -166,6 +171,7 @@ export function PremiumSalesInvoice({
   },[lines,type,placeOfSupply,profile.stateCode]);
   const stageAmount = stage ? currencyTotal(lines[0] ?? blank()) : 0;
   const stageInvalid = !!stage && (stageAmount <= 0 || stageAmount > stage.amount ||
+    (!allowPartialStage && Math.abs(stageAmount-stage.amount)>0.009) ||
     (lines[0]?.quantity ?? 0) !== 1 || (lines[0]?.discount ?? 0) !== 0);
   const hasStage = Boolean(choice && stage);
   const canSwitchLead = !existing;
@@ -184,7 +190,7 @@ export function PremiumSalesInvoice({
         <div className="psi-paper-logo">⌂</div>
         <div><strong>{profile.legalName}</strong><small>{profile.address}</small>
           <small>{profile.gstin ? 'GSTIN: '+profile.gstin : 'GSTIN not configured'}</small></div>
-        <b>TAX INVOICE</b>
+        <b>{type==='tax_invoice'?'GST TAX INVOICE':type==='bill_of_supply'?'BILL OF SUPPLY':'NON-GST COMMERCIAL INVOICE'}</b>
       </div>
       <div className="psi-paper-bill">
         <div><span>BILL TO</span><strong>{partyName || 'Customer name'}</strong>
@@ -199,7 +205,7 @@ export function PremiumSalesInvoice({
           <td>{line.quantity}</td><td>{money(line.unitPrice)}</td><td>{money(currencyTotal(line))}</td>
         </tr>)}</tbody></table>
       <div className="psi-paper-totals">
-        <div><span>Taxable value</span><strong>{money(amounts.taxable)}</strong></div>
+        <div><span>{type==='tax_invoice'?'Taxable value':'Value of supply'}</span><strong>{money(amounts.taxable)}</strong></div>
         {amounts.cgst>0&&<div><span>CGST</span><strong>{money(amounts.cgst)}</strong></div>}
         {amounts.sgst>0&&<div><span>SGST</span><strong>{money(amounts.sgst)}</strong></div>}
         {amounts.igst>0&&<div><span>IGST</span><strong>{money(amounts.igst)}</strong></div>}
@@ -212,6 +218,8 @@ export function PremiumSalesInvoice({
     {existing && <><input type="hidden" name="id" value={existing.id}/>
       <input type="hidden" name="version" value={existing.version}/></>}
     <input type="hidden" name="kind" value="sales_invoice"/>
+    {type!=='tax_invoice'&&<input type="hidden" name="nonGstReason" value={nonGstReason}/>}
+    {hasStage&&<input type="hidden" name="allowPartialStage" value={allowPartialStage?'true':'false'}/>}
     <input type="hidden" name="linesJson" value={JSON.stringify(safeLines)}/>
     {customerId && !hasStage && selectedClient?.fromExistingCustomer &&
       <input type="hidden" name="customerId" value={customerId}/>}
@@ -296,10 +304,15 @@ export function PremiumSalesInvoice({
         <section className="psi-card">
           <div className="psi-title"><span className="psi-step">2</span><h2>Invoice details</h2></div>
           <div className="psi-fields psi-four">
-            <label className="psi-field"><span>Invoice type</span><select name="documentType" value={type}
-              onChange={e=>setType(e.target.value as GstDocument['documentType'])}>
-              <option value="tax_invoice">Tax invoice</option><option value="bill_of_supply">Bill of supply</option>
-              <option value="commercial_invoice">Commercial invoice</option></select></label>
+            <label className="psi-field"><span>Billing type</span><select name="documentType" value={type}
+              onChange={e=>{const next=e.target.value as GstDocument['documentType'];
+                setType(next);if(next!=='tax_invoice')setReverseCharge(false);
+                setNonGstReason(next==='bill_of_supply'?'exempt':
+                profile.gstin?'non_taxable':'unregistered');}}>
+              {profile.gstin&&<option value="tax_invoice">GST bill — Tax invoice</option>}
+              {profile.gstin&&<option value="bill_of_supply">Non-GST — Bill of Supply</option>}
+              <option value="commercial_invoice">Non-GST — Commercial invoice</option>
+             </select></label>
             <label className="psi-field"><span>Invoice date</span><input required type="date" name="date" value={date}
               onChange={e=>setDate(e.target.value)}/></label>
             <label className="psi-field"><span>Due date</span><input type="date" name="dueDate" value={dueDate}
@@ -308,8 +321,22 @@ export function PremiumSalesInvoice({
               pattern="[0-9]{2}" maxLength={2} value={placeOfSupply}
               onChange={e=>setPlaceOfSupply(e.target.value)}/></label>
           </div>
-          <label className="psi-toggle"><input type="checkbox" name="reverseCharge" value="true" checked={reverseCharge}
-            onChange={e=>setReverseCharge(e.target.checked)}/> Reverse charge applies</label>
+          {type!=='tax_invoice'&&<div className="psi-fields">
+            <label className="psi-field"><span>Reason GST is not charged</span>
+             <select aria-label="Non-GST reason" value={nonGstReason}
+              onChange={event=>setNonGstReason(event.target.value)}>
+              {type==='bill_of_supply'?<>
+               <option value="exempt">GST-exempt supply</option>
+               <option value="composition">Supplier under composition scheme</option>
+              </>:profile.gstin?
+               <option value="non_taxable">Supply outside GST / non-taxable</option>:
+               <option value="unregistered">Supplier is not GST registered</option>}
+             </select>
+            </label>
+            <p className="psi-hint">Non-GST billing is only for qualifying supplies; taxable supplies of GST-registered businesses require GST invoices.</p>
+           </div>}
+          {type==='tax_invoice'&&<label className="psi-toggle"><input type="checkbox" name="reverseCharge" value="true" checked={reverseCharge}
+            onChange={e=>setReverseCharge(e.target.checked)}/> Reverse charge applies</label>}
         </section>
         {eligibleStages.length>0 && <section className="psi-card">
           <div className="psi-title"><span className="psi-step">3</span><h2>Select project stage &amp; payment</h2></div>
@@ -334,9 +361,14 @@ export function PremiumSalesInvoice({
               <input aria-label="Stage amount" type="number" min="0.01"
                 max={stage?.amount} disabled={!hasStage} step="0.01"
                 value={hasStage ? lines[0]?.unitPrice ?? 0 : ''}
+                readOnly={!ownerCanAllowPartial||!allowPartialStage}
                 onChange={e=>updateLine(0,'unitPrice',e.target.value)}/></label>
           </div>
-          {hasStage && <p className="psi-hint">Suggested from the saved quotation ({money(choice!.quoteTotal)}). Partial stage billing is allowed up to {money(stage!.amount)} before applicable GST.</p>}
+          {hasStage && <p className="psi-hint">Full agreed stage amount: {money(stage!.amount)} before applicable GST. Partial billing is off by default.</p>}
+          {hasStage&&ownerCanAllowPartial&&<label className="psi-toggle"><input type="checkbox" checked={allowPartialStage}
+            onChange={event=>{setAllowPartialStage(event.target.checked);
+              if(!event.target.checked&&stage)updateLine(0,'unitPrice',String(stage.amount));}}/>
+            Owner exception: allow partial stage billing</label>}
           {stageInvalid && <p className="psi-alert" role="alert">Stage billing amount must be above zero and cannot exceed the agreed stage amount.</p>}
         </section>}
         <section className="psi-card">

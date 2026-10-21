@@ -10,6 +10,7 @@ import {
 } from '@business-os/database/gst';
 import { idSchema, safeFailure, DomainError } from '@business-os/shared';
 import { createGstTemplatesRepository } from '@business-os/database/gst-templates';
+import { invoiceStageChoices } from './stage-choices';
 
 type State = { message: string };
 const gstin = z.union([
@@ -101,7 +102,10 @@ export async function saveGstDocument(form: FormData) {
   let attachmentWarning = false;
   try {
     const { org, authorization, client } = await workspace();
-    await authorization.requirePermission(org, 'invoice.create');
+    const access=await authorization.requirePermission(org, 'invoice.create');
+    const owner=access.roles.some(role=>role.name.toLowerCase()==='owner');
+    const gst=createGstRepository(client);
+    const profile=await gst.profile(org);
     const existingId = String(form.get('id') ?? '').trim();
     const marketplaceOrderId = String(
       form.get('marketplaceOrderId') ?? '',
@@ -133,6 +137,32 @@ export async function saveGstDocument(form: FormData) {
       ...(marketplaceOrderId ? { marketplaceOrderId } : {}),
     });
     const input = parsed as GstDocumentInput;
+    // GST invoice is only valid for a GST-registered supplier; non-GST
+    // documents must have a qualifying category, independently validated.
+    const reason=String(form.get('nonGstReason')??'');
+    if(input.kind==='sales_invoice'){
+      if(input.documentType==='tax_invoice'&&!profile?.gstin)
+        throw new DomainError('VALIDATION_FAILED');
+      if(input.documentType==='bill_of_supply'&&
+        (!profile?.gstin||!['exempt','composition'].includes(reason)))
+        throw new DomainError('VALIDATION_FAILED');
+      if(input.documentType==='commercial_invoice'&&
+        (profile?.gstin?reason!=='non_taxable':reason!=='unregistered'))
+        throw new DomainError('VALIDATION_FAILED');
+      if(input.documentType!=='tax_invoice'&&
+        (input.reverseCharge||input.lines.some(line=>line.gstRate!==0)))
+        throw new DomainError('VALIDATION_FAILED');
+      if(input.documentType!=='tax_invoice'){
+        // Keep the classification on the saved document for future audit.
+        const nl=String.fromCharCode(10);
+        const clean=input.notes.startsWith('Non-GST category: ')
+          ?input.notes.substring(input.notes.indexOf(nl)+1):input.notes;
+        const memo='Non-GST category: '+reason+nl+clean;
+        if(memo.length>3000)throw new DomainError('VALIDATION_FAILED');
+        input.notes=memo;
+      }
+    }
+
     const attachment = form.get('supplierBillFile');
     const supplierFile = attachment instanceof File && attachment.size > 0 ? attachment : null;
     if (supplierFile && (input.kind !== 'purchase_bill' || supplierFile.size > 8 * 1024 * 1024 ||
@@ -155,6 +185,17 @@ export async function saveGstDocument(form: FormData) {
       const checkedRevision = idSchema.parse(revisionId);
       const checkedStage = z.coerce.number().int().min(1).max(40).parse(stageNumber);
       if (input.kind !== 'sales_invoice') throw new DomainError('VALIDATION_FAILED');
+      const choice=invoiceStageChoices(await gst.stageOptions(org),profile?.stateCode??'36')
+        .find(item=>item.leadId===checkedLead&&item.revisionId===checkedRevision);
+      const stage=choice?.stages.find(item=>item.number===checkedStage);
+      if(!stage||!input.lines.length)throw new DomainError('VALIDATION_FAILED');
+      const primary=input.lines[0]!;
+      const amount=Math.round((primary.quantity*primary.unitPrice-primary.discount)*100);
+      const full=Math.round(stage.amount*100);
+      if(!Number.isSafeInteger(amount)||amount<=0||amount>full)
+        throw new DomainError('VALIDATION_FAILED');
+      if(amount<full&&(form.get('allowPartialStage')!=='true'||!owner))
+        throw new DomainError('FORBIDDEN');
       id = await createGstRepository(client).saveStageDocument(
         org, input, checkedLead, checkedRevision, checkedStage,
       );
