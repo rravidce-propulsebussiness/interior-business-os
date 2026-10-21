@@ -101,6 +101,13 @@ BEGIN
       AND schedule_id=schedule.id ORDER BY sort_order LOOP
   qualified:=false;
   index_no:=item.sort_order;
+  -- Agreement and advance belong to the pre-construction payment flow,
+  -- not to construction stage certification. Existing advance proformas
+  -- are the only payment request for those pre-work milestones.
+  IF index_no=0 AND (item.label ~* '(advance|agreement|booking)'
+    OR item.due_trigger ~* '(advance|agreement|booking)') THEN
+    CONTINUE;
+  END IF;
   bind_row:=CASE WHEN bindings IS NOT NULL THEN bindings->index_no ELSE NULL END;
   IF bind_row IS NOT NULL AND jsonb_typeof(bind_row)<>'array' THEN
    CONTINUE;
