@@ -204,10 +204,11 @@ export async function saveGstDocument(form: FormData) {
       }
       const issued=await client.rpc('gst_sales_invoice_save_and_issue',{
         p_org:org,p_input:input,
-        p_customer:customerId?idSchema.parse(customerId):undefined,
-        p_won_lead:wonLeadId?idSchema.parse(wonLeadId):undefined,
-        p_stage_lead:checkedLead??undefined,p_revision:checkedRevision??undefined,
-        p_stage:checkedStage??undefined,
+        ...(customerId?{p_customer:idSchema.parse(customerId)}:{}),
+        ...(wonLeadId?{p_won_lead:idSchema.parse(wonLeadId)}:{}),
+        ...(checkedLead?{p_stage_lead:checkedLead}:{}),
+        ...(checkedRevision?{p_revision:checkedRevision}:{}),
+        ...(checkedStage?{p_stage:checkedStage}:{}),
       });
       if(issued.error||!issued.data){
         throw new Error(issued.error?.message??'Could not issue invoice');
