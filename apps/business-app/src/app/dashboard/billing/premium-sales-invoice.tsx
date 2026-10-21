@@ -436,7 +436,7 @@ export function PremiumSalesInvoice({
               }
             }}/>
         </label>
-        <p className="psi-hint">We'll link this project to the selected Won lead.
+        <p className="psi-hint">We&apos;ll link this project to the selected Won lead.
           If a quotation already has a project, it will be reused.</p>
         {projectError && <p className="psi-alert" role="alert">{projectError}</p>}
         <div className="psi-project-modal-actions">
