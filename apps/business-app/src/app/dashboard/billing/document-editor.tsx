@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { saveGstDocument } from './actions';
+import { useInvoiceSave } from './use-invoice-save';
 import type { GstInvoiceAppearance } from '@business-os/database/gst-templates';
 import type {
   GstDocument,
@@ -42,6 +42,7 @@ export function DocumentEditor({
   existingLayout,
   requestedKind,
 }: Props) {
+  const { saveAction, onSubmit, pending, message } = useInvoiceSave();
   const initialKind =
     existing?.kind ??
     (order ? 'sales_invoice' : (requestedKind ?? 'sales_invoice'));
@@ -111,7 +112,13 @@ export function DocumentEditor({
     currency: 'INR',
   });
   return (
-    <form action={saveGstDocument} className="space-y-6">
+    <form
+      action={saveAction}
+      onSubmit={onSubmit}
+      className="space-y-6"
+      aria-busy={pending}
+    >
+      {message && <p role="alert">{message}</p>}
       {existing && (
         <>
           <input type="hidden" name="id" value={existing.id} />
@@ -316,16 +323,21 @@ export function DocumentEditor({
       </section>
       {kind === 'purchase_bill' && (
         <section className="rounded-2xl border border-orange-100 bg-orange-50/30 p-5 sm:p-7">
-          <h2 className="mb-2 text-xl font-semibold">Supplier bill attachment</h2>
+          <h2 className="mb-2 text-xl font-semibold">
+            Supplier bill attachment
+          </h2>
           <p className="mb-4 text-sm text-slate-600">
-            Upload the original outside supplier invoice as evidence. Enter
-            the bill items and amount below; the file remains private.
+            Upload the original outside supplier invoice as evidence. Enter the
+            bill items and amount below; the file remains private.
           </p>
           <label className="grid gap-2 text-sm font-medium">
             PDF or photo (optional, maximum 8 MB)
-            <input type="file" name="supplierBillFile"
+            <input
+              type="file"
+              name="supplierBillFile"
               accept="application/pdf,image/png,image/jpeg,image/webp"
-              className="block w-full rounded-xl border border-orange-200 bg-white p-3 text-sm"/>
+              className="block w-full rounded-xl border border-orange-200 bg-white p-3 text-sm"
+            />
           </label>
         </section>
       )}
@@ -500,9 +512,10 @@ export function DocumentEditor({
         <div className="mt-6 flex flex-wrap items-center gap-4">
           <button
             type="submit"
+            disabled={pending}
             className="rounded-xl bg-slate-900 px-6 py-3 font-semibold text-white hover:bg-slate-800"
           >
-            Save draft
+            {pending ? 'Saving…' : 'Save'}
           </button>
           <p className="text-xs text-slate-500">
             Documents receive a final number only on issuance. GST filing and
