@@ -67,3 +67,25 @@
 @media(max-width:850px){.us-columns{grid-template-columns:1fr}.us-preview{position:static}.us-card{padding:17px}.us-tabs{margin-top:19px;scroll-snap-type:x proximity}.us-tabs a{scroll-snap-align:start}.us-heading h1{font-size:26px}}
 @media(max-width:550px){.us-shell{padding:17px 12px 90px}.us-grid{grid-template-columns:1fr 1fr;gap:11px}.us-field:has(textarea),.us-field:has(input[name="tradeName"]),.us-field:has(input[name="businessType"]),.us-field:has(input[name="email"]),.us-field:has(input[name="website"]),.us-field:has(input[name="bankAccount"]),.us-field:has(input[name="bankHolder"]){grid-column:1/-1}.us-card{padding:16px 13px}.us-card-heading{gap:9px;flex-wrap:wrap}.us-extra{margin-left:0}.us-synced{font-size:9px}.us-categories{grid-template-columns:1fr 1fr;gap:13px 8px}.us-categories label{font-size:10px}.us-link-cards{grid-template-columns:1fr}.us-master form{grid-template-columns:1fr}.us-heading p{font-size:12px}.us-actions{position:sticky;bottom:5px;background:#fffefef7;border-radius:11px;border:1px solid #e7ebf3;box-shadow:0 -6px 24px #2e3e6017;padding:10px}.us-actions>*{flex:1}.us-tabs a{font-size:11px;padding:12px 10px}}
 @media(prefers-reduced-motion:reduce){.us-shell *{scroll-behavior:auto!important;transition:none!important}}
+
+
+/* Owner-only irreversible test-data reset, separated from ordinary settings. */
+.us-reset{margin-top:16px;max-width:100%}
+.us-reset-note{font-size:12px;line-height:1.65;color:#65748b;margin:10px 0 15px}
+.us-reset-open{padding:11px 15px;border:1px solid #e9b7a2;border-radius:9px;background:#fff7f3;color:#c34f2e;font-weight:800;font-size:12px;cursor:pointer}
+.us-reset-details{border-top:1px solid #efedf0;margin-top:17px;padding-top:17px;display:grid;gap:12px}
+.us-reset-details>p{font-size:12px;margin:0;color:#485771;line-height:1.6}
+.us-reset-counts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.us-reset-counts>div{background:#fff9f6;border:1px solid #f5e4dd;padding:12px;border-radius:10px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.us-reset-counts span{font-size:11px;color:#65748b}.us-reset-counts strong{font-size:14px;font-weight:850;color:#1e2940}
+.us-reset-confirm{display:grid;gap:7px;font-size:12px;font-weight:700;color:#313c52}
+.us-reset-confirm input{width:100%;border:1px solid #ebc6b8;border-radius:9px;padding:12px;color:#27344b;font:inherit;font-size:13px}
+.us-reset-confirm input:focus{outline:2px solid #e99e82}
+.us-reset-checkbox{display:flex;gap:10px;align-items:flex-start;font-size:12px;line-height:1.55;color:#344258}
+.us-reset-checkbox input{width:17px;height:17px;margin-top:1px;accent-color:#c5452a;flex-shrink:0}
+.us-reset-delete{justify-self:start;min-height:44px;padding:11px 17px;background:#b42318;color:#fff;border:0;border-radius:10px;font-size:12px;font-weight:800;cursor:pointer}
+.us-reset-delete:disabled{opacity:.4;cursor:not-allowed}
+.us-reset-result{font-size:12px;line-height:1.6;margin-top:12px}
+.us-reset-result.ok{color:#14764a}.us-reset-result.bad{color:#b42318}
+@media(max-width:670px){.us-reset-counts{grid-template-columns:repeat(2,minmax(0,1fr))}.us-reset-delete{width:100%}}
+@media(max-width:390px){.us-reset-counts{grid-template-columns:1fr}}
