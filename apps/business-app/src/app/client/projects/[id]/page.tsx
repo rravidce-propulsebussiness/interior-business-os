@@ -57,6 +57,11 @@ const timelineSchema = z.array(
     activities: z.array(z.string()),
   }),
 );
+const paymentProofSchema=z.array(z.object({
+ id:z.uuid(),requestId:z.uuid(),amount:z.number(),
+ reference:z.string(),status:z.enum(['pending','approved','rejected','reversed']),
+ date:z.string(),reviewNote:z.string(),receiptId:z.uuid().nullable(),
+}));
 const stageRequestSchema=z.array(z.object({
  id:z.uuid(),number:z.string(),label:z.string(),total:z.number(),
  date:z.string(),dueDate:z.string().nullable(),
@@ -135,13 +140,14 @@ export default async function ClientProjectPage({
     name: string,
     args: Record<string, string>,
   ) => Promise<{ data: unknown; error: { message: string } | null }>;
-  const [projectResult, timelineResult, dashboardResult, requestsResult, invoicesResult, stageRequestsResult] = await Promise.all([
+  const [projectResult, timelineResult, dashboardResult, requestsResult, invoicesResult, stageRequestsResult, paymentProofsResult] = await Promise.all([
     rpc('client_portal_project', { p_project_id: id }),
     rpc('client_portal_timeline', { p_project_id: id }),
     rpc('client_portal_dashboard', { p_project_id: id }),
     rpc('project_client_request_list', { p_project_id: id }),
     rpc('client_portal_invoices', { p_project_id: id }),
     rpc('client_portal_stage_payment_requests', { p_project_id: id }),
+    rpc('client_payment_proof_list', { p_project: id }),
   ]);
   const project = projectSchema.safeParse(projectResult.data);
   if (projectResult.error || !project.success) notFound();
@@ -152,6 +158,7 @@ export default async function ClientProjectPage({
   const latest = parsedDashboard.success ? parsedDashboard.data : null;
   const invoices=invoicesSchema.safeParse(invoicesResult.data);
   const stageRequests=stageRequestSchema.safeParse(stageRequestsResult.data);
+  const paymentProofs=paymentProofSchema.safeParse(paymentProofsResult.data);
 
   return (
     <ClientDashboard
@@ -181,6 +188,7 @@ export default async function ClientProjectPage({
       requests={parsedRequests.success&&!requestsResult.error?parsedRequests.data:[]}
       invoices={invoices.success&&!invoicesResult.error?invoices.data:[]}
       paymentRequests={stageRequests.success&&!stageRequestsResult.error?stageRequests.data:[]}
+      paymentProofs={paymentProofs.success&&!paymentProofsResult.error?paymentProofs.data:[]}
       clientEmail={auth.user.email ?? ''}
     />
   );
