@@ -38,8 +38,9 @@ export function StageChecklistItem({projectId,stageId,kind,index,title,status,no
      </select></label>
     <label>Inspection / work photo {kind==='check'?'(required to pass)':'(optional)'}
      <input type="file" name="file" accept="image/jpeg,image/png,image/webp"/></label>
+    {!photos.length&&!!photoId&&<input type="hidden" name="photo_id" value={photoId}/>}
     {!!photos.length&&<label>Or use a photo already uploaded to this project
-     <select name="photo_id" defaultValue="">
+     <select name="photo_id" defaultValue={photoId}>
       <option value="">Choose an existing photo (optional)</option>
       {photos.map(p=><option key={p.id} value={p.id}>{p.filename}</option>)}
      </select></label>}
