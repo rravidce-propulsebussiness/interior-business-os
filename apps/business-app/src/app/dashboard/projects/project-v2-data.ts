@@ -14,7 +14,7 @@ export type Stage = {id:string;title:string;status:string;phase:string;floor_cod
  instance_code:string;template_code:string;dependencies:string[];inspectionTopics:string[]};
 export type StageLink = {stage_id:string;kind:string;record_id:string};
 export type StageItemRecord=Record<string,unknown>;
-export type StageProgress={work:StageItemRecord[];checks:StageItemRecord[]};
+export type StageProgress={work:StageItemRecord[];checks:StageItemRecord[];qualityStages:StageItemRecord[]};
 export type PaymentMilestone={id:string;label:string;amount:string;currency:string;contract_number:string;
  contract_id:string};
 export type ProjectQuotation={id:string;number:string;revisionId:string;status:string;createdAt:string};
@@ -64,7 +64,7 @@ function stageProgress(value:unknown):StageProgress{
  const r=obj(value);
  const list=(v:unknown):StageItemRecord[]=>Array.isArray(v)?
   v.filter((x):x is StageItemRecord=>Boolean(x)&&typeof x==='object'&&!Array.isArray(x)):[];
- return {work:list(r.work),checks:list(r.checks)};
+ return {work:list(r.work),checks:list(r.checks),qualityStages:list(r.qualityStages)};
 }
 function obj(value:unknown):Record<string,unknown>{
  return value&&typeof value==='object'&&!Array.isArray(value)?value as Record<string,unknown>:{};
@@ -124,7 +124,7 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
   payments:has('payment.view'),purchases:has('purchase.view'),
   team:has('team.manage')||has('team.view'),quotation:has('quotation.view','quotation'),
  };
- const [org,user,industries,customer,taskResult,siteResult,stageResult,stageLinkResult,stageProgressResult,receipts,orders,contract,agreementResult,preflightResult,advanceResult]=await Promise.all([
+ const [org,user,industries,customer,taskResult,siteResult,stageResult,stageLinkResult,stageProgressResult,qualityResult,receipts,orders,contract,agreementResult,preflightResult,advanceResult]=await Promise.all([
   s.repository.organization(s.org),s.authorization.requireAuthenticatedUser(),
   s.repository.industries(),
   project.customer_id?s.client.from('customers').select('id,display_name').eq('organization_id',s.org)
@@ -135,6 +135,7 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
   s.client.rpc('construction_project_read',{p_organization_id:s.org,p_project_id:id}),
   s.client.rpc('construction_stage_record_read',{p_organization_id:s.org,p_project_id:id}),
   s.client.rpc('project_stage_checklist_read' as never,{p_org:s.org,p_project:id} as never),
+  s.client.rpc('construction_quality_read',{p_org:s.org,p_project:id}),
   permissions.payments?s.client.from('payments').select('id,payment_number,payment_date,amount,status')
     .eq('organization_id',s.org).eq('project_id',id).order('payment_date',{ascending:false})
     .limit(250):Promise.resolve({data:null,error:null}),
@@ -317,7 +318,9 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
    client:customer.data?.display_name??'Not linked',
    industry:(project.industry_id?industriesById.get(project.industry_id):null)??'Project',progress
   },
-  site,stages:stageList,links:linkList,stageProgress:stageProgress(stageProgressResult.error?null:stageProgressResult.data),milestones,quotations,quotePaymentTriggers,stageRequests,
+  site,stages:stageList,links:linkList,stageProgress:{...stageProgress(stageProgressResult.error?null:stageProgressResult.data),
+    qualityStages:Array.isArray(obj(qualityResult.error?null:qualityResult.data).stages)?
+     (obj(qualityResult.data).stages as StageItemRecord[]):[]},milestones,quotations,quotePaymentTriggers,stageRequests,
   preflight,advance,requests,
   transactions:trans,purchaseOrders:po,
   tasks:tasks.map(t=>({id:t.id,title:t.title,planned_start:t.planned_start,status:t.status})),
@@ -372,12 +375,13 @@ async function assignedProjectWorkspace(id:string):Promise<WorkspaceData>{
  if(read.error||!read.data)notFound();
  const raw=obj(read.data),p=obj(raw.project);
  if(stringValue(p.id)!==id)notFound();
- const [org,stagesResult,tasksResult,stageProgressResult]=await Promise.all([
+ const [org,stagesResult,tasksResult,stageProgressResult,qualityResult]=await Promise.all([
   repository.organization(context.organizationId),
   client.rpc('construction_project_read',{p_organization_id:context.organizationId,p_project_id:id}),
   client.from('project_tasks').select('id,project_id,title,status,planned_start,completion_percentage,weight')
    .eq('organization_id',context.organizationId).eq('project_id',id).limit(1200),
   client.rpc('project_stage_checklist_read' as never,{p_org:context.organizationId,p_project:id} as never),
+  client.rpc('construction_quality_read',{p_org:context.organizationId,p_project:id}),
  ]);
  if(!org)notFound();
  const stagesRaw=obj(stagesResult.error?null:stagesResult.data);
@@ -409,7 +413,9 @@ async function assignedProjectWorkspace(id:string):Promise<WorkspaceData>{
    projectType:'',address:'Project site',createdAt:'',client:'Project team',customerId:null,
    industry:'Site Delivery',
    progress:workCompletionByProject([id],tasks&&tasks.length<1200?tasks:null).get(id)??null},
-  site,stages,links:[],stageProgress:stageProgress(stageProgressResult.error?null:stageProgressResult.data),milestones:[],quotations:[],quotePaymentTriggers:[],transactions:null,purchaseOrders:null,tasks:(tasks??[]).map(t=>({
+  site,stages,links:[],stageProgress:{...stageProgress(stageProgressResult.error?null:stageProgressResult.data),
+    qualityStages:Array.isArray(obj(qualityResult.error?null:qualityResult.data).stages)?
+     (obj(qualityResult.data).stages as StageItemRecord[]):[]},milestones:[],quotations:[],quotePaymentTriggers:[],transactions:null,purchaseOrders:null,tasks:(tasks??[]).map(t=>({
    id:t.id,title:t.title,planned_start:t.planned_start,status:t.status,
   })),
   contractValue:null,expenditure:null,requests:null,agreement:null,projectRaw:null,
