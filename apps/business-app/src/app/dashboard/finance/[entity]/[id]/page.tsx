@@ -32,6 +32,11 @@ export default async function FinanceDetail({
     contractId = entity === 'contracts' ? id : text(r, 'contract_id'),
     status = text(r, 'status'),
     version = r.version;
+  // Payment details are displayed in the canonical Finance receipt ledger.
+  if (entity === 'payments' && s.allowed('invoice.view')) {
+    redirect('/dashboard/finance?tab=payments' +
+      (contractId ? '&contract_id=' + encodeURIComponent(contractId) : ''));
+  }
   // Use the existing project Quote & Agreement section for company users.
   // Keep Finance contract detail for finance-only staff who cannot view the
   // project; do not strand them behind project access restrictions.
