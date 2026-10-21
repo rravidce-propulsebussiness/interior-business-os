@@ -29,6 +29,11 @@ CREATE TABLE private.client_payment_proofs (
  FOREIGN KEY(organization_id,payment_id) REFERENCES public.payments(organization_id,id),
  FOREIGN KEY(organization_id,receipt_id) REFERENCES public.receipts(organization_id,id)
 );
+-- Prevent replay of a verified bank reference through any payment entry
+-- method (including manual Finance) across the same company.
+CREATE UNIQUE INDEX recorded_bank_reference_once_per_company
+ ON public.payments(organization_id,upper(btrim(external_reference)))
+ WHERE status='recorded' AND length(btrim(external_reference))>=6;
 CREATE UNIQUE INDEX one_pending_client_proof_per_request
  ON private.client_payment_proofs(organization_id,request_id)
  WHERE status='pending';
@@ -267,6 +272,9 @@ BEGIN
   WHERE organization_id=p_org AND id=pr.request_id AND status='issued';
  IF NOT FOUND THEN RAISE EXCEPTION 'Payment request no longer issued'
     USING ERRCODE='22023';END IF;
+ -- Serialize Finance and approval against the same contractual ledger.
+ PERFORM 1 FROM public.contracts
+  WHERE organization_id=p_org AND id=pr.contract_id FOR UPDATE;
  IF EXISTS(SELECT 1 FROM public.payments
      WHERE organization_id=p_org AND status='recorded'
        AND upper(btrim(external_reference))=pr.bank_reference) THEN
