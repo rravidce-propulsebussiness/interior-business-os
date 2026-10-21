@@ -91,6 +91,7 @@ if (!initializeOnly) {
   // Exercises actual company data deletion in an isolated transaction,
   // ending with ROLLBACK so demo fixtures are retained for later checks.
   assertionFile('test-data-reset');
+  assertionFile('client-payment-proof-approval');
   assertionFile('deployment');
 } else {
   console.log(

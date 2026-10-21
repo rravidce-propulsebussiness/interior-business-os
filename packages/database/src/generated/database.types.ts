@@ -10846,6 +10846,38 @@ export interface Database {
         Args: { p_message: string; p_signature: string };
         Returns: Json;
       };
+      client_payment_proof_list: { Args: { p_project: string }; Returns: Json };
+      client_payment_proof_media: {
+        Args: { p_project: string; p_proof: string };
+        Returns: Json;
+      };
+      client_payment_proof_prepare: {
+        Args: {
+          p_project: string;
+          p_request: string;
+          p_amount: number;
+          p_reference: string;
+        };
+        Returns: Json;
+      };
+      client_payment_proof_receipt: {
+        Args: { p_project: string; p_proof: string };
+        Returns: Json;
+      };
+      client_payment_proof_submit: {
+        Args: {
+          p_project: string;
+          p_request: string;
+          p_amount: number;
+          p_reference: string;
+          p_method: string;
+          p_proof_id: string;
+          p_object_key: string;
+          p_mime: string;
+          p_bytes: number;
+        };
+        Returns: string;
+      };
       client_portal_access_list: {
         Args: { p_organization_id: string; p_customer_id: string };
         Returns: Json;
@@ -12195,6 +12227,26 @@ export interface Database {
           p_status: string;
         };
         Returns: undefined;
+      };
+      staff_payment_proof_decide: {
+        Args: {
+          p_org: string;
+          p_proof: string;
+          p_action: string;
+          p_method?: string;
+          p_confirm_bank_credit?: boolean;
+          p_allow_partial?: boolean;
+          p_note?: string;
+        };
+        Returns: Json;
+      };
+      staff_payment_proof_list: {
+        Args: { p_org: string; p_contract?: string };
+        Returns: Json;
+      };
+      staff_payment_proof_media: {
+        Args: { p_org: string; p_proof: string };
+        Returns: Json;
       };
       website_asset_manage: {
         Args: {

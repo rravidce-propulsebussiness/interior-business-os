@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { financeServices } from './service';
 import { FinanceForm } from './form';
 import { nextMilestoneDue, type MilestoneDue } from './payment-due';
+import { PaymentProofReview,type SubmittedProof } from './payment-proof-review';
 
 const idPattern=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const value=(row:Record<string,unknown>,key:string)=>
@@ -46,6 +47,7 @@ export async function CustomerPaymentsPanel({
  let methods:Record<string,unknown>[]=[];
  let invoices:Record<string,unknown>[]=[];
  let stageRequests:Record<string,unknown>[]=[];
+ let proofs:SubmittedProof[]=[];
  let loadError='';
  let due:MilestoneDue|null=null;
  try {
@@ -68,6 +70,14 @@ export async function CustomerPaymentsPanel({
    const req=await s.finance.search('payment_requests',
      {contract_id:selected,status:'issued'},1);
    stageRequests=req.rows;
+  }
+  if(canRecord&&(owner||s.context.roles.some(role=>role.name.toLowerCase()==='accountant'))){
+   const result=await s.client.rpc('staff_payment_proof_list',{
+    p_org:s.org,...(selected?{p_contract:selected}:{}),
+   });
+   if(!result.error&&Array.isArray(result.data))
+    proofs=(result.data as unknown as SubmittedProof[]).filter(proof=>
+      proof&&proof.id&&typeof proof.amount==='number');
   }
   if(selected&&canSeeInvoices&&canAllocate){
    const invoiceResponse=await s.finance.search('invoices',
@@ -125,6 +135,26 @@ export async function CustomerPaymentsPanel({
      </div>)}
    </div>:<p className="fw-muted">No stage payment request issued yet.</p>}
   </section>}
+  {canRecord&&(owner||s.context.roles.some(role=>role.name.toLowerCase()==='accountant'))&&
+   <section className="fw-panel">
+    <div className="fw-panel-head"><div>
+     <h2>Customer payment screenshots · Bank verification</h2>
+     <p>Approve only after confirming the actual bank credit. Approval records
+      a payment and generates its receipt once. Screenshots alone are not receipts.</p>
+    </div></div>
+    {proofs.filter(p=>p.status==='pending').length?
+     proofs.filter(p=>p.status==='pending').map(proof=>
+      <PaymentProofReview key={proof.id} proof={proof}
+       owner={owner} methods={methods.map(m=>({
+        id:value(m,'id'),name:value(m,'name')}))}/>)
+     :<p className="fw-muted">No payment screenshots awaiting verification.</p>}
+    {proofs.some(p=>p.status!=='pending')&&<details className="fw-payment-inline">
+     <summary>Reviewed screenshots ({proofs.filter(p=>p.status!=='pending').length})</summary>
+     {proofs.filter(p=>p.status!=='pending').map(p=><p key={p.id}
+       className="fw-muted">{p.requestNumber} · {cash(String(p.amount))}
+       {' · '+p.status} · {p.reference}</p>)}
+    </details>}
+   </section>}
   <section className="fw-panel">
    <div className="fw-panel-head"><div>
     <h2>Receipt history</h2><p>Only actual recorded amounts count. Quotation milestones and proforma invoices are not receipts.</p>

@@ -55,7 +55,7 @@ async function request(
 ) {
   const values = config();
   if (!values) throw new Error('R2 media is not configured');
-  if (!/^site\/[a-f0-9-]{36}\/[a-f0-9-]{36}\/[a-f0-9-]{36}$/.test(key))
+  if (!/^(?:site|payment-proof)\/[a-f0-9-]{36}\/[a-f0-9-]{36}\/[a-f0-9-]{36}$/.test(key))
     throw new Error('Invalid R2 object key');
   if (bytes && bytes.length > MAX_BYTES) throw new Error('File too large');
   const host = values.account + '.r2.cloudflarestorage.com';
