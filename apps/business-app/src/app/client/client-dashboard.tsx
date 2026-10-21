@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { signOut } from '@business-os/auth/actions';
 import { ClientDesignReview } from './client-design-review';
+import { ClientPaymentProofForm } from './client-payment-proof-form';
 import { ClientProjectTimeline } from './project-timeline';
 import { ClientProjectRequests, type ProjectClientRequest } from '../project-request-widgets';
 
@@ -65,6 +66,11 @@ export type ClientUpdate = {
   summary: string;
   created_at: string;
 };
+export type ClientPaymentProof={
+ id:string;requestId:string;amount:number;reference:string;
+ status:'pending'|'approved'|'rejected'|'reversed';date:string;
+ reviewNote:string;receiptId:string|null;
+};
 export type ClientStagePaymentRequest={
  id:string;number:string;label:string;total:number;date:string;
  dueDate:string|null;paymentStatus:'payment_requested';
@@ -100,6 +106,7 @@ export type ClientDashboardData = {
   requests: ProjectClientRequest[];
   invoices: ClientInvoice[];
   paymentRequests: ClientStagePaymentRequest[];
+  paymentProofs: ClientPaymentProof[];
   clientEmail: string;
 };
 
@@ -308,6 +315,7 @@ export function ClientDashboard({
   requests,
   invoices,
   paymentRequests,
+  paymentProofs,
   clientEmail,
 }: ClientDashboardData) {
   const [search, setSearch] = useState('');
@@ -1020,7 +1028,26 @@ export function ClientDashboard({
                   <small>{request.number} · Certified milestone payment request</small>
                   <strong>₹{request.total.toLocaleString('en-IN',{
                     maximumFractionDigits:2,minimumFractionDigits:2})}</strong>
-                  <small>Payment requested · Not a receipt</small>
+                  {(()=>{
+                    const proof=paymentProofs.find(p=>p.requestId===request.id);
+                    return proof?<div style={{display:'grid',gap:6}}>
+                     <strong>{proof.status==='approved'?'Paid and verified':
+                      proof.status==='pending'?'Bank verification pending':
+                      proof.status==='reversed'?'Payment reversed':'Evidence rejected — resubmit'}</strong>
+                     <small>Reference: {proof.reference} · Paid amount claimed:
+                      ₹{proof.amount.toLocaleString('en-IN')}</small>
+                     {proof.reviewNote&&<small>{proof.reviewNote}</small>}
+                     <a href={'/client/payment-proofs/'+proof.id+'/file?project='+project.id}
+                      className="pc-view-link" target="_blank" rel="noreferrer">
+                      View submitted evidence</a>
+                     {proof.status==='approved'&&proof.receiptId&&
+                      <a href={'/client/payment-proofs/'+proof.id+'/receipt?project='+project.id}
+                       className="pc-view-link">Download official receipt</a>}
+                     {proof.status==='rejected'&&<ClientPaymentProofForm
+                      projectId={project.id} requestId={request.id} amount={request.total}/>}
+                    </div>:<ClientPaymentProofForm
+                      projectId={project.id} requestId={request.id} amount={request.total}/>;
+                  })()}
                  </div>
                  <a href={'/client/payment-requests/'+request.id+'/pdf?project='+project.id}
                    className="pc-view-link" download>
