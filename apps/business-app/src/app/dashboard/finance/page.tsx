@@ -253,7 +253,7 @@ export default async function Finance({
         </div>
       </>}
       {tab === 'payments' && (canPayments
-        ? <CustomerPaymentsPanel contractId={params.contract_id} query={params.q ?? ''} page={Number(params.payment_page ?? 1)}/>
+        ? <CustomerPaymentsPanel contractId={params.contract_id ?? ''} query={params.q ?? ''} page={Number(params.payment_page ?? 1)}/>
         : <section className="fw-panel"><p className="fw-muted">Payment viewing access is required for this tab.</p></section>)}
       {tab === 'expenses' && <>
         <div className="fw-metrics">
