@@ -7,6 +7,7 @@ import { idSchema } from '@business-os/shared';
 import { ActionForm } from '@business-os/ui/action-form';
 import { finalizeGstDocument } from '../actions';
 import { PrintDocumentButton } from './print-button';
+import { ShareInvoicePdf } from './share-invoice-pdf';
 import { readSupplierBillAttachment } from '../supplier-bill-storage';
 
 export const dynamic = 'force-dynamic';
@@ -82,7 +83,10 @@ export default async function GstDocumentDetail({
               : 'Supplier purchase bill'}{' '}
             · {doc.number ?? 'Draft'}
           </h1>
-          <p className="text-sm capitalize text-slate-500">{doc.status}</p>
+          <p className="text-sm capitalize text-slate-500">
+            {doc.status==='issued'&&doc.kind==='sales_invoice'
+             ?'Issued · Payment requested (not proof of payment)':doc.status}
+           </p>
         </div>
         <div className="flex flex-wrap gap-2">
           {doc.kind === 'purchase_bill' && billAttachment && (
@@ -92,6 +96,13 @@ export default async function GstDocumentDetail({
             </a>
           )}
           {doc.status !== 'draft' && <PrintDocumentButton />}
+          {doc.status==='issued'&&doc.kind==='sales_invoice'&&<>
+           <a href={'/dashboard/billing/'+id+'/pdf'}
+             className="rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold"
+             download>Download PDF</a>
+           <ShareInvoicePdf url={'/dashboard/billing/'+id+'/pdf'}
+             number={doc.number??'invoice'}/>
+          </>}
           {doc.status === 'draft' && canEdit && (
             <Link
               href={'/dashboard/billing/new?edit=' + id}
