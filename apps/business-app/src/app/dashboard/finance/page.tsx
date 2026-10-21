@@ -7,15 +7,17 @@ import { OwnerShell, type OwnerNavItem, OwnerIcon } from '../owner-shell';
 import { OwnerMobileNav } from '../owner-mobile-nav';
 import { createGstTemplatesRepository, type GstFilingDocument } from '@business-os/database/gst-templates';
 import { SalaryPanel } from './salary-panel';
+import { CustomerPaymentsPanel } from './customer-payments-panel';
 import '../owner-dashboard.css';
 import '../command-centre.css';
 import './finance-home.css';
 
 export const dynamic = 'force-dynamic';
-type Tab = 'invoices' | 'expenses' | 'gst' | 'salaries';
+type Tab = 'invoices' | 'payments' | 'expenses' | 'gst' | 'salaries';
 type Period = 'month' | 'quarter' | 'year' | 'all';
 const tabs: { id: Tab; label: string; icon: 'billing' | 'expenses' | 'reports' | 'team' }[] = [
   { id: 'invoices', label: 'Invoices', icon: 'billing' },
+  { id: 'payments', label: 'Payments', icon: 'billing' },
   { id: 'expenses', label: 'Expenses', icon: 'expenses' },
   { id: 'gst', label: 'GST', icon: 'reports' },
   { id: 'salaries', label: 'Salaries', icon: 'team' },
@@ -103,7 +105,7 @@ function GstInline({from,to,rows,invalid}:{
 }
 export default async function Finance({
   searchParams,
-}: { searchParams: Promise<{ tab?: string; period?: string; q?: string; month?: string; from?: string; to?: string }> }) {
+}: { searchParams: Promise<{ tab?: string; period?: string; q?: string; month?: string; from?: string; to?: string; contract_id?: string; payment_page?: string }> }) {
   const { authorization, repository, client, user } = await pageServices();
   const ctx = await activeOrganization();
   if (!ctx) return <main className="fw-empty"><h1>Select a company to open Finance.</h1><Link href="/dashboard">Dashboard</Link></main>;
@@ -214,7 +216,7 @@ export default async function Finance({
     notificationsEnabled={grants.has('notification.view')}>
     <main className="fw-page" id="main-content" tabIndex={-1}>
       <div className="fw-crumb"><Link href="/dashboard">Dashboard</Link><span>/</span><strong>Finance</strong></div>
-      <header className="fw-heading"><div><h1>Finance</h1><p>Manage invoices, expenses, GST and salaries. Keep your business finances organized.</p></div>
+      <header className="fw-heading"><div><h1>Finance</h1><p>Invoices, customer payments, expenses, GST and salaries in one workspace.</p></div>
         {headlineAction && canCreate && <a className="fw-primary" href={headlineAction.href}>＋ {headlineAction.label}</a>}
       </header>
       <nav className="fw-tabs" aria-label="Finance sections">{tabs.map((t) =>
@@ -250,6 +252,9 @@ export default async function Finance({
           <p className="fw-footnote">Sales invoices and project advance proformas appear in one register. Proformas are payment requests, not GST invoices or proof of payment. Only verified receipt allocations determine what has actually been received.</p>
         </div>
       </>}
+      {tab === 'payments' && (canPayments
+        ? <CustomerPaymentsPanel contractId={params.contract_id} query={params.q ?? ''} page={Number(params.payment_page ?? 1)}/>
+        : <section className="fw-panel"><p className="fw-muted">Payment viewing access is required for this tab.</p></section>)}
       {tab === 'expenses' && <>
         <div className="fw-metrics">
           <Metric title="Supplier bills" value={money(recorded.reduce((s, b) => s + Number(b.total), 0))} detail="Recorded bills (not proof of payment)" icon="expenses"/>
