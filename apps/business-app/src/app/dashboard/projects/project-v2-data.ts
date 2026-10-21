@@ -29,6 +29,7 @@ export type WorkspaceData = {
  stages:Stage[];links:StageLink[];milestones:PaymentMilestone[];quotations:ProjectQuotation[];
  quotePaymentTriggers:{name:string;percent:number;stageCodes:string[]}[];
  transactions: {id:string;number:string;date:string;amount:number;status:string}[]|null;
+ stageRequests?: {id:string;number:string;amount:number;status:string;date:string}[];
  purchaseOrders:{id:string;number:string;status:string;date:string}[]|null;
  tasks:{id:string;title:string;planned_start:string|null;status:string}[];
  contractValue:number|null;expenditure:number|null;requests:ClientRequestRow[]|null;
@@ -285,6 +286,16 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
       responded_at:stringValue(x.responded_at)||null,
     };
    }):null;
+ const contractId=contract.data?.[0]?.id;
+ const reqs=contractId&&has('payment_request.view')
+  ?await s.client.from('payment_requests')
+   .select('id,request_number,amount,status,issued_at')
+   .eq('organization_id',s.org).eq('contract_id',contractId)
+   .order('issued_at',{ascending:false}).limit(120):null;
+ const stageRequests=reqs&&!reqs.error?reqs.data?.map(r=>({
+  id:r.id,number:r.request_number,amount:Number(r.amount),
+  status:r.status,date:r.issued_at,
+ }))??[]:[];
  const quotePaymentTriggers=(proposal??[]).map((row,index)=>({
   name:row.name,percent:row.percent,stageCodes:bindings?.[index]??[],
  }));
@@ -297,7 +308,7 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
    client:customer.data?.display_name??'Not linked',
    industry:(project.industry_id?industriesById.get(project.industry_id):null)??'Project',progress
   },
-  site,stages:stageList,links:linkList,milestones,quotations,quotePaymentTriggers,
+  site,stages:stageList,links:linkList,milestones,quotations,quotePaymentTriggers,stageRequests,
   preflight,advance,requests,
   transactions:trans,purchaseOrders:po,
   tasks:tasks.map(t=>({id:t.id,title:t.title,planned_start:t.planned_start,status:t.status})),
