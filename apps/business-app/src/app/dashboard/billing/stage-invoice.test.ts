@@ -14,6 +14,7 @@ const migrations = file('../../../../../../packages/database/supabase/migrations
 const customerMigration = file('../../../../../../packages/database/supabase/migrations/20261017000700_gst_existing_customer_link.sql');
 const billingCustomersMigration = file('../../../../../../packages/database/supabase/migrations/20261017000800_invoice_client_options_and_save.sql');
 const wonLeadMigration = file('../../../../../../packages/database/supabase/migrations/20261017000900_won_lead_invoice_picker_no_reason.sql');
+const issueMigration=file('../../../../../../packages/database/supabase/migrations/20261021000400_issued_sales_invoices_client_requests.sql');
 const leadStage = file('../crm/leads/lead-inline-controls.tsx');
 const conversionPage = file('../crm/leads/[id]/convert/page.tsx');
 const inlineProject = file('../crm/leads/lead-project-action.tsx');
@@ -46,7 +47,7 @@ describe('lead-linked GST milestone invoicing',()=>{
     expect(screen).toContain('name="leadId"');
     expect(screen).toContain('name="stageNumber"');
     expect(screen).toContain('name="revisionId"');
-    expect(screen).toContain('Save &amp; preview');
+    expect(screen).toContain('Save Invoice');
     expect(screen).toContain('className="psi-mobile-actions"');
     expect(screen).toContain('disabledSave');
     expect(page).toContain("params.kind === 'purchase_bill'");
@@ -87,7 +88,8 @@ describe('lead-linked GST milestone invoicing',()=>{
     expect(customerMigration).toContain("REVOKE ALL ON private.gst_customer_invoice_links");
     expect(customerMigration).not.toContain('INSERT INTO public.customers');
     expect(customerMigration).not.toContain('INSERT INTO public.projects');
-    expect(actions).toContain('.saveCustomerDocument(');
+    expect(actions).toContain("client.rpc('gst_sales_invoice_save_and_issue'");
+    expect(issueMigration).toContain('public.gst_customer_invoice_save(p_org,p_input,p_customer)');
     expect(actions).toContain("idSchema.parse(customerId)");
   });
   it('offers project creation immediately after marking Won and never duplicates quote prospects',()=>{
@@ -131,7 +133,7 @@ describe('lead-linked GST milestone invoicing',()=>{
     expect(screen).toContain("type=\"button\" className=\"psi-project-create\"");
     expect(screen).toContain("setProjectDialog(true)");
     expect(page).toContain('existingWonLeadId={existingWonLeadId}');
-    expect(actions).toContain('.saveWonLeadDocument(');
+    expect(issueMigration).toContain('public.gst_won_lead_invoice_save(p_org,p_input,p_won_lead)');
     expect(wonLeadMigration).toContain("l.lifecycle='won'");
     expect(wonLeadMigration).toContain("l.converted_customer_id IS NULL");
     expect(wonLeadMigration).toContain('private.finance_require(p_org,\'invoice.create\')');
@@ -149,11 +151,11 @@ describe('lead-linked GST milestone invoicing',()=>{
     expect(wonLeadMigration).toContain('Lost reason required');
     expect(wonLeadMigration).toContain("private.crm_require(org,'lead.win')");
   });
-  it('routes linked sales draft through the validated tenant RPC',()=>{
+  it('routes linked sales invoice through the validated tenant RPC',()=>{
     expect(actions).toContain('idSchema.parse(leadId)');
     expect(actions).toContain('idSchema.parse(revisionId)');
     expect(actions).toContain('.min(1).max(40)');
-    expect(actions).toContain('.saveStageDocument(');
+    expect(issueMigration).toContain('public.gst_stage_invoice_save(p_org,p_input,p_stage_lead,p_revision,p_stage)');
     expect(actions).toContain("revalidatePath('/dashboard/projects')");
     expect(migrations).toContain('private.finance_require(p_org');
     expect(migrations).toContain('l.lifecycle');
