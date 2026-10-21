@@ -154,8 +154,10 @@ export async function saveGstDocument(form: FormData) {
         throw new DomainError('VALIDATION_FAILED');
       if(input.documentType!=='tax_invoice'){
         // Keep the classification on the saved document for future audit.
-        const clean=input.notes.replace(/^Non-GST category: [a-z_]+\\n/,'');
-        const memo='Non-GST category: '+reason+'\\n'+clean;
+        const nl=String.fromCharCode(10);
+        const clean=input.notes.startsWith('Non-GST category: ')
+          ?input.notes.substring(input.notes.indexOf(nl)+1):input.notes;
+        const memo='Non-GST category: '+reason+nl+clean;
         if(memo.length>3000)throw new DomainError('VALIDATION_FAILED');
         input.notes=memo;
       }
