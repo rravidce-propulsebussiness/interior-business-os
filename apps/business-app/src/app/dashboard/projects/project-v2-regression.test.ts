@@ -34,7 +34,7 @@ describe('Projects v2 one screen per route',()=>{
   expect(loader).toContain('workCompletionByProject');
   expect(ui).toContain("status==='recorded'");
   expect(loader).toContain('expenditure:null');
-  expect(ui).toContain('Finance workspace');
+  expect(ui).toContain('Finance payments');
  });
 });
 
@@ -144,7 +144,8 @@ it('keeps site readiness and quotation completion inside the actual project time
  expect(ui).toContain('Site execution requirements');
  expect(ui).toContain('Next action: {readinessStep?.title');
  expect(ui).toContain("d.agreement?.authorized===true");
- expect(ui).toContain("'/dashboard/finance/payments/new?contract_id='");
+ expect(ui).toContain("'/dashboard/finance?tab=payments&contract_id='");
+ expect(ui).not.toContain("'/dashboard/finance/payments/new?contract_id='");
  expect(ui).not.toContain("'/dashboard/finance/payment_schedules/new?contract_id='");
  expect(ui).toContain('Sync agreed payment milestones');
  expect(ui).toContain('The stage-wise payment plan is already saved in the signed quotation.');
@@ -177,4 +178,11 @@ it('reuses signed quote payment stages without duplicate finance schedule entry'
  expect(route).toContain("entity === 'payment_schedules'");
  expect(route).toContain("redirect('/dashboard/projects/'");
  expect(route).toContain("'/payments'");
+});
+
+it('keeps project payments read-only and sends every receipt to the single Finance tab',()=>{
+ expect(ui).toContain("label='Finance ledger'".replaceAll("'",'\"'));
+ expect(ui).toContain("'/dashboard/finance?tab=payments&contract_id='");
+ expect(ui).toContain('Read-only mirror of recorded and voided receipts in Finance');
+ expect(ui).not.toContain("'/dashboard/finance/payments/new?contract_id='");
 });

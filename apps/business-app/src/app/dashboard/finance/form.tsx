@@ -72,6 +72,7 @@ export function FinanceForm({
   itemsKey = 'items',
   itemDefaults = {},
   maxItems = 100,
+  successHref,
 }: {
   initial: Values;
   title: string;
@@ -80,6 +81,7 @@ export function FinanceForm({
   itemsKey?: string;
   itemDefaults?: Values;
   maxItems?: number;
+  successHref?: string;
 }) {
   const input =
     initial.input && typeof initial.input === 'object'
@@ -138,7 +140,7 @@ export function FinanceForm({
             const result = await financeCommand(command);
             setMessage(result.message);
             if (result.id && result.entity) {
-              router.push(`/dashboard/finance/${result.entity}/${result.id}`);
+              router.push(successHref ?? `/dashboard/finance/${result.entity}/${result.id}`);
               router.refresh();
             }
           } catch {

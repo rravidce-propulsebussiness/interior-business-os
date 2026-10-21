@@ -5,7 +5,7 @@
 .fw-crumb{display:flex;gap:10px;color:var(--fw-muted);font-size:12px;margin-bottom:16px}.fw-crumb strong{color:#263450}
 .fw-heading{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:20px}.fw-heading h1{margin:0;font-size:clamp(26px,3vw,35px);line-height:1.1;letter-spacing:-.04em;font-weight:850}.fw-heading p{margin:6px 0 0;color:#697a94;font-size:12px;line-height:1.5}
 .fw-primary{display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;gap:8px;border-radius:11px;padding:12px 17px;background:linear-gradient(130deg,#ff7824,#fe5105);color:#fff!important;font-weight:800;font-size:12px;box-shadow:0 5px 14px #f6571333}.fw-primary:hover{filter:brightness(1.04)}
-.fw-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;background:#fff;border:1px solid #f2e7df;border-radius:14px;margin-bottom:19px;overflow:hidden}
+.fw-tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;background:#fff;border:1px solid #f2e7df;border-radius:14px;margin-bottom:19px;overflow:hidden}
 .fw-tabs a{display:flex;align-items:center;justify-content:center;gap:9px;text-align:center;white-space:nowrap;min-height:52px;padding:11px 6px;font-size:12px;font-weight:750;color:#405372;border-bottom:3px solid transparent}
 .fw-tabs a:hover{background:#fff3eb;color:#ed550e}.fw-tabs a.fw-tab-active{border-color:var(--fw-orange);color:#f1570e;background:#fffaf7}
 .fw-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:19px}
@@ -61,3 +61,29 @@
 .fw-gst-secondary{display:inline-flex;border:1px solid #ffcbb0;border-radius:9px;padding:11px 13px;color:#e9550e;font-weight:750}
 .fw-gst-panel .fw-footnote{padding:17px 0 0}
 @media(max-width:760px){.fw-gst-registers{grid-template-columns:1fr}.fw-gst-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.fw-gst-stats strong{font-size:16px}.fw-gst-panel{padding:14px}.fw-gst-period{gap:8px}.fw-gst-period input{font-size:10px}.fw-gst-registers a{font-size:10px}}
+
+/* One customer-payment ledger inside the owner Finance tabs. Never
+   treat a quotation schedule, proforma, or unallocated promise as cash. */
+.fw-payment-workspace{display:grid;gap:0;min-width:0}
+.fw-payment-filter{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap}
+.fw-payment-filter label{display:grid;gap:7px;font-size:12px;font-weight:750;min-width:min(100%,240px);flex:1;color:#53627c}
+.fw-payment-filter select{width:100%;height:43px;border-radius:9px;border:1px solid #eeded4;background:#fff;padding:8px 11px;color:#1d2b47;font-size:12px}
+.fw-payment-filter button{border:0;border-radius:9px;background:#fe5105;color:white;padding:11px 14px;font-size:12px;font-weight:800;cursor:pointer}
+.fw-payment-summary{display:flex;flex-wrap:wrap;gap:11px;margin-top:17px}
+.fw-payment-summary span{display:grid;gap:5px;background:#fff9f4;border:1px solid #f6e7dc;border-radius:11px;padding:12px 15px;min-width:160px}
+.fw-payment-summary small{font-size:11px;color:#697990}.fw-payment-summary strong{font-size:18px;color:#182744;font-variant-numeric:tabular-nums}
+.fw-payment-history{border:1px solid #f3e5da;border-radius:12px;overflow:hidden}
+.fw-payment-history-row{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:13px 14px;border-bottom:1px solid #f3e9e1}
+.fw-payment-history-row:last-child{border-bottom:0}
+.fw-payment-history-row div{display:grid;gap:5px;min-width:0}
+.fw-payment-history-row strong{font-size:12px;color:#23324e}
+.fw-payment-history-row small{font-size:11px;color:#7d8a9b}
+.fw-payment-more{display:inline-flex;color:#ee5a0c;font-size:12px;font-weight:800;padding:13px 7px 0}
+.fw-payment-inline{border-radius:12px;border:1px solid #f2d9c8;background:#fffaf7;margin-top:13px;padding:14px}
+.fw-payment-inline>summary{font-weight:800;color:#ed590e;font-size:13px;cursor:pointer}
+.fw-payment-inline form{max-width:100%;margin:14px 0 0;padding:0;gap:12px}
+.fw-payment-inline form label{font-size:12px;font-weight:700;color:#37465e}
+.fw-payment-inline form input,.fw-payment-inline form select,.fw-payment-inline form textarea{border:1px solid #efded2;border-radius:9px;background:white;max-width:100%;min-height:39px;padding:8px;color:#22314b;font-size:12px}
+.fw-payment-inline form button[type=submit]{background:#fe5105;color:white;border:0;border-radius:10px;font-size:12px;font-weight:800;padding:12px 15px}
+.fw-payment-inline .fw-footnote{padding:12px 0 0}
+@media(max-width:760px){.fw-tabs a{padding:9px 2px;font-size:9px}.fw-payment-filter{display:grid}.fw-payment-filter label{min-width:0}.fw-payment-filter button{width:100%}.fw-payment-summary span{flex:1;min-width:125px}.fw-payment-inline{padding:11px}.fw-payment-history-row{padding:12px 10px}}

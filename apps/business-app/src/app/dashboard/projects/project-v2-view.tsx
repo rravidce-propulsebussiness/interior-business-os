@@ -176,8 +176,8 @@ function ProjectStageWorkflow({d,code}:{d:WorkspaceData;code:string}){
       href:contractHref,action:'View agreement terms'}
   :!d.advance?.received
   ?{title:'Record advance actually received',detail:'The advance invoice is issued, but no payment has been verified. Record a receipt only after receiving funds.',
-    href:'/dashboard/finance/payments/new?contract_id='+d.agreement.contractId,
-    action:'Record received payment'}
+    href:'/dashboard/finance?tab=payments&contract_id='+d.agreement.contractId,
+    action:'Open Finance payments'}
   :!d.agreement.authorized
   ?{title:'Confirm site-start clearance',detail:'Verify current signed evidence and required payment records before physical construction.',
     href:contractHref,action:'View project agreement'}
@@ -528,12 +528,12 @@ function Payments({d}:{d:WorkspaceData}){
    <article className="pv2-stat"><small>Pending</small><strong>{formatMoney(d.contractValue!==null&&total!==null?Math.max(0,d.contractValue-total):null)}</strong></article>
   </section>
   <section className="pv2-panel"><Title title="Payment Schedule" detail="Milestones from active contract schedules. Requests are not receipts."
-   action={<NextLink href={'/dashboard/finance/contracts?project_id='+d.project.id} label="Finance workspace"/>}/>
+   action={<NextLink href={'/dashboard/finance?tab=payments'+(d.agreement?'&contract_id='+d.agreement.contractId:'')} label="Finance payments"/>}/>
    {d.milestones.length?<DataTable head={['Milestone','Amount','Contract','Actions']}>
     {d.milestones.map(m=><tr key={m.id}><td><strong>{m.label}</strong></td>
      <td>{m.currency} {m.amount}</td><td>{m.contract_number}</td>
-     <td><NextLink href={'/dashboard/finance/contracts?project_id='+d.project.id} label="View / Request"/></td></tr>)}</DataTable>:
-    <Blank title="No payment milestones" detail="Payment schedules are managed in Finance from the signed contract."/>}
+     <td><NextLink href={'/dashboard/finance?tab=payments&contract_id='+m.contract_id} label="Finance ledger"/></td></tr>)}</DataTable>:
+    <Blank title="No payment milestones" detail="Payment stages are copied from the signed quotation when the contract is activated."/>}
   </section>
   {!!d.quotePaymentTriggers.length&&<section className="pv2-panel">
     <Title title="Quoted Work-Linked Payments" detail="Quoted payment proposal; actual contract requests and receipts remain in Finance."/>
@@ -544,7 +544,7 @@ function Payments({d}:{d:WorkspaceData}){
         :'Custom milestone'}</td><td><span className="pv2-label">Not a receipt</span></td></tr>)}
     </DataTable>
   </section>}
-  <section className="pv2-panel"><Title title="Client Payment Transactions" detail="All recorded and voided payments stay in their canonical finance ledger"/>
+  <section className="pv2-panel"><Title title="Client Payment Transactions" detail="Read-only mirror of recorded and voided receipts in Finance"/>
    {paymentRows?.length?<DataTable head={['Receipt / Payment','Date','Amount','Status']}>
     {paymentRows.map(r=><tr key={r.id}><td><strong>{r.number}</strong></td><td><FieldDate value={r.date}/></td>
      <td>{formatMoney(r.amount)}</td><td><Status value={r.status}/></td></tr>)}</DataTable>:

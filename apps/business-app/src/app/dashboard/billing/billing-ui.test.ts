@@ -15,7 +15,8 @@ describe('Finance navigation and single-source billing',()=>{
  it('separates company Finance from platform subscription Billing',()=>{
   expect(billing).toContain('Billing & Plans');
   expect(billing).not.toContain('gst.list');
-  expect(finance).toContain("'invoices' | 'expenses' | 'gst' | 'salaries'");
+  expect(finance).toContain("'invoices' | 'payments' | 'expenses' | 'gst' | 'salaries'");
+   expect(finance).toContain('<CustomerPaymentsPanel');
   expect(finance).toContain('Payment Pending');
   expect(finance).not.toContain('Outstanding');
  });
