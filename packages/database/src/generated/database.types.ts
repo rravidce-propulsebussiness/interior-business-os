@@ -11453,7 +11453,10 @@ export interface Database {
         Args: { p_organization_id: string; p_id: string; p_version: number };
         Returns: string;
       };
-      invoice_payment_claim_list: { Args: { p_org: string; p_invoice: string }; Returns: Json };
+      invoice_payment_claim_list: {
+        Args: { p_org: string; p_invoice: string };
+        Returns: Json;
+      };
       invoice_payment_claim_review: {
         Args: {
           p_org: string;
@@ -11482,7 +11485,10 @@ export interface Database {
         };
         Returns: string;
       };
-      invoice_payment_request_list: { Args: { p_org: string; p_invoice: string }; Returns: Json };
+      invoice_payment_request_list: {
+        Args: { p_org: string; p_invoice: string };
+        Returns: Json;
+      };
       invoice_save: {
         Args: {
           p_organization_id: string;
