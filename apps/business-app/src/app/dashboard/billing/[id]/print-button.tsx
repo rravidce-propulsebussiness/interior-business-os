@@ -30,6 +30,7 @@ export function ShareInvoiceWhatsAppButton({
   dueDate,
 }: ShareInvoiceProps) {
   function share() {
+    // WhatsApp's URL API shares text, not an attached PDF file.
     const amount = new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency: 'INR',
