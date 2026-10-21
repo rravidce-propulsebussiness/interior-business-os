@@ -5,6 +5,7 @@ RETURNS regclass[] LANGUAGE sql STABLE SET search_path=''
 AS $f$ SELECT pg_catalog.array_remove(ARRAY[
   'private.automation_email_payloads'::regclass,
   'private.client_design_decisions'::regclass,
+  'private.client_payment_proofs'::regclass,
   'private.client_project_access'::regclass,
   'private.construction_project_roles'::regclass,
   'private.construction_project_stages'::regclass,
