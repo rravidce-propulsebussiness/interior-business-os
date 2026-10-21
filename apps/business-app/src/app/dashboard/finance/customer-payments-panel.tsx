@@ -45,6 +45,7 @@ export async function CustomerPaymentsPanel({
  let total=0;
  let methods:Record<string,unknown>[]=[];
  let invoices:Record<string,unknown>[]=[];
+ let stageRequests:Record<string,unknown>[]=[];
  let loadError='';
  let due:MilestoneDue|null=null;
  try {
@@ -63,6 +64,11 @@ export async function CustomerPaymentsPanel({
    contracts=[exact,...contracts];
   }
   if(selected&&canSeeContracts) due=await nextMilestoneDue(s.client,s.org,selected);
+  if(selected&&s.allowed('payment_request.view')){
+   const req=await s.finance.search('payment_requests',
+     {contract_id:selected,status:'issued'},1);
+   stageRequests=req.rows;
+  }
   if(selected&&canSeeInvoices&&canAllocate){
    const invoiceResponse=await s.finance.search('invoices',
     {contract_id:selected,status:'issued'},1);
@@ -102,6 +108,23 @@ export async function CustomerPaymentsPanel({
     <span><small>Recorded transactions</small><strong>{payments.filter(p=>p.status==='recorded').length}</strong></span>
    </div>}
   </section>
+  {selected&&s.allowed('payment_request.view')&&<section className="fw-panel">
+   <div className="fw-panel-head"><div>
+    <h2>Certified stage payment requests</h2>
+    <p>Generated automatically from the signed quotation when linked project
+       stages receive independent QC certification. A payment request is not a GST tax invoice or a receipt.</p>
+   </div></div>
+   {stageRequests.length?<div className="fw-payment-history">
+    {stageRequests.map(row=><div className="fw-payment-history-row"
+      key={value(row,'id')}>
+      <div><strong>{value(row,'request_number')}</strong>
+       <small>Payment requested · {value(row,'status')}</small></div>
+      <strong>{cash(value(row,'amount'))}</strong>
+      <Link href={'/dashboard/finance/requests/'+value(row,'id')+'/pdf'}
+        className="fw-payment-more">Download PDF</Link>
+     </div>)}
+   </div>:<p className="fw-muted">No stage payment request issued yet.</p>}
+  </section>}
   <section className="fw-panel">
    <div className="fw-panel-head"><div>
     <h2>Receipt history</h2><p>Only actual recorded amounts count. Quotation milestones and proforma invoices are not receipts.</p>
