@@ -86,10 +86,12 @@ BEGIN
    AND status='issued';
  IF paid<>1 OR receipts<>1 THEN
   RAISE EXCEPTION 'FAIL: expected exactly 1 payment and 1 receipt';END IF;
- IF NOT EXISTS(SELECT 1 FROM private.client_payment_proofs
-  WHERE id=proof AND status='approved' AND payment_id=(result->>'paymentId')::uuid
-  AND receipt_id=(result->>'receiptId')::uuid) THEN
-  RAISE EXCEPTION 'FAIL: client proof not linked to canonical ledger';END IF;
+ IF NOT EXISTS(SELECT 1 FROM jsonb_array_elements(
+    public.staff_payment_proof_list(org,contract)) p
+  WHERE p->>'id'=proof::text AND p->>'status'='approved'
+   AND p->>'paymentId'=result->>'paymentId'
+   AND p->>'receiptId'=result->>'receiptId') THEN
+  RAISE EXCEPTION 'FAIL: review projection not linked to canonical ledger';END IF;
  RAISE NOTICE 'PASS: bank-verified approval creates one payment and one receipt, retry idempotent';
 END;$verify$;
 ROLLBACK;
