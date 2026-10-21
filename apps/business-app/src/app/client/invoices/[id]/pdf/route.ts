@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { createServerDatabase } from '@business-os/database/server';
-import { invoicePdf, type InvoicePdfData } from '../../../../../invoice-pdf';
+import { invoicePdf, type InvoicePdfData } from '../../../../invoice-pdf';
 export const runtime='nodejs';
 export async function GET(request:Request,{params}:{params:Promise<{id:string}>}){
  const {id}=await params;
