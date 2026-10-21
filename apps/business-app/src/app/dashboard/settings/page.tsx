@@ -15,6 +15,8 @@ import { companyCategoryOptions } from './company-categories';
 import '../owner-dashboard.css';
 import './settings.css';
 import { InvoiceTemplateSelector } from './template-selector';
+import { ResetTestDataPanel } from './reset-test-data-panel';
+import type { ResetPreview } from './test-reset-actions';
 
 export const dynamic='force-dynamic';
 type Tab='company'|'branding'|'invoice'|'documents'|'payments'|'team'|'preferences';
@@ -77,6 +79,26 @@ export default async function SettingsPage({searchParams}:{
  const canEdit=has('organization.manage');
  const canBrand=has('settings.manage','quotation');
  const canBilling=has('billing.manage');
+ const isOwner=context.roles.some(role=>role.name.toLowerCase()==='owner');
+ let resetPreview:ResetPreview|null=null;
+ if(tab==='preferences'&&isOwner&&canEdit){
+  // The RPC is shipped by the migration; generated Supabase types are updated separately.
+  const previewRpc=client.rpc as unknown as (
+   name:'owner_test_data_reset_preview',args:{p_org:string}
+  )=>Promise<{data:unknown;error:{code?:string}|null}>;
+  const {data,error}=await previewRpc('owner_test_data_reset_preview',{
+   p_org:context.organizationId,
+  });
+  if(!error&&data&&typeof data==='object'&&!Array.isArray(data)){
+   const parsed=z.object({
+    company:z.string(),total:z.number().int().nonnegative(),
+    signature:z.string().regex(/^[0-9a-f]{32}$/),
+    required_phrase:z.string(),
+    counts:z.record(z.string(),z.number().int().nonnegative()),
+   }).safeParse(data);
+   if(parsed.success)resetPreview=parsed.data;
+  }
+ }
  const [org,sourceRaw,user,privateResponse,brandResponse,invoiceProfile]=await Promise.all([
   repository.organization(context.organizationId),
   repository.propulseCompanyProfile(context.organizationId),
@@ -329,6 +351,8 @@ export default async function SettingsPage({searchParams}:{
     <Cards items={[{label:'Automation settings',href:'/dashboard/automations/settings'},
       {label:'Website studio',href:'/dashboard/website'}]}/>
    </section>}
+   {tab==='preferences'&&isOwner&&canEdit&&
+     <ResetTestDataPanel preview={resetPreview}/>} 
   </main>
  </OwnerShell>;
 }

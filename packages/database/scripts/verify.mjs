@@ -88,6 +88,9 @@ if (!initializeOnly) {
   await import('./test-brochure.mjs');
   await import('./test-automation.mjs');
   await import('./test-reporting.mjs');
+  // Exercises actual company data deletion in an isolated transaction,
+  // ending with ROLLBACK so demo fixtures are retained for later checks.
+  assertionFile('test-data-reset');
   assertionFile('deployment');
 } else {
   console.log(

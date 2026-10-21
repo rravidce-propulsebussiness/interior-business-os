@@ -11709,6 +11709,11 @@ export interface Database {
         Args: { p_org: string; p_input: Json };
         Returns: undefined;
       };
+      owner_test_data_reset_execute: {
+        Args: { p_org: string; p_phrase: string; p_signature: string };
+        Returns: Json;
+      };
+      owner_test_data_reset_preview: { Args: { p_org: string }; Returns: Json };
       payment_allocate: {
         Args: {
           p_organization_id: string;
