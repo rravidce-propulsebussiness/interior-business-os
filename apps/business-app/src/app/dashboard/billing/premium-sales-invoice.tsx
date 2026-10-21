@@ -367,7 +367,7 @@ export function PremiumSalesInvoice({
           {hasStage&&ownerCanAllowPartial&&<label className="psi-toggle"><input type="checkbox" checked={allowPartialStage}
             onChange={event=>{setAllowPartialStage(event.target.checked);
               if(!event.target.checked&&stage)updateLine(0,'unitPrice',String(stage.amount));}}/>
-            Owner exception: allow partial stage billing</label>
+            Owner exception: allow partial stage billing</label>}
           {stageInvalid && <p className="psi-alert" role="alert">Stage billing amount must be above zero and cannot exceed the agreed stage amount.</p>}
         </section>}
         <section className="psi-card">
