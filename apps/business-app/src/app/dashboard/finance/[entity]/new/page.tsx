@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
+import { canAccess } from '@business-os/auth';
 import { randomUUID } from 'node:crypto';
 import { financeServices } from '../../service';
 import { FinanceForm } from '../../form';
@@ -33,6 +34,21 @@ export default async function NewFinance({
     contractId && s.allowed('contract.view')
       ? await s.finance.detail('contracts', contractId)
       : null;
+  // Legacy schedule-entry links must not reopen the same work for projects
+  // whose signed quotation milestones are already the active schedule.
+  // Finance-only staff retain their ordinary, permissioned Finance screens.
+  if (entity === 'payment_schedules' && contractId && contract &&
+      canAccess(s.context, { organizationId: s.org, permission: 'project.view',
+        moduleKey: 'projects' })) {
+    const projectId = text(contract, 'project_id');
+    if (projectId) {
+      const existing = await s.client.from('payment_schedules').select('id')
+        .eq('organization_id', s.org).eq('contract_id', contractId)
+        .eq('status', 'active').limit(1);
+      if (!existing.error && existing.data?.length)
+        redirect('/dashboard/projects/' + encodeURIComponent(projectId) + '/payments');
+    }
+  }
   const today = new Date().toISOString().slice(0, 10);
   let initial: Record<string, unknown> = {},
     fields: FinanceField[] = [],
