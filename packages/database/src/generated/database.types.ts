@@ -10878,6 +10878,14 @@ export interface Database {
         Returns: undefined;
       };
       client_portal_media_get: { Args: { p_media_id: string }; Returns: Json };
+      client_portal_invoices: {
+        Args: { p_project_id: string };
+        Returns: Json;
+      };
+      client_portal_invoice_read: {
+        Args: { p_project_id: string; p_invoice: string };
+        Returns: Json;
+      };
       client_portal_project: { Args: { p_project_id: string }; Returns: Json };
       client_portal_projects: { Args: Record<string, never>; Returns: Json };
       client_portal_timeline: { Args: { p_project_id: string }; Returns: Json };
@@ -11368,6 +11376,18 @@ export interface Database {
       gst_document_layout: {
         Args: { p_org: string; p_id: string };
         Returns: Json;
+      };
+      gst_sales_invoice_save_and_issue: {
+        Args: {
+          p_org: string;
+          p_input: Json;
+          p_customer?: string | null;
+          p_won_lead?: string | null;
+          p_stage_lead?: string | null;
+          p_revision?: string | null;
+          p_stage?: number | null;
+        };
+        Returns: string;
       };
       gst_document_save: {
         Args: { p_org: string; p_input: Json };
