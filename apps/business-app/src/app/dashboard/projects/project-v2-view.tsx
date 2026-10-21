@@ -7,6 +7,7 @@ import { OwnerProjectRequests } from '../../project-request-widgets';
 import { canAccess } from '@business-os/auth';
 import { guidanceForConstructionStage } from '@business-os/core/construction-payment-schedule';
 import { ProjectStageLinker,type StageLinkOption } from './project-stage-linker';
+import { ProjectStagePaymentLinker } from './project-stage-payment-linker';
 import { ProjectClientAccess } from './project-client-access';
 import { ProjectSiteSurvey,ProjectAdvanceAction } from './project-next-forms';
 import { effectiveProjectStageStatus } from './project-stage-status';
@@ -342,7 +343,7 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
         {payment.length>0&&d.permissions.finance&&<div className="pv2-command-payments">
          <OwnerIcon name="billing" size={17}/><div><strong>Linked quotation payments</strong>
           <p>{payment.map(p=>p.name+' ('+p.percent+'%)').join(' · ')}</p>
-          <small>Milestones are not receipts until payments are recorded.</small></div>
+          <small>After linked stages pass QC, one agreed payment request is issued. Payment is only recorded in Finance.</small></div>
          </div>}
         {!!checks.length&&<details className="pv2-stage-secondary"><summary>Checks & tests ({checks.length})</summary>
          <ul>{checks.map((name,i)=><li key={i}>{name}</li>)}</ul></details>}
@@ -356,6 +357,9 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
          {allowChecks&&<details><summary><OwnerIcon name="check" size={16}/> Quality check</summary><QualityForm id={d.project.id}/></details>}
          {site?.canManage&&!!site.memberOptions.length&&<details><summary><OwnerIcon name="team" size={16}/> Assign team</summary><AssignRole projectId={d.project.id} users={site.memberOptions}/></details>}
         </div>
+        {site?.canManage&&d.permissions.finance&&d.milestones.length>0&&
+         <ProjectStagePaymentLinker projectId={d.project.id} stageId={stage.id}
+          milestones={d.milestones}/>}
         {site?.canManage&&availableRecords.length>0&&<details className="pv2-stage-secondary"><summary>Attach existing site evidence</summary>
          <ProjectStageLinker projectId={d.project.id} stageId={stage.id} options={availableRecords}/></details>}
        </div>
@@ -544,6 +548,17 @@ function Payments({d}:{d:WorkspaceData}){
         :'Custom milestone'}</td><td><span className="pv2-label">Not a receipt</span></td></tr>)}
     </DataTable>
   </section>}
+  <section className="pv2-panel">
+   <Title title="Stage payment requests" detail="Automatically created only when linked work passes independent quality certification. Requests do not confirm payment."/>
+   {d.stageRequests?.length?<DataTable head={['Request','Issued','Amount','Status','PDF']}>
+    {d.stageRequests.map(r=><tr key={r.id}>
+     <td><strong>{r.number}</strong></td>
+     <td><FieldDate value={r.date}/></td>
+     <td>{formatMoney(r.amount)}</td><td><Status value={r.status}/></td>
+     <td><NextLink href={'/dashboard/finance/requests/'+r.id+'/pdf'} label="Download request"/></td>
+    </tr>)}
+   </DataTable>:<Blank title="No stage payment requests yet" detail="The system issues the first eligible request when all required linked stages are certified. No payment has been assumed."/>}
+  </section>
   <section className="pv2-panel"><Title title="Client Payment Transactions" detail="Read-only mirror of recorded and voided receipts in Finance"/>
    {paymentRows?.length?<DataTable head={['Receipt / Payment','Date','Amount','Status']}>
     {paymentRows.map(r=><tr key={r.id}><td><strong>{r.number}</strong></td><td><FieldDate value={r.date}/></td>
