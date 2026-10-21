@@ -164,7 +164,7 @@ begin
     or (v_item - array['item','quantity','unit','notes']) <> '{}'::jsonb
     or length(trim(coalesce(v_item->>'item',''))) not between 2 and 200
     or length(coalesce(v_item->>'notes',''))>3000
-    or coalesce(v_item->>'quantity','') !~ '^[0-9]{1,8}([.][0-9]{1,3})?$'
+    or coalesce(v_item->>'quantity','') !~ '^[0-9]{1,9}([.][0-9]{1,3})?$'
   then raise exception 'Invalid material line' using errcode='22023';end if;
   v_qty=(v_item->>'quantity')::numeric;
   v_unit=v_item->>'unit';
