@@ -10885,6 +10885,14 @@ export interface Database {
       client_portal_media_get: { Args: { p_media_id: string }; Returns: Json };
       client_portal_project: { Args: { p_project_id: string }; Returns: Json };
       client_portal_projects: { Args: Record<string, never>; Returns: Json };
+      client_portal_stage_payment_requests: {
+        Args: { p_project_id: string };
+        Returns: Json;
+      };
+      client_portal_stage_request_read: {
+        Args: { p_project_id: string; p_request_id: string };
+        Returns: Json;
+      };
       client_portal_timeline: { Args: { p_project_id: string }; Returns: Json };
       commercial_search: {
         Args: {
