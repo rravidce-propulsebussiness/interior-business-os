@@ -65,6 +65,11 @@ export type ClientUpdate = {
   summary: string;
   created_at: string;
 };
+export type ClientStagePaymentRequest={
+ id:string;number:string;label:string;total:number;date:string;
+ dueDate:string|null;paymentStatus:'payment_requested';
+ contractNumber:string;
+};
 export type ClientInvoice={
  id:string;number:string;documentType:string;
  date:string;dueDate:string|null;total:number;
@@ -94,6 +99,7 @@ export type ClientDashboardData = {
   metricsUnavailable: boolean;
   requests: ProjectClientRequest[];
   invoices: ClientInvoice[];
+  paymentRequests: ClientStagePaymentRequest[];
   clientEmail: string;
 };
 
@@ -301,6 +307,7 @@ export function ClientDashboard({
   metricsUnavailable,
   requests,
   invoices,
+  paymentRequests,
   clientEmail,
 }: ClientDashboardData) {
   const [search, setSearch] = useState('');
@@ -1004,6 +1011,23 @@ export function ClientDashboard({
                 <h2>Invoices &amp; payment requests</h2>
                 <p>Issued bills from your builder. A bill is not a payment receipt.</p>
               </div></div>
+              {paymentRequests.length>0&&<div className="pc-record-list">
+               {paymentRequests.map(request=><article key={request.id}
+                 className="pc-file-link" style={{display:'flex',flexWrap:'wrap',
+                   alignItems:'center',gap:12,justifyContent:'space-between'}}>
+                 <div style={{display:'grid',gap:5}}>
+                  <b>{request.label}</b>
+                  <small>{request.number} · Certified milestone payment request</small>
+                  <strong>₹{request.total.toLocaleString('en-IN',{
+                    maximumFractionDigits:2,minimumFractionDigits:2})}</strong>
+                  <small>Payment requested · Not a receipt</small>
+                 </div>
+                 <a href={'/client/payment-requests/'+request.id+'/pdf?project='+project.id}
+                   className="pc-view-link" download>
+                   <Icon name="file" size={16}/> Download PDF <Icon name="arrow" size={14}/>
+                 </a>
+               </article>)}
+              </div>}
               {invoices.length ? <div className="pc-record-list">
                 {invoices.map(invoice=><article key={invoice.id}
                   className="pc-file-link" style={{display:'flex',flexWrap:'wrap',
@@ -1022,7 +1046,7 @@ export function ClientDashboard({
                     <Icon name="file" size={16}/> Download PDF <Icon name="arrow" size={14}/>
                   </a>
                 </article>)}
-              </div>:<p className="pc-empty">No issued payment requests for this project.</p>}
+              </div>:paymentRequests.length===0?<p className="pc-empty">No issued payment requests for this project.</p>:null}
             </section>
             <section id="all-documents" className="pc-panel pc-expand-section">
               {cardHeader('Shared documents', '#drawings')}
