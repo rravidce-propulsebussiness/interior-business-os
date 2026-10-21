@@ -548,6 +548,17 @@ function Payments({d}:{d:WorkspaceData}){
         :'Custom milestone'}</td><td><span className="pv2-label">Not a receipt</span></td></tr>)}
     </DataTable>
   </section>}
+  <section className="pv2-panel">
+   <Title title="Stage payment requests" detail="Automatically created only when linked work passes independent quality certification. Requests do not confirm payment."/>
+   {d.stageRequests?.length?<DataTable head={['Request','Issued','Amount','Status','PDF']}>
+    {d.stageRequests.map(r=><tr key={r.id}>
+     <td><strong>{r.number}</strong></td>
+     <td><FieldDate value={r.date}/></td>
+     <td>{formatMoney(r.amount)}</td><td><Status value={r.status}/></td>
+     <td><NextLink href={'/dashboard/finance/requests/'+r.id+'/pdf'} label="Download request"/></td>
+    </tr>)}
+   </DataTable>:<Blank title="No stage payment requests yet" detail="The system issues the first eligible request when all required linked stages are certified. No payment has been assumed."/>}
+  </section>
   <section className="pv2-panel"><Title title="Client Payment Transactions" detail="Read-only mirror of recorded and voided receipts in Finance"/>
    {paymentRows?.length?<DataTable head={['Receipt / Payment','Date','Amount','Status']}>
     {paymentRows.map(r=><tr key={r.id}><td><strong>{r.number}</strong></td><td><FieldDate value={r.date}/></td>
