@@ -15,6 +15,54 @@ AS $f$
        AND m.status='active' AND m.branch_id IS NULL AND r.is_owner=true);
 $f$;
 
+-- Explicitly scoped exception to immutable execution triggers.
+-- Outside an Owner-confirmed reset, original guard behavior is unchanged.
+CREATE OR REPLACE FUNCTION private.execution_guard()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+declare a jsonb=to_jsonb(old);b jsonb=to_jsonb(new);r jsonb=case when tg_op='DELETE' then a else b end;parent_status text;parent_entity text;parent_column text;begin
+ -- Exception only within a transaction confirmed by the Owner-only reset RPC.
+ -- This GUC is checked alongside the authenticated Owner and exact tenant.
+ if tg_op in ('DELETE','UPDATE') and
+    pg_catalog.current_setting('business_os.test_reset_org',true)=r->>'organization_id'
+    and private.owner_test_reset_allowed((r->>'organization_id')::uuid) then
+   if tg_op='DELETE' then return old;end if;
+   return new;
+ end if;
+ if tg_op='UPDATE' and (a->'id' is distinct from b->'id' or a->'organization_id' is distinct from b->'organization_id') then raise exception 'Stable execution identity required' using errcode='23514';end if;
+ if tg_table_name in ('material_unit_conversions','goods_receipts','goods_receipt_items') then
+ if tg_op<>'INSERT' then raise exception 'Append-only execution history' using errcode='23514';end if;return new;end if;
+ if tg_table_name='material_cost_revisions' then
+ if tg_op='DELETE' or tg_op='UPDATE' and (a-array['valid_until','version','updated_at'] is distinct from b-array['valid_until','version','updated_at'] or a->>'valid_until' is not null or b->>'valid_until' is null) then raise exception 'Cost revisions preserve history' using errcode='23514';end if;return new;end if;
+ if tg_table_name in ('execution_estimate_scope_items','execution_estimate_lines','execution_estimate_line_costs') then parent_entity='execution_estimate_revisions';parent_column='revision_id';
+ elsif tg_table_name in ('purchase_requisition_items','purchase_requisition_sources') then parent_entity='purchase_requisitions';parent_column='requisition_id';
+ elsif tg_table_name in ('rfq_items','rfq_vendors') then parent_entity='rfqs';parent_column='rfq_id';
+ elsif tg_table_name='vendor_quote_items' then parent_entity='vendor_quotes';parent_column='quote_id';
+ elsif tg_table_name in ('purchase_order_items','purchase_order_costs','purchase_order_item_costs') then parent_entity='purchase_orders';parent_column='po_id';end if;
+ if parent_entity is not null then
+ if tg_op='UPDATE' and a->parent_column is distinct from b->parent_column then raise exception 'Stable execution parent required' using errcode='23514';end if;
+ execute format('select status from public.%I where organization_id=$1 and id=$2 for update',parent_entity) into parent_status using (r->>'organization_id')::uuid,(r->>parent_column)::uuid;
+ if parent_status is distinct from 'draft' then
+ if tg_table_name='rfq_vendors' and tg_op='UPDATE' and a-array['response_status','updated_at'] is not distinct from b-array['response_status','updated_at'] and parent_status='issued' then return new;end if;
+ raise exception 'Frozen execution lines' using errcode='23514';end if;
+ if tg_op='DELETE' then return old;end if;return new;
+ end if;
+ if tg_op='DELETE' then raise exception 'Execution records cannot be deleted' using errcode='23514';end if;
+ if tg_op='UPDATE' then
+ if tg_table_name='execution_estimates' and a-array['next_revision','current_approved_revision_id','version','updated_at'] is distinct from b-array['next_revision','current_approved_revision_id','version','updated_at'] then raise exception 'Frozen estimate identity' using errcode='23514';end if;
+ if tg_table_name='execution_estimate_revisions' and a->>'status'<>'draft' then
+ if a-array['status','version','reviewed_by','approved_by','approved_at','decision_reason','updated_at'] is distinct from b-array['status','version','reviewed_by','approved_by','approved_at','decision_reason','updated_at'] or
+ not(a->>'status'='under_review' and b->>'status' in ('draft','approved','cancelled') or a->>'status'='approved' and b->>'status'='superseded') then raise exception 'Frozen estimate revision' using errcode='23514';end if;
+ elsif tg_table_name in ('purchase_requisitions','rfqs','vendor_quotes','purchase_orders') and a->>'status'<>'draft' then
+ if a-array['status','version','approved_at','approved_by','decision_reason','cancel_reason','closed_at','updated_at'] is distinct from b-array['status','version','approved_at','approved_by','decision_reason','cancel_reason','closed_at','updated_at'] or a->>'status' in ('cancelled','closed','declined') then raise exception 'Frozen procurement document' using errcode='23514';end if;
+ end if;end if;
+ return new;
+end$function$
+;
+
 CREATE OR REPLACE FUNCTION private.test_reset_targets()
 RETURNS regclass[] LANGUAGE sql STABLE SET search_path=''
 AS $f$ SELECT ARRAY[
@@ -218,6 +266,9 @@ BEGIN
  IF p_signature IS DISTINCT FROM v_preview->>'signature' THEN
    RAISE EXCEPTION 'Data changed. Refresh your reset preview before retrying'
      USING ERRCODE='40001'; END IF;
+ -- All bypasses additionally verify this owner's membership and tenant.
+ -- set_config(...,true) is local to this transaction (never global).
+ PERFORM pg_catalog.set_config('business_os.test_reset_org',p_org::text,true);
  -- Break the three known circular relationships *inside this reset transaction*.
  -- Quotations -> current revision uses a deferrable FK; these two non-
  -- deferrable references are nullable and may be cleared before deletion.
@@ -266,6 +317,7 @@ BEGIN
  INSERT INTO public.audit_logs(actor_user_id,organization_id,action,entity_type,entity_id,metadata)
  VALUES(auth.uid(),p_org,'organization.test_data_reset','organization',p_org::text,
   jsonb_build_object('deleted_rows',(v_preview->>'total')::bigint));
+ PERFORM pg_catalog.set_config('business_os.test_reset_org','',true);
  RETURN jsonb_build_object('success',true,'deleted_rows',(v_preview->>'total')::bigint);
 END;$f$;
 
