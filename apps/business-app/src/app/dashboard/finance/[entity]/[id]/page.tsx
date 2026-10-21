@@ -7,6 +7,7 @@ import {
 } from '@business-os/core/finance';
 import { financeServices } from '../../service';
 import { FinanceForm } from '../../form';
+import { canAccess } from '@business-os/auth';
 import { titles, text, RecordList, Metrics } from '../../presentation';
 function redirectLegacyInvoiceDetail(entity: string, invoiceNumber: string) {
   // Keep Finance invoice routes backward compatible without rendering
@@ -31,8 +32,14 @@ export default async function FinanceDetail({
     contractId = entity === 'contracts' ? id : text(r, 'contract_id'),
     status = text(r, 'status'),
     version = r.version;
-  // Route only legacy invoice details to the Finance register; other
-  // entity detail pages (contracts, receipts, schedules) remain available.
+  // Use the existing project Quote & Agreement section for company users.
+  // Keep Finance contract detail for finance-only staff who cannot view the
+  // project; do not strand them behind project access restrictions.
+  if (entity === 'contracts' && text(r, 'project_id') && canAccess(s.context, {
+    organizationId: s.org, permission: 'project.view', moduleKey: 'projects',
+  })) {
+    redirect('/dashboard/projects/' + encodeURIComponent(text(r, 'project_id')) + '/documents#project-agreement');
+  }
   redirectLegacyInvoiceDetail(entity, text(r, 'invoice_number'));
   const items = Array.isArray(r.items)
     ? (r.items as Record<string, unknown>[])

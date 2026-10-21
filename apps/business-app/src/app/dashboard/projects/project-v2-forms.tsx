@@ -5,6 +5,7 @@ import { saveProjectSite, uploadProjectSiteMedia } from './[id]/site/actions';
 import { syncConstructionFromProjectAgreement, assignConstructionRole } from './[id]/site/construction-actions';
 import { saveSignedAgreement } from './[id]/site/agreement-actions';
 import { prepareAgreementFromProjectQuote } from './project-agreement-actions';
+import { financeCommand } from '../finance/actions';
 import { submitProjectDrawing } from './project-design-actions';
 
 type Result={saved:boolean;message:string};
@@ -42,6 +43,28 @@ export function PrepareAgreement({projectId,revisionId}:{projectId:string;revisi
    {pending?'Preparing…':prepared?'Agreement prepared':'Prepare agreement'}
   </button>
   {message&&<p role="status" className={'pv2-form-feedback '+(prepared?'good':'')}>{message}</p>}
+ </div>;
+}
+
+
+/** The existing Finance contract is activated here, never by creating a second
+ * agreement or navigating to a parallel contract-detail workspace. */
+export function ProjectContractActivation({contractId,version}:{contractId:string;version:number}){
+ const router=useRouter();
+ const [pending,start]=useTransition();
+ const [message,setMessage]=useState('');
+ const [activated,setActivated]=useState(false);
+ return <div className="pv2-contract-activation">
+  <button type="button" className="pv2-button pv2-primary" disabled={pending||activated}
+   onClick={()=>start(async()=>{
+    const result=await financeCommand({
+     action:'contract_status',id:contractId,version,status:'active',
+     reason:'Signed agreement evidence has been recorded for this project.',
+    });
+    setMessage(result.message);
+    if(result.id){setActivated(true);router.refresh();}
+   })}>{pending?'Activating…':activated?'Contract activated':'Activate signed contract'}</button>
+  {message&&<p role="status" className={'pv2-form-feedback '+(activated?'good':'bad')}>{message}</p>}
  </div>;
 }
 

@@ -22,7 +22,7 @@ export type ClientRequestRow={
 };
 export type WorkspaceData = {
  project:ProjectEntry;org:string;company:string;email:string;
- permissions:{manage:boolean;finance:boolean;payments:boolean;purchases:boolean;team:boolean;quotation:boolean};
+ permissions:{manage:boolean;finance:boolean;contractManage:boolean;payments:boolean;purchases:boolean;team:boolean;quotation:boolean};
  site:null|{stage:string;role:string;canManage:boolean;reports:SiteRow[];materials:SiteRow[];
  checks:SiteRow[];media:SiteRow[];designs:SiteRow[];team:SiteRow[];gate:SiteRow[];
  memberOptions:{id:string;label:string}[]};
@@ -33,7 +33,7 @@ export type WorkspaceData = {
  tasks:{id:string;title:string;planned_start:string|null;status:string}[];
  contractValue:number|null;expenditure:number|null;requests:ClientRequestRow[]|null;
  projectRaw:Record<string,unknown>|null;
- agreement:{contractId:string;contractNumber:string;status:string;authorized:boolean;revisionId:string|null;clearanceType:string|null}|null;
+ agreement:{contractId:string;contractNumber:string;status:string;authorized:boolean;revisionId:string|null;clearanceType:string|null;version:number|null}|null;
  preflight:{inspectionDone:boolean;measurementsDone:boolean;inspectionDetails:string;measurementDetails:string;signedReady:boolean}|null;
  advance:{invoiceId:string|null;invoiceNumber:string|null;invoiceStatus:string|null;invoiceTotal:number;percent:number|null;received:number;scheduleActive:boolean}|null;
 };
@@ -111,6 +111,7 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
  });
  const permissions={
   manage:has('project.manage','projects'),finance:has('contract.view','billing'),
+   contractManage:has('contract.manage','billing'),
   payments:has('payment.view'),purchases:has('purchase.view'),
   team:has('team.manage')||has('team.view'),quotation:has('quotation.view','quotation'),
  };
@@ -130,7 +131,7 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
   permissions.purchases?s.client.from('purchase_orders').select('id,po_number,status,order_date')
     .eq('organization_id',s.org).eq('project_id',id).order('order_date',{ascending:false})
     .limit(200):Promise.resolve({data:null,error:null}),
-  permissions.finance?s.client.from('contracts').select('id,contract_number,original_contract_value,status,revision_id')
+  permissions.finance?s.client.from('contracts').select('id,contract_number,original_contract_value,status,revision_id,version')
     .eq('organization_id',s.org).eq('project_id',id).order('created_at',{ascending:false})
     .limit(1):Promise.resolve({data:null,error:null}),
   permissions.manage&&permissions.finance?s.client.rpc('project_agreement_read',{
@@ -249,15 +250,21 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
  const choiceObject=choice&&!choice.error?obj(choice.data):{};
  const finalQuoteId=typeof choiceObject[project.customer_id]==='string'
    ?choiceObject[project.customer_id] as string:null;
- const finalRoot=quoteRoots.find(q=>q.id===finalQuoteId
-   &&q.current_revision_id&&revisionsById.has(q.current_revision_id))
+ // The recorded signed agreement binds the project to its quoted scope.
+ // A newer unsent or alternative quote cannot reopen completed project work.
+ const contractedRevision=permissions.finance&&!contract.error?contract.data?.[0]?.revision_id:null;
+ const signedContractSource=agreement.clearance_type==='signed_copy_recorded'
+   &&agreement.current_scope===true&&typeof contractedRevision==='string';
+ const finalRoot=(signedContractSource
+   ?quoteRoots.find(q=>q.current_revision_id===contractedRevision):null)
+   ??quoteRoots.find(q=>q.id===finalQuoteId
+     &&q.current_revision_id&&revisionsById.has(q.current_revision_id))
    ??quoteRoots.find(q=>q.current_revision_id&&revisionsById.has(q.current_revision_id));
  const quotations:ProjectQuotation[]=finalRoot&&finalRoot.current_revision_id
    ?[{id:finalRoot.id,number:finalRoot.quotation_number??'Quotation',
       revisionId:finalRoot.current_revision_id,
       status:revisionsById.get(finalRoot.current_revision_id)??'',
       createdAt:finalRoot.created_at}]:[];
- const contractedRevision=permissions.finance&&!contract.error?contract.data?.[0]?.revision_id:null;
  // Read only a saved planning proposal before the agreement exists.
  // This never activates milestones or invents payment receipts.
  const paymentRevision=contractedRevision??quotations[0]?.revisionId??null;
@@ -300,6 +307,7 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
    status:stringValue(agreement.contract_status),authorized:agreement.execution_authorized===true,
    clearanceType:stringValue(agreement.clearance_type)||null,
    revisionId:contract.data?.find(c=>c.id===agreement.contract_id)?.revision_id??null,
+   version:contract.data?.find(c=>c.id===agreement.contract_id)?.version??null,
   }:null,
   // There is no canonical all-in site cash-expense ledger yet.
   // A purchase order is only a commitment; labour entries cover just part of spend.
@@ -375,7 +383,7 @@ async function assignedProjectWorkspace(id:string):Promise<WorkspaceData>{
  };
  return {
   org:context.organizationId,company:org.name,email:user.email??'',
-  permissions:{manage:site.canManage,finance:false,payments:false,purchases:false,team:site.canManage,quotation:false},
+  permissions:{manage:site.canManage,finance:false,contractManage:false,payments:false,purchases:false,team:site.canManage,quotation:false},
   project:{id,name:stringValue(p.name),code:stringValue(p.code),status:stringValue(p.status)||'active',
    projectType:'',address:'Project site',createdAt:'',client:'Project team',customerId:null,
    industry:'Site Delivery',
