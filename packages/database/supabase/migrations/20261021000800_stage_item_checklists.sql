@@ -140,3 +140,46 @@ revoke all on function public.project_stage_checklist_read(uuid,uuid) from publi
 revoke all on function public.project_stage_checklist_command(uuid,uuid,uuid,text,integer,text,text,text,uuid) from public,anon;
 grant execute on function public.project_stage_checklist_read(uuid,uuid) to authenticated;
 grant execute on function public.project_stage_checklist_command(uuid,uuid,uuid,text,integer,text,text,text,uuid) to authenticated;
+
+
+-- One material request may contain several separately tracked quantities.
+-- All rows are inserted in a single database transaction.
+create or replace function public.project_site_material_batch(
+ p_org uuid,p_project uuid,p_items jsonb
+) returns jsonb language plpgsql security definer set search_path='' as $function$
+declare v_item jsonb;v_id uuid;v_qty numeric;v_unit text;v_total integer:=0;
+begin
+ if not private.site_access(p_org,p_project) or
+  not private.site_allowed(p_org,p_project,array['manager','site_engineer','procurement'])
+ then raise exception 'Material access denied' using errcode='42501';end if;
+ if (select stage from private.site_state where organization_id=p_org and project_id=p_project)
+  is distinct from 'execution'
+ then raise exception 'Project execution must be active' using errcode='42501';end if;
+ if jsonb_typeof(p_items) is distinct from 'array' or jsonb_array_length(p_items) not between 1 and 12
+  or octet_length(p_items::text)>12000 then
+  raise exception 'Choose between 1 and 12 materials' using errcode='22023';end if;
+ perform 1 from public.projects where id=p_project and organization_id=p_org for update;
+ for v_item in select value from jsonb_array_elements(p_items) loop
+  if jsonb_typeof(v_item) is distinct from 'object'
+    or (v_item - array['item','quantity','unit','notes']) <> '{}'::jsonb
+    or length(trim(coalesce(v_item->>'item',''))) not between 2 and 200
+    or length(coalesce(v_item->>'notes',''))>3000
+    or coalesce(v_item->>'quantity','') !~ '^[0-9]{1,8}([.][0-9]{1,3})?$'
+  then raise exception 'Invalid material line' using errcode='22023';end if;
+  v_qty=(v_item->>'quantity')::numeric;
+  v_unit=v_item->>'unit';
+  if v_qty<=0 or v_unit not in
+    ('bags','kg','tonnes','litres','nos','sqft','sqm','cft','cum','yards','metres','feet')
+  then raise exception 'Invalid material quantity or unit' using errcode='22023';end if;
+  insert into private.site_material_needs(
+    organization_id,project_id,item,quantity,unit,notes,requested_by)
+   values(p_org,p_project,trim(v_item->>'item'),v_qty,v_unit,
+    coalesce(v_item->>'notes',''),auth.uid()) returning id into v_id;
+  perform private.site_log(p_org,p_project,'material.requested',v_id);
+  v_total=v_total+1;
+ end loop;
+ return jsonb_build_object('count',v_total);
+end
+$function$;
+revoke all on function public.project_site_material_batch(uuid,uuid,jsonb) from public,anon;
+grant execute on function public.project_site_material_batch(uuid,uuid,jsonb) to authenticated;
