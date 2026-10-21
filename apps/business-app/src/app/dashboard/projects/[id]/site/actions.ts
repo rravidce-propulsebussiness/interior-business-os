@@ -186,8 +186,6 @@ export async function uploadProjectSiteMedia(
         });
         throw error;
       }
-      revalidatePath(pathFor(project));
-      return { saved: true, message: 'Media saved privately to this project.' };
     }
     const { data, error } = await client.rpc('project_site_media_put', {
       p_organization_id: org,
