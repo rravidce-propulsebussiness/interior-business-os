@@ -729,34 +729,98 @@
 @media(max-width:680px){.pv2-execution-readiness-grid{grid-template-columns:1fr}}
 
 
-/* One-by-one construction execution with the existing dashboard palette. */
-.pv2-stage-task-group{margin:14px 0;padding:14px;border:1px solid var(--border,#e6e9ee);border-radius:16px;background:var(--surface,#fff)}
-.pv2-stage-task-group h4{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:15px;margin:0 0 8px}
-.pv2-stage-task-group h4 small{font-weight:650;font-size:12px;color:var(--muted,#64748b);white-space:nowrap}
-.pv2-stage-task-entries{display:grid;gap:7px;margin-top:12px}
-.pv2-item-checklist{border:1px solid var(--border,#e6e9ee);border-radius:12px;background:var(--surface,#fff);overflow:hidden}
-.pv2-item-checklist[open]{border-color:var(--accent,#ff650c)}
-.pv2-item-checklist-summary{cursor:pointer;display:flex;align-items:center;gap:12px;padding:12px;list-style:none}
-.pv2-item-checklist-summary::-webkit-details-marker{display:none}
-.pv2-item-checklist-icon{display:grid;place-items:center;flex:none;width:27px;height:27px;border:1px solid var(--border,#ddd);border-radius:50%;font-weight:750;color:var(--muted,#758092)}
-.pv2-item-checklist.is-done .pv2-item-checklist-icon{background:#dcfce7;color:#168059;border-color:#a2e9c7}
-.pv2-item-checklist-copy{display:grid;gap:2px;min-width:0;flex:1}
-.pv2-item-checklist-copy strong{font-size:13px;line-height:1.45;overflow-wrap:anywhere}
-.pv2-item-checklist-copy small{font-size:11px;color:var(--muted,#6b7280)}
-.pv2-item-checklist-chevron{font-size:20px;color:var(--muted,#9ca3af)}
-.pv2-item-checklist-inner{padding:12px;border-top:1px solid var(--border,#e5e7eb)}
-.pv2-item-checklist-inner .pv2-form{max-width:100%}
-.pv2-check-photo-link{display:inline-flex;font-weight:650;font-size:12px;padding-bottom:8px}
-.pv2-material-line{padding:13px;margin:0 0 9px;border:1px solid var(--border,#e5e7eb);border-radius:13px;background:var(--surface,#fff)}
-.pv2-material-line-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
-.pv2-material-line-head .pv2-button{padding:5px 10px;font-size:11px}
-.pv2-material-line-controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding-top:5px}
-.pv2-batch-material-form .pv2-material-line .pv2-two{grid-template-columns:minmax(0,1.6fr) minmax(100px,1fr)}
+/* Execution checklists extend the existing Projects design, never global theme tokens.
+   Some workspace themes define --surface / --border as dark values; do not inherit them. */
+.pv2-page .pv2-stage-task-group{
+ margin:9px 0;padding:11px 12px;min-width:0;
+ border:1px solid #f0e8df;border-radius:12px;background:#fff;
+ color:#25354b;
+}
+.pv2-page .pv2-stage-task-group h4{
+ display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;
+ gap:8px;margin:0 0 5px;color:#192b43;font-size:13px;font-weight:800;
+}
+.pv2-page .pv2-stage-task-group h4 small{
+ font-size:11px;font-weight:750;color:#e45b16;white-space:nowrap;
+}
+.pv2-page .pv2-stage-task-group > .pv2-hint{
+ color:#697a90;font-size:11px;line-height:1.55;
+}
+.pv2-page .pv2-stage-task-entries{
+ display:grid;gap:6px;margin-top:10px;
+}
+.pv2-page .pv2-item-checklist{
+ border:1px solid #eee5dc;border-radius:10px;background:#fff;
+ color:#27384e;overflow:hidden;min-width:0;
+}
+.pv2-page .pv2-item-checklist[open]{
+ border-color:#ffc8a6;background:#fffaf6;box-shadow:0 2px 8px #e78a4010;
+}
+.pv2-page .pv2-item-checklist-summary{
+ cursor:pointer;display:flex;align-items:center;gap:10px;
+ padding:11px 12px;list-style:none;background:#fff;color:#27384e;
+}
+.pv2-page .pv2-item-checklist[open] > .pv2-item-checklist-summary{
+ background:#fff7f1;
+}
+.pv2-page .pv2-item-checklist-summary::-webkit-details-marker{display:none}
+.pv2-page .pv2-item-checklist-icon{
+ display:grid;place-items:center;flex:none;width:26px;height:26px;
+ border:1px solid #f6d8c1;border-radius:8px;background:#fff1e7;
+ color:#e76322;font-size:16px;font-weight:800;
+}
+.pv2-page .pv2-item-checklist.is-done .pv2-item-checklist-icon{
+ background:#e7f8ed;color:#148759;border-color:#bcdfca;
+}
+.pv2-page .pv2-item-checklist-copy{display:grid;gap:3px;min-width:0;flex:1}
+.pv2-page .pv2-item-checklist-copy strong{
+ color:#26364a;font-size:12px;font-weight:750;line-height:1.45;
+ overflow-wrap:anywhere;
+}
+.pv2-page .pv2-item-checklist-copy small{
+ font-size:10px;color:#7a899b;
+}
+.pv2-page .pv2-item-checklist-chevron{color:#e05b19;font-size:19px}
+.pv2-page .pv2-item-checklist-inner{
+ padding:12px;border-top:1px solid #f4e6dd;background:#fffdfb;
+ color:#34445b;
+}
+.pv2-page .pv2-item-checklist-inner .pv2-form{
+ max-width:100%;margin:0;padding:0;background:transparent;
+}
+.pv2-page .pv2-item-checklist-inner .pv2-form label{
+ color:#40536e;font-size:11px;font-weight:750;
+}
+.pv2-page .pv2-item-checklist-inner .pv2-form :is(input,select,textarea){
+ background:#fff;color:#23364d;border-color:#e1e6eb;
+ border-radius:9px;min-height:42px;
+}
+.pv2-page .pv2-item-checklist-inner .pv2-form textarea::placeholder{
+ color:#8492a2;
+}
+.pv2-page .pv2-check-photo-link{
+ display:inline-flex;color:#dc5b18;font-weight:750;
+ font-size:11px;padding-bottom:8px;
+}
+.pv2-page .pv2-material-line{
+ padding:12px;margin:0 0 9px;border:1px solid #f0e8df;
+ border-radius:11px;background:#fff;
+}
+.pv2-page .pv2-material-line-head{
+ display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;
+}
+.pv2-page .pv2-material-line-head .pv2-button{padding:5px 10px;font-size:11px}
+.pv2-page .pv2-material-line-controls{
+ display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding-top:5px;
+}
+.pv2-page .pv2-batch-material-form .pv2-material-line .pv2-two{
+ grid-template-columns:minmax(0,1.6fr) minmax(100px,1fr);
+}
 @media(max-width:650px){
- .pv2-stage-task-group{padding:10px;margin-inline:-3px}
- .pv2-item-checklist-summary{padding:10px;gap:9px}
- .pv2-batch-material-form .pv2-material-line .pv2-two{grid-template-columns:1fr}
- .pv2-material-line-controls .pv2-button{width:100%;justify-content:center}
+ .pv2-page .pv2-stage-task-group{padding:10px;margin:6px 0}
+ .pv2-page .pv2-item-checklist-summary{padding:10px;gap:9px}
+ .pv2-page .pv2-batch-material-form .pv2-material-line .pv2-two{grid-template-columns:1fr}
+ .pv2-page .pv2-material-line-controls .pv2-button{width:100%;justify-content:center}
 }
 
 .pv2-formal-quality .pv2-qc-history-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 0;border-bottom:1px solid var(--border,#e6e9ee)}
