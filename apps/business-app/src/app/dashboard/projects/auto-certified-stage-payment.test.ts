@@ -31,7 +31,7 @@ describe('Auto stage payment requests from certified signed quotation',()=>{
  it('does not duplicate issued or voided requests or existing invoices',()=>{
   expect(migration).toContain('ON CONFLICT DO NOTHING RETURNING id INTO request_id');
   expect(migration).toContain('WHERE r.organization_id=p_org AND r.schedule_item_id=item.id)');
-  expect(migration).toContain("'public.invoice_items");
+  expect(migration).toContain('FROM public.invoice_items il');
   expect(migration).toContain('private.gst_stage_invoice_links');
   expect(migration).not.toContain('INSERT INTO public.invoices');
   expect(migration).not.toContain('INSERT INTO private.gst_business_documents');
