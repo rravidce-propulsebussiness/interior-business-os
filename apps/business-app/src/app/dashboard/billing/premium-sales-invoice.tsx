@@ -406,7 +406,7 @@ export function PremiumSalesInvoice({
     </div>
     <div className="psi-mobile-actions">
       <button type="button" onClick={()=>setPreview(true)} className="psi-outline-button">Preview</button>
-      <button type="submit" disabled={disabledSave} className="psi-orange-button">Save draft</button>
+      <button type="submit" disabled={disabledSave} className="psi-orange-button">Save</button>
     </div>
 
     {projectDialog && selectedClient?.wonLeadId && <div
