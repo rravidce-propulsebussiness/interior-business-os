@@ -84,7 +84,7 @@ BEGIN
 
   FOREACH v_line IN ARRAY regexp_split_to_array(v_block,E'\r?\n') LOOP
     v_match := regexp_match(btrim(v_line),
-      '^(.+)\\|([0-9]+(\\.[0-9]{1,2})?)$');
+      '^(.+)\|([0-9]+(\.[0-9]{1,2})?)$');
     IF v_match IS NULL THEN RETURN NULL; END IF;
     v_name := btrim(v_match[1]);
     v_percent := v_match[2]::numeric;
