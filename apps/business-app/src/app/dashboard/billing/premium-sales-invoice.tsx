@@ -205,7 +205,7 @@ export function PremiumSalesInvoice({
           <td>{line.quantity}</td><td>{money(line.unitPrice)}</td><td>{money(currencyTotal(line))}</td>
         </tr>)}</tbody></table>
       <div className="psi-paper-totals">
-        <div><span>Taxable value</span><strong>{money(amounts.taxable)}</strong></div>
+        <div><span>{type==='tax_invoice'?'Taxable value':'Value of supply'}</span><strong>{money(amounts.taxable)}</strong></div>
         {amounts.cgst>0&&<div><span>CGST</span><strong>{money(amounts.cgst)}</strong></div>}
         {amounts.sgst>0&&<div><span>SGST</span><strong>{money(amounts.sgst)}</strong></div>}
         {amounts.igst>0&&<div><span>IGST</span><strong>{money(amounts.igst)}</strong></div>}
@@ -306,7 +306,8 @@ export function PremiumSalesInvoice({
           <div className="psi-fields psi-four">
             <label className="psi-field"><span>Billing type</span><select name="documentType" value={type}
               onChange={e=>{const next=e.target.value as GstDocument['documentType'];
-                setType(next);setNonGstReason(next==='bill_of_supply'?'exempt':
+                setType(next);if(next!=='tax_invoice')setReverseCharge(false);
+                setNonGstReason(next==='bill_of_supply'?'exempt':
                 profile.gstin?'non_taxable':'unregistered');}}>
               {profile.gstin&&<option value="tax_invoice">GST bill — Tax invoice</option>}
               {profile.gstin&&<option value="bill_of_supply">Non-GST — Bill of Supply</option>}
@@ -334,8 +335,8 @@ export function PremiumSalesInvoice({
             </label>
             <p className="psi-hint">Non-GST billing is only for qualifying supplies; taxable supplies of GST-registered businesses require GST invoices.</p>
            </div>}
-          <label className="psi-toggle"><input type="checkbox" name="reverseCharge" value="true" checked={reverseCharge}
-            onChange={e=>setReverseCharge(e.target.checked)}/> Reverse charge applies</label>
+          {type==='tax_invoice'&&<label className="psi-toggle"><input type="checkbox" name="reverseCharge" value="true" checked={reverseCharge}
+            onChange={e=>setReverseCharge(e.target.checked)}/> Reverse charge applies</label>}
         </section>
         {eligibleStages.length>0 && <section className="psi-card">
           <div className="psi-title"><span className="psi-step">3</span><h2>Select project stage &amp; payment</h2></div>
