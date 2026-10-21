@@ -313,7 +313,7 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
       const linked=d.links.filter(x=>x.stage_id===stage.id);
       const stageWork=d.stageProgress.work.filter(x=>stringValue(x.stage_id)===stage.id);
       const stageChecks=d.stageProgress.checks.filter(x=>stringValue(x.stage_id)===stage.id);
-      const passed=checks.filter(title=>stageChecks.some(x=>
+      const passed=checks.filter(title=>[...stageChecks,...(site?.checks??[])].some(x=>
        stringValue(x.title).toLowerCase()===title.toLowerCase()&&stringValue(x.status)==='passed')).length;
       const finishedActivities=stage.activities.filter((_,i)=>stageWork.some(x=>
        Number(x.index)===i&&stringValue(x.status)==='completed')).length;
