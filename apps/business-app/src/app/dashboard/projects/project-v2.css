@@ -828,3 +828,16 @@
 .pv2-formal-quality .pv2-qc-history-row strong{font-size:12px;flex:1;min-width:145px}
 .pv2-formal-quality .pv2-qc-history-row small{font-size:11px;color:var(--muted,#64748b)}
 .pv2-formal-quality .pv2-qc-history-row p{width:100%;margin:0;font-size:12px}
+
+/* Previously uploaded inspection evidence is selected explicitly and visibly. */
+.pv2-page .pv2-check-photo-preview{
+ display:flex;flex-wrap:wrap;gap:6px 12px;justify-content:space-between;
+ align-items:center;margin:0;padding:9px 11px;
+ border:1px solid #f6dccb;border-radius:9px;background:#fff8f3;
+ color:#556174;font-size:11px;line-height:1.55;
+}
+.pv2-page .pv2-check-photo-preview span{min-width:0;overflow-wrap:anywhere}
+.pv2-page .pv2-check-photo-preview a{
+ color:#e65b13;font-weight:800;text-decoration:underline;
+ text-underline-offset:2px;white-space:nowrap;
+}
