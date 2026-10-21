@@ -22,7 +22,7 @@ const allowedActions = new Set([
   'gate_add',
   'handover',
 ]);
-type Result = { saved: boolean; message: string };
+type Result = { saved: boolean; message: string; mediaId?: string };
 const pathFor = (project: string) => '/dashboard/projects/' + project + '/site';
 
 async function context(project: string) {
@@ -178,6 +178,8 @@ export async function uploadProjectSiteMedia(
           } as never,
         );
         if (response.error) throw new Error(response.error.message);
+        revalidatePath(pathFor(project));
+        return { saved: true, message: 'Media saved privately to this project.', mediaId: String(response.data ?? '') };
       } catch (error) {
         await r2MediaDelete(key).catch(() => {
           console.error('[Business OS] R2 orphan cleanup failed');
@@ -187,7 +189,7 @@ export async function uploadProjectSiteMedia(
       revalidatePath(pathFor(project));
       return { saved: true, message: 'Media saved privately to this project.' };
     }
-    const { error } = await client.rpc('project_site_media_put', {
+    const { data, error } = await client.rpc('project_site_media_put', {
       p_organization_id: org,
       p_project_id: project,
       p_category: category,
@@ -203,7 +205,7 @@ export async function uploadProjectSiteMedia(
           : error.message.slice(0, 220),
       );
     revalidatePath(pathFor(project));
-    return { saved: true, message: 'Media saved privately to this project.' };
+    return { saved: true, message: 'Media saved privately to this project.', mediaId: String(data ?? '') };
   } catch (error) {
     return {
       saved: false,
