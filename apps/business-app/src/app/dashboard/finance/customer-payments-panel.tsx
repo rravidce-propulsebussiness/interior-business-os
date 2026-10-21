@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import Link from 'next/link';
 import { financeServices } from './service';
 import { FinanceForm } from './form';
+import { nextMilestoneDue, type MilestoneDue } from './payment-due';
 
 const idPattern=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const value=(row:Record<string,unknown>,key:string)=>
@@ -33,6 +34,7 @@ export async function CustomerPaymentsPanel({
  const s=await financeServices('payment.view',true);
  const selected=idPattern.test(rawId)?rawId:'';
  const canRecord=s.allowed('payment.record');
+ const owner=s.context.roles.some(role=>role.name.toLowerCase()==='owner');
  const canManageMethods=s.allowed('billing.manage');
  const canSeeContracts=s.allowed('contract.view');
  const canAllocate=s.allowed('payment.allocate');
@@ -44,6 +46,7 @@ export async function CustomerPaymentsPanel({
  let methods:Record<string,unknown>[]=[];
  let invoices:Record<string,unknown>[]=[];
  let loadError='';
+ let due:MilestoneDue|null=null;
  try {
   const [contractResponse,paymentResponse,methodResponse]=await Promise.all([
    canSeeContracts?s.finance.search('contracts',{q:query.slice(0,100)},1):
@@ -59,6 +62,7 @@ export async function CustomerPaymentsPanel({
    const exact=await s.finance.detail('contracts',selected);
    contracts=[exact,...contracts];
   }
+  if(selected&&canSeeContracts) due=await nextMilestoneDue(s.client,s.org,selected);
   if(selected&&canSeeInvoices&&canAllocate){
    const invoiceResponse=await s.finance.search('invoices',
     {contract_id:selected,status:'issued'},1);
@@ -138,8 +142,9 @@ export async function CustomerPaymentsPanel({
      <details className="fw-payment-inline" key={selected}>
       <summary>Record received amount</summary>
       <FinanceForm title="Save received payment" successHref={url}
+       fullPaymentAmount={due?.amount} ownerCanEnablePartial={owner}
        initial={{action:'record_payment',contract_id:selected,input:{
-        idempotency_key:randomUUID(),payment_date:todayInIndia(),amount:'',
+        idempotency_key:randomUUID(),payment_date:todayInIndia(),amount:due?.amount??'',
         method_id:value(methods[0]??{},'id'),external_reference:'',notes:'',allocations:[]}}}
        fields={[
         {key:'payment_date',label:'Date received',type:'date',required:true},
@@ -158,6 +163,7 @@ export async function CustomerPaymentsPanel({
          {key:'amount',label:'Allocated amount (₹)',required:true}],
         itemsKey:'allocations',itemDefaults:{invoice_id:value(invoices[0]??{},'id'),amount:'0',idempotency_key:randomUUID()},
        }: {})}/>
+      {due&&<p className="fw-footnote">Current milestone: {due.label}. Full remaining milestone payment is selected by default. Only the company Owner can enable a smaller receipt.</p>}
       <p className="fw-footnote">Invoice allocations are optional. Advance proformas are requests, not tax invoices; do not allocate an advance to a proforma as if it were a paid tax invoice.</p>
      </details>}
     </>}
