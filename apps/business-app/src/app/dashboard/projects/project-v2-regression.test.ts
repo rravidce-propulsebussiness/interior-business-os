@@ -44,17 +44,19 @@ it('shows only the selected Final saved quotation on a converted project',()=>{
   expect(ui).toContain('title="Final Quotation"');
   expect(ui).toContain("q.status==='draft'?'Saved':q.status");
   expect(ui).toContain("Quotation history / change Final");
-  expect(ui).toContain('label="Open agreement & schedule"');
+  expect(ui).toContain('id="project-agreement"');
   expect(loader).toContain("quotation:has('quotation.view','quotation')");
   expect(loader).toContain("'quotation_final_choices'");
-  expect(loader).toContain('finalRoot=quoteRoots.find');
+  expect(loader).toContain("signedContractSource=agreement.clearance_type==='signed_copy_recorded'");
   expect(loader).toContain('const quotations:ProjectQuotation[]=finalRoot');
   expect(loader).toContain("lead_quotation_list");
   expect(loader).toContain("quotations:[]");
 });
-it('does not imply an old agreement automatically covers a newer final quote',()=>{
-  expect(ui).toContain("not the currently selected Final quotation");
-  expect(loader).toContain("revisionId:contract.data?.find");
+it('preserves the legally signed quotation while later alternatives remain in history',()=>{
+  expect(ui).toContain('The signed agreement fixes the agreed quotation for this project');
+  expect(loader).toContain('quoteRoots.find(q=>q.current_revision_id===contractedRevision)');
+  expect(loader).toContain('revisionId:contract.data?.find');
+  expect(ui).not.toContain('Review signed contract revision');
 });
 
 
@@ -86,7 +88,7 @@ it('starts at a real floor plan action after signed agreement, before final desi
  expect(forms).toContain("if(stage==='client_approved')");
  expect(forms).toContain("submitProjectDrawing(id,form)");
  expect(ui).toContain("agreementSigned={signed}");
- expect(ui).toContain('This agreement was prepared from an earlier quotation');
+ expect(ui).toContain('The unsigned agreement references a different quotation');
  expect(drawing).toContain("p_action:'design_submit'");
  expect(drawing).toContain("p_category:'design'");
  expect(drawing).toContain('if(uploaded)revalidatePath');
@@ -144,7 +146,7 @@ it('keeps site readiness and quotation completion inside the actual project time
  expect(ui).toContain("d.agreement?.authorized===true");
  expect(ui).toContain("'/dashboard/finance/payments/new?contract_id='");
  expect(ui).toContain("'/dashboard/finance/payment_schedules/new?contract_id='");
- expect(ui).toContain("Activate contract in Finance");
+ expect(ui).toContain("Activate signed contract");
  expect(forms).toContain("return executionReady?");
  expect(forms).toContain("operation=\"execution_start\"");
  expect(ui).not.toContain('Agreement and payment actions are in the Agreement &amp; Preconstruction stage');
@@ -152,4 +154,15 @@ it('keeps site readiness and quotation completion inside the actual project time
  const hub=ui.slice(ui.indexOf('function ProjectWorkHub('),ui.indexOf('function Overview('));
  expect(hub).not.toContain('<ProjectLifecycle');
  expect(hub).toContain('<ProjectStageBoard d={d}/>');
+});
+
+it('keeps completed stages free of repeated agreement reviews and avoids duplicate contract pages',()=>{
+ const oldDetail=read('../finance/[entity]/[id]/page.tsx');
+ expect(ui).toContain("(!complete||(['DESIGN','DESIGN_APPROVAL'].includes(stage.template_code)");
+ expect(ui).toContain('ProjectContractActivation');
+ expect(forms).toContain("export function ProjectContractActivation");
+ expect(forms).toContain("action:'contract_status'");
+ expect(ui).not.toContain("'/dashboard/finance/contracts/'+d.agreement.contractId");
+ expect(oldDetail).toContain("redirect('/dashboard/projects/'");
+ expect(oldDetail).toContain("'/documents#project-agreement'");
 });
