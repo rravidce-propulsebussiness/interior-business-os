@@ -9,8 +9,12 @@ describe('Owner-only transactional test data reset',()=>{
  it('exists only inside Owner Settings Preferences',()=>{
   expect(page).toContain("tab==='preferences'&&isOwner&&canEdit");
   expect(page).toContain('ResetTestDataPanel');
-  expect(page).toContain('owner_test_data_reset_preview');
-  expect(page).toContain('ResetPreview');
+  expect(page).not.toContain('owner_test_data_reset_preview');
+  expect(action).toContain('owner_test_data_reset_preview');
+  expect(panel).toContain('ownerResetTestDataPreview()');
+  expect(panel).toContain('Checking linked test records for this company');
+  expect(page).not.toContain('resetPreview');
+  expect(panel).toContain('ResetPreview');
  });
  it('requires preview, exact company phrase, and acknowledgement',()=>{
   expect(panel).toContain("confirmation===preview.required_phrase&&ack");
