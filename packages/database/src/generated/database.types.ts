@@ -11374,18 +11374,6 @@ export interface Database {
         Args: { p_org: string; p_id: string };
         Returns: Json;
       };
-      gst_sales_invoice_save_and_issue: {
-        Args: {
-          p_org: string;
-          p_input: Json;
-          p_customer?: string | null;
-          p_won_lead?: string | null;
-          p_stage_lead?: string | null;
-          p_revision?: string | null;
-          p_stage?: number | null;
-        };
-        Returns: string;
-      };
       gst_document_save: {
         Args: { p_org: string; p_input: Json };
         Returns: string;
@@ -11407,6 +11395,18 @@ export interface Database {
       gst_profile_save: {
         Args: { p_org: string; p_input: Json };
         Returns: undefined;
+      };
+      gst_sales_invoice_save_and_issue: {
+        Args: {
+          p_org: string;
+          p_input: Json;
+          p_customer?: string;
+          p_won_lead?: string;
+          p_stage_lead?: string;
+          p_revision?: string;
+          p_stage?: number;
+        };
+        Returns: string;
       };
       gst_stage_invoice_context: {
         Args: { p_org: string; p_invoice: string };
