@@ -65,7 +65,7 @@ end$function$
 
 CREATE OR REPLACE FUNCTION private.test_reset_targets()
 RETURNS regclass[] LANGUAGE sql STABLE SET search_path=''
-AS $f$ SELECT ARRAY[
+AS $f$ SELECT pg_catalog.array_remove(ARRAY[
   'private.automation_email_payloads'::regclass,
   'private.client_design_decisions'::regclass,
   'private.client_project_access'::regclass,
@@ -89,7 +89,7 @@ AS $f$ SELECT ARRAY[
   'private.project_advance_proformas'::regclass,
   'private.project_advance_requirements'::regclass,
   'private.project_agreement_events'::regclass,
-  'private.project_client_requests'::regclass,
+  pg_catalog.to_regclass('private.project_client_requests'),
   'private.project_preflight'::regclass,
   'private.project_quote_timeline_sources'::regclass,
   'private.project_stage_owner_history'::regclass,
@@ -190,7 +190,7 @@ AS $f$ SELECT ARRAY[
   'public.work_measurement_costs'::regclass,
   'public.work_measurements'::regclass,
   'public.work_packages'::regclass
-]::regclass[] $f$;
+]::regclass[],NULL) $f$;
 
 CREATE OR REPLACE FUNCTION private.test_reset_counts(p_org uuid)
 RETURNS jsonb LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path=''
