@@ -4,6 +4,7 @@ import { financeCommandSchema } from '@business-os/core/finance';
 import { safeFailure } from '@business-os/shared';
 import { financeServices } from './service';
 import { syncQuotedConstructionTimeline } from './quote-construction-handoff';
+import { nextMilestoneDue } from './payment-due';
 export async function financeCommand(
   input: unknown,
 ): Promise<{ message: string; id?: string; entity?: string }> {
@@ -43,6 +44,23 @@ export async function financeCommand(
                                 }[command.input.action]
                               : 'billing.manage';
     const s = await financeServices(permission);
+    if (command.action==='record_payment') {
+      const owner=s.context.roles.some(role=>role.name.toLowerCase()==='owner');
+      if (command.allow_partial&&!owner)
+        return {message:'Only the company Owner can authorize a partial payment.'};
+      // Compare with trusted live contract ledger amounts, never with a browser
+      // supplied "full" value. Existing ad-hoc receipts without a schedule
+      // retain their old workflow.
+      const due=await nextMilestoneDue(s.client,s.org,command.contract_id);
+      if (due) {
+        const paid=Math.round(Number(command.input.amount)*100);
+        const required=Math.round(Number(due.amount)*100);
+        if (paid>required)
+          return {message:'Amount exceeds the unpaid milestone. Review the Finance ledger.'};
+        if (paid<required&&!command.allow_partial)
+          return {message:'Full milestone payment is the default. Only the Owner may enable partial payment.'};
+      }
+    }
     const result = await s.finance.command(command);
     let message = 'Commercial record saved.';
     if (command.action === 'create_contract') {
