@@ -10867,6 +10867,11 @@ export interface Database {
         Args: { p_organization_id: string; p_customer_id: string };
         Returns: Json;
       };
+      client_portal_invoice_read: {
+        Args: { p_project_id: string; p_invoice: string };
+        Returns: Json;
+      };
+      client_portal_invoices: { Args: { p_project_id: string }; Returns: Json };
       client_portal_manage: {
         Args: {
           p_organization_id: string;
@@ -11390,6 +11395,18 @@ export interface Database {
       gst_profile_save: {
         Args: { p_org: string; p_input: Json };
         Returns: undefined;
+      };
+      gst_sales_invoice_save_and_issue: {
+        Args: {
+          p_org: string;
+          p_input: Json;
+          p_customer?: string;
+          p_won_lead?: string;
+          p_stage_lead?: string;
+          p_revision?: string;
+          p_stage?: number;
+        };
+        Returns: string;
       };
       gst_stage_invoice_context: {
         Args: { p_org: string; p_invoice: string };

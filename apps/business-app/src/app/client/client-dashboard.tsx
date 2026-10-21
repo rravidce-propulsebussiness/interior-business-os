@@ -65,6 +65,11 @@ export type ClientUpdate = {
   summary: string;
   created_at: string;
 };
+export type ClientInvoice={
+ id:string;number:string;documentType:string;
+ date:string;dueDate:string|null;total:number;
+ paymentStatus:'payment_requested';
+};
 export type ClientDashboardData = {
   project: {
     id: string;
@@ -88,6 +93,7 @@ export type ClientDashboardData = {
   };
   metricsUnavailable: boolean;
   requests: ProjectClientRequest[];
+  invoices: ClientInvoice[];
   clientEmail: string;
 };
 
@@ -294,6 +300,7 @@ export function ClientDashboard({
   metrics,
   metricsUnavailable,
   requests,
+  invoices,
   clientEmail,
 }: ClientDashboardData) {
   const [search, setSearch] = useState('');
@@ -349,6 +356,7 @@ export function ClientDashboard({
     { href: '#photos', title: 'Photos', icon: 'camera' },
     { href: '#drawings', title: 'Drawings', icon: 'file' },
     { href: '#approvals', title: 'Approvals', icon: 'check' },
+    { href: '#payment-requests', title: 'Payments', icon: 'file' },
   ];
   return (
     <div className="pc-root" id="overview">
@@ -990,6 +998,31 @@ export function ClientDashboard({
               ) : (
                 <p className="pc-empty">No shared site photos.</p>
               )}
+            </section>
+            <section id="payment-requests" className="pc-panel pc-expand-section">
+              <div className="pc-section-head"><div>
+                <h2>Invoices &amp; payment requests</h2>
+                <p>Issued bills from your builder. A bill is not a payment receipt.</p>
+              </div></div>
+              {invoices.length ? <div className="pc-record-list">
+                {invoices.map(invoice=><article key={invoice.id}
+                  className="pc-file-link" style={{display:'flex',flexWrap:'wrap',
+                  alignItems:'center',gap:12,justifyContent:'space-between'}}>
+                  <div style={{display:'grid',gap:5}}>
+                    <b>{invoice.number}</b>
+                    <small>{invoice.documentType==='tax_invoice'?'GST invoice':
+                      invoice.documentType==='bill_of_supply'?'Bill of Supply':'Invoice'}
+                      {' · Issued '+fmt(invoice.date)}</small>
+                    <strong>₹{invoice.total.toLocaleString('en-IN',{
+                      maximumFractionDigits:2,minimumFractionDigits:2})}</strong>
+                    <small>Payment requested · Due: {fmt(invoice.dueDate)}</small>
+                  </div>
+                  <a href={'/client/invoices/'+invoice.id+'/pdf?project='+project.id}
+                    className="pc-view-link" download>
+                    <Icon name="file" size={16}/> Download PDF <Icon name="arrow" size={14}/>
+                  </a>
+                </article>)}
+              </div>:<p className="pc-empty">No issued payment requests for this project.</p>}
             </section>
             <section id="all-documents" className="pc-panel pc-expand-section">
               {cardHeader('Shared documents', '#drawings')}

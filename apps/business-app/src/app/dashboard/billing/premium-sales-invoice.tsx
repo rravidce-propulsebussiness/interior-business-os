@@ -233,13 +233,13 @@ export function PremiumSalesInvoice({
       <input type="hidden" name="stageNumber" value={stage!.number}/></>}
     <header className="psi-top">
       <div><div className="psi-breadcrumb"><Link href="/dashboard/finance?tab=invoices">Finance</Link>
-        <span>/</span><span>Sales invoices</span><span>/</span><b>{existing ? 'Edit draft' : 'New invoice'}</b></div>
-        <h1>Create sales invoice <span className="psi-draft">Draft</span></h1>
+        <span>/</span><span>Sales invoices</span><span>/</span><b>{existing ? 'Complete invoice' : 'New invoice'}</b></div>
+        <h1>{existing?'Update & issue':'Create sales invoice'} <span className="psi-draft">Payment request</span></h1>
         <p>Select an existing client or enter a new customer. Choose a payment stage when applicable.</p>
       </div>
       <div className="psi-header-actions"><Link href="/dashboard/finance?tab=invoices" className="psi-muted-button">Cancel</Link>
         <button type="button" className="psi-outline-button" onClick={()=>setPreview(true)}>Preview invoice</button>
-        <button type="submit" className="psi-orange-button" disabled={disabledSave}>Save &amp; preview</button></div>
+        <button type="submit" className="psi-orange-button" disabled={disabledSave}>Save Invoice</button></div>
     </header>
     <div className="psi-columns">
       <div className="psi-left">
@@ -260,7 +260,7 @@ export function PremiumSalesInvoice({
           {hasStage && <div className="psi-attached">
             <span className="psi-check">✓</span><div><strong>{choice!.projectName}</strong>
               <p>Accepted quote {choice!.quoteNumber} · {choice!.projectType || 'Project'}</p>
-              <small>On the first issued invoice, this existing quotation project becomes active. Saving a draft does not create it.</small></div>
+              <small>Saving issues the official invoice and connects this agreed payment stage to the customer project.</small></div>
             </div>}
           {!customerAccess && !customers.length && <p className="psi-hint">Invoice client options could not be loaded.</p>}
           {selectedClient?.wonLeadId && !hasStage && <div className="psi-attached">
@@ -429,16 +429,16 @@ export function PremiumSalesInvoice({
           </div>
           {hasStage && <div className="psi-project-note">
             <strong>Project activates after invoice issuance</strong>
-            <p>Quote: {choice!.quoteNumber} · Stage: {stage!.name}. Drafts never start execution or record payment.</p>
+            <p>Quote: {choice!.quoteNumber} · Stage: {stage!.name}. Issuing a bill requests payment; it does not record money received.</p>
           </div>}
-          <button className="psi-orange-button psi-full" disabled={disabledSave} type="submit">Save &amp; preview</button>
-          <p className="psi-hint psi-centered">After saving, review the official draft and choose <b>Issue sales invoice</b>. Final issuance assigns the number and activates the linked project.</p>
+          <button className="psi-orange-button psi-full" disabled={disabledSave} type="submit">Save Invoice</button>
+          <p className="psi-hint psi-centered">Save issues the official numbered invoice. An authorized client sees the payment request in their project. No payment is marked received.</p>
         </section>
       </aside>
     </div>
     <div className="psi-mobile-actions">
       <button type="button" onClick={()=>setPreview(true)} className="psi-outline-button">Preview</button>
-      <button type="submit" disabled={disabledSave} className="psi-orange-button">Save draft</button>
+      <button type="submit" disabled={disabledSave} className="psi-orange-button">Save Invoice</button>
     </div>
 
     {projectDialog && selectedClient?.wonLeadId && <div
@@ -489,7 +489,7 @@ export function PremiumSalesInvoice({
         <div className="psi-modal-head"><strong>Preview — unsaved invoice</strong>
           <button type="button" onClick={()=>setPreview(false)} aria-label="Close preview">×</button></div>
         {invoicePreview}
-        <p className="psi-hint">This is a local estimate only. Save the draft to view the authoritative server-calculated invoice.</p>
+        <p className="psi-hint">This is a local preview only. Save Invoice to issue the official numbered document.</p>
       </section>
     </div>}
   </form>;

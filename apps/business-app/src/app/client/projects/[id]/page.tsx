@@ -57,6 +57,11 @@ const timelineSchema = z.array(
     activities: z.array(z.string()),
   }),
 );
+const invoicesSchema=z.array(z.object({
+ id:z.uuid(),number:z.string(),documentType:z.string(),
+ date:z.string(),dueDate:z.string().nullable(),
+ total:z.number(),paymentStatus:z.literal('payment_requested'),
+}));
 const requestsSchema=z.array(z.object({
  id:z.uuid(),kind:z.string(),details:z.string(),status:z.string(),
  requested_date:z.string().nullable(),response:z.string(),created_at:z.string(),
@@ -125,11 +130,12 @@ export default async function ClientProjectPage({
     name: string,
     args: Record<string, string>,
   ) => Promise<{ data: unknown; error: { message: string } | null }>;
-  const [projectResult, timelineResult, dashboardResult, requestsResult] = await Promise.all([
+  const [projectResult, timelineResult, dashboardResult, requestsResult, invoicesResult] = await Promise.all([
     rpc('client_portal_project', { p_project_id: id }),
     rpc('client_portal_timeline', { p_project_id: id }),
     rpc('client_portal_dashboard', { p_project_id: id }),
     rpc('project_client_request_list', { p_project_id: id }),
+    rpc('client_portal_invoices', { p_project_id: id }),
   ]);
   const project = projectSchema.safeParse(projectResult.data);
   if (projectResult.error || !project.success) notFound();
@@ -138,6 +144,7 @@ export default async function ClientProjectPage({
   const parsedDashboard = dashboardSchema.safeParse(dashboardResult.data);
   const parsedRequests=requestsSchema.safeParse(requestsResult.data);
   const latest = parsedDashboard.success ? parsedDashboard.data : null;
+  const invoices=invoicesSchema.safeParse(invoicesResult.data);
 
   return (
     <ClientDashboard
@@ -165,6 +172,7 @@ export default async function ClientProjectPage({
         dashboardResult.error || !parsedDashboard.success,
       )}
       requests={parsedRequests.success&&!requestsResult.error?parsedRequests.data:[]}
+      invoices={invoices.success&&!invoicesResult.error?invoices.data:[]}
       clientEmail={auth.user.email ?? ''}
     />
   );
