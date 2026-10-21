@@ -34,7 +34,7 @@ describe('Projects v2 one screen per route',()=>{
   expect(loader).toContain('workCompletionByProject');
   expect(ui).toContain("status==='recorded'");
   expect(loader).toContain('expenditure:null');
-  expect(ui).toContain('Finance workspace');
+  expect(ui).toContain('Finance payments');
  });
 });
 
