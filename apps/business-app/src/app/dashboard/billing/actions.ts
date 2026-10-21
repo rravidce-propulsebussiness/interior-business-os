@@ -9,6 +9,7 @@ import {
   type GstDocumentInput,
 } from '@business-os/database/gst';
 import { idSchema, safeFailure, DomainError } from '@business-os/shared';
+
 import { createGstTemplatesRepository } from '@business-os/database/gst-templates';
 
 type State = { message: string };
@@ -96,13 +97,14 @@ export async function saveGstProfile(_state: State, form: FormData) {
   }
 }
 export async function saveGstDocument(form: FormData) {
-  const path = '/dashboard/billing/new';
   let id: string;
   let attachmentWarning = false;
   try {
     const { org, authorization, client } = await workspace();
     await authorization.requirePermission(org, 'invoice.create');
     const existingId = String(form.get('id') ?? '').trim();
+    if (existingId)
+      await authorization.requirePermission(org, 'invoice.manage');
     const marketplaceOrderId = String(
       form.get('marketplaceOrderId') ?? '',
     ).trim();
@@ -134,9 +136,16 @@ export async function saveGstDocument(form: FormData) {
     });
     const input = parsed as GstDocumentInput;
     const attachment = form.get('supplierBillFile');
-    const supplierFile = attachment instanceof File && attachment.size > 0 ? attachment : null;
-    if (supplierFile && (input.kind !== 'purchase_bill' || supplierFile.size > 8 * 1024 * 1024 ||
-        !['application/pdf','image/png','image/jpeg','image/webp'].includes(supplierFile.type)))
+    const supplierFile =
+      attachment instanceof File && attachment.size > 0 ? attachment : null;
+    if (
+      supplierFile &&
+      (input.kind !== 'purchase_bill' ||
+        supplierFile.size > 8 * 1024 * 1024 ||
+        !['application/pdf', 'image/png', 'image/jpeg', 'image/webp'].includes(
+          supplierFile.type,
+        ))
+    )
       throw new DomainError('VALIDATION_FAILED');
     // Every tenant uses the same platform-admin-approved appearance.
     // The database ignores client-selected template IDs as a second check.
@@ -148,40 +157,72 @@ export async function saveGstDocument(form: FormData) {
     const customerId = String(form.get('customerId') ?? '').trim();
     // Stage invoices must stay tied to the accepted quote. Ordinary invoices
     // may optionally reference an existing tenant customer without conversion.
-    if ((stageRequested && (customerId || wonLeadId)) || (customerId && wonLeadId))
+    if (
+      (stageRequested && (customerId || wonLeadId)) ||
+      (customerId && wonLeadId)
+    )
       throw new DomainError('VALIDATION_FAILED');
     if (stageRequested) {
       const checkedLead = idSchema.parse(leadId);
       const checkedRevision = idSchema.parse(revisionId);
-      const checkedStage = z.coerce.number().int().min(1).max(40).parse(stageNumber);
-      if (input.kind !== 'sales_invoice') throw new DomainError('VALIDATION_FAILED');
+      const checkedStage = z.coerce
+        .number()
+        .int()
+        .min(1)
+        .max(40)
+        .parse(stageNumber);
+      if (input.kind !== 'sales_invoice')
+        throw new DomainError('VALIDATION_FAILED');
       id = await createGstRepository(client).saveStageDocument(
-        org, input, checkedLead, checkedRevision, checkedStage,
+        org,
+        input,
+        checkedLead,
+        checkedRevision,
+        checkedStage,
       );
-    } else if (input.kind === 'sales_invoice' && !marketplaceOrderId && wonLeadId) {
+    } else if (
+      input.kind === 'sales_invoice' &&
+      !marketplaceOrderId &&
+      wonLeadId
+    ) {
       id = await createGstRepository(client).saveWonLeadDocument(
-        org, input, idSchema.parse(wonLeadId),
+        org,
+        input,
+        idSchema.parse(wonLeadId),
       );
     } else if (input.kind === 'sales_invoice' && !marketplaceOrderId) {
       id = await createGstRepository(client).saveCustomerDocument(
-        org, input, customerId ? idSchema.parse(customerId) : null,
+        org,
+        input,
+        customerId ? idSchema.parse(customerId) : null,
       );
     } else {
       if (customerId || wonLeadId) throw new DomainError('VALIDATION_FAILED');
       // Supplier and marketplace bills continue through their original path.
-      id = await createGstTemplatesRepository(client).saveDocument(org, input, null);
+      id = await createGstTemplatesRepository(client).saveDocument(
+        org,
+        input,
+        null,
+      );
     }
     // The GST bill is canonical. A failed attachment does not duplicate it.
     if (input.kind === 'purchase_bill' && supplierFile) {
-      try { await saveSupplierBillAttachment(org, id, supplierFile); }
-      catch { attachmentWarning = true; }
+      try {
+        await saveSupplierBillAttachment(org, id, supplierFile);
+      } catch {
+        attachmentWarning = true;
+      }
     }
     revalidatePath('/dashboard/billing');
     revalidatePath('/dashboard/finance');
   } catch (error) {
-    redirect(path + '?error=' + encodeURIComponent(safeFailure(error).message));
+    return { message: safeFailure(error).message };
   }
-  redirect('/dashboard/billing/' + id + (attachmentWarning ? '?attachment=failed' : '?saved=1'));
+  redirect(
+    '/dashboard/billing/' +
+      id +
+      (attachmentWarning ? '?attachment=failed' : '?saved=1'),
+  );
 }
 export async function finalizeGstDocument(_state: State, form: FormData) {
   try {

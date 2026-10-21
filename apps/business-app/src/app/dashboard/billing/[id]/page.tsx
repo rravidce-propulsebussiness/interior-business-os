@@ -6,7 +6,7 @@ import { createGstTemplatesRepository } from '@business-os/database/gst-template
 import { idSchema } from '@business-os/shared';
 import { ActionForm } from '@business-os/ui/action-form';
 import { finalizeGstDocument } from '../actions';
-import { PrintDocumentButton } from './print-button';
+import { PrintDocumentButton, ShareInvoiceWhatsAppButton } from './print-button';
 import { readSupplierBillAttachment } from '../supplier-bill-storage';
 
 export const dynamic = 'force-dynamic';
@@ -19,10 +19,13 @@ function text(obj: Record<string, unknown>, key: string) {
 }
 export default async function GstDocumentDetail({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ saved?: string }>;
 }) {
   const { id } = await params;
+  const { saved } = await searchParams;
   if (!idSchema.safeParse(id).success) notFound();
   const { authorization, client } = await pageServices();
   const context = await activeOrganization();
@@ -51,7 +54,9 @@ export default async function GstDocumentDetail({
     );
   const billAttachment =
     doc.kind === 'purchase_bill' && doc.isOwner
-      ? await readSupplierBillAttachment(context.organizationId, id).catch(() => null)
+      ? await readSupplierBillAttachment(context.organizationId, id).catch(
+          () => null,
+        )
       : null;
   const snapshot = doc.snapshot;
   const issuer =
@@ -71,6 +76,14 @@ export default async function GstDocumentDetail({
       id="main-content"
       className="mx-auto max-w-5xl space-y-5 px-4 py-8 text-slate-900 sm:px-7 print:max-w-none print:p-0"
     >
+      {saved === '1' && (
+        <p
+          role="status"
+          className="rounded-xl border border-green-200 bg-green-50 p-4 text-sm text-green-800 print:hidden"
+        >
+          Invoice saved successfully.
+        </p>
+      )}
       <nav className="text-sm text-slate-500 print:hidden">
         <Link href="/dashboard/billing">← GST billing</Link>
       </nav>
@@ -86,12 +99,22 @@ export default async function GstDocumentDetail({
         </div>
         <div className="flex flex-wrap gap-2">
           {doc.kind === 'purchase_bill' && billAttachment && (
-            <a href={'/dashboard/billing/' + id + '/attachment'}
-              className="rounded-xl border border-orange-200 bg-orange-50 px-4 py-2.5 text-sm font-semibold text-orange-700">
+            <a
+              href={'/dashboard/billing/' + id + '/attachment'}
+              className="rounded-xl border border-orange-200 bg-orange-50 px-4 py-2.5 text-sm font-semibold text-orange-700"
+            >
               Download supplier bill
             </a>
           )}
           {doc.status !== 'draft' && <PrintDocumentButton />}
+          {doc.kind === 'sales_invoice' && doc.status !== 'draft' && (
+            <ShareInvoiceWhatsAppButton
+              invoiceNumber={doc.number ?? 'Invoice'}
+              customerName={doc.partyName}
+              total={doc.total}
+              dueDate={doc.dueDate}
+            />
+          )}
           {doc.status === 'draft' && canEdit && (
             <Link
               href={'/dashboard/billing/new?edit=' + id}
