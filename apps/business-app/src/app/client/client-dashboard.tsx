@@ -1029,24 +1029,35 @@ export function ClientDashboard({
                   <strong>₹{request.total.toLocaleString('en-IN',{
                     maximumFractionDigits:2,minimumFractionDigits:2})}</strong>
                   {(()=>{
-                    const proof=paymentProofs.find(p=>p.requestId===request.id);
-                    return proof?<div style={{display:'grid',gap:6}}>
-                     <strong>{proof.status==='approved'?'Paid and verified':
-                      proof.status==='pending'?'Bank verification pending':
-                      proof.status==='reversed'?'Payment reversed':'Evidence rejected — resubmit'}</strong>
-                     <small>Reference: {proof.reference} · Paid amount claimed:
-                      ₹{proof.amount.toLocaleString('en-IN')}</small>
-                     {proof.reviewNote&&<small>{proof.reviewNote}</small>}
-                     <a href={'/client/payment-proofs/'+proof.id+'/file?project='+project.id}
-                      className="pc-view-link" target="_blank" rel="noreferrer">
-                      View submitted evidence</a>
-                     {proof.status==='approved'&&proof.receiptId&&
-                      <a href={'/client/payment-proofs/'+proof.id+'/receipt?project='+project.id}
-                       className="pc-view-link">Download official receipt</a>}
-                     {proof.status==='rejected'&&<ClientPaymentProofForm
-                      projectId={project.id} requestId={request.id} amount={request.total}/>}
-                    </div>:<ClientPaymentProofForm
-                      projectId={project.id} requestId={request.id} amount={request.total}/>;
+                    const related=paymentProofs.filter(p=>p.requestId===request.id);
+                    const latest=related[0];
+                    const approved=related.filter(p=>p.status==='approved');
+                    const paid=approved.reduce((sum,p)=>sum+p.amount,0);
+                    const remaining=Math.max(0,Math.round((request.total-paid)*100)/100);
+                    const pending=related.find(p=>p.status==='pending');
+                    return <div style={{display:'grid',gap:6}}>
+                     <strong>{remaining===0?'Paid and verified':
+                       pending?'Bank verification pending':
+                       paid>0?'Partially paid · Balance outstanding':
+                       latest?.status==='rejected'?'Evidence rejected — resubmit':
+                       'Payment requested'}</strong>
+                     {paid>0&&<small>Verified: ₹{paid.toLocaleString('en-IN')}
+                      {' · Balance: ₹'+remaining.toLocaleString('en-IN')}</small>}
+                     {latest&&<small>Latest bank reference: {latest.reference}</small>}
+                     {latest?.reviewNote&&<small>{latest.reviewNote}</small>}
+                     {related.map(proof=><div key={proof.id} style={{display:'flex',
+                       gap:12,flexWrap:'wrap',alignItems:'center'}}>
+                      <a href={'/client/payment-proofs/'+proof.id+'/file?project='+project.id}
+                       className="pc-view-link" target="_blank" rel="noreferrer">
+                       {proof.status==='approved'?'Verified evidence':
+                        proof.status==='pending'?'Pending evidence':'Submitted evidence'}</a>
+                      {proof.status==='approved'&&proof.receiptId&&
+                       <a href={'/client/payment-proofs/'+proof.id+'/receipt?project='+project.id}
+                        className="pc-view-link">Official receipt</a>}
+                     </div>)}
+                     {remaining>0&&!pending&&<ClientPaymentProofForm
+                      projectId={project.id} requestId={request.id} amount={remaining}/>}
+                    </div>;
                   })()}
                  </div>
                  <a href={'/client/payment-requests/'+request.id+'/pdf?project='+project.id}
