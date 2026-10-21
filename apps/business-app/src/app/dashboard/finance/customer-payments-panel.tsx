@@ -73,7 +73,7 @@ export async function CustomerPaymentsPanel({
   }
   if(canRecord&&(owner||s.context.roles.some(role=>role.name.toLowerCase()==='accountant'))){
    const result=await s.client.rpc('staff_payment_proof_list',{
-    p_org:s.org,p_contract:selected||undefined,
+    p_org:s.org,...(selected?{p_contract:selected}:{}),
    });
    if(!result.error&&Array.isArray(result.data))
     proofs=(result.data as unknown as SubmittedProof[]).filter(proof=>
