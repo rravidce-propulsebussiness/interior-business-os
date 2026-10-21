@@ -372,7 +372,7 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
              photos={photos} canEdit={allowChecks&&!complete}/>;
           })}
          </div>
-        </div>
+        </div>}
         {!!guidance.materials.length&&<details className="pv2-stage-secondary"><summary>Materials to plan</summary>
          <ul>{guidance.materials.map((name,i)=><li key={i}>{name}</li>)}</ul></details>}
         <div className="pv2-stage-attachment-count">{linked.length} linked site record{linked.length===1?'':'s'} · Linked evidence is not an approval.</div>
