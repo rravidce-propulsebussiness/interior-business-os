@@ -206,7 +206,7 @@ CREATE FUNCTION public.staff_payment_proof_decide(
 AS $decide$
 DECLARE pr private.client_payment_proofs%ROWTYPE;
  req public.payment_requests%ROWTYPE;
- value_due numeric; previously_received numeric; outstanding numeric;
+ value_due numeric; previously_received numeric; outstanding numeric; contract_received numeric;
  payment uuid; receipt uuid; is_owner boolean; payment_day date;
 BEGIN
  PERFORM private.finance_require(p_org,'payment.record');
@@ -286,6 +286,15 @@ BEGIN
   RAISE EXCEPTION 'Payment exceeds outstanding request' USING ERRCODE='22023';END IF;
  IF value_due<outstanding AND NOT p_allow_partial THEN
   RAISE EXCEPTION 'Full milestone payment required; Owner may permit partial'
+   USING ERRCODE='22023';END IF;
+ -- Protect against manual Finance receipts not recorded through this proof
+ -- flow. Check the real ledger, not only proof-linked payments.
+ SELECT COALESCE(sum(private.finance_decimal(pay.amount)),0)
+ INTO contract_received FROM public.payments pay
+ WHERE pay.organization_id=p_org AND pay.contract_id=pr.contract_id
+  AND pay.status='recorded';
+ IF contract_received+value_due>private.contract_value(pr.contract_id) THEN
+  RAISE EXCEPTION 'Payment would exceed remaining signed contract value'
    USING ERRCODE='22023';END IF;
  IF NOT EXISTS(SELECT 1 FROM public.contracts
     WHERE organization_id=p_org AND id=pr.contract_id
