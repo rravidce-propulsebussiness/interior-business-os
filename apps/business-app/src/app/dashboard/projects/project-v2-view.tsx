@@ -169,9 +169,11 @@ function ProjectStageWorkflow({d,code}:{d:WorkspaceData;code:string}){
   ?{title:'Activate the contract',detail:'Signed agreement recorded. Activate its existing contract before physical construction.',
     href:contractHref,action:'Activate signed contract'}
   :!d.advance?.scheduleActive
-  ?{title:'Activate the payment schedule',detail:'Create the agreed stage-wise milestones, save, then activate the schedule.',
-    href:'/dashboard/finance/payment_schedules/new?contract_id='+d.agreement.contractId,
-    action:'Prepare payment schedule'}
+  ?d.quotePaymentTriggers.length>0
+    ?{title:'Sync agreed payment milestones',detail:'The stage-wise payment plan is already saved in the signed quotation. It is imported automatically; refresh the project to confirm its activation.',
+      href:cur(d.project.id,'payments'),action:'View agreed payment milestones'}
+    :{title:'Confirm contract payment terms',detail:'No valid stage-wise payment plan was found in the signed quotation. Confirm the agreed terms before physical work.',
+      href:contractHref,action:'View agreement terms'}
   :!d.advance?.received
   ?{title:'Record advance actually received',detail:'The advance invoice is issued, but no payment has been verified. Record a receipt only after receiving funds.',
     href:'/dashboard/finance/payments/new?contract_id='+d.agreement.contractId,
@@ -211,7 +213,8 @@ function ProjectStageWorkflow({d,code}:{d:WorkspaceData;code:string}){
        <ProjectAdvanceAction projectId={d.project.id} defaultPercent={defaultPercent}/>
       </details>}
      {invoice.invoiceId&&d.permissions.finance&&<NextLink href={'/dashboard/finance?tab=invoices'+(invoice.invoiceNumber?'&q='+encodeURIComponent(invoice.invoiceNumber):'')} label="View advance in Finance"/>}
-     {!invoice.scheduleActive&&<p className="pv2-hint">The payment schedule and verified receipts are required before physical construction.</p>}
+     {!invoice.scheduleActive&&<p className="pv2-hint">Payment stages come from the signed quotation; no second payment schedule should be entered. A verified advance is required before physical construction.</p>}
+     {invoice.scheduleActive&&<p className="pv2-hint">Agreed quotation milestones are active. Payments remain unpaid until actual receipts are recorded.</p>}
     </div>}
    </>}
    {d.site?.stage==='not_started'&&signed&&sameRevision&&d.site.canManage&&
