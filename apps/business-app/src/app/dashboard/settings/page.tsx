@@ -82,7 +82,11 @@ export default async function SettingsPage({searchParams}:{
  const isOwner=context.roles.some(role=>role.name.toLowerCase()==='owner');
  let resetPreview:ResetPreview|null=null;
  if(tab==='preferences'&&isOwner&&canEdit){
-  const {data,error}=await client.rpc('owner_test_data_reset_preview',{
+  // The RPC is shipped by the migration; generated Supabase types are updated separately.
+  const previewRpc=client.rpc as unknown as (
+   name:'owner_test_data_reset_preview',args:{p_org:string}
+  )=>Promise<{data:unknown;error:{code?:string}|null}>;
+  const {data,error}=await previewRpc('owner_test_data_reset_preview',{
    p_org:context.organizationId,
   });
   if(!error&&data&&typeof data==='object'&&!Array.isArray(data)){
