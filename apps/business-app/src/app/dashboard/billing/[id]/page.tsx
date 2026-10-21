@@ -7,6 +7,8 @@ import { idSchema } from '@business-os/shared';
 import { ActionForm } from '@business-os/ui/action-form';
 import { finalizeGstDocument } from '../actions';
 import { PrintDocumentButton } from './print-button';
+import { RequestInvoicePayment } from './request-invoice-payment';
+import { ClaimReviewForm } from './claim-review-form';
 import { readSupplierBillAttachment } from '../supplier-bill-storage';
 
 export const dynamic = 'force-dynamic';
@@ -49,6 +51,23 @@ export default async function GstDocumentDetail({
       (g) =>
         g.permission === 'invoice.manage' && g.scope.kind === 'organization',
     );
+  const canManagePayments = doc.isOwner &&
+    context.grants.some((g) => g.permission === 'payment.manage' && g.scope.kind === 'organization');
+  type Claim = { id: string; amount: number; utr: string; status: string; submittedAt: string };
+  let paymentClaims: Claim[] = [];
+  if (doc.kind === 'sales_invoice' && canManagePayments) {
+    const result = await client.rpc('invoice_payment_claim_list', {
+      p_org: context.organizationId, p_invoice: doc.id,
+    });
+    if (result.error) throw new Error('Unable to load payment claims');
+    if (Array.isArray(result.data)) {
+      paymentClaims = result.data.filter((claim): claim is Claim =>
+        typeof claim === 'object' && claim !== null && !Array.isArray(claim) &&
+        typeof claim.id === 'string' && typeof claim.status === 'string' &&
+        typeof claim.utr === 'string' && typeof claim.amount === 'number' &&
+        typeof claim.submittedAt === 'string');
+    }
+  }
   const billAttachment =
     doc.kind === 'purchase_bill' && doc.isOwner
       ? await readSupplierBillAttachment(context.organizationId, id).catch(() => null)
@@ -97,7 +116,7 @@ export default async function GstDocumentDetail({
               href={'/dashboard/billing/new?edit=' + id}
               className="rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold"
             >
-              Edit draft
+              Edit
             </Link>
           )}
         </div>
@@ -121,6 +140,23 @@ export default async function GstDocumentDetail({
             <input type="hidden" name="id" value={doc.id} />
             <input type="hidden" name="version" value={doc.version} />
           </ActionForm>
+        </section>
+      )}
+      {doc.kind === 'sales_invoice' && doc.status === 'issued' && doc.isOwner &&
+        context.grants.some((g) => g.permission === 'payment.manage' && g.scope.kind === 'organization') &&
+        <RequestInvoicePayment invoiceId={doc.id} outstanding={doc.total} />}
+      {doc.kind === 'sales_invoice' && canManagePayments && (
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 print:hidden">
+          <h2 className="text-lg font-semibold">Bank payment claims</h2>
+          <p className="mt-1 text-sm text-slate-600">A UTR is not proof of settlement. Confirm the bank statement before approving.</p>
+          {paymentClaims.length === 0 && <p className="mt-3 text-sm">No payment claims submitted.</p>}
+          {paymentClaims.map((claim) => (
+            <div key={claim.id} className="mt-4 border-t pt-4">
+              <p className="text-sm font-semibold">{money(claim.amount)} · {claim.status}</p>
+              <p className="text-sm">UTR: {claim.utr}</p>
+              {claim.status === 'submitted' && <ClaimReviewForm claimId={claim.id} invoiceId={doc.id} />}
+            </div>
+          ))}
         </section>
       )}
       <article

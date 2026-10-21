@@ -46,7 +46,7 @@ describe('lead-linked GST milestone invoicing',()=>{
     expect(screen).toContain('name="leadId"');
     expect(screen).toContain('name="stageNumber"');
     expect(screen).toContain('name="revisionId"');
-    expect(screen).toContain('Save &amp; preview');
+    expect(screen).toContain('>Save</button>');
     expect(screen).toContain('className="psi-mobile-actions"');
     expect(screen).toContain('disabledSave');
     expect(page).toContain("params.kind === 'purchase_bill'");
