@@ -727,3 +727,40 @@
 .pv2-ready-to-execute .pv2-form{padding:0;border:0;min-width:0}
 .pv2-ready-to-execute .pv2-hint{margin:0 0 8px;color:#637a6d}
 @media(max-width:680px){.pv2-execution-readiness-grid{grid-template-columns:1fr}}
+
+
+/* One-by-one construction execution with the existing dashboard palette. */
+.pv2-stage-task-group{margin:14px 0;padding:14px;border:1px solid var(--border,#e6e9ee);border-radius:16px;background:var(--surface,#fff)}
+.pv2-stage-task-group h4{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:15px;margin:0 0 8px}
+.pv2-stage-task-group h4 small{font-weight:650;font-size:12px;color:var(--muted,#64748b);white-space:nowrap}
+.pv2-stage-task-entries{display:grid;gap:7px;margin-top:12px}
+.pv2-item-checklist{border:1px solid var(--border,#e6e9ee);border-radius:12px;background:var(--surface,#fff);overflow:hidden}
+.pv2-item-checklist[open]{border-color:var(--accent,#ff650c)}
+.pv2-item-checklist-summary{cursor:pointer;display:flex;align-items:center;gap:12px;padding:12px;list-style:none}
+.pv2-item-checklist-summary::-webkit-details-marker{display:none}
+.pv2-item-checklist-icon{display:grid;place-items:center;flex:none;width:27px;height:27px;border:1px solid var(--border,#ddd);border-radius:50%;font-weight:750;color:var(--muted,#758092)}
+.pv2-item-checklist.is-done .pv2-item-checklist-icon{background:#dcfce7;color:#168059;border-color:#a2e9c7}
+.pv2-item-checklist-copy{display:grid;gap:2px;min-width:0;flex:1}
+.pv2-item-checklist-copy strong{font-size:13px;line-height:1.45;overflow-wrap:anywhere}
+.pv2-item-checklist-copy small{font-size:11px;color:var(--muted,#6b7280)}
+.pv2-item-checklist-chevron{font-size:20px;color:var(--muted,#9ca3af)}
+.pv2-item-checklist-inner{padding:12px;border-top:1px solid var(--border,#e5e7eb)}
+.pv2-item-checklist-inner .pv2-form{max-width:100%}
+.pv2-check-photo-link{display:inline-flex;font-weight:650;font-size:12px;padding-bottom:8px}
+.pv2-material-line{padding:13px;margin:0 0 9px;border:1px solid var(--border,#e5e7eb);border-radius:13px;background:var(--surface,#fff)}
+.pv2-material-line-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.pv2-material-line-head .pv2-button{padding:5px 10px;font-size:11px}
+.pv2-material-line-controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding-top:5px}
+.pv2-batch-material-form .pv2-material-line .pv2-two{grid-template-columns:minmax(0,1.6fr) minmax(100px,1fr)}
+@media(max-width:650px){
+ .pv2-stage-task-group{padding:10px;margin-inline:-3px}
+ .pv2-item-checklist-summary{padding:10px;gap:9px}
+ .pv2-batch-material-form .pv2-material-line .pv2-two{grid-template-columns:1fr}
+ .pv2-material-line-controls .pv2-button{width:100%;justify-content:center}
+}
+
+.pv2-formal-quality .pv2-qc-history-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 0;border-bottom:1px solid var(--border,#e6e9ee)}
+.pv2-formal-quality .pv2-qc-history-row:last-child{border-bottom:0}
+.pv2-formal-quality .pv2-qc-history-row strong{font-size:12px;flex:1;min-width:145px}
+.pv2-formal-quality .pv2-qc-history-row small{font-size:11px;color:var(--muted,#64748b)}
+.pv2-formal-quality .pv2-qc-history-row p{width:100%;margin:0;font-size:12px}

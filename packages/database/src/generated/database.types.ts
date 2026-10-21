@@ -12016,6 +12016,10 @@ export interface Database {
         Args: { p_organization_id: string; p_project_id: string };
         Returns: Json;
       };
+      project_site_material_batch: {
+        Args: { p_org: string; p_project: string; p_items: Json };
+        Returns: Json;
+      };
       project_site_media_get: {
         Args: { p_organization_id: string; p_project_id: string; p_id: string };
         Returns: Json;
@@ -12056,6 +12060,24 @@ export interface Database {
       };
       project_site_read: {
         Args: { p_organization_id: string; p_project_id: string };
+        Returns: Json;
+      };
+      project_stage_checklist_command: {
+        Args: {
+          p_org: string;
+          p_project: string;
+          p_stage: string;
+          p_kind: string;
+          p_index: number;
+          p_title: string;
+          p_action: string;
+          p_note?: string;
+          p_photo?: string;
+        };
+        Returns: Json;
+      };
+      project_stage_checklist_read: {
+        Args: { p_org: string; p_project: string };
         Returns: Json;
       };
       project_stage_owner_edit: {
