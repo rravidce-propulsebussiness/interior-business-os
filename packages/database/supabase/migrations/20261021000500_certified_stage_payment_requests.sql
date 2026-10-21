@@ -33,6 +33,9 @@ BEGIN
  SELECT * INTO contract FROM public.contracts
  WHERE organization_id=p_org AND project_id=p_project AND status='active'
  ORDER BY created_at DESC LIMIT 1 FOR UPDATE;
+ IF (SELECT count(*) FROM public.contracts
+      WHERE organization_id=p_org AND project_id=p_project AND status='active')<>1
+ THEN RETURN 0; END IF;
  IF contract.id IS NULL OR NOT private.project_agreement_authorized(p_org,p_project)
  THEN RETURN 0; END IF;
  SELECT * INTO revision FROM public.quotation_revisions
@@ -126,8 +129,9 @@ BEGIN
   END IF;
   IF NOT qualified THEN CONTINUE; END IF;
   IF EXISTS(SELECT 1 FROM public.payment_requests r
-    WHERE r.organization_id=p_org AND r.schedule_item_id=item.id
-      AND r.status='issued')
+    WHERE r.organization_id=p_org AND r.schedule_item_id=item.id)
+  -- A manually voided request must NOT be recreated by an unrelated
+  -- certification. Finance can resolve the cancellation deliberately.
   THEN CONTINUE; END IF;
   IF EXISTS(SELECT 1 FROM public.invoice_items il
     JOIN public.invoices inv ON inv.id=il.invoice_id
