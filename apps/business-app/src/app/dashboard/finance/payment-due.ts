@@ -1,6 +1,6 @@
 import 'server-only';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '@business-os/database/generated/database.types';
+import type { Database } from '@business-os/database';
 
 export type MilestoneDue = { amount: string; label: string; source: 'milestone' };
 
