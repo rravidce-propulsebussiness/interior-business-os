@@ -25,7 +25,11 @@ export async function ownerResetTestData(input:{
   if(!/^[0-9a-f]{32}$/.test(input.signature)||
      input.phrase.length>220||!input.phrase.startsWith('RESET '))
    return {success:false,message:'Invalid reset confirmation.'};
-  const {data,error}=await client.rpc('owner_test_data_reset_execute',{
+  const resetRpc=client.rpc as unknown as (
+   name:'owner_test_data_reset_execute',
+   args:{p_org:string;p_phrase:string;p_signature:string}
+  )=>Promise<{data:unknown;error:{code?:string}|null}>;
+  const {data,error}=await resetRpc('owner_test_data_reset_execute',{
    p_org:context.organizationId,
    p_phrase:input.phrase,p_signature:input.signature,
   });
