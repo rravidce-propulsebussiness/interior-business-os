@@ -144,7 +144,7 @@ AS $f$ SELECT ARRAY[
 ]::regclass[] $f$;
 
 CREATE OR REPLACE FUNCTION private.test_reset_counts(p_org uuid)
-RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path=''
+RETURNS jsonb LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path=''
 AS $f$
 DECLARE target regclass; n bigint; counts jsonb:='{}'::jsonb; missing_child text;
 BEGIN
@@ -180,7 +180,7 @@ BEGIN
 END;$f$;
 
 CREATE OR REPLACE FUNCTION public.owner_test_data_reset_preview(p_org uuid)
-RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path=''
+RETURNS jsonb LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path=''
 AS $f$
 DECLARE counts jsonb; n bigint; company text;
 BEGIN
