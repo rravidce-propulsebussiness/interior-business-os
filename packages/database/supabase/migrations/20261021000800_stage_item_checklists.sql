@@ -91,7 +91,7 @@ begin
     coalesce(p_note,''),p_photo,auth.uid())
   on conflict (organization_id,project_id,stage_id,activity_index)
   do update set status=excluded.status,notes=excluded.notes,
-    photo_id=coalesce(excluded.photo_id,private.project_stage_activity_progress.photo_id),
+    photo_id=coalesce(excluded.photo_id,project_stage_activity_progress.photo_id),
     updated_by=excluded.updated_by,updated_at=now();
   perform private.site_log(p_org,p_project,'stage.activity.'||p_action,p_stage);
  else
