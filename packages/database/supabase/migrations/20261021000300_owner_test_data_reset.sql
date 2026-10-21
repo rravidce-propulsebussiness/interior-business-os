@@ -217,6 +217,14 @@ BEGIN
  IF p_signature IS DISTINCT FROM v_preview->>'signature' THEN
    RAISE EXCEPTION 'Data changed. Refresh your reset preview before retrying'
      USING ERRCODE='40001'; END IF;
+ -- Break the three known circular relationships *inside this reset transaction*.
+ -- Quotations -> current revision uses a deferrable FK; these two non-
+ -- deferrable references are nullable and may be cleared before deletion.
+ SET CONSTRAINTS ALL DEFERRED;
+ UPDATE public.execution_estimates SET current_approved_revision_id=NULL
+   WHERE organization_id=p_org AND current_approved_revision_id IS NOT NULL;
+ UPDATE public.material_variants SET active_conversion_id=NULL
+   WHERE organization_id=p_org AND active_conversion_id IS NOT NULL;
  -- Tenantless descendants: delete ONLY rows linked to this organization's parents.
  DELETE FROM private.automation_email_payloads c USING public.email_deliveries p
    WHERE c.delivery_id=p.id AND p.organization_id=p_org;
