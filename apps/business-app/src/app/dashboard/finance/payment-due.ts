@@ -1,6 +1,6 @@
 import 'server-only';
-import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '@business-os/database';
+import type { serverServices } from '@business-os/auth/server';
+type PaymentClient=Awaited<ReturnType<typeof serverServices>>['client'];
 
 export type MilestoneDue = { amount: string; label: string; source: 'milestone' };
 
@@ -10,7 +10,7 @@ export type MilestoneDue = { amount: string; label: string; source: 'milestone' 
  * full-amount default. No receipt, invoice or payment is created here.
  */
 export async function nextMilestoneDue(
-  client: SupabaseClient<Database>, org: string, contractId: string,
+  client: PaymentClient, org: string, contractId: string,
 ): Promise<MilestoneDue | null> {
   const { data: active, error: scheduleError } = await client.from('payment_schedules')
     .select('id').eq('organization_id',org).eq('contract_id',contractId)
