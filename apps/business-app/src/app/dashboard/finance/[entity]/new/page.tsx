@@ -29,6 +29,13 @@ export default async function NewFinance({
   };
   if (!permissions[entity]) notFound();
   const s = await financeServices(permissions[entity]!, true);
+  // This is a compatibility URL, not another client payment workspace.
+  // Keep fallback for restricted finance-only roles without main Finance access.
+  if (entity === 'payments' && s.allowed('payment.view') && s.allowed('invoice.view')) {
+    redirect('/dashboard/finance?tab=payments' +
+      (q.contract_id && /^[0-9a-f-]{36}$/i.test(q.contract_id)
+        ? '&contract_id=' + encodeURIComponent(q.contract_id) : ''));
+  }
   const contractId = q.contract_id;
   const contract =
     contractId && s.allowed('contract.view')
