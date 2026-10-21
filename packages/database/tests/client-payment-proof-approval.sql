@@ -94,4 +94,37 @@ BEGIN
   RAISE EXCEPTION 'FAIL: review projection not linked to canonical ledger';END IF;
  RAISE NOTICE 'PASS: bank-verified approval creates one payment and one receipt, retry idempotent';
 END;$verify$;
+
+-- Rejected evidence can be replaced with a corrected screenshot under the
+-- SAME real UPI/UTR number, without permitting two live claims.
+RESET ROLE;
+DO $resubmit$
+DECLARE
+ org uuid:='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
+ contract uuid:=current_setting('test.client_proof_contract')::uuid;
+ project uuid; request uuid; account uuid;
+ ref text:='TEST-REJECT-UTR-0003';
+BEGIN
+ SELECT id INTO project FROM public.projects WHERE organization_id=org
+  AND code='demo-3bhk';
+ SELECT id INTO request FROM public.payment_requests WHERE organization_id=org
+  AND contract_id=contract LIMIT 1;
+ INSERT INTO private.client_payment_proofs(id,organization_id,project_id,
+  contract_id,request_id,submitted_by,amount,bank_reference,method,
+  object_key,mime,byte_size,status)
+ VALUES(gen_random_uuid(),org,project,contract,request,
+  '11111111-1111-4111-8111-111111111111','1.00',ref,
+  'upi','payment-proof/'||org||'/'||project||'/'||gen_random_uuid(),
+  'image/png',1024,'rejected');
+ INSERT INTO private.client_payment_proofs(id,organization_id,project_id,
+  contract_id,request_id,submitted_by,amount,bank_reference,method,
+  object_key,mime,byte_size,status)
+ VALUES(gen_random_uuid(),org,project,contract,request,
+  '11111111-1111-4111-8111-111111111111','1.00',ref,
+  'upi','payment-proof/'||org||'/'||project||'/'||gen_random_uuid(),
+  'image/png',1024,'pending');
+ RAISE NOTICE 'PASS: rejected UTR can be resubmitted with corrected evidence';
+END;
+$resubmit$;
+
 ROLLBACK;
