@@ -273,6 +273,8 @@ export const financeCommandSchema = z.discriminatedUnion('action', [
     .object({
       action: z.literal('record_payment'),
       contract_id: z.uuid(),
+      /** Exceptional partial receipt: only the company's Owner may opt in. */
+      allow_partial: z.boolean().default(false),
       input: paymentInputSchema,
     })
     .strict(),
