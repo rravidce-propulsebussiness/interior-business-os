@@ -145,7 +145,9 @@ it('keeps site readiness and quotation completion inside the actual project time
  expect(ui).toContain('Next action: {readinessStep?.title');
  expect(ui).toContain("d.agreement?.authorized===true");
  expect(ui).toContain("'/dashboard/finance/payments/new?contract_id='");
- expect(ui).toContain("'/dashboard/finance/payment_schedules/new?contract_id='");
+ expect(ui).not.toContain("'/dashboard/finance/payment_schedules/new?contract_id='");
+ expect(ui).toContain('Sync agreed payment milestones');
+ expect(ui).toContain('The stage-wise payment plan is already saved in the signed quotation.');
  expect(ui).toContain("Activate signed contract");
  expect(forms).toContain("return executionReady?");
  expect(forms).toContain("operation=\"execution_start\"");
@@ -165,4 +167,14 @@ it('keeps completed stages free of repeated agreement reviews and avoids duplica
  expect(ui).not.toContain("'/dashboard/finance/contracts/'+d.agreement.contractId");
  expect(oldDetail).toContain("redirect('/dashboard/projects/'");
  expect(oldDetail).toContain("'/documents#project-agreement'");
+});
+
+it('reuses signed quote payment stages without duplicate finance schedule entry',()=>{
+ const route=read('../finance/[entity]/new/page.tsx');
+ expect(ui).toContain('invoice.scheduleActive');
+ expect(ui).toContain('Agreed quotation milestones are active');
+ expect(ui).not.toContain('Prepare payment schedule');
+ expect(route).toContain("entity === 'payment_schedules'");
+ expect(route).toContain("redirect('/dashboard/projects/'");
+ expect(route).toContain("'/payments'");
 });
