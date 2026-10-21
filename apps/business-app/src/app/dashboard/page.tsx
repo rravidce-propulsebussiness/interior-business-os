@@ -468,11 +468,11 @@ export default async function Dashboard({
   if (canQuotes && responseQueue && responseQueue.total > 0) {
     attention.push({
       title: number.format(responseQueue.total) + ' quotation' + (responseQueue.total === 1 ? '' : 's') + ' awaiting reply',
-      detail: 'Customer response pending',
+      detail: 'Final quotation needs a response',
       status: 'Waiting',
       tone: 'pending',
       icon: 'quotations',
-      href: '/dashboard/quotations?response_status=awaiting#customer-responses',
+      href: '/dashboard/quotations',
     });
   }
   if (canBilling && invoices?.some((document) => document.status === 'draft')) {
