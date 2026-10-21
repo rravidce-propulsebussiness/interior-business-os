@@ -36,7 +36,7 @@ export async function reviewClientPaymentProof(
    return {message:'Give the client a reason (8+ characters).',success:false};
   const {data,error}=await s.client.rpc('staff_payment_proof_decide',{
    p_org:s.org,p_proof:input.proof,p_action:input.action,
-   p_method:input.method??null,p_confirm_bank_credit:input.confirm,
+   p_method:input.method??undefined,p_confirm_bank_credit:input.confirm,
    p_allow_partial:input.allowPartial,p_note:input.note,
   });
   if(error||!data)return {message:error?.message?.slice(0,180)
