@@ -2,7 +2,7 @@ import { describe,it,expect } from 'vitest';
 import { customerTermSections } from './quotation-terms';
 import {
  defaultStageRequirements,encodeStageRequirements,savedStageRequirements,
- mergeStageRequirementOverrides,
+ mergeStageRequirementOverrides,validateStageRequirements,
 } from './quotation-stage-requirements';
 
 describe('project-specific construction stage requirements',()=>{
@@ -41,4 +41,11 @@ describe('project-specific construction stage requirements',()=>{
   const foundation=defaultStageRequirements('FOUNDATION');
   expect(mergeStageRequirementOverrides({},'FOUNDATION',foundation)).toEqual({});
  });
+});
+
+it('requires check titles long enough for the site inspection API',()=>{
+ const foundation=defaultStageRequirements('FOUNDATION');
+ expect(()=>validateStageRequirements({FOUNDATION:{
+  ...foundation,checks:[...foundation.checks,'pH'],
+ }})).toThrow();
 });
