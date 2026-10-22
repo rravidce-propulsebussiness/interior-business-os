@@ -50,3 +50,43 @@ const materials:Record<string,string[]>={
 export function suggestedStageMaterials(stageCode:string):readonly string[]{
  return materials[stageCode]??[];
 }
+
+/** Small, transparent work-specific suggestions, never an automatic BOQ or purchase order.
+ * Site staff must confirm the actual item, brand, size, quantity and approval.
+ * The stage's full material catalogue stays available in the request dropdown.
+ */
+export function suggestedActivityMaterials(workTitle:string,stageSuggestions:readonly string[]):string[]{
+ const title=workTitle.toLowerCase();
+ const rules:{activity:RegExp;materials:RegExp;extra?:string[]}[]=[
+  {activity:/layout|dimension|marking|set.out|grid line|survey|level verification/,
+   materials:/marking|pegs|stakes|nylon|thread|lime|chalk/,
+   extra:['Marking lime / chalk powder','Nylon line / marking thread','Site marking pegs']},
+  {activity:/\bpcc\b|concrete|concreting|curing/,
+   materials:/cement|aggregate|sand|ready.mix|admixture/},
+  {activity:/steel|reinforcement|bar bending|bar spacing|binding|anchorage|laps|stirrups/,
+   materials:/\btmt\b|steel|binding wire|cover blocks/},
+  {activity:/shuttering|formwork|props|scaffolding/,
+   materials:/shuttering|plywood|formwork|props|scaffolding/},
+  {activity:/sump|termite|soil compaction|filling|waterproof|treatment/,
+   materials:/chemical|anti.termite|waterproof|murram|soil|membrane/},
+  {activity:/masonry|brick|blockwork|wall/,
+   materials:/brick|block|cement|sand|mortar/},
+  {activity:/plaster|putty|rendering/,
+   materials:/cement|sand|plaster|putty/},
+  {activity:/plumbing|pipe|drain|sanitary/,
+   materials:/pipe|fitting|plumbing|drain/},
+  {activity:/electrical|wiring|conduit/,
+   materials:/conduit|wire|electrical|boxes|clips/},
+  {activity:/tile|flooring|grout/,
+   materials:/tile|adhesive|grout|spacer|levelling/},
+  {activity:/door|frame|shutter|lock/,
+   materials:/door|frame|shutter|hinge|lock|handle/},
+  {activity:/paint|primer|emulsion/,
+   materials:/paint|primer|emulsion|putty/},
+ ];
+ const matched=rules.filter(rule=>rule.activity.test(title));
+ if(!matched.length)return [];
+ const selected=[...stageSuggestions.filter(item=>matched.some(rule=>rule.materials.test(item.toLowerCase()))),
+  ...matched.flatMap(rule=>rule.extra??[])];
+ return [...new Set(selected)].slice(0,12);
+}
