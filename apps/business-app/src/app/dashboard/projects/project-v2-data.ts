@@ -36,7 +36,7 @@ function executionRows(input:unknown):StageExecution[]{
 export type StageItemRecord=Record<string,unknown>;
 export type StageQcItem = {
  id:string;stage_id:string;index:number;title:string;decision:string;
- notes:string;photo_id:string;reviewed_by:string;reviewed_at:string;
+ notes:string;photo_id:string;reviewed_by:string;reviewed_at:string;self_review:boolean;
 };
 export type StageQcReview={canReview:boolean;isOwner:boolean;inspectorAssigned:boolean;records:StageQcItem[]};
 function stageQcReview(value:unknown):StageQcReview {
@@ -48,7 +48,7 @@ function stageQcReview(value:unknown):StageQcReview {
    return {id:stringValue(x.id),stage_id:stringValue(x.stage_id),
     index:Number(x.index)||0,title:stringValue(x.title),decision:stringValue(x.decision),
     notes:stringValue(x.notes),photo_id:stringValue(x.photo_id),
-    reviewed_by:stringValue(x.reviewed_by),reviewed_at:stringValue(x.reviewed_at)};
+    reviewed_by:stringValue(x.reviewed_by),reviewed_at:stringValue(x.reviewed_at),self_review:x.self_review===true};
   }).filter(x=>x.id&&x.stage_id)};
 }
 
