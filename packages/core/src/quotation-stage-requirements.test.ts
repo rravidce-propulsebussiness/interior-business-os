@@ -2,7 +2,7 @@ import { describe,it,expect } from 'vitest';
 import { customerTermSections } from './quotation-terms';
 import {
  defaultStageRequirements,encodeStageRequirements,savedStageRequirements,
- mergeStageRequirementOverrides,validateStageRequirements,validateStageRequirementsDraft,
+ mergeStageRequirementOverrides,renameStageRequirement,validateStageRequirements,validateStageRequirementsDraft,
 } from './quotation-stage-requirements';
 
 describe('project-specific construction stage requirements',()=>{
@@ -82,4 +82,44 @@ it('repairs legacy short QC checks one stage at a time without crashing the edit
   ...rcc,checks:rcc.checks.filter(x=>x!=='pH').concat('Concrete pH inspection'),
  });
  expect(encodeStageRequirements(bothClean)).toContain('Concrete pH inspection');
+});
+
+describe('editing a quotation stage requirement without duplicating records',()=>{
+ it('renames a main material order item but does not alter default company guidance',()=>{
+  const standard=defaultStageRequirements('FOUNDATION');
+  const first=standard.materials[0]!;
+  const next=renameStageRequirement(standard,'materials',first,'TMT steel Fe 500D, 12 mm');
+  expect(next.materials).toContain('TMT steel Fe 500D, 12 mm');
+  expect(next.materials).not.toContain(first);
+  expect(next.materials.length).toBe(standard.materials.length);
+  expect(defaultStageRequirements('FOUNDATION').materials).toContain(first);
+  const result=mergeStageRequirementOverrides({},'FOUNDATION',next);
+  expect(savedStageRequirements(encodeStageRequirements(result)).FOUNDATION?.materials)
+   .toContain('TMT steel Fe 500D, 12 mm');
+ });
+ it('edits a work item and a report, preserving count and order',()=>{
+  const base=defaultStageRequirements('PLINTH');
+  const item=base.work[1]!;
+  const work=renameStageRequirement(base,'work',item,'Compaction and checked soil filling');
+  const report=renameStageRequirement(work,'reports',work.reports[0]!,'Soil compaction test certificate');
+  expect(report.work[1]).toBe('Compaction and checked soil filling');
+  expect(report.reports[0]).toBe('Soil compaction test certificate');
+ });
+ it('rejects empty, duplicate and invalid check title updates',()=>{
+  const base=defaultStageRequirements('FOUNDATION');
+  expect(()=>renameStageRequirement(base,'materials',base.materials[0]!,base.materials[1]!.toUpperCase()))
+   .toThrow('already exists');
+  expect(()=>renameStageRequirement(base,'checks',base.checks[0]!,'pH')).toThrow('3 to 180');
+  expect(()=>renameStageRequirement(base,'work',base.work[0]!,' ')).toThrow('2 to 180');
+  expect(()=>renameStageRequirement(base,'work','missing item','new')).toThrow('Select an existing');
+ });
+ it('keeps mandated structural checks protected when changing the quote',()=>{
+  const base=defaultStageRequirements('FOUNDATION');
+  const mandatory=base.checks[0]!;
+  expect(()=>renameStageRequirement(base,'checks',mandatory,'Renamed mandatory inspection',true))
+   .toThrow(/Required structural/);
+  const bypass=renameStageRequirement(base,'checks',mandatory,'Renamed mandatory inspection');
+  expect(()=>mergeStageRequirementOverrides({},'FOUNDATION',bypass))
+   .toThrow(/Mandatory structural/);
+ });
 });
