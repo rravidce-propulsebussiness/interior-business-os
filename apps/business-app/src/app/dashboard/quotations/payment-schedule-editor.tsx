@@ -3,7 +3,10 @@
 import { useMemo, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { savedStagePaymentPlan,savedStagePaymentLinks } from '@business-os/core/quotation-payment-plan';
-import { proposedConstructionPayments,guidanceForConstructionStage } from '@business-os/core/construction-payment-schedule';
+import { proposedConstructionPayments } from '@business-os/core/construction-payment-schedule';
+import { savedStageRequirements,mergeStageRequirementOverrides,
+ type StageRequirements,type StageRequirementsMap } from '@business-os/core/quotation-stage-requirements';
+import { StageRequirementsEditor } from './stage-requirements-editor';
 
 type Milestone = { name: string; percent: string; stageCodes: string[] };
 type Feedback = { type: 'success' | 'error'; text: string } | null;
@@ -67,12 +70,29 @@ export function PaymentScheduleEditor({
   };
 }) {
   const [rows, setRows] = useState<Milestone[]>(() => readPlan(initial.terms, industry, editable, floorNames));
+  const [stageRequirements,setStageRequirements]=useState<StageRequirementsMap>(
+    ()=>savedStageRequirements(initial.terms));
+  const stageCodes=[...new Set(rows.flatMap(row=>row.stageCodes))];
+  function editRequirements(code:string,value:StageRequirements){
+   setFeedback(null);
+   setStageRequirements(current=>mergeStageRequirementOverrides(current,code,value));
+  }
+  function applyRelated(code:string,value:StageRequirements){
+   const related=stageCodes.filter(item=>item.split('/')[0]===code.split('/')[0]);
+   setStageRequirements(current=>{
+    let next=current;
+    for(const stage of related)next=mergeStageRequirementOverrides(next,stage,value);
+    return next;
+   });
+   setFeedback(null);
+  }
   const [feedback, setFeedback] = useState<Feedback>(null);
   const [pending, start] = useTransition();
   const dragging = useRef<number | null>(null);
   const router = useRouter();
   const savedPlan = savedStagePaymentPlan(initial.terms);
-  const hasChanges = JSON.stringify(rows) !== JSON.stringify(readPlan(initial.terms, industry, editable, floorNames));
+  const hasChanges = JSON.stringify(rows) !== JSON.stringify(readPlan(initial.terms, industry, editable, floorNames))
+    || JSON.stringify(stageRequirements)!==JSON.stringify(savedStageRequirements(initial.terms));
   const percentTotal = useMemo(
     () => rows.reduce((sum, row) => sum + (Number(row.percent) || 0), 0),
     [rows],
@@ -111,6 +131,10 @@ export function PaymentScheduleEditor({
 
   function save() {
     if (pending || !editable) return;
+    if(Object.keys(stageRequirements).some(code=>!stageCodes.includes(code))){
+     setFeedback({type:'error',text:'A customized stage is no longer linked. Remove its overrides first.'});
+     return;
+    }
     if (!valid) {
       setFeedback({
         type: 'error',
@@ -128,7 +152,7 @@ export function PaymentScheduleEditor({
         const response=await fetch('/dashboard/quotations/'+initial.revision_id+'/conditions',{
           method:'POST',credentials:'same-origin',cache:'no-store',
           headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({kind:'payments',stages:rows}),
+          body:JSON.stringify({kind:'payments',stages:rows,stageRequirements}),
         });
         const result:unknown=await response.json().catch(()=>null);
         const data=result&&typeof result==='object'
@@ -258,21 +282,13 @@ export function PaymentScheduleEditor({
                   </div>}
                   {industry==='construction'&&row.stageCodes.length>0&&
                    <details className="qs-payment-stage-guidance">
-                    <summary>Work checks, materials & reports <span aria-hidden="true">⌄</span></summary>
-                    {[...new Set(row.stageCodes.map(code=>code.split('/')[0]!))].map(code=>{
-                     const info=guidanceForConstructionStage(code);
-                     return <div key={code} className="qs-payment-stage-checklist">
-                      <h4>{code.replaceAll('_',' ')}</h4>
-                      {info.materials.length>0&&<><strong>Materials to arrange</strong><ul>
-                       {info.materials.map(x=><li key={x}>{x}</li>)}</ul></>}
-                      {info.checks.length>0&&<><strong>Quality checks & tests</strong><ul>
-                       {info.checks.map(x=><li key={x}>{x}</li>)}</ul></>}
-                      {info.reports.length>0&&<><strong>Evidence & reports</strong><ul>
-                       {info.reports.map(x=><li key={x}>{x}</li>)}</ul></>}
-                     </div>;
-                    })}
-                    <p>Inspection requirements follow approved designs, specifications and the engineer's site QA plan.
-                      This checklist does not certify any test or make payment due automatically.</p>
+                    <summary>Customize work, materials & checks <span aria-hidden="true">⌄</span></summary>
+                    {[...new Set(row.stageCodes)].map(code=>
+                     <StageRequirementsEditor key={code} code={code}
+                      value={stageRequirements[code]} editable={editable}
+                      onChange={value=>editRequirements(code,value)}
+                      relatedCount={stageCodes.filter(c=>c.split('/')[0]===code.split('/')[0]).length}
+                      onApplyRelated={value=>applyRelated(code,value)}/>)}
                    </details>}
                 </div>
                 <div className="qs-payment-percent">
