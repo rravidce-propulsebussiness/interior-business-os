@@ -474,9 +474,7 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
 
 
          {site?.canManage&&!!site.memberOptions.length&&<details><summary><OwnerIcon name="team" size={16}/> Assign team</summary><AssignRole projectId={d.project.id} users={site.memberOptions}/></details>}
-         {site?.canManage&&site.memberOptions.length>0&&
-          <MaterialOrderingAccess projectId={d.project.id} users={site.memberOptions}
-           grants={d.materialAccess.grants}/>}
+
         </div>
 
         {site?.canManage&&availableRecords.length>0&&<details className="pv2-stage-secondary"><summary>Attach existing site evidence</summary>
@@ -813,6 +811,8 @@ function Team({d}:{d:WorkspaceData}){
   </div>)}</div>:<Blank title="No project assignments" detail="Invite existing company staff to this project without copying employee profiles."/>}
   {d.site?.canManage&&users.length>0&&<details className="pv2-edit-drawer">
    <summary>＋ Add Project Team Member</summary><AssignRole projectId={d.project.id} users={users}/></details>}
+  {d.site?.canManage&&users.length>0&&<MaterialOrderingAccess projectId={d.project.id}
+     users={users} grants={d.materialAccess.grants}/>}
  </section>
  <p className="pv2-muted">Use “Share with client” in the project header to invite or revoke access for this exact project.</p></div>;
 }
