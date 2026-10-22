@@ -3,7 +3,6 @@ import { ErrorState } from '@business-os/ui';
 
 export default function ErrorPage({
   error,
-  reset,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
