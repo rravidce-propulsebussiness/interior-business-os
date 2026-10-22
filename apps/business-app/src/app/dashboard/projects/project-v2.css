@@ -903,3 +903,31 @@
 @media(max-width:650px){
  .pv2-page .pv2-material-delivery-actions .pv2-button,.pv2-page .pv2-material-order-access .pv2-button{width:100%}
 }
+
+/* Stage activation is independent for every quoted floor or zone.
+   Preserve the white/orange Project dashboard styling. */
+.pv2-page .pv2-stage-activation{
+ margin:11px 0 15px;padding:12px 13px;border:1px solid #f5d6c0;
+ border-radius:12px;background:#fff9f4;color:#34445b;
+}
+.pv2-page .pv2-stage-activation-head{
+ display:flex;justify-content:space-between;gap:9px;align-items:center;flex-wrap:wrap;
+ margin-bottom:9px;
+}
+.pv2-page .pv2-stage-activation-head strong{font-size:13px;color:#27374d}
+.pv2-page .pv2-stage-activation-head small{font-size:11px;color:#77869a}
+.pv2-page .pv2-stage-activation-actions{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.pv2-page .pv2-stage-activation-actions .pv2-button{font-size:12px;min-height:41px}
+.pv2-page .pv2-stage-activation-actions .pv2-button:disabled{opacity:.6;cursor:not-allowed}
+.pv2-page .pv2-stage-activation-blockers{
+ background:#fff;border:1px solid #e8e1d9;border-radius:10px;
+ padding:9px 11px;margin:10px 0;
+}
+.pv2-page .pv2-stage-activation-blockers strong{font-size:11px;color:#79491d}
+.pv2-page .pv2-stage-activation-blockers ul{margin:5px 0 0;padding-left:18px;color:#697789;font-size:11px;line-height:1.7}
+.pv2-page .pv2-stage-activation-note{padding:9px 11px;color:#5d6f80;font-size:12px;background:#fff9f5;border-radius:9px}
+.pv2-page .pv2-stage-activation-ok{color:#13815d;font-size:12px;font-weight:750}
+@media(max-width:650px){
+ .pv2-page .pv2-stage-activation{padding:11px;margin:10px 0}
+ .pv2-page .pv2-stage-activation-actions .pv2-button{flex:1;white-space:normal}
+}

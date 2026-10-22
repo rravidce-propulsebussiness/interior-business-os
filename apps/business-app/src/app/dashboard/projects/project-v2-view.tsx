@@ -11,6 +11,7 @@ import { suggestedStageMaterials } from './stage-material-options';
 import { MaterialMarketplaceOrder } from './project-material-marketplace-order';
 import { MaterialOrderingAccess,MaterialDeliveryActions } from './project-material-delivery';
 import { StageChecklistItem } from './project-stage-checklist-item';
+import { StageActivationControl } from './project-stage-activation';
 import { ProjectClientAccess } from './project-client-access';
 import { ProjectSiteSurvey,ProjectAdvanceAction } from './project-next-forms';
 import { effectiveProjectStageStatus } from './project-stage-status';
@@ -280,7 +281,14 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
   designRevisionStarted:Boolean(d.site?.designs.length),
   designClientApproved:['client_approved','execution'].includes(d.site?.stage??''),
  };
- const visualStatuses=d.stages.map(stage=>effectiveProjectStageStatus(stage,evidence));
+ const executionById=new Map(d.stageExecution.map(item=>[item.stageId,item]));
+ const visualStatuses=d.stages.map(stage=>{
+  const effective=effectiveProjectStageStatus(stage,evidence);
+  const recorded=executionById.get(stage.id);
+  return recorded?.status==='certified'?'certified':
+   recorded&&recorded.status!=='not_started'?recorded.status:effective;
+ });
+ const activeStages=d.stageExecution.filter(stage=>stage.status==='in_progress').length;
  const active=visualStatuses.findIndex(status=>!done(status));
  const designIndex=d.stages.findIndex(stage=>['DESIGN','DESIGN_APPROVAL'].includes(stage.template_code));
  // The active client-approved design stage contains the final execution gate.
@@ -298,7 +306,7 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
   <div className="pv2-command-head">
    <div><h2>Project timeline</h2>
     <p>Manage stages, work, payments, materials, labour, photos and checks in one place.</p></div>
-   <span className="pv2-timeline-counter">{d.stages.length} stages</span>
+   <span className="pv2-timeline-counter">{activeStages} active · {d.stages.length} stages</span>
   </div>
   {!d.stages.length?<div className="pv2-stage-empty">
     <p>Stages are created from the signed agreement and its approved quotation; no generic stages are inserted.</p>
@@ -309,6 +317,10 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
    </div>:<div className="pv2-command-stage-list">
     {d.stages.map((stage,index)=>{
       const visualStatus=visualStatuses[index]??stage.status;
+      const stageExecution=executionById.get(stage.id);
+      const physicalStage=!['QUOTED_SCOPE','PRECONSTRUCTION','DESIGN','DESIGN_APPROVAL','SITE_SURVEY'].includes(stage.template_code);
+      const workAllowed=allowWork&&stageExecution?.status==='in_progress';
+      const checksAllowed=allowChecks&&stageExecution?.status==='in_progress';
       const complete=done(visualStatus);
       const guidance=guidanceForConstructionStage(stage.template_code);
       const checks=[...new Set([...stage.inspectionTopics,...guidance.checks])];
@@ -326,8 +338,8 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
       const formalQc=d.stageProgress.qualityStages.find(x=>stringValue(x.stage_id)===stage.id);
       const formalInspections=Array.isArray(formalQc?.inspections)?formalQc.inspections as Record<string,unknown>[]:[];
       const formalReviews=Array.isArray(formalQc?.reviews)?formalQc.reviews as Record<string,unknown>[]:[];
-      const displayStatus=!complete && finishedActivities>0&&['not_started','pending'].includes(visualStatus)?
-        'in_progress':visualStatus;
+      const displayStatus=visualStatus==='not_started'&&finishedActivities>0?
+        'work_recorded':visualStatus;
       const photos=(site?.media??[]).filter(x=>stringValue(x.mime).startsWith('image/'))
        .map(x=>({id:x.id,filename:stringValue(x.filename)}));
       const availableRecords:StageLinkOption[]=[
@@ -352,6 +364,9 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
         {(!complete||(['DESIGN','DESIGN_APPROVAL'].includes(stage.template_code)&&site?.stage==='client_approved'))&&
          <ProjectStageWorkflow d={d} code={stage.template_code}/>}
 
+        {physicalStage&&site?.stage==='execution'&&<StageActivationControl
+         projectId={d.project.id} stageId={stage.id} state={stageExecution}
+         canManage={allowWork}/>}
         {!!stage.activities.length&&<div className="pv2-stage-task-group">
          <h4>Work checklist <small>{finishedActivities}/{stage.activities.length} completed</small></h4>
          <p className="pv2-hint">Mark each activity separately as work progresses. This does not certify or close the whole stage.</p>
@@ -361,7 +376,7 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
            return <StageChecklistItem key={i} projectId={d.project.id} stageId={stage.id}
              kind="work" index={i} title={work} status={stringValue(record?.status)||'pending'}
              notes={stringValue(record?.notes)} photoId={stringValue(record?.photo_id)}
-             photos={photos} canEdit={allowWork&&!complete}/>;
+             photos={photos} canEdit={workAllowed&&!complete}/>;
           })}
          </div>
         </div>}
@@ -380,7 +395,7 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
            return <StageChecklistItem key={name} projectId={d.project.id} stageId={stage.id}
              kind="check" index={i} title={name} status={stringValue(existing?.status)||'pending'}
              notes={stringValue(existing?.notes)} photoId={stringValue(existing?.photo_id)}
-             photos={photos} canEdit={allowChecks&&!complete}/>;
+             photos={photos} canEdit={checksAllowed&&!complete}/>;
           })}
          </div>
         </div>}
