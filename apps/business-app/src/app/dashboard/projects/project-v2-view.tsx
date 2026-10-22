@@ -435,7 +435,7 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
          {stageExecution?.status==='ready_for_qc'&&
           <p className="pv2-stage-ready-note">
            All required site checks are passed and field work has been submitted.
-           Independent QC certification remains pending; the checks do not need
+           On-site company QC review and final stage certification remain pending; the checks do not need
            to be repeated unless corrections are requested.
           </p>}
          {stageExecution?.status==='in_progress'&&
@@ -444,7 +444,7 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
            Work and checks are complete. Use “Finish field work · Request QC”
            above to unlock the next eligible stage.
           </p>}
-         <p className="pv2-hint">Complete checks one by one, with photo evidence. A passed checklist item does not replace formal independent QC approval.</p>
+         <p className="pv2-hint">Complete checks one by one, with photo evidence. A passed site check must still be reviewed by the assigned company QC inspector when the stage is submitted.</p>
          <details className="pv2-single-checks">
           <summary>Review / edit individual checks</summary>
          <div className="pv2-stage-task-entries">
