@@ -464,7 +464,7 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
           <StageOnsiteQcReview projectId={d.project.id} stageId={stage.id}
            stageName={stage.title} topics={stage.inspectionTopics}
            stageStatus={stageExecution?.status??'not_started'}
-           canReview={d.stageQc.canReview} canManage={site?.canManage===true}
+           canReview={d.stageQc.canReview} isOwner={d.stageQc.isOwner} canManage={site?.canManage===true}
            inspectorAssigned={d.stageQc.inspectorAssigned}
            records={d.stageQc.records.filter(review=>review.stage_id===stage.id)}
            photos={photos}

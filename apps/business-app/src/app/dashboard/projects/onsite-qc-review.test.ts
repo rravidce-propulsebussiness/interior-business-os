@@ -4,6 +4,21 @@ import { readFileSync } from 'node:fs';
 const read=(file:string)=>readFileSync(new URL(file,import.meta.url),'utf8');
 
 describe('On-site company QC inspection',()=>{
+ it('lets verified company owner perform QC without assigning a separate QC inspector',()=>{
+ const sql=read('../../../../../../packages/database/supabase/migrations/20261022131500_owner_can_do_company_qc.sql');
+ const quality=read('../../../../../../packages/database/supabase/migrations/20261022131600_owner_quality_approval.sql');
+ const ui=read('./project-onsite-qc-review.tsx');
+ const data=read('./project-v2-data.ts');
+ expect(sql).toContain("private.site_owner(p_org)");
+ expect(sql).toContain("self_review");
+ expect(sql).toContain("at least 12 characters");
+ expect(quality).toContain("kind=''quality'' and private.site_owner(p_org)");
+ expect(quality).toContain("Non-owner cannot certify their own stage");
+ expect(ui).toContain("Company owner QC");
+ expect(ui).toContain("Owner QC is enabled without assigning another employee");
+ expect(ui).toContain("isOwner");
+ expect(data).toContain("isOwner:input.is_owner===true");
+});
  it('records per-item pass/fail and physical site-visit evidence',()=>{
   const action=read('./[id]/site/onsite-qc-actions.ts');
   const ui=read('./project-onsite-qc-review.tsx');
