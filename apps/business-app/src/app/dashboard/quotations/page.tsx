@@ -225,6 +225,15 @@ export default async function Quotations({
       })
     : {data:{},error:null};
   if(finalChoiceError) throw new Error('Could not load final quotation selections');
+  const manualChoices=validCustomerIds.length
+    ?await s.client.rpc('quotation_final_marked' as never,{
+      p_org:s.org,p_customer_ids:validCustomerIds,
+     } as never):{data:{},error:null};
+  if(manualChoices.error)throw new Error('Could not read manual final quotations');
+  const manualByCustomer=manualChoices.data&&typeof manualChoices.data==='object'
+    &&!Array.isArray(manualChoices.data)
+    ?manualChoices.data as Record<string,unknown>:{};
+
   const finalByCustomer = new Map<string,string>(
     finalChoices && typeof finalChoices==='object' && !Array.isArray(finalChoices)
       ? Object.entries(finalChoices).filter((entry):entry is [string,string] =>
@@ -267,7 +276,8 @@ export default async function Quotations({
       <div className="qs-quotes-mobile-top">
         <Link href={editor}>{row.quotation_number || 'Quotation'}</Link>
         {revision?.quotation_id===finalByCustomer.get(customerId) &&
-          <span className="qs-final-label">★ Final</span>}
+          <span className="qs-final-label">{manualByCustomer[customerId]===revision?.quotation_id?
+          '★ Final':'Latest'}</span>}
         {shared ? <span className="qs-quotes-state qs-state-shared">Shared</span> : row.status === 'draft' ? <span className="qs-quotes-state">Saved</span> : null}
       </div>
       <div className="qs-quotes-mobile-meta">
@@ -323,7 +333,8 @@ export default async function Quotations({
     <td className="qs-quotes-no">
       <Link href={editor}>{row.quotation_number || 'Quotation'}</Link>
       {revision?.quotation_id===finalByCustomer.get(customerId) &&
-        <span className="qs-final-label">★ Final</span>}
+        <span className="qs-final-label">{manualByCustomer[customerId]===revision?.quotation_id?
+          '★ Final':'Latest'}</span>}
       <small>Revision {row.revision_number ?? 1}</small>
     </td>
     <td>
