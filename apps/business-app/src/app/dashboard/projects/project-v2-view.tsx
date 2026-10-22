@@ -12,6 +12,7 @@ import { MaterialMarketplaceOrder } from './project-material-marketplace-order';
 import { MaterialOrderingAccess,MaterialDeliveryActions } from './project-material-delivery';
 import { StageChecklistItem } from './project-stage-checklist-item';
 import { BulkStageChecks } from './project-stage-bulk-checks';
+import { StageOnsiteQcReview } from './project-onsite-qc-review';
 import { ProjectDailyCommand } from './project-daily-command';
 import { StageActivationControl } from './project-stage-activation';
 import { ProjectClientAccess } from './project-client-access';
@@ -457,6 +458,19 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
           })}
          </div></details>
         </div>}
+        {physicalStage&&
+          (stageExecution?.status==='ready_for_qc'||
+           d.stageQc.records.some(review=>review.stage_id===stage.id))&&
+          <StageOnsiteQcReview projectId={d.project.id} stageId={stage.id}
+           stageName={stage.title} topics={stage.inspectionTopics}
+           stageStatus={stageExecution?.status??'not_started'}
+           canReview={d.stageQc.canReview} canManage={site?.canManage===true}
+           inspectorAssigned={d.stageQc.inspectorAssigned}
+           records={d.stageQc.records.filter(review=>review.stage_id===stage.id)}
+           photos={photos}
+           existingChecks={stageChecks.map(check=>({
+            title:stringValue(check.title),photoId:stringValue(check.photo_id)
+           }))}/>}
         {(formalInspections.length>0||formalReviews.length>0)&&<details className="pv2-stage-secondary pv2-formal-quality">
          <summary>Recorded QC inspections & approvals ({formalInspections.length} inspections)</summary>
          <p className="pv2-hint">Official inspection results and structural / quality approvals already recorded for this stage.</p>
