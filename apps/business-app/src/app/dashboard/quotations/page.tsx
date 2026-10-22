@@ -244,7 +244,7 @@ export default async function Quotations({
   // Hide changing the project's final quotation from other staff.
   const finalCandidateIds=[...new Set(visible.map(row=>row.revision?.quotation_id)
     .filter((id):id is string=>Boolean(id)))].slice(0,100);
-  const finalPermissions=canEdit&&finalCandidateIds.length
+  const finalPermissions=finalCandidateIds.length
     ?await s.client.rpc('quotation_final_eligible' as never,{
       p_org:s.org,p_quotation_ids:finalCandidateIds,
      } as never):{data:{},error:null};
@@ -289,7 +289,7 @@ export default async function Quotations({
         <span>{row.project_name || 'Project'}</span>
         <span>{niceDate(createdAt)} · R{row.revision_number ?? 1}</span>
       </div>
-      {canEdit && revision && finalEligibility[revision.quotation_id]===true && manualByCustomer[customerId]!==revision.quotation_id &&
+      {revision && finalEligibility[revision.quotation_id]===true && manualByCustomer[customerId]!==revision.quotation_id &&
         <QuotationFinalButton quotationId={revision.quotation_id}
           number={row.quotation_number||'Quotation'}/>}
       <div className="qs-quotes-mobile-actions">
@@ -367,7 +367,7 @@ export default async function Quotations({
         {row.status === 'issued' && canCreate && revision &&
           <QuotationReviseButton revisionId={row.id} version={revision.version}
             number={row.quotation_number || 'Quotation'} />}
-        {canEdit && revision && finalEligibility[revision.quotation_id]===true && manualByCustomer[customerId]!==revision.quotation_id &&
+        {revision && finalEligibility[revision.quotation_id]===true && manualByCustomer[customerId]!==revision.quotation_id &&
           <QuotationFinalButton quotationId={revision.quotation_id}
             number={row.quotation_number||'Quotation'}/>}
         <details className="qs-quotes-more">
