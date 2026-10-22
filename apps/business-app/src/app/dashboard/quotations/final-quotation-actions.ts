@@ -18,6 +18,9 @@ export async function markQuotationFinal(quotationId: string):
     }
     revalidatePath('/dashboard/quotations');
     revalidatePath('/dashboard/crm/leads');
+    // Converted projects display their selected quote immediately. This
+    // invalidates their existing project pages, without changing agreements.
+    revalidatePath('/dashboard/projects','layout');
     return {ok:true,message:'Quotation marked Final.'};
   }catch(error){
     return {ok:false,message:safeFailure(error).message};
