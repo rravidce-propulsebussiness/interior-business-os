@@ -4,7 +4,7 @@ import { useMemo, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { savedStagePaymentPlan,savedStagePaymentLinks } from '@business-os/core/quotation-payment-plan';
 import { proposedConstructionPayments } from '@business-os/core/construction-payment-schedule';
-import { savedStageRequirements,mergeStageRequirementOverrides,encodeStageRequirements,
+import { savedStageRequirements,mergeStageRequirementOverrides,encodeStageRequirements,validateStageRequirementsDraft,
  type StageRequirements,type StageRequirementsMap } from '@business-os/core/quotation-stage-requirements';
 import { StageRequirementsEditor } from './stage-requirements-editor';
 
@@ -81,9 +81,10 @@ export function PaymentScheduleEditor({
    try{
     const onlyLinked=Object.fromEntries(Object.entries(candidate).filter(([code])=>
       stageCodes.includes(code))) as StageRequirementsMap;
-    // Validate both the total stage count and the 7,500-character saved marker limit
-    // BEFORE scheduling a React state update, not inside its updater.
-    encodeStageRequirements(onlyLinked);
+    // Allow legacy issued 2-character checks in unchanged stages while
+    // editing another stage. Count/size checks still apply to the entire draft.
+    // New saves must pass the strict check-title rule.
+    validateStageRequirementsDraft(onlyLinked);
     return onlyLinked;
    }catch(error){
     setFeedback({type:'error',text:error instanceof Error?error.message:
@@ -159,6 +160,17 @@ export function PaymentScheduleEditor({
   function save() {
     if (pending || !editable) return;
     if(candidateRequirements(visibleRequirements)===null)return;
+    try{
+      encodeStageRequirements(visibleRequirements);
+    }catch(error){
+      const invalid=Object.entries(visibleRequirements).filter(([,item])=>
+        item.checks.some(title=>title.trim().length<3)).map(([code])=>code);
+      setFeedback({type:'error',text:invalid.length?
+        'Update the older short check names in '+invalid.join(', ')+
+        ' (minimum 3 characters) before saving this quotation.':
+        error instanceof Error?error.message:'Review stage requirements before saving.'});
+      return;
+    }
     if (!valid) {
       setFeedback({
         type: 'error',
