@@ -12188,6 +12188,10 @@ export interface Database {
         Args: { p_org: string; p_quotation_ids: string[] };
         Returns: Json;
       };
+      quotation_final_marked: {
+        Args: { p_org: string; p_customer_ids: string[] };
+        Returns: Json;
+      };
       quotation_item_configuration: {
         Args: {
           p_organization_id: string;
