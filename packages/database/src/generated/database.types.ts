@@ -12136,6 +12136,16 @@ export interface Database {
         Args: { p_organization_id: string; p_project_id: string };
         Returns: Json;
       };
+      project_stage_activity_material_batch: {
+        Args: {
+          p_org: string;
+          p_project: string;
+          p_stage: string;
+          p_items: Json;
+          p_activity_index: number;
+        };
+        Returns: Json;
+      };
       project_stage_checklist_batch_command: {
         Args: {
           p_org: string;
@@ -12166,16 +12176,6 @@ export interface Database {
       };
       project_stage_guidance_read: {
         Args: { p_org: string; p_project: string };
-        Returns: Json;
-      };
-      project_stage_activity_material_batch: {
-        Args: {
-          p_org: string;
-          p_project: string;
-          p_stage: string;
-          p_items: Json;
-          p_activity_index: number;
-        };
         Returns: Json;
       };
       project_stage_material_batch: {
