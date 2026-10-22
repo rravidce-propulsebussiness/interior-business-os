@@ -9,8 +9,9 @@ const names:Record<Action,string>={
  start:'Start stage',pause:'Pause stage',resume:'Resume stage',
  submit_for_qc:'Finish field work · Request QC',reopen:'Reopen work'
 };
-export function StageActivationControl({projectId,stageId,state,canManage}:{
+export function StageActivationControl({projectId,stageId,state,canManage,workCompleted=0,workTotal=0,checksPassed=0,checksTotal=0}:{
  projectId:string;stageId:string;state:StageExecution|undefined;canManage:boolean;
+ workCompleted?:number;workTotal?:number;checksPassed?:number;checksTotal?:number;
 }){
  const router=useRouter();
  const [pending,startTransition]=useTransition();
@@ -19,6 +20,7 @@ export function StageActivationControl({projectId,stageId,state,canManage}:{
  const status=state?.status??'not_started';
  const blockers=state?.blockers??[];
  const active=['in_progress','on_hold','ready_for_qc'].includes(status);
+ const canSubmitForQc=workCompleted===workTotal&&checksPassed===checksTotal;
  if(status==='certified')return <p className="pv2-stage-activation-ok">Stage certified following independent QC.</p>;
  if(!canManage)return active?<p className="pv2-stage-activation-note">
   {status==='ready_for_qc'?'Field work submitted for quality review.':
@@ -48,9 +50,13 @@ export function StageActivationControl({projectId,stageId,state,canManage}:{
   </div>}
   <div className="pv2-stage-activation-actions">
    {actions.map(cmd=><button key={cmd} className={'pv2-button '+(cmd==='start'||cmd==='resume'?'pv2-primary':'pv2-outline')}
-    type="button" disabled={pending||(cmd==='start'&&blockers.length>0)}
+    type="button" disabled={pending||(cmd==='start'&&blockers.length>0)||(cmd==='submit_for_qc'&&!canSubmitForQc)}
     onClick={()=>action(cmd)}>{pending?'Saving…':names[cmd]}</button>)}
   </div>
+  {status==='in_progress'&&<p className="pv2-stage-check-progress">
+   {workCompleted}/{workTotal} work items · {checksPassed}/{checksTotal} checks passed
+   {!canSubmitForQc?' · Finish remaining items to request QC.':' · Ready to submit for formal QC.'}
+  </p>}
   {status==='in_progress'&&<p className="pv2-hint">
    Work can proceed alongside other eligible floors. Finish each checklist item and required test before submitting this stage for independent QC.</p>}
   {status==='ready_for_qc'&&<p className="pv2-hint">
