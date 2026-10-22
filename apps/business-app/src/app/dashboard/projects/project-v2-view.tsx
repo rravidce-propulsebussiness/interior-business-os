@@ -400,7 +400,8 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
 
         {physicalStage&&site?.stage==='execution'&&<StageActivationControl
          projectId={d.project.id} stageId={stage.id} state={stageExecution}
-         canManage={allowWork}/>}
+         canManage={allowWork} workCompleted={finishedActivities} workTotal={stage.activities.length}
+         checksPassed={passed} checksTotal={checks.length}/>}
         {!!stage.activities.length&&<div className="pv2-stage-task-group">
          <h4>Work checklist <small>{finishedActivities}/{stage.activities.length} completed</small></h4>
          <p className="pv2-hint">Mark each activity separately as work progresses. This does not certify or close the whole stage.</p>
