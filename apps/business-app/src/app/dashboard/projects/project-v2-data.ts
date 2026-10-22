@@ -422,6 +422,11 @@ async function assignedProjectWorkspace(id:string):Promise<WorkspaceData>{
    task_count:Number(a.task_count)||0};
  }):[];
  const tasks=tasksResult.error?null:tasksResult.data??[];
+ const canPurchase=canAccess(context,{organizationId:context.organizationId,permission:'purchase.manage'});
+ const offers:StageMarketplaceProduct[]=canPurchase?
+  await createMarketplaceRepository(client).catalog(context.organizationId).then(products=>
+   products.slice(0,100).map(({id,name,unit,minQuantity,price,currency,seller,sku})=>
+    ({id,name,unit,minQuantity,price,currency,seller,sku}))).catch(()=>[]):[];
  const site={
   stage:stringValue(raw.stage)||'not_started',role:stringValue(raw.role),
   canManage:raw.can_manage===true,
@@ -434,7 +439,7 @@ async function assignedProjectWorkspace(id:string):Promise<WorkspaceData>{
  };
  return {
   org:context.organizationId,company:org.name,email:user.email??'',
-  permissions:{manage:site.canManage,finance:false,contractManage:false,payments:false,purchases:false,purchaseManage:false,team:site.canManage,quotation:false},
+  permissions:{manage:site.canManage,finance:false,contractManage:false,payments:false,purchases:canPurchase,purchaseManage:canPurchase,team:site.canManage,quotation:false},
   project:{id,name:stringValue(p.name),code:stringValue(p.code),status:stringValue(p.status)||'active',
    projectType:'',address:'Project site',createdAt:'',client:'Project team',customerId:null,
    industry:'Site Delivery',
@@ -442,7 +447,7 @@ async function assignedProjectWorkspace(id:string):Promise<WorkspaceData>{
   site,stages,links:Array.isArray(obj(stageLinkResult.data).links)?
    (obj(stageLinkResult.data).links as Record<string,unknown>[]).map(x=>({
     stage_id:stringValue(x.stage_id),kind:stringValue(x.kind),record_id:stringValue(x.record_id),
-   })):[],marketplaceOffers:[],materialAccess:materialAccess(materialAccessResult.data),stageProgress:{...stageProgress(stageProgressResult.error?null:stageProgressResult.data),
+   })):[],marketplaceOffers:offers,materialAccess:materialAccess(materialAccessResult.data),stageProgress:{...stageProgress(stageProgressResult.error?null:stageProgressResult.data),
     qualityStages:Array.isArray(obj(qualityResult.error?null:qualityResult.data).stages)?
      (obj(qualityResult.data).stages as StageItemRecord[]):[]},milestones:[],quotations:[],quotePaymentTriggers:[],transactions:null,purchaseOrders:null,tasks:(tasks??[]).map(t=>({
    id:t.id,title:t.title,planned_start:t.planned_start,status:t.status,
