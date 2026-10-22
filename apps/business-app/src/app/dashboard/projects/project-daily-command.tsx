@@ -205,9 +205,9 @@ export function ProjectDailyCommand({ d, stageDetails, financialDetails }: {
               stringValue(check.status) === 'passed')).length;
           return <div className="daily-alert-row" key={stage.id}>
             <span className="daily-alert-icon"><OwnerIcon name="check" size={17}/></span>
-            <span><strong>Site checks passed · Independent QC sign-off pending</strong>
+            <span><strong>Site checks passed · Company QC visit pending</strong>
               <small>{stageLabel(stage)} · {passed}/{stage.inspectionTopics.length} required site checks recorded</small>
-              <small>Formal sign-off is a separate authorized review; no need to redo passed checks.</small>
+              <small>An assigned company QC inspector visits the site and reviews each item. Failed items require correction.</small>
             </span>
           </div>;
         })}
