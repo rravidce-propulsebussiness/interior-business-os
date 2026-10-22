@@ -97,6 +97,60 @@ export async function saveProjectStageItem(
   }
 }
 
+const batchCheck = z.object({
+ index:z.number().int().min(0).max(200),
+ title:z.string().trim().min(3).max(200),
+ photo_id:uuid.nullable(),
+ note:z.string().max(2000).default(''),
+}).strict();
+export async function passProjectStageChecks(
+ projectId:string,stageId:string,form:FormData,
+):Promise<Result> {
+ try {
+  uuid.parse(stageId);
+  const chosen=z.array(batchCheck).min(1).max(30).parse(
+   JSON.parse(String(form.get('items')??'null')) as unknown);
+  const finish=form.get('finish')==='true';
+  if(new Set(chosen.map(item=>item.index)).size!==chosen.length)
+   throw new Error('Duplicate checklist item selected');
+  const evidence=form.get('file');
+  let commonPhoto=String(form.get('shared_photo_id')??'').trim();
+  if(commonPhoto)uuid.parse(commonPhoto);
+  if(evidence instanceof File && evidence.size>0){
+   if(!['image/jpeg','image/png','image/webp'].includes(evidence.type))
+    throw new Error('Choose a JPEG, PNG or WebP inspection photo');
+   const media=new FormData();
+   media.set('file',evidence);media.set('category','inspection');
+   media.set('caption','Selected stage inspection evidence');
+   const uploaded=await uploadProjectSiteMedia(projectId,media);
+   if(!uploaded.saved||!uploaded.mediaId)throw new Error(uploaded.message);
+   commonPhoto=uploaded.mediaId;
+  }
+  if(commonPhoto&&chosen.length>1&&form.get('confirm_shared')!=='true')
+   throw new Error('Confirm the shared photo documents every selected inspection');
+  const sharedNote=String(form.get('batch_note')??'').trim();
+  if(sharedNote.length>2000)throw new Error('Inspection note is too long');
+  const items=chosen.map(item=>({
+   index:item.index,title:item.title,note:sharedNote||item.note,
+   photo_id:commonPhoto||item.photo_id,
+  }));
+  if(items.some(item=>!item.photo_id))
+   throw new Error('Choose relevant photo evidence for each selected check');
+  const {client,org}=await context(projectId);
+  const response=await client.rpc('project_stage_checklist_batch_command' as never,{
+   p_org:org,p_project:projectId,p_stage:stageId,p_items:items,p_finish:finish,
+  } as never);
+  if(response.error)throw new Error(response.error.message);
+  refresh(projectId);
+  revalidatePath('/dashboard/projects/'+projectId+'/execution');
+  return {saved:true,message:finish
+   ?items.length+' checks passed; field work submitted for QC. The next eligible stage can now be started.'
+   :items.length+' checks passed. Formal QC approval remains separate.'};
+ }catch(error){
+  return {saved:false,message:error instanceof Error?error.message:'Unable to pass selected checks'};
+ }
+}
+
 /** Sends a separately approved site material to a real published marketplace seller.
  * A seller request is not a purchase order, payment or a delivered material.
  */

@@ -11,6 +11,7 @@ import { suggestedStageMaterials } from './stage-material-options';
 import { MaterialMarketplaceOrder } from './project-material-marketplace-order';
 import { MaterialOrderingAccess,MaterialDeliveryActions } from './project-material-delivery';
 import { StageChecklistItem } from './project-stage-checklist-item';
+import { BulkStageChecks } from './project-stage-bulk-checks';
 import { ProjectDailyCommand } from './project-daily-command';
 import { StageActivationControl } from './project-stage-activation';
 import { ProjectClientAccess } from './project-client-access';
@@ -311,7 +312,8 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
    recorded&&recorded.status!=='not_started'?recorded.status:effective;
  });
  const activeStages=d.stageExecution.filter(stage=>stage.status==='in_progress').length;
- const active=visualStatuses.findIndex(status=>!done(status));
+ // When field work is submitted for QC, focus the next physical stage.
+ const active=visualStatuses.findIndex(status=>!done(status)&&status!=='ready_for_qc');
  const designIndex=timelineStages.findIndex(stage=>['DESIGN','DESIGN_APPROVAL'].includes(stage.template_code));
  // The active client-approved design stage contains the final execution gate.
  // Keep that action visible in the timeline instead of hiding it behind
@@ -398,7 +400,8 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
 
         {physicalStage&&site?.stage==='execution'&&<StageActivationControl
          projectId={d.project.id} stageId={stage.id} state={stageExecution}
-         canManage={allowWork}/>}
+         canManage={allowWork} workCompleted={finishedActivities} workTotal={stage.activities.length}
+         checksPassed={passed} checksTotal={checks.length}/>}
         {!!stage.activities.length&&<div className="pv2-stage-task-group">
          <h4>Work checklist <small>{finishedActivities}/{stage.activities.length} completed</small></h4>
          <p className="pv2-hint">Mark each activity separately as work progresses. This does not certify or close the whole stage.</p>
@@ -418,8 +421,25 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
           <small>After linked stages pass QC, one agreed payment request is issued. Payment is only recorded in Finance.</small></div>
          </div>}
         {!!checks.length&&<div className="pv2-stage-task-group">
+         <BulkStageChecks projectId={d.project.id} stageId={stage.id} photos={photos}
+          canEdit={checksAllowed&&!complete} workCompleted={finishedActivities}
+          workTotal={stage.activities.length} stageStatus={stageExecution?.status??'not_started'}
+          checks={checks.map((title,index)=>{
+           const record=stageChecks.find(x=>stringValue(x.title).toLowerCase()===title.toLowerCase())??
+            (site?.checks??[]).find(x=>stringValue(x.title).toLowerCase()===title.toLowerCase());
+           return {index,title,status:stringValue(record?.status)||'pending',
+            photoId:stringValue(record?.photo_id),notes:stringValue(record?.notes)};
+          })}/>
          <h4>Checks & tests <small>{passed}/{checks.length} passed</small></h4>
+         {stageExecution?.status==='in_progress'&&
+          finishedActivities===stage.activities.length&&passed===checks.length&&
+          <p className="pv2-stage-ready-note">
+           Work and checks are complete. Use “Finish field work · Request QC”
+           above to unlock the next eligible stage.
+          </p>}
          <p className="pv2-hint">Complete checks one by one, with photo evidence. A passed checklist item does not replace formal independent QC approval.</p>
+         <details className="pv2-single-checks">
+          <summary>Review / edit individual checks</summary>
          <div className="pv2-stage-task-entries">
           {checks.map((name,i)=>{
            const existing=stageChecks.find(x=>stringValue(x.title).toLowerCase()===name.toLowerCase())??
@@ -429,7 +449,7 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
              notes={stringValue(existing?.notes)} photoId={stringValue(existing?.photo_id)}
              photos={photos} canEdit={checksAllowed&&!complete}/>;
           })}
-         </div>
+         </div></details>
         </div>}
         {(formalInspections.length>0||formalReviews.length>0)&&<details className="pv2-stage-secondary pv2-formal-quality">
          <summary>Recorded QC inspections & approvals ({formalInspections.length} inspections)</summary>
