@@ -485,3 +485,11 @@
 .qs-quotes-mobile-quote>.qs-mark-final-control{margin:10px 14px 1px}
 .qs-quotes-mobile-quote>.qs-mark-final-control .qs-mark-final{width:100%}
 .qs-quotes-mobile-top{flex-wrap:wrap}
+
+
+/* A read-only quotation metadata outage must not cover the actual saved quotes. */
+.qs-quotes-lookup-warning{
+ margin:12px 0 14px;padding:11px 13px;border:1px solid #f3d4bc;
+ border-radius:12px;background:#fffaf4;color:#7c572f;
+ font-size:12px;line-height:1.65
+}
