@@ -202,6 +202,10 @@ begin
     x.updated_at as sort_time,
     case when x.status='received' then 'delivered'
          when x.status='ordered' and x.expected_delivery_date<v_today then 'overdue'
+         when x.status='approved' and x.source='marketplace' and exists(
+           select 1 from private.marketplace_orders o
+           where o.id=x.marketplace_order_id and o.status='requested'
+         ) then 'supplier_requested'
          else x.status end as status,
     case when x.received_at is not null then
       (x.received_at at time zone 'Asia/Kolkata')::date::text else null end as received_date
