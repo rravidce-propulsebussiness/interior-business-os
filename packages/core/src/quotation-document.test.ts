@@ -1,5 +1,7 @@
 import { expect, it } from 'vitest';
 import { renderQuotationDocument } from './quotation-document';
+import { encodeStagePaymentLinks } from './quotation-payment-plan';
+import { defaultStageRequirements,encodeStageRequirements,mergeStageRequirementOverrides } from './quotation-stage-requirements';
 import { quotationDocumentFixture } from './quotation-document.fixture';
 import { calculateSftEstimate, encodeSftEstimate } from './sft-quotation';
 it('escapes customer text and excludes all unlisted/internal payload fields', () => {
@@ -443,4 +445,31 @@ it('prints quality and material requirements only for saved construction stage l
   expect(html).not.toContain('[STAGE_PAYMENT_LINKS]');
   d.terms=d.terms.replace(/\[STAGE_PAYMENT_LINKS\][\s\S]*?\[\/STAGE_PAYMENT_LINKS\]/,'');
   expect(renderQuotationDocument(d)).not.toContain('pb-quality-page');
+});
+
+it('shows customer-approved custom stage work, materials, tests and reports by actual floor',()=>{
+ const d=quotationDocumentFixture();
+ d.lines[0]!.description=encodeSftEstimate(calculateSftEstimate({
+  rows:[{name:'Ground Floor',kind:'floor',lengthFeet:'20',widthFeet:'30',ratePerSqft:'1750'}],
+  materialIds:[],
+ }));
+ const code='RCC/GROUND_FLOOR';
+ const req=defaultStageRequirements(code);
+ const overrides=mergeStageRequirementOverrides({},code,{
+  ...req,
+  work:[...req.work,'Custom site shuttering work'],
+  materials:[...req.materials,'Customer agreed steel brand'],
+  checks:[...req.checks,'Custom pre-pour engineer inspection'],
+  reports:[...req.reports,'Extra RCC pour evidence photos'],
+ });
+ d.terms='[STAGE_PAYMENT_PLAN]\nGround slab|100.00\n[/STAGE_PAYMENT_PLAN]\n'
+   +encodeStagePaymentLinks([[code]])+'\n'+encodeStageRequirements(overrides);
+ const html=renderQuotationDocument(d);
+ for(const label of ['Custom site shuttering work','Customer agreed steel brand',
+   'Custom pre-pour engineer inspection','Extra RCC pour evidence photos']){
+  expect(html).toContain(label);
+ }
+ expect(html).toContain('RCC · GROUND FLOOR');
+ expect(html).not.toContain('[STAGE_CUSTOM_REQUIREMENTS]');
+ expect(html).not.toContain('"stages":{"RCC/GROUND_FLOOR"');
 });
