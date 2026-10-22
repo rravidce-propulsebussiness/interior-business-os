@@ -40,7 +40,7 @@ export default function ErrorPage({
   return (
     <ErrorState
       reset={() => window.location.reload()}
-      reference={error.digest}
+      {...(error.digest ? { reference: error.digest } : {})}
     />
   );
 }
