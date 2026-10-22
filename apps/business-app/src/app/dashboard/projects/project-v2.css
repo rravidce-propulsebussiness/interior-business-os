@@ -983,3 +983,12 @@
 @media(prefers-reduced-motion:reduce){
  .pv2-page .pv2-bulk-row{transition:none}
 }
+
+/* Distinguish passed site inspections from formal independent stage certification. */
+.pv2-page .pv2-stage-qc-clarity{display:grid;gap:6px;margin-top:11px;padding:12px 13px;
+ border:1px solid #d2ebe0;border-radius:11px;background:#f3fbf6;color:#255b42}
+.pv2-page .pv2-stage-qc-clarity strong{font-size:12px}
+.pv2-page .pv2-stage-qc-clarity p{font-size:11px;line-height:1.6;color:#416b58}
+.pv2-page .daily-next-ready{border-color:#d2eadd;background:#f8fdfa}
+.pv2-page .daily-next-ready .daily-alert-icon{background:#dff8e9;color:#178b58}
+.pv2-page .daily-next-ready b{color:#16865b}

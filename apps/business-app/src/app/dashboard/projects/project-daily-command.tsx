@@ -107,11 +107,18 @@ export function ProjectDailyCommand({ d, stageDetails, financialDetails }: {
     !['resolved', 'declined'].includes(row.status));
   const nextStage = allStages.find(stage =>
     !['completed', 'certified', 'done', 'skipped'].includes(stage.status));
+  const nextReadyStage = d.site?.stage === 'execution' ? allStages.find(stage => {
+    if (['QUOTED_SCOPE', 'PRECONSTRUCTION', 'DESIGN', 'DESIGN_APPROVAL', 'SITE_SURVEY'].includes(stage.template_code))
+      return false;
+    const execution = d.stageExecution.find(item => item.stageId === stage.id);
+    return execution?.status === 'not_started' && execution.blockers.length === 0;
+  }) : undefined;
   const canUpdate = d.site?.stage === 'execution' &&
     (d.site.canManage || ['manager', 'project_manager', 'site_engineer', 'supervisor'].includes(d.site.role));
   const canUpload = d.site?.stage === 'execution' &&
     (d.site.canManage || ['manager', 'project_manager', 'site_engineer', 'supervisor'].includes(d.site.role));
   const needsCount = qcPending.length + materialPending.length + clientRequests.length +
+    (nextReadyStage ? 1 : 0) +
     (d.site?.stage !== 'execution' && !d.agreement?.authorized ? 1 : 0);
   const progressStyle: CSSProperties = { background: 'conic-gradient(#ff6519 ' + percent + '%, #f0e9e6 0)' };
   const mostRecentPhotos = (d.site?.media ?? []).filter(row =>
@@ -191,12 +198,27 @@ export function ProjectDailyCommand({ d, stageDetails, financialDetails }: {
         <span className="daily-chevron" aria-hidden>⌄</span>
       </summary>
       <div className="daily-section-body daily-alert-list">
-        {qcPending.map(stage => <Link className="daily-alert-row" key={stage.id}
-          href={'/dashboard/projects/' + d.project.id + '/checks'}>
-          <span className="daily-alert-icon"><OwnerIcon name="check" size={17}/></span>
-          <span><strong>Quality certification awaiting approval</strong><small>{stageLabel(stage)}</small></span>
-          <b>Review →</b>
-        </Link>)}
+        {qcPending.map(stage => {
+          const passed = stage.inspectionTopics.filter(topic =>
+            d.stageProgress.checks.some(check => stringValue(check.stage_id) === stage.id &&
+              stringValue(check.title).toLowerCase() === topic.toLowerCase() &&
+              stringValue(check.status) === 'passed')).length;
+          return <div className="daily-alert-row" key={stage.id}>
+            <span className="daily-alert-icon"><OwnerIcon name="check" size={17}/></span>
+            <span><strong>Site checks passed · Independent QC sign-off pending</strong>
+              <small>{stageLabel(stage)} · {passed}/{stage.inspectionTopics.length} required site checks recorded</small>
+              <small>Formal sign-off is a separate authorized review; no need to redo passed checks.</small>
+            </span>
+          </div>;
+        })}
+        {nextReadyStage && <Link className="daily-alert-row daily-next-ready"
+          href={'/dashboard/projects/' + d.project.id + '/timeline#project-timeline'}>
+          <span className="daily-alert-icon"><OwnerIcon name="projects" size={17}/></span>
+          <span><strong>{stageLabel(nextReadyStage)} is ready to start</strong>
+            <small>Its start prerequisites are clear. QC certification of other stages remains separate.</small>
+          </span>
+          <b>Open stage →</b>
+        </Link>}
         {materialPending.map(row => <Link className="daily-alert-row" key={row.id}
           href={'/dashboard/projects/' + d.project.id + '/procurement'}>
           <span className="daily-alert-icon"><OwnerIcon name="purchases" size={17}/></span>

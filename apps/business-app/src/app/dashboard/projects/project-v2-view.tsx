@@ -430,7 +430,13 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
            return {index,title,status:stringValue(record?.status)||'pending',
             photoId:stringValue(record?.photo_id),notes:stringValue(record?.notes)};
           })}/>
-         <h4>Checks & tests <small>{passed}/{checks.length} passed</small></h4>
+         <h4>Site checks & tests <small>{passed}/{checks.length} passed</small></h4>
+         {stageExecution?.status==='ready_for_qc'&&
+          <p className="pv2-stage-ready-note">
+           All required site checks are passed and field work has been submitted.
+           Independent QC certification remains pending; the checks do not need
+           to be repeated unless corrections are requested.
+          </p>}
          {stageExecution?.status==='in_progress'&&
           finishedActivities===stage.activities.length&&passed===checks.length&&
           <p className="pv2-stage-ready-note">
