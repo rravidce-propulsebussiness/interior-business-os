@@ -38,11 +38,11 @@ export type StageQcItem = {
  id:string;stage_id:string;index:number;title:string;decision:string;
  notes:string;photo_id:string;reviewed_by:string;reviewed_at:string;
 };
-export type StageQcReview={canReview:boolean;inspectorAssigned:boolean;records:StageQcItem[]};
+export type StageQcReview={canReview:boolean;isOwner:boolean;inspectorAssigned:boolean;records:StageQcItem[]};
 function stageQcReview(value:unknown):StageQcReview {
  const input=obj(value);
  const data=Array.isArray(input.reviews)?input.reviews:[];
- return {canReview:input.can_review===true,inspectorAssigned:input.has_inspector===true,
+ return {canReview:input.can_review===true,isOwner:input.is_owner===true,inspectorAssigned:input.has_inspector===true,
   records:data.map(raw=>{
    const x=obj(raw);
    return {id:stringValue(x.id),stage_id:stringValue(x.stage_id),
