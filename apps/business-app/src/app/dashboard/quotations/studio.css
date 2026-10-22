@@ -1973,3 +1973,50 @@ border-radius:7px;padding:5px 8px;font-size:10px;font-weight:800;cursor:pointer}
 .qs-payment-stage-checklist li{padding:2px 0;line-height:1.55}
 .qs-payment-stage-guidance p{line-height:1.5;color:#64748b;margin:6px 0 0}
 @media (max-width:640px){.qs-payment-stage-guidance{padding:10px;font-size:11px}.qs-payment-stage-checklist ul{padding-left:17px}}
+
+/* Project-specific requirements inside the quotation payment workspace. */
+.qs-stage-requirements-editor{
+ border-top:1px solid #e9e0d8;padding:11px 0 14px;color:#28384d;
+}
+.qs-stage-requirements-title{display:flex;justify-content:space-between;flex-wrap:wrap;align-items:center;gap:7px;margin-bottom:10px}
+.qs-stage-requirements-title strong{font-size:12px;color:#21354e}
+.qs-stage-requirements-title small{font-size:10px;font-weight:700;color:#d46322}
+.qs-stage-requirements-section{
+ margin:7px 0;padding:10px;border:1px solid #e8eaf0;border-radius:11px;background:#fff;
+}
+.qs-stage-requirements-section>summary{
+ display:flex;align-items:center;justify-content:space-between;gap:9px;
+ cursor:pointer;list-style:none;font-size:12px;font-weight:750;color:#293d52;
+}
+.qs-stage-requirements-section>summary::-webkit-details-marker{display:none}
+.qs-stage-requirements-section>summary small{color:#da6326;font-size:10px;white-space:nowrap}
+.qs-stage-requirements-section>p{font-size:11px;color:#718092;margin:8px 0}
+.qs-stage-requirements-items{display:grid;gap:4px;padding-top:5px}
+.qs-payment-stage-guidance .qs-stage-requirement-option{
+ display:flex;gap:10px;align-items:flex-start;cursor:pointer;padding:8px 6px;
+ border-radius:7px;line-height:1.45;font-size:11px;color:#304358;
+ background:#fff;margin:0;min-width:0;
+}
+.qs-stage-requirement-option>input[type=checkbox]{
+ width:17px;height:17px;min-width:17px;margin:0;accent-color:#f97316;flex:none;
+}
+.qs-stage-requirement-option>span{flex:1;overflow-wrap:anywhere}
+.qs-stage-requirement-option>small{color:#838d99;font-size:9px}
+.qs-stage-add-line{display:flex;gap:8px;margin:8px 0 0;align-items:stretch}
+.qs-stage-add-line input{
+ min-width:0;flex:1;padding:9px 10px;border-radius:8px;border:1px solid #dfe4ec;
+ background:#fff;color:#26374c;font-size:12px;
+}
+.qs-stage-add-line button,.qs-stage-requirements-actions button{
+ border:1px solid #ffd1b7;background:#fff6ef;color:#d95c18;border-radius:8px;
+ cursor:pointer;padding:9px;font-size:11px;font-weight:750;
+}
+.qs-stage-add-line button:disabled{opacity:.4;cursor:not-allowed}
+.qs-stage-requirements-actions{display:flex;gap:7px;flex-wrap:wrap;margin:11px 0}
+.qs-payment-stage-guidance .qs-stage-requirements-foot{font-size:10px;color:#68798d;line-height:1.6}
+@media(max-width:640px){
+ .qs-stage-add-line{flex-wrap:wrap}
+ .qs-stage-add-line input{flex:1 1 160px}
+ .qs-stage-add-line button{flex:1 1 auto}
+ .qs-stage-requirements-actions button{width:100%}
+}
