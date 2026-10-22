@@ -16,6 +16,20 @@ export type Stage = {id:string;title:string;status:string;phase:string;floor_cod
 export type StageLink = {stage_id:string;kind:string;record_id:string};
 export type StageItemRecord=Record<string,unknown>;
 export type StageProgress={work:StageItemRecord[];checks:StageItemRecord[];qualityStages:StageItemRecord[]};
+export type MaterialAccess={canOrder:boolean;canApprove:boolean;grants:{userId:string;canOrder:boolean}[]};
+function materialAccess(data:unknown):MaterialAccess{
+ const r=obj(data);
+ return {canOrder:r.can_order===true,canApprove:r.can_approve===true,
+  grants:Array.isArray(r.grants)?r.grants.map(row=>{
+   const a=obj(row);return {userId:stringValue(a.user_id),canOrder:a.can_order===true};
+  }).filter(row=>row.userId):[]};
+}
+function mergeMaterialLogistics(materials:SiteRow[],value:unknown):SiteRow[]{
+ const r=obj(value);
+ const rowsById=new Map((Array.isArray(r.delivery)?r.delivery:[])
+  .map(v=>obj(v)).filter(v=>typeof v.id==='string').map(v=>[String(v.id),v]));
+ return materials.map(item=>({...item,...(rowsById.get(item.id)??{})}));
+}
 export type StageMarketplaceProduct=Pick<MarketplaceProduct,'id'|'name'|'unit'|'minQuantity'|'price'|'currency'|'seller'|'sku'>;
 export type PaymentMilestone={id:string;label:string;amount:string;currency:string;contract_number:string;
  contract_id:string};
@@ -27,7 +41,7 @@ export type ClientRequestRow={
 export type WorkspaceData = {
  project:ProjectEntry;org:string;company:string;email:string;
  permissions:{manage:boolean;finance:boolean;contractManage:boolean;payments:boolean;purchases:boolean;purchaseManage:boolean;team:boolean;quotation:boolean};
- marketplaceOffers:StageMarketplaceProduct[];
+ marketplaceOffers:StageMarketplaceProduct[];materialAccess:MaterialAccess;
  site:null|{stage:string;role:string;canManage:boolean;reports:SiteRow[];materials:SiteRow[];
  checks:SiteRow[];media:SiteRow[];designs:SiteRow[];team:SiteRow[];gate:SiteRow[];
  memberOptions:{id:string;label:string}[]};
@@ -127,7 +141,7 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
   payments:has('payment.view'),purchases:has('purchase.view'),purchaseManage:has('purchase.manage'),
   team:has('team.manage')||has('team.view'),quotation:has('quotation.view','quotation'),
  };
- const [org,user,industries,customer,taskResult,siteResult,stageResult,stageLinkResult,stageProgressResult,qualityResult,receipts,orders,contract,agreementResult,preflightResult,advanceResult]=await Promise.all([
+ const [org,user,industries,customer,taskResult,siteResult,stageResult,stageLinkResult,stageProgressResult,qualityResult,materialAccessResult,receipts,orders,contract,agreementResult,preflightResult,advanceResult]=await Promise.all([
   s.repository.organization(s.org),s.authorization.requireAuthenticatedUser(),
   s.repository.industries(),
   project.customer_id?s.client.from('customers').select('id,display_name').eq('organization_id',s.org)
@@ -139,6 +153,7 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
   s.client.rpc('construction_stage_record_read',{p_organization_id:s.org,p_project_id:id}),
   s.client.rpc('project_stage_checklist_read' as never,{p_org:s.org,p_project:id} as never),
   s.client.rpc('construction_quality_read',{p_org:s.org,p_project:id}),
+  s.client.rpc('project_material_access_read' as never,{p_org:s.org,p_project:id} as never),
   permissions.payments?s.client.from('payments').select('id,payment_number,payment_date,amount,status')
     .eq('organization_id',s.org).eq('project_id',id).order('payment_date',{ascending:false})
     .limit(250):Promise.resolve({data:null,error:null}),
@@ -162,7 +177,7 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
  const site=rawSite?{
   stage:stringValue(rawSite.stage)||'not_started',role:stringValue(rawSite.role),
   canManage:rawSite.can_manage===true,
-  reports:rows(rawSite.reports),materials:rows(rawSite.materials),checks:rows(rawSite.checks),
+  reports:rows(rawSite.reports),materials:mergeMaterialLogistics(rows(rawSite.materials),materialAccessResult.data),checks:rows(rawSite.checks),
   media:rows(rawSite.media),designs:rows(rawSite.designs),team:rows(rawSite.team),
   gate:rows(rawSite.gate),
   memberOptions:Array.isArray(rawSite.member_options)?rawSite.member_options.filter((v):v is {id:string;label:string}=>{
@@ -327,7 +342,7 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
    client:customer.data?.display_name??'Not linked',
    industry:(project.industry_id?industriesById.get(project.industry_id):null)??'Project',progress
   },
-  site,stages:stageList,links:linkList,marketplaceOffers,stageProgress:{...stageProgress(stageProgressResult.error?null:stageProgressResult.data),
+  site,stages:stageList,links:linkList,marketplaceOffers,materialAccess:materialAccess(materialAccessResult.data),stageProgress:{...stageProgress(stageProgressResult.error?null:stageProgressResult.data),
     qualityStages:Array.isArray(obj(qualityResult.error?null:qualityResult.data).stages)?
      (obj(qualityResult.data).stages as StageItemRecord[]):[]},milestones,quotations,quotePaymentTriggers,stageRequests,
   preflight,advance,requests,
@@ -384,13 +399,15 @@ async function assignedProjectWorkspace(id:string):Promise<WorkspaceData>{
  if(read.error||!read.data)notFound();
  const raw=obj(read.data),p=obj(raw.project);
  if(stringValue(p.id)!==id)notFound();
- const [org,stagesResult,tasksResult,stageProgressResult,qualityResult]=await Promise.all([
+ const [org,stagesResult,tasksResult,stageProgressResult,qualityResult,materialAccessResult,stageLinkResult]=await Promise.all([
   repository.organization(context.organizationId),
   client.rpc('construction_project_read',{p_organization_id:context.organizationId,p_project_id:id}),
   client.from('project_tasks').select('id,project_id,title,status,planned_start,completion_percentage,weight')
    .eq('organization_id',context.organizationId).eq('project_id',id).limit(1200),
   client.rpc('project_stage_checklist_read' as never,{p_org:context.organizationId,p_project:id} as never),
   client.rpc('construction_quality_read',{p_org:context.organizationId,p_project:id}),
+  client.rpc('project_material_access_read' as never,{p_org:context.organizationId,p_project:id} as never),
+  client.rpc('construction_stage_record_read',{p_organization_id:context.organizationId,p_project_id:id}),
  ]);
  if(!org)notFound();
  const stagesRaw=obj(stagesResult.error?null:stagesResult.data);
@@ -408,7 +425,7 @@ async function assignedProjectWorkspace(id:string):Promise<WorkspaceData>{
  const site={
   stage:stringValue(raw.stage)||'not_started',role:stringValue(raw.role),
   canManage:raw.can_manage===true,
-  reports:rows(raw.reports),materials:rows(raw.materials),checks:rows(raw.checks),
+  reports:rows(raw.reports),materials:mergeMaterialLogistics(rows(raw.materials),materialAccessResult.data),checks:rows(raw.checks),
   media:rows(raw.media),designs:rows(raw.designs),team:rows(raw.team),
   gate:rows(raw.gate),
   memberOptions:Array.isArray(raw.member_options)?raw.member_options.filter((v):v is {id:string;label:string}=>{
@@ -422,7 +439,10 @@ async function assignedProjectWorkspace(id:string):Promise<WorkspaceData>{
    projectType:'',address:'Project site',createdAt:'',client:'Project team',customerId:null,
    industry:'Site Delivery',
    progress:workCompletionByProject([id],tasks&&tasks.length<1200?tasks:null).get(id)??null},
-  site,stages,links:[],marketplaceOffers:[],stageProgress:{...stageProgress(stageProgressResult.error?null:stageProgressResult.data),
+  site,stages,links:Array.isArray(obj(stageLinkResult.data).links)?
+   (obj(stageLinkResult.data).links as Record<string,unknown>[]).map(x=>({
+    stage_id:stringValue(x.stage_id),kind:stringValue(x.kind),record_id:stringValue(x.record_id),
+   })):[],marketplaceOffers:[],materialAccess:materialAccess(materialAccessResult.data),stageProgress:{...stageProgress(stageProgressResult.error?null:stageProgressResult.data),
     qualityStages:Array.isArray(obj(qualityResult.error?null:qualityResult.data).stages)?
      (obj(qualityResult.data).stages as StageItemRecord[]):[]},milestones:[],quotations:[],quotePaymentTriggers:[],transactions:null,purchaseOrders:null,tasks:(tasks??[]).map(t=>({
    id:t.id,title:t.title,planned_start:t.planned_start,status:t.status,
