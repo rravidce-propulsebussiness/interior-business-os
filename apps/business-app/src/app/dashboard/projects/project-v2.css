@@ -875,3 +875,16 @@
  .pv2-page .pv2-stage-material-row{align-items:flex-start}
  .pv2-page .pv2-marketplace-purchase .pv2-button{width:100%;white-space:normal}
 }
+
+/* Inline procurement review matches the project's original orange/white mobile UI. */
+.pv2-page .pv2-stage-material-row .pv2-subaction {
+ flex-basis:100%;width:100%;margin:0;border-color:#f0d7c6;background:#fff9f5;
+}
+.pv2-page .pv2-stage-material-row .pv2-subaction>summary{
+ color:#d85b18;font-size:11px;font-weight:800;
+}
+.pv2-page .pv2-stage-marketplace-empty{
+ padding:10px 12px;border:1px solid #f4dfcd;border-radius:9px;
+ background:#fff8f1;color:#6d583f;font-size:11px;line-height:1.6;
+ margin:10px 0;
+}
