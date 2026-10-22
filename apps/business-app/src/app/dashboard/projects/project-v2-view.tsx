@@ -12,6 +12,7 @@ import { MaterialMarketplaceOrder } from './project-material-marketplace-order';
 import { MaterialOrderingAccess,MaterialDeliveryActions } from './project-material-delivery';
 import { StageChecklistItem } from './project-stage-checklist-item';
 import { BulkStageChecks } from './project-stage-bulk-checks';
+import { StageOnsiteQcReview } from './project-onsite-qc-review';
 import { ProjectDailyCommand } from './project-daily-command';
 import { StageActivationControl } from './project-stage-activation';
 import { ProjectClientAccess } from './project-client-access';
@@ -434,7 +435,7 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
          {stageExecution?.status==='ready_for_qc'&&
           <p className="pv2-stage-ready-note">
            All required site checks are passed and field work has been submitted.
-           Independent QC certification remains pending; the checks do not need
+           On-site company QC review and final stage certification remain pending; the checks do not need
            to be repeated unless corrections are requested.
           </p>}
          {stageExecution?.status==='in_progress'&&
@@ -443,7 +444,7 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
            Work and checks are complete. Use “Finish field work · Request QC”
            above to unlock the next eligible stage.
           </p>}
-         <p className="pv2-hint">Complete checks one by one, with photo evidence. A passed checklist item does not replace formal independent QC approval.</p>
+         <p className="pv2-hint">Complete checks one by one, with photo evidence. A passed site check must still be reviewed by the assigned company QC inspector when the stage is submitted.</p>
          <details className="pv2-single-checks">
           <summary>Review / edit individual checks</summary>
          <div className="pv2-stage-task-entries">
@@ -457,6 +458,19 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
           })}
          </div></details>
         </div>}
+        {physicalStage&&
+          (stageExecution?.status==='ready_for_qc'||
+           d.stageQc.records.some(review=>review.stage_id===stage.id))&&
+          <StageOnsiteQcReview projectId={d.project.id} stageId={stage.id}
+           stageName={stage.title} topics={stage.inspectionTopics}
+           stageStatus={stageExecution?.status??'not_started'}
+           canReview={d.stageQc.canReview} canManage={site?.canManage===true}
+           inspectorAssigned={d.stageQc.inspectorAssigned}
+           records={d.stageQc.records.filter(review=>review.stage_id===stage.id)}
+           photos={photos}
+           existingChecks={stageChecks.map(check=>({
+            title:stringValue(check.title),photoId:stringValue(check.photo_id)
+           }))}/>}
         {(formalInspections.length>0||formalReviews.length>0)&&<details className="pv2-stage-secondary pv2-formal-quality">
          <summary>Recorded QC inspections & approvals ({formalInspections.length} inspections)</summary>
          <p className="pv2-hint">Official inspection results and structural / quality approvals already recorded for this stage.</p>

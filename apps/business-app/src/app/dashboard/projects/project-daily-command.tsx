@@ -96,6 +96,13 @@ export function ProjectDailyCommand({ d, stageDetails, financialDetails }: {
       Number(row.index) === i && complete(stringValue(row.status)))).length, 0);
   const totalCount = active.reduce((sum, stage) => sum + stage.activities.length, 0);
   const percent = totalCount ? Math.round(doneCount * 100 / totalCount) : 0;
+  const latestQc = new Map<string,(typeof d.stageQc.records)[number]>();
+  for (const record of [...d.stageQc.records].sort((a,b)=>
+    b.reviewed_at.localeCompare(a.reviewed_at)||b.id.localeCompare(a.id))) {
+    const key=record.stage_id+':'+record.index;
+    if(!latestQc.has(key))latestQc.set(key,record);
+  }
+  const qcFailures=[...latestQc.values()].filter(record=>record.decision==='failed');
   const qcPending = d.stageExecution.filter(row => row.status === 'ready_for_qc')
     .map(row => byId.get(row.stageId)).filter((stage): stage is Stage => Boolean(stage));
   const materialPending = (d.site?.materials ?? []).filter(row =>
@@ -117,7 +124,7 @@ export function ProjectDailyCommand({ d, stageDetails, financialDetails }: {
     (d.site.canManage || ['manager', 'project_manager', 'site_engineer', 'supervisor'].includes(d.site.role));
   const canUpload = d.site?.stage === 'execution' &&
     (d.site.canManage || ['manager', 'project_manager', 'site_engineer', 'supervisor'].includes(d.site.role));
-  const needsCount = qcPending.length + materialPending.length + clientRequests.length +
+  const needsCount = qcPending.length + qcFailures.length + materialPending.length + clientRequests.length +
     (nextReadyStage ? 1 : 0) +
     (d.site?.stage !== 'execution' && !d.agreement?.authorized ? 1 : 0);
   const progressStyle: CSSProperties = { background: 'conic-gradient(#ff6519 ' + percent + '%, #f0e9e6 0)' };
@@ -198,6 +205,14 @@ export function ProjectDailyCommand({ d, stageDetails, financialDetails }: {
         <span className="daily-chevron" aria-hidden>⌄</span>
       </summary>
       <div className="daily-section-body daily-alert-list">
+        {qcFailures.map(item => <Link key={item.id} className="daily-alert-row"
+          href={'/dashboard/projects/'+d.project.id+'/timeline#project-timeline'}>
+          <span className="daily-alert-icon"><OwnerIcon name="check" size={17}/></span>
+          <span><strong>QC failed · Correct this site check</strong>
+            <small>{byId.get(item.stage_id)?.title??'Construction stage'} · {item.title}</small>
+            <small>{item.notes}</small>
+          </span><b>Rework →</b>
+        </Link>)}
         {qcPending.map(stage => {
           const passed = stage.inspectionTopics.filter(topic =>
             d.stageProgress.checks.some(check => stringValue(check.stage_id) === stage.id &&
@@ -205,9 +220,9 @@ export function ProjectDailyCommand({ d, stageDetails, financialDetails }: {
               stringValue(check.status) === 'passed')).length;
           return <div className="daily-alert-row" key={stage.id}>
             <span className="daily-alert-icon"><OwnerIcon name="check" size={17}/></span>
-            <span><strong>Site checks passed · Independent QC sign-off pending</strong>
+            <span><strong>Site checks passed · Company QC visit pending</strong>
               <small>{stageLabel(stage)} · {passed}/{stage.inspectionTopics.length} required site checks recorded</small>
-              <small>Formal sign-off is a separate authorized review; no need to redo passed checks.</small>
+              <small>An assigned company QC inspector visits the site and reviews each item. Failed items require correction.</small>
             </span>
           </div>;
         })}

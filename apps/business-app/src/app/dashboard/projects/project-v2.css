@@ -992,3 +992,72 @@
 .pv2-page .daily-next-ready{border-color:#d2eadd;background:#f8fdfa}
 .pv2-page .daily-next-ready .daily-alert-icon{background:#dff8e9;color:#178b58}
 .pv2-page .daily-next-ready b{color:#16865b}
+
+/* On-site QC: one official reviewer verdict per existing stage checklist item. */
+.pv2-page .pv2-on-site-qc{margin:15px 0;border:1px solid #dfd9ff;border-radius:18px;
+ background:linear-gradient(135deg,#f8f6ff,#fff 58%);overflow:visible}
+.pv2-page .pv2-qc-heading{cursor:pointer;list-style:none;display:flex;gap:11px;align-items:center;
+ padding:15px 13px;min-width:0}
+.pv2-page .pv2-qc-heading::-webkit-details-marker,.pv2-page .pv2-qc-item-head::-webkit-details-marker{display:none}
+.pv2-page .pv2-qc-heading-icon{display:grid;place-items:center;background:#7a64ed;color:#fff;
+ width:39px;height:39px;flex:0 0 39px;border-radius:12px;font-size:22px;font-weight:900}
+.pv2-page .pv2-qc-heading>span:nth-child(2){flex:1;min-width:0;display:grid;gap:4px}
+.pv2-page .pv2-qc-heading strong{color:#203250;font-size:14px;line-height:1.25}
+.pv2-page .pv2-qc-heading small{color:#727d93;font-size:11px;line-height:1.4}
+.pv2-page .pv2-qc-score{border-radius:20px;padding:8px 9px;background:#ebe6ff;
+ color:#624ad3;font-size:10px;font-weight:800;white-space:nowrap}
+.pv2-page .pv2-qc-inner{padding:0 13px 15px;display:grid;gap:10px;animation:daily-appear .22s both}
+.pv2-page .pv2-qc-metrics{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px;
+ padding:12px;border-radius:11px;background:#fff;border:1px solid #e8e2fb}
+.pv2-page .pv2-qc-metrics span{color:#7a8294;font-size:11px}
+.pv2-page .pv2-qc-metrics b{color:#6354ca;font-size:11px}
+.pv2-page .pv2-qc-help{border-radius:11px;padding:12px 13px;border:1px solid #ecd9bb;
+ background:#fffbf3;color:#705734;font-size:11px;line-height:1.65}
+.pv2-page .pv2-qc-help a{color:#f3661f;text-decoration:underline;font-weight:800}
+.pv2-page .pv2-qc-item{border-radius:12px;border:1px solid #e8e7e8;background:#fff}
+.pv2-page .pv2-qc-item.qc-failed{border-color:#fac5c5}
+.pv2-page .pv2-qc-item.qc-passed{border-color:#cce9dc}
+.pv2-page .pv2-qc-item-head{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:13px}
+.pv2-page .pv2-qc-item-icon{background:#f4f3f4;color:#8692a0;border-radius:10px;display:grid;place-items:center;
+ width:32px;height:32px;flex:0 0 32px;font-weight:900;font-size:16px}
+.pv2-page .qc-passed .pv2-qc-item-icon{background:#e1f9ec;color:#11955c}
+.pv2-page .qc-failed .pv2-qc-item-icon{background:#ffeded;color:#db3131}
+.pv2-page .pv2-qc-item-title{flex:1;min-width:0;display:grid;gap:4px}
+.pv2-page .pv2-qc-item-title strong{font-size:12px;line-height:1.45;color:#263750}
+.pv2-page .pv2-qc-item-title small{font-size:10px;color:#808b9d}
+.pv2-page .qc-failed .pv2-qc-item-title small{color:#d33b38;font-weight:800}
+.pv2-page .qc-passed .pv2-qc-item-title small{color:#12915e;font-weight:750}
+.pv2-page .pv2-qc-chevron{color:#89789c;transition:transform .22s}
+.pv2-page .pv2-qc-item[open] .pv2-qc-chevron{transform:rotate(180deg)}
+.pv2-page .pv2-qc-item-body{display:grid;gap:11px;padding:0 13px 14px;animation:daily-appear .18s both}
+.pv2-page .pv2-qc-last{font-size:11px;color:#67748b}
+.pv2-page .pv2-qc-failure-note{background:#fff2f1;border:1px solid #ffc9c4;color:#9e322e;
+ border-radius:10px;padding:12px;font-size:12px;line-height:1.5}
+.pv2-page .pv2-qc-review-form{display:grid;gap:11px}
+.pv2-page .pv2-qc-review-form>label:not(.pv2-qc-visit-confirm){display:grid;gap:6px;
+ font-size:11px;color:#536178;font-weight:750}
+.pv2-page .pv2-qc-review-form :is(select,textarea,input[type=file]){min-width:0;width:100%;
+ padding:11px;background:#fff;border:1px solid #d9dce3;color:#202d44;border-radius:11px;font-size:12px}
+.pv2-page .pv2-qc-review-form textarea{resize:vertical}
+.pv2-page .pv2-qc-review-form .pv2-button{justify-self:start;min-height:43px;font-size:12px}
+.pv2-page .pv2-qc-visit-confirm{display:flex;gap:10px;align-items:flex-start;cursor:pointer;
+ border:1px solid #d8e9dc;background:#f3fbf5;padding:12px;border-radius:11px;
+ font-size:11px;color:#365b46;line-height:1.5}
+.pv2-page .pv2-qc-visit-confirm input{width:18px;height:18px;flex:0 0 18px;accent-color:#128b56}
+.pv2-page .pv2-qc-photo{font-size:11px;color:#f36a20;text-decoration:underline;font-weight:800}
+.pv2-page .pv2-qc-history{border-radius:11px;border:1px solid #e9e6eb;padding:11px}
+.pv2-page .pv2-qc-history summary{cursor:pointer;color:#5d548e;font-size:11px;font-weight:750}
+.pv2-page .pv2-qc-history-line{display:grid;gap:4px;margin-top:10px;border-top:1px solid #eee;
+ padding-top:10px;font-size:11px;color:#4c5a70}
+.pv2-page .pv2-qc-history-line a{color:#ed641c;font-weight:800;text-decoration:underline}
+@media(max-width:480px){
+ .pv2-page .pv2-qc-heading{gap:7px;padding:13px 9px;flex-wrap:wrap}
+ .pv2-page .pv2-qc-heading-icon{width:32px;height:32px;flex-basis:32px}
+ .pv2-page .pv2-qc-score{font-size:9px}
+ .pv2-page .pv2-qc-inner{padding:0 9px 13px}
+ .pv2-page .pv2-qc-review-form .pv2-button{justify-self:stretch;white-space:normal}
+}
+@media(prefers-reduced-motion:reduce){
+ .pv2-page .pv2-qc-inner,.pv2-page .pv2-qc-item-body{animation:none}
+ .pv2-page .pv2-qc-chevron{transition:none}
+}
