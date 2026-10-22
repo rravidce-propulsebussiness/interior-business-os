@@ -281,8 +281,10 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
   designRevisionStarted:Boolean(d.site?.designs.length),
   designClientApproved:['client_approved','execution'].includes(d.site?.stage??''),
  };
+ // QUOTED_SCOPE is contract metadata, not an executable construction stage.
+ const timelineStages=d.stages.filter(stage=>!stage.template_code.startsWith('QUOTED_SCOPE'));
  const executionById=new Map(d.stageExecution.map(item=>[item.stageId,item]));
- const visualStatuses=d.stages.map(stage=>{
+ const visualStatuses=timelineStages.map(stage=>{
   const effective=effectiveProjectStageStatus(stage,evidence);
   const recorded=executionById.get(stage.id);
   return recorded?.status==='certified'?'certified':
@@ -290,12 +292,12 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
  });
  const activeStages=d.stageExecution.filter(stage=>stage.status==='in_progress').length;
  const active=visualStatuses.findIndex(status=>!done(status));
- const designIndex=d.stages.findIndex(stage=>['DESIGN','DESIGN_APPROVAL'].includes(stage.template_code));
+ const designIndex=timelineStages.findIndex(stage=>['DESIGN','DESIGN_APPROVAL'].includes(stage.template_code));
  // The active client-approved design stage contains the final execution gate.
  // Keep that action visible in the timeline instead of hiding it behind
  // an older preconstruction stage whose financial details remain accessible.
  const current=['design','client_approved'].includes(d.site?.stage??'')&&designIndex>=0?designIndex:
-  active<0?d.stages.length-1:active;
+  active<0?timelineStages.length-1:active;
  const allowWork=site?.stage==='execution'&&
   (site.canManage||['manager','project_manager','site_engineer','supervisor'].includes(site.role));
  const allowMaterials=site?.stage==='execution'&&
@@ -306,16 +308,19 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
   <div className="pv2-command-head">
    <div><h2>Project timeline</h2>
     <p>Manage stages, work, payments, materials, labour, photos and checks in one place.</p></div>
-   <span className="pv2-timeline-counter">{activeStages} active · {d.stages.length} stages</span>
+   <span className="pv2-timeline-counter">{activeStages} active · {timelineStages.length} stages</span>
   </div>
-  {!d.stages.length?<div className="pv2-stage-empty">
+  {d.quotations.length>0&&d.permissions.quotation&&<p className="pv2-timeline-quote-note">
+   Quotation {d.quotations[0]?.number} is linked automatically in <a href={cur(d.project.id,'documents')}>Quote & Agreement</a>, not repeated as construction work.
+  </p>}
+  {!timelineStages.length?<div className="pv2-stage-empty">
     <p>Stages are created from the signed agreement and its approved quotation; no generic stages are inserted.</p>
     {d.site?.canManage&&d.agreement&&<SyncStages id={d.project.id}/>}
     {!d.agreement&&d.quotations[0]?.status==='issued'&&d.permissions.manage&&d.permissions.finance&&
     <PrepareAgreement projectId={d.project.id} revisionId={d.quotations[0].revisionId}/>}
    {!d.agreement&&<p>Prepare the agreement from the issued Final quotation before importing stages.</p>}
    </div>:<div className="pv2-command-stage-list">
-    {d.stages.map((stage,index)=>{
+    {timelineStages.map((stage,index)=>{
       const visualStatus=visualStatuses[index]??stage.status;
       const stageExecution=executionById.get(stage.id);
       const physicalStage=!['QUOTED_SCOPE','PRECONSTRUCTION','DESIGN','DESIGN_APPROVAL','SITE_SURVEY'].includes(stage.template_code);
