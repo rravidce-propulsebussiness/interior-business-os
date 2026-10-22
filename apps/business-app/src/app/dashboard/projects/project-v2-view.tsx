@@ -413,6 +413,14 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
              <div><b>{stringValue(m.item)}</b>
               <small>{stringValue(m.quantity)} {stringValue(m.unit)}</small></div>
              <Status value={status}/>
+             {(site?.canManage||['manager','procurement'].includes(site?.role??''))&&
+               (!((source==='marketplace') &&
+                   stringValue(m.vendor_reference).startsWith('Marketplace request ') &&
+                   status==='approved'))&&
+               ['requested','approved','ordered'].includes(status)&&
+               <MaterialUpdateForm id={d.project.id} material={{
+                id:m.id,status,source,vendorReference:stringValue(m.vendor_reference),
+               }}/>}
              {d.permissions.purchaseManage&&<MaterialMarketplaceOrder
               projectId={d.project.id} material={{
                id:m.id,item:stringValue(m.item),quantity:Number(m.quantity),
@@ -423,7 +431,7 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
               <p className="pv2-hint">{
                status==='requested'?'Awaiting owner/procurement approval':
                status==='approved'?'Approved for sourcing':
-               status==='ordered'?'Supplier order accepted / placed; delivery still pending':
+               status==='ordered'?'Supplier order placed; delivery must still be verified':
                'Marked received by site staff'
               }</p>}
             </article>;
