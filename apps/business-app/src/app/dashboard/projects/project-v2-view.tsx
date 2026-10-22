@@ -667,7 +667,10 @@ function Procurement({d}:{d:WorkspaceData}){
      {Boolean(m.vendor_reference)&&<small>Supplier / order: {stringValue(m.vendor_reference)}</small>}</div>
     <Status value={stringValue(m.status)}/>
     {site?.stage==='execution'&&site.role&&['manager','procurement'].includes(site.role)&&
-     <MaterialUpdateForm id={d.project.id} material={{id:m.id,status:stringValue(m.status)}}/>}
+     <MaterialUpdateForm id={d.project.id} material={{
+      id:m.id,status:stringValue(m.status),source:stringValue(m.source),
+      vendorReference:stringValue(m.vendor_reference),
+     }}/>}
    </article>)}</div>:
     <Blank title="No material requests" detail="Site engineers and procurement staff can add requests throughout the project."/>}
    {site?.stage==='execution'&&['manager','procurement','site_engineer'].includes(site.role)&&
