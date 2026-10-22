@@ -71,9 +71,10 @@ export function StageRequirementsEditor({code,value,editable,onChange,onApplyRel
   <div className="qs-stage-requirements-title">
    <strong>{title}</strong><small>{value?'Project customized':'Standard requirements'}</small>
   </div>
-  {fields.map(section=><Section key={section.key} {...section}
+  {fields.map(section=><Section key={section.key} field={section.key}
+    title={section.title} hint={section.hint}
     base={defaults[section.key]} requirements={requirements}
-    locked={section.key==='checks'&&structural}
+    locked={section.key==='checks'&&Boolean(structural)}
     editable={editable} onUpdate={onChange}/>)}
   {editable&&<div className="qs-stage-requirements-actions">
    {value&&<button type="button" onClick={()=>onChange(defaults)}>
@@ -81,7 +82,7 @@ export function StageRequirementsEditor({code,value,editable,onChange,onApplyRel
    </button>}
    {relatedCount>1&&onApplyRelated&&<button type="button"
     onClick={()=>onApplyRelated(requirements)}>
-    Apply these requirements to all {relatedCount} {code.split('/')[0].replaceAll('_',' ')} floors
+    Apply these requirements to all {relatedCount} {(code.split('/')[0]??'').replaceAll('_',' ')} floors
    </button>}
   </div>}
   <p className="qs-stage-requirements-foot">These project requirements become construction work, material planning and QC guidance after the accepted quotation is converted. Adding scope or cost requires an appropriate quotation revision. Mandatory structural approvals cannot be removed.</p>
