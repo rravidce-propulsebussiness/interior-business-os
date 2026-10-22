@@ -34,14 +34,19 @@ const refresh = (id:string)=>{
   revalidatePath('/dashboard/projects/'+id+'/checks');
   revalidatePath('/dashboard/projects/'+id+'/procurement');
 };
-export async function saveProjectMaterials(projectId:string,form:FormData):Promise<Result> {
+export async function saveProjectMaterials(projectId:string,form:FormData,stageId?:string):Promise<Result> {
   try {
     const raw=JSON.parse(String(form.get('items')??'null')) as unknown;
     const items=z.array(materialSchema).min(1).max(12).parse(raw);
     const {client,org}=await context(projectId);
-    const response=await client.rpc('project_site_material_batch' as never,{
-      p_org:org,p_project:projectId,p_items:items,
-    } as never);
+    if(stageId)uuid.parse(stageId);
+    const response=stageId
+      ?await client.rpc('project_stage_material_batch' as never,{
+         p_org:org,p_project:projectId,p_stage:stageId,p_items:items,
+       } as never)
+      :await client.rpc('project_site_material_batch' as never,{
+         p_org:org,p_project:projectId,p_items:items,
+       } as never);
     if(response.error)throw new Error(response.error.message);
     refresh(projectId);
     return {saved:true,message:items.length+' material requests saved.'};
@@ -89,4 +94,28 @@ export async function saveProjectStageItem(
   } catch(error) {
     return {saved:false,message:error instanceof Error?error.message:'Unable to update checklist'};
   }
+}
+
+/** Sends a separately approved site material to a real published marketplace seller.
+ * A seller request is not a purchase order, payment or a delivered material.
+ */
+export async function requestMaterialFromMarketplace(projectId:string,form:FormData):Promise<Result>{
+ try{
+  const materialId=uuid.parse(form.get('materialId'));
+  const productId=uuid.parse(form.get('productId'));
+  const key=uuid.parse(form.get('requestKey'));
+  const {client,org}=await context(projectId);
+  const {authorization}=await serverServices();
+  await authorization.requirePermission(org,'purchase.manage');
+  const result=await client.rpc('project_site_marketplace_order' as never,{
+   p_org:org,p_project:projectId,p_material:materialId,p_product:productId,
+   p_request_key:key,
+  } as never);
+  if(result.error)throw new Error(result.error.message);
+  refresh(projectId);
+  revalidatePath('/dashboard/marketplace/orders');
+  return {saved:true,message:'Supplier request placed. Seller acceptance and delivery are separate steps.'};
+ }catch(error){
+  return {saved:false,message:error instanceof Error?error.message:'Unable to send marketplace request'};
+ }
 }
