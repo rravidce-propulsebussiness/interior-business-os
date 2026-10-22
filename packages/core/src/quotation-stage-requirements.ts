@@ -86,6 +86,31 @@ export function savedStageRequirements(terms:string):StageRequirementsMap {
 export function stripStageRequirements(terms:string):string {
  return terms.replace(MARK,'').trim();
 }
+/** Rename a selected, non-mandatory stage item without touching company templates.
+ * A rename replaces one existing entry; it does not add a duplicate scope line.
+ * Structural hold-point requirements are enforced again by merge validation.
+ */
+export function renameStageRequirement(
+ current:StageRequirements,
+ field:keyof StageRequirements,
+ original:string,
+ nextTitle:string,
+ mandatory=false,
+):StageRequirements {
+ if(mandatory)throw new Error('Required structural inspection cannot be renamed');
+ const at=current[field].indexOf(original);
+ if(at<0)throw new Error('Select an existing entry before editing');
+ const title=nextTitle.replace(/\s+/g,' ').trim();
+ const minimum=field==='checks'?3:2;
+ if(title.length<minimum||title.length>180)
+  throw new Error('Enter '+minimum+' to 180 characters');
+ if(current[field].some((item,i)=>i!==at&&item.toLowerCase()===title.toLowerCase()))
+  throw new Error('This '+field+' entry already exists');
+ const updated=[...current[field]];
+ updated[at]=title;
+ return {...current,[field]:updated};
+}
+
 export function mergeStageRequirementOverrides(
   all:StageRequirementsMap,instanceCode:string,changed:StageRequirements,
 ):StageRequirementsMap {

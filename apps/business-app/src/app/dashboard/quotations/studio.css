@@ -2020,3 +2020,69 @@ border-radius:7px;padding:5px 8px;font-size:10px;font-weight:800;cursor:pointer}
  .qs-stage-add-line button{flex:1 1 auto}
  .qs-stage-requirements-actions button{width:100%}
 }
+
+
+/* Editable stage work/order/QC/report rows; no extra navigation or duplicate register. */
+.qs-payment-stage-guidance .qs-stage-requirement-row{
+ display:flex;align-items:flex-start;gap:7px;flex-wrap:wrap;
+ padding:4px 0;border-bottom:1px solid #f0eeec;min-width:0
+}
+.qs-payment-stage-guidance .qs-stage-requirement-row:last-child{border-bottom:0}
+.qs-payment-stage-guidance .qs-stage-requirement-row>.qs-stage-requirement-option{
+ flex:1 1 180px;min-width:0
+}
+.qs-payment-stage-guidance .qs-stage-requirement-edit{
+ display:inline-flex;align-items:center;justify-content:center;gap:5px;
+ border:1px solid #efd6c3;background:#fff9f5;color:#bb531b;
+ border-radius:9px;min-height:37px;padding:7px 10px;
+ font-weight:750;font-size:11px;line-height:1.2;font-family:inherit;cursor:pointer;flex-shrink:0
+}
+.qs-payment-stage-guidance .qs-stage-requirement-edit:hover,
+.qs-payment-stage-guidance .qs-stage-requirement-edit[aria-expanded=true]{
+ border-color:#e9a777;background:#fff0e5
+}
+.qs-payment-stage-guidance .qs-stage-rename{
+ display:grid;gap:9px;width:100%;min-width:0;
+ margin:3px 0 10px;padding:12px;
+ background:#fffaf6;border:1px solid #f0dacb;border-radius:11px
+}
+.qs-payment-stage-guidance .qs-stage-rename>label{
+ font-size:11px;font-weight:750;color:#495a6c
+}
+.qs-payment-stage-guidance .qs-stage-rename>input{
+ width:100%;min-width:0;min-height:43px;
+ padding:10px 12px;border:1px solid #dbe2e8;border-radius:9px;
+ background:#fff;color:#253449;font-size:12px
+}
+.qs-payment-stage-guidance .qs-stage-rename-actions{
+ display:flex;flex-wrap:wrap;gap:8px
+}
+.qs-payment-stage-guidance .qs-stage-rename-actions button{
+ border:1px solid #eac3a6;border-radius:9px;
+ padding:10px 15px;min-height:40px;font-size:12px;
+ font-weight:750;cursor:pointer;color:#a84c18;background:#fff
+}
+.qs-payment-stage-guidance .qs-stage-rename-actions button:first-child{
+ background:#ff6c12;color:#fff;border-color:#ff6c12
+}
+.qs-payment-stage-guidance .qs-stage-rename-error{
+ margin:0;color:#b42318;font-size:11px;line-height:1.55
+}
+.qs-payment-stage-guidance .qs-stage-material-order-note{
+ margin:9px 0;padding:12px;background:#fff9f3;
+ border:1px solid #f3ddc8;border-radius:10px;
+ font-size:11px;line-height:1.7;color:#65503f
+}
+.qs-payment-stage-guidance .qs-stage-material-order-note a{
+ color:#cf5c21;font-weight:750;text-decoration:underline
+}
+@media(max-width:640px){
+ .qs-payment-stage-guidance .qs-stage-requirement-row>.qs-stage-requirement-option{
+  flex:1 1 140px
+ }
+ .qs-payment-stage-guidance .qs-stage-requirement-edit{padding:8px 9px;min-height:39px}
+ .qs-payment-stage-guidance .qs-stage-rename-actions button{flex:1}
+}
+@media(prefers-reduced-motion:reduce){
+ .qs-payment-stage-guidance .qs-stage-rename{scroll-behavior:auto}
+}
