@@ -4,7 +4,7 @@ import { useMemo, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { savedStagePaymentPlan,savedStagePaymentLinks } from '@business-os/core/quotation-payment-plan';
 import { proposedConstructionPayments } from '@business-os/core/construction-payment-schedule';
-import { savedStageRequirements,mergeStageRequirementOverrides,
+import { savedStageRequirements,mergeStageRequirementOverrides,encodeStageRequirements,
  type StageRequirements,type StageRequirementsMap } from '@business-os/core/quotation-stage-requirements';
 import { StageRequirementsEditor } from './stage-requirements-editor';
 
@@ -73,18 +73,45 @@ export function PaymentScheduleEditor({
   const [stageRequirements,setStageRequirements]=useState<StageRequirementsMap>(
     ()=>savedStageRequirements(initial.terms));
   const stageCodes=[...new Set(rows.flatMap(row=>row.stageCodes))];
+  // Removing a payment milestone can remove its last referenced work stage.
+  // Silently discard only the now-orphaned customizations; retain those still linked.
+  const visibleRequirements=Object.fromEntries(Object.entries(stageRequirements)
+    .filter(([code])=>stageCodes.includes(code))) as StageRequirementsMap;
+  function candidateRequirements(candidate:StageRequirementsMap):StageRequirementsMap|null{
+   try{
+    const onlyLinked=Object.fromEntries(Object.entries(candidate).filter(([code])=>
+      stageCodes.includes(code))) as StageRequirementsMap;
+    // Validate both the total stage count and the 7,500-character saved marker limit
+    // BEFORE scheduling a React state update, not inside its updater.
+    encodeStageRequirements(onlyLinked);
+    return onlyLinked;
+   }catch(error){
+    setFeedback({type:'error',text:error instanceof Error?error.message:
+      'These stage requirements exceed the quotation limits.'});
+    return null;
+   }
+  }
   function editRequirements(code:string,value:StageRequirements){
-   setFeedback(null);
-   setStageRequirements(current=>mergeStageRequirementOverrides(current,code,value));
+   try{
+    const changed=mergeStageRequirementOverrides(visibleRequirements,code,value);
+    const next=candidateRequirements(changed);
+    if(next){setStageRequirements(next);setFeedback(null);}
+   }catch(error){
+    setFeedback({type:'error',text:error instanceof Error?error.message:
+      'Unable to update this stage. Check the entered requirements.'});
+   }
   }
   function applyRelated(code:string,value:StageRequirements){
    const related=stageCodes.filter(item=>item.split('/')[0]===code.split('/')[0]);
-   setStageRequirements(current=>{
-    let next=current;
-    for(const stage of related)next=mergeStageRequirementOverrides(next,stage,value);
-    return next;
-   });
-   setFeedback(null);
+   try{
+    let candidate=visibleRequirements;
+    for(const stage of related)candidate=mergeStageRequirementOverrides(candidate,stage,value);
+    const next=candidateRequirements(candidate);
+    if(next){setStageRequirements(next);setFeedback(null);}
+   }catch(error){
+    setFeedback({type:'error',text:error instanceof Error?error.message:
+      'Unable to apply requirements to every floor.'});
+   }
   }
   const [feedback, setFeedback] = useState<Feedback>(null);
   const [pending, start] = useTransition();
@@ -92,7 +119,7 @@ export function PaymentScheduleEditor({
   const router = useRouter();
   const savedPlan = savedStagePaymentPlan(initial.terms);
   const hasChanges = JSON.stringify(rows) !== JSON.stringify(readPlan(initial.terms, industry, editable, floorNames))
-    || JSON.stringify(stageRequirements)!==JSON.stringify(savedStageRequirements(initial.terms));
+    || JSON.stringify(visibleRequirements)!==JSON.stringify(savedStageRequirements(initial.terms));
   const percentTotal = useMemo(
     () => rows.reduce((sum, row) => sum + (Number(row.percent) || 0), 0),
     [rows],
@@ -131,10 +158,7 @@ export function PaymentScheduleEditor({
 
   function save() {
     if (pending || !editable) return;
-    if(Object.keys(stageRequirements).some(code=>!stageCodes.includes(code))){
-     setFeedback({type:'error',text:'A customized stage is no longer linked. Remove its overrides first.'});
-     return;
-    }
+    if(candidateRequirements(visibleRequirements)===null)return;
     if (!valid) {
       setFeedback({
         type: 'error',
@@ -152,7 +176,7 @@ export function PaymentScheduleEditor({
         const response=await fetch('/dashboard/quotations/'+initial.revision_id+'/conditions',{
           method:'POST',credentials:'same-origin',cache:'no-store',
           headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({kind:'payments',stages:rows,stageRequirements}),
+          body:JSON.stringify({kind:'payments',stages:rows,stageRequirements:visibleRequirements}),
         });
         const result:unknown=await response.json().catch(()=>null);
         const data=result&&typeof result==='object'
@@ -285,7 +309,7 @@ export function PaymentScheduleEditor({
                     <summary>Customize work, materials & checks <span aria-hidden="true">⌄</span></summary>
                     {[...new Set(row.stageCodes)].map(code=>
                      <StageRequirementsEditor key={code} code={code}
-                      value={stageRequirements[code]} editable={editable}
+                      value={visibleRequirements[code]} editable={editable}
                       onChange={value=>editRequirements(code,value)}
                       relatedCount={stageCodes.filter(c=>c.split('/')[0]===code.split('/')[0]).length}
                       onApplyRelated={value=>applyRelated(code,value)}/>)}
