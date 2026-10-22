@@ -163,6 +163,27 @@ create trigger project_marketplace_accept_order_timestamp
  for each row when (old.status is distinct from new.status)
  execute function private.project_marketplace_accept_order_timestamp();
 
+-- Legacy status forms must not create "ordered" or "delivered" claims without proof
+-- of an actual supplier action or physical site receipt.
+create or replace function private.project_material_transition_guard()
+returns trigger language plpgsql security definer set search_path='' as $f$
+begin
+ if new.status='ordered' then
+  if new.source='outside' and (new.expected_delivery_date is null or new.ordered_at is null)
+  then raise exception 'Outside orders require actual supplier confirmation and an ETA' using errcode='23514';end if;
+  if new.source='marketplace' and new.marketplace_order_id is null
+  then raise exception 'Marketplace orders require an actual seller request' using errcode='23514';end if;
+ end if;
+ if new.status='received' and new.received_at is null then
+  raise exception 'Site receipt confirmation is required before marking received' using errcode='23514';end if;
+ return new;
+end
+$f$;
+drop trigger if exists project_material_transition_guard on private.site_material_needs;
+create trigger project_material_transition_guard
+ before insert or update of status,source,expected_delivery_date,received_at on private.site_material_needs
+ for each row execute function private.project_material_transition_guard();
+
 -- Site requests use the same project scoped data. No supplier, price, margin,
 -- order keys or internal permission data is exposed to the client.
 create or replace function public.client_portal_site_materials(p_project_id uuid)
