@@ -941,3 +941,45 @@
 .pv2-page .pv2-timeline-quote-note a{
  color:#d95e1c;font-weight:750;text-underline-offset:2px;
 }
+
+
+/* Multi-check inspection editing: one clean control, canonical check records. */
+.pv2-page .pv2-bulk-checks{margin:10px 0 14px;border:1px solid #f9c9a5;border-radius:13px;background:#fff9f3;min-width:0}
+.pv2-page .pv2-bulk-checks>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:9px;
+ padding:14px 13px;color:#e65b12;font-weight:850;font-size:12px}
+.pv2-page .pv2-bulk-checks>summary::-webkit-details-marker{display:none}
+.pv2-page .pv2-bulk-checks>summary>span{margin-left:auto;background:#ffeadb;color:#bc551d;border-radius:40px;
+ padding:5px 9px;font-size:10px;white-space:nowrap}
+.pv2-page .pv2-bulk-form{padding:0 13px 14px;display:grid;gap:11px;min-width:0}
+.pv2-page .pv2-bulk-toggle{justify-self:start;background:#fff;border:1px solid #f2d7c4;color:#d45a20;
+ border-radius:9px;padding:10px 14px;font-size:11px;font-weight:800}
+.pv2-page .pv2-bulk-list{display:grid;gap:7px}
+.pv2-page .pv2-bulk-row{display:flex;align-items:center;gap:10px;cursor:pointer;background:#fff;
+ border:1px solid #f0e3da;border-radius:11px;padding:12px;min-width:0;transition:border-color .2s,background .2s}
+.pv2-page .pv2-bulk-row.is-selected{background:#fff1e8;border-color:#feac73}
+.pv2-page .pv2-bulk-row input[type=checkbox],.pv2-page .pv2-bulk-confirm input[type=checkbox],
+.pv2-page .pv2-bulk-attach input[type=checkbox]{accent-color:#f5681b;width:18px;height:18px;flex:0 0 18px}
+.pv2-page .pv2-bulk-row>span{display:grid;gap:4px;min-width:0}
+.pv2-page .pv2-bulk-row strong{font-size:12px;color:#27364d;font-weight:800;line-height:1.45}
+.pv2-page .pv2-bulk-row small{font-size:10px;color:#8793a3}
+.pv2-page .pv2-bulk-label{display:grid;gap:7px;font-size:11px;font-weight:750;color:#495568}
+.pv2-page .pv2-bulk-label :is(select,textarea,input[type=file]){background:#fff;border:1px solid #e5e3df;
+ border-radius:11px;padding:10px;max-width:100%;width:100%;min-width:0;color:#253148}
+.pv2-page .pv2-bulk-confirm,.pv2-page .pv2-bulk-attach{display:flex;align-items:flex-start;gap:9px;
+ padding:10px 11px;border:1px solid #f0e3d6;background:#fff;border-radius:11px;
+ color:#5f5960;font-size:11px;line-height:1.55;cursor:pointer}
+.pv2-page .pv2-bulk-form>.pv2-button{min-height:46px;justify-self:start;font-size:12px}
+.pv2-page .pv2-single-checks{margin-top:10px}
+.pv2-page .pv2-single-checks>summary{padding:11px 12px;border:1px solid #eee7df;background:#fff;
+ border-radius:10px;cursor:pointer;font-size:11px;color:#b45d30;font-weight:800}
+.pv2-page .pv2-single-checks .pv2-stage-task-entries{margin-top:10px}
+.pv2-page .pv2-stage-ready-note{padding:11px 13px;border:1px solid #f5d3b4;
+ border-radius:10px;background:#fff5ea;color:#9c4918;font-size:12px;line-height:1.5}
+@media(max-width:500px){
+ .pv2-page .pv2-bulk-checks>summary{padding:12px 9px;flex-wrap:wrap}
+ .pv2-page .pv2-bulk-form{padding:0 9px 12px}
+ .pv2-page .pv2-bulk-form>.pv2-button{justify-self:stretch;white-space:normal}
+}
+@media(prefers-reduced-motion:reduce){
+ .pv2-page .pv2-bulk-row{transition:none}
+}
