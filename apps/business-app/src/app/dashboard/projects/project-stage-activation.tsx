@@ -41,7 +41,7 @@ export function StageActivationControl({projectId,stageId,state,canManage,workCo
    <strong>{status==='not_started'?'Start physical work':
     status==='in_progress'?'Work in progress':
     status==='on_hold'?'Stage paused':
-    status==='ready_for_qc'?'Field work finished · QC pending':'Stage execution'}</strong>
+    status==='ready_for_qc'?'Field work submitted · Independent QC pending':'Stage execution'}</strong>
    {state?.startedAt&&<small>Started {new Date(state.startedAt).toLocaleDateString('en-IN')}</small>}
   </div>
   {status==='not_started'&&blockers.length>0&&<div className="pv2-stage-activation-blockers">
@@ -59,8 +59,11 @@ export function StageActivationControl({projectId,stageId,state,canManage,workCo
   </p>}
   {status==='in_progress'&&<p className="pv2-hint">
    Work can proceed alongside other eligible floors. Finish each checklist item and required test before submitting this stage for independent QC.</p>}
-  {status==='ready_for_qc'&&<p className="pv2-hint">
-   Awaiting independent QC/structural certification. This does not trigger an invoice or mark a payment received.</p>}
+  {status==='ready_for_qc'&&<div className="pv2-stage-qc-clarity" role="status">
+   <strong>Site checks passed: {checksPassed}/{checksTotal}</strong>
+   <p>Field work is submitted. The separate independent QC approval is still pending; no checks need to be repeated unless the reviewer requests corrections.</p>
+   <p>Other stages can start when their own prerequisites are clear. Structural sign-off and finance certification remain separate.</p>
+  </div>}
   {message&&<p role="status" className={'pv2-form-feedback '+(saved?'good':'bad')}>{message}</p>}
  </div>;
 }
