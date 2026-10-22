@@ -4,6 +4,7 @@ import { canAccess } from '@business-os/auth';
 import { commercialServices } from '../commercial/service';
 import { activeOrganization,pageServices } from '@business-os/auth/server';
 import { workCompletionByProject } from './work-progress';
+import { createMarketplaceRepository, type MarketplaceProduct } from '@business-os/database/marketplace';
 import type { ProjectEntry } from './project-v2-types';
 import { savedStagePaymentPlan,savedStagePaymentLinks } from '@business-os/core/quotation-payment-plan';
 export type { ProjectEntry } from './project-v2-types';
@@ -15,6 +16,7 @@ export type Stage = {id:string;title:string;status:string;phase:string;floor_cod
 export type StageLink = {stage_id:string;kind:string;record_id:string};
 export type StageItemRecord=Record<string,unknown>;
 export type StageProgress={work:StageItemRecord[];checks:StageItemRecord[];qualityStages:StageItemRecord[]};
+export type StageMarketplaceProduct=Pick<MarketplaceProduct,'id'|'name'|'unit'|'minQuantity'|'price'|'currency'|'seller'|'sku'>;
 export type PaymentMilestone={id:string;label:string;amount:string;currency:string;contract_number:string;
  contract_id:string};
 export type ProjectQuotation={id:string;number:string;revisionId:string;status:string;createdAt:string};
@@ -24,7 +26,8 @@ export type ClientRequestRow={
 };
 export type WorkspaceData = {
  project:ProjectEntry;org:string;company:string;email:string;
- permissions:{manage:boolean;finance:boolean;contractManage:boolean;payments:boolean;purchases:boolean;team:boolean;quotation:boolean};
+ permissions:{manage:boolean;finance:boolean;contractManage:boolean;payments:boolean;purchases:boolean;purchaseManage:boolean;team:boolean;quotation:boolean};
+ marketplaceOffers:StageMarketplaceProduct[];
  site:null|{stage:string;role:string;canManage:boolean;reports:SiteRow[];materials:SiteRow[];
  checks:SiteRow[];media:SiteRow[];designs:SiteRow[];team:SiteRow[];gate:SiteRow[];
  memberOptions:{id:string;label:string}[]};
@@ -121,7 +124,7 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
  const permissions={
   manage:has('project.manage','projects'),finance:has('contract.view','billing'),
    contractManage:has('contract.manage','billing'),
-  payments:has('payment.view'),purchases:has('purchase.view'),
+  payments:has('payment.view'),purchases:has('purchase.view'),purchaseManage:has('purchase.manage'),
   team:has('team.manage')||has('team.view'),quotation:has('quotation.view','quotation'),
  };
  const [org,user,industries,customer,taskResult,siteResult,stageResult,stageLinkResult,stageProgressResult,qualityResult,receipts,orders,contract,agreementResult,preflightResult,advanceResult]=await Promise.all([
@@ -187,6 +190,11 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
    currency:stringValue(a.currency),contract_number:stringValue(a.contract_number),
    contract_id:stringValue(a.contract_id)};
  }):[];
+ const marketplaceOffers:StageMarketplaceProduct[]=permissions.purchaseManage?
+   await createMarketplaceRepository(s.client).catalog(s.org).then(products=>
+     products.slice(0,100).map(({id,name,unit,minQuantity,price,currency,seller,sku})=>
+       ({id,name,unit,minQuantity,price,currency,seller,sku}))
+   ).catch(()=>[]):[];
  const trans=permissions.payments&&!receipts.error&&receipts.data?receipts.data.map(x=>({
   id:x.id,number:x.payment_number,date:x.payment_date,amount:Number(x.amount)||0,status:x.status
  })):null;
@@ -318,7 +326,7 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
    client:customer.data?.display_name??'Not linked',
    industry:(project.industry_id?industriesById.get(project.industry_id):null)??'Project',progress
   },
-  site,stages:stageList,links:linkList,stageProgress:{...stageProgress(stageProgressResult.error?null:stageProgressResult.data),
+  site,stages:stageList,links:linkList,marketplaceOffers,stageProgress:{...stageProgress(stageProgressResult.error?null:stageProgressResult.data),
     qualityStages:Array.isArray(obj(qualityResult.error?null:qualityResult.data).stages)?
      (obj(qualityResult.data).stages as StageItemRecord[]):[]},milestones,quotations,quotePaymentTriggers,stageRequests,
   preflight,advance,requests,
@@ -408,12 +416,12 @@ async function assignedProjectWorkspace(id:string):Promise<WorkspaceData>{
  };
  return {
   org:context.organizationId,company:org.name,email:user.email??'',
-  permissions:{manage:site.canManage,finance:false,contractManage:false,payments:false,purchases:false,team:site.canManage,quotation:false},
+  permissions:{manage:site.canManage,finance:false,contractManage:false,payments:false,purchases:false,purchaseManage:false,team:site.canManage,quotation:false},
   project:{id,name:stringValue(p.name),code:stringValue(p.code),status:stringValue(p.status)||'active',
    projectType:'',address:'Project site',createdAt:'',client:'Project team',customerId:null,
    industry:'Site Delivery',
    progress:workCompletionByProject([id],tasks&&tasks.length<1200?tasks:null).get(id)??null},
-  site,stages,links:[],stageProgress:{...stageProgress(stageProgressResult.error?null:stageProgressResult.data),
+  site,stages,links:[],marketplaceOffers:[],stageProgress:{...stageProgress(stageProgressResult.error?null:stageProgressResult.data),
     qualityStages:Array.isArray(obj(qualityResult.error?null:qualityResult.data).stages)?
      (obj(qualityResult.data).stages as StageItemRecord[]):[]},milestones:[],quotations:[],quotePaymentTriggers:[],transactions:null,purchaseOrders:null,tasks:(tasks??[]).map(t=>({
    id:t.id,title:t.title,planned_start:t.planned_start,status:t.status,
