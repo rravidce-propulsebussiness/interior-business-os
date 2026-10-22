@@ -257,6 +257,17 @@ export function SiteReportForm({id}:{id:string}){
  </ProjectForm>;
 }
 type MaterialLine={item:string;quantity:string;unit:string;notes:string};
+/** Suggested units are editable; the approved BOQ remains the authoritative quantity/unit. */
+function proposedUnitFor(name:string):string {
+ const value=name.toLowerCase();
+ if(/cement|tile adhesive|grout|putty|plaster mix/.test(value))return 'bags';
+ if(/bricks|blocks|pegs|stakes|spacers|frames|hinges|locks|handles|boxes|clips|props|shutters|fittings|stoppers|sheets/.test(value))return 'nos';
+ if(/ready-mix concrete|aggregates|sand|murram|filling soil/.test(value))return 'cum';
+ if(/tiles|safety net|waterproofing membrane|plywood/.test(value))return 'sqft';
+ if(/paint|primer|chemical|admixture/.test(value))return 'litres';
+ if(/pipes|hoses|conduits|thread|tape|line/.test(value))return 'metres';
+ return 'kg';
+}
 const newMaterial=():MaterialLine=>({item:'',quantity:'',unit:'kg',notes:''});
 const materialUnits=[
  {value:'kg',label:'Kilograms (kg)'},{value:'tonnes',label:'Metric tonnes'},
@@ -287,7 +298,8 @@ export function MaterialRequestForm({id,stageId,suggestions=[]}:{
    </div>
    {!!suggestions.length&&<label>Choose material from this stage (or enter your own)
     <select aria-label={'Suggested material '+(i+1)} value="" onChange={e=>{
-     if(e.target.value)edit(i,'item',e.target.value);
+     if(e.target.value)setItems(current=>current.map((item,index)=>
+      index===i?{...item,item:e.target.value,unit:proposedUnitFor(e.target.value)}:item));
     }}>
      <option value="">Select a material</option>
      {suggestions.map(name=><option key={name} value={name}>{name}</option>)}
@@ -311,7 +323,7 @@ export function MaterialRequestForm({id,stageId,suggestions=[]}:{
    {items.length<12&&<button type="button" className="pv2-button pv2-outline"
     onClick={()=>setItems(v=>[...v,newMaterial()])}>+ Add another material</button>}
    <button type="submit" className="pv2-button pv2-primary" disabled={pending}>
-    {pending?'Requesting…':'Request '+items.length+' material'+(items.length===1?'':'s')}
+    {pending?'Saving…':'Send '+items.length+' material'+(items.length===1?'':'s')+' for approval'}
    </button>
   </div>
   {state.message&&<p role="status" className={'pv2-form-feedback '+(state.saved?'good':'bad')}>{state.message}</p>}
@@ -322,6 +334,12 @@ export function MaterialUpdateForm({id,material}:{id:string;material:{
 }}){
  const next=material.status==='requested'?['approved','rejected']:
   material.status==='approved'?['ordered']:material.status==='ordered'?['received']:[];
+ const sellerRequestPending=material.status==='approved'&&
+  material.source==='marketplace'&&
+  (material.vendorReference??'').startsWith('Marketplace request ');
+ if(sellerRequestPending)return <p className="pv2-hint">
+  Seller request pending. Its acceptance updates this material automatically; do not mark it ordered manually.
+ </p>;
  if(!next.length)return null;
  return <details className="pv2-subaction"><summary>Update status</summary>
   <ProjectForm projectId={id} operation="material_update" label="Save material status">
