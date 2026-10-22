@@ -32,6 +32,12 @@ begin
  return jsonb_build_object(
   'can_order',private.project_material_can_order(p_org,p_project),
   'can_approve',private.site_allowed(p_org,p_project,array['manager','procurement']),
+  'delivery',coalesce((select jsonb_agg(jsonb_build_object(
+     'id',n.id,'expected_delivery_date',n.expected_delivery_date,
+     'expected_delivery_window',n.expected_delivery_window,
+     'ordered_at',n.ordered_at,'received_at',n.received_at
+   )) from private.site_material_needs n
+   where n.organization_id=p_org and n.project_id=p_project),'[]'::jsonb),
   'grants',case when private.site_is_manager(p_org,p_project) then
     coalesce((select jsonb_agg(jsonb_build_object('user_id',t.user_id,'can_order',t.can_order_materials)
       order by t.user_id) from private.site_team t
@@ -138,6 +144,24 @@ begin
  return jsonb_build_object('saved',true);
 end
 $f$;
+
+-- Keep marketplace seller acceptance separate from actual physical delivery.
+create or replace function private.project_marketplace_accept_order_timestamp()
+returns trigger language plpgsql security definer set search_path='' as $f$
+begin
+ if old.status='requested' and new.status='accepted' then
+  update private.site_material_needs
+   set ordered_at=coalesce(ordered_at,now()),updated_at=now()
+   where marketplace_order_id=new.id and organization_id=new.buyer_organization_id;
+ end if;
+ return new;
+end
+$f$;
+drop trigger if exists project_marketplace_accept_order_timestamp on private.marketplace_orders;
+create trigger project_marketplace_accept_order_timestamp
+ after update of status on private.marketplace_orders
+ for each row when (old.status is distinct from new.status)
+ execute function private.project_marketplace_accept_order_timestamp();
 
 -- Site requests use the same project scoped data. No supplier, price, margin,
 -- order keys or internal permission data is exposed to the client.
