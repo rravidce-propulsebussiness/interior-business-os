@@ -370,7 +370,10 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
        </summary>
        <div className="pv2-command-stage-inner">
         {stage.explanation&&<p className="pv2-muted">{stage.explanation}</p>}
-        {!!stage.dependencies.length&&<p className="pv2-stage-hint">Dependent on: {stage.dependencies.join(' · ')}</p>}
+        {stage.dependencies.some(dep=>!dep.startsWith('QUOTED_SCOPE'))&&
+         <p className="pv2-stage-hint">Dependent on: {
+          stage.dependencies.filter(dep=>!dep.startsWith('QUOTED_SCOPE')).join(' · ')
+         }</p>}
         {(!complete||(['DESIGN','DESIGN_APPROVAL'].includes(stage.template_code)&&site?.stage==='client_approved'))&&
          <ProjectStageWorkflow d={d} code={stage.template_code}/>}
 
