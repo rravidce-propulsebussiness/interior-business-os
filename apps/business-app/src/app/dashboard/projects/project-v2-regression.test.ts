@@ -48,13 +48,14 @@ it('shows only the selected Final saved quotation on a converted project',()=>{
   expect(loader).toContain("quotation:has('quotation.view','quotation')");
   expect(loader).toContain("'quotation_final_choices'");
   expect(loader).toContain("signedContractSource=agreement.clearance_type==='signed_copy_recorded'");
-  expect(loader).toContain('const quotations:ProjectQuotation[]=finalRoot');
+  expect(loader).toContain('const quotations:ProjectQuotation[]=contractedQuote?');
   expect(loader).toContain("lead_quotation_list");
   expect(loader).toContain("quotations:[]");
 });
 it('preserves the legally signed quotation while later alternatives remain in history',()=>{
   expect(ui).toContain('The signed agreement fixes the agreed quotation for this project');
-  expect(loader).toContain('quoteRoots.find(q=>q.current_revision_id===contractedRevision)');
+  expect(loader).toContain('const signedRevision=signedContractSource&&contractedRevision');
+  expect(loader).toContain('signedContractSource?[]:currentQuote?');
   expect(loader).toContain('revisionId:contract.data?.find');
   expect(ui).not.toContain('Review signed contract revision');
 });
@@ -185,4 +186,13 @@ it('keeps project payments read-only and sends every receipt to the single Finan
  expect(ui).toContain("'/dashboard/finance?tab=payments&contract_id='");
  expect(ui).toContain('Read-only mirror of recorded and voided receipts in Finance');
  expect(ui).not.toContain("'/dashboard/finance/payments/new?contract_id='");
+});
+
+it('starts the visible project timeline with agreement rather than duplicating the saved quotation',()=>{
+ const selector=read('./project-visible-stages.ts');
+ expect(ui).toContain('const timelineStages=projectTimelineStages(d.stages)');
+ expect(ui).toContain('timelineStages.map((stage,index)=>');
+ expect(ui).toContain('{activeStages} active · {timelineStages.length} stages');
+ expect(selector).toContain("!stage.template_code.startsWith('QUOTED_SCOPE')");
+ expect(ui).toContain('Quote & Agreement');
 });
