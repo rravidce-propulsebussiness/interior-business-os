@@ -329,37 +329,23 @@ export function MaterialRequestForm({id,stageId,suggestions=[]}:{
   {state.message&&<p role="status" className={'pv2-form-feedback '+(state.saved?'good':'bad')}>{state.message}</p>}
  </form>;
 }
+/** Approval only. Orders and site receipts require explicit delivery actions. */
 export function MaterialUpdateForm({id,material}:{id:string;material:{
  id:string;status:string;source?:string;vendorReference?:string;
 }}){
- const next=material.status==='requested'?['approved','rejected']:
-  material.status==='approved'?['ordered']:material.status==='ordered'?['received']:[];
- const sellerRequestPending=material.status==='approved'&&
-  material.source==='marketplace'&&
-  (material.vendorReference??'').startsWith('Marketplace request ')&&
-  !(material.vendorReference??'').startsWith('Marketplace request rejected ');
- if(sellerRequestPending)return <p className="pv2-hint">
-  Seller request pending. Its acceptance updates this material automatically; do not mark it ordered manually.
- </p>;
- if(!next.length)return null;
- return <details className="pv2-subaction"><summary>Update status</summary>
-  <ProjectForm projectId={id} operation="material_update" label="Save material status">
+ if(material.status!=='requested')return null;
+ return <details className="pv2-subaction"><summary>Approve / reject</summary>
+  <ProjectForm projectId={id} operation="material_update" label="Save decision">
    <input type="hidden" name="id" value={material.id}/>
-   <label>Next status<select name="status">{next.map(v=><option key={v} value={v}>{v}</option>)}</select></label>
-   <label>Source<select name="source"
-    defaultValue={material.status==='ordered'?(material.source||'outside'):
-     material.status==='approved'?'outside':'undecided'}>
-    {material.status==='requested'&&<option value="undecided">Not chosen yet</option>}
-    {material.status==='ordered'&&material.source==='marketplace'&&
-     <option value="marketplace">Confirmed marketplace seller request</option>}
-    <option value="outside">Outside supplier / local stock</option>
-   </select></label>
-   <label>Supplier / order reference
-    <input name="vendor_reference" maxLength={500}
-     defaultValue={material.vendorReference??''}
-     placeholder="Actual supplier or external PO reference"/>
+   <input type="hidden" name="source" value="undecided"/>
+   <input type="hidden" name="vendor_reference" value=""/>
+   <label>Material decision
+    <select name="status" defaultValue="approved">
+     <option value="approved">Approve for ordering</option>
+     <option value="rejected">Reject request</option>
+    </select>
    </label>
-   <p className="pv2-hint">Marketplace orders must be requested through a published seller listing; entering a reference here does not order anything. Mark received only after delivery verification.</p>
+   <p className="pv2-hint">Approval permits an authorized employee to place an order. No order or client delivery estimate is created yet.</p>
   </ProjectForm>
  </details>;
 }
