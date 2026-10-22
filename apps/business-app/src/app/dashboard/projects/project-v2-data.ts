@@ -192,7 +192,8 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
  }):[];
  const marketplaceOffers:StageMarketplaceProduct[]=permissions.purchaseManage?
    await createMarketplaceRepository(s.client).catalog(s.org).then(products=>
-     products.slice(0,100).map(({id,name,unit,minQuantity,price,currency,seller,sku})=>
+     products.filter(x=>x.currency===org.default_currency).slice(0,100)
+       .map(({id,name,unit,minQuantity,price,currency,seller,sku})=>
        ({id,name,unit,minQuantity,price,currency,seller,sku}))
    ).catch(()=>[]):[];
  const trans=permissions.payments&&!receipts.error&&receipts.data?receipts.data.map(x=>({
