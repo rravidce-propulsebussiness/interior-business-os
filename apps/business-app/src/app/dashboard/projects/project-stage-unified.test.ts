@@ -15,7 +15,13 @@ describe('One work item owns its progress and material workflow',()=>{
   expect(screen).toContain('Earlier stage material requests');
   expect(screen).not.toContain('Materials to plan & request (');
   expect(screen).not.toContain('pv2-command-stage-actions');
-  expect(activity).toContain('Materials · Requests, approval, order & delivery');
+  expect(activity).toContain('Materials & orders');
+  expect(activity).toContain('setMaterialsOpen(open=>!open)');
+  expect(activity).toContain('hidden={!materialsOpen}');
+  expect(activity).toContain('target.open=true');
+  expect(activity).toContain('individual.open=true');
+  expect(screen).toContain('Materials required for this work');
+  expect(screen).toContain('suggestedActivityMaterials(work,suggestedMaterials)');
  });
  it('keeps one canonical inspection checklist and one QC review for each stage',()=>{
   expect(screen).toContain('Site checks & company QC');
