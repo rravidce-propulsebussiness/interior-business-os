@@ -1,15 +1,16 @@
 'use client';
 
-import { useActionState, useState } from 'react';
+import { useActionState, useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { saveProjectStageItem } from './[id]/site/stage-checklist-actions';
 
 type Result={saved:boolean;message:string};
 type Photo={id:string;filename:string};
 export function StageChecklistItem({projectId,stageId,kind,index,title,status,notes,photos,
-  canEdit=false,photoId=''}:{
+  canEdit=false,photoId='',materialPanel,checksHref}:{
   projectId:string;stageId:string;kind:'work'|'check';index:number;title:string;
   status:string;notes?:string;photos:Photo[];canEdit?:boolean;photoId?:string;
+  materialPanel?:ReactNode;checksHref?:string;
 }) {
  const router=useRouter();
  const [selectedPhotoId,setSelectedPhotoId]=useState(photoId);
@@ -31,6 +32,10 @@ export function StageChecklistItem({projectId,stageId,kind,index,title,status,no
    <span aria-hidden="true" className="pv2-item-checklist-chevron">⌄</span>
   </summary>
   <div className="pv2-item-checklist-inner">
+   {kind==='work'&&materialPanel&&<nav className="pv2-item-inline-quick" aria-label="Work item actions">
+    <a href={'#activity-materials-'+stageId+'-'+index}>Materials & orders</a>
+    {checksHref&&<a href={checksHref}>Site checks</a>}
+   </nav>}
    {photoId&&<a href={'/dashboard/projects/'+projectId+'/site/media/'+photoId}
      target="_blank" rel="noopener noreferrer" className="pv2-check-photo-link">View recorded photo</a>}
    {notes&&<p className="pv2-hint">{notes}</p>}
@@ -65,6 +70,10 @@ export function StageChecklistItem({projectId,stageId,kind,index,title,status,no
      {pending?'Saving…':'Save this item'}</button>
     {!evidenceEdited&&state.message&&<p role="status" className={'pv2-form-feedback '+(state.saved?'good':'bad')}>{state.message}</p>}
    </form>:<p className="pv2-hint">Only authorized site engineers or project managers can update this item.</p>}
+   {kind==='work'&&materialPanel&&<details className="pv2-item-material-panel" id={'activity-materials-'+stageId+'-'+index}>
+     <summary>Materials · Requests, approval, order & delivery</summary>
+     {materialPanel}
+   </details>}
   </div>
  </details>;
 }
