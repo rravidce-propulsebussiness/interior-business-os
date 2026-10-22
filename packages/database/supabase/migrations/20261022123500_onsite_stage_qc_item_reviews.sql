@@ -57,6 +57,9 @@ begin
   'can_review',exists(select 1 from private.construction_project_roles member
     where member.organization_id=p_org and member.project_id=p_project
       and member.user_id=auth.uid() and member.active and member.role='quality_inspector'),
+  'has_inspector',exists(select 1 from private.construction_project_roles member
+    where member.organization_id=p_org and member.project_id=p_project
+      and member.active and member.role='quality_inspector'),
   'reviews',coalesce((
   select jsonb_agg(jsonb_build_object(
    'id',r.id,'stage_id',r.stage_id,'index',r.check_index,
