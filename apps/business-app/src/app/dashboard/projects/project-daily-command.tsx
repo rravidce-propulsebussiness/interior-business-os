@@ -4,7 +4,7 @@ import type { CSSProperties, ReactNode } from 'react';
 import { OwnerIcon } from '../owner-shell';
 import { SiteMediaForm, SiteReportForm } from './project-v2-forms';
 import { projectTimelineStages } from './project-visible-stages';
-import { pretty, shortDate, stringValue, type Stage, type WorkspaceData } from './project-v2-data';
+import { pretty, stringValue, type Stage, type WorkspaceData } from './project-v2-data';
 
 /** Date labels are calculated on the server in the project's India time zone. */
 const inIndia = new Intl.DateTimeFormat('en-GB', {
@@ -33,7 +33,11 @@ function StageDayCard({ d, stage, expanded }: { d: WorkspaceData; stage: Stage; 
   const work = d.stageProgress.work.filter(x => stringValue(x.stage_id) === stage.id);
   const finished = stage.activities.filter((_, i) => work.some(row =>
     Number(row.index) === i && complete(stringValue(row.status)))).length;
-  const photos = (d.site?.media ?? []).filter(row => stringValue(row.mime).startsWith('image/'));
+  // Never attach an unrelated project's photo to this floor: only use stage-linked media.
+  const stageMediaIds = new Set(d.links.filter(link => link.stage_id === stage.id && link.kind === 'media')
+    .map(link => link.record_id));
+  const photos = (d.site?.media ?? []).filter(row =>
+    stageMediaIds.has(row.id) && stringValue(row.mime).startsWith('image/'));
   const progress = stage.activities.length ? Math.round(100 * finished / stage.activities.length) : 0;
   const execution = d.stageExecution.find(item => item.stageId === stage.id);
   return <details className="daily-stage" open={expanded}>
