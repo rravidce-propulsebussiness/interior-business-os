@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import Link from 'next/link';
 import {
  defaultStageRequirements,renameStageRequirement,type StageRequirements,
@@ -21,6 +21,7 @@ function Section({field,title,hint,base,requirements,locked,onUpdate,editable}:{
  requirements:StageRequirements;locked:boolean;
  editable:boolean;onUpdate:(next:StageRequirements)=>void;
 }){
+ const renameId=useId();
  const [name,setName]=useState('');
  const [editing,setEditing]=useState<string|null>(null);
  const [draft,setDraft]=useState('');
@@ -77,8 +78,8 @@ function Section({field,title,hint,base,requirements,locked,onUpdate,editable}:{
       <span aria-hidden="true">✎</span> {editing===label?'Cancel':'Edit'}
      </button>}
      {editing===label&&canRename&&<div className="qs-stage-rename">
-      <label htmlFor={'qs-stage-rename-'+field}>Edit {title.toLowerCase()} entry</label>
-      <input id={'qs-stage-rename-'+field} maxLength={180} value={draft}
+      <label htmlFor={renameId}>Edit {title.toLowerCase()} entry</label>
+      <input id={renameId} maxLength={180} value={draft}
        onChange={e=>{setDraft(e.target.value);if(error)setError('');}}
        onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();saveEdit(label);}
         if(e.key==='Escape'){e.preventDefault();stopEdit();}}}/>
