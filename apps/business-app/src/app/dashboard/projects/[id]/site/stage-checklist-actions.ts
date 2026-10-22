@@ -128,8 +128,10 @@ export async function passProjectStageChecks(
   }
   if(commonPhoto&&chosen.length>1&&form.get('confirm_shared')!=='true')
    throw new Error('Confirm the shared photo documents every selected inspection');
+  const sharedNote=String(form.get('batch_note')??'').trim();
+  if(sharedNote.length>2000)throw new Error('Inspection note is too long');
   const items=chosen.map(item=>({
-   index:item.index,title:item.title,note:item.note,
+   index:item.index,title:item.title,note:sharedNote||item.note,
    photo_id:commonPhoto||item.photo_id,
   }));
   if(items.some(item=>!item.photo_id))
