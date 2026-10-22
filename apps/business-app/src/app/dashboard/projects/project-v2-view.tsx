@@ -413,6 +413,10 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
              <div><b>{stringValue(m.item)}</b>
               <small>{stringValue(m.quantity)} {stringValue(m.unit)}</small></div>
              <Status value={status}/>
+             {(site?.canManage||['manager','procurement'].includes(site?.role??''))&&
+              <MaterialUpdateForm id={d.project.id} material={{
+               id:m.id,status,source,vendorReference:stringValue(m.vendor_reference),
+              }}/>}
              {d.permissions.purchaseManage&&<MaterialMarketplaceOrder
               projectId={d.project.id} material={{
                id:m.id,item:stringValue(m.item),quantity:Number(m.quantity),
