@@ -35,13 +35,21 @@ const refresh = (id:string)=>{
   revalidatePath('/dashboard/projects/'+id+'/checks');
   revalidatePath('/dashboard/projects/'+id+'/procurement');
 };
-export async function saveProjectMaterials(projectId:string,form:FormData,stageId?:string):Promise<Result> {
+export async function saveProjectMaterials(projectId:string,form:FormData,stageId?:string,activityIndex?:number):Promise<Result> {
   try {
     const raw=JSON.parse(String(form.get('items')??'null')) as unknown;
     const items=z.array(materialSchema).min(1).max(12).parse(raw);
     const {client,org}=await context(projectId);
     if(stageId)uuid.parse(stageId);
-    const response=stageId
+    if(activityIndex!==undefined) {
+      if(!stageId)throw new Error('A work item requires a construction stage');
+      z.number().int().min(0).max(300).parse(activityIndex);
+    }
+    const response=stageId && activityIndex!==undefined
+      ?await client.rpc('project_stage_activity_material_batch' as never,{
+         p_org:org,p_project:projectId,p_stage:stageId,p_items:items,p_activity_index:activityIndex,
+       } as never)
+      :stageId
       ?await client.rpc('project_stage_material_batch' as never,{
          p_org:org,p_project:projectId,p_stage:stageId,p_items:items,
        } as never)

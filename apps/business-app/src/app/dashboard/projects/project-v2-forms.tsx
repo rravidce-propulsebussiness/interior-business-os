@@ -277,20 +277,22 @@ const materialUnits=[
  {value:'cum',label:'Cubic metres'},{value:'yards',label:'Yards'},
  {value:'metres',label:'Metres'},{value:'feet',label:'Feet'},
 ];
-export function MaterialRequestForm({id,stageId,suggestions=[]}:{
- id:string;stageId?:string;suggestions?:readonly string[];
+export function MaterialRequestForm({id,stageId,activityIndex,activityLabel,suggestions=[]}:{
+ id:string;stageId?:string;activityIndex?:number;activityLabel?:string;suggestions?:readonly string[];
 }){
  const router=useRouter();
  const [items,setItems]=useState<MaterialLine[]>([newMaterial()]);
  const [state,submit,pending]=useActionState(async(_prev:Result,form:FormData)=>{
-  const result=await saveProjectMaterials(id,form,stageId);
+  const result=await saveProjectMaterials(id,form,stageId,activityIndex);
   if(result.saved){setItems([newMaterial()]);router.refresh();}
   return result;
  },initial);
  const edit=(index:number,key:keyof MaterialLine,value:string)=>
   setItems(current=>current.map((row,i)=>index===i?{...row,[key]:value}:row));
  return <form action={submit} className="pv2-form pv2-batch-material-form">
-  <p className="pv2-hint">Enter quantities and sizes for this stage. Approval is required before requesting a marketplace seller. No order is placed by this form.</p>
+  <p className="pv2-hint">{activityLabel
+    ?'Request materials for '+activityLabel+'. Quantity approval, marketplace sourcing and delivery tracking use the existing procurement workflow.'
+    :'Request stage materials. Approval is required before marketplace sourcing. No order is placed automatically.'}</p>
   {items.map((row,i)=><div className="pv2-material-line" key={i}>
    <div className="pv2-material-line-head"><strong>Material {i+1}</strong>
     {items.length>1&&<button type="button" className="pv2-button pv2-outline"
