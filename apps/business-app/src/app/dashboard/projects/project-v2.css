@@ -882,3 +882,24 @@
   background:#fff8f1;color:#6d583f;font-size:11px;line-height:1.6;
   margin:10px 0;
 }
+
+/* Materials ordering: scoped to existing Projects white/orange design only. */
+.pv2-page .pv2-material-delivery-actions,.pv2-page .pv2-material-order-access{
+ margin:9px 0;border:1px solid #f0dccd;border-radius:10px;
+ background:#fffaf6;padding:10px;min-width:0;width:100%;
+}
+.pv2-page .pv2-material-delivery-actions>summary,.pv2-page .pv2-material-order-access>summary{
+ cursor:pointer;color:#df5e16;font-size:12px;font-weight:750;list-style:none;
+}
+.pv2-page .pv2-material-delivery-actions>summary::-webkit-details-marker,
+.pv2-page .pv2-material-order-access>summary::-webkit-details-marker{display:none}
+.pv2-page .pv2-material-delivery-actions .pv2-form,.pv2-page .pv2-material-order-access .pv2-form{
+ margin-top:10px;padding:10px;background:#fff;border:1px solid #f1e7de;border-radius:9px;
+}
+.pv2-page .pv2-material-delivery-actions :is(input,select),.pv2-page .pv2-material-order-access :is(input,select){
+ background:#fff;color:#27384e;border-color:#e2e6ed;min-height:40px;
+}
+.pv2-page .pv2-material-eta{flex-basis:100%;color:#53677b;font-weight:650;margin:0}
+@media(max-width:650px){
+ .pv2-page .pv2-material-delivery-actions .pv2-button,.pv2-page .pv2-material-order-access .pv2-button{width:100%}
+}
