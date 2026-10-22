@@ -9,6 +9,7 @@ import { guidanceForConstructionStage } from '@business-os/core/construction-pay
 import { ProjectStageLinker,type StageLinkOption } from './project-stage-linker';
 import { suggestedStageMaterials } from './stage-material-options';
 import { MaterialMarketplaceOrder } from './project-material-marketplace-order';
+import { MaterialOrderingAccess,MaterialDeliveryActions } from './project-material-delivery';
 import { StageChecklistItem } from './project-stage-checklist-item';
 import { ProjectClientAccess } from './project-client-access';
 import { ProjectSiteSurvey,ProjectAdvanceAction } from './project-next-forms';
@@ -422,7 +423,22 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
                <MaterialUpdateForm id={d.project.id} material={{
                 id:m.id,status,source,vendorReference:stringValue(m.vendor_reference),
                }}/>}
-             {d.permissions.purchaseManage&&<MaterialMarketplaceOrder
+
+             <MaterialDeliveryActions projectId={d.project.id} material={{
+              id:m.id,status,source,reference:stringValue(m.vendor_reference),
+              date:stringValue(m.expected_delivery_date)||null,
+              window:stringValue(m.expected_delivery_window)||null,
+             }} canOrder={d.materialAccess.canOrder}
+                canReceive={site?.canManage===true||['site_engineer','manager','procurement'].includes(site?.role??'')}/>
+             {(status==='ordered'||status==='received')&&
+              <p className="pv2-hint pv2-material-eta">
+                {status==='received'?'Received at site':
+                 stringValue(m.expected_delivery_date)?
+                  'Expected '+shortDate(m.expected_delivery_date)+
+                  (stringValue(m.expected_delivery_window)?' · '+stringValue(m.expected_delivery_window):''):
+                  'Ordered · delivery date not yet set'}
+              </p>}
+             {d.permissions.purchaseManage&&d.materialAccess.canOrder&&<MaterialMarketplaceOrder
               projectId={d.project.id} material={{
                id:m.id,item:stringValue(m.item),quantity:Number(m.quantity),
                unit:stringValue(m.unit),status,source,
@@ -458,6 +474,9 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
 
 
          {site?.canManage&&!!site.memberOptions.length&&<details><summary><OwnerIcon name="team" size={16}/> Assign team</summary><AssignRole projectId={d.project.id} users={site.memberOptions}/></details>}
+         {site?.canManage&&site.memberOptions.length>0&&
+          <MaterialOrderingAccess projectId={d.project.id} users={site.memberOptions}
+           grants={d.materialAccess.grants}/>}
         </div>
 
         {site?.canManage&&availableRecords.length>0&&<details className="pv2-stage-secondary"><summary>Attach existing site evidence</summary>
@@ -679,6 +698,17 @@ function Procurement({d}:{d:WorkspaceData}){
      <small>{stringValue(m.quantity)} {stringValue(m.unit)} · {shortDate(m.created_at)}</small>
      {Boolean(m.vendor_reference)&&<small>Supplier / order: {stringValue(m.vendor_reference)}</small>}</div>
     <Status value={stringValue(m.status)}/>
+    {['ordered','received'].includes(stringValue(m.status))&&
+     <small>{stringValue(m.status)==='received'?'Received at site':
+       'Expected '+(stringValue(m.expected_delivery_date)?shortDate(m.expected_delivery_date):'date not set')+
+       (stringValue(m.expected_delivery_window)?' · '+stringValue(m.expected_delivery_window):'')}</small>}
+    <MaterialDeliveryActions projectId={d.project.id} material={{
+      id:m.id,status:stringValue(m.status),source:stringValue(m.source),
+      reference:stringValue(m.vendor_reference),
+      date:stringValue(m.expected_delivery_date)||null,
+      window:stringValue(m.expected_delivery_window)||null
+    }} canOrder={d.materialAccess.canOrder}
+       canReceive={site?.canManage===true||['site_engineer','manager','procurement'].includes(site?.role??'')}/>
     {site?.stage==='execution'&&site.role&&['manager','procurement'].includes(site.role)&&
      <MaterialUpdateForm id={d.project.id} material={{
       id:m.id,status:stringValue(m.status),source:stringValue(m.source),
