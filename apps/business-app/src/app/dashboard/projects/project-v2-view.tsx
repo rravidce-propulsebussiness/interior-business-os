@@ -289,6 +289,63 @@ function ProjectStageWorkflow({d,code}:{d:WorkspaceData;code:string}){
     designs={d.site.designs.map(x=>({id:x.id,kind:stringValue(x.kind),status:stringValue(x.status)}))}/>}
  </div>;
 }
+/** The same canonical material controls are embedded in the work item that requested them.
+ * Marketplace sourcing, owner approval, order and delivery remain unchanged.
+ */
+function StageMaterialRows({d,rows}:{d:WorkspaceData;rows:SiteRow[]}){
+ const site=d.site;
+ return <>
+          {!!rows.length&&<div className="pv2-stage-material-requests">
+           <strong>Stage material requests</strong>
+           {rows.map(m=>{
+            const source=stringValue(m.source),status=stringValue(m.status);
+            return <article key={m.id} className="pv2-stage-material-row">
+             <div><b>{stringValue(m.item)}</b>
+              <small>{stringValue(m.quantity)} {stringValue(m.unit)}</small></div>
+             <Status value={status}/>
+             {(site?.canManage||['manager','procurement'].includes(site?.role??''))&&
+               (!((source==='marketplace') &&
+                   stringValue(m.vendor_reference).startsWith('Marketplace request ') &&
+                   !stringValue(m.vendor_reference).startsWith('Marketplace request rejected ') &&
+                   status==='approved'))&&
+               ['requested','approved','ordered'].includes(status)&&
+               <MaterialUpdateForm id={d.project.id} material={{
+                id:m.id,status,source,vendorReference:stringValue(m.vendor_reference),
+               }}/>}
+
+             <MaterialDeliveryActions projectId={d.project.id} material={{
+              id:m.id,status,source,reference:stringValue(m.vendor_reference),
+              date:stringValue(m.expected_delivery_date)||null,
+              window:stringValue(m.expected_delivery_window)||null,
+             }} canOrder={d.materialAccess.canOrder}
+                canReceive={site?.canManage===true||['site_engineer','manager','procurement'].includes(site?.role??'')}/>
+             {(status==='ordered'||status==='received')&&
+              <p className="pv2-hint pv2-material-eta">
+                {status==='received'?'Received at site':
+                 stringValue(m.expected_delivery_date)?
+                  'Expected '+shortDate(m.expected_delivery_date)+
+                  (stringValue(m.expected_delivery_window)?' · '+stringValue(m.expected_delivery_window):''):
+                  'Ordered · delivery date not yet set'}
+              </p>}
+             {d.permissions.purchaseManage&&d.materialAccess.canOrder&&<MaterialMarketplaceOrder
+              projectId={d.project.id} material={{
+               id:m.id,item:stringValue(m.item),quantity:Number(m.quantity),
+               unit:stringValue(m.unit),status,source,
+               vendorReference:stringValue(m.vendor_reference),
+              }} offers={d.marketplaceOffers}/>}
+             {['approved','requested','ordered','received'].includes(status)&&
+              <p className="pv2-hint">{
+               status==='requested'?'Awaiting owner/procurement approval':
+               status==='approved'?'Approved for sourcing':
+               status==='ordered'?'Supplier order placed; delivery must still be verified':
+               'Marked received by site staff'
+              }</p>}
+            </article>;
+           })}
+          </div>}
+
+ </>;
+}
 function ProjectStageBoard({d}:{d:WorkspaceData}){
  const site=d.site;
  const done=(status:string)=>['completed','certified','done','skipped'].includes(status);
