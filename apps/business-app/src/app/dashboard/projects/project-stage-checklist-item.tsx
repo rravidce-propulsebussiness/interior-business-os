@@ -53,7 +53,7 @@ export function StageChecklistItem({projectId,stageId,kind,index,title,status,no
       onClick={()=>setMaterialsOpen(open=>!open)}>Materials & orders</button>}
     {checksHref&&<button type="button" onClick={showSiteChecks}>Site checks</button>}
    </div>}
-   {kind==='work'&&materialPanel&&materialsOpen&&<section
+   {kind==='work'&&materialPanel&&<section hidden={!materialsOpen}
      className="pv2-item-material-panel" id={'activity-materials-'+stageId+'-'+index}
      aria-label={'Materials required for '+title}>
      {materialPanel}
