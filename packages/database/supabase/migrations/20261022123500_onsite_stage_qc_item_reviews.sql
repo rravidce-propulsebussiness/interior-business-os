@@ -46,10 +46,18 @@ begin
   raise exception 'Project unavailable' using errcode='42501';
  end if;
  if not private.site_allowed(p_org,p_project,
-   array['manager','site_engineer','quality_inspector','structural_engineer']) then
-  return '[]'::jsonb;
+   array['manager','site_engineer','quality_inspector','structural_engineer'])
+   and not exists (select 1 from private.construction_project_roles member
+     where member.organization_id=p_org and member.project_id=p_project
+       and member.user_id=auth.uid() and member.active
+       and member.role in ('quality_inspector','structural_engineer')) then
+  return jsonb_build_object('can_review',false,'reviews','[]'::jsonb);
  end if;
- return coalesce((
+ return jsonb_build_object(
+  'can_review',exists(select 1 from private.construction_project_roles member
+    where member.organization_id=p_org and member.project_id=p_project
+      and member.user_id=auth.uid() and member.active and member.role='quality_inspector'),
+  'reviews',coalesce((
   select jsonb_agg(jsonb_build_object(
    'id',r.id,'stage_id',r.stage_id,'index',r.check_index,
    'title',r.check_title,'decision',r.decision,'notes',r.notes,
@@ -59,7 +67,7 @@ begin
   from (select * from private.construction_stage_qc_item_reviews
     where organization_id=p_org and project_id=p_project
     order by reviewed_at desc,id desc limit 1000) r
- ),'[]'::jsonb);
+ ),'[]'::jsonb));
 end
 $body$;
 revoke all on function public.construction_stage_qc_item_read(uuid,uuid) from public,anon;
