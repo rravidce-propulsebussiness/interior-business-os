@@ -3,10 +3,11 @@ import { guidanceForConstructionStage, milestoneConstructionStages } from './con
 
 /** Per-quotation, per-real-stage overrides. Never change shared company templates. */
 const list = z.array(z.string().trim().min(2).max(180)).max(50);
+const checkList = z.array(z.string().trim().min(3).max(180)).max(50);
 const requirements = z.object({
   work: list.min(1),
   materials: list,
-  checks: list,
+  checks: checkList,
   reports: list,
 }).strict();
 export type StageRequirements = z.infer<typeof requirements>;
