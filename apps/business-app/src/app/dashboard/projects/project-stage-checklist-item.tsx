@@ -15,6 +15,21 @@ export function StageChecklistItem({projectId,stageId,kind,index,title,status,no
  const router=useRouter();
  const [selectedPhotoId,setSelectedPhotoId]=useState(photoId);
  const [evidenceEdited,setEvidenceEdited]=useState(false);
+ const [materialsOpen,setMaterialsOpen]=useState(false);
+ const showSiteChecks=()=>{
+   if(!checksHref)return;
+   const target=document.getElementById(checksHref.replace(/^#/,'')) as HTMLDetailsElement|null;
+   if(!target)return;
+   // Open the stage-wide inspector and its individual check rows; the records
+   // remain canonical stage checks instead of duplicating them per activity.
+   const parent=target.closest('details.pv2-command-stage') as HTMLDetailsElement|null;
+   if(parent)parent.open=true;
+   target.open=true;
+   const individual=target.querySelector('details.pv2-single-checks') as HTMLDetailsElement|null;
+   if(individual)individual.open=true;
+   target.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
+ };
+
  const [state,submit,pending]=useActionState(async(_previous:Result,form:FormData)=>{
   const result=await saveProjectStageItem({projectId,stageId,kind,index,title},form);
   setEvidenceEdited(false);
@@ -32,10 +47,17 @@ export function StageChecklistItem({projectId,stageId,kind,index,title,status,no
    <span aria-hidden="true" className="pv2-item-checklist-chevron">⌄</span>
   </summary>
   <div className="pv2-item-checklist-inner">
-   {kind==='work'&&materialPanel&&<nav className="pv2-item-inline-quick" aria-label="Work item actions">
-    <a href={'#activity-materials-'+stageId+'-'+index}>Materials & orders</a>
-    {checksHref&&<a href={checksHref}>Site checks</a>}
-   </nav>}
+   {kind==='work'&&(materialPanel||checksHref)&&<div className="pv2-item-inline-quick" role="group" aria-label="Work item actions">
+    {materialPanel&&<button type="button" aria-controls={'activity-materials-'+stageId+'-'+index}
+      aria-expanded={materialsOpen} className={materialsOpen?'is-active':''}
+      onClick={()=>setMaterialsOpen(open=>!open)}>Materials & orders</button>}
+    {checksHref&&<button type="button" onClick={showSiteChecks}>Site checks</button>}
+   </div>}
+   {kind==='work'&&materialPanel&&materialsOpen&&<section
+     className="pv2-item-material-panel" id={'activity-materials-'+stageId+'-'+index}
+     aria-label={'Materials required for '+title}>
+     {materialPanel}
+   </section>}
    {photoId&&<a href={'/dashboard/projects/'+projectId+'/site/media/'+photoId}
      target="_blank" rel="noopener noreferrer" className="pv2-check-photo-link">View recorded photo</a>}
    {notes&&<p className="pv2-hint">{notes}</p>}
@@ -70,10 +92,7 @@ export function StageChecklistItem({projectId,stageId,kind,index,title,status,no
      {pending?'Saving…':'Save this item'}</button>
     {!evidenceEdited&&state.message&&<p role="status" className={'pv2-form-feedback '+(state.saved?'good':'bad')}>{state.message}</p>}
    </form>:<p className="pv2-hint">Only authorized site engineers or project managers can update this item.</p>}
-   {kind==='work'&&materialPanel&&<details className="pv2-item-material-panel" id={'activity-materials-'+stageId+'-'+index}>
-     <summary>Materials · Requests, approval, order & delivery</summary>
-     {materialPanel}
-   </details>}
+
   </div>
  </details>;
 }
