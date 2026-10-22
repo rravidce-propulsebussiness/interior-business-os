@@ -931,3 +931,13 @@
  .pv2-page .pv2-stage-activation{padding:11px;margin:10px 0}
  .pv2-page .pv2-stage-activation-actions .pv2-button{flex:1;white-space:normal}
 }
+
+/* Commercial quote metadata is linked once in Documents, not a work stage. */
+.pv2-page .pv2-timeline-quote-note{
+ margin:0 0 13px;padding:8px 12px;border:1px solid #f2e6da;
+ border-radius:10px;background:#fffaf6;color:#526174;
+ font-size:11px;line-height:1.55;
+}
+.pv2-page .pv2-timeline-quote-note a{
+ color:#d95e1c;font-weight:750;text-underline-offset:2px;
+}
