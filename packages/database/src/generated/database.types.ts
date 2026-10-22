@@ -12168,6 +12168,16 @@ export interface Database {
         Args: { p_org: string; p_project: string };
         Returns: Json;
       };
+      project_stage_activity_material_batch: {
+        Args: {
+          p_org: string;
+          p_project: string;
+          p_stage: string;
+          p_items: Json;
+          p_activity_index: number;
+        };
+        Returns: Json;
+      };
       project_stage_material_batch: {
         Args: {
           p_org: string;
