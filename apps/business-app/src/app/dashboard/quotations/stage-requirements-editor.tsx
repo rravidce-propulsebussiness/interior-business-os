@@ -25,7 +25,7 @@ function Section({field,title,hint,base,requirements,locked,onUpdate,editable}:{
  const rows=names(base,current);
  const add=()=>{
   const entered=name.replace(/\s+/g,' ').trim();
-  if(entered.length<2||entered.length>180||current.some(v=>v.toLowerCase()===entered.toLowerCase()))return;
+  if(entered.length<(field==='checks'?3:2)||entered.length>180||current.some(v=>v.toLowerCase()===entered.toLowerCase()))return;
   onUpdate({...requirements,[field]:[...current,entered]});
   setName('');
  };
@@ -53,7 +53,7 @@ function Section({field,title,hint,base,requirements,locked,onUpdate,editable}:{
     value={name} onChange={e=>setName(e.target.value)}
     onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();add();}}}
     placeholder={'Add a custom '+title.toLowerCase().replace(/s$/,'')}/>
-   <button type="button" onClick={add} disabled={name.trim().length<2}>+ Add</button>
+   <button type="button" onClick={add} disabled={name.trim().length<(field==='checks'?3:2)}>+ Add</button>
   </div>}
  </details>;
 }
