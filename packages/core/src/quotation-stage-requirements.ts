@@ -10,6 +10,9 @@ const requirements = z.object({
   checks: checkList,
   reports: list,
 }).strict();
+// Legacy issued quotations may already contain two-character inspection labels.
+// Keep frozen revisions readable, but do not allow those labels in new writes.
+const legacyRequirements=requirements.extend({checks:list});
 export type StageRequirements = z.infer<typeof requirements>;
 export type StageRequirementsMap = Record<string,StageRequirements>;
 const CODE = /^[A-Z][A-Z0-9_]*(?:\/[A-Z][A-Z0-9_]*)?$/;
@@ -28,8 +31,8 @@ export function defaultStageRequirements(instanceCode:string):StageRequirements 
   reports:trimUnique(guide.reports),
  };
 }
-export function validateStageRequirements(value:unknown):StageRequirementsMap {
- const raw=z.record(z.string(),requirements).parse(value);
+function validateRequirements(value:unknown,legacyRead:boolean):StageRequirementsMap {
+ const raw=z.record(z.string(),legacyRead?legacyRequirements:requirements).parse(value);
  const entries=Object.entries(raw);
  if(entries.length>35)throw new Error('Too many customized construction stages');
  const result:StageRequirementsMap={};
@@ -51,6 +54,9 @@ export function validateStageRequirements(value:unknown):StageRequirementsMap {
  }
  return result;
 }
+export function validateStageRequirements(value:unknown):StageRequirementsMap {
+ return validateRequirements(value,false);
+}
 export function encodeStageRequirements(overrides:StageRequirementsMap):string {
  const cleaned=validateStageRequirements(overrides);
  if(!Object.keys(cleaned).length)return '';
@@ -64,7 +70,7 @@ export function savedStageRequirements(terms:string):StageRequirementsMap {
  if(matches.length!==1)throw new Error('Ambiguous saved construction requirements');
  const raw=JSON.parse(matches[0]![1]??'null') as unknown;
  const record=z.object({version:z.literal(1),stages:z.unknown()}).strict().parse(raw);
- return validateStageRequirements(record.stages);
+ return validateRequirements(record.stages,true);
 }
 export function stripStageRequirements(terms:string):string {
  return terms.replace(MARK,'').trim();
