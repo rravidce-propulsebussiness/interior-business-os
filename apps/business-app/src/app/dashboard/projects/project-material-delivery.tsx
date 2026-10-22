@@ -35,10 +35,10 @@ export function MaterialOrderingAccess({projectId,users,grants}:{
   <p className="pv2-hint">Marketplace orders additionally require company purchase permission; this setting never grants company-wide purchasing.</p>
  </details>;
 }
-export function MaterialDeliveryActions({projectId,material,canOrder,canReceive}:{
+function DeliveryCommandForm({projectId,material,action}:{
  projectId:string;
  material:{id:string;status:string;source:string;reference:string;date:string|null;window:string|null};
- canOrder:boolean;canReceive:boolean;
+ action:'place_outside_order'|'update_eta'|'confirm_received';
 }){
  const router=useRouter();
  const [result,submit,pending]=useActionState(async(_p:Result,form:FormData)=>{
@@ -46,40 +46,49 @@ export function MaterialDeliveryActions({projectId,material,canOrder,canReceive}
   if(r.saved)router.refresh();
   return r;
  },initial);
+ const delivery=action!=='confirm_received';
+ return <form className="pv2-form" action={submit}>
+  <input type="hidden" name="material_id" value={material.id}/>
+  <input type="hidden" name="action_type" value={action}/>
+  {action==='place_outside_order'&&<label>Outside supplier / order reference
+    <input name="reference" required minLength={3} maxLength={500}
+     placeholder="Supplier name, confirmation number or outside PO"/></label>}
+  {delivery&&<>
+   <label>Expected delivery date
+    <input name="delivery_date" type="date" required defaultValue={material.date??''}/></label>
+   <label>Delivery time window
+    <select name="delivery_window" defaultValue={material.window??'evening'}>
+     <option value="morning">Morning</option>
+     <option value="afternoon">Afternoon</option>
+     <option value="evening">Evening</option>
+     <option value="anytime">Any time</option>
+    </select></label>
+  </>}
+  <button className="pv2-button pv2-primary" type="submit" disabled={pending}>
+   {pending?'Saving…':action==='place_outside_order'?'Record outside order':action==='update_eta'?'Save delivery estimate':'Confirm materials received'}
+  </button>
+  {action==='confirm_received'&&<p className="pv2-hint">Confirm only after the materials have physically arrived at the site.</p>}
+  {result.message&&<p role="status" className={'pv2-form-feedback '+(result.saved?'good':'bad')}>{result.message}</p>}
+ </form>;
+}
+export function MaterialDeliveryActions({projectId,material,canOrder,canReceive}:{
+ projectId:string;
+ material:{id:string;status:string;source:string;reference:string;date:string|null;window:string|null};
+ canOrder:boolean;canReceive:boolean;
+}){
  const status=material.status;
- const isMarketplacePending=material.source==='marketplace'&&material.reference.startsWith('Marketplace request ')&&!material.reference.startsWith('Marketplace request rejected ');
+ const isMarketplacePending=material.source==='marketplace'&&
+  material.reference.startsWith('Marketplace request ')&&
+  !material.reference.startsWith('Marketplace request rejected ');
  const canPlace=status==='approved'&&canOrder&&!isMarketplacePending;
  const canEta=status==='ordered'&&canOrder;
  const canConfirm=status==='ordered'&&canReceive;
  if(!canPlace&&!canEta&&!canConfirm)return null;
  return <details className="pv2-material-delivery-actions">
-  <summary>{canPlace?'Record outside order':canEta?'Update delivery / confirm arrival':'Confirm material received'}</summary>
-  <form className="pv2-form" action={submit}>
-   <input type="hidden" name="material_id" value={material.id}/>
-   <label>Action
-    <select name="action_type" defaultValue={canPlace?'place_outside_order':canEta?'update_eta':'confirm_received'}>
-     {canPlace&&<option value="place_outside_order">Outside supplier order placed</option>}
-     {canEta&&<option value="update_eta">Set or revise expected delivery</option>}
-     {canConfirm&&<option value="confirm_received">Material physically received at site</option>}
-    </select>
-   </label>
-   {canPlace&&<label>Outside supplier / actual order reference
-    <input name="reference" required minLength={3} maxLength={500}
-     placeholder="Supplier name, confirmation number or outside PO"/></label>}
-   {(canPlace||canEta)&&<>
-    <label>Expected delivery date
-     <input name="delivery_date" type="date" required defaultValue={material.date??''}/></label>
-    <label>Delivery time window
-     <select name="delivery_window" defaultValue={material.window??'evening'}>
-      <option value="morning">Morning</option>
-      <option value="afternoon">Afternoon</option>
-      <option value="evening">Evening</option>
-      <option value="anytime">Any time</option>
-     </select></label>
-   </>}
-   <button className="pv2-button pv2-primary" type="submit" disabled={pending}>{pending?'Saving…':'Save material update'}</button>
-   <p className="pv2-hint">Ordering is not delivery. The client sees the expected window only after it is recorded. Choose “physically received” only after confirming materials arrived.</p>
-   {result.message&&<p role="status" className={'pv2-form-feedback '+(result.saved?'good':'bad')}>{result.message}</p>}
-  </form>
+  <summary>{canPlace?'Record outside order':'Delivery schedule & arrival'}</summary>
+  {canPlace&&<DeliveryCommandForm projectId={projectId} material={material} action="place_outside_order"/>}
+  {canEta&&<DeliveryCommandForm projectId={projectId} material={material} action="update_eta"/>}
+  {canConfirm&&<DeliveryCommandForm projectId={projectId} material={material} action="confirm_received"/>}
+  <p className="pv2-hint">Order placed ≠ delivered. Clients see confirmed status and recorded estimates, not supplier pricing.</p>
  </details>;
 }
