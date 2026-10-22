@@ -499,8 +499,6 @@ function ProjectCommandSidebar({d,showHistory=false}:{d:WorkspaceData;showHistor
      <details><summary><OwnerIcon name="projects" size={16}/> Add work update</summary><SiteReportForm id={d.project.id}/></details>}
     {d.site?.stage==='execution'&&
      <details><summary><OwnerIcon name="projects" size={16}/> Add photo</summary><SiteMediaForm id={d.project.id}/></details>}
-    {d.site?.stage==='execution'&&
-     <details><summary><OwnerIcon name="purchases" size={16}/> Request material</summary><MaterialRequestForm id={d.project.id}/></details>}
     {d.site?.canManage&&
      <details><summary><OwnerIcon name="team" size={16}/> Assign labour / team</summary>
       <p className="pv2-hint">Assign existing employees to this project. Daily labour counts are recorded with work updates.</p>
