@@ -81,7 +81,13 @@ export function StatusPage({
   );
 }
 
-export function ErrorState({ reset }: { reset: () => void }) {
+export function ErrorState({
+  reset,
+  reference,
+}: {
+  reset: () => void;
+  reference?: string;
+}) {
   return (
     <main
       id="main-content"
@@ -92,6 +98,11 @@ export function ErrorState({ reset }: { reset: () => void }) {
       <p role="alert" className="my-6">
         Please try again. If the problem continues, contact support.
       </p>
+      {reference && (
+        <p className="mb-5 break-all text-sm text-muted-foreground">
+          Error reference: <code>{reference}</code>
+        </p>
+      )}
       <Button onClick={reset}>Try again</Button>
     </main>
   );
