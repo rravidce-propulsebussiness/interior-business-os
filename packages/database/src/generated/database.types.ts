@@ -11099,6 +11099,23 @@ export interface Database {
         Args: { p_org: string; p_project: string };
         Returns: Json;
       };
+      construction_stage_qc_item_command: {
+        Args: {
+          p_org: string;
+          p_project: string;
+          p_stage: string;
+          p_index: number;
+          p_decision: string;
+          p_notes: string;
+          p_photo: string;
+          p_visited: boolean;
+        };
+        Returns: Json;
+      };
+      construction_stage_qc_item_read: {
+        Args: { p_org: string; p_project: string };
+        Returns: Json;
+      };
       construction_stage_record_command: {
         Args: {
           p_organization_id: string;
