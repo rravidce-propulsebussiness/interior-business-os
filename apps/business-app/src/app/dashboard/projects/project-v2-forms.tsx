@@ -336,7 +336,8 @@ export function MaterialUpdateForm({id,material}:{id:string;material:{
   material.status==='approved'?['ordered']:material.status==='ordered'?['received']:[];
  const sellerRequestPending=material.status==='approved'&&
   material.source==='marketplace'&&
-  (material.vendorReference??'').startsWith('Marketplace request ');
+  (material.vendorReference??'').startsWith('Marketplace request ')&&
+  !(material.vendorReference??'').startsWith('Marketplace request rejected ');
  if(sellerRequestPending)return <p className="pv2-hint">
   Seller request pending. Its acceptance updates this material automatically; do not mark it ordered manually.
  </p>;
