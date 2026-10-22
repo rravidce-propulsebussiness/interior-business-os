@@ -438,6 +438,12 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
            <MaterialRequestForm id={d.project.id} stageId={stage.id}
             suggestions={suggestedMaterials}/>
           </details>}
+          {d.permissions.purchaseManage&&d.marketplaceOffers.length===0&&
+           <p className="pv2-stage-marketplace-empty">
+            No published supplier products are available in the marketplace yet.
+            Material requests still work; after approval you can source from an outside supplier
+            or use the marketplace once an approved seller publishes a matching product.
+           </p>}
           <p className="pv2-hint">Stage needs → internal approval → marketplace seller request or outside supplier → delivery verification. Requesting does not automatically place an order.</p>
          </details>}
         <div className="pv2-stage-attachment-count">{linked.length} linked site record{linked.length===1?'':'s'} · Linked evidence is not an approval.</div>
