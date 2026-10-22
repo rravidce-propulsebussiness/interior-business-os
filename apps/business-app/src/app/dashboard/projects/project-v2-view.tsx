@@ -7,7 +7,7 @@ import { OwnerProjectRequests } from '../../project-request-widgets';
 import { canAccess } from '@business-os/auth';
 import { guidanceForConstructionStage } from '@business-os/core/construction-payment-schedule';
 import { ProjectStageLinker,type StageLinkOption } from './project-stage-linker';
-import { suggestedStageMaterials } from './stage-material-options';
+import { suggestedStageMaterials,suggestedActivityMaterials } from './stage-material-options';
 import { MaterialMarketplaceOrder } from './project-material-marketplace-order';
 import { MaterialOrderingAccess,MaterialDeliveryActions } from './project-material-delivery';
 import { StageChecklistItem } from './project-stage-checklist-item';
@@ -531,12 +531,21 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
           {stage.activities.map((work,i)=>{
            const record=stageWork.find(x=>Number(x.index)===i);
            const workMaterials=stageMaterials.filter(m=>stringValue(m.activity_index)===String(i));
+           const requiredSuggestions=suggestedActivityMaterials(work,suggestedMaterials);
+           const requestOptions=[...new Set([...requiredSuggestions,...suggestedMaterials])];
            const materialPanel=(allowMaterials||workMaterials.length>0)?<div className="pv2-activity-material-content">
+              <div className="pv2-activity-material-required">
+               <h5>Materials required for this work</h5>
+               {requiredSuggestions.length>0?<ul>
+                {requiredSuggestions.map(material=><li key={material}>{material}</li>)}
+               </ul>:<p>Materials for this activity are not pre-defined. Choose applicable items from the stage catalogue or add your own.</p>}
+               <small>Suggested materials only. Confirm approved brands, sizes and quantities against the quotation/BOQ before requesting.</small>
+              </div>
               {workMaterials.length>0&&<StageMaterialRows d={d} rows={workMaterials}/>}
               {allowMaterials&&<details className="pv2-stage-material-entry">
                <summary>+ Request materials for this work item</summary>
                <MaterialRequestForm id={d.project.id} stageId={stage.id}
-                activityIndex={i} activityLabel={work} suggestions={suggestedMaterials}/>
+                activityIndex={i} activityLabel={work} suggestions={requestOptions}/>
               </details>}
               {!workMaterials.length&&!allowMaterials&&<p className="pv2-hint">No material requests yet.</p>}
              </div>:undefined;
