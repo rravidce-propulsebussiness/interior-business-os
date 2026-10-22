@@ -9,7 +9,7 @@ export async function markQuotationFinal(quotationId: string):
   Promise<{ok:boolean;message:string}> {
   try {
     const id=idSchema.parse(quotationId);
-    const s=await commercialServices('quotation.edit','quotation');
+    const s=await commercialServices('quotation.view','quotation');
     const {data,error}=await s.client.rpc('quotation_mark_final',{
       p_org:s.org,p_quotation:id,
     });
