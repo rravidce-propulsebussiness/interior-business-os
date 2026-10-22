@@ -63,7 +63,14 @@ export default async function Quotations({
     s.authorization.requireAuthenticatedUser(),
   ]);
   if (!organization) throw new Error('Company workspace unavailable');
-  const data = commercialSearchResultSchema.parse(result);
+  const parsed = commercialSearchResultSchema.safeParse(result);
+  if (!parsed.success) {
+    console.error('[quotations:list] Core search schema error', {
+      issues: parsed.error.issues.map(issue => ({ path: issue.path.join('.'), code: issue.code })),
+    });
+    throw new Error('Quotation search returned invalid data');
+  }
+  const data = parsed.data;
   // Superseded and cancelled revisions remain in history, not the everyday list.
   const rows = data.rows.filter((row) => row.status === 'draft' || row.status === 'issued');
 
@@ -90,6 +97,10 @@ export default async function Quotations({
   const sharedLookup = s.client.rpc.bind(s.client) as unknown as (
     name: string, args: { p_organization_id: string; p_revision_ids: string[] },
   ) => Promise<{ data: unknown; error: unknown }>;
+  const industryPromise = s.repository.industries().catch((error: unknown) => {
+    console.error('[quotations:list] Industry metadata unavailable', error);
+    return [] as Awaited<ReturnType<typeof s.repository.industries>>;
+  });
   const [{ data: projectIndustries }, industryList, countResponse, shareResponse] =
     await Promise.all([
       projectIds.length
@@ -98,7 +109,7 @@ export default async function Quotations({
           .eq('organization_id', s.org)
           .in('id', projectIds)
         : Promise.resolve({ data: [] }),
-      s.repository.industries(),
+      industryPromise,
       s.client.from('quotations')
         .select('id', { count: 'exact', head: true })
         .eq('organization_id', s.org)
@@ -110,6 +121,8 @@ export default async function Quotations({
           })
         : Promise.resolve({ data: [], error: null }),
     ]);
+  const sharingAvailable = !shareResponse.error && Array.isArray(shareResponse.data);
+  if (!sharingAvailable) console.error('[quotations:list] Sharing metadata unavailable', shareResponse.error);
   const sharedIds = new Set<string>(
     Array.isArray(shareResponse.data)
       ? shareResponse.data.filter((id): id is string => typeof id === 'string')
@@ -164,14 +177,14 @@ export default async function Quotations({
     },
     {
       label: 'Shared',
-      value: quotes.filter((row) => sharedIds.has(row.id)).length.toLocaleString('en-IN'),
+      value: sharingAvailable ? quotes.filter((row) => sharedIds.has(row.id)).length.toLocaleString('en-IN') : '—',
       note: 'On this page',
       icon: '➤',
       tone: 'green',
     },
     {
       label: 'Shared Value',
-      value: currencyValue(organization.default_currency || 'INR', String(values)),
+      value: sharingAvailable ? currencyValue(organization.default_currency || 'INR', String(values)) : '—',
       note: 'Shared quotations on this page',
       icon: '₹',
       tone: 'blue',
@@ -224,12 +237,12 @@ export default async function Quotations({
         p_org:s.org,p_customer_ids:validCustomerIds,
       })
     : {data:{},error:null};
-  if(finalChoiceError) throw new Error('Could not load final quotation selections');
+  if (finalChoiceError) console.error('[quotations:list] Final selection lookup unavailable', finalChoiceError);
   const manualChoices=validCustomerIds.length
     ?await s.client.rpc('quotation_final_marked' as never,{
       p_org:s.org,p_customer_ids:validCustomerIds,
      } as never):{data:{},error:null};
-  if(manualChoices.error)throw new Error('Could not read manual final quotations');
+  if (manualChoices.error) console.error('[quotations:list] Manually pinned Final lookup unavailable', manualChoices.error);
   const manualByCustomer=manualChoices.data&&typeof manualChoices.data==='object'
     &&!Array.isArray(manualChoices.data)
     ?manualChoices.data as Record<string,unknown>:{};
@@ -248,7 +261,8 @@ export default async function Quotations({
     ?await s.client.rpc('quotation_final_eligible' as never,{
       p_org:s.org,p_quotation_ids:finalCandidateIds,
      } as never):{data:{},error:null};
-  if(finalPermissions.error)throw new Error('Could not read final quotation permissions');
+  if (finalPermissions.error) console.error('[quotations:list] Final eligibility lookup unavailable', finalPermissions.error);
+  const finalStatusAvailable = !finalChoiceError && !manualChoices.error && !finalPermissions.error;
   const finalEligibility=finalPermissions.data&&typeof finalPermissions.data==='object'
     &&!Array.isArray(finalPermissions.data)
     ?finalPermissions.data as Record<string,unknown>:{};
@@ -256,8 +270,8 @@ export default async function Quotations({
 
     ...group,
     quotes: group.quotes.sort((a, b) =>
-      Number(b.revision?.quotation_id===finalByCustomer.get(group.id)) -
-      Number(a.revision?.quotation_id===finalByCustomer.get(group.id)) ||
+      (finalStatusAvailable ? Number(b.revision?.quotation_id===finalByCustomer.get(group.id)) -
+      Number(a.revision?.quotation_id===finalByCustomer.get(group.id)) : 0) ||
       (b.createdAt ?? '').localeCompare(a.createdAt ?? '') ||
       (b.row.quotation_number ?? '').localeCompare(a.row.quotation_number ?? '') ||
       b.row.id.localeCompare(a.row.id)),
@@ -275,10 +289,10 @@ export default async function Quotations({
       key={row.id}>
       <div className="qs-quotes-mobile-top">
         <Link href={editor}>{row.quotation_number || 'Quotation'}</Link>
-        {revision?.quotation_id===finalByCustomer.get(customerId) &&
+        {finalStatusAvailable && revision?.quotation_id===finalByCustomer.get(customerId) &&
           <span className="qs-final-label">{manualByCustomer[customerId]===revision?.quotation_id?
           '★ Final':'Latest'}</span>}
-        {shared ? <span className="qs-quotes-state qs-state-shared">Shared</span> : row.status === 'draft' ? <span className="qs-quotes-state">Saved</span> : null}
+        {shared ? <span className="qs-quotes-state qs-state-shared">Shared</span> : !sharingAvailable ? <span className="qs-quotes-state">Sharing unavailable</span> : row.status === 'draft' ? <span className="qs-quotes-state">Saved</span> : null}
       </div>
       <div className="qs-quotes-mobile-meta">
         <span className="qs-quotes-service">{industry}</span>
@@ -289,7 +303,7 @@ export default async function Quotations({
         <span>{row.project_name || 'Project'}</span>
         <span>{niceDate(createdAt)} · R{row.revision_number ?? 1}</span>
       </div>
-      {revision && finalEligibility[revision.quotation_id]===true && manualByCustomer[customerId]!==revision.quotation_id &&
+      {finalStatusAvailable && revision && finalEligibility[revision.quotation_id]===true && manualByCustomer[customerId]!==revision.quotation_id &&
         <QuotationFinalButton quotationId={revision.quotation_id}
           number={row.quotation_number||'Quotation'}/>}
       <div className="qs-quotes-mobile-actions">
@@ -332,7 +346,7 @@ export default async function Quotations({
   ) => <tr key={row.id}>
     <td className="qs-quotes-no">
       <Link href={editor}>{row.quotation_number || 'Quotation'}</Link>
-      {revision?.quotation_id===finalByCustomer.get(customerId) &&
+      {finalStatusAvailable && revision?.quotation_id===finalByCustomer.get(customerId) &&
         <span className="qs-final-label">{manualByCustomer[customerId]===revision?.quotation_id?
           '★ Final':'Latest'}</span>}
       <small>Revision {row.revision_number ?? 1}</small>
@@ -355,7 +369,8 @@ export default async function Quotations({
       row.currency || organization.default_currency || 'INR', row.amount)}</td>
     <td>{shared
       ? <span className="qs-quotes-state qs-state-shared">Shared</span>
-      : <span className="qs-quotes-unshared">{row.status === 'draft' ? 'Saved' : 'Not shared'}</span>}</td>
+      : !sharingAvailable ? <span className="qs-quotes-unshared">Sharing unavailable</span>
+       : <span className="qs-quotes-unshared">{row.status === 'draft' ? 'Saved' : 'Not shared'}</span>}</td>
     <td className="qs-quotes-created">{niceDate(createdAt)}</td>
     <td>
       <div className="qs-quotes-actions">
@@ -367,7 +382,7 @@ export default async function Quotations({
         {row.status === 'issued' && canCreate && revision &&
           <QuotationReviseButton revisionId={row.id} version={revision.version}
             number={row.quotation_number || 'Quotation'} />}
-        {revision && finalEligibility[revision.quotation_id]===true && manualByCustomer[customerId]!==revision.quotation_id &&
+        {finalStatusAvailable && revision && finalEligibility[revision.quotation_id]===true && manualByCustomer[customerId]!==revision.quotation_id &&
           <QuotationFinalButton quotationId={revision.quotation_id}
             number={row.quotation_number||'Quotation'}/>}
         <details className="qs-quotes-more">
@@ -402,7 +417,11 @@ export default async function Quotations({
           </Link>}
         </div>
 
-        <section className="qs-quotes-kpis" aria-label="Quotation overview">
+        {(!sharingAvailable || !finalStatusAvailable) && <p role="status" className="qs-quotes-lookup-warning">
+           Some sharing or Final-selection details are unavailable. Your saved quotations remain accessible,
+           and no Final choice has been changed.
+         </p>}
+         <section className="qs-quotes-kpis" aria-label="Quotation overview">
           {cards.map((card) => <div className="qs-quotes-kpi" key={card.label}>
             <span className={'qs-quotes-kpi-icon qs-quotes-kpi-' + card.tone}>{card.icon}</span>
             <div>
