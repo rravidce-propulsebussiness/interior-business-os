@@ -26,13 +26,13 @@ begin
    raise exception 'Select 1 to 30 checks at once' using errcode='22023';
  end if;
  if exists (select 1 from jsonb_array_elements(p_items) x
-   where jsonb_typeof(x) <> 'object'
-     or x->>'index' is null
-     or x->>'title' is null
-     or x->>'photo_id' is null) then
+   where jsonb_typeof(x.value) <> 'object'
+     or x.value->>'index' is null
+     or x.value->>'title' is null
+     or x.value->>'photo_id' is null) then
    raise exception 'Every check must include its name and evidence' using errcode='22023';
  end if;
- if (select count(distinct (x->>'index')) from jsonb_array_elements(p_items) x) <> v_total then
+ if (select count(distinct (x.value->>'index')) from jsonb_array_elements(p_items) x) <> v_total then
    raise exception 'Repeated checklist items are not allowed' using errcode='22023';
  end if;
  for v_item in select value from jsonb_array_elements(p_items) loop
