@@ -34,5 +34,14 @@ export default function ErrorPage({
       </main>
     );
   }
-  return <ErrorState reset={reset} />;
+  // Retrying the same React segment may reuse an incomplete Flight stream
+  // after a Hostinger deployment. Request fresh document HTML instead.
+  // The opaque Next.js digest helps support match a server exception to logs;
+  // do not expose a production error message or stack trace.
+  return (
+    <ErrorState
+      reset={() => window.location.reload()}
+      reference={error.digest}
+    />
+  );
 }
