@@ -49,3 +49,13 @@ it('requires check titles long enough for the site inspection API',()=>{
   ...foundation,checks:[...foundation.checks,'pH'],
  }})).toThrow();
 });
+
+it('reads previously issued two-character checks but will not persist them in a new revision',()=>{
+ const base=defaultStageRequirements('FOUNDATION');
+ const previous={...base,checks:[...base.checks,'pH']};
+ const terms='[STAGE_CUSTOM_REQUIREMENTS]'+JSON.stringify({
+  version:1,stages:{FOUNDATION:previous},
+ })+'[/STAGE_CUSTOM_REQUIREMENTS]';
+ expect(savedStageRequirements(terms).FOUNDATION?.checks).toContain('pH');
+ expect(()=>encodeStageRequirements({FOUNDATION:previous})).toThrow();
+});
