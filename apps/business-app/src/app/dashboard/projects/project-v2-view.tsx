@@ -416,6 +416,7 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
              {(site?.canManage||['manager','procurement'].includes(site?.role??''))&&
                (!((source==='marketplace') &&
                    stringValue(m.vendor_reference).startsWith('Marketplace request ') &&
+                   !stringValue(m.vendor_reference).startsWith('Marketplace request rejected ') &&
                    status==='approved'))&&
                ['requested','approved','ordered'].includes(status)&&
                <MaterialUpdateForm id={d.project.id} material={{
@@ -442,6 +443,12 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
            <MaterialRequestForm id={d.project.id} stageId={stage.id}
             suggestions={suggestedMaterials}/>
           </details>}
+          {d.permissions.purchaseManage&&d.marketplaceOffers.length===0&&
+           <p className="pv2-stage-marketplace-empty">
+            No approved sellers have published products in the marketplace yet.
+            You can still plan and approve material quantities for this stage,
+            or source approved requests from a local supplier.
+           </p>}
           <p className="pv2-hint">Stage needs → internal approval → marketplace seller request or outside supplier → delivery verification. Requesting does not automatically place an order.</p>
          </details>}
         <div className="pv2-stage-attachment-count">{linked.length} linked site record{linked.length===1?'':'s'} · Linked evidence is not an approval.</div>
