@@ -12091,7 +12091,12 @@ export interface Database {
         Returns: Json;
       };
       project_stage_material_batch: {
-        Args: { p_org: string; p_project: string; p_stage: string; p_items: Json };
+        Args: {
+          p_org: string;
+          p_project: string;
+          p_stage: string;
+          p_items: Json;
+        };
         Returns: Json;
       };
       project_stage_owner_edit: {
