@@ -289,7 +289,7 @@ export default async function Quotations({
         <span>{row.project_name || 'Project'}</span>
         <span>{niceDate(createdAt)} · R{row.revision_number ?? 1}</span>
       </div>
-      {canEdit && revision && finalEligibility[revision.quotation_id]===true && revision.quotation_id!==finalByCustomer.get(customerId) &&
+      {canEdit && revision && finalEligibility[revision.quotation_id]===true && manualByCustomer[customerId]!==revision.quotation_id &&
         <QuotationFinalButton quotationId={revision.quotation_id}
           number={row.quotation_number||'Quotation'}/>}
       <div className="qs-quotes-mobile-actions">
@@ -367,7 +367,7 @@ export default async function Quotations({
         {row.status === 'issued' && canCreate && revision &&
           <QuotationReviseButton revisionId={row.id} version={revision.version}
             number={row.quotation_number || 'Quotation'} />}
-        {canEdit && revision && finalEligibility[revision.quotation_id]===true && revision.quotation_id!==finalByCustomer.get(customerId) &&
+        {canEdit && revision && finalEligibility[revision.quotation_id]===true && manualByCustomer[customerId]!==revision.quotation_id &&
           <QuotationFinalButton quotationId={revision.quotation_id}
             number={row.quotation_number||'Quotation'}/>}
         <details className="qs-quotes-more">
