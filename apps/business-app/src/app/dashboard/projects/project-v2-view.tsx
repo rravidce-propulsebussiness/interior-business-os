@@ -422,6 +422,7 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
       const stageChecks=d.stageProgress.checks.filter(x=>stringValue(x.stage_id)===stage.id);
       const passed=checks.filter(title=>[...stageChecks,...(site?.checks??[])].some(x=>
        stringValue(x.title).toLowerCase()===title.toLowerCase()&&stringValue(x.status)==='passed')).length;
+      const unassignedStageMaterials=stageMaterials.filter(m=>stringValue(m.activity_index)==='');
       const finishedActivities=stage.activities.filter((_,i)=>stageWork.some(x=>
        Number(x.index)===i&&stringValue(x.status)==='completed')).length;
       const formalQc=d.stageProgress.qualityStages.find(x=>stringValue(x.stage_id)===stage.id);
@@ -460,24 +461,9 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
          projectId={d.project.id} stageId={stage.id} state={stageExecution}
          canManage={allowWork} workCompleted={finishedActivities} workTotal={stage.activities.length}
          checksPassed={passed} checksTotal={checks.length}/>}
-        {!!stage.activities.length&&<div className="pv2-stage-task-group">
-         <h4>Work checklist <small>{finishedActivities}/{stage.activities.length} completed</small></h4>
-         <p className="pv2-hint">Mark each activity separately as work progresses. This does not certify or close the whole stage.</p>
-         <div className="pv2-stage-task-entries">
-          {stage.activities.map((work,i)=>{
-           const record=stageWork.find(x=>Number(x.index)===i);
-           return <StageChecklistItem key={i} projectId={d.project.id} stageId={stage.id}
-             kind="work" index={i} title={work} status={stringValue(record?.status)||'pending'}
-             notes={stringValue(record?.notes)} photoId={stringValue(record?.photo_id)}
-             photos={photos} canEdit={workAllowed&&!complete}/>;
-          })}
-         </div>
-        </div>}
-        {payment.length>0&&d.permissions.finance&&<div className="pv2-command-payments">
-         <OwnerIcon name="billing" size={17}/><div><strong>Linked quotation payments</strong>
-          <p>{payment.map(p=>p.name+' ('+p.percent+'%)').join(' · ')}</p>
-          <small>After linked stages pass QC, one agreed payment request is issued. Payment is only recorded in Finance.</small></div>
-         </div>}
+        {!!checks.length&&<details className="pv2-stage-quality-hub" id={'pv2-stage-checks-'+stage.id}>
+         <summary><span>Site checks & company QC</span><strong>{passed}/{checks.length} checks passed</strong></summary>
+         <div className="pv2-stage-quality-inner">
         {!!checks.length&&<div className="pv2-stage-task-group">
          <BulkStageChecks projectId={d.project.id} stageId={stage.id} photos={photos}
           canEdit={checksAllowed&&!complete} workCompleted={finishedActivities}
@@ -515,6 +501,7 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
           })}
          </div></details>
         </div>}
+
         {physicalStage&&
           (stageExecution?.status==='ready_for_qc'||
            d.stageQc.records.some(review=>review.stage_id===stage.id))&&
@@ -528,6 +515,44 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
            existingChecks={stageChecks.map(check=>({
             title:stringValue(check.title),photoId:stringValue(check.photo_id)
            }))}/>}
+
+        {!!plannedReports.length&&<details className="pv2-stage-secondary">
+          <summary>Evidence & reports to collect ({plannedReports.length})</summary>
+          <ul>{plannedReports.map((report,i)=><li key={i}>{report}</li>)}</ul>
+          <p className="pv2-hint">Upload evidence against this project stage. Listed reports are requirements, not automatically approved documents.</p>
+         </details>}
+
+         </div>
+        </details>}
+        {!!stage.activities.length&&<div className="pv2-stage-task-group">
+         <h4>Work checklist <small>{finishedActivities}/{stage.activities.length} completed</small></h4>
+         <p className="pv2-hint">Open any work item to record progress/photos, request materials, or view existing orders. The stage checklist is shared once below its heading.</p>
+         <div className="pv2-stage-task-entries">
+          {stage.activities.map((work,i)=>{
+           const record=stageWork.find(x=>Number(x.index)===i);
+           const workMaterials=stageMaterials.filter(m=>stringValue(m.activity_index)===String(i));
+           const materialPanel=(allowMaterials||workMaterials.length>0)?<div className="pv2-activity-material-content">
+              {workMaterials.length>0&&<StageMaterialRows d={d} rows={workMaterials}/>}
+              {allowMaterials&&<details className="pv2-stage-material-entry">
+               <summary>+ Request materials for this work item</summary>
+               <MaterialRequestForm id={d.project.id} stageId={stage.id}
+                activityIndex={i} activityLabel={work} suggestions={suggestedMaterials}/>
+              </details>}
+              {!workMaterials.length&&!allowMaterials&&<p className="pv2-hint">No material requests yet.</p>}
+             </div>:undefined;
+           return <StageChecklistItem key={i} projectId={d.project.id} stageId={stage.id}
+             kind="work" index={i} title={work} status={stringValue(record?.status)||'pending'}
+             notes={stringValue(record?.notes)} photoId={stringValue(record?.photo_id)}
+             photos={photos} canEdit={workAllowed&&!complete}
+             checksHref={'#pv2-stage-checks-'+stage.id} materialPanel={materialPanel}/>;
+          })}
+         </div>
+        </div>}
+        {payment.length>0&&d.permissions.finance&&<div className="pv2-command-payments">
+         <OwnerIcon name="billing" size={17}/><div><strong>Linked quotation payments</strong>
+          <p>{payment.map(p=>p.name+' ('+p.percent+'%)').join(' · ')}</p>
+          <small>After linked stages pass QC, one agreed payment request is issued. Payment is only recorded in Finance.</small></div>
+         </div>}
         {(formalInspections.length>0||formalReviews.length>0)&&<details className="pv2-stage-secondary pv2-formal-quality">
          <summary>Recorded QC inspections & approvals ({formalInspections.length} inspections)</summary>
          <p className="pv2-hint">Official inspection results and structural / quality approvals already recorded for this stage.</p>
@@ -543,89 +568,11 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
           {!!stringValue(record.notes)&&<p className="pv2-hint">{stringValue(record.notes)}</p>}
          </div>)}
         </details>}
-        {!!plannedReports.length&&<details className="pv2-stage-secondary">
-          <summary>Evidence & reports to collect ({plannedReports.length})</summary>
-          <ul>{plannedReports.map((report,i)=><li key={i}>{report}</li>)}</ul>
-          <p className="pv2-hint">Upload evidence against this project stage. Listed reports are requirements, not automatically approved documents.</p>
+        {unassignedStageMaterials.length>0&&<details className="pv2-stage-secondary pv2-legacy-materials">
+          <summary>Earlier stage material requests ({unassignedStageMaterials.length})</summary>
+          <p className="pv2-hint">Previously recorded stage-level requests have no specific work-item assignment. New materials should be requested from the relevant work item above.</p>
+          <StageMaterialRows d={d} rows={unassignedStageMaterials}/>
          </details>}
-        {(!!plannedMaterials.length||allowMaterials||!!stageMaterials.length)&&
-         <details className="pv2-stage-secondary pv2-stage-material-plan">
-          <summary>Materials to plan & request ({stageMaterials.length} recorded)</summary>
-          {!!plannedMaterials.length&&<>
-           <p className="pv2-hint">Planned materials from the accepted quotation and approved site specification. Enter actual quantities when requesting.</p>
-           <ul>{plannedMaterials.map((name,i)=><li key={i}>{name}</li>)}</ul>
-          </>}
-          {!!stageMaterials.length&&<div className="pv2-stage-material-requests">
-           <strong>Stage material requests</strong>
-           {stageMaterials.map(m=>{
-            const source=stringValue(m.source),status=stringValue(m.status);
-            return <article key={m.id} className="pv2-stage-material-row">
-             <div><b>{stringValue(m.item)}</b>
-              <small>{stringValue(m.quantity)} {stringValue(m.unit)}</small></div>
-             <Status value={status}/>
-             {(site?.canManage||['manager','procurement'].includes(site?.role??''))&&
-               (!((source==='marketplace') &&
-                   stringValue(m.vendor_reference).startsWith('Marketplace request ') &&
-                   !stringValue(m.vendor_reference).startsWith('Marketplace request rejected ') &&
-                   status==='approved'))&&
-               ['requested','approved','ordered'].includes(status)&&
-               <MaterialUpdateForm id={d.project.id} material={{
-                id:m.id,status,source,vendorReference:stringValue(m.vendor_reference),
-               }}/>}
-
-             <MaterialDeliveryActions projectId={d.project.id} material={{
-              id:m.id,status,source,reference:stringValue(m.vendor_reference),
-              date:stringValue(m.expected_delivery_date)||null,
-              window:stringValue(m.expected_delivery_window)||null,
-             }} canOrder={d.materialAccess.canOrder}
-                canReceive={site?.canManage===true||['site_engineer','manager','procurement'].includes(site?.role??'')}/>
-             {(status==='ordered'||status==='received')&&
-              <p className="pv2-hint pv2-material-eta">
-                {status==='received'?'Received at site':
-                 stringValue(m.expected_delivery_date)?
-                  'Expected '+shortDate(m.expected_delivery_date)+
-                  (stringValue(m.expected_delivery_window)?' · '+stringValue(m.expected_delivery_window):''):
-                  'Ordered · delivery date not yet set'}
-              </p>}
-             {d.permissions.purchaseManage&&d.materialAccess.canOrder&&<MaterialMarketplaceOrder
-              projectId={d.project.id} material={{
-               id:m.id,item:stringValue(m.item),quantity:Number(m.quantity),
-               unit:stringValue(m.unit),status,source,
-               vendorReference:stringValue(m.vendor_reference),
-              }} offers={d.marketplaceOffers}/>}
-             {['approved','requested','ordered','received'].includes(status)&&
-              <p className="pv2-hint">{
-               status==='requested'?'Awaiting owner/procurement approval':
-               status==='approved'?'Approved for sourcing':
-               status==='ordered'?'Supplier order placed; delivery must still be verified':
-               'Marked received by site staff'
-              }</p>}
-            </article>;
-           })}
-          </div>}
-          {allowMaterials&&<details className="pv2-stage-material-entry">
-           <summary>+ Add materials needed for this stage</summary>
-           <MaterialRequestForm id={d.project.id} stageId={stage.id}
-            suggestions={suggestedMaterials}/>
-          </details>}
-          {d.permissions.purchaseManage&&d.marketplaceOffers.length===0&&
-           <p className="pv2-stage-marketplace-empty">
-            No approved sellers have published products in the marketplace yet.
-            You can still plan and approve material quantities for this stage,
-            or source approved requests from a local supplier.
-           </p>}
-          <p className="pv2-hint">Stage needs → internal approval → marketplace seller request or outside supplier → delivery verification. Requesting does not automatically place an order.</p>
-         </details>}
-        <div className="pv2-stage-attachment-count">{linked.length} linked site record{linked.length===1?'':'s'} · Linked evidence is not an approval.</div>
-        <div className="pv2-command-stage-actions">
-         {allowWork&&<details><summary><OwnerIcon name="projects" size={16}/> Update work</summary><SiteReportForm id={d.project.id}/></details>}
-         {site?.stage==='execution'&&<details><summary><OwnerIcon name="projects" size={16}/> Upload photos</summary><SiteMediaForm id={d.project.id}/></details>}
-
-
-         {site?.canManage&&!!site.memberOptions.length&&<details><summary><OwnerIcon name="team" size={16}/> Assign team</summary><AssignRole projectId={d.project.id} users={site.memberOptions}/></details>}
-
-        </div>
-
         {site?.canManage&&availableRecords.length>0&&<details className="pv2-stage-secondary"><summary>Attach existing site evidence</summary>
          <ProjectStageLinker projectId={d.project.id} stageId={stage.id} options={availableRecords}/></details>}
        </div>
