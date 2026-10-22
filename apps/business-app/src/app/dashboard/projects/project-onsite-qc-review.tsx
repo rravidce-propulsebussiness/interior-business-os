@@ -10,17 +10,17 @@ export type QcFinding={
 };
 type Props={
  projectId:string;stageId:string;stageName:string;topics:string[];
- stageStatus:string;canReview:boolean;canManage:boolean;inspectorAssigned:boolean;
+ stageStatus:string;canReview:boolean;canManage:boolean;inspectorAssigned:boolean;isOwner:boolean;
  records:QcFinding[];photos:{id:string;filename:string}[];
  existingChecks:{title:string;photoId:string}[];
 };
 type Result={saved:boolean;message:string};
 
 function QcItem({projectId,stageId,index,title,records,photos,fieldPhotoId,
-  canReview,stageReady}:{
+  canReview,stageReady,isOwner}:{
  projectId:string;stageId:string;index:number;title:string;records:QcFinding[];
  photos:{id:string;filename:string}[];fieldPhotoId:string;
- canReview:boolean;stageReady:boolean;
+ canReview:boolean;stageReady:boolean;isOwner:boolean;
 }){
  const router=useRouter();
  const latest=records[0];
@@ -54,10 +54,10 @@ function QcItem({projectId,stageId,index,title,records,photos,fieldPhotoId,
       <option value="failed">Fail — corrective work required</option>
      </select>
     </label>
-    <label>Inspection remarks {decision==='failed'?'(required)':'(optional)'}
-     <textarea name="notes" rows={2} minLength={decision==='failed'?10:undefined}
-      required={decision==='failed'} maxLength={2000}
-      placeholder={decision==='failed'?'Describe the defect, measurement and correction needed':'Measurements, verification and observations'}/>
+    <label>Inspection remarks {decision==='failed'||isOwner?'(required)':'(optional)'}
+     <textarea name="notes" rows={2} minLength={isOwner?12:decision==='failed'?10:undefined}
+      required={isOwner||decision==='failed'} maxLength={2000}
+      placeholder={decision==='failed'?'Describe the defect, measurement and correction needed':isOwner?'Describe what you personally verified on site':'Measurements, verification and observations'}/>
     </label>
     <label>Site inspection photograph
      <input type="file" name="file" accept="image/jpeg,image/png,image/webp"/>
@@ -97,7 +97,7 @@ function QcItem({projectId,stageId,index,title,records,photos,fieldPhotoId,
  </details>;
 }
 export function StageOnsiteQcReview(props:Props){
- const {projectId,stageId,stageName,topics,stageStatus,canReview,canManage,inspectorAssigned,
+ const {projectId,stageId,stageName,topics,stageStatus,canReview,canManage,inspectorAssigned,isOwner,
   records,photos,existingChecks}=props;
  const byIndex=(index:number)=>records.filter(record=>record.index===index)
   .sort((a,b)=>b.reviewed_at.localeCompare(a.reviewed_at)||b.id.localeCompare(a.id));
@@ -109,7 +109,7 @@ export function StageOnsiteQcReview(props:Props){
   <summary className="pv2-qc-heading">
    <span className="pv2-qc-heading-icon">✓</span>
    <span><strong>On-site Quality Inspection</strong>
-    <small>{stageName} · QC inspector from the project team</small></span>
+    <small>{stageName} · {isOwner?'Company owner QC':'Assigned company QC inspector'}</small></span>
    <span className="pv2-qc-score">{passed}/{topics.length} QC passed</span>
   </summary>
   <div className="pv2-qc-inner">
@@ -118,10 +118,11 @@ export function StageOnsiteQcReview(props:Props){
     <b>{failed?failed+' failed · correction required':passed===topics.length?
      'All QC items passed':'QC review: '+(topics.length-passed-failed)+' pending'}</b>
    </div>
-   {!inspectorAssigned&&canManage&&<p className="pv2-qc-help">
+   {!inspectorAssigned&&!isOwner&&canManage&&<p className="pv2-qc-help">
     No QC inspector is assigned. Open <a href={'/dashboard/projects/'+projectId+'/team'}>Team & Access</a>
     {' '}and assign one of your company employees as <strong>Quality Inspector</strong>.
    </p>}
+   {isOwner&&stageReady&&<p className="pv2-qc-help">Owner QC is enabled without assigning another employee. Visit the site and record your inspection photo and verification notes. Self-reviewed checks are identified in the audit history.</p>}
    {!canReview&&stageReady&&<p className="pv2-qc-help">
     The assigned company QC inspector must visit the site to record Pass or Fail for each item.
    </p>}
@@ -130,7 +131,7 @@ export function StageOnsiteQcReview(props:Props){
      'QC inspections become editable after the site engineer finishes field work and requests QC.'}
    </p>}
    {topics.map((title,index)=><QcItem key={index} projectId={projectId} stageId={stageId}
-    index={index} title={title} records={byIndex(index)} canReview={canReview} stageReady={stageReady}
+    index={index} title={title} records={byIndex(index)} canReview={canReview} stageReady={stageReady} isOwner={isOwner}
     photos={photos} fieldPhotoId={existingChecks.find(c=>c.title.toLowerCase()===title.toLowerCase())?.photoId||''}/>)}
    <p className="pv2-hint">QC Pass/Fail is recorded per item with photo, inspection date and reviewer identity.
     A failed item needs site correction and re-inspection. Formal stage certification and any structural hold points remain protected.</p>
