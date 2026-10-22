@@ -1,5 +1,7 @@
 import { describe,it,expect } from 'vitest';
 import { customerTermSections } from './quotation-terms';
+import { projectTimelineFromQuote } from './quote-project-timeline';
+import { calculateSftEstimate,encodeSftEstimate } from './sft-quotation';
 import {
  defaultStageRequirements,encodeStageRequirements,savedStageRequirements,
  mergeStageRequirementOverrides,
@@ -41,4 +43,30 @@ describe('project-specific construction stage requirements',()=>{
   const foundation=defaultStageRequirements('FOUNDATION');
   expect(mergeStageRequirementOverrides({},'FOUNDATION',foundation)).toEqual({});
  });
+ it('transfers a quoted foundation tar coat without changing another slab',()=>{
+  const estimate=calculateSftEstimate({rows:[
+   {name:'Ground',kind:'floor',lengthFeet:'30',widthFeet:'40',ratePerSqft:'1750'},
+   {name:'First',kind:'floor',lengthFeet:'30',widthFeet:'40',ratePerSqft:'1750'},
+  ],materialIds:[]});
+  const scope=[{id:'00000000-0000-4000-8000-000000000001',
+   name:'Construction',description:encodeSftEstimate(estimate)}];
+  const initial=projectTimelineFromQuote('construction',scope);
+  const foundation=initial?.stages.find(x=>x.templateCode==='FOUNDATION');
+  expect(foundation).toBeDefined();
+  const baseline=defaultStageRequirements(foundation!.instanceCode);
+  const extras={
+   ...baseline,work:[...baseline.work,'Apply foundation tar coating'],
+   checks:[...baseline.checks,'Check tar-coat coverage'],
+  };
+  const customized=projectTimelineFromQuote('construction',scope,{
+   [foundation!.instanceCode]:extras,
+  });
+  expect(customized?.stages.find(x=>x.instanceCode===foundation!.instanceCode)?.activities)
+   .toContain('Apply foundation tar coating');
+  expect(customized?.stages.find(x=>x.instanceCode===foundation!.instanceCode)?.inspectionTopics)
+   .toContain('Check tar-coat coverage');
+  expect(customized?.stages.find(x=>x.templateCode==='RCC')?.activities)
+   .not.toContain('Apply foundation tar coating');
+ });
+
 });
