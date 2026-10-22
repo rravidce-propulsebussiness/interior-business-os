@@ -49,7 +49,7 @@ export type ClientMaterial = {
   ordered_quantity: string | null;
   po_number: string | null;
   expected_date: string | null;
-  expected_window?: string | null;
+  expected_window?: string | null | undefined;
   status: string;
   received_date: string | null;
   sort_time: string | null;
