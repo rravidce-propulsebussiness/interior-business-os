@@ -57,6 +57,17 @@ function validateRequirements(value:unknown,legacyRead:boolean):StageRequirement
 export function validateStageRequirements(value:unknown):StageRequirementsMap {
  return validateRequirements(value,false);
 }
+
+/** Editing draft may still contain older issued two-character check titles.
+ * Enforce count and serialized size so multi-floor changes remain safe,
+ * but defer strict minimum check length until save.
+ */
+export function validateStageRequirementsDraft(value:unknown):StageRequirementsMap {
+ const draft=validateRequirements(value,true);
+ const body=JSON.stringify({version:1,stages:draft});
+ if(body.length>7500)throw new Error('Too many project-specific requirements; reduce long descriptions');
+ return draft;
+}
 export function encodeStageRequirements(overrides:StageRequirementsMap):string {
  const cleaned=validateStageRequirements(overrides);
  if(!Object.keys(cleaned).length)return '';
@@ -83,5 +94,5 @@ export function mergeStageRequirementOverrides(
  const merged={...all};
  if(JSON.stringify(validated)===JSON.stringify(defaults))delete merged[instanceCode];
  else merged[instanceCode]=validated;
- return validateStageRequirements(merged);
+ return validateStageRequirementsDraft(merged);
 }

@@ -2,7 +2,7 @@ import { describe,it,expect } from 'vitest';
 import { customerTermSections } from './quotation-terms';
 import {
  defaultStageRequirements,encodeStageRequirements,savedStageRequirements,
- mergeStageRequirementOverrides,validateStageRequirements,
+ mergeStageRequirementOverrides,validateStageRequirements,validateStageRequirementsDraft,
 } from './quotation-stage-requirements';
 
 describe('project-specific construction stage requirements',()=>{
@@ -58,4 +58,28 @@ it('reads previously issued two-character checks but will not persist them in a 
  })+'[/STAGE_CUSTOM_REQUIREMENTS]';
  expect(savedStageRequirements(terms).FOUNDATION?.checks).toContain('pH');
  expect(()=>encodeStageRequirements({FOUNDATION:previous})).toThrow();
+});
+
+it('repairs legacy short QC checks one stage at a time without crashing the editor',()=>{
+ const base=defaultStageRequirements('FOUNDATION');
+ const older={...base,checks:[...base.checks,'pH']};
+ const prior={FOUNDATION:older,'RCC/GROUND_FLOOR':{
+  ...defaultStageRequirements('RCC/GROUND_FLOOR'),
+  checks:[...defaultStageRequirements('RCC/GROUND_FLOOR').checks,'pH'],
+ }};
+ const savedText='[STAGE_CUSTOM_REQUIREMENTS]'+JSON.stringify({version:1,stages:prior})+
+  '[/STAGE_CUSTOM_REQUIREMENTS]';
+ const loaded=savedStageRequirements(savedText);
+ const foundationClean=mergeStageRequirementOverrides(loaded,'FOUNDATION',{
+  ...base,checks:[...base.checks,'pH inspection'],
+ });
+ expect(foundationClean.FOUNDATION?.checks).toContain('pH inspection');
+ expect(foundationClean['RCC/GROUND_FLOOR']?.checks).toContain('pH');
+ expect(validateStageRequirementsDraft(foundationClean)).toEqual(foundationClean);
+ expect(()=>encodeStageRequirements(foundationClean)).toThrow();
+ const rcc=foundationClean['RCC/GROUND_FLOOR']!;
+ const bothClean=mergeStageRequirementOverrides(foundationClean,'RCC/GROUND_FLOOR',{
+  ...rcc,checks:rcc.checks.filter(x=>x!=='pH').concat('Concrete pH inspection'),
+ });
+ expect(encodeStageRequirements(bothClean)).toContain('Concrete pH inspection');
 });
