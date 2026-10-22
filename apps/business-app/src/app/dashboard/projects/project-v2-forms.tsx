@@ -320,6 +320,11 @@ export function MaterialRequestForm({id,stageId,suggestions=[]}:{
 export function MaterialUpdateForm({id,material}:{id:string;material:{
  id:string;status:string;source?:string;vendorReference?:string;
 }}){
+ // An open marketplace request must be accepted or rejected by its seller;
+ // don't claim a purchase by manually advancing its internal site status.
+ if(material.status==='approved'&&material.source==='marketplace'&&
+  material.vendorReference?.startsWith('Marketplace request ')&&
+  !material.vendorReference.startsWith('Marketplace request rejected '))return null;
  const next=material.status==='requested'?['approved','rejected']:
   material.status==='approved'?['ordered']:material.status==='ordered'?['received']:[];
  if(!next.length)return null;
