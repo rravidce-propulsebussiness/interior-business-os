@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import { activeOrganization, serverServices } from '@business-os/auth/server';
 import { uploadProjectSiteMedia } from './actions';
@@ -103,7 +104,7 @@ export async function requestMaterialFromMarketplace(projectId:string,form:FormD
  try{
   const materialId=uuid.parse(form.get('materialId'));
   const productId=uuid.parse(form.get('productId'));
-  const key=uuid.parse(form.get('requestKey'));
+  const key=randomUUID();
   const {client,org}=await context(projectId);
   const {authorization}=await serverServices();
   await authorization.requirePermission(org,'purchase.manage');
