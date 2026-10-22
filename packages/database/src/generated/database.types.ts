@@ -12119,10 +12119,6 @@ export interface Database {
         Args: { p_organization_id: string; p_project_id: string };
         Returns: Json;
       };
-      project_stage_guidance_read: {
-        Args: { p_org: string; p_project: string };
-        Returns: Json;
-      };
       project_stage_checklist_command: {
         Args: {
           p_org: string;
@@ -12138,6 +12134,10 @@ export interface Database {
         Returns: Json;
       };
       project_stage_checklist_read: {
+        Args: { p_org: string; p_project: string };
+        Returns: Json;
+      };
+      project_stage_guidance_read: {
         Args: { p_org: string; p_project: string };
         Returns: Json;
       };
