@@ -57,6 +57,8 @@ export function suggestedStageMaterials(stageCode:string):readonly string[]{
  */
 export function suggestedActivityMaterials(workTitle:string,stageSuggestions:readonly string[]):string[]{
  const title=workTitle.toLowerCase();
+ // Inspection-only hold points need evidence and sign-off, not an assumed material order.
+ if(/structural inspection|qc clearance|quality clearance/.test(title))return [];
  const rules:{activity:RegExp;materials:RegExp;extra?:string[]}[]=[
   {activity:/layout|dimension|marking|set.out|grid line|survey|level verification/,
    materials:/marking|pegs|stakes|nylon|thread|lime|chalk/,
