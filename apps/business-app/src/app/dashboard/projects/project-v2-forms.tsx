@@ -317,18 +317,30 @@ export function MaterialRequestForm({id,stageId,suggestions=[]}:{
   {state.message&&<p role="status" className={'pv2-form-feedback '+(state.saved?'good':'bad')}>{state.message}</p>}
  </form>;
 }
-export function MaterialUpdateForm({id,material}:{id:string;material:{id:string;status:string}}){
+export function MaterialUpdateForm({id,material}:{id:string;material:{
+ id:string;status:string;source?:string;vendorReference?:string;
+}}){
  const next=material.status==='requested'?['approved','rejected']:
   material.status==='approved'?['ordered']:material.status==='ordered'?['received']:[];
  if(!next.length)return null;
  return <details className="pv2-subaction"><summary>Update status</summary>
   <ProjectForm projectId={id} operation="material_update" label="Save material status">
    <input type="hidden" name="id" value={material.id}/>
-   <label>Next status<select name="status">{next.map(s=><option key={s} value={s}>{s}</option>)}</select></label>
-   <label>Source<select name="source" defaultValue="undecided">
-    <option value="undecided">Undecided</option><option value="marketplace">Marketplace</option>
-    <option value="outside">Outside supplier</option></select></label>
-   <label>Supplier / PO reference<input name="vendor_reference" maxLength={500}/></label>
+   <label>Next status<select name="status">{next.map(v=><option key={v} value={v}>{v}</option>)}</select></label>
+   <label>Source<select name="source"
+    defaultValue={material.status==='ordered'?(material.source||'outside'):
+     material.status==='approved'?'outside':'undecided'}>
+    {material.status==='requested'&&<option value="undecided">Not chosen yet</option>}
+    {material.status==='ordered'&&material.source==='marketplace'&&
+     <option value="marketplace">Confirmed marketplace seller request</option>}
+    <option value="outside">Outside supplier / local stock</option>
+   </select></label>
+   <label>Supplier / order reference
+    <input name="vendor_reference" maxLength={500}
+     defaultValue={material.vendorReference??''}
+     placeholder="Actual supplier or external PO reference"/>
+   </label>
+   <p className="pv2-hint">Marketplace orders must be requested through a published seller listing; entering a reference here does not order anything. Mark received only after delivery verification.</p>
   </ProjectForm>
  </details>;
 }
