@@ -11963,6 +11963,31 @@ export interface Database {
         };
         Returns: undefined;
       };
+      project_material_access_read: {
+        Args: { p_org: string; p_project: string };
+        Returns: Json;
+      };
+      project_material_delivery_command: {
+        Args: {
+          p_org: string;
+          p_project: string;
+          p_material: string;
+          p_action: string;
+          p_reference?: string;
+          p_expected_date?: string;
+          p_window?: string;
+        };
+        Returns: Json;
+      };
+      project_material_permission_set: {
+        Args: {
+          p_org: string;
+          p_project: string;
+          p_user: string;
+          p_allowed: boolean;
+        };
+        Returns: Json;
+      };
       project_permanent_delete: {
         Args: {
           p_org: string;
@@ -12018,28 +12043,6 @@ export interface Database {
       };
       project_site_manager_read: {
         Args: { p_organization_id: string; p_project_id: string };
-        Returns: Json;
-      };
-      project_material_access_read: { Args: { p_org: string; p_project: string }; Returns: Json };
-      project_material_delivery_command: {
-        Args: {
-          p_org: string;
-          p_project: string;
-          p_material: string;
-          p_action: string;
-          p_reference?: string;
-          p_expected_date?: string;
-          p_window?: string;
-        };
-        Returns: Json;
-      };
-      project_material_permission_set: {
-        Args: {
-          p_org: string;
-          p_project: string;
-          p_user: string;
-          p_allowed: boolean;
-        };
         Returns: Json;
       };
       project_site_marketplace_order: {
