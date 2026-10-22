@@ -311,16 +311,30 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
  const contractedRevision=permissions.finance&&!contract.error?contract.data?.[0]?.revision_id:null;
  const signedContractSource=agreement.clearance_type==='signed_copy_recorded'
    &&agreement.current_scope===true&&typeof contractedRevision==='string';
- const finalRoot=(signedContractSource
-   ?quoteRoots.find(q=>q.current_revision_id===contractedRevision):null)
-   ??quoteRoots.find(q=>q.id===finalQuoteId
+ // A signed contract freezes one specific quotation revision. Even after
+ // another quotation becomes Final or the same quote gets a new revision,
+ // the project document must not silently replace the legally agreed version.
+ const signedRevision=signedContractSource&&contractedRevision
+   ?await s.client.from('quotation_revisions')
+    .select('id,quotation_id,status').eq('organization_id',s.org)
+    .eq('id',contractedRevision).maybeSingle():null;
+ const signedQuoteId=!signedRevision?.error?signedRevision?.data?.quotation_id:null;
+ const signedRoot=quoteRoots.find(q=>q.id===signedQuoteId);
+ const contractedQuote=(signedContractSource&&signedRoot&&contractedRevision&&signedRevision?.data)
+   ?{id:signedRoot.id,number:signedRoot.quotation_number??'Quotation',
+      revisionId:contractedRevision,status:signedRevision.data.status,
+      createdAt:signedRoot.created_at}:null;
+ const finalRoot=quoteRoots.find(q=>q.id===finalQuoteId
      &&q.current_revision_id&&revisionsById.has(q.current_revision_id))
    ??quoteRoots.find(q=>q.current_revision_id&&revisionsById.has(q.current_revision_id));
- const quotations:ProjectQuotation[]=finalRoot&&finalRoot.current_revision_id
-   ?[{id:finalRoot.id,number:finalRoot.quotation_number??'Quotation',
+ const currentQuote=finalRoot&&finalRoot.current_revision_id
+   ?{id:finalRoot.id,number:finalRoot.quotation_number??'Quotation',
       revisionId:finalRoot.current_revision_id,
       status:revisionsById.get(finalRoot.current_revision_id)??'',
-      createdAt:finalRoot.created_at}]:[];
+      createdAt:finalRoot.created_at}:null;
+ const quotations:ProjectQuotation[]=contractedQuote?[contractedQuote]:
+   // If signed scope is not resolvable, do not substitute a new Final quote.
+   signedContractSource?[]:currentQuote?[currentQuote]:[];
  // Read only a saved planning proposal before the agreement exists.
  // This never activates milestones or invents payment receipts.
  const paymentRevision=contractedRevision??quotations[0]?.revisionId??null;
