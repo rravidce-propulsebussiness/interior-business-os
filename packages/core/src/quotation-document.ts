@@ -6,6 +6,7 @@ import { premiumCss, premiumSections } from './premium-quotation';
 import { savedStagePaymentPlan,savedStagePaymentLinks } from './quotation-payment-plan';
 import { guidanceForConstructionStage } from './construction-payment-schedule';
 import { customerTermSections } from './quotation-terms';
+import { savedStageRequirements } from './quotation-stage-requirements';
 const money = z.string().regex(/^(0|[1-9]\d{0,79})(\.\d{1,100})?$/);
 export const documentHeaderSchema = z.object({
   branding: brandingSchema,
@@ -361,27 +362,32 @@ export function renderQuotationDocument(input: unknown): string {
     brochure.pageFooter('Payments / terms') + '</section>';
   // Only saved quote-stage associations produce this proposed QA annexure.
   // Never infer test completion, certification or material quantities.
-  const qualityCodes=[...new Set((paymentStageLinks??[]).flatMap(row=>
-    row.map(code=>code.split('/')[0]!)))].filter(code=>{
-      const info=guidanceForConstructionStage(code);
-      return info.checks.length>0||info.reports.length>0;
-    });
+  const quotedRequirements=savedStageRequirements(d.terms);
+  const qualityCodes=[...new Set((paymentStageLinks??[]).flat())].filter(stageCode=>{
+    const info=guidanceForConstructionStage(stageCode.split('/')[0]??stageCode);
+    return Boolean(quotedRequirements[stageCode]) || info.checks.length>0 ||
+      info.reports.length>0;
+  });
   const qualityPage=isFloorQuote&&qualityCodes.length>0
     ? '<section class="pb-page pb-quality-page">' +
       brochure.pageHeader('Construction quality plan') +
       '<div class="pb-section-title"><h2>Stage-wise quality &amp; material plan</h2></div>' +
-      '<p class="pb-section-subtitle">Proposed checks and records for work associated with saved payment milestones. Tests and material requirements follow approved drawings, specifications and the engineer\'s QA plan. No results or payments are automatically certified.</p>' +
+      '<p class="pb-section-subtitle">Project-specific work, materials, required tests and evidence agreed in this quotation. The approved drawings, specifications and engineer\'s QA plan govern on-site inspections; no result or payment is automatically certified.</p>' +
       '<div class="pb-terms-panel">' +
-      qualityCodes.map(code=>{
-        const info=guidanceForConstructionStage(code);
+      qualityCodes.map(stageCode=>{
+        const templateCode=stageCode.split('/')[0]??stageCode;
+        const info=guidanceForConstructionStage(templateCode);
+        const custom=quotedRequirements[stageCode];
         const detail=(label:string,entries:readonly string[])=>
           entries.length?'<p class="text"><strong>'+label+':</strong> '+
             entries.map(escape).join(' · ')+'</p>':'';
+        const title=stageCode.replaceAll('_',' ').replace('/', ' · ');
         return '<div class="pb-term-section" style="break-inside:avoid;page-break-inside:avoid">' +
-          '<h3>'+escape(code.replaceAll('_',' '))+'</h3>' +
-          detail('Materials',info.materials) +
-          detail('Checks and tests',info.checks) +
-          detail('Reports and evidence',info.reports) + '</div>';
+          '<h3>'+escape(title)+'</h3>' +
+          (custom?detail('Work activities',custom.work):'') +
+          detail('Materials',custom?.materials??info.materials) +
+          detail('Checks and tests',custom?.checks??info.checks) +
+          detail('Reports and evidence',custom?.reports??info.reports) + '</div>';
       }).join('')+'</div>' +
       '<p class="pb-section-subtitle">Lower-floor brickwork may proceed while upper-floor RCC continues, after required lower-floor structural and safety clearances.</p>' +
       brochure.pageFooter('Construction quality plan')+'</section>'
