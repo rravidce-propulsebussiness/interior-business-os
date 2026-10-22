@@ -290,3 +290,45 @@ begin
  perform private.site_log(p_org,p_project,'construction.quality.'||p_action,result_id);
  return result_id;
 end$function$;
+
+-- Permit an explicitly assigned on-site company QC reviewer to read and upload
+-- inspection evidence without granting company-wide project.manage.
+CREATE OR REPLACE FUNCTION private.site_allowed(org uuid, project uuid, roles text[])
+ RETURNS boolean
+ LANGUAGE sql
+ STABLE SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+ select private.site_access(org,project) and (
+  private.site_owner(org) or
+  (private.site_role(org,project) is null and private.has_permission(org,'project.manage')) or
+  private.site_role(org,project)=any(roles)
+  or exists(select 1 from private.construction_project_roles r
+    where r.organization_id=org and r.project_id=project and r.user_id=(select auth.uid())
+      and r.active and r.role=any(roles)
+      and r.role in ('quality_inspector','structural_engineer'))
+ )
+$function$;
+
+CREATE OR REPLACE FUNCTION private.site_role(org uuid, project uuid)
+ RETURNS text
+ LANGUAGE sql
+ STABLE SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+ select coalesce(
+   (select t.role from private.site_team t
+    join public.organization_memberships m on m.organization_id=t.organization_id and m.user_id=t.user_id and m.status='active'
+    where t.organization_id=org and t.project_id=project and t.user_id=(select auth.uid()) and t.active
+      and t.role<>'watchman' limit 1),
+   (select r.role from private.construction_project_roles r
+    join public.organization_memberships m on m.organization_id=r.organization_id and m.user_id=r.user_id and m.status='active'
+    where r.organization_id=org and r.project_id=project and r.user_id=(select auth.uid())
+      and r.active and r.role in ('quality_inspector','structural_engineer')
+    order by case when r.role='quality_inspector' then 0 else 1 end limit 1),
+   (select t.role from private.site_team t
+    join public.organization_memberships m on m.organization_id=t.organization_id and m.user_id=t.user_id and m.status='active'
+    where t.organization_id=org and t.project_id=project and t.user_id=(select auth.uid()) and t.active limit 1)
+ )
+$function$;
+
