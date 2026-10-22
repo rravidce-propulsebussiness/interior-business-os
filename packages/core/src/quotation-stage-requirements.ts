@@ -100,7 +100,7 @@ export function renameStageRequirement(
  if(mandatory)throw new Error('Required structural inspection cannot be renamed');
  const at=current[field].indexOf(original);
  if(at<0)throw new Error('Select an existing entry before editing');
- const title=nextTitle.replace(/\\s+/g,' ').trim();
+ const title=nextTitle.replace(/\s+/g,' ').trim();
  const minimum=field==='checks'?3:2;
  if(title.length<minimum||title.length>180)
   throw new Error('Enter '+minimum+' to 180 characters');
