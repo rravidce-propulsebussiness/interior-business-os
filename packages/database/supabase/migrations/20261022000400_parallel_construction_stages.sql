@@ -70,7 +70,7 @@ begin
  then raise exception 'Project execution unavailable' using errcode='42501';end if;
  return coalesce((select jsonb_agg(jsonb_build_object(
   'stage_id',s.id,
-  'status',coalesce(e.status,case when private.construction_stage_current(p_org,p_project,s.id) then 'certified' else 'not_started' end),
+  'status',case when private.construction_stage_current(p_org,p_project,s.id) then 'certified' else coalesce(e.status,'not_started') end,
   'started_at',e.started_at,'updated_at',e.updated_at,'field_finished_at',e.field_finished_at,
   'blockers',private.construction_stage_start_blockers(p_org,p_project,s.id)
  ) order by s.sequence)
@@ -124,14 +124,14 @@ begin
     if v_completed<>v_total then
      raise exception 'Complete all % work items before submitting for QC (% recorded)',v_total,v_completed using errcode='23514';end if;
     select count(*) into v_missing_checks
-    from jsonb_array_elements_text(v_stage.inspection_topics) topic
+    from jsonb_array_elements_text(v_stage.inspection_topics) as required(topic_name)
     where not exists(
      select 1 from private.site_checks c
      join private.construction_stage_record_links l
        on l.organization_id=c.organization_id and l.project_id=c.project_id and l.check_id=c.id
       and l.record_kind='check'
      where l.organization_id=p_org and l.project_id=p_project and l.stage_id=p_stage
-       and lower(trim(c.title))=lower(trim(topic)) and c.status='passed'
+       and lower(trim(c.title))=lower(trim(required.topic_name)) and c.status='passed'
        and c.photo_id is not null
     );
     if v_missing_checks>0 then
