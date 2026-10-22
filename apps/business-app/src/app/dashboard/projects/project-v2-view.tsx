@@ -323,12 +323,16 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
       const checksAllowed=allowChecks&&stageExecution?.status==='in_progress';
       const complete=done(visualStatus);
       const guidance=guidanceForConstructionStage(stage.template_code);
-      const checks=[...new Set([...stage.inspectionTopics,...guidance.checks])];
+      const customGuidance=d.stageGuidance.find(x=>x.stageId===stage.id);
+      const plannedMaterials=customGuidance?.materials??guidance.materials;
+      const plannedReports=customGuidance?.reports??guidance.reports;
+      const checks=customGuidance?stage.inspectionTopics:
+       [...new Set([...stage.inspectionTopics,...guidance.checks])];
       const payment=d.quotePaymentTriggers.filter(p=>p.stageCodes.includes(stage.instance_code));
       const linked=d.links.filter(x=>x.stage_id===stage.id);
       const stageMaterials=(site?.materials??[]).filter(m=>linked.some(l=>
        l.kind==='material'&&l.record_id===m.id));
-      const suggestedMaterials=suggestedStageMaterials(stage.template_code);
+      const suggestedMaterials=[...new Set([...suggestedStageMaterials(stage.template_code),...plannedMaterials])];
       const stageWork=d.stageProgress.work.filter(x=>stringValue(x.stage_id)===stage.id);
       const stageChecks=d.stageProgress.checks.filter(x=>stringValue(x.stage_id)===stage.id);
       const passed=checks.filter(title=>[...stageChecks,...(site?.checks??[])].some(x=>
@@ -414,12 +418,17 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
           {!!stringValue(record.notes)&&<p className="pv2-hint">{stringValue(record.notes)}</p>}
          </div>)}
         </details>}
-        {(!!guidance.materials.length||allowMaterials||!!stageMaterials.length)&&
+        {!!plannedReports.length&&<details className="pv2-stage-secondary">
+          <summary>Evidence & reports to collect ({plannedReports.length})</summary>
+          <ul>{plannedReports.map((report,i)=><li key={i}>{report}</li>)}</ul>
+          <p className="pv2-hint">Upload evidence against this project stage. Listed reports are requirements, not automatically approved documents.</p>
+         </details>}
+        {(!!plannedMaterials.length||allowMaterials||!!stageMaterials.length)&&
          <details className="pv2-stage-secondary pv2-stage-material-plan">
           <summary>Materials to plan & request ({stageMaterials.length} recorded)</summary>
-          {!!guidance.materials.length&&<>
-           <p className="pv2-hint">Typical resources for this stage. Choose actual materials and quantities from the approved drawings or BOQ.</p>
-           <ul>{guidance.materials.map((name,i)=><li key={i}>{name}</li>)}</ul>
+          {!!plannedMaterials.length&&<>
+           <p className="pv2-hint">Planned materials from the accepted quotation and approved site specification. Enter actual quantities when requesting.</p>
+           <ul>{plannedMaterials.map((name,i)=><li key={i}>{name}</li>)}</ul>
           </>}
           {!!stageMaterials.length&&<div className="pv2-stage-material-requests">
            <strong>Stage material requests</strong>
