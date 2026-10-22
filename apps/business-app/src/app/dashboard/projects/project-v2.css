@@ -1061,3 +1061,58 @@
  .pv2-page .pv2-qc-inner,.pv2-page .pv2-qc-item-body{animation:none}
  .pv2-page .pv2-qc-chevron{transition:none}
 }
+
+
+/* One source of truth per work item. Legacy stage-wide requests remain available,
+   but do not repeat material, photo or report actions at the bottom of the stage. */
+.pv2-page .pv2-stage-quality-hub{
+ margin:11px 0 13px;border:1px solid #f0e2d6;border-radius:13px;background:#fff;overflow:hidden
+}
+.pv2-page .pv2-stage-quality-hub>summary{
+ display:flex;align-items:center;justify-content:space-between;gap:12px;list-style:none;
+ padding:13px 14px;cursor:pointer;color:#b65521;font-size:12px;font-weight:850;background:#fffaf7
+}
+.pv2-page .pv2-stage-quality-hub>summary::-webkit-details-marker{display:none}
+.pv2-page .pv2-stage-quality-hub>summary>strong{font-size:11px;color:#de6323;white-space:nowrap}
+.pv2-page .pv2-stage-quality-hub[open]>summary{border-bottom:1px solid #f2e7db}
+.pv2-page .pv2-stage-quality-inner{padding:11px;display:grid;gap:11px;animation:daily-appear .2s both}
+.pv2-page .pv2-stage-quality-inner>.pv2-stage-task-group{padding:9px;margin:0}
+.pv2-page .pv2-stage-quality-inner>.pv2-stage-secondary{margin:0}
+.pv2-page .pv2-item-inline-quick{
+ display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px;
+}
+.pv2-page .pv2-item-inline-quick>a{
+ display:inline-flex;align-items:center;justify-content:center;min-height:37px;padding:8px 12px;
+ border:1px solid #f3d5c0;border-radius:9px;background:#fff8f3;color:#d35b1e;
+ font-size:11px;font-weight:800;text-decoration:none;
+}
+.pv2-page .pv2-item-material-panel{
+ margin:14px 0 0;border:1px solid #f3dcca;border-radius:11px;background:#fff9f4;min-width:0
+}
+.pv2-page .pv2-item-material-panel>summary{
+ cursor:pointer;list-style:none;padding:13px;color:#cc5621;
+ font-weight:850;font-size:12px;line-height:1.5
+}
+.pv2-page .pv2-item-material-panel>summary::-webkit-details-marker{display:none}
+.pv2-page .pv2-item-material-panel[open]>summary{border-bottom:1px solid #f1d9c8}
+.pv2-page .pv2-activity-material-content{display:grid;gap:10px;padding:10px;min-width:0}
+.pv2-page .pv2-activity-material-content>.pv2-stage-material-requests{margin:0}
+.pv2-page .pv2-activity-material-content>.pv2-stage-material-entry{margin:0;background:#fff}
+.pv2-page .pv2-legacy-materials{
+ margin:12px 0;background:#fff;border:1px solid #e9e3de;border-radius:12px;padding:12px
+}
+.pv2-page .pv2-legacy-materials>summary{
+ cursor:pointer;list-style:none;color:#56667d;font-weight:800;font-size:11px
+}
+.pv2-page .pv2-legacy-materials>summary::-webkit-details-marker{display:none}
+.pv2-page .pv2-legacy-materials .pv2-stage-material-requests{margin-top:10px}
+@media(max-width:680px){
+ .pv2-page .pv2-stage-quality-inner{padding:8px}
+ .pv2-page .pv2-stage-quality-hub>summary{gap:8px;padding:12px 10px}
+ .pv2-page .pv2-stage-quality-hub>summary>strong{font-size:10px}
+ .pv2-page .pv2-item-inline-quick>a{flex:1 1 120px;white-space:normal}
+ .pv2-page .pv2-activity-material-content{padding:7px}
+}
+@media(prefers-reduced-motion:reduce){
+ .pv2-page .pv2-stage-quality-inner{animation:none}
+}
