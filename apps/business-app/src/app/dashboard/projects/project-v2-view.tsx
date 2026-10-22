@@ -311,9 +311,6 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
     <p>Manage stages, work, payments, materials, labour, photos and checks in one place.</p></div>
    <span className="pv2-timeline-counter">{activeStages} active · {timelineStages.length} stages</span>
   </div>
-  {d.quotations.length>0&&d.permissions.quotation&&<p className="pv2-timeline-quote-note">
-   Quotation {d.quotations[0]?.number} is linked automatically in <a href={cur(d.project.id,'documents')}>Quote & Agreement</a>, not repeated as construction work.
-  </p>}
   {!timelineStages.length?<div className="pv2-stage-empty">
     <p>Stages are created from the signed agreement and its approved quotation; no generic stages are inserted.</p>
     {d.site?.canManage&&d.agreement&&<SyncStages id={d.project.id}/>}
