@@ -225,12 +225,33 @@ export default async function Quotations({
       })
     : {data:{},error:null};
   if(finalChoiceError) throw new Error('Could not load final quotation selections');
+  const manualChoices=validCustomerIds.length
+    ?await s.client.rpc('quotation_final_marked' as never,{
+      p_org:s.org,p_customer_ids:validCustomerIds,
+     } as never):{data:{},error:null};
+  if(manualChoices.error)throw new Error('Could not read manual final quotations');
+  const manualByCustomer=manualChoices.data&&typeof manualChoices.data==='object'
+    &&!Array.isArray(manualChoices.data)
+    ?manualChoices.data as Record<string,unknown>:{};
+
   const finalByCustomer = new Map<string,string>(
     finalChoices && typeof finalChoices==='object' && !Array.isArray(finalChoices)
       ? Object.entries(finalChoices).filter((entry):entry is [string,string] =>
           typeof entry[1]==='string')
       : [],
   );
+  // Final is also checked in the database on submission.
+  // Hide changing the project's final quotation from other staff.
+  const finalCandidateIds=[...new Set(visible.map(row=>row.revision?.quotation_id)
+    .filter((id):id is string=>Boolean(id)))].slice(0,100);
+  const finalPermissions=finalCandidateIds.length
+    ?await s.client.rpc('quotation_final_eligible' as never,{
+      p_org:s.org,p_quotation_ids:finalCandidateIds,
+     } as never):{data:{},error:null};
+  if(finalPermissions.error)throw new Error('Could not read final quotation permissions');
+  const finalEligibility=finalPermissions.data&&typeof finalPermissions.data==='object'
+    &&!Array.isArray(finalPermissions.data)
+    ?finalPermissions.data as Record<string,unknown>:{};
   const mobileCustomers = [...customerGroups.values()].map((group) => ({
 
     ...group,
@@ -255,7 +276,8 @@ export default async function Quotations({
       <div className="qs-quotes-mobile-top">
         <Link href={editor}>{row.quotation_number || 'Quotation'}</Link>
         {revision?.quotation_id===finalByCustomer.get(customerId) &&
-          <span className="qs-final-label">★ Final</span>}
+          <span className="qs-final-label">{manualByCustomer[customerId]===revision?.quotation_id?
+          '★ Final':'Latest'}</span>}
         {shared ? <span className="qs-quotes-state qs-state-shared">Shared</span> : row.status === 'draft' ? <span className="qs-quotes-state">Saved</span> : null}
       </div>
       <div className="qs-quotes-mobile-meta">
@@ -267,7 +289,7 @@ export default async function Quotations({
         <span>{row.project_name || 'Project'}</span>
         <span>{niceDate(createdAt)} · R{row.revision_number ?? 1}</span>
       </div>
-      {canEdit && revision && revision.quotation_id!==finalByCustomer.get(customerId) &&
+      {revision && finalEligibility[revision.quotation_id]===true && manualByCustomer[customerId]!==revision.quotation_id &&
         <QuotationFinalButton quotationId={revision.quotation_id}
           number={row.quotation_number||'Quotation'}/>}
       <div className="qs-quotes-mobile-actions">
@@ -311,7 +333,8 @@ export default async function Quotations({
     <td className="qs-quotes-no">
       <Link href={editor}>{row.quotation_number || 'Quotation'}</Link>
       {revision?.quotation_id===finalByCustomer.get(customerId) &&
-        <span className="qs-final-label">★ Final</span>}
+        <span className="qs-final-label">{manualByCustomer[customerId]===revision?.quotation_id?
+          '★ Final':'Latest'}</span>}
       <small>Revision {row.revision_number ?? 1}</small>
     </td>
     <td>
@@ -344,7 +367,7 @@ export default async function Quotations({
         {row.status === 'issued' && canCreate && revision &&
           <QuotationReviseButton revisionId={row.id} version={revision.version}
             number={row.quotation_number || 'Quotation'} />}
-        {canEdit && revision && revision.quotation_id!==finalByCustomer.get(customerId) &&
+        {revision && finalEligibility[revision.quotation_id]===true && manualByCustomer[customerId]!==revision.quotation_id &&
           <QuotationFinalButton quotationId={revision.quotation_id}
             number={row.quotation_number||'Quotation'}/>}
         <details className="qs-quotes-more">
