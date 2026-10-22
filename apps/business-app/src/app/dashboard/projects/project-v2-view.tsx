@@ -11,6 +11,7 @@ import { suggestedStageMaterials } from './stage-material-options';
 import { MaterialMarketplaceOrder } from './project-material-marketplace-order';
 import { MaterialOrderingAccess,MaterialDeliveryActions } from './project-material-delivery';
 import { StageChecklistItem } from './project-stage-checklist-item';
+import { ProjectDailyCommand } from './project-daily-command';
 import { StageActivationControl } from './project-stage-activation';
 import { ProjectClientAccess } from './project-client-access';
 import { ProjectSiteSurvey,ProjectAdvanceAction } from './project-next-forms';
@@ -27,6 +28,7 @@ import {
 } from './project-v2-forms';
 import '../owner-dashboard.css';
 import './project-v2.css';
+import './project-daily-command.css';
 
 export const projectPages=[
  {slug:'overview',title:'Overview',icon:'dashboard' as OwnerIconName},
@@ -72,18 +74,35 @@ function PhotoStrip({projectId,rows}:{projectId:string;rows:SiteRow[]}){
 }
 function FieldDate({value}:{value:unknown}){return <time>{shortDate(value)}</time>;}
 function LinkTabs({data,active}:{data:WorkspaceData;active:ProjectPageSlug}){
- return <nav className="pv2-project-tabs" aria-label="Project workspace pages">
-  {projectPages.filter(p=>p.slug!=='timeline'&&(p.slug!=='payments'||data.permissions.payments)).map(p=>
-   <Link key={p.slug} href={cur(data.project.id,p.slug)}
-    aria-current={active===p.slug?'page':undefined} className={active===p.slug?'selected':''}>
-    <OwnerIcon name={p.icon} size={16}/>{p.slug==='documents'&&!data.permissions.quotation&&!data.permissions.finance?'Documents':p.title}</Link>)}
+ const id=data.project.id;
+ const tabs=[
+  {slug:'overview' as ProjectPageSlug,title:'Overview',icon:'dashboard' as OwnerIconName,href:cur(id,'overview')},
+  {slug:'timeline' as ProjectPageSlug,title:'Stages',icon:'projects' as OwnerIconName,href:cur(id,'timeline')},
+  {slug:'execution' as ProjectPageSlug,title:'Photos',icon:'globe' as OwnerIconName,href:cur(id,'execution')+'#site-photos'},
+  {slug:'execution' as ProjectPageSlug,title:'Reports',icon:'reports' as OwnerIconName,href:cur(id,'execution')},
+  {slug:'team' as ProjectPageSlug,title:'Team',icon:'team' as OwnerIconName,href:cur(id,'team')},
+ ];
+ const extra=projectPages.filter(item=>!['overview','timeline','execution','team'].includes(item.slug)
+  &&(item.slug!=='payments'||data.permissions.payments));
+ return <nav className="pv2-project-tabs pv2-premium-tabs" aria-label="Project sections">
+  {tabs.map(tab=><Link key={tab.title} href={tab.href}
+   aria-current={active===tab.slug&&(tab.title!=='Photos'||active==='execution')?'page':undefined}
+   className={active===tab.slug&&(tab.title!=='Photos'||active==='execution')?'selected':''}>
+   <OwnerIcon name={tab.icon} size={16}/>{tab.title}</Link>)}
+  <details className="pv2-project-more"><summary><OwnerIcon name="settings" size={16}/> More</summary>
+   <div>{extra.map(item=><Link key={item.slug} href={cur(id,item.slug)}>
+    <OwnerIcon name={item.icon} size={16}/>{item.title}</Link>)}</div>
+  </details>
  </nav>;
 }
 function ProjectHeader({data,active}:{data:WorkspaceData;active:ProjectPageSlug}){
  const p=data.project;
  return <div className="pv2-project-header">
   <div className="pv2-project-identity">
-   <div className="pv2-project-thumb"><OwnerIcon name="projects" size={27}/></div>
+   <div className="pv2-project-thumb">{data.site?.media.find(row=>stringValue(row.mime).startsWith('image/'))
+    ?<Image unoptimized width={95} height={65} alt="Project site"
+      src={'/dashboard/projects/'+p.id+'/site/media/'+data.site.media.find(row=>stringValue(row.mime).startsWith('image/'))!.id}/>
+    :<OwnerIcon name="projects" size={27}/>}</div>
    <div><h1>{p.name}</h1><div className="pv2-project-meta">
     <span><OwnerIcon name="quotations" size={13}/>{p.code||'Project'}</span>
     <span><OwnerIcon name="projects" size={13}/>{p.industry}</span>
@@ -583,7 +602,11 @@ function ProjectWorkHub({d,showHistory=false}:{d:WorkspaceData;showHistory?:bool
   </div>
  </div>;
 }
-function Overview({d}:{d:WorkspaceData}){return <ProjectWorkHub d={d}/>;}
+function Overview({d}:{d:WorkspaceData}){
+ return <ProjectDailyCommand d={d}
+  stageDetails={<ProjectStageBoard d={d}/>}
+  financialDetails={<ProjectFinancialSummary d={d}/>}/>;
+}
 
 type Activity={id:string;date:string;title:string;kind:string;description:string;media?:SiteRow};
 function timeline(d:WorkspaceData):Activity[]{
@@ -794,7 +817,7 @@ function Execution({d}:{d:WorkspaceData}){
     <p>Tomorrow: {stringValue(row.tomorrow_plan)}</p>
     {Boolean(row.blockers)&&<small>Blockers: {stringValue(row.blockers)}</small>}
    </article>)}</div>:<Blank title="No daily execution reports" detail="When work starts, site engineers can record daily updates here."/>}
-   <PhotoStrip projectId={d.project.id} rows={d.site?.media??[]}/>
+   <div id="site-photos"><PhotoStrip projectId={d.project.id} rows={d.site?.media??[]}/></div>
    {d.site?.stage==='execution'&&['manager','site_engineer'].includes(d.site.role)&&
     <details className="pv2-edit-drawer"><summary>＋ Add Work Update</summary><SiteReportForm id={d.project.id}/></details>}
    {d.site?.stage==='execution'&&
