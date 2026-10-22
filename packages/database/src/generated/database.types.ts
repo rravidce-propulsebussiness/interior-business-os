@@ -12024,6 +12024,10 @@ export interface Database {
         };
         Returns: Json;
       };
+      project_quote_stage_guidance_import: {
+        Args: { p_org: string; p_contract: string };
+        Returns: Json;
+      };
       project_quote_timeline_create: {
         Args: { p_org: string; p_contract: string; p_input: Json };
         Returns: Json;
@@ -12130,6 +12134,10 @@ export interface Database {
         Returns: Json;
       };
       project_stage_checklist_read: {
+        Args: { p_org: string; p_project: string };
+        Returns: Json;
+      };
+      project_stage_guidance_read: {
         Args: { p_org: string; p_project: string };
         Returns: Json;
       };

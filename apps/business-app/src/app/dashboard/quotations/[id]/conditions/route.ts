@@ -5,6 +5,7 @@ import { DomainError, idSchema, safeFailure } from '@business-os/shared';
 import { quotationCommandSchema } from '@business-os/core/commercial';
 import { savedStagePaymentPlan, encodeStagePaymentLinks, savedStagePaymentLinks } from '@business-os/core/quotation-payment-plan';
 import { constructionPlanFromQuotedDescriptions } from '@business-os/core/quote-construction-handoff';
+import { encodeStageRequirements,savedStageRequirements,validateStageRequirements } from '@business-os/core/quotation-stage-requirements';
 import { joinQuotationTerms, splitQuotationTerms } from '../../quotation-terms-format';
 
 export const runtime = 'nodejs';
@@ -30,6 +31,7 @@ const payload = z.discriminatedUnion('kind',[
       percent: z.string().regex(/^\d+(?:\.\d{1,2})?$/),
       stageCodes: z.array(z.string().regex(/^[A-Z][A-Z0-9_]*(?:\/[A-Z][A-Z0-9_]*)?$/).max(120)).max(18).optional(),
     }).strict()).min(1).max(40),
+    stageRequirements:z.record(z.string(),z.unknown()).optional(),
   }).strict(),
 ]);
 
@@ -122,7 +124,14 @@ export async function POST(request:Request, {params}:{
         .join('\n')+'\n[/STAGE_PAYMENT_PLAN]';
       const hasLinks=incoming.stages.some(row=>row.stageCodes?.length);
       const links=hasLinks?encodeStagePaymentLinks(incoming.stages.map(row=>row.stageCodes??[])):'';
-      terms=joinQuotationTerms({...saved,paymentPlan:[mark,links].filter(Boolean).join('\n')});
+      let overrides;
+      try{overrides=validateStageRequirements(incoming.stageRequirements??savedStageRequirements(current.terms));}
+      catch{ return reply({message:'Check the customized work, materials and QC lists.',reference:ref},422); }
+      const validStageKeys=incoming.stages.flatMap(row=>row.stageCodes??[]);
+      if(Object.keys(overrides).some(code=>!validStageKeys.includes(code)))
+        return reply({message:'Customized requirements must belong to a quoted construction work stage.',reference:ref},422);
+      const custom=encodeStageRequirements(overrides);
+      terms=joinQuotationTerms({...saved,paymentPlan:[mark,links,custom].filter(Boolean).join('\n')});
       if(!savedStagePaymentPlan(terms)||
         (hasLinks&&!savedStagePaymentLinks(terms)))
         return reply({message:'Invalid payment schedule. Check all stages and percentages.',reference:ref},422);

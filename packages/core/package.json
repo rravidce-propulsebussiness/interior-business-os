@@ -8,6 +8,7 @@
     "./commercial": "./src/commercial.ts",
     "./quotation-document": "./src/quotation-document.ts",
     "./quotation-payment-plan": "./src/quotation-payment-plan.ts",
+    "./quotation-stage-requirements": "./src/quotation-stage-requirements.ts",
     "./quotation-terms": "./src/quotation-terms.ts",
     "./sft-quotation": "./src/sft-quotation.ts",
     "./custom-brand-quote": "./src/custom-brand-quote.ts",
