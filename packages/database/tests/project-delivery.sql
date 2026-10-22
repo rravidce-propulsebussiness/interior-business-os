@@ -93,8 +93,8 @@ begin
  end;
  perform public.project_site_command(org,project,'material_update',
    jsonb_build_object('id',need_id,'status','approved','source','undecided','vendor_reference',''));
- perform public.project_site_command(org,project,'material_update',
-   jsonb_build_object('id',need_id,'status','ordered','source','outside','vendor_reference','PO-TEST-001'));
+ perform public.project_material_delivery_command(org,project,need_id,'place_outside_order',
+   'PO-TEST-001',(now() at time zone 'Asia/Kolkata')::date,'afternoon');
  result=public.project_site_command(org,project,'check_add',
    '{"title":"Column gridline level check","notes":"Compare plan"}');
  check_id=(result->>'id')::uuid;

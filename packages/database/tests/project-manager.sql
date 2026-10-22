@@ -60,8 +60,8 @@ begin
   jsonb_build_object('id',material,'status','approved','source','undecided','vendor_reference',''));
  perform public.project_site_manager_command(org,project,'material_quantity_correct',
   jsonb_build_object('id',material,'quantity',120,'reason','Recount before purchase'));
- perform public.project_site_command(org,project,'material_update',
-  jsonb_build_object('id',material,'status','ordered','source','outside','vendor_reference','PO-001'));
+ perform public.project_material_delivery_command(org,project,material,'place_outside_order',
+  'PO-001',(now() at time zone 'Asia/Kolkata')::date,'evening');
  begin
   perform public.project_site_manager_command(org,project,'material_quantity_correct',
     jsonb_build_object('id',material,'quantity',140,'reason','Cannot change ordered quantity'));

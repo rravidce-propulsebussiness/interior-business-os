@@ -10917,6 +10917,10 @@ export interface Database {
       client_portal_media_get: { Args: { p_media_id: string }; Returns: Json };
       client_portal_project: { Args: { p_project_id: string }; Returns: Json };
       client_portal_projects: { Args: Record<string, never>; Returns: Json };
+      client_portal_site_materials: {
+        Args: { p_project_id: string };
+        Returns: Json;
+      };
       client_portal_stage_payment_requests: {
         Args: { p_project_id: string };
         Returns: Json;
@@ -11958,6 +11962,31 @@ export interface Database {
           p_response: string;
         };
         Returns: undefined;
+      };
+      project_material_access_read: {
+        Args: { p_org: string; p_project: string };
+        Returns: Json;
+      };
+      project_material_delivery_command: {
+        Args: {
+          p_org: string;
+          p_project: string;
+          p_material: string;
+          p_action: string;
+          p_reference?: string;
+          p_expected_date?: string;
+          p_window?: string;
+        };
+        Returns: Json;
+      };
+      project_material_permission_set: {
+        Args: {
+          p_org: string;
+          p_project: string;
+          p_user: string;
+          p_allowed: boolean;
+        };
+        Returns: Json;
       };
       project_permanent_delete: {
         Args: {

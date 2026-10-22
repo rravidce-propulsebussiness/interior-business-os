@@ -49,6 +49,7 @@ export type ClientMaterial = {
   ordered_quantity: string | null;
   po_number: string | null;
   expected_date: string | null;
+  expected_window?: string | null | undefined;
   status: string;
   received_date: string | null;
   sort_time: string | null;
@@ -271,6 +272,15 @@ function advanceDate(value: string | null, offset: number) {
   if (Number.isNaN(d.getTime())) return null;
   d.setUTCDate(d.getUTCDate() + offset);
   return d.toISOString().slice(0, 10);
+}
+function deliveryExpectation(material:ClientMaterial,localDate:string){
+ if(material.status==='delivered'||material.status==='received')return 'Received at site';
+ if(!material.expected_date)return material.status==='ordered'?'Expected delivery not yet confirmed':'Not ordered yet';
+ const today=localDate;
+ const tomorrow=advanceDate(today,1);
+ const label=material.expected_date===today?'Today':material.expected_date===tomorrow?'Tomorrow':fmt(material.expected_date);
+ const window=material.expected_window&&material.expected_window!=='anytime'?' · '+pretty(material.expected_window):'';
+ return label+window;
 }
 function statusTone(status: string) {
   if (positiveStates.has(status) || status === 'delivered') return 'good';
@@ -745,13 +755,7 @@ export function ClientDashboard({
                           {short(item.description, 45)}
                         </b>
                         <small>
-                          {item.expected_date
-                            ? fmt(item.expected_date, {
-                                day: 'numeric',
-                                month: 'short',
-                                timeZone: 'UTC',
-                              })
-                            : '—'}
+                          {deliveryExpectation(item,metrics.local_date)}
                         </small>
                         <span className={'pc-pill ' + statusTone(item.status)}>
                           {pretty(item.status)}
@@ -931,8 +935,9 @@ export function ClientDashboard({
                           {m.received_date
                             ? 'Received ' + fmt(m.received_date)
                             : m.expected_date
-                              ? 'Expected ' + fmt(m.expected_date)
-                              : 'Awaiting scheduling'}
+                              ? 'Expected ' + deliveryExpectation(m,metrics.local_date)
+                              : m.status==='ordered'?'Ordered · delivery date pending':
+                                m.status==='approved'?'Approved · not yet ordered':'Awaiting order approval'}
                         </small>
                       </div>
                       <span className={'pc-pill ' + statusTone(m.status)}>
