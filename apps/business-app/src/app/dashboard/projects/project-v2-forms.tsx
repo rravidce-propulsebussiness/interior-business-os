@@ -266,23 +266,32 @@ const materialUnits=[
  {value:'cum',label:'Cubic metres'},{value:'yards',label:'Yards'},
  {value:'metres',label:'Metres'},{value:'feet',label:'Feet'},
 ];
-export function MaterialRequestForm({id}:{id:string}){
+export function MaterialRequestForm({id,stageId,suggestions=[]}:{
+ id:string;stageId?:string;suggestions?:readonly string[];
+}){
  const router=useRouter();
  const [items,setItems]=useState<MaterialLine[]>([newMaterial()]);
  const [state,submit,pending]=useActionState(async(_prev:Result,form:FormData)=>{
-  const result=await saveProjectMaterials(id,form);
+  const result=await saveProjectMaterials(id,form,stageId);
   if(result.saved){setItems([newMaterial()]);router.refresh();}
   return result;
  },initial);
  const edit=(index:number,key:keyof MaterialLine,value:string)=>
   setItems(current=>current.map((row,i)=>index===i?{...row,[key]:value}:row));
  return <form action={submit} className="pv2-form pv2-batch-material-form">
-  <p className="pv2-hint">Add all materials needed for this work. Each line is tracked separately for procurement.</p>
+  <p className="pv2-hint">Enter quantities and sizes for this stage. Approval is required before requesting a marketplace seller. No order is placed by this form.</p>
   {items.map((row,i)=><div className="pv2-material-line" key={i}>
    <div className="pv2-material-line-head"><strong>Material {i+1}</strong>
     {items.length>1&&<button type="button" className="pv2-button pv2-outline"
      onClick={()=>setItems(v=>v.filter((_,n)=>i!==n))}>Remove</button>}
    </div>
+   {!!suggestions.length&&<label>Choose material from this stage (or enter your own)
+    <select aria-label={'Suggested material '+(i+1)} value="" onChange={e=>{
+     if(e.target.value)edit(i,'item',e.target.value);
+    }}>
+     <option value="">Select a material</option>
+     {suggestions.map(name=><option key={name} value={name}>{name}</option>)}
+    </select></label>}
    <div className="pv2-two">
     <label>Material / size<input required minLength={2} maxLength={200} value={row.item}
      onChange={e=>edit(i,'item',e.target.value)} placeholder="Example: TMT steel 8 mm, cement"/></label>
