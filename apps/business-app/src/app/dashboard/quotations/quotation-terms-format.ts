@@ -14,7 +14,7 @@ const HEADINGS = [
   ['Warranty', 'warranty'],
   ['Additional terms', 'additional'],
 ] as const;
-const STAGE = /\[STAGE_PAYMENT_(PLAN|LINKS)\][\s\S]*?\[\/STAGE_PAYMENT_\1\]/g;
+const STAGE = /\[(STAGE_PAYMENT_PLAN|STAGE_PAYMENT_LINKS|STAGE_CUSTOM_REQUIREMENTS)\][\s\S]*?\[\/\1\]/g;
 const HEADER = /^(Inclusions|Exclusions|Warranty|Additional terms):[ \t]*$/gim;
 
 export function splitQuotationTerms(terms: string): QuotationTermsSections {
