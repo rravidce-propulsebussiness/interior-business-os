@@ -801,8 +801,21 @@ describe('customer final quotation selection',()=>{
     expect(quotes).toContain('★ Final');
     expect(quotes).toContain('QuotationFinalButton');
     expect(quotes).toContain('quote.customerId');
+    expect(quotes).toContain('quotation_final_marked');
+    expect(quotes).toContain('Latest');
   });
 
+  it('enforces assigned manager or owner only for created projects and keeps signed revisions fixed',()=>{
+    const permissions=file('../../../../../../packages/database/supabase/migrations/20261022000800_project_final_quote_permissions.sql');
+    const manager=file('../../../../../../packages/database/supabase/migrations/20261022001000_project_manager_final_quote_access.sql');
+    expect(permissions).toContain('private.site_owner(p_org)');
+    expect(permissions).toContain("r.role in ('project_manager','project_director')");
+    expect(permissions).toContain('coalesce(pinned.id,newest.id)');
+    expect(manager).toContain("private.has_permission(p_org,'quotation.view')");
+    expect(quotes).toContain('quotation_final_eligible');
+    expect(quotes).toContain('manualByCustomer[customerId]');
+    expect(action).toContain("revalidatePath('/dashboard/projects','layout')");
+  });
   it('securely selects one customer quote without changing draft, issue or PDF',()=>{
     expect(migration).toContain('PRIMARY KEY(organization_id,customer_id)');
     expect(migration).toContain("private.has_permission(p_org,'quotation.edit')");
@@ -811,7 +824,7 @@ describe('customer final quotation selection',()=>{
     expect(migration).toContain('REVOKE ALL ON private.quotation_final_selections');
     expect(migration).not.toContain('UPDATE public.quotation_revisions');
     expect(migration).not.toContain('UPDATE public.quotations');
-    expect(action).toContain("commercialServices('quotation.edit','quotation')");
+    expect(action).toContain("commercialServices('quotation.view','quotation')");
     expect(action).toContain("s.client.rpc('quotation_mark_final'");
     expect(button).toContain('Mark as Final');
     expect(button).toContain('router.refresh()');
