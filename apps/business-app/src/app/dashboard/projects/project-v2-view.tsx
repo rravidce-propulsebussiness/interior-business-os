@@ -7,6 +7,8 @@ import { OwnerProjectRequests } from '../../project-request-widgets';
 import { canAccess } from '@business-os/auth';
 import { guidanceForConstructionStage } from '@business-os/core/construction-payment-schedule';
 import { ProjectStageLinker,type StageLinkOption } from './project-stage-linker';
+import { suggestedStageMaterials } from './stage-material-options';
+import { MaterialMarketplaceOrder } from './project-material-marketplace-order';
 import { StageChecklistItem } from './project-stage-checklist-item';
 import { ProjectClientAccess } from './project-client-access';
 import { ProjectSiteSurvey,ProjectAdvanceAction } from './project-next-forms';
@@ -311,6 +313,9 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
       const checks=[...new Set([...stage.inspectionTopics,...guidance.checks])];
       const payment=d.quotePaymentTriggers.filter(p=>p.stageCodes.includes(stage.instance_code));
       const linked=d.links.filter(x=>x.stage_id===stage.id);
+      const stageMaterials=(site?.materials??[]).filter(m=>linked.some(l=>
+       l.kind==='material'&&l.record_id===m.id));
+      const suggestedMaterials=suggestedStageMaterials(stage.template_code);
       const stageWork=d.stageProgress.work.filter(x=>stringValue(x.stage_id)===stage.id);
       const stageChecks=d.stageProgress.checks.filter(x=>stringValue(x.stage_id)===stage.id);
       const passed=checks.filter(title=>[...stageChecks,...(site?.checks??[])].some(x=>
@@ -393,13 +398,49 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
           {!!stringValue(record.notes)&&<p className="pv2-hint">{stringValue(record.notes)}</p>}
          </div>)}
         </details>}
-        {!!guidance.materials.length&&<details className="pv2-stage-secondary"><summary>Materials to plan</summary>
-         <ul>{guidance.materials.map((name,i)=><li key={i}>{name}</li>)}</ul></details>}
+        {(!!guidance.materials.length||allowMaterials||!!stageMaterials.length)&&
+         <details className="pv2-stage-secondary pv2-stage-material-plan">
+          <summary>Materials to plan & request ({stageMaterials.length} recorded)</summary>
+          {!!guidance.materials.length&&<>
+           <p className="pv2-hint">Typical resources for this stage. Choose actual materials and quantities from the approved drawings or BOQ.</p>
+           <ul>{guidance.materials.map((name,i)=><li key={i}>{name}</li>)}</ul>
+          </>}
+          {!!stageMaterials.length&&<div className="pv2-stage-material-requests">
+           <strong>Stage material requests</strong>
+           {stageMaterials.map(m=>{
+            const source=stringValue(m.source),status=stringValue(m.status);
+            return <article key={m.id} className="pv2-stage-material-row">
+             <div><b>{stringValue(m.item)}</b>
+              <small>{stringValue(m.quantity)} {stringValue(m.unit)}</small></div>
+             <Status value={status}/>
+             {d.permissions.purchaseManage&&<MaterialMarketplaceOrder
+              projectId={d.project.id} material={{
+               id:m.id,item:stringValue(m.item),quantity:Number(m.quantity),
+               unit:stringValue(m.unit),status,source,
+               vendorReference:stringValue(m.vendor_reference),
+              }} offers={d.marketplaceOffers}/>}
+             {['approved','requested','ordered','received'].includes(status)&&
+              <p className="pv2-hint">{
+               status==='requested'?'Awaiting owner/procurement approval':
+               status==='approved'?'Approved for sourcing':
+               status==='ordered'?'Supplier order accepted / placed; delivery still pending':
+               'Marked received by site staff'
+              }</p>}
+            </article>;
+           })}
+          </div>}
+          {allowMaterials&&<details className="pv2-stage-material-entry">
+           <summary>+ Add materials needed for this stage</summary>
+           <MaterialRequestForm id={d.project.id} stageId={stage.id}
+            suggestions={suggestedMaterials}/>
+          </details>}
+          <p className="pv2-hint">Stage needs → internal approval → marketplace seller request or outside supplier → delivery verification. Requesting does not automatically place an order.</p>
+         </details>}
         <div className="pv2-stage-attachment-count">{linked.length} linked site record{linked.length===1?'':'s'} · Linked evidence is not an approval.</div>
         <div className="pv2-command-stage-actions">
          {allowWork&&<details><summary><OwnerIcon name="projects" size={16}/> Update work</summary><SiteReportForm id={d.project.id}/></details>}
          {site?.stage==='execution'&&<details><summary><OwnerIcon name="projects" size={16}/> Upload photos</summary><SiteMediaForm id={d.project.id}/></details>}
-         {allowMaterials&&<details><summary><OwnerIcon name="purchases" size={16}/> Request materials</summary><MaterialRequestForm id={d.project.id}/></details>}
+
 
          {site?.canManage&&!!site.memberOptions.length&&<details><summary><OwnerIcon name="team" size={16}/> Assign team</summary><AssignRole projectId={d.project.id} users={site.memberOptions}/></details>}
         </div>
@@ -458,8 +499,6 @@ function ProjectCommandSidebar({d,showHistory=false}:{d:WorkspaceData;showHistor
      <details><summary><OwnerIcon name="projects" size={16}/> Add work update</summary><SiteReportForm id={d.project.id}/></details>}
     {d.site?.stage==='execution'&&
      <details><summary><OwnerIcon name="projects" size={16}/> Add photo</summary><SiteMediaForm id={d.project.id}/></details>}
-    {d.site?.stage==='execution'&&
-     <details><summary><OwnerIcon name="purchases" size={16}/> Request material</summary><MaterialRequestForm id={d.project.id}/></details>}
     {d.site?.canManage&&
      <details><summary><OwnerIcon name="team" size={16}/> Assign labour / team</summary>
       <p className="pv2-hint">Assign existing employees to this project. Daily labour counts are recorded with work updates.</p>
@@ -626,7 +665,10 @@ function Procurement({d}:{d:WorkspaceData}){
      {Boolean(m.vendor_reference)&&<small>Supplier / order: {stringValue(m.vendor_reference)}</small>}</div>
     <Status value={stringValue(m.status)}/>
     {site?.stage==='execution'&&site.role&&['manager','procurement'].includes(site.role)&&
-     <MaterialUpdateForm id={d.project.id} material={{id:m.id,status:stringValue(m.status)}}/>}
+     <MaterialUpdateForm id={d.project.id} material={{
+      id:m.id,status:stringValue(m.status),source:stringValue(m.source),
+      vendorReference:stringValue(m.vendor_reference),
+     }}/>}
    </article>)}</div>:
     <Blank title="No material requests" detail="Site engineers and procurement staff can add requests throughout the project."/>}
    {site?.stage==='execution'&&['manager','procurement','site_engineer'].includes(site.role)&&

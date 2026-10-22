@@ -841,3 +841,37 @@
  color:#e65b13;font-weight:800;text-decoration:underline;
  text-underline-offset:2px;white-space:nowrap;
 }
+
+/* Stage planning uses the existing white-and-orange Project dashboard palette. */
+.pv2-page .pv2-stage-material-plan{display:block}
+.pv2-page .pv2-stage-material-plan>summary{color:#d85b18;font-size:12px;font-weight:800}
+.pv2-page .pv2-stage-material-plan>.pv2-hint{margin:9px 0;color:#60728a;font-size:11px;line-height:1.6}
+.pv2-page .pv2-stage-material-plan ul{margin:7px 0 12px;color:#4c6175}
+.pv2-page .pv2-stage-material-requests{margin:12px 0;display:grid;gap:8px}
+.pv2-page .pv2-stage-material-requests>strong{font-size:12px;color:#243348}
+.pv2-page .pv2-stage-material-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;
+ padding:11px;border:1px solid #f1e1d4;border-radius:10px;background:#fffdfb;min-width:0}
+.pv2-page .pv2-stage-material-row>div{display:grid;gap:3px;flex:1;min-width:125px}
+.pv2-page .pv2-stage-material-row b{font-size:12px;color:#25364c;overflow-wrap:anywhere}
+.pv2-page .pv2-stage-material-row small{font-size:11px;color:#6a7b90}
+.pv2-page .pv2-stage-material-row>.pv2-hint{flex-basis:100%;margin:0}
+.pv2-page .pv2-stage-material-entry,.pv2-page .pv2-marketplace-purchase{
+ padding:9px 10px;border:1px solid #f5d5bd;background:#fff9f4;border-radius:9px;min-width:0;
+}
+.pv2-page .pv2-stage-material-entry>summary,.pv2-page .pv2-marketplace-purchase>summary{
+ color:#d85b18;font-size:11px;font-weight:850;cursor:pointer;list-style:none;
+}
+.pv2-page .pv2-stage-material-entry>summary::-webkit-details-marker,
+.pv2-page .pv2-marketplace-purchase>summary::-webkit-details-marker{display:none}
+.pv2-page .pv2-stage-material-entry[open],.pv2-page .pv2-marketplace-purchase[open]{
+ background:#fff;border-color:#ffcda9;
+}
+.pv2-page .pv2-marketplace-purchase{width:100%;flex-basis:100%;background:#fff}
+.pv2-page .pv2-marketplace-purchase .pv2-form{margin-top:8px;padding:0}
+.pv2-page .pv2-marketplace-purchase .pv2-form label{color:#40536e}
+.pv2-page .pv2-marketplace-purchase .pv2-form select{color:#25354b;background:#fff}
+@media(max-width:650px){
+ .pv2-page .pv2-stage-material-plan{padding:11px}
+ .pv2-page .pv2-stage-material-row{align-items:flex-start}
+ .pv2-page .pv2-marketplace-purchase .pv2-button{width:100%;white-space:normal}
+}
