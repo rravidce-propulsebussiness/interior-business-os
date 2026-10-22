@@ -15,6 +15,7 @@ import { StageActivationControl } from './project-stage-activation';
 import { ProjectClientAccess } from './project-client-access';
 import { ProjectSiteSurvey,ProjectAdvanceAction } from './project-next-forms';
 import { effectiveProjectStageStatus } from './project-stage-status';
+import { projectTimelineStages } from './project-visible-stages';
 import { MasterForm } from '../commercial/master-form';
 import { activeOrganization } from '@business-os/auth/server';
 import { projectWorkspace,formatMoney,pretty,shortDate,stringValue,
@@ -282,7 +283,7 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
   designClientApproved:['client_approved','execution'].includes(d.site?.stage??''),
  };
  // QUOTED_SCOPE is contract metadata, not an executable construction stage.
- const timelineStages=d.stages.filter(stage=>!stage.template_code.startsWith('QUOTED_SCOPE'));
+ const timelineStages=projectTimelineStages(d.stages);
  const executionById=new Map(d.stageExecution.map(item=>[item.stageId,item]));
  const visualStatuses=timelineStages.map(stage=>{
   const effective=effectiveProjectStageStatus(stage,evidence);
