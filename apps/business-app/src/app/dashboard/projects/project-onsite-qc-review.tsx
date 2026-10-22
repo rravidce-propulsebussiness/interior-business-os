@@ -6,7 +6,7 @@ import { recordOnsiteStageQcItem } from './[id]/site/onsite-qc-actions';
 
 export type QcFinding={
  id:string;stage_id:string;index:number;title:string;decision:string;
- notes:string;photo_id:string;reviewed_by:string;reviewed_at:string;
+ notes:string;photo_id:string;reviewed_by:string;reviewed_at:string;self_review:boolean;
 };
 type Props={
  projectId:string;stageId:string;stageName:string;topics:string[];
@@ -86,7 +86,7 @@ function QcItem({projectId,stageId,index,title,records,photos,fieldPhotoId,
    {records.length>0&&<details className="pv2-qc-history">
     <summary>Inspection history ({records.length})</summary>
     {records.map(item=><div key={item.id} className="pv2-qc-history-line">
-     <b>{item.decision==='passed'?'Passed':'Failed'}</b>
+     <b>{item.decision==='passed'?'Passed':'Failed'}{item.self_review?' · Owner self-QC':''}</b>
      <small>{new Date(item.reviewed_at).toLocaleDateString('en-IN')}</small>
      <span>{item.notes||'No additional remarks'}</span>
      <a href={'/dashboard/projects/'+projectId+'/site/media/'+item.photo_id}
