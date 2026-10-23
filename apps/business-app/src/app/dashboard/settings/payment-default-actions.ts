@@ -8,7 +8,7 @@ export async function saveConstructionPaymentDefaults(
  _previous:DefaultPaymentState,form:FormData,
 ):Promise<DefaultPaymentState> {
  const raw=form.get('rows');
- if(typeof raw!=='string'||raw.length>10000)return {saved:false,message:'Invalid payment schedule.'};
+ if(typeof raw!=='string'||raw.length>45000)return {saved:false,message:'Invalid payment schedule.'};
  let payload:unknown;
  try{payload=JSON.parse(raw);}catch{return {saved:false,message:'Invalid payment schedule.'};}
  const validated=companyConstructionPaymentRows.safeParse(payload);
@@ -23,6 +23,6 @@ export async function saveConstructionPaymentDefaults(
   } as never);
   if(error)return {saved:false,message:'Unable to save company defaults: '+error.message};
   revalidatePath('/dashboard/settings');
-  return {saved:true,message:'Company payment defaults saved. Existing quotations and projects are unchanged.'};
+  return {saved:true,message:'Company payment stages, work, materials and checks saved. Existing quotations and projects are unchanged.'};
  }catch{return {saved:false,message:'Only authorized company managers can save payment defaults.'};}
 }
