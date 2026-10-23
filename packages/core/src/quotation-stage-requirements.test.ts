@@ -3,7 +3,7 @@ import { customerTermSections } from './quotation-terms';
 import {
  defaultStageRequirements,encodeStageRequirements,savedStageRequirements,
  mergeStageRequirementOverrides,validateStageRequirements,validateStageRequirementsDraft,
- stageExecutionFlow,reconcileStageExecutionFlow,
+ stageExecutionFlow,reconcileStageExecutionFlow,deleteStageExecutionStep,remapStageFlowPayments,
 } from './quotation-stage-requirements';
 
 describe('project-specific construction stage requirements',()=>{
@@ -179,5 +179,67 @@ describe('quotation-driven alternating construction work, site checks, tests and
   });
   expect(next.flow?.at(-1)).toEqual({kind:'check',index:base.checks.length});
   expect(next.flow?.filter(step=>step.kind==='qc')).toEqual([{kind:'qc',index:0}]);
+ });
+});
+
+
+describe('payment references and safe editing of ordered execution items',()=>{
+ it('persists a payment milestone reference without creating a second work or check',()=>{
+  const base=defaultStageRequirements('SITE_PREP');
+  const flow=[...stageExecutionFlow(base),{kind:'payment' as const,index:2}];
+  const changed={...base,flow};
+  const serialized=encodeStageRequirements(mergeStageRequirementOverrides({},'SITE_PREP',changed));
+  const read=savedStageRequirements(serialized).SITE_PREP!;
+  expect(read.flow?.at(-1)).toEqual({kind:'payment',index:2});
+  expect(read.work).toEqual(base.work);
+  expect(read.checks).toEqual(base.checks);
+  expect(()=>validateStageRequirements({SITE_PREP:{...base,flow:[...flow,{kind:'payment',index:2}]}}))
+   .toThrow(/Duplicate payment/);
+ });
+
+ it('removes payment display step only, retaining quotation stage work and site checks',()=>{
+  const base=defaultStageRequirements('SITE_PREP');
+  const plan={...base,flow:[...stageExecutionFlow(base),{kind:'payment' as const,index:0}]};
+  const after=deleteStageExecutionStep(plan,plan.flow.length-1,'SITE_PREP');
+  expect(after.work).toEqual(base.work);
+  expect(after.checks).toEqual(base.checks);
+  expect(after.flow?.some(s=>s.kind==='payment')).toBe(false);
+ });
+
+ it('deleting a check also deletes its linked QC and renumbers following checks',()=>{
+  const base=defaultStageRequirements('SITE_PREP');
+  const ordered=[
+   ...stageExecutionFlow(base).filter(s=>s.kind==='work'),
+   {kind:'check' as const,index:0},{kind:'qc' as const,index:0},
+   ...base.checks.slice(1).map((_,i)=>({kind:'test' as const,index:i+1})),
+  ];
+  const result=deleteStageExecutionStep({...base,flow:ordered},base.work.length,'SITE_PREP');
+  expect(result.checks).toEqual(base.checks.slice(1));
+  expect(result.flow?.some(s=>s.kind==='qc')).toBe(false);
+  expect(result.flow?.filter(s=>s.kind==='test')[0]).toEqual({kind:'test',index:0});
+  expect(()=>validateStageRequirements({SITE_PREP:result})).not.toThrow();
+ });
+
+ it('does not remove mandatory structural checks or the last work item',()=>{
+  const foundation=defaultStageRequirements('FOUNDATION');
+  const sequence=stageExecutionFlow(foundation);
+  const firstCheck=sequence.findIndex(s=>s.kind==='check');
+  expect(()=>deleteStageExecutionStep({...foundation,flow:sequence},firstCheck,'FOUNDATION'))
+   .toThrow(/Mandatory structural/);
+  const onlyWork={...foundation,work:[foundation.work[0]!],flow:[
+   {kind:'work' as const,index:0},...foundation.checks.map((_,index)=>({kind:'check' as const,index})),
+  ]};
+  expect(()=>deleteStageExecutionStep(onlyWork,0,'FOUNDATION')).toThrow(/At least one/);
+ });
+
+ it('remaps payment references when the payment schedule changes without duplication',()=>{
+  const base=defaultStageRequirements('PRECONSTRUCTION');
+  const requirements={PRECONSTRUCTION:{...base,flow:[
+   ...stageExecutionFlow(base),{kind:'payment' as const,index:3},
+  ]}};
+  const shifted=remapStageFlowPayments(requirements,old=>old===3?1:old);
+  expect(shifted.PRECONSTRUCTION?.flow?.at(-1)).toEqual({kind:'payment',index:1});
+  const removed=remapStageFlowPayments(shifted,()=>null);
+  expect(removed.PRECONSTRUCTION?.flow?.some(s=>s.kind==='payment')).toBe(false);
  });
 });

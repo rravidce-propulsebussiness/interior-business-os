@@ -85,3 +85,30 @@ describe('Quotation-defined ordered site execution reuses existing records',()=>
   expect(dependencies).toContain('private.construction_stage_qc_item_reviews');
  });
 });
+
+
+describe('quotation work sequence exposes real payment, edit and delete controls',()=>{
+ const editor=read('../quotations/stage-execution-flow-editor.tsx');
+ const schedule=read('../quotations/payment-schedule-editor.tsx');
+ const handoff=read('./project-v2-view.tsx');
+ const migration=read('../../../../../../packages/database/supabase/migrations/20261023133000_payment_stage_flow_references.sql');
+ it('links existing agreed milestone and never records a receipt from a sequence step',()=>{
+  expect(editor).toContain('<option value="payment">Payment</option>');
+  expect(editor).toContain('Linked payment milestone');
+  expect(editor).toContain('payments.find(row=>row.index===step.index)');
+  expect(editor).not.toContain("recordPayment(");
+  expect(schedule).toContain('payment.stageCodes.includes(code)');
+  expect(schedule).toContain('remapStageFlowPayments');
+  expect(handoff).toContain("step.kind==='payment'");
+  expect(handoff).toContain('View payment status in Finance');
+  expect(migration).toContain("''payment'' then true");
+ });
+ it('supports in-place label edits and protected deletes without deleting finance rows',()=>{
+  expect(editor).toContain('✎ Edit');
+  expect(editor).toContain('Save changes');
+  expect(editor).toContain("deleteStageExecutionStep(value,position,code)");
+  expect(editor).toContain('Mandatory structural check');
+  expect(editor).toContain('The quotation payment schedule will stay unchanged.');
+  expect(schedule).toContain('removeMilestone(index)');
+ });
+});
