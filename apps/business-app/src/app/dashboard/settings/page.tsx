@@ -19,6 +19,7 @@ import './settings.css';
 import { InvoiceTemplateSelector } from './template-selector';
 import { ResetTestDataPanel } from './reset-test-data-panel';
 import {ConstructionPaymentDefaults} from './construction-payment-defaults';
+import {SettingsHome,type SettingSection} from './settings-home';
 
 export const dynamic='force-dynamic';
 type Tab='company'|'branding'|'invoice'|'documents'|'payments'|'team'|'preferences';
@@ -70,7 +71,7 @@ export default async function SettingsPage({searchParams}:{
  searchParams:Promise<{tab?:string;status?:string}>;
 }){
  const params=await searchParams;
- const tab=tabs.find(t=>t.id===params.tab)?.id??'company';
+ const tab=tabs.find(t=>t.id===params.tab)?.id??null;
  const context=await activeOrganization();
  if(!context)notFound();
  const {repository,client,authorization}=await pageServices();
@@ -164,20 +165,82 @@ export default async function SettingsPage({searchParams}:{
   ...((has('team.view')||has('role.view'))?[{label:'Team',href:'/dashboard/company/team',icon:'team' as const}]:[]),
   {label:'Settings',href:'/dashboard/settings',icon:'settings'},
  ];
+
+ const canTeam=has('team.view')||has('role.view');
+ const canViewInvoice=canBilling||has('billing.view');
+ const sections:SettingSection[]=[
+  {id:'business',title:'Business & Company',
+   description:'Manage your company profile, branding and compliance details.',
+   icon:'company',cards:[
+    {id:'company',title:'Company Details',description:'Basic information, address, contact details and bank details',
+     icon:'company',tone:'orange',href:'/dashboard/settings?tab=company'},
+    ...(canBrand?[{id:'branding',title:'Branding',description:'Logo, colour theme and document appearance',
+     icon:'branding',tone:'rose',href:'/dashboard/settings?tab=branding#brand-identity'}] as const:[]),
+    ...(canViewInvoice?[{id:'invoice',title:'Invoice & GST',description:'GST details, invoice settings, numbering and payment terms',
+     icon:'invoice',tone:'purple',href:'/dashboard/settings?tab=invoice'}] as const:[]),
+  ]},
+  {id:'construction',title:'Project & Construction',
+   description:'Set up construction templates, payment stages and site workflows.',
+   icon:'preferences',cards:[
+    {id:'payments',title:'Payment Settings',description:'Default payment stages, work, materials, checks and QC',
+     icon:'payments',tone:'orange',href:'/dashboard/settings?tab=payments#company-payment-stages'},
+    {id:'construction-items',title:'Construction Items',description:'Manage work items, materials, checks, tests and company QC',
+     icon:'construction',tone:'blue',href:'/dashboard/settings?tab=payments#company-payment-stages'},
+    ...(canBrand?[{id:'quote-settings',title:'Quote Settings',description:'Terms, conditions and quotation preferences',
+     icon:'quote',tone:'green',href:'/dashboard/settings?tab=branding#quotation-template-settings'}] as const:[]),
+  ]},
+  {id:'people',title:'People & Access',
+   description:'Manage your team, client communication and permissions.',
+   icon:'team',cards:[
+    ...(canTeam?[{id:'team',title:'Team & Permissions',description:'Team members, roles and access control',
+     icon:'team',tone:'purple',href:'/dashboard/settings?tab=team'}] as const:[]),
+    ...(has('project.view','projects')?[{id:'clients',title:'Client Portal',description:'Client access, sharing and communication by project',
+     icon:'client',tone:'mint',href:'/dashboard/projects'}] as const:[]),
+    ...(has('notification.manage_preferences')?[{id:'notifications',title:'Notifications',description:'Email, SMS and in-app notification preferences',
+     icon:'notifications',tone:'rose',href:'/dashboard/notifications/preferences'}] as const:[]),
+  ]},
+  {id:'documents',title:'Documents & Templates',
+   description:'Manage document templates, reports and file settings.',
+   icon:'documents',cards:[
+    {id:'doc-templates',title:'Document Templates',description:'Agreements, BOQs, checklists and other documents',
+     icon:'documents',tone:'blue',href:'/dashboard/settings?tab=documents'},
+    {id:'storage',title:'File Storage',description:'Document folders, naming and upload settings',
+     icon:'storage',tone:'purple'},
+    ...(has('report.view')||has('billing.view')?[{id:'reports',title:'Reports & Exports',
+     description:'Download formats, report content and export options',
+     icon:'reports',tone:'amber',href:'/dashboard/reports'}] as const:[]),
+  ]},
+  {id:'system',title:'System & Preferences',
+   description:'General application settings and customisation.',
+   icon:'preferences',cards:[
+    {id:'preferences',title:'Preferences',description:'Language, date format, units and other preferences',
+     icon:'preferences',tone:'rose',href:'/dashboard/settings?tab=preferences'},
+    ...(has('automation.manage')?[{id:'integrations',title:'Integrations',
+     description:'Automations, communication and service connections',
+     icon:'integrations',tone:'blue',href:'/dashboard/automations/settings'}] as const:[]),
+    ...(has('lead.view','crm')?[{id:'custom-fields',title:'Custom Fields',
+     description:'Configure lead requirement fields and choices',
+     icon:'custom',tone:'mint',href:'/dashboard/crm/settings?entity=crm_requirement_fields'}] as const:[]),
+    {id:'backups',title:'Data & Backup',description:'Data export, backup and restore',
+     icon:'backup',tone:'amber'},
+    {id:'subscription',title:'Subscription & Billing',description:'Business OS plan details and billing',
+     icon:'subscription',tone:'purple',href:'/dashboard/billing'},
+    {id:'activity',title:'Activity Log',description:'Recent account activity and configuration changes',
+     icon:'activity',tone:'orange'},
+  ]},
+ ];
+
  const logo=typeof branding.logo_data_uri==='string'&&
    /^data:image\/(?:png|jpeg);base64,/.test(branding.logo_data_uri)?branding.logo_data_uri:null;
  return <OwnerShell companyName={org.name} accountLabel={(user.email??'Account').split('@')[0]||'Account'}
    accountEmail={user.email??''} planLabel="Business workspace" navigation={navigation}
    search="" currentHref="/dashboard/settings" notificationsEnabled={has('notification.view')}>
   <main id="main-content" className="us-shell">
-   <p className="us-breadcrumb"><Link href="/dashboard">⌂</Link> › Settings</p>
-   <header className="us-heading"><h1>Settings</h1><p>Manage your company profile, branding, invoice details and preferences.</p></header>
-   <nav className="us-tabs" aria-label="Settings categories">{tabs.filter(t=>
-     t.id!=='branding'||canBrand).filter(t=>t.id!=='invoice'||canBilling||has('billing.view'))
-     .filter(t=>t.id!=='team'||has('team.view')||has('role.view')).map(t=>
-       <Link key={t.id} aria-current={tab===t.id?'page':undefined}
-         className={tab===t.id?'selected':''} href={'/dashboard/settings?tab='+t.id}>
-         <span>{t.icon}</span>{t.label}</Link>)}</nav>
+   {tab===null?<SettingsHome sections={sections}/>:
+    <div className="ush-detail-heading">
+     <Link href="/dashboard/settings" className="ush-back" aria-label="Back to all settings">← <span>All Settings</span></Link>
+     <div className="ush-detail-current"><span>Settings</span><span aria-hidden="true">›</span><strong>{tabs.find(item=>item.id===tab)?.label}</strong></div>
+    </div>}
    {params.status&&tab==='company'&&<p role="status" className={'us-status '+(params.status==='saved'?'ok':'bad')}>
      {params.status==='saved'?'Company details saved.':
       params.status==='invalid'?'Some entries were invalid. Check email, PIN, PAN and bank details.':
@@ -245,11 +308,11 @@ export default async function SettingsPage({searchParams}:{
     </section></aside>
    </div>}
    {tab==='branding'&&<div className="us-columns">
-    <div className="us-stack"><section className="us-card">
+    <div className="us-stack"><section className="us-card" id="brand-identity">
      <Header icon="◈" title="Branding & Quotation Design"
        detail="Customize your company's logo, colors and quotation template."/>
      {canBrand?<div className="us-master">
-      <MasterForm entity="organization_quotation_settings" initial={brandInitial}
+      <div id="quotation-template-settings"><MasterForm entity="organization_quotation_settings" initial={brandInitial}
        title="Save branding" fields={[
         {key:'branding.logo_data_uri',label:'Upload company logo',type:'file'},
         {key:'branding.cover_image_data_uri',label:'Quotation cover photograph',type:'file',fileMaxBytes:62000},
@@ -263,7 +326,7 @@ export default async function SettingsPage({searchParams}:{
         {key:'show_specifications',label:'Show specifications',type:'checkbox'},
         {key:'default_terms',label:'Default quotation terms',type:'textarea'},
         {key:'default_customer_notes',label:'Default customer notes',type:'textarea'},
-       ]}/>
+       ]}/></div>
       </div>:<p>You need quotation settings permission to update branding.</p>}
     </section>
     {canBrand&&has('quotation.edit','quotation')&&<section className="us-card">
@@ -319,7 +382,7 @@ export default async function SettingsPage({searchParams}:{
    </section>}
    {tab==='payments'&&<section className="us-card us-wide">
     <Header icon="♧" title="Payment Stage Settings" detail="Define payment milestones and included work items."/>
-     <div className="us-payment-template-section">
+     <div className="us-payment-template-section" id="company-payment-stages">
       <h3>Default construction payment schedule</h3>
       {constructionDefaultsResponse.error?
        <p className="us-info">Company payment defaults are temporarily unavailable.</p>:
