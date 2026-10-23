@@ -18,6 +18,7 @@ import {
   type LeadServiceOption,
 } from './lead-service-options';
 import { leadRequirementLabel, resolveLeadCategory } from './lead-category';
+import {mapRequirementField,type QuickRequirementField} from '../requirement-fields';
 import { leadDateBounds } from './date-range';
 import { LeadActivityPanel, type ActivityView, type ActivityQueueFilter } from './lead-activity-panel';
 import '../../owner-dashboard.css';
@@ -141,6 +142,14 @@ export default async function Leads({
         label: value === 'construction' ? 'Construction' : 'Interiors',
       });
   }
+
+  const requirementFields:QuickRequirementField[]=choices.requirements.rows
+    .map(mapRequirementField)
+    .filter(field=>field.active)
+    .map(field=>{
+      const industry=industries.find(entry=>entry.id===field.industryId);
+      return {...field,service:industry?leadServiceFromIndustryKey(industry.key):null};
+    }).filter(field=>field.industryId===null||field.service!==null);
 
   // Secondary cards are optional. A failed analytics query must not make
   // the company's lead list or existing navigation unusable.
@@ -503,6 +512,7 @@ export default async function Leads({
         stages={stages}
         sources={sources}
         services={services}
+        requirementFields={requirementFields}
         assignees={assignees}
         branches={branches}
         lostReasons={reasons}
