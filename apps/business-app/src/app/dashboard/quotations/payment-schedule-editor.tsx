@@ -238,21 +238,19 @@ export function PaymentScheduleEditor({
   }
 
   function combineBrickwork(index:number){
-    setRows(current=>{
-      const first=current[index],next=current[index+1];
-      if(!first||!next||!first.name.toLowerCase().includes('brickwork')||
-         !next.name.toLowerCase().includes('brickwork')||!first.stageCodes.length||
-         !next.stageCodes.length)return current;
-      const joined=[...new Set([...first.stageCodes,...next.stageCodes])];
-      if(joined.length>18)return current;
-      const before=first.name.replace(/ brickwork.*$/i,'');
-      const after=next.name.replace(/ brickwork.*$/i,'');
-      const name=(before+' + '+after+' brickwork & door frames payment').slice(0,100);
-      const merged={name,percent:(Number(first.percent)+Number(next.percent)).toFixed(2),
-        stageCodes:joined};
-      return [...current.slice(0,index),merged,...current.slice(index+2)];
-    });
-    setFeedback(null);
+    const first=rows[index],next=rows[index+1];
+    if(!first||!next||!first.name.toLowerCase().includes('brickwork')||
+       !next.name.toLowerCase().includes('brickwork')||!first.stageCodes.length||
+       !next.stageCodes.length)return;
+    const joined=[...new Set([...first.stageCodes,...next.stageCodes])];
+    if(joined.length>18)return;
+    const before=first.name.replace(/ brickwork.*$/i,'');
+    const after=next.name.replace(/ brickwork.*$/i,'');
+    const name=(before+' + '+after+' brickwork & door frames payment').slice(0,100);
+    const merged={name,percent:(Number(first.percent)+Number(next.percent)).toFixed(2),
+      stageCodes:joined};
+    remapMilestones([...rows.slice(0,index),merged,...rows.slice(index+2)],oldIndex=>
+      oldIndex===index||oldIndex===index+1?index:oldIndex>index+1?oldIndex-1:oldIndex);
   }
 
   const remaining = Math.abs(100 - percentTotal) < 0.001 ? 0 : 100 - percentTotal;
