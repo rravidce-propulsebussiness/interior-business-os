@@ -164,7 +164,7 @@ function DefaultPaymentStage({row,index,canEdit,onChange,onRemove}:{
 export function ConstructionPaymentDefaults({initial,canEdit}:{
  initial:CompanyConstructionPaymentRow[];canEdit:boolean;
 }) {
- const [rows,setRows]=useState(initial.map(x=>({...x,areas:[...(x.areas??[])],
+ const [rows,setRows]=useState<CompanyConstructionPaymentRow[]>(initial.map(x=>({...x,areas:[...(x.areas??[])],
   steps:[...(x.steps??[])]})));
  const [state,action,pending]=useActionState(saveConstructionPaymentDefaults,{saved:false,message:''});
  const total=rows.reduce((sum,row)=>sum+(Number(row.percent)||0),0);
