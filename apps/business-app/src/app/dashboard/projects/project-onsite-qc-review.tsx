@@ -12,7 +12,8 @@ type Props={
  projectId:string;stageId:string;stageName:string;topics:string[];
  stageStatus:string;canReview:boolean;canManage:boolean;inspectorAssigned:boolean;isOwner:boolean;
  records:QcFinding[];photos:{id:string;filename:string}[];
- existingChecks:{title:string;photoId:string}[];
+ existingChecks:{title:string;photoId:string;status?:string}[];
+ topicIndices?:number[];earlyQc?:boolean;
 };
 type Result={saved:boolean;message:string};
 
@@ -98,14 +99,17 @@ function QcItem({projectId,stageId,index,title,records,photos,fieldPhotoId,
 }
 export function StageOnsiteQcReview(props:Props){
  const {projectId,stageId,stageName,topics,stageStatus,canReview,canManage,inspectorAssigned,isOwner,
-  records,photos,existingChecks}=props;
+  records,photos,existingChecks,topicIndices,earlyQc=false}=props;
+ const indices=topicIndices??topics.map((_,index)=>index);
  const byIndex=(index:number)=>records.filter(record=>record.index===index)
   .sort((a,b)=>b.reviewed_at.localeCompare(a.reviewed_at)||b.id.localeCompare(a.id));
- const passed=topics.filter((_,i)=>byIndex(i)[0]?.decision==='passed').length;
- const failed=topics.filter((_,i)=>byIndex(i)[0]?.decision==='failed').length;
+ const passed=indices.filter(index=>byIndex(index)[0]?.decision==='passed').length;
+ const failed=indices.filter(index=>byIndex(index)[0]?.decision==='failed').length;
  const stageReady=stageStatus==='ready_for_qc';
+ const earlyReady=earlyQc&&stageStatus==='in_progress'&&indices.some((index,i)=>
+  existingChecks.some(check=>check.title.toLowerCase()===topics[i]?.toLowerCase()&&check.status==='passed'));
  if(!topics.length)return null;
- return <details className="pv2-on-site-qc" open={stageReady||failed>0}>
+ return <details className="pv2-on-site-qc" open={stageReady||earlyReady||failed>0}>
   <summary className="pv2-qc-heading">
    <span className="pv2-qc-heading-icon">✓</span>
    <span><strong>On-site Quality Inspection</strong>
@@ -122,17 +126,21 @@ export function StageOnsiteQcReview(props:Props){
     No QC inspector is assigned. Open <a href={'/dashboard/projects/'+projectId+'/team'}>Team & Access</a>
     {' '}and assign one of your company employees as <strong>Quality Inspector</strong>.
    </p>}
-   {isOwner&&stageReady&&<p className="pv2-qc-help">Owner QC is enabled without assigning another employee. Visit the site and record your inspection photo and verification notes. Self-reviewed checks are identified in the audit history.</p>}
-   {!canReview&&stageReady&&<p className="pv2-qc-help">
+   {isOwner&&(stageReady||earlyReady)&&<p className="pv2-qc-help">Owner QC is enabled without assigning another employee. Visit the site and record your inspection photo and verification notes. Self-reviewed checks are identified in the audit history.</p>}
+   {!canReview&&(stageReady||earlyReady)&&<p className="pv2-qc-help">
     The assigned company QC inspector must visit the site to record Pass or Fail for each item.
    </p>}
-   {!stageReady&&<p className="pv2-qc-help">
+   {!stageReady&&!earlyReady&&<p className="pv2-qc-help">
     {failed?'This stage was reopened for site corrections. Previously passed QC items remain recorded.':
-     'QC inspections become editable after the site engineer finishes field work and requests QC.'}
+     earlyQc?'Pass the corresponding site check with photo evidence to unlock this QC checkpoint.':
+      'QC inspections become editable after the site engineer finishes field work and requests QC.'}
    </p>}
-   {topics.map((title,index)=><QcItem key={index} projectId={projectId} stageId={stageId}
-    index={index} title={title} records={byIndex(index)} canReview={canReview} stageReady={stageReady} isOwner={isOwner}
-    photos={photos} fieldPhotoId={existingChecks.find(c=>c.title.toLowerCase()===title.toLowerCase())?.photoId||''}/>)}
+   {topics.map((title,i)=>{const index=indices[i]!;
+    const itemReady=stageReady||(earlyQc&&stageStatus==='in_progress'&&existingChecks.some(check=>
+      check.title.toLowerCase()===title.toLowerCase()&&check.status==='passed'));
+    return <QcItem key={index} projectId={projectId} stageId={stageId}
+    index={index} title={title} records={byIndex(index)} canReview={canReview} stageReady={itemReady} isOwner={isOwner}
+    photos={photos} fieldPhotoId={existingChecks.find(c=>c.title.toLowerCase()===title.toLowerCase())?.photoId||''}/>;})}
    <p className="pv2-hint">QC Pass/Fail is recorded per item with photo, inspection date and reviewer identity.
     A failed item needs site correction and re-inspection. Formal stage certification and any structural hold points remain protected.</p>
   </div>
