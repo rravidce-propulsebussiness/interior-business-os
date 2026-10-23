@@ -101,6 +101,12 @@ function LinkTabs({data,active}:{data:WorkspaceData;active:ProjectPageSlug}){
 }
 function ProjectHeader({data,active}:{data:WorkspaceData;active:ProjectPageSlug}){
  const p=data.project;
+ // The header reflects the exact physical work/checklist in the project, not
+ // an unrelated task counter or a paid milestone. No stage/QC is auto-passed.
+ const realWork=forecastWork(
+  projectTimelineStages(data.stages),[],data.stageProgress.work,'');
+ const usesWork=realWork.total>0&&(data.site?.stage==='execution'||realWork.completed>0);
+ const displayedProgress=usesWork?realWork.progressPct:p.progress;
  return <div className="pv2-project-header">
   <div className="pv2-project-identity">
    <div className="pv2-project-thumb">{data.site?.media.find(row=>stringValue(row.mime).startsWith('image/'))
@@ -113,9 +119,9 @@ function ProjectHeader({data,active}:{data:WorkspaceData;active:ProjectPageSlug}
     <span><OwnerIcon name="globe" size={13}/>{p.address}</span>
    </div></div><Status value={p.status}/>
   </div>
-  {p.progress!==null&&<div className="pv2-header-progress">
-   <span>Overall progress <strong>{p.progress}%</strong></span>
-   <div className="pv2-bar"><span style={{width:p.progress+'%'}}/></div>
+  {displayedProgress!==null&&<div className="pv2-header-progress">
+   <span>{usesWork?'Recorded physical work':'Operations task progress'} <strong>{displayedProgress}%</strong></span>
+   <div className="pv2-bar"><span style={{width:displayedProgress+'%'}}/></div>
   </div>}
   <div className="pv2-project-header-actions">
    {data.permissions.manage&&data.projectRaw&&<details className="pv2-header-drawer">
