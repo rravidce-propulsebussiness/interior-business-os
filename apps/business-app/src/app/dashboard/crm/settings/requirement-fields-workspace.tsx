@@ -33,18 +33,12 @@ function Glyph({name,size=20}:{name:string;size?:number}){
  eye:'M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7ZM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6',
  trash:'M4 7h16M10 4h4m-8 3 1 14h10l1-14M10 11v6m4-6v6',
  back:'M20 12H4m7-7-7 7 7 7',
+ close:'M5 5l14 14M19 5 5 19',
  };
  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
  stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"
  strokeLinejoin="round" aria-hidden="true"><path d={p[name]??p.fields}/></svg>;
 }
-
-const nav=[
- {id:'lead_sources',label:'Sources',icon:'source'},
- {id:'crm_pipeline_stages',label:'Pipeline',icon:'pipeline'},
- {id:'crm_lost_reasons',label:'Lost Reasons',icon:'lost'},
- {id:'crm_requirement_fields',label:'Fields',icon:'fields'},
-] as const;
 
 export function RequirementFieldsWorkspace({initial,industries,canManage,total}:{
  initial:RequirementField[];industries:RequirementIndustry[];
@@ -55,7 +49,7 @@ export function RequirementFieldsWorkspace({initial,industries,canManage,total}:
  const [query,setQuery]=useState('');
  const [filter,setFilter]=useState<Filter>('all');
  const [orderBy,setOrderBy]=useState<'position'|'name'>('position');
- const [editing,setEditing]=useState<RequirementField|null>(null);
+ const [editing,setEditing]=useState<RequirementField|null>(blank());
  const [draft,setDraft]=useState<RequirementField>(blank());
  const [busy,setBusy]=useState(false);
  const [feedback,setFeedback]=useState('');
@@ -118,25 +112,23 @@ export function RequirementFieldsWorkspace({initial,industries,canManage,total}:
   finally{setBusy(false);}
  };
  return <div className="crf-root">
-  {editing===null?<>
+  <div className="crf-layout">
+   <section className="crf-library">
    <div className="crf-heading">
-    <div className="crf-crumb"><a href="/dashboard/crm/leads">CRM</a><Glyph name="chevron" size={13}/> Settings</div>
-    <h1>Requirement Fields</h1><p>Capture the right project details on every lead.</p>
+    <h1>Lead Requirement Fields</h1>
+    <p>Manage custom questions to capture the right project details on every lead.</p>
    </div>
    <div className="crf-info"><Glyph name="info" size={22}/><span>
     These fields appear in your lead information forms. Configure questions to match your company's requirements.
    </span></div>
-   <nav className="crf-nav" aria-label="CRM settings">
-    {nav.map(item=><a href={'/dashboard/crm/settings?entity='+item.id}
-      key={item.id} className={item.id==='crm_requirement_fields'?'active':''}
-      aria-current={item.id==='crm_requirement_fields'?'page':undefined}>
-      <Glyph name={item.icon} size={17}/>{item.label}</a>)}
-   </nav>
    <div className="crf-tools">
     <label className="crf-search"><Glyph name="search" size={18}/>
      <input type="search" value={query} onChange={e=>setQuery(e.target.value)}
       placeholder="Search fields..." aria-label="Search requirement fields"/>
     </label>
+    {canManage&&<button type="button" className="crf-add crf-add-top" onClick={()=>begin()}>
+      <Glyph name="plus" size={18}/> Add Field
+    </button>}
     <div className="crf-filterline">
      <div className="crf-chips" aria-label="Filter by industry">
       {(['all','construction','interior'] as const).map(f=><button type="button"
@@ -174,13 +166,15 @@ export function RequirementFieldsWorkspace({initial,industries,canManage,total}:
     {!visible.length&&<p className="crf-empty">No matching requirement fields. Change your filters or add a field.</p>}
    </div>
    {total>fields.length&&<p className="crf-hint">Showing {fields.length} of {total} configured fields. Use pagination below to access other records.</p>}
-   {canManage&&<button className="crf-add" type="button" onClick={()=>begin()}>
-    <Glyph name="plus" size={19}/> Add Field
-   </button>}
-  </>:<>
-   <button type="button" className="crf-back" onClick={()=>{setEditing(null);setFeedback('');}}>
-    <Glyph name="back" size={20}/> <span>{draft.id?'Edit Requirement Field':'New Requirement Field'}</span>
-   </button>
+   </section>
+   {editing!==null&&<aside className="crf-sidepanel" role="dialog"
+      aria-label={draft.id?'Edit Requirement Field':'Add Requirement Field'}>
+    <div className="crf-panel-head">
+     <h2>{draft.id?'Edit Requirement Field':'Add Requirement Field'}</h2>
+     <button type="button" aria-label="Close requirement editor" onClick={()=>{setEditing(null);setFeedback('');}}>
+       <Glyph name="close" size={21}/>
+     </button>
+    </div>
    <p className="crf-editor-intro">{draft.id?'Update how this question appears in lead forms.':
     'Add a custom field to capture specific information from your leads.'}</p>
    <div className="crf-editor">
@@ -263,6 +257,7 @@ export function RequirementFieldsWorkspace({initial,industries,canManage,total}:
     <button type="button" disabled={busy||!canManage} onClick={()=>void save()}>
      {busy?'Saving…':'Save Field'}</button>
    </div>
-  </>}
+   </aside>}
+  </div>
  </div>;
 }
