@@ -39,6 +39,7 @@ export function MilestoneWorkflowBuilder({paymentIndex,paymentName,steps,codes,a
  const [existing,setExisting]=useState('0');
  const [qcPosition,setQcPosition]=useState('');
  const [error,setError]=useState('');
+ const [catalogSearch,setCatalogSearch]=useState('');
  const lastCode=steps[Math.min(Math.max((after??steps.length)-1,0),steps.length-1)]?.code;
  const selectedCode=code&&[...codes,...allCodes].includes(code)?code:
   suggestWorkArea(name,paymentName,allCodes,codes,lastCode);
@@ -47,6 +48,20 @@ export function MilestoneWorkflowBuilder({paymentIndex,paymentName,steps,codes,a
  const existingChoices=stage[field];
  const preservedReports=codes.flatMap(area=>(requirements[area]?.reports??[])
   .map(report=>({area,report})));
+ const catalog=codes.flatMap(area=>{
+  const base=requirements[area]??defaultStageRequirements(area);
+  return [
+   ...base.work.map((text,index)=>({area,kind:'work' as const,index,text})),
+   ...base.materials.map((text,index)=>({area,kind:'material' as const,index,text})),
+   ...base.checks.map((text,index)=>({area,kind:'check' as const,index,text})),
+   ...base.reports.map((text,index)=>({area,kind:'report' as const,index,text})),
+  ];
+ }).filter(entry=>entry.kind==='report'||!steps.some(item=>
+  item.code===entry.area&&item.index===entry.index&&
+  (entry.kind==='check'?isCheck(item.kind):item.kind===entry.kind)));
+ const filteredCatalog=catalog.filter(entry=>!catalogSearch.trim()||
+  (entry.text+' '+label(entry.area)+' '+entry.kind).toLowerCase()
+    .includes(catalogSearch.trim().toLowerCase()));
  const priorChecks=(position:number)=>steps.slice(0,position+1).filter(item=>isCheck(item.kind));
  const reset=()=>{
   setAfter(null);setEditing(null);setName('');setChoice('new');setError('');
@@ -196,6 +211,35 @@ export function MilestoneWorkflowBuilder({paymentIndex,paymentName,steps,codes,a
   onChange(next,{...requirements,[item.code]:{...source,[f]:remaining}});
   reset();
  };
+
+ const insertStandard=(entry:{area:string;kind:'work'|'material'|'check'|'report';index:number;text:string})=>{
+  if(entry.kind==='report')return;
+  if(entry.kind==='check'&&!steps.some(item=>item.kind==='work'&&item.code===entry.area)){
+   setError('Add an existing work item in '+label(entry.area)+' before its site check.');
+   return;
+  }
+  const source=requirements[entry.area];
+  const template=defaultStageRequirements(entry.area);
+  const structural=milestoneConstructionStages().find(item=>item.code===entry.area.split('/')[0])
+   ?.holdPoint==='structural';
+  // Do not copy a complete default checklist into a new customization.
+  // Keep the original templates untouched and record only selected work.
+  const base=source??{...template,
+   work:entry.kind==='work'?[]:[template.work[0]!],
+   materials:[],checks:structural?[...template.checks]:[],reports:[]};
+  const field=entry.kind==='work'?'work':entry.kind==='material'?'materials':'checks';
+  let items=[...base[field]];
+  let index=items.indexOf(entry.text);
+  if(index===-1){
+   if(items.length>=50){setError('There are already 50 selected items in this work area.');return;}
+   index=items.length;items.push(entry.text);
+  }
+  if(steps.some(item=>item.code===entry.area&&item.index===index&&
+   (entry.kind==='check'?isCheck(item.kind):item.kind===entry.kind)))return;
+  const next=[...steps,{kind:entry.kind,code:entry.area,index}];
+  onChange(next,{...requirements,[entry.area]:{...base,[field]:items}});
+  setError('');
+ };
  const beginEdit=(position:number)=>{
   const item=steps[position];if(!item)return;
   setEditing(position);setAfter(null);setName(itemName(item));
@@ -224,7 +268,24 @@ export function MilestoneWorkflowBuilder({paymentIndex,paymentName,steps,codes,a
    </li>)}</ul>
    <small>These reports are retained in the quotation and project record.</small>
   </details>}
-  {steps.length===0&&<p className="qs-one-flow-empty">No saved work items in this payment stage. Type an activity below to add it.</p>}
+  {catalog.length>0&&<details className="qs-one-flow-catalog">
+   <summary>Existing construction work, materials, checks &amp; reports ({catalog.length})</summary>
+   <p>These are the original standard items or saved quotation items, not deleted data.
+    Search or tap Add to place any item into the sequence without retyping.</p>
+   <input type="search" aria-label="Search existing construction items"
+    value={catalogSearch} onChange={event=>setCatalogSearch(event.target.value)}
+    placeholder="Search floor plan, excavation, footing, steel..." />
+   <ul>{filteredCatalog.slice(0,45).map(entry=>
+    <li key={entry.area+'-'+entry.kind+'-'+entry.index}>
+     <div><strong>{entry.text}</strong>
+      <small>{entry.kind==='report'?'Report / evidence':names[entry.kind]} · {label(entry.area)}</small>
+     </div>
+     {entry.kind==='report'?<small>Preserved</small>:
+      <button type="button" onClick={()=>insertStandard(entry)}>+ Add</button>}
+    </li>)}</ul>
+   {filteredCatalog.length>45&&<small>Showing 45 items. Search to find more.</small>}
+  </details>}
+  {steps.length===0&&<p className="qs-one-flow-empty">Type a new work item using + Add, or choose an existing one from the library above. Your old standard item names are still available.</p>}
   <ol className="qs-one-flow-list">
    {steps.map((item,index)=><li key={item.kind+'-'+item.code+'-'+item.index} className="qs-one-flow-item">
     <span className="qs-one-flow-num">{index+1}</span>
