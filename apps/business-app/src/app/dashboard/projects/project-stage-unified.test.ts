@@ -62,6 +62,8 @@ describe('Quotation-defined ordered site execution reuses existing records',()=>
  it('renders work, test, check, and QC in quote order, with one canonical work item and site check',()=>{
   expect(quotationEditor).toContain("kind==='qc'");
   expect(quotationEditor).toContain("kind==='work'");
+  expect(quotationEditor).toContain('Use an existing selected item');
+  expect(quotationEditor).toContain('Move selected item here');
   expect(screen).toContain('orderedFlow.map((step,position)=>');
   expect(screen).toContain('renderWorkItem(work,step.index)');
   expect(screen).toContain('renderCheckItem(title,step.index)');
