@@ -15,6 +15,7 @@ export type SettingSection={
 
 // Icons are decorative SVG paths, not another icon component dependency.
 const paths:Record<string,string>={
+ 'search':'M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16ZM17 17l5 5',
  'company':'M3 21h18M6 21V5l6-3 6 3v16M9 8h1M14 8h1M9 12h1M14 12h1M10 21v-5h4v5',
  'branding':'m4 20 4-1 11-11-3-3L5 16l-1 4ZM14 6l3 3M5 4h5M7.5 1.5v5',
  'invoice':'M5 2h11l4 4v16H5zM16 2v5h4M8 11h8M8 15h8M8 19h6',
