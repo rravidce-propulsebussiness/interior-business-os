@@ -1,6 +1,7 @@
 'use client';
 import {useActionState,useState} from 'react';
 import {type CompanyConstructionPaymentRow,type CompanyWorkStep} from '@business-os/core/company-construction-defaults';
+import {milestoneConstructionStages} from '@business-os/core/construction-payment-schedule';
 import {saveConstructionPaymentDefaults} from './payment-default-actions';
 
 type Kind=CompanyWorkStep['kind'];
@@ -8,6 +9,7 @@ const labels:Record<Kind,string>={
  work:'Work',material:'Material',check:'Site check',test:'Test',qc:'Company QC',
 };
 const prettify=(code:string)=>code.replaceAll('_',' ');
+const allAreas=milestoneConstructionStages().map(stage=>stage.code);
 const isCheck=(step:CompanyWorkStep)=>step.kind==='check'||step.kind==='test';
 const link=(step:CompanyWorkStep)=>step.area+'|'+step.name.toLowerCase();
 
@@ -99,6 +101,26 @@ function DefaultPaymentStage({row,index,canEdit,onChange,onRemove}:{
    </button>}
   </div>
   <details className="us-payment-stage-work">
+   {canEdit&&<div className="us-payment-work-areas">
+    <small>Construction work areas included in this payment stage</small>
+    <div className="us-payment-area-tags">
+     {areas.map(value=><span key={value}>
+      {prettify(value)}
+      {!steps.some(step=>step.area===value)&&<button type="button"
+       aria-label={'Remove work area '+prettify(value)}
+       onClick={()=>onChange({...row,areas:areas.filter(x=>x!==value)})}>×</button>}
+     </span>)}
+    </div>
+    <select aria-label={'Add work area to milestone '+(index+1)}
+     value="" onChange={event=>{
+      const value=event.target.value;
+      if(value&&!areas.includes(value))onChange({...row,areas:[...areas,value]});
+     }}>
+     <option value="">+ Add construction work area</option>
+     {allAreas.filter(value=>!areas.includes(value)).map(value=>
+      <option key={value} value={value}>{prettify(value)}</option>)}
+    </select>
+   </div>}
    <summary>Work, materials, checks, tests &amp; QC <strong>{steps.length} included</strong></summary>
    <p className="us-info">These steps will be copied into new quotations. Edit the sequence here once;
     modify a quotation separately for any particular project.</p>
