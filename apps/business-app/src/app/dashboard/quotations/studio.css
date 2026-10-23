@@ -2090,3 +2090,19 @@ border-radius:7px;padding:5px 8px;font-size:10px;font-weight:800;cursor:pointer}
 .qs-stage-requirements-library{margin:11px 0;border:1px solid #e9e1dc;border-radius:10px;background:#fff;padding:10px}
 .qs-stage-requirements-library>summary{cursor:pointer;font-size:12px;font-weight:800;color:#5d514b;padding:5px}
 .qs-stage-requirements-library[open]>summary{border-bottom:1px solid #f1e4da;padding-bottom:11px}
+
+/* Inline mobile-first edits, deletion and real payment schedule references. */
+.qs-stage-flow-inline-edit{margin-top:7px}
+.qs-stage-flow-kind.is-payment{color:#946013}
+.qs-stage-flow-delete{color:#b0442b!important;background:#fff6f4!important;border-color:#f1c8bd!important}
+.qs-stage-flow-item .qs-stage-flow-actions button{white-space:normal;text-align:center}
+.qs-stage-flow-item .qs-stage-flow-copy{min-width:0}
+.qs-stage-flow-item .qs-stage-flow-new small{font-size:11px;color:#7f6c61}
+.qs-stage-flow-item:has(.qs-stage-flow-inline-edit) .qs-stage-flow-actions{display:none}
+@media(max-width:640px){
+ .qs-stage-flow-inline-edit{padding:9px}
+ .qs-stage-flow-item .qs-stage-flow-actions{padding-left:0}
+ .qs-stage-flow-item .qs-stage-flow-actions button{flex:0 1 auto;min-width:56px;min-height:36px;padding:7px 9px}
+ .qs-stage-flow-item .qs-stage-flow-actions button[aria-label^="Edit"],
+ .qs-stage-flow-item .qs-stage-flow-delete{min-width:72px}
+}
