@@ -933,7 +933,7 @@ describe('Settings category dashboard keeps one canonical settings workspace',()
  it('matches five grouped sections with 18 visual category cards, without new forms',()=>{
   for(const label of ['Business & Company','Project & Construction','People & Access',
    'Documents & Templates','System & Preferences'])expect(page).toContain(label);
-  const home=page.split('const sections:SettingSection[]=')[1]?.split('.filter(section=>section.cards.length>0)')[0]??'';
+  const home=page.split('const sections:SettingSection[]=')[1]?.split('\n ];')[0]??'';
   // Five section headings plus the eighteen category cards share this shape.
   expect((home.match(/\bid:'[^']+',title:/g)??[]).length-5).toBe(18);
   expect(page).toContain("href:'/dashboard/settings?tab=payments#company-payment-stages'");
