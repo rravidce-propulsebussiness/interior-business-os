@@ -12,6 +12,7 @@ type Props={
  codes:string[];
  allCodes:string[];
  plannedCodes:string[];
+ plannedWorkCodes:string[];
  requirements:StageRequirementsMap;
  editable:boolean;
  onChange:(steps:QuotationMilestoneStep[],requirements:StageRequirementsMap)=>void;
@@ -27,7 +28,7 @@ const belongs=(step:QuotationMilestoneStep)=>step.kind==='work'?'work':
  step.kind==='material'?'materials':'checks';
 const minLength=(kind:Kind)=>isCheck(kind as QuotationMilestoneStep['kind'])?3:2;
 
-export function MilestoneWorkflowBuilder({paymentIndex,steps,codes,allCodes,plannedCodes,requirements,
+export function MilestoneWorkflowBuilder({paymentIndex,steps,codes,allCodes,plannedCodes,plannedWorkCodes,requirements,
  editable,onChange,onAddPayment,onLinkStage}:Props){
  const [after,setAfter]=useState<number|null>(null);
  const [editing,setEditing]=useState<number|null>(null);
@@ -109,10 +110,20 @@ export function MilestoneWorkflowBuilder({paymentIndex,steps,codes,allCodes,plan
    reset();return;
   }
   const key=kind as Exclude<Kind,'payment'>;
+  if((key==='check'||key==='test')&&!steps.slice(0,after!+1).some(s=>s.kind==='work'&&s.code===chosen)){
+   setError('Add work in this construction area before its site check or test.');return;
+  }
   const listField=key==='work'?'work':key==='material'?'materials':'checks';
   // The first manually added step replaces the old bulky template selection
   // for this real work area. Structural hold-point checks stay mandatory.
   let base=plannedCodes.includes(chosen)?requirements[chosen]:undefined;
+  // A preparatory Material may appear before its first Work. Do not retain
+  // a hidden placeholder template work once the user adds actual work.
+  if(base&&key==='work'&&!plannedWorkCodes.includes(chosen)&&
+    base.work.length===1&&
+    base.work[0]===defaultStageRequirements(chosen).work[0]){
+   base={...base,work:[]};
+  }
   if(!base){
    const original=defaultStageRequirements(chosen);
    const template=milestoneConstructionStages().find(s=>s.code===chosen.split('/')[0]);
