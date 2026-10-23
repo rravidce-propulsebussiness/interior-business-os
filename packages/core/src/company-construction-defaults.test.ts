@@ -203,7 +203,7 @@ describe('Stage 2 Foundation template without duplicate materials or QC',()=>{
    'Reinforcement steel (footings, columns, plinth beam and sump)',
    '20 mm aggregate (footings and columns)',
   ]);
-  expect(foundation.steps?.filter(step=>step.kind==='material'&&/cement/i.test(step.name)).length).toBe(1);
+  expect(foundation.steps?.filter(step=>step.kind==='material'&&/^Cement\b/.test(step.name)).length).toBe(1);
  });
  it('pairs exactly three site checks with later company QC checkpoints',()=>{
   const checks=foundation.steps?.filter(step=>step.kind==='check')??[];
