@@ -103,3 +103,34 @@
 .us-payment-default-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:13px}
 .us-payment-error{color:#b43826;font-size:12px}
 @media(max-width:560px){.us-payment-template-section{padding:10px}.us-payment-default-list label:nth-of-type(2){flex:0 0 94px}.us-payment-default-index{width:22px;height:22px}}
+
+
+/* Default payment stage now owns editable work/material/check/QC sequence. */
+.us-payment-default-list>.us-payment-stage{display:block;padding:12px;background:#fff;border:1px solid #e8dfd4;border-radius:13px;min-width:0}
+.us-payment-stage-main{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.us-payment-stage-main>label{flex:1 1 200px;display:grid;gap:6px;min-width:0;color:#68788c;font-size:11px;font-weight:700}
+.us-payment-stage-main>label:nth-of-type(2){flex:0 0 104px}
+.us-payment-stage-main input,.us-payment-step input,.us-payment-step-form input,.us-payment-step-form select{min-height:40px;border:1px solid #e0e4e8;border-radius:9px;background:#fff;color:#304056;padding:8px 10px;min-width:0;width:100%;font-size:12px}
+.us-payment-stage-main .us-payment-remove{background:#fff4ed;border:1px solid #e8c9b5;color:#97491d;padding:9px;border-radius:9px;min-height:37px;font-size:11px}
+.us-payment-stage-work{margin-top:13px;padding:10px;border:1px solid #f0e2d8;border-radius:11px;background:#fffaf7}
+.us-payment-stage-work summary{font-size:12px;color:#815337;font-weight:800;cursor:pointer;line-height:1.5}
+.us-payment-stage-work summary strong{font-weight:700;color:#b95721;margin-left:7px}
+.us-payment-step-list{padding:0;list-style:none;margin:12px 0;display:grid;gap:8px;max-height:430px;overflow-y:auto}
+.us-payment-step-list>.us-payment-step{display:block;min-width:0;padding:10px;border:1px solid #ebdfd8;border-radius:10px;background:#fff}
+.us-payment-step>small{font-size:10px;color:#95633a;font-weight:700}
+.us-payment-step-edit{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin-top:6px}
+.us-payment-step-edit>input,.us-payment-step-edit>strong{flex:1 1 170px;min-width:0;font-size:12px;color:#304052}
+.us-payment-step-actions{display:flex;gap:5px;flex-wrap:wrap}
+.us-payment-step-actions>button,.us-payment-add-work{min-height:35px;padding:7px 9px;border:1px solid #e7c9b6;background:#fff4ed;color:#a85120;border-radius:8px;font-weight:800;font-size:11px}
+.us-payment-step-actions>button:disabled{opacity:.35}
+.us-payment-add-work{margin-top:10px;background:#fb701d;color:#fff;border-color:#fb701d}
+.us-payment-step-form{display:grid;gap:9px;margin-top:11px;padding:12px;border:1px solid #ebc8af;border-radius:10px;background:#fff4ec}
+.us-payment-step-form>label{display:grid;gap:5px;color:#344356;font-size:11px;font-weight:750}
+@media(max-width:550px){
+ .us-payment-stage-main>label:first-of-type{flex-basis:calc(100% - 45px)}
+ .us-payment-stage-main>label:nth-of-type(2){flex-basis:96px}
+ .us-payment-stage-main>.us-payment-remove{margin-left:auto}
+ .us-payment-step-edit>input,.us-payment-step-edit>strong{flex-basis:100%}
+ .us-payment-step-actions{width:100%}
+ .us-payment-step-actions button{flex:1 1 45px}
+}
