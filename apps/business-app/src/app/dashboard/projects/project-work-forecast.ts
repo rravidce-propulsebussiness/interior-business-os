@@ -1,7 +1,7 @@
 /** A read-only forecast from the original stage work and actual completion.
  * No stage activation, approval or schedule mutation happens here. */
 export type PlannedWork={stageId:string;kind:string;index:number;plannedStart:string;plannedFinish:string};
-export type CompletedWork={stage_id:unknown;index:unknown;status:unknown};
+export type CompletedWork=Record<string,unknown>;
 type WorkStage={id:string;activities:string[]};
 export type WorkPace={
  completed:number;total:number;progressPct:number;
