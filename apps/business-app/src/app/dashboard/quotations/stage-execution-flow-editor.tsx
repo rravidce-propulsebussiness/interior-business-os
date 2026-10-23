@@ -68,7 +68,7 @@ export function StageExecutionFlowEditor({value,editable,onChange}:{
    flow.splice(destination,0,{...selected!,kind});
    if(flow.some((step,i)=>step.kind==='qc'&&
       !flow.slice(0,i).some(previous=>previous.index===step.index&&
-       (previous.kind==='check'||previous.kind==='test'))){
+       (previous.kind==='check'||previous.kind==='test')))){
     setError('This item has a linked QC review. Keep its check before that QC checkpoint.');
     return;
    }
