@@ -40,6 +40,7 @@ export function MilestoneWorkflowBuilder({paymentIndex,paymentName,steps,codes,a
  const [qcPosition,setQcPosition]=useState('');
  const [error,setError]=useState('');
  const [catalogSearch,setCatalogSearch]=useState('');
+ const [showAllWork,setShowAllWork]=useState(false);
  const lastCode=steps[Math.min(Math.max((after??steps.length)-1,0),steps.length-1)]?.code;
  const selectedCode=code&&[...codes,...allCodes].includes(code)?code:
   suggestWorkArea(name,paymentName,allCodes,codes,lastCode);
@@ -286,8 +287,12 @@ export function MilestoneWorkflowBuilder({paymentIndex,paymentName,steps,codes,a
    {filteredCatalog.length>45&&<small>Showing 45 items. Search to find more.</small>}
   </details>}
   {steps.length===0&&<p className="qs-one-flow-empty">Type a new work item using + Add, or choose an existing one from the library above. Your old standard item names are still available.</p>}
+  {steps.length>8&&<button type="button" className="qs-one-flow-expand"
+   onClick={()=>setShowAllWork(!showAllWork)}>
+   {showAllWork?'Show first 8 items':'Show all '+steps.length+' default & saved steps'}
+  </button>}
   <ol className="qs-one-flow-list">
-   {steps.map((item,index)=><li key={item.kind+'-'+item.code+'-'+item.index} className="qs-one-flow-item">
+   {(showAllWork?steps:steps.slice(0,8)).map((item,index)=><li key={item.kind+'-'+item.code+'-'+item.index} className="qs-one-flow-item">
     <span className="qs-one-flow-num">{index+1}</span>
     <div className="qs-one-flow-detail">
      <small>{names[item.kind]} · {label(item.code)}</small>

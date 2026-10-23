@@ -4,6 +4,8 @@ import { z } from 'zod';
 import { canAccess } from '@business-os/auth';
 import { activeOrganization, pageServices } from '@business-os/auth/server';
 import { emptyAddress } from '@business-os/core/commercial';
+import { proposedConstructionPayments } from '@business-os/core/construction-payment-schedule';
+import {companyConstructionPaymentRows} from '@business-os/core/company-construction-defaults';
 import { createGstRepository } from '@business-os/database/gst';
 import { ActionForm } from '@business-os/ui/action-form';
 import { MasterForm } from '../commercial/master-form';
@@ -16,6 +18,7 @@ import '../owner-dashboard.css';
 import './settings.css';
 import { InvoiceTemplateSelector } from './template-selector';
 import { ResetTestDataPanel } from './reset-test-data-panel';
+import {ConstructionPaymentDefaults} from './construction-payment-defaults';
 
 export const dynamic='force-dynamic';
 type Tab='company'|'branding'|'invoice'|'documents'|'payments'|'team'|'preferences';
@@ -79,7 +82,7 @@ export default async function SettingsPage({searchParams}:{
  const canBrand=has('settings.manage','quotation');
  const canBilling=has('billing.manage');
  const isOwner=context.roles.some(role=>role.name.toLowerCase()==='owner');
- const [org,sourceRaw,user,privateResponse,brandResponse,invoiceProfile]=await Promise.all([
+ const [org,sourceRaw,user,privateResponse,brandResponse,invoiceProfile,constructionDefaultsResponse]=await Promise.all([
   repository.organization(context.organizationId),
   repository.propulseCompanyProfile(context.organizationId),
   authorization.requireAuthenticatedUser(),
@@ -90,6 +93,8 @@ export default async function SettingsPage({searchParams}:{
     :Promise.resolve({data:null,error:null}),
   canBilling||has('billing.view')?createGstRepository(client).profile(context.organizationId)
     :Promise.resolve(null),
+  tab==='payments'?client.rpc('organization_construction_payment_defaults_read' as never,
+   {p_org:context.organizationId} as never):Promise.resolve({data:null,error:null}),
  ]);
  if(!org)notFound();
  if(privateResponse.error||brandResponse.error)throw new Error('Settings could not load');
@@ -314,6 +319,16 @@ export default async function SettingsPage({searchParams}:{
    </section>}
    {tab==='payments'&&<section className="us-card us-wide">
     <Header icon="♧" title="Payment Settings" detail="Configure accounts and collection options."/>
+     <div className="us-payment-template-section">
+      <h3>Default construction payment schedule</h3>
+      {constructionDefaultsResponse.error?
+       <p className="us-info">Company payment defaults are temporarily unavailable.</p>:
+       <ConstructionPaymentDefaults canEdit={canEdit}
+        initial={(companyConstructionPaymentRows.safeParse(constructionDefaultsResponse.data).success?
+         companyConstructionPaymentRows.parse(constructionDefaultsResponse.data):
+         proposedConstructionPayments(['Ground']).map(row=>({name:row.name,percent:Number(row.percent)}))
+        )}/>}
+     </div>
     <Cards items={[{label:'Edit company bank details',href:'/dashboard/settings?tab=company#bank-details'},
      {label:'Payment methods',href:'/dashboard/finance/payment_methods'},
      {label:'Invoices & stage collections',href:'/dashboard/finance'}]}/>

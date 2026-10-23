@@ -10,6 +10,7 @@
     "./quotation-payment-plan": "./src/quotation-payment-plan.ts",
     "./quotation-stage-requirements": "./src/quotation-stage-requirements.ts",
     "./quotation-milestone-flow": "./src/quotation-milestone-flow.ts",
+    "./company-construction-defaults": "./src/company-construction-defaults.ts",
     "./quotation-terms": "./src/quotation-terms.ts",
     "./sft-quotation": "./src/sft-quotation.ts",
     "./custom-brand-quote": "./src/custom-brand-quote.ts",

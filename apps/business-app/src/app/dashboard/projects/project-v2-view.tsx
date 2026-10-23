@@ -414,6 +414,7 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
       const checks=customGuidance?stage.inspectionTopics:
        [...new Set([...stage.inspectionTopics,...guidance.checks])];
       const payment=d.quotePaymentTriggers.filter(p=>p.stageCodes.includes(stage.instance_code));
+      const startingPayments=payment.filter(p=>p.stageCodes[0]===stage.instance_code);
       const linked=d.links.filter(x=>x.stage_id===stage.id);
       const stageMaterials=(site?.materials??[]).filter(m=>linked.some(l=>
        l.kind==='material'&&l.record_id===m.id));
@@ -460,9 +461,16 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
 
            const record=stageWork.find(x=>Number(x.index)===i);
            const workMaterials=stageMaterials.filter(m=>stringValue(m.activity_index)===String(i));
+           const hasExplicitMaterials=orderedFlow.some(step=>step.kind==='material');
+           const namedMaterials=new Set(orderedFlow.filter(step=>step.kind==='material')
+            .map(step=>(plannedMaterials[step.index]??'').toLowerCase()));
+           const legacyWorkMaterials=workMaterials.filter(material=>
+            !namedMaterials.has(stringValue(material.item).toLowerCase()));
            const requiredSuggestions=suggestedActivityMaterials(work,suggestedMaterials);
            const requestOptions=[...new Set([...requiredSuggestions,...suggestedMaterials])];
-           const materialPanel=(allowMaterials||workMaterials.length>0)?<div className="pv2-activity-material-content">
+           const materialPanel=hasExplicitMaterials?
+             (legacyWorkMaterials.length>0?<StageMaterialRows d={d} rows={legacyWorkMaterials}/>:null):
+             (allowMaterials||workMaterials.length>0)?<div className="pv2-activity-material-content">
               <div className="pv2-activity-material-required">
                <h5>Materials required for this work</h5>
                {requiredSuggestions.length>0?<ul>
@@ -482,7 +490,7 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
              kind="work" index={i} title={work} status={stringValue(record?.status)||'pending'}
              notes={stringValue(record?.notes)} photoId={stringValue(record?.photo_id)}
              photos={photos} canEdit={workAllowed&&!complete}
-             checksHref={'#pv2-stage-checks-'+stage.id} materialPanel={materialPanel}/>;
+             checksHref={orderedFlow.length?'':'#pv2-stage-checks-'+stage.id} materialPanel={materialPanel}/>;
           
       };
       const availableRecords:StageLinkOption[]=[
@@ -510,14 +518,23 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
         {(!complete||(['DESIGN','DESIGN_APPROVAL'].includes(stage.template_code)&&site?.stage==='client_approved'))&&
          <ProjectStageWorkflow d={d} code={stage.template_code}/>}
 
-        {physicalStage&&site?.stage==='execution'&&<StageActivationControl
+        {startingPayments.length>0&&<div className="pv2-stage-payment-start">
+          <strong>Payment milestone at stage start</strong>
+          {startingPayments.map((p,i)=><p key={i}>{p.name} · {p.percent}% of accepted quotation</p>)}
+          <p className="pv2-hint">Review this agreed payment before starting work. Invoices,
+           payment requests and verified receipts stay in Finance. An invoice alone is not proof of payment.</p>
+          {d.permissions.finance&&<Link href={cur(d.project.id,'payments')}>
+           Check invoice and verified payment status
+          </Link>}
+         </div>}
+         {physicalStage&&site?.stage==='execution'&&<StageActivationControl
          projectId={d.project.id} stageId={stage.id} state={stageExecution}
          canManage={allowWork} workCompleted={finishedActivities} workTotal={stage.activities.length}
          checksPassed={passed} checksTotal={checks.length}/>}
-        {!!checks.length&&<details className="pv2-stage-quality-hub" id={'pv2-stage-checks-'+stage.id}>
-         <summary><span>Site checks & company QC</span><strong>{passed}/{checks.length} checks passed</strong></summary>
+        {!!checks.length&&(orderedFlow.length===0||stageExecution?.status==='ready_for_qc'||formalReviews.length>0)&&<details className="pv2-stage-quality-hub" id={'pv2-stage-checks-'+stage.id}>
+         <summary><span>{orderedFlow.length?'Final stage quality approval & history':'Site checks & company QC'}</span><strong>{passed}/{checks.length} checks passed</strong></summary>
          <div className="pv2-stage-quality-inner">
-        {!!checks.length&&<div className="pv2-stage-task-group">
+        {!!checks.length&&orderedFlow.length===0&&<div className="pv2-stage-task-group">
          {orderedFlow.length===0&&<BulkStageChecks projectId={d.project.id} stageId={stage.id} photos={photos}
           canEdit={checksAllowed&&!complete} workCompleted={finishedActivities}
           workTotal={stage.activities.length} stageStatus={stageExecution?.status??'not_started'}
@@ -601,7 +618,10 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
              <StageMaterialRows d={d} rows={stageMaterials.filter(x=>
               stringValue(x.item).toLowerCase()===material.toLowerCase())}/>
              {allowMaterials&&<details className="pv2-stage-material-entry">
-              <summary>+ Request / arrange this material</summary>
+              <summary>+ Arrange material · Marketplace or outside supplier</summary>
+              <p className="pv2-hint">Request quantity first. Authorized procurement can then
+               place an approved marketplace order or record an outside supplier order.
+               Expected delivery and receipt are tracked here.</p>
               <MaterialRequestForm id={d.project.id} stageId={stage.id} suggestions={[material]}/>
              </details>}
             </div>;
@@ -631,7 +651,7 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
           }):stage.activities.map((work,i)=>renderWorkItem(work,i))}
          </div>
         </div>}
-        {unpositionedPayments.length>0&&d.permissions.finance&&<div className="pv2-command-payments">
+        {unpositionedPayments.length>0&&startingPayments.length===0&&d.permissions.finance&&orderedFlow.length===0&&<div className="pv2-command-payments">
          <OwnerIcon name="billing" size={17}/><div><strong>Linked quotation payments</strong>
           <p>{unpositionedPayments.map(p=>p.name+' ('+p.percent+'%)').join(' · ')}</p>
           <small>After linked stages pass QC, one agreed payment request is issued. Payment is only recorded in Finance.</small></div>

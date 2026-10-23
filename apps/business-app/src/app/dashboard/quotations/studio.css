@@ -2179,3 +2179,5 @@ border-radius:7px;padding:5px 8px;font-size:10px;font-weight:800;cursor:pointer}
 .qs-one-flow-catalog>ul>li strong{font-size:11px;color:#344255;overflow-wrap:anywhere}
 .qs-one-flow-catalog>ul>li small{font-size:10px;color:#7b8794}
 .qs-one-flow-catalog>ul>li button{flex:none;min-height:34px;padding:6px 10px;border:1px solid #edc5a8;border-radius:8px;background:#fff4ec;color:#a9531a;font-size:11px;font-weight:800}
+
+.qs-one-flow-expand{width:100%;margin-top:11px;background:#fff4eb;color:#a74e18;min-height:37px;padding:8px;border:1px solid #ecd0b7;border-radius:9px;font-size:11px;font-weight:800;cursor:pointer}

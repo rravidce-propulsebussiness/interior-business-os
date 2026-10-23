@@ -11789,6 +11789,14 @@ export interface Database {
         Args: { p_organization_id: string; p_operation: string; p_input: Json };
         Returns: string;
       };
+      organization_construction_payment_defaults_read: {
+        Args: { p_org: string };
+        Returns: Json;
+      };
+      organization_construction_payment_defaults_save: {
+        Args: { p_org: string; p_rows: Json };
+        Returns: undefined;
+      };
       organization_context: {
         Args: { p_organization_id: string };
         Returns: Json;

@@ -214,3 +214,44 @@ export function suggestWorkArea(
  for(const [test,code] of hints)if(test.test(query)&&named(code))return named(code);
  return linked[0]??options[0]??'';
 }
+
+
+/** Default proposal for draft quotations. Reuse platform work, material and
+ * inspection templates once; each new quotation can edit those references.
+ * Nothing here mutates company templates, project ledgers or saved quotations.
+ */
+export function standardMilestoneWorkflow(
+ rows:readonly {stageCodes:readonly string[]}[],
+ requirements:StageRequirementsMap,
+):QuotationMilestoneFlow {
+ const plan:QuotationMilestoneFlow={};
+ const seen=new Set<string>();
+ let count=0;
+ for(let rowIndex=0;rowIndex<rows.length;rowIndex++){
+  const steps:QuotationMilestoneStep[]=[];
+  for(const code of rows[rowIndex]?.stageCodes??[]){
+   if(seen.has(code))continue;
+   seen.add(code);
+   const stage=requirements[code]??defaultStageRequirements(code);
+   const work=stage.work.map((_,index)=>({kind:'work' as const,code,index}));
+   const materials=stage.materials.map((_,index)=>({kind:'material' as const,code,index}));
+   const checks=stage.checks.map((_,index)=>({kind:'check' as const,code,index}));
+   const ordered:QuotationMilestoneStep[]=[];
+   const total=Math.max(work.length,materials.length,checks.length);
+   for(let i=0;i<total;i++){
+    if(work[i])ordered.push(work[i]!);
+    if(materials[i])ordered.push(materials[i]!);
+    if(checks[i])ordered.push(checks[i]!);
+   }
+   if(steps.length+ordered.length>100||count+ordered.length>150) {
+    // For unusually large/floor-heavy estimates, leave the additional
+    // standard items in the searchable library instead of discarding data.
+    continue;
+   }
+   steps.push(...ordered);count+=ordered.length;
+  }
+  if(steps.length)plan[String(rowIndex)]=steps;
+ }
+ if(JSON.stringify({version:1,rows:plan}).length>7000)return {};
+ return plan;
+}

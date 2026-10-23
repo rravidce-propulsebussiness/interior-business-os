@@ -7,6 +7,8 @@ import { workCompletionByProject } from './work-progress';
 import { createMarketplaceRepository, type MarketplaceProduct } from '@business-os/database/marketplace';
 import type { ProjectEntry } from './project-v2-types';
 import { savedStagePaymentPlan,savedStagePaymentLinks } from '@business-os/core/quotation-payment-plan';
+import { savedMilestoneFlow,projectStageFlowFromMilestones } from '@business-os/core/quotation-milestone-flow';
+import { savedStageRequirements,defaultStageRequirements } from '@business-os/core/quotation-stage-requirements';
 import { stageFlowStepSchema,type StageFlowStep } from '@business-os/core/quotation-stage-requirements';
 export type { ProjectEntry } from './project-v2-types';
 
@@ -389,7 +391,25 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
   id:r.id,number:r.request_number,amount:Number(r.amount),
   status:r.status,date:r.issued_at,
  }))??[]:[];
- const quotePaymentTriggers=(proposal??[]).map((row,index)=>({
+ // The frozen signed quotation remains the execution source. If its ordered
+ // steps are not repeated in stage-guidance metadata, project them onto the
+ // existing canonical stage records without creating a duplicate checklist.
+ const importedGuidance=stageGuidanceRows(stageGuidanceResult.data);
+ const frozenMilestones=contractedRevision&&typeof savedTerms==='string'
+  ?savedMilestoneFlow(savedTerms):{};
+ const frozenStageRequirements=contractedRevision&&typeof savedTerms==='string'
+  ?savedStageRequirements(savedTerms):{};
+ const stageGuidance=stageList.map(stage=>{
+  const imported=importedGuidance.find(row=>row.stageId===stage.id);
+  if(imported?.flow.length)return imported;
+  const ordered=projectStageFlowFromMilestones(stage.instance_code,frozenStageRequirements,frozenMilestones);
+  if(!Object.values(frozenMilestones).some(list=>list.some(item=>item.code===stage.instance_code)))
+   return imported??null;
+  const base=frozenStageRequirements[stage.instance_code]??defaultStageRequirements(stage.instance_code);
+  return {stageId:stage.id,materials:imported?.materials??base.materials,
+   reports:imported?.reports??base.reports,flow:ordered};
+ }).filter((item):item is StageGuidance=>item!==null);
+  const quotePaymentTriggers=(proposal??[]).map((row,index)=>({
   name:row.name,percent:row.percent,stageCodes:bindings?.[index]??[],
  }));
  return {
@@ -401,7 +421,7 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
    client:customer.data?.display_name??'Not linked',
    industry:(project.industry_id?industriesById.get(project.industry_id):null)??'Project',progress
   },
-  site,stages:stageList,links:linkList,stageGuidance:stageGuidanceRows(stageGuidanceResult.data),stageExecution:executionRows(stageExecutionResult.data),marketplaceOffers,materialAccess:materialAccess(materialAccessResult.data),stageProgress:{...stageProgress(stageProgressResult.error?null:stageProgressResult.data),
+  site,stages:stageList,links:linkList,stageGuidance,stageExecution:executionRows(stageExecutionResult.data),marketplaceOffers,materialAccess:materialAccess(materialAccessResult.data),stageProgress:{...stageProgress(stageProgressResult.error?null:stageProgressResult.data),
     qualityStages:Array.isArray(obj(qualityResult.error?null:qualityResult.data).stages)?
      (obj(qualityResult.data).stages as StageItemRecord[]):[]},stageQc:stageQcReview(qcItemResult.error?null:qcItemResult.data),milestones,quotations,quotePaymentTriggers,stageRequests,
   preflight,advance,requests,
