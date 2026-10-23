@@ -554,6 +554,12 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
          projectId={d.project.id} stageId={stage.id} state={stageExecution}
          canManage={allowWork} workCompleted={finishedActivities} workTotal={stage.activities.length}
          checksPassed={passed} checksTotal={checks.length}/>}
+        {orderedFlow.length===0&&remainingQc.length>0&&<details className="pv2-stage-secondary">
+         <summary>Plan company QC visits ({remainingQc.length})</summary>
+         {remainingQc.map(item=><ProjectItemSchedule key={item.i} projectId={d.project.id}
+          stageId={stage.id} kind="qc" index={item.i} title={item.name}
+          item={planFor(stage.id,'qc',item.i)} canPlan={canPlan&&!complete}/>)}
+        </details>}
         {!!checks.length&&(orderedFlow.length===0||stageExecution?.status==='ready_for_qc'||formalReviews.length>0)&&<details className="pv2-stage-quality-hub" id={'pv2-stage-checks-'+stage.id}>
          <summary><span>{orderedFlow.length?'Final stage quality approval & history':'Site checks & company QC'}</span><strong>{passed}/{checks.length} checks passed</strong></summary>
          <div className="pv2-stage-quality-inner">
