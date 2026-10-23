@@ -181,8 +181,16 @@ export function PaymentScheduleEditor({
     ...rows.slice(place)],old=>old>=place?old+1:old);
   }
   function linkWorkStage(paymentIndex:number,code:string){
-   setRows(current=>current.map((row,index)=>index===paymentIndex&&
-    !row.stageCodes.includes(code)?{...row,stageCodes:[...row.stageCodes,code]}:row));
+   const linkedElsewhere=Object.entries(milestoneFlow).some(([row,items])=>
+     Number(row)!==paymentIndex&&items.some(item=>item.code===code));
+   if(linkedElsewhere){
+    setFeedback({type:'error',text:'This work area has planned steps under another payment. Delete or move those steps before reassigning its payment milestone.'});
+    return;
+   }
+   setRows(current=>current.map((row,index)=>{
+    if(index===paymentIndex)return {...row,stageCodes:[...new Set([...row.stageCodes,code])]};
+    return {...row,stageCodes:row.stageCodes.filter(item=>item!==code)};
+   }));
    setFeedback(null);
   }
   function changeWorkflow(paymentIndex:number,nextSteps:QuotationMilestoneStep[],
