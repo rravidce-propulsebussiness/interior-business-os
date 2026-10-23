@@ -2147,3 +2147,23 @@ border-radius:7px;padding:5px 8px;font-size:10px;font-weight:800;cursor:pointer}
 .qs-one-flow-area-picker summary{cursor:pointer;color:#91532d;font-size:11px;font-weight:780}
 .qs-one-flow-area-picker p,.qs-one-flow-area-picker small{font-size:10px;line-height:1.45;color:#718095;display:block;margin:8px 0}
 .qs-one-flow-area-picker select{width:100%;min-height:39px;border:1px solid #e1d5ca;background:#fff;border-radius:8px;padding:7px;color:#314155;font-size:11px}
+
+
+/* Typing-first work entry; optional technical mapping is secondary on mobile. */
+.qs-one-flow-form>label:first-child input{
+ min-height:50px;font-size:14px;font-weight:650;background:#fff;
+ border:1px solid #e4c4ae;box-shadow:0 2px 7px rgba(96,56,30,.04);
+}
+.qs-one-flow-form>label:first-child input:focus{
+ border-color:#f97316;outline:2px solid rgba(249,115,22,.13);outline-offset:1px;
+}
+.qs-one-flow-advanced{border-top:1px solid #efd9cc;padding:9px 0 0;display:grid;gap:8px}
+.qs-one-flow-advanced>summary{cursor:pointer;color:#8d6551;font-size:11px;font-weight:720;padding:3px 0}
+.qs-one-flow-advanced[open]{display:grid;gap:9px}
+.qs-one-flow-destination{font-size:10px;color:#766c66;line-height:1.45;overflow-wrap:anywhere}
+.qs-one-flow-area-picker>summary{font-size:10px;font-weight:650;color:#947b6b}
+@media(max-width:750px){
+ .qs-one-flow-form{gap:9px}
+ .qs-one-flow-form>label:first-child input{min-height:49px;font-size:14px}
+ .qs-one-flow-buttons button:first-child{min-width:120px}
+}
