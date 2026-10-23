@@ -7,8 +7,8 @@ import { proposedConstructionPayments } from '@business-os/core/construction-pay
 import { savedStageRequirements,encodeStageRequirements,validateStageRequirementsDraft,remapStageFlowPayments,
  type StageRequirementsMap } from '@business-os/core/quotation-stage-requirements';
 import { MilestoneWorkflowBuilder } from './milestone-workflow-builder';
-import {savedMilestoneFlow,encodeMilestoneFlow,validateMilestoneFlow,
- remapMilestoneFlow,projectStageFlowFromMilestones,
+import {encodeMilestoneFlow,validateMilestoneFlow,
+ remapMilestoneFlow,projectStageFlowFromMilestones,visibleMilestoneFlow,
  type QuotationMilestoneFlow,type QuotationMilestoneStep} from '@business-os/core/quotation-milestone-flow';
 
 type Milestone = { name: string; percent: string; stageCodes: string[] };
@@ -75,7 +75,9 @@ export function PaymentScheduleEditor({
   const [rows, setRows] = useState<Milestone[]>(() => readPlan(initial.terms, industry, editable, floorNames));
   const [stageRequirements,setStageRequirements]=useState<StageRequirementsMap>(
     ()=>savedStageRequirements(initial.terms));
-  const [milestoneFlow,setMilestoneFlow]=useState<QuotationMilestoneFlow>(()=>savedMilestoneFlow(initial.terms));
+  const [milestoneFlow,setMilestoneFlow]=useState<QuotationMilestoneFlow>(()=>
+    visibleMilestoneFlow(initial.terms,
+      readPlan(initial.terms,industry,editable,floorNames),savedStageRequirements(initial.terms)));
   const stageCodes=[...new Set(rows.flatMap(row=>row.stageCodes))];
   const allCodes=[...new Set(suggestions(industry,floorNames).flatMap(row=>row.stageCodes))];
   // Removing a payment milestone can remove its last referenced work stage.
@@ -111,7 +113,8 @@ export function PaymentScheduleEditor({
   const savedPlan = savedStagePaymentPlan(initial.terms);
   const hasChanges = JSON.stringify(rows) !== JSON.stringify(readPlan(initial.terms, industry, editable, floorNames))
     || JSON.stringify(visibleRequirements)!==JSON.stringify(savedStageRequirements(initial.terms))
-    || JSON.stringify(milestoneFlow)!==JSON.stringify(savedMilestoneFlow(initial.terms));
+    || JSON.stringify(milestoneFlow)!==JSON.stringify(visibleMilestoneFlow(initial.terms,
+      readPlan(initial.terms,industry,editable,floorNames),savedStageRequirements(initial.terms)));
   const percentTotal = useMemo(
     () => rows.reduce((sum, row) => sum + (Number(row.percent) || 0), 0),
     [rows],
@@ -195,18 +198,53 @@ export function PaymentScheduleEditor({
   }
   function changeWorkflow(paymentIndex:number,nextSteps:QuotationMilestoneStep[],
     nextRequirements:StageRequirementsMap){
-   const plan={...milestoneFlow,[String(paymentIndex)]:nextSteps};
-   const codesChanged=new Set([...(milestoneFlow[String(paymentIndex)]??[]),...nextSteps].map(x=>x.code));
-   const combined={...visibleRequirements,...nextRequirements};
-   for(const code of codesChanged){
-    const base=combined[code];
-    if(base)combined[code]={...base,flow:projectStageFlowFromMilestones(code,combined,plan)};
+   // A typed work item may belong to Foundation even if the old quotation
+   // grouped Foundation under Advance. Move all of that area's saved work
+   // with it, never reset or silently drop the prior items.
+   const plan:QuotationMilestoneFlow={...milestoneFlow,[String(paymentIndex)]:nextSteps};
+   const updatedRows=rows.map(row=>({...row,stageCodes:[...row.stageCodes]}));
+   const newCodes=[...new Set(nextSteps.map(x=>x.code))]
+    .filter(code=>!updatedRows[paymentIndex]?.stageCodes.includes(code));
+   for(const code of newCodes){
+    const previous=updatedRows.findIndex((row,i)=>i!==paymentIndex&&row.stageCodes.includes(code));
+    if(previous!==-1){
+     const carried=(plan[String(previous)]??[]).filter(step=>step.code===code);
+     if(carried.length && !window.confirm(
+      'This work area already has '+carried.length+' saved steps in Stage '+(previous+1)+
+      '. Move them to Stage '+(paymentIndex+1)+' without deleting or resetting anything?'
+     ))return;
+     const destination=plan[String(paymentIndex)]??[];
+     // Existing selected items remain before the just-entered item.
+     const unique=new Set<string>();
+     plan[String(paymentIndex)]=[...carried,...destination].filter(step=>{
+      const key=step.kind+':'+step.code+':'+step.index;
+      if(unique.has(key))return false;
+      unique.add(key);return true;
+     });
+     plan[String(previous)]=(plan[String(previous)]??[]).filter(step=>step.code!==code);
+     updatedRows[previous]!.stageCodes=updatedRows[previous]!.stageCodes.filter(x=>x!==code);
+    }
+    updatedRows[paymentIndex]!.stageCodes=[...new Set([
+     ...updatedRows[paymentIndex]!.stageCodes,code,
+    ])];
    }
-   const checked=candidateRequirements(combined);
-   if(!checked)return;
+   const allCodes=new Set(updatedRows.flatMap(row=>row.stageCodes));
+   const combined={...stageRequirements,...nextRequirements};
+   const checked=Object.fromEntries(Object.entries(combined)
+     .filter(([code])=>allCodes.has(code))) as StageRequirementsMap;
+   const affected=new Set([...Object.values(plan).flat(),...
+    Object.values(milestoneFlow).flat()].map(step=>step.code));
    try{
-    validateMilestoneFlow(plan,checked,rows);
-    setStageRequirements(checked);setMilestoneFlow(plan);setFeedback(null);
+    for(const code of affected){
+     const stage=checked[code];
+     if(stage)checked[code]={...stage,flow:projectStageFlowFromMilestones(code,checked,plan)};
+    }
+    validateStageRequirementsDraft(checked);
+    validateMilestoneFlow(plan,checked,updatedRows);
+    setRows(updatedRows);
+    setStageRequirements(checked);
+    setMilestoneFlow(plan);
+    setFeedback(null);
    }catch(err){
     setFeedback({type:'error',text:err instanceof Error?err.message:
      'Check the stage and order of the added item.'});
@@ -393,9 +431,8 @@ export function PaymentScheduleEditor({
                   <output aria-label={'Estimated payment ' + (index + 1)}>{money(stageAmounts[index] ?? 0)}</output>
                 </div>
                 {industry==='construction'&&<MilestoneWorkflowBuilder
-                  paymentIndex={index} steps={milestoneFlow[String(index)]??[]}
+                  paymentIndex={index} paymentName={row.name} steps={milestoneFlow[String(index)]??[]}
                   codes={row.stageCodes} allCodes={allCodes}
-                  plannedCodes={Object.values(milestoneFlow).flatMap(items=>items.map(item=>item.code))}
                   plannedWorkCodes={Object.values(milestoneFlow).flatMap(items=>
                    items.filter(item=>item.kind==='work').map(item=>item.code))}
                   requirements={visibleRequirements} editable={editable}

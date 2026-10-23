@@ -1,7 +1,7 @@
 import {describe,expect,it} from 'vitest';
 import {defaultStageRequirements,type StageRequirementsMap} from './quotation-stage-requirements';
 import {encodeMilestoneFlow,savedMilestoneFlow,validateMilestoneFlow,
- remapMilestoneFlow,projectStageFlowFromMilestones} from './quotation-milestone-flow';
+ remapMilestoneFlow,projectStageFlowFromMilestones,restoreLegacyMilestoneFlow,visibleMilestoneFlow,suggestWorkArea} from './quotation-milestone-flow';
 
 const requirements:StageRequirementsMap={
  DESIGN:{...defaultStageRequirements('DESIGN'),
@@ -53,5 +53,51 @@ describe('a single ordered work list underneath each payment stage',()=>{
  it('starts with an empty manually created flow, not 13 duplicate template cards',()=>{
   expect(savedMilestoneFlow('Terms without a milestone flow')).toEqual({});
   expect(encodeMilestoneFlow({})).toBe('');
+ });
+});
+
+
+describe('retaining old quotation data when the display changes',()=>{
+ it('restores old saved work, checks, QC and materials without writing over them',()=>{
+  const legacy={
+   FOUNDATION:{...requirements.FOUNDATION!,
+    flow:[
+     {kind:'work' as const,index:1},
+     {kind:'work' as const,index:2},
+     {kind:'check' as const,index:0},
+     {kind:'qc' as const,index:0},
+     {kind:'work' as const,index:0},
+     {kind:'work' as const,index:3},
+    ],
+    reports:['Footing check inspection report'],
+   },
+  };
+  const prior=restoreLegacyMilestoneFlow([{stageCodes:['FOUNDATION']}],legacy);
+  expect(prior['0']?.map(item=>item.kind).slice(0,4))
+   .toEqual(['work','work','check','qc']);
+  expect(prior['0']?.filter(item=>item.kind==='material')).toHaveLength(2);
+  expect(legacy.FOUNDATION.reports).toEqual(['Footing check inspection report']);
+  expect(validateMilestoneFlow(prior,legacy,[{stageCodes:['FOUNDATION']}])).toEqual(prior);
+ });
+ it('includes old saved items missing from a newer partial plan',()=>{
+  const prior=encodeMilestoneFlow({'0':[{kind:'work',code:'DESIGN',index:0}]});
+  const combined=visibleMilestoneFlow(prior,[{stageCodes:['DESIGN']}],{DESIGN:requirements.DESIGN!});
+  expect(combined['0']?.filter(step=>step.kind==='work')).toHaveLength(2);
+  expect(combined['0']?.some(step=>step.kind==='check')).toBe(true);
+ });
+ it('does not bring default items into an unrelated unsaved quote',()=>{
+  const empty=visibleMilestoneFlow('',[{stageCodes:['DESIGN']}],{});
+  expect(empty).toEqual({});
+ });
+ it('infers a stage from typed site work without forcing technical dropdown selection',()=>{
+  const available=['PRECONSTRUCTION','DESIGN','SITE_PREP','FOUNDATION','PLINTH','RCC/THIRD_FLOOR'];
+  expect(suggestWorkArea('Bar bending for footings','Advance',[...available],available))
+   .toBe('FOUNDATION');
+  expect(suggestWorkArea('Floor plan approval','Foundation Fee',available,available))
+   .toBe('DESIGN');
+  expect(suggestWorkArea('Excavation depth and layout check','Foundation Fee',available,available))
+   .toBe('SITE_PREP');
+  expect(suggestWorkArea('Next activity','Foundation Fee',available,['FOUNDATION']))
+   .toBe('FOUNDATION');
  });
 });

@@ -2,16 +2,16 @@
 
 import {useState} from 'react';
 import {defaultStageRequirements,type StageRequirementsMap} from '@business-os/core/quotation-stage-requirements';
-import {type QuotationMilestoneStep} from '@business-os/core/quotation-milestone-flow';
+import {suggestWorkArea,type QuotationMilestoneStep} from '@business-os/core/quotation-milestone-flow';
 import {milestoneConstructionStages} from '@business-os/core/construction-payment-schedule';
 
 type Kind=QuotationMilestoneStep['kind']|'payment';
 type Props={
  paymentIndex:number;
+ paymentName:string;
  steps:QuotationMilestoneStep[];
  codes:string[];
  allCodes:string[];
- plannedCodes:string[];
  plannedWorkCodes:string[];
  requirements:StageRequirementsMap;
  editable:boolean;
@@ -28,7 +28,7 @@ const belongs=(step:QuotationMilestoneStep)=>step.kind==='work'?'work':
  step.kind==='material'?'materials':'checks';
 const minLength=(kind:Kind)=>isCheck(kind as QuotationMilestoneStep['kind'])?3:2;
 
-export function MilestoneWorkflowBuilder({paymentIndex,steps,codes,allCodes,plannedCodes,plannedWorkCodes,requirements,
+export function MilestoneWorkflowBuilder({paymentIndex,paymentName,steps,codes,allCodes,plannedWorkCodes,requirements,
  editable,onChange,onAddPayment,onLinkStage}:Props){
  const [after,setAfter]=useState<number|null>(null);
  const [editing,setEditing]=useState<number|null>(null);
@@ -39,17 +39,21 @@ export function MilestoneWorkflowBuilder({paymentIndex,steps,codes,allCodes,plan
  const [existing,setExisting]=useState('0');
  const [qcPosition,setQcPosition]=useState('');
  const [error,setError]=useState('');
- const selectedCode=codes.includes(code)?code:codes[0]??'';
+ const lastCode=steps[Math.min(Math.max((after??steps.length)-1,0),steps.length-1)]?.code;
+ const selectedCode=code&&[...codes,...allCodes].includes(code)?code:
+  suggestWorkArea(name,paymentName,allCodes,codes,lastCode);
  const stage=requirements[selectedCode]??defaultStageRequirements(selectedCode);
  const field=kind==='work'?'work':kind==='material'?'materials':'checks';
  const existingChoices=stage[field];
+ const preservedReports=codes.flatMap(area=>(requirements[area]?.reports??[])
+  .map(report=>({area,report})));
  const priorChecks=(position:number)=>steps.slice(0,position+1).filter(item=>isCheck(item.kind));
  const reset=()=>{
   setAfter(null);setEditing(null);setName('');setChoice('new');setError('');
  };
  const open=(position:number)=>{
   setAfter(position);setEditing(null);setKind('work');setName('');
-  setCode(codes[0]??'');setChoice('new');setExisting('0');
+  setCode('');setChoice('new');setExisting('0');
   setQcPosition('');setError('');
  };
  const itemName=(item:QuotationMilestoneStep)=>{
@@ -78,15 +82,19 @@ export function MilestoneWorkflowBuilder({paymentIndex,steps,codes,allCodes,plan
   if(kind==='payment'&&editing===null){reset();onAddPayment();return;}
   const position=editing??after!+1;
   const target=editing===null?null:steps[position]!;
-  const chosen=target?.code??selectedCode;
-  if(!chosen||!codes.includes(chosen)){setError('Select a work area linked to this payment stage.');return;}
+  const inspected=kind==='qc'&&qcPosition.includes(':')?
+    priorChecks(after??-1).find(item=>item.code+':'+item.index===qcPosition):undefined;
+  const chosen=target?.code??inspected?.code??selectedCode;
+  if(!chosen||![...codes,...allCodes].includes(chosen)){
+   setError('Unable to identify a construction work area. Open Advanced and select one.');return;
+  }
   const current=requirements[chosen]??defaultStageRequirements(chosen);
   if(editing!==null&&target?.kind==='qc'){
    setError('QC is linked to the site check. Delete and add it after the correct check to change it.');return;
   }
   if(kind==='qc'&&editing===null){
-   if(qcPosition===''){setError('Choose which passed site check QC will inspect.');return;}
-   const index=Number(qcPosition);
+   if(!inspected){setError('Choose which earlier site check QC will inspect.');return;}
+   const index=inspected.index;
    const check=priorChecks(after!).find(x=>x.code===chosen&&x.index===index);
    if(!check){setError('Add and position a site check/test before QC.');return;}
    if(steps.some(x=>x.kind==='qc'&&x.code===chosen&&x.index===index)){
@@ -116,7 +124,9 @@ export function MilestoneWorkflowBuilder({paymentIndex,steps,codes,allCodes,plan
   const listField=key==='work'?'work':key==='material'?'materials':'checks';
   // The first manually added step replaces the old bulky template selection
   // for this real work area. Structural hold-point checks stay mandatory.
-  let base=plannedCodes.includes(chosen)?requirements[chosen]:undefined;
+  // Always reuse persisted quotation requirements. Switching to a typed
+  // editor must never clear previously selected work, materials, or reports.
+  let base=requirements[chosen];
   // A preparatory Material may appear before its first Work. Do not retain
   // a hidden placeholder template work once the user adds actual work.
   if(base&&key==='work'&&!plannedWorkCodes.includes(chosen)&&
@@ -194,11 +204,11 @@ export function MilestoneWorkflowBuilder({paymentIndex,steps,codes,allCodes,plan
  const button=(text:string,onClick:()=>void,disabled=false)=><button type="button" disabled={disabled} onClick={onClick}>{text}</button>;
  return <div className="qs-one-flow">
   <div className="qs-one-flow-intro"><strong>{'Stage '+(paymentIndex+1)+' · Work sequence'}</strong>
-   <small>Only steps you add appear here. Standard template items are replaced for a work area once you start customizing it; required structural checks stay protected.</small>
+   <small>Existing saved work is retained. Type the next activity and add it in order.</small>
   </div>
   {editable&&<details className="qs-one-flow-area-picker">
-   <summary>Choose or move construction work areas for this payment stage</summary>
-   <p>Assign each work area to the payment milestone when its work begins. An area must belong to only one payment milestone.</p>
+   <summary>Advanced · Change underlying construction stage mapping</summary>
+   <p>Optional. Work areas are suggested automatically from the item name and payment stage. Reassign a work area here only when needed.</p>
    <small>Currently linked: {codes.length?codes.map(label).join(' · '):'Choose an area below'}</small>
    <select aria-label="Add or move construction work area" defaultValue=""
     onChange={event=>{if(event.target.value)onLinkStage(event.target.value);event.target.value='';}}>
@@ -207,7 +217,14 @@ export function MilestoneWorkflowBuilder({paymentIndex,steps,codes,allCodes,plan
      <option key={value} value={value}>{label(value)}</option>)}
    </select>
   </details>}
-  {steps.length===0&&<p className="qs-one-flow-empty">No steps added. Start with + Add to plan work after this payment milestone.</p>}
+  {preservedReports.length>0&&<details className="qs-one-flow-advanced qs-one-flow-reports">
+   <summary>Previously saved reports & evidence ({preservedReports.length})</summary>
+   <ul>{preservedReports.map((item,index)=><li key={item.area+'-'+index}>
+    {item.report} <small>({label(item.area)})</small>
+   </li>)}</ul>
+   <small>These reports are retained in the quotation and project record.</small>
+  </details>}
+  {steps.length===0&&<p className="qs-one-flow-empty">No saved work items in this payment stage. Type an activity below to add it.</p>}
   <ol className="qs-one-flow-list">
    {steps.map((item,index)=><li key={item.kind+'-'+item.code+'-'+item.index} className="qs-one-flow-item">
     <span className="qs-one-flow-num">{index+1}</span>
@@ -235,7 +252,7 @@ export function MilestoneWorkflowBuilder({paymentIndex,steps,codes,allCodes,plan
    </li>)}
   </ol>
   {editable&&<div className="qs-one-flow-footer">
-   {button('+ Add',()=>open(-1))}
+   {button('+ Add work / check',()=>open(steps.length-1))}
    {steps.length>0&&button('+ Add at end',()=>open(steps.length-1))}
   </div>}
   {editable&&after===-1&&renderForm()}
@@ -243,53 +260,68 @@ export function MilestoneWorkflowBuilder({paymentIndex,steps,codes,allCodes,plan
  </div>;
  function renderForm(){
   const available=kind==='qc'?priorChecks(after??-1):[];
+  const current=requirements[selectedCode]??defaultStageRequirements(selectedCode);
+  const pickedExisting=current[field];
   return <div className="qs-one-flow-form">
-   <label>What do you want to add?
-    <select value={kind} onChange={e=>{setKind(e.target.value as Kind);setError('');setChoice('new');}}>
-     <option value="payment">Payment / Next stage</option>
+   <label>Next item
+    <input aria-label="Type next construction work or check" value={name} maxLength={180}
+     autoFocus={kind!=='qc'&&kind!=='payment'}
+     onChange={event=>{setName(event.target.value);setError('');}}
+     onKeyDown={event=>{
+      if(event.key==='Enter'){event.preventDefault();save();}
+     }}
+     disabled={kind==='qc'||kind==='payment'||choice==='existing'}
+     placeholder={kind==='material'?'Type material, e.g. Steel for footing':
+      kind==='check'?'Type site check, e.g. Excavation depth and width':
+      kind==='test'?'Type test, e.g. Concrete slump test':
+      'Type work, e.g. Footing bar bending'}/>
+   </label>
+   <label>Item type
+    <select aria-label="Choose item type" value={kind}
+     onChange={event=>{setKind(event.target.value as Kind);setCode('');setError('');setChoice('new');}}>
      <option value="work">Work</option>
      <option value="material">Material required</option>
      <option value="check">Site check</option>
      <option value="test">Test</option>
      <option value="qc">Company QC</option>
+     <option value="payment">Payment / Next stage</option>
     </select>
    </label>
-   {kind==='payment'?<p>Creates a new payment stage with its own name, percentage, and ordered work. The existing Finance schedule remains the source of payment requests.</p>:<>
-    <label>Construction stage / work area
-     <select value={selectedCode} onChange={e=>{setCode(e.target.value);setError('');}}>
-      {codes.map(x=><option key={x} value={x}>{label(x)}</option>)}
-     </select>
-    </label>
-    {!codes.length&&<label>Link a construction work stage first
-     <select defaultValue="" onChange={e=>{if(e.target.value)onLinkStage(e.target.value);}}>
-      <option value="" disabled>Select project stage</option>
-      {allCodes.map(x=><option key={x} value={x}>{label(x)}</option>)}
-     </select>
-    </label>}
-    {kind==='qc'?<label>QC after which passed site check/test?
-     <select value={qcPosition} onChange={e=>setQcPosition(e.target.value)}>
-      <option value="" disabled>Choose earlier check</option>
-      {available.filter(x=>!selectedCode||x.code===selectedCode).map(x=>
-       <option key={x.code+'-'+x.index} value={x.index}>{itemName(x)}</option>)}
-     </select>
-    </label>:<>
-     <label>Item
-      <select value={choice} onChange={e=>setChoice(e.target.value as 'new'|'existing')}>
-       <option value="new">New item</option>
-       <option value="existing">Use existing item</option>
+   {kind==='payment'?<p>Add the next priced payment stage without removing existing stages or amounts.</p>:null}
+   {kind==='qc'?<label>QC reviews this earlier site check
+    <select value={qcPosition} onChange={event=>setQcPosition(event.target.value)}>
+     <option value="" disabled>Choose earlier site check or test</option>
+     {available.map(item=><option key={item.code+':'+item.index}
+       value={item.code+':'+item.index}>{itemName(item)}</option>)}
+    </select>
+   </label>:null}
+   {kind!=='qc'&&kind!=='payment'&&
+    <details className="qs-one-flow-advanced">
+     <summary>Previous items / change work area (optional)</summary>
+     <label>Work area
+      <select value={selectedCode}
+       onChange={event=>{setCode(event.target.value);setError('');}}>
+       {[...new Set([...codes,...allCodes])].map(value=>
+        <option key={value} value={value}>{label(value)}</option>)}
       </select>
      </label>
-     {choice==='existing'?<label>Choose existing item
-      <select value={existing} onChange={e=>setExisting(e.target.value)}>
-       {existingChoices.map((x,i)=><option value={i} key={i}>{x}</option>)}
+     <label>Source
+      <select value={choice} onChange={event=>setChoice(event.target.value as 'new'|'existing')}>
+       <option value="new">Type new item</option>
+       <option value="existing">Reuse an existing saved item</option>
       </select>
-     </label>:<label>{names[kind]} name
-      <input value={name} maxLength={180} autoFocus onChange={e=>setName(e.target.value)}
-       placeholder={kind==='work'?'e.g. Footing bar bending':kind==='material'?'e.g. Footing TMT steel':
-        'e.g. Check bar bending against structural drawing'}/>
+     </label>
+     {choice==='existing'&&<label>Existing saved item
+      <select value={existing} onChange={event=>setExisting(event.target.value)}>
+       {pickedExisting.map((item,index)=>
+        <option key={index} value={index}>{item}</option>)}
+      </select>
      </label>}
-    </>}
-   </>}
+    </details>}
+   {kind!=='payment'&&selectedCode&&<small className="qs-one-flow-destination">
+    {kind==='qc'?'QC recorded against':'Will be recorded under'} {label(selectedCode)}
+    {!codes.includes(selectedCode)?' · Existing data will be preserved if reassignment is needed':''}
+   </small>}
    {error&&<p role="alert">{error}</p>}
    <div className="qs-one-flow-buttons">
     {button(kind==='payment'?'Add payment stage':'Add '+names[kind],save)}
