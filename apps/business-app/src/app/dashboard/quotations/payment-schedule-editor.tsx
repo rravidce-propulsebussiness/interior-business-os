@@ -431,7 +431,7 @@ export function PaymentScheduleEditor({
                   <output aria-label={'Estimated payment ' + (index + 1)}>{money(stageAmounts[index] ?? 0)}</output>
                 </div>
                 {industry==='construction'&&<MilestoneWorkflowBuilder
-                  paymentIndex={index} steps={milestoneFlow[String(index)]??[]}
+                  paymentIndex={index} paymentName={row.name} steps={milestoneFlow[String(index)]??[]}
                   codes={row.stageCodes} allCodes={allCodes}
                   plannedCodes={Object.values(milestoneFlow).flatMap(items=>items.map(item=>item.code))}
                   plannedWorkCodes={Object.values(milestoneFlow).flatMap(items=>
