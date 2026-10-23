@@ -830,3 +830,28 @@ describe('customer final quotation selection',()=>{
     expect(button).toContain('router.refresh()');
   });
 });
+
+
+describe('quotation stage requirements inline editing', () => {
+ const editor=file('./stage-requirements-editor.tsx');
+ const styles=file('./studio.css');
+ const schedule=file('./payment-schedule-editor.tsx');
+
+ it('provides inline Save item and Cancel without removing checklist toggles', () => {
+  expect(editor).toContain('const saveEdit = () =>');
+  expect(editor).toContain('setEditing(label)');
+  expect(editor).toContain('Save item');
+  expect(editor).toContain('Cancel');
+  expect(editor).toContain('type="checkbox" checked');
+  expect(editor).toContain('Add from standard items');
+  expect(editor).toContain('locked && base.includes(label)');
+  expect(styles).toContain('.qs-stage-item-inline-edit');
+  expect(styles).toContain('.qs-stage-item-edit-button');
+ });
+
+ it('persists customized stage labels with the payment schedule', () => {
+  expect(schedule).toContain('onChange={value=>editRequirements(code,value)}');
+  expect(schedule).toContain('stageRequirements:visibleRequirements');
+  expect(schedule).toContain('encodeStageRequirements(visibleRequirements)');
+ });
+});
