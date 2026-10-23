@@ -130,6 +130,13 @@ export async function POST(request:Request, {params}:{
       const validStageKeys=incoming.stages.flatMap(row=>row.stageCodes??[]);
       if(Object.keys(overrides).some(code=>!validStageKeys.includes(code)))
         return reply({message:'Customized requirements must belong to a quoted construction work stage.',reference:ref},422);
+      // An execution Payment step may refer only to a real signed quotation
+      // milestone that covers this construction stage. It is not a receipt.
+      for(const [code,item] of Object.entries(overrides)){
+        if(item.flow?.some(step=>step.kind==='payment'&&
+          !incoming.stages[step.index]?.stageCodes?.includes(code)))
+          return reply({message:'Choose a payment milestone linked to '+code+'.',reference:ref},422);
+      }
       const custom=encodeStageRequirements(overrides);
       terms=joinQuotationTerms({...saved,paymentPlan:[mark,links,custom].filter(Boolean).join('\n')});
       if(!savedStagePaymentPlan(terms)||
