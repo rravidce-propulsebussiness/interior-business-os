@@ -6,7 +6,10 @@ import { savedStagePaymentPlan,savedStagePaymentLinks } from '@business-os/core/
 import { proposedConstructionPayments } from '@business-os/core/construction-payment-schedule';
 import { savedStageRequirements,mergeStageRequirementOverrides,encodeStageRequirements,validateStageRequirementsDraft,remapStageFlowPayments,
  type StageRequirements,type StageRequirementsMap } from '@business-os/core/quotation-stage-requirements';
-import { StageRequirementsEditor } from './stage-requirements-editor';
+import { MilestoneWorkflowBuilder } from './milestone-workflow-builder';
+import {savedMilestoneFlow,encodeMilestoneFlow,validateMilestoneFlow,
+ remapMilestoneFlow,projectStageFlowFromMilestones,
+ type QuotationMilestoneFlow,type QuotationMilestoneStep} from '@business-os/core/quotation-milestone-flow';
 
 type Milestone = { name: string; percent: string; stageCodes: string[] };
 type Feedback = { type: 'success' | 'error'; text: string } | null;
@@ -72,7 +75,9 @@ export function PaymentScheduleEditor({
   const [rows, setRows] = useState<Milestone[]>(() => readPlan(initial.terms, industry, editable, floorNames));
   const [stageRequirements,setStageRequirements]=useState<StageRequirementsMap>(
     ()=>savedStageRequirements(initial.terms));
+  const [milestoneFlow,setMilestoneFlow]=useState<QuotationMilestoneFlow>(()=>savedMilestoneFlow(initial.terms));
   const stageCodes=[...new Set(rows.flatMap(row=>row.stageCodes))];
+  const allCodes=[...new Set(suggestions(industry,floorNames).flatMap(row=>row.stageCodes))];
   // Removing a payment milestone can remove its last referenced work stage.
   // Silently discard only the now-orphaned customizations; retain those still linked.
   const visibleRequirements=Object.fromEntries(Object.entries(stageRequirements)
@@ -127,7 +132,8 @@ export function PaymentScheduleEditor({
   const router = useRouter();
   const savedPlan = savedStagePaymentPlan(initial.terms);
   const hasChanges = JSON.stringify(rows) !== JSON.stringify(readPlan(initial.terms, industry, editable, floorNames))
-    || JSON.stringify(visibleRequirements)!==JSON.stringify(savedStageRequirements(initial.terms));
+    || JSON.stringify(visibleRequirements)!==JSON.stringify(savedStageRequirements(initial.terms))
+    || JSON.stringify(milestoneFlow)!==JSON.stringify(savedMilestoneFlow(initial.terms));
   const percentTotal = useMemo(
     () => rows.reduce((sum, row) => sum + (Number(row.percent) || 0), 0),
     [rows],
@@ -162,6 +168,7 @@ export function PaymentScheduleEditor({
   function remapMilestones(next:Milestone[],mapping:(oldIndex:number)=>number|null){
    setRows(next);
    setStageRequirements(previous=>remapStageFlowPayments(previous,mapping));
+   setMilestoneFlow(previous=>remapMilestoneFlow(previous,mapping));
    setFeedback(null);
   }
   function reorderMilestones(from:number,to:number){
@@ -180,6 +187,36 @@ export function PaymentScheduleEditor({
   function resetMilestones(){
    remapMilestones(suggestions(industry,floorNames),()=>null);
   }
+  function addMilestoneAfter(position:number){
+   if(rows.length>=MAX_STAGES)return;
+   const place=position+1;
+   remapMilestones([...rows.slice(0,place),{name:'',percent:'',stageCodes:[]},
+    ...rows.slice(place)],old=>old>=place?old+1:old);
+  }
+  function linkWorkStage(paymentIndex:number,code:string){
+   setRows(current=>current.map((row,index)=>index===paymentIndex&&
+    !row.stageCodes.includes(code)?{...row,stageCodes:[...row.stageCodes,code]}:row));
+   setFeedback(null);
+  }
+  function changeWorkflow(paymentIndex:number,nextSteps:QuotationMilestoneStep[],
+    nextRequirements:StageRequirementsMap){
+   const plan={...milestoneFlow,[String(paymentIndex)]:nextSteps};
+   const codesChanged=new Set([...(milestoneFlow[String(paymentIndex)]??[]),...nextSteps].map(x=>x.code));
+   const combined={...visibleRequirements,...nextRequirements};
+   for(const code of codesChanged){
+    const base=combined[code];
+    if(base)combined[code]={...base,flow:projectStageFlowFromMilestones(code,combined,plan)};
+   }
+   const checked=candidateRequirements(combined);
+   if(!checked)return;
+   try{
+    validateMilestoneFlow(plan,checked,rows);
+    setStageRequirements(checked);setMilestoneFlow(plan);setFeedback(null);
+   }catch(err){
+    setFeedback({type:'error',text:err instanceof Error?err.message:
+     'Check the stage and order of the added item.'});
+   }
+  }
   function addStage() {
     if (rows.length >= MAX_STAGES) return;
     setFeedback(null);
@@ -190,6 +227,8 @@ export function PaymentScheduleEditor({
     if (pending || !editable) return;
     if(candidateRequirements(visibleRequirements)===null)return;
     try{
+      validateMilestoneFlow(milestoneFlow,visibleRequirements,rows);
+      encodeMilestoneFlow(milestoneFlow);
       encodeStageRequirements(visibleRequirements);
     }catch(error){
       const invalid=Object.entries(visibleRequirements).filter(([,item])=>
@@ -217,7 +256,7 @@ export function PaymentScheduleEditor({
         const response=await fetch('/dashboard/quotations/'+initial.revision_id+'/conditions',{
           method:'POST',credentials:'same-origin',cache:'no-store',
           headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({kind:'payments',stages:rows,stageRequirements:visibleRequirements}),
+          body:JSON.stringify({kind:'payments',stages:rows,stageRequirements:visibleRequirements,milestoneFlow}),
         });
         const result:unknown=await response.json().catch(()=>null);
         const data=result&&typeof result==='object'
@@ -267,8 +306,7 @@ export function PaymentScheduleEditor({
         </span>
         <div>
           <h2>Payment Schedule</h2>
-          <p>Define stage-wise payments from the quoted work and floors.</p>
-          <p>Slabs and brickwork are floor-wise. Combine adjacent brickwork rows when agreed. Milestones appear in the PDF only after saving.</p>
+          <p>Each payment stage has one price and one + Add workflow. Add work, material, check, test or QC in site order.</p>
         </div>
       </div>
 
@@ -329,7 +367,7 @@ export function PaymentScheduleEditor({
                   <span aria-hidden="true">⠿</span>
                 </button>
                 <div className="qs-payment-stage-name">
-                  <label className="qs-payment-mobile-label" htmlFor={'qs-pay-stage-' + index}>Stage / Milestone</label>
+                  <label className="qs-payment-mobile-label" htmlFor={'qs-pay-stage-' + index}>{'Stage '+(index+1)+' · Payment / Fee'}</label>
                   <input id={'qs-pay-stage-' + index} aria-label={'Milestone ' + (index + 1)}
                     value={row.name} maxLength={100} disabled={!editable}
                     placeholder="Enter milestone"
@@ -342,18 +380,7 @@ export function PaymentScheduleEditor({
                       Combine with next floor brickwork
                      </button>}
                   </div>}
-                  {industry==='construction'&&row.stageCodes.length>0&&
-                   <details className="qs-payment-stage-guidance">
-                    <summary>Customize work, materials & checks <span aria-hidden="true">⌄</span></summary>
-                    {[...new Set(row.stageCodes)].map(code=>
-                     <StageRequirementsEditor key={code} code={code}
-                      value={visibleRequirements[code]} editable={editable}
-                      payments={rows.flatMap((payment,paymentIndex)=>
-                       payment.stageCodes.includes(code)?[{index:paymentIndex,name:payment.name,percent:payment.percent}]:[])}
-                      onChange={value=>editRequirements(code,value)}
-                      relatedCount={stageCodes.filter(c=>c.split('/')[0]===code.split('/')[0]).length}
-                      onApplyRelated={value=>applyRelated(code,value)}/>)}
-                   </details>}
+
                 </div>
                 <div className="qs-payment-percent">
                   <label className="qs-payment-mobile-label" htmlFor={'qs-pay-pct-' + index}>Percentage</label>
@@ -369,6 +396,13 @@ export function PaymentScheduleEditor({
                   <span className="qs-payment-mobile-label">Amount</span>
                   <output aria-label={'Estimated payment ' + (index + 1)}>{money(stageAmounts[index] ?? 0)}</output>
                 </div>
+                {industry==='construction'&&<MilestoneWorkflowBuilder
+                  paymentIndex={index} steps={milestoneFlow[String(index)]??[]}
+                  codes={row.stageCodes} allCodes={allCodes}
+                  requirements={visibleRequirements} editable={editable}
+                  onChange={(steps,changed)=>changeWorkflow(index,steps,changed)}
+                  onAddPayment={()=>addMilestoneAfter(index)}
+                  onLinkStage={code=>linkWorkStage(index,code)}/>}
                 {editable && (
                   <button type="button" className="qs-payment-remove" disabled={pending}
                     title="Remove milestone" aria-label={'Remove milestone ' + (index + 1)}
