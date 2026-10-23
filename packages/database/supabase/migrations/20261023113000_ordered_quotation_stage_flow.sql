@@ -61,7 +61,8 @@ begin
        or (f.value-array['kind','index']) <> '{}'::jsonb
        or f.value->>'kind' not in ('work','check','test','qc')
        or jsonb_typeof(f.value->'index') is distinct from 'number'
-       or (f.value->>'index') !~ '^[0-9]{1,2}
+       or (f.value->>'index') not similar to '[0-9]{1,2}'
+        or (f.value->>'index')::int >= 50) or
    exists(select 1 from jsonb_array_elements(v_item.value->'materials') x
      where jsonb_typeof(x.value)<>'string' or length(x.value#>>'{}')>180) or
    exists(select 1 from jsonb_array_elements(v_item.value->'reports') x
