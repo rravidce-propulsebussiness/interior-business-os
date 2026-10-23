@@ -7,6 +7,7 @@ import { proposedConstructionPayments } from '@business-os/core/construction-pay
 import { savedStageRequirements,encodeStageRequirements,validateStageRequirementsDraft,remapStageFlowPayments,
  type StageRequirementsMap } from '@business-os/core/quotation-stage-requirements';
 import { MilestoneWorkflowBuilder } from './milestone-workflow-builder';
+import {applyCompanyPaymentDefaults,companyConstructionPaymentRows,type CompanyConstructionPaymentRow} from '@business-os/core/company-construction-defaults';
 import {encodeMilestoneFlow,validateMilestoneFlow,
  remapMilestoneFlow,projectStageFlowFromMilestones,visibleMilestoneFlow,
  type QuotationMilestoneFlow,type QuotationMilestoneStep} from '@business-os/core/quotation-milestone-flow';
@@ -31,14 +32,14 @@ function suggestions(industry: string, floors: readonly string[]): Milestone[] {
   return (templates[industry] ?? templates.interior)!.map(row=>({...row,stageCodes:[...row.stageCodes]}));
 }
 
-function readPlan(terms: string, industry: string, editable: boolean,floors: readonly string[]): Milestone[] {
+function readPlan(terms: string, industry: string, editable: boolean,floors: readonly string[],companyRows:readonly CompanyConstructionPaymentRow[]=[]): Milestone[] {
   const saved=savedStagePaymentPlan(terms);
   const links=savedStagePaymentLinks(terms);
   if(saved)return saved.map((row,index)=>({
     name:row.name,percent:String(row.percent),stageCodes:links?.[index]??[],
   }));
   // Suggestions are editable only, never part of the PDF before explicitly saved.
-  return editable?suggestions(industry,floors):[];
+  return editable?(industry==='construction'?applyCompanyPaymentDefaults(suggestions(industry,floors),companyRows):suggestions(industry,floors)):[];
 }
 
 function moveStage(rows: Milestone[], from: number, to: number): Milestone[] {
@@ -55,10 +56,11 @@ function formatPercent(value: number): string {
 }
 
 export function PaymentScheduleEditor({
-  industry, total, currency, editable, initial, floorNames=[],
+  industry, total, currency, editable, initial, floorNames=[],companyDefaults=[],
 }: {
   industry: string;
   floorNames?: string[];
+  companyDefaults?:unknown;
   total: string;
   currency: string;
   editable: boolean;
@@ -72,12 +74,15 @@ export function PaymentScheduleEditor({
     discount: unknown;
   };
 }) {
-  const [rows, setRows] = useState<Milestone[]>(() => readPlan(initial.terms, industry, editable, floorNames));
+  const parsedDefaults=companyConstructionPaymentRows.safeParse(companyDefaults);
+  const defaultCompanyRows=parsedDefaults.success?parsedDefaults.data:[];
+  const initialRows=readPlan(initial.terms,industry,editable,floorNames,defaultCompanyRows);
+  const [rows, setRows] = useState<Milestone[]>(()=>initialRows);
   const [stageRequirements,setStageRequirements]=useState<StageRequirementsMap>(
     ()=>savedStageRequirements(initial.terms));
   const [milestoneFlow,setMilestoneFlow]=useState<QuotationMilestoneFlow>(()=>
     visibleMilestoneFlow(initial.terms,
-      readPlan(initial.terms,industry,editable,floorNames),savedStageRequirements(initial.terms)));
+      initialRows,savedStageRequirements(initial.terms)));
   const stageCodes=[...new Set(rows.flatMap(row=>row.stageCodes))];
   const allCodes=[...new Set(suggestions(industry,floorNames).flatMap(row=>row.stageCodes))];
   // Removing a payment milestone can remove its last referenced work stage.
@@ -111,10 +116,10 @@ export function PaymentScheduleEditor({
   const dragging = useRef<number | null>(null);
   const router = useRouter();
   const savedPlan = savedStagePaymentPlan(initial.terms);
-  const hasChanges = JSON.stringify(rows) !== JSON.stringify(readPlan(initial.terms, industry, editable, floorNames))
+  const hasChanges = JSON.stringify(rows) !== JSON.stringify(initialRows)
     || JSON.stringify(visibleRequirements)!==JSON.stringify(savedStageRequirements(initial.terms))
     || JSON.stringify(milestoneFlow)!==JSON.stringify(visibleMilestoneFlow(initial.terms,
-      readPlan(initial.terms,industry,editable,floorNames),savedStageRequirements(initial.terms)));
+      initialRows,savedStageRequirements(initial.terms)));
   const percentTotal = useMemo(
     () => rows.reduce((sum, row) => sum + (Number(row.percent) || 0), 0),
     [rows],
@@ -175,7 +180,7 @@ export function PaymentScheduleEditor({
     oldIndex===index?null:oldIndex>index?oldIndex-1:oldIndex);
   }
   function resetMilestones(){
-   remapMilestones(suggestions(industry,floorNames),()=>null);
+   remapMilestones(readPlan('',industry,true,floorNames,defaultCompanyRows),()=>null);
   }
   function addMilestoneAfter(position:number){
    if(rows.length>=MAX_STAGES)return;
