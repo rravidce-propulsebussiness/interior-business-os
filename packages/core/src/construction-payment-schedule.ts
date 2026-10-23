@@ -49,10 +49,14 @@ export function proposedConstructionPayments(floorNames: readonly string[]): Pro
   const slabShares = allocate(27, floors.length);
   const masonryShares = allocate(15, floors.length);
   const result: ProposedConstructionPayment[] = [
-    { name: 'Advance — agreement, planning, marking & excavation',
-      percent: '10.00', stageCodes: ['PRECONSTRUCTION', 'DESIGN', 'SITE_PREP'] },
+    // Planning Fee is the payment milestone itself, not another duplicated
+    // payment task inside the ordered work list.
+    { name: 'Planning',
+      percent: '10.00', stageCodes: ['PRECONSTRUCTION', 'DESIGN'] },
+    // Site marking and excavation belong to the foundation phase, after
+    // the Planning payment and its agreement/design/site-inspection work.
     { name: 'Foundation payment — PCC, footings, plinth & ground bed',
-      percent: '18.00', stageCodes: ['FOUNDATION', 'PLINTH'] },
+      percent: '18.00', stageCodes: ['SITE_PREP', 'FOUNDATION', 'PLINTH'] },
     ...floors.map((floor, index) => ({
       name: floor.name + ' slab payment',
       percent: percent(slabShares[index]!),

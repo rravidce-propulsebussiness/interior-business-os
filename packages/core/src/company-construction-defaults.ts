@@ -1,6 +1,6 @@
 import {z} from 'zod';
-import {defaultStageRequirements,type StageRequirementsMap,validateStageRequirementsDraft} from './quotation-stage-requirements';
-import {standardMilestoneWorkflow,validateMilestoneFlow,
+import {defaultStageRequirements,type StageRequirementsMap,validateStageRequirementsDraft,encodeStageRequirements} from './quotation-stage-requirements';
+import {standardMilestoneWorkflow,validateMilestoneFlow,encodeMilestoneFlow,
  type QuotationMilestoneFlow,type QuotationMilestoneStep} from './quotation-milestone-flow';
 import {milestoneConstructionStages} from './construction-payment-schedule';
 
@@ -160,22 +160,71 @@ export function applyCompanyWorkDefaults(
   }
   planned[String(i)]=steps.length?steps:(fallback[String(i)]??[]);
  }
- // Unmodified quote stage references still use their built-in guidance.
- // If the strict size boundary is exceeded, never save a partial template.
+ // Preserve as many full milestones as can fit the bounded quotation terms.
+ // In particular, a large floor-wise company template must not discard the
+ // short Planning sequence and silently restore 31 older default checklist
+ // items. Other stages still retain their canonical default guidance.
+ const valid=(stages:StageRequirementsMap,plan:QuotationMilestoneFlow)=>{
+  validateStageRequirementsDraft(stages);
+  validateMilestoneFlow(plan,stages,payments);
+  encodeStageRequirements(stages);
+  encodeMilestoneFlow(plan);
+ };
  try{
-  validateStageRequirementsDraft(requirements);
-  validateMilestoneFlow(planned,requirements,payments);
+  valid(requirements,planned);
   return {requirements,flow:planned};
  }catch{
-  return {requirements:original,flow:fallback};
+  const keptRequirements:StageRequirementsMap={...original};
+  const keptFlow:QuotationMilestoneFlow={};
+  for(let index=0;index<payments.length;index++){
+   const payment=payments[index]!;
+   const own=Object.fromEntries(payment.stageCodes.flatMap(code=>
+    requirements[code]&&!keptRequirements[code]?[[code,requirements[code]!]]:[])
+   ) as StageRequirementsMap;
+   const trialRequirements={...keptRequirements,...own};
+   const trialFlow={...keptFlow};
+   if(planned[String(index)]?.length)trialFlow[String(index)]=planned[String(index)]!;
+   try{
+    valid(trialRequirements,trialFlow);
+    Object.assign(keptRequirements,own);
+    Object.assign(keptFlow,trialFlow);
+   }catch{
+    // Do not persist a partly copied stage. Built-in stage templates remain
+    // available to the quotation until individual work is customized.
+    const builtin=fallback[String(index)];
+    if(!builtin?.length)continue;
+    const fallbackTrial={...keptFlow,[String(index)]:builtin};
+    try{valid(keptRequirements,fallbackTrial);Object.assign(keptFlow,fallbackTrial);}
+    catch{ /* This stage still uses canonical stage guidance at execution. */ }
+   }
+  }
+  return {requirements:keptRequirements,flow:keptFlow};
  }
 }
+
+/** The first priced Planning milestone. Payment is already represented by
+ * the milestone amount in Finance; do not duplicate it as a work task. */
+export const planningWorkDefaults:readonly CompanyWorkStep[]=[
+ {kind:'work',name:'Price Freeze',area:'PRECONSTRUCTION'},
+ {kind:'work',name:'Agreement',area:'PRECONSTRUCTION'},
+ {kind:'work',name:'Floor Plan',area:'DESIGN'},
+ {kind:'work',name:'Structural Design',area:'DESIGN'},
+ {kind:'work',name:'MEP Plans',area:'DESIGN'},
+ {kind:'check',name:'Site Inspection',area:'PRECONSTRUCTION'},
+];
 
 export function defaultCompanyWorkRows(
  payments:readonly {name:string;percent:string;stageCodes:string[]}[],
 ):CompanyConstructionPaymentRow[] {
- const result:CompanyConstructionPaymentRow[]=payments.map(payment=>{
+ const result:CompanyConstructionPaymentRow[]=payments.map((payment,index)=>{
   const areas=[...new Set(payment.stageCodes.map(family))];
+  // Only the standard Planning stage receives this sequence. Company-owned
+  // customized payment templates and all other milestone defaults are retained.
+  if(index===0&&payment.name==='Planning'&&
+    areas.includes('PRECONSTRUCTION')&&areas.includes('DESIGN')){
+   return {name:payment.name,percent:Number(payment.percent),areas,
+    steps:planningWorkDefaults.map(step=>({...step}))};
+  }
   const steps:CompanyWorkStep[]=[];
   for(const area of areas){
    const base=defaultStageRequirements(area);

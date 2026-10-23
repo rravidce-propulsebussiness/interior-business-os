@@ -1,6 +1,7 @@
 import {describe,it,expect} from 'vitest';
-import {companyConstructionPaymentRows,applyCompanyPaymentDefaults,applyCompanyWorkDefaults,defaultCompanyWorkRows,hydrateCompanyWorkDefaults,inferCompanyWorkAreaCode,companyWorkAreaLabel} from './company-construction-defaults';
+import {companyConstructionPaymentRows,applyCompanyPaymentDefaults,applyCompanyWorkDefaults,defaultCompanyWorkRows,hydrateCompanyWorkDefaults,inferCompanyWorkAreaCode,companyWorkAreaLabel,planningWorkDefaults} from './company-construction-defaults';
 import {defaultStageRequirements} from './quotation-stage-requirements';
+import {proposedConstructionPayments} from './construction-payment-schedule';
 import {standardMilestoneWorkflow,validateMilestoneFlow} from './quotation-milestone-flow';
 
 describe('company construction defaults vs quotation snapshot',()=>{
@@ -131,5 +132,43 @@ describe('editable text labels for technical company work areas',()=>{
   expect(inferCompanyWorkAreaCode('Structural design')).toBe('DESIGN');
   expect(inferCompanyWorkAreaCode('Outer plastering')).toBe('EXTERNAL_PLASTER');
   expect(inferCompanyWorkAreaCode('Unspecified other activity')).toBeNull();
+ });
+});
+
+
+describe('Stage 1 Planning default payment and ordered site work',()=>{
+ it('uses the paid Planning milestone once, followed by exact work/check order',()=>{
+  const plans=proposedConstructionPayments(['Ground']);
+  const company=defaultCompanyWorkRows(plans);
+  const planning=company[0]!;
+  expect(planning.name).toBe('Planning');
+  expect(planning.percent).toBe(10);
+  expect(planning.areas).toEqual(['PRECONSTRUCTION','DESIGN']);
+  expect(planning.steps).toEqual(planningWorkDefaults);
+  expect(planning.steps?.map(step=>step.name)).toEqual([
+   'Price Freeze','Agreement','Floor Plan','Structural Design',
+   'MEP Plans','Site Inspection',
+  ]);
+  expect(planning.steps?.map(step=>step.kind)).toEqual([
+   'work','work','work','work','work','check',
+  ]);
+  expect(companyConstructionPaymentRows.safeParse(company).success).toBe(true);
+  expect(company[1]?.areas).toContain('SITE_PREP');
+  expect(company[1]?.steps?.some(step=>step.name.toLowerCase().includes('excavat'))).toBe(true);
+ });
+ it('is cloned into the quotation before later structural inspection controls',()=>{
+  const plans=proposedConstructionPayments(['Ground']);
+  const company=defaultCompanyWorkRows(plans);
+  const quote=applyCompanyWorkDefaults(plans,company);
+  const order=(quote.flow['0']??[]).map(step=>{
+   const area=quote.requirements[step.code]??defaultStageRequirements(step.code);
+   const column=step.kind==='work'?'work':step.kind==='material'?'materials':'checks';
+   return area[column][step.index];
+  });
+  expect(order.slice(0,6)).toEqual([
+   'Price Freeze','Agreement','Floor Plan','Structural Design','MEP Plans','Site Inspection',
+  ]);
+  expect(quote.flow['0']?.[5]?.kind).toBe('check');
+  expect(quote.flow['1']?.some(step=>step.code==='SITE_PREP')).toBe(true);
  });
 });

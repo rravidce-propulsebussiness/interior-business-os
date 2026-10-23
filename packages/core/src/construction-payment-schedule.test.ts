@@ -11,8 +11,12 @@ describe('quoted construction milestone payments',()=>{
   expect(stages.filter(s=>s.name.includes('slab payment'))).toHaveLength(3);
   expect(stages.filter(s=>s.name.includes('brickwork'))).toHaveLength(3);
   expect(stages.reduce((sum,r)=>sum+Number(r.percent),0)).toBeCloseTo(100,8);
-  expect(stages[0]!.stageCodes).toContain('SITE_PREP');
-  expect(stages.find(s=>s.name.startsWith('Foundation'))!.stageCodes).toEqual(['FOUNDATION','PLINTH']);
+  expect(stages[0]!.name).toBe('Planning');
+  expect(stages[0]!.percent).toBe('10.00');
+  expect(stages[0]!.stageCodes).toEqual(['PRECONSTRUCTION','DESIGN']);
+  expect(stages[0]!.stageCodes).not.toContain('SITE_PREP');
+  expect(stages.find(s=>s.name.startsWith('Foundation'))!.stageCodes)
+   .toEqual(['SITE_PREP','FOUNDATION','PLINTH']);
   expect(stages.find(s=>s.name.includes('1st Floor slab'))!.stageCodes).toContain('RCC/F_1ST_FLOOR');
   expect(stages.find(s=>s.name.includes('2nd Floor brickwork'))!.stageCodes).toContain('MASONRY/F_2ND_FLOOR');
  });
