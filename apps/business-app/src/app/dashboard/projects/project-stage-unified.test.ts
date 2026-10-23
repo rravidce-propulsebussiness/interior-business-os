@@ -49,3 +49,37 @@ describe('One work item owns its progress and material workflow',()=>{
   expect(reader).toContain('select id,activity_index,item,quantity');
  });
 });
+
+
+describe('Quotation-defined ordered site execution reuses existing records',()=>{
+ const screen=read('./project-v2-view.tsx');
+ const quotationEditor=read('../quotations/stage-execution-flow-editor.tsx');
+ const qc=read('./project-onsite-qc-review.tsx');
+ const importer=read('../../../../../../packages/database/supabase/migrations/20261023113000_ordered_quotation_stage_flow.sql');
+ const earlyQc=read('../../../../../../packages/database/supabase/migrations/20261023113100_early_ordered_qc_checkpoint.sql');
+ const dependencies=read('../../../../../../packages/database/supabase/migrations/20261023113200_stage_flow_dependency_guards.sql');
+
+ it('renders work, test, check, and QC in quote order, with one canonical work item and site check',()=>{
+  expect(quotationEditor).toContain("kind==='qc'");
+  expect(quotationEditor).toContain("kind==='work'");
+  expect(screen).toContain('orderedFlow.map((step,position)=>');
+  expect(screen).toContain('renderWorkItem(work,step.index)');
+  expect(screen).toContain('renderCheckItem(title,step.index)');
+  expect(screen).toContain('topicIndices={[step.index]} earlyQc');
+  expect(screen).toContain("orderedFlow.length===0&&<details className=\"pv2-single-checks\"");
+  expect(screen).toContain('checksHref');
+  expect(qc).toContain("topicIndices");
+  expect(qc).toContain('stageStatus');
+ });
+
+ it('keeps signed quote revision gate, validates JSON and never generates new QC check rows',()=>{
+  expect(importer).toContain('Stage guidance revision does not match the frozen project timeline');
+  expect(importer).toContain("coalesce(v_item.value->'flow','[]'::jsonb)");
+  expect(importer).toContain("'flow',g.flow");
+  expect(importer).not.toContain('insert into private.site_checks');
+  expect(earlyQc).toContain("v_existing.status = 'in_progress'");
+  expect(earlyQc).toContain("step.value->>'kind'='qc'");
+  expect(dependencies).toContain("Complete the preceding quotation work, test or QC checkpoint first");
+  expect(dependencies).toContain('private.construction_stage_qc_item_reviews');
+ });
+});
