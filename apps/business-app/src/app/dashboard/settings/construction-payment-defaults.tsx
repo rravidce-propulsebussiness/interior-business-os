@@ -31,9 +31,11 @@ function DefaultPaymentStage({row,index,canEdit,onChange,onRemove}:{
  const workAreaFor=(title:string,position:number):string|null=>{
   const inferred=inferCompanyWorkAreaCode(title);
   if(inferred&&areas.includes(inferred))return inferred;
-  // Do not silently put footing/structural work into Site Prep, for example.
+  // A newly created empty fee may infer its area from the typed work or name.
+  if(inferred&&!areas.length)return inferred;
   if(inferred&&!areas.includes(inferred))return null;
-  return steps[position]?.area??steps[position+1]?.area??areas[0]??null;
+  return steps[position]?.area??steps[position+1]?.area??
+   areas[0]??inferCompanyWorkAreaCode(row.name);
  };
  const editRows=(next:CompanyWorkStep[])=>{onChange({...row,steps:next});setError('');};
  const add=(position:number)=>{
@@ -62,7 +64,9 @@ function DefaultPaymentStage({row,index,canEdit,onChange,onRemove}:{
    setError('This item already exists in the payment stage.');return;
   }
   const updated=[...steps];updated.splice((after??steps.length-1)+1,0,next);
-  editRows(updated);setAfter(null);setName('');setCheckRef('');
+  onChange({...row,steps:updated,
+   areas:areas.includes(chosen)?row.areas:[...areas,chosen]});
+  setError('');setAfter(null);setName('');setCheckRef('');
  };
  const edit=(position:number,changes:Partial<CompanyWorkStep>)=>{
   const currentItem=steps[position]!;
@@ -197,7 +201,7 @@ export function ConstructionPaymentDefaults({initial,canEdit}:{
    </ol>
    {canEdit&&<button type="button" className="us-payment-add"
      onClick={()=>setRows([...rows,{name:'New construction milestone',percent:0,
-      areas:['PRECONSTRUCTION'],steps:[]}])}
+      areas:[],steps:[]}])}
      disabled={rows.length>=40}>+ Add payment stage</button>}
    <div className="us-payment-default-footer">
     <strong>Total: {total.toFixed(2)}%</strong>
