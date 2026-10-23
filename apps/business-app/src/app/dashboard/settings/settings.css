@@ -135,21 +135,9 @@
  .us-payment-step-actions button{flex:1 1 45px}
 }
 
-.us-payment-work-areas{display:grid;gap:8px;margin:12px 0;padding:10px;border:1px dashed #e9d3c3;border-radius:9px;background:#fff}
-.us-payment-work-areas>small{font-size:11px;color:#64748b;font-weight:750}
-.us-payment-area-tags{display:flex;flex-wrap:wrap;gap:6px}
-.us-payment-area-tags>span{display:inline-flex;align-items:center;gap:5px;border-radius:7px;background:#fff0e4;border:1px solid #e8c9b4;color:#a25424;padding:4px 7px;font-size:10px;font-weight:750}
-.us-payment-area-tags button{border:none;background:transparent;color:#af4823;font-size:15px;cursor:pointer}
-.us-payment-work-areas>select{padding:8px;min-height:38px;border:1px solid #e8d6c9;border-radius:8px;background:#fff;color:#344356;font-size:11px}
 
 
 /* Typed work-area names: stable stage codes are private implementation details. */
-.us-payment-area-tags>.us-payment-area-name{display:flex;flex:1 1 185px;align-items:center;gap:6px;padding:7px 9px;background:#fff9f4;border:1px solid #ead9cb;border-radius:9px;min-width:0}
-.us-payment-area-name>span{font-size:10px;color:#857565;white-space:nowrap}
-.us-payment-area-name>input{flex:1;min-width:0;width:100%;min-height:35px;background:white;border:1px solid #e3d6c9;border-radius:7px;color:#374358;font-size:12px;font-weight:700;padding:7px 8px}
-.us-payment-area-name>button{flex:none;min-width:26px;min-height:30px;border:0;background:transparent;color:#b04e25;font-size:17px}
-.us-payment-area-add{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.us-payment-area-add>input{flex:1 1 180px;min-width:0;min-height:41px;padding:9px 10px;border:1px solid #dfd5ce;border-radius:9px;background:#fff;color:#344255;font-size:12px}
-.us-payment-area-add>button{flex:0 0 auto;min-height:39px;padding:9px 12px;border:1px solid #eac5a9;background:#fff2e8;color:#9c4c20;font-size:11px;font-weight:800;border-radius:9px}
 .us-payment-step-form label>small{font-size:10px;color:#76849a;font-weight:500}
-@media(max-width:540px){.us-payment-area-tags>.us-payment-area-name{flex-basis:100%}.us-payment-area-add>button{flex:1 0 100px}}
+
+.us-payment-step-expand{width:100%;margin-top:10px;min-height:38px;border:1px solid #e8c9b5;background:#fff6ee;border-radius:9px;color:#a05122;font-weight:800;font-size:11px;padding:8px 10px;cursor:pointer}
