@@ -21,7 +21,8 @@ describe('unified company settings',()=>{
    expect(page).toContain("label:'Team & Access'");
    expect(page).toContain("label:'Preferences'");
    expect(page).toContain('us-company-preview');
-   expect(page).toContain('us-tabs');
+   expect(page).toContain('<SettingsHome sections={sections}/>');
+   expect(page).not.toContain('<nav className="us-tabs"');
    expect(page).toContain('<OwnerShell');
    expect(companyCategoryOptions).toHaveLength(8);
  });
