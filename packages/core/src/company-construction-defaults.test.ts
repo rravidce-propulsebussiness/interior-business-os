@@ -1,5 +1,5 @@
 import {describe,it,expect} from 'vitest';
-import {companyConstructionPaymentRows,applyCompanyPaymentDefaults,applyCompanyWorkDefaults,defaultCompanyWorkRows,hydrateCompanyWorkDefaults,inferCompanyWorkAreaCode,companyWorkAreaLabel,planningWorkDefaults} from './company-construction-defaults';
+import {companyConstructionPaymentRows,applyCompanyPaymentDefaults,applyCompanyWorkDefaults,defaultCompanyWorkRows,hydrateCompanyWorkDefaults,inferCompanyWorkAreaCode,companyWorkAreaLabel,planningWorkDefaults,foundationWorkDefaults} from './company-construction-defaults';
 import {defaultStageRequirements} from './quotation-stage-requirements';
 import {proposedConstructionPayments} from './construction-payment-schedule';
 import {standardMilestoneWorkflow,validateMilestoneFlow} from './quotation-milestone-flow';
@@ -170,5 +170,83 @@ describe('Stage 1 Planning default payment and ordered site work',()=>{
   ]);
   expect(quote.flow['0']?.[5]?.kind).toBe('check');
   expect(quote.flow['1']?.some(step=>step.code==='SITE_PREP')).toBe(true);
+ });
+});
+
+
+describe('Stage 2 Foundation template without duplicate materials or QC',()=>{
+ const plans=proposedConstructionPayments(['Ground']);
+ const defaults=defaultCompanyWorkRows(plans);
+ const foundation=defaults[1]!;
+ it('preserves 18% foundation payment, stage ownership and exact work scope',()=>{
+  expect(foundation.name).toBe('Foundation payment — PCC, footings, plinth & ground bed');
+  expect(foundation.percent).toBe(18);
+  expect(foundation.areas).toEqual(['SITE_PREP','FOUNDATION','PLINTH']);
+  expect(foundation.steps).toEqual(foundationWorkDefaults);
+  expect(foundation.steps?.filter(step=>step.kind==='work').map(step=>step.name))
+   .toEqual([
+    'Site marking','Excavation','Foundation pit dressing','PCC',
+    'Bar bending','Footing marking','Reinforcement installation','Footings',
+    'Plinth level columns','Soil backfilling','Soil compaction',
+    'Basement preparation for plinth beam','Soil leveling and compaction',
+    'Anti-termite treatment','PCC bed',
+   ]);
+  expect(companyConstructionPaymentRows.safeParse(defaults).success).toBe(true);
+  expect(defaults[0]?.name).toBe('Planning');
+  expect(defaults[2]?.name).toContain('slab payment');
+ });
+ it('includes five distinct materials without repeating the generic cement entry',()=>{
+  expect(foundation.steps?.filter(step=>step.kind==='material').map(step=>step.name)).toEqual([
+   'Sand (PCC, footings and columns)',
+   'Cement (PCC, footings and columns)',
+   '40 mm aggregate (PCC)',
+   'Reinforcement steel (footings, columns, plinth beam and sump)',
+   '20 mm aggregate (footings and columns)',
+  ]);
+  expect(foundation.steps?.filter(step=>step.kind==='material'&&/^Cement\b/.test(step.name)).length).toBe(1);
+ });
+ it('pairs exactly three site checks with later company QC checkpoints',()=>{
+  const checks=foundation.steps?.filter(step=>step.kind==='check')??[];
+  const qcs=foundation.steps?.filter(step=>step.kind==='qc')??[];
+  expect(checks.map(step=>step.name)).toEqual([
+   'Mix ratio check','Footing marking checks','Bar bending checks',
+  ]);
+  expect(qcs.map(step=>step.name)).toEqual(checks.map(step=>step.name));
+  for(const check of checks){
+   const checkAt=foundation.steps!.indexOf(check);
+   const qcAt=foundation.steps!.findIndex(step=>step.kind==='qc'&&
+     step.name===check.name&&step.area===check.area);
+   expect(qcAt).toBeGreaterThan(checkAt);
+  }
+  expect(checks.every(step=>step.area==='FOUNDATION')).toBe(true);
+ });
+ it('does not mutate existing company saved templates, or quote paid status',()=>{
+  const saved=companyConstructionPaymentRows.parse([
+   {name:'Planning',percent:10,areas:['PRECONSTRUCTION'],steps:[{
+    kind:'work',name:'Saved company agreement',area:'PRECONSTRUCTION',
+   }]},
+   {name:'Customized foundation',percent:90,areas:['FOUNDATION'],steps:[{
+    kind:'work',name:'Existing custom footing activity',area:'FOUNDATION',
+   }]},
+  ]);
+  const rebuilt=hydrateCompanyWorkDefaults(saved,defaults);
+  expect(rebuilt[1]?.name).toBe('Customized foundation');
+  expect(rebuilt[1]?.steps).toEqual(saved[1]?.steps);
+  expect(rebuilt[1]?.percent).toBe(90);
+ });
+ it('clones all three foundation work areas as ordered work into a simple quotation',()=>{
+  const quoteRows=plans.slice(0,2);
+  const mapped=applyCompanyWorkDefaults(quoteRows,defaults.slice(0,2));
+  const flow=mapped.flow['1']??[];
+  const described=flow.map(step=>{
+   const req=mapped.requirements[step.code]??defaultStageRequirements(step.code);
+   return {name:req[step.kind==='work'?'work':step.kind==='material'?'materials':'checks'][step.index],
+     kind:step.kind,code:step.code};
+  });
+  expect(described.filter(item=>item.kind==='work').map(item=>item.name))
+   .toEqual(foundationWorkDefaults.filter(item=>item.kind==='work').map(item=>item.name));
+  expect(described.filter(item=>item.kind==='qc').map(item=>item.name))
+   .toEqual(['Mix ratio check','Footing marking checks','Bar bending checks']);
+  expect(described.some(item=>item.code==='PLINTH')).toBe(true);
  });
 });
