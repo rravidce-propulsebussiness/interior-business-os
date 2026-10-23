@@ -9,7 +9,7 @@ export type ProjectItemScheduleRow={
 type Props={
  projectId:string;stageId:string;kind:ProjectItemScheduleRow['kind'];
  index:number;title:string;item?:ProjectItemScheduleRow|undefined;canPlan:boolean;
- planningMode?:'full'|'daily';today?:string;
+ planningMode?:'full'|'daily'|undefined;today?:string|undefined;
 };
 const readable=(date:string)=>{
  if(!date)return '';
