@@ -83,6 +83,7 @@ export function MilestoneWorkflowBuilder({paymentIndex,steps,codes,allCodes,requ
    setError('QC is linked to the site check. Delete and add it after the correct check to change it.');return;
   }
   if(kind==='qc'&&editing===null){
+   if(qcPosition===''){setError('Choose which passed site check QC will inspect.');return;}
    const index=Number(qcPosition);
    const check=priorChecks(after!).find(x=>x.code===chosen&&x.index===index);
    if(!check){setError('Add and position a site check/test before QC.');return;}
