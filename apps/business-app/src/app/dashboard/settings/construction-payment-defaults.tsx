@@ -1,7 +1,6 @@
 'use client';
 import {useActionState,useState} from 'react';
 import {companyWorkAreaLabel,inferCompanyWorkAreaCode,type CompanyConstructionPaymentRow,type CompanyWorkStep} from '@business-os/core/company-construction-defaults';
-import {milestoneConstructionStages} from '@business-os/core/construction-payment-schedule';
 import {saveConstructionPaymentDefaults} from './payment-default-actions';
 
 type Kind=CompanyWorkStep['kind'];
@@ -9,7 +8,6 @@ const labels:Record<Kind,string>={
  work:'Work',material:'Material',check:'Site check',test:'Test',qc:'Company QC',
 };
 const prettify=(code:string)=>code.replaceAll('_',' ');
-const allAreas=milestoneConstructionStages().map(stage=>stage.code);
 const isCheck=(step:CompanyWorkStep)=>step.kind==='check'||step.kind==='test';
 const link=(step:CompanyWorkStep)=>step.area+'|'+step.name.toLowerCase();
 
