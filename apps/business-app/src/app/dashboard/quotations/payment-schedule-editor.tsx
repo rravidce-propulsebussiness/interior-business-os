@@ -166,9 +166,18 @@ export function PaymentScheduleEditor({
 
   // Payment flow steps reference existing payment rows: remap when rows move.
   function remapMilestones(next:Milestone[],mapping:(oldIndex:number)=>number|null){
+   const plan=remapMilestoneFlow(milestoneFlow,mapping);
    setRows(next);
-   setStageRequirements(previous=>remapStageFlowPayments(previous,mapping));
-   setMilestoneFlow(previous=>remapMilestoneFlow(previous,mapping));
+   setStageRequirements(previous=>{
+    const updated=remapStageFlowPayments(previous,mapping);
+    const affected=new Set(Object.values(milestoneFlow).flatMap(steps=>steps.map(s=>s.code)));
+    for(const code of affected){
+     const stage=updated[code];
+     if(stage)updated[code]={...stage,flow:projectStageFlowFromMilestones(code,updated,plan)};
+    }
+    return updated;
+   });
+   setMilestoneFlow(plan);
    setFeedback(null);
   }
   function reorderMilestones(from:number,to:number){
