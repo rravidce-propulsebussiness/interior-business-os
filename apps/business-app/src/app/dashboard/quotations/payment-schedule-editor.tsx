@@ -120,7 +120,9 @@ export function PaymentScheduleEditor({
   const savedPlan = savedStagePaymentPlan(initial.terms);
   const hasChanges = JSON.stringify(rows) !== JSON.stringify(initialRows)
     || JSON.stringify(visibleRequirements)!==JSON.stringify(savedStageRequirements(initial.terms))
-    || JSON.stringify(milestoneFlow)!==JSON.stringify(prefilledFlow);
+    || JSON.stringify(milestoneFlow)!==JSON.stringify(prefilledFlow)
+    || (industry==='construction'&&Object.keys(prefilledFlow).length>0&&
+       !initial.terms.includes('[QUOTATION_MILESTONE_FLOW]'));
   const percentTotal = useMemo(
     () => rows.reduce((sum, row) => sum + (Number(row.percent) || 0), 0),
     [rows],
