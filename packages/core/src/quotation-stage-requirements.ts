@@ -5,7 +5,7 @@ import { guidanceForConstructionStage, milestoneConstructionStages } from './con
 const list = z.array(z.string().trim().min(2).max(180)).max(50);
 const checkList = z.array(z.string().trim().min(3).max(180)).max(50);
 export const stageFlowStepSchema=z.object({
- kind:z.enum(['work','check','test','qc']),
+ kind:z.enum(['work','check','test','qc','payment']),
  index:z.number().int().min(0).max(49),
 }).strict();
 export type StageFlowStep=z.infer<typeof stageFlowStepSchema>;
@@ -53,9 +53,12 @@ function validateRequirements(value:unknown,legacyRead:boolean):StageRequirement
   if(input.flow){
    const works=new Set<number>();const checks=new Set<number>();const qcs=new Set<number>();
    for(const item of input.flow){
-    if(item.index>=(item.kind==='work'?input.work.length:input.checks.length))
+    if(item.index>=(item.kind==='payment'?40:item.kind==='work'?input.work.length:input.checks.length))
      throw new Error('Execution step refers to a missing stage item in '+code);
-    if(item.kind==='work'){
+    if(item.kind==='payment'){
+     if(qcs.has(-item.index-1))throw new Error('Duplicate payment milestone in execution order');
+     qcs.add(-item.index-1);
+    }else if(item.kind==='work'){
      if(works.has(item.index))throw new Error('Duplicate work in execution order');
      works.add(item.index);
     }else if(item.kind==='qc'){
@@ -155,6 +158,7 @@ export function reconcileStageExecutionFlow(
   return -1;
  };
  const reordered:StageFlowStep[]=original.flatMap(item=>{
+  if(item.kind==='payment')return [item];
   const nextIndex=mapIndex(item.kind==='work'?'work':'checks',item.index);
   return nextIndex===-1?[]:[{...item,index:nextIndex}];
  });
@@ -167,4 +171,58 @@ export function reconcileStageExecutionFlow(
    reordered.push({kind:'check',index:i});
  }
  return {...after,flow:reordered};
+}
+
+
+/** Removing a selected item updates its canonical array and renumbers flow
+ * references. Removing a check also removes the corresponding QC reference.
+ * Payment removal only removes a display link, never the actual payment plan.
+ */
+export function deleteStageExecutionStep(
+ stage:StageRequirements,position:number,instanceCode:string,
+):StageRequirements {
+ const flow=stageExecutionFlow(stage);
+ const step=flow[position];
+ if(!step)throw new Error('Execution step was not found');
+ if(step.kind==='qc'||step.kind==='payment')
+  return {...stage,flow:flow.filter((_,index)=>index!==position)};
+ const field=step.kind==='work'?'work':'checks';
+ const entries=stage[field];
+ if(field==='work'&&entries.length===1)
+  throw new Error('At least one work item is required per stage');
+ if(field==='checks'){
+  const template=milestoneConstructionStages().find(x=>x.code===instanceCode.split('/')[0]);
+  if(template?.holdPoint==='structural'&&
+   defaultStageRequirements(instanceCode).checks.includes(entries[step.index]??''))
+    throw new Error('Mandatory structural checks cannot be deleted');
+ }
+ const shortened=entries.filter((_,index)=>index!==step.index);
+ const next=flow.flatMap(item=>{
+  if(item.kind==='payment')return [item];
+  if(item.kind==='work'&&field!=='work')return [item];
+  if(item.kind!=='work'&&field==='work')return [item];
+  if(item.index===step.index)return [];
+  return [{...item,index:item.index>step.index?item.index-1:item.index}];
+ });
+ return {...stage,[field]:shortened,flow:next};
+}
+
+/** Payment steps are references to existing schedule rows, not money actions.
+ * A row reorder/removal must not silently attach the wrong milestone.
+ */
+export function remapStageFlowPayments(
+ all:StageRequirementsMap,remap:(oldIndex:number)=>number|null,
+):StageRequirementsMap {
+ return Object.fromEntries(Object.entries(all).map(([code,stage])=>{
+  if(!stage.flow?.some(step=>step.kind==='payment'))return [code,stage];
+  const seen=new Set<number>();
+  const flow=stage.flow.flatMap(step=>{
+   if(step.kind!=='payment')return [step];
+   const next=remap(step.index);
+   if(next===null||next<0||next>=40||seen.has(next))return [];
+   seen.add(next);
+   return [{kind:'payment' as const,index:next}];
+  });
+  return [code,{...stage,flow}];
+ }));
 }
