@@ -2,9 +2,10 @@
 
 import { useId, useState } from 'react';
 import {
-  defaultStageRequirements, type StageRequirements,
+  defaultStageRequirements, reconcileStageExecutionFlow, type StageRequirements,
 } from '@business-os/core/quotation-stage-requirements';
 import { milestoneConstructionStages } from '@business-os/core/construction-payment-schedule';
+import { StageExecutionFlowEditor } from './stage-execution-flow-editor';
 
 const fields = [
   { key: 'work', title: 'Work items', hint: 'Activities completed one by one on site' },
@@ -162,11 +163,13 @@ export function StageRequirementsEditor({ code, value, editable, onChange, onApp
     <div className="qs-stage-requirements-title">
       <strong>{title}</strong><small>{value ? 'Project customized' : 'Standard requirements'}</small>
     </div>
+    <StageExecutionFlowEditor value={requirements} editable={editable} onChange={onChange} />
+    <p className="qs-stage-requirements-hint">Use the ordered sequence above for the site workflow. The expandable lists below manage which work, materials, checks, tests and reports are included.</p>
     {fields.map((section) => <Section key={section.key} field={section.key}
       title={section.title} hint={section.hint}
       base={defaults[section.key]} requirements={requirements}
       locked={section.key === 'checks' && Boolean(structural)}
-      editable={editable} onUpdate={onChange} />)}
+      editable={editable} onUpdate={(next) => onChange(reconcileStageExecutionFlow(requirements,next))} />)}
     {editable && <div className="qs-stage-requirements-actions">
       {value && <button type="button" onClick={() => onChange(defaults)}>
         Restore standard requirements for this stage
