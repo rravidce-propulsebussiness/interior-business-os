@@ -470,14 +470,14 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
       const checkRecords=stageChecks.map(check=>({
        title:stringValue(check.title),photoId:stringValue(check.photo_id),status:stringValue(check.status),
       }));
-      const renderCheckItem=(name:string,i:number)=>{
+      const renderCheckItem=(name:string,i:number,kind:'check'|'test'='check')=>{
        const existing=stageChecks.find(x=>stringValue(x.title).toLowerCase()===name.toLowerCase())??
         (site?.checks??[]).find(x=>stringValue(x.title).toLowerCase()===name.toLowerCase());
        return <StageChecklistItem key={'site-check-'+i} projectId={d.project.id} stageId={stage.id}
         kind="check" index={i} title={name} status={stringValue(existing?.status)||'pending'}
         notes={stringValue(existing?.notes)} photoId={stringValue(existing?.photo_id)}
         photos={photos} canEdit={checksAllowed&&!complete}
-        schedule={planFor(stage.id,'check',i)} canPlan={canPlan&&!complete}/>;
+        schedule={planFor(stage.id,kind,i)} canPlan={canPlan&&!complete}/>;
       };
       const renderWorkItem=(work:string,i:number)=>{
 
@@ -676,10 +676,7 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
            </div>;
            return <div key={'flow-'+position} className="pv2-flow-step">
             <span className="pv2-flow-step-number">{position+1} · {step.kind==='test'?'Test':'Site check'}</span>
-            {step.kind==='test'&&<ProjectItemSchedule projectId={d.project.id} stageId={stage.id}
-             kind="test" index={step.index} title={title} item={planFor(stage.id,'test',step.index)}
-             canPlan={canPlan&&!complete}/>}
-            {renderCheckItem(title,step.index)}
+            {renderCheckItem(title,step.index,step.kind==='test'?'test':'check')}
            </div>;
           }):stage.activities.map((work,i)=>renderWorkItem(work,i))}
          </div>
