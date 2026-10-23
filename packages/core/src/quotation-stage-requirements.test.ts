@@ -83,3 +83,31 @@ it('repairs legacy short QC checks one stage at a time without crashing the edit
  });
  expect(encodeStageRequirements(bothClean)).toContain('Concrete pH inspection');
 });
+
+
+it('saves renamed preconstruction work and materials without changing shared stage defaults', () => {
+ const defaults=defaultStageRequirements('PRECONSTRUCTION');
+ const renamedWork='Signed agreement accepted and archived';
+ const renamedMaterial='Survey instruments and site markers';
+ const customized={
+  ...defaults,
+  work:[renamedWork,...defaults.work.slice(1)],
+  materials:defaults.materials.length
+   ? [renamedMaterial,...defaults.materials.slice(1)]
+   : [renamedMaterial],
+ };
+ const overrides=mergeStageRequirementOverrides({},'PRECONSTRUCTION',customized);
+ const restored=savedStageRequirements(encodeStageRequirements(overrides));
+ expect(restored.PRECONSTRUCTION?.work[0]).toBe(renamedWork);
+ expect(restored.PRECONSTRUCTION?.materials[0]).toBe(renamedMaterial);
+ expect(defaultStageRequirements('PRECONSTRUCTION').work).toEqual(defaults.work);
+});
+
+it('does not allow renaming mandatory structural QC checks', () => {
+ const defaults=defaultStageRequirements('FOUNDATION');
+ expect(()=>encodeStageRequirements({
+  FOUNDATION:{...defaults,checks:[
+   'Changed mandatory structural inspection',...defaults.checks.slice(1),
+  ]},
+ })).toThrow(/Mandatory structural/);
+});
