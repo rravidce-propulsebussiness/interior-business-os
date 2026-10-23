@@ -18,6 +18,9 @@ const row=z.object({
  percent:z.union([z.number(),z.string()]).transform(value=>Number(value))
   .pipe(z.number().finite().positive().max(100)),
  areas:z.array(z.string().max(45)).max(15).optional(),
+ // A custom human-readable label is separate from the stable project stage
+ // identifier so changing its text never breaks quotation/project mapping.
+ areaLabels:z.record(z.string().max(45),z.string().trim().min(2).max(80)).optional(),
  steps:z.array(companyWorkStep).max(100).optional(),
 }).strict();
 export const companyConstructionPaymentRows=z.array(row).min(1).max(40).superRefine((rows,ctx)=>{
@@ -28,6 +31,10 @@ export const companyConstructionPaymentRows=z.array(row).min(1).max(40).superRef
   total+=(item.steps?.length??0);
   const seen=new Set<string>();
   const checked=new Set<string>();
+  for(const [code] of Object.entries(item.areaLabels??{})){
+   if(!validAreas.has(code)||!(item.areas??[]).includes(code))
+    ctx.addIssue({code:'custom',message:'Area label must belong to a linked construction area',path:[position,'areaLabels',code]});
+  }
   for(const step of item.steps??[]){
    if(item.areas?.length&&!item.areas.includes(step.area))
     ctx.addIssue({code:'custom',message:'Item must belong to this milestone work area',path:[position,'steps']});
@@ -44,6 +51,37 @@ export const companyConstructionPaymentRows=z.array(row).min(1).max(40).superRef
 });
 export type CompanyConstructionPaymentRow=z.infer<typeof companyConstructionPaymentRows>[number];
 
+
+const areaHints:[RegExp,string][]=[
+ [/(agreement|advance|pre.?construction|survey|permit|site\s*inspection)/i,'PRECONSTRUCTION'],
+ [/(design|drawing|floor\s*plan|architecture)/i,'DESIGN'],
+ [/(site\s*prep|marking|excavat|setting.?out|site\s*clearing)/i,'SITE_PREP'],
+ [/(foundation|footing|bar.?bend|reinforcement|pcc\b|pit.?dress)/i,'FOUNDATION'],
+ [/(plinth|basement)/i,'PLINTH'],
+ [/(rcc|slab|beam|column\s*casting)/i,'RCC'],
+ [/(brick|masonry|block\s*work)/i,'MASONRY'],
+ [/(external\s*plaster|outer\s*plaster|elevation)/i,'EXTERNAL_PLASTER'],
+ [/(internal\s*plaster|inside\s*plaster)/i,'INTERNAL_PLASTER'],
+ [/(plumb|paint|sanitary)/i,'PLUMBING_PAINT'],
+ [/(tile|flooring)/i,'TILES'],
+ [/(door|window)/i,'DOORS'],
+ [/(handover|warranty|final\s*inspection)/i,'HANDOVER'],
+];
+/** Text labels are editable. Code is retained internally for valid project mapping.
+ * Avoid guessing a wrong stage for a name that cannot be resolved. */
+export function inferCompanyWorkAreaCode(name:string):string|null {
+ const normal=name.trim();
+ if(!normal)return null;
+ const direct=normal.toUpperCase().replace(/[^A-Z0-9]+/g,'_').replace(/^_|_$/g,'');
+ if(validAreas.has(direct))return direct;
+ for(const [pattern,code] of areaHints)if(pattern.test(normal)&&validAreas.has(code))return code;
+ return null;
+}
+export function companyWorkAreaLabel(
+ row:CompanyConstructionPaymentRow,code:string,
+):string {
+ return row.areaLabels?.[code]??code.replaceAll('_',' ');
+}
 export function applyCompanyPaymentDefaults(
  suggested:readonly {name:string;percent:string;stageCodes:string[]}[],
  defaults:readonly CompanyConstructionPaymentRow[],
@@ -158,9 +196,9 @@ export function hydrateCompanyWorkDefaults(
  standard:readonly CompanyConstructionPaymentRow[],
 ):CompanyConstructionPaymentRow[] {
  return saved.map((row,index)=>{
-  if(row.steps!==undefined)return {...row,steps:[...row.steps]};
+  if(row.steps!==undefined)return {...row,areaLabels:{...(row.areaLabels??{})},steps:[...row.steps]};
   const example=saved.length===standard.length?standard[index]:undefined;
-  return {...row,areas:[...(row.areas??example?.areas??[])],
+  return {...row,areaLabels:{...(row.areaLabels??{})},areas:[...(row.areas??example?.areas??[])],
    steps:[...(example?.steps??[])]};
  });
 }
