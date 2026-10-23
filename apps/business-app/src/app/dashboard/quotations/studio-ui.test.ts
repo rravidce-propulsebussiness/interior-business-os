@@ -877,17 +877,42 @@ describe('Payment Settings keeps work-area entry textual and removes unrelated s
   expect(stageEditor).not.toContain('<label>Work area');
   expect(stageEditor).not.toContain('Type default step work area');
   expect(stageEditor).toContain('workAreaFor(title,after??steps.length-1)');
-  expect(stageEditor).toContain("setError('This item belongs to a different construction stage.");
+  expect(stageEditor).toContain("setError('This work belongs to another construction stage.");
   expect(stageEditor).toContain('steps:updated');
  });
- it('uses only one ordered list and collapses long sequences on mobile',()=>{
-  expect(stageEditor).toContain('us-payment-step-expand');
-  expect(stageEditor).toContain('steps.slice(0,showAll?undefined:8)');
+ it('renders one accordion per payment milestone, first open only',()=>{
+  expect(stageEditor).toContain('const [expandedIndex,setExpandedIndex]=useState<number|null>(0)');
+  expect(stageEditor).toContain('className="us-payment-stage-toggle"');
+  expect(stageEditor).toContain('aria-expanded={expanded}');
+  expect(stageEditor).toContain('onToggle={()');
+  expect(stageEditor).toContain('expanded={expandedIndex===index}');
+  expect(stageEditor).not.toContain('className="us-payment-stage-work"');
+  expect(stageEditor).toContain('us-payment-stage-stats');
+  expect(stageEditor).toContain('kinds.map(type=>');
+ });
+ it('Show all and Show fewer actually change the rendered item count with no scrollbar cap',()=>{
+  const style=file('../settings/settings.css');
+  expect(stageEditor).toContain('const limit=6');
+  expect(stageEditor).toContain('const visible=showAll?steps:steps.slice(0,limit)');
+  expect(stageEditor).toContain("{showAll?'Show fewer items':'Show all '+steps.length+' items'}");
+  expect(stageEditor).toContain('setShowAll(value=>!value)');
+  expect(stageEditor).toContain('visible.map((item,position)');
+  expect(style).toContain('.us-payment-step-list{');
+  expect(style).toContain('overflow:visible;max-height:none');
+  expect(style).not.toContain('overflow-y:auto');
+ });
+ it('renders one compact action row with edit, move and delete for each work step',()=>{
+  expect(stageEditor).toContain('us-payment-step-name');
+  expect(stageEditor).toContain('saveEdit');
+  expect(stageEditor).toContain('startEdit(position)');
+  expect(stageEditor).toContain('onClick={()=>removeStep(position)}');
+  expect(stageEditor).toContain('onClick={()=>move(position,-1)}');
+  expect(stageEditor).toContain('onClick={()=>move(position,1)}');
   expect(stageEditor).toContain('New default work item name');
   expect(stageEditor).toContain('Company QC');
  });
  it('does not double number the work items',()=>{
-  expect(stageEditor).toContain('<div className="us-payment-step-list">');
+  expect(stageEditor).toContain('className="us-payment-step-list"');
   expect(stageEditor).not.toContain('<ol className="us-payment-step-list">');
  });
 });

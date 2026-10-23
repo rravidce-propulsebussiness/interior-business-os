@@ -318,7 +318,7 @@ export default async function SettingsPage({searchParams}:{
     <p className="us-info">No duplicate document store or permission bypass is created in Settings.</p>
    </section>}
    {tab==='payments'&&<section className="us-card us-wide">
-    <Header icon="♧" title="Payment Settings" detail="Configure accounts and collection options."/>
+    <Header icon="♧" title="Payment Stage Settings" detail="Define payment milestones and included work items."/>
      <div className="us-payment-template-section">
       <h3>Default construction payment schedule</h3>
       {constructionDefaultsResponse.error?
