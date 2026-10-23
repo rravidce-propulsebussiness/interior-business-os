@@ -1143,3 +1143,14 @@
 @media(prefers-reduced-motion:reduce){
  .pv2-page .pv2-stage-quality-inner{animation:none}
 }
+
+
+/* Quotation-defined interleaved stage execution: a single work/check record per step. */
+.pv2-flow-step{display:grid;gap:5px;padding:7px 7px 9px;border-left:2px solid #e4d5ca;margin-left:12px;min-width:0}
+.pv2-flow-step-number{font-size:11px;color:#a9531c;font-weight:800;letter-spacing:.01em;margin:0 0 3px}
+.pv2-flow-step .pv2-on-site-qc{margin:3px 0 8px;min-width:0}
+.pv2-flow-step .pv2-qc-heading{flex-wrap:wrap}
+@media(max-width:640px){
+ .pv2-flow-step{padding:6px 0 9px 8px;margin-left:7px}
+ .pv2-flow-step .pv2-item-checklist{min-width:0}
+}
