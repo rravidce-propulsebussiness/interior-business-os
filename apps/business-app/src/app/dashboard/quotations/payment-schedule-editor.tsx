@@ -9,7 +9,7 @@ import { savedStageRequirements,encodeStageRequirements,validateStageRequirement
 import { MilestoneWorkflowBuilder } from './milestone-workflow-builder';
 import {applyCompanyPaymentDefaults,companyConstructionPaymentRows,type CompanyConstructionPaymentRow} from '@business-os/core/company-construction-defaults';
 import {encodeMilestoneFlow,validateMilestoneFlow,
- remapMilestoneFlow,projectStageFlowFromMilestones,visibleMilestoneFlow,
+ remapMilestoneFlow,projectStageFlowFromMilestones,visibleMilestoneFlow,standardMilestoneWorkflow,
  type QuotationMilestoneFlow,type QuotationMilestoneStep} from '@business-os/core/quotation-milestone-flow';
 
 type Milestone = { name: string; percent: string; stageCodes: string[] };
@@ -80,9 +80,11 @@ export function PaymentScheduleEditor({
   const [rows, setRows] = useState<Milestone[]>(()=>initialRows);
   const [stageRequirements,setStageRequirements]=useState<StageRequirementsMap>(
     ()=>savedStageRequirements(initial.terms));
-  const [milestoneFlow,setMilestoneFlow]=useState<QuotationMilestoneFlow>(()=>
-    visibleMilestoneFlow(initial.terms,
-      initialRows,savedStageRequirements(initial.terms)));
+  const seededFlow=visibleMilestoneFlow(initial.terms,initialRows,savedStageRequirements(initial.terms));
+  const prefilledFlow=industry==='construction'&&
+    !Object.keys(seededFlow).length&&editable
+      ?standardMilestoneWorkflow(initialRows,savedStageRequirements(initial.terms)):seededFlow;
+  const [milestoneFlow,setMilestoneFlow]=useState<QuotationMilestoneFlow>(()=>prefilledFlow);
   const stageCodes=[...new Set(rows.flatMap(row=>row.stageCodes))];
   const allCodes=[...new Set(suggestions(industry,floorNames).flatMap(row=>row.stageCodes))];
   // Removing a payment milestone can remove its last referenced work stage.
@@ -118,8 +120,7 @@ export function PaymentScheduleEditor({
   const savedPlan = savedStagePaymentPlan(initial.terms);
   const hasChanges = JSON.stringify(rows) !== JSON.stringify(initialRows)
     || JSON.stringify(visibleRequirements)!==JSON.stringify(savedStageRequirements(initial.terms))
-    || JSON.stringify(milestoneFlow)!==JSON.stringify(visibleMilestoneFlow(initial.terms,
-      initialRows,savedStageRequirements(initial.terms)));
+    || JSON.stringify(milestoneFlow)!==JSON.stringify(prefilledFlow);
   const percentTotal = useMemo(
     () => rows.reduce((sum, row) => sum + (Number(row.percent) || 0), 0),
     [rows],
