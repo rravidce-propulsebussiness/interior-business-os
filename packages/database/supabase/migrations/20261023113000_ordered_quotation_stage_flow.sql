@@ -25,6 +25,16 @@ begin
   raise exception 'Approved quotation stage snapshot required' using errcode='42501';end if;
  v_raw=split_part(split_part(coalesce(rev.terms,''),'[STAGE_CUSTOM_REQUIREMENTS]',2),
    '[/STAGE_CUSTOM_REQUIREMENTS]',1);
+ -- A replaced agreement must never import workflow metadata from a
+ -- different quotation than the snapshot that created these project stages.
+ if not exists(
+   select 1 from private.project_quote_timeline_sources src
+    where src.organization_id=p_org and src.project_id=c.project_id
+      and src.revision_id=rev.id and src.industry_key='construction'
+ ) then
+   raise exception 'Stage guidance revision does not match the frozen project timeline'
+    using errcode='23514';
+ end if;
  if v_raw='' then return jsonb_build_object('imported',0);end if;
  if length(v_raw)>7500 then raise exception 'Invalid customization size' using errcode='22023';end if;
  v_json=v_raw::jsonb;
