@@ -12,7 +12,6 @@ type Props={
  steps:QuotationMilestoneStep[];
  codes:string[];
  allCodes:string[];
- plannedCodes:string[];
  plannedWorkCodes:string[];
  requirements:StageRequirementsMap;
  editable:boolean;
