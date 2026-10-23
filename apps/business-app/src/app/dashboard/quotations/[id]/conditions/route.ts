@@ -6,6 +6,8 @@ import { quotationCommandSchema } from '@business-os/core/commercial';
 import { savedStagePaymentPlan, encodeStagePaymentLinks, savedStagePaymentLinks } from '@business-os/core/quotation-payment-plan';
 import { constructionPlanFromQuotedDescriptions } from '@business-os/core/quote-construction-handoff';
 import { encodeStageRequirements,savedStageRequirements,validateStageRequirements } from '@business-os/core/quotation-stage-requirements';
+import {validateMilestoneFlow,encodeMilestoneFlow,savedMilestoneFlow}
+ from '@business-os/core/quotation-milestone-flow';
 import { joinQuotationTerms, splitQuotationTerms } from '../../quotation-terms-format';
 
 export const runtime = 'nodejs';
@@ -32,6 +34,7 @@ const payload = z.discriminatedUnion('kind',[
       stageCodes: z.array(z.string().regex(/^[A-Z][A-Z0-9_]*(?:\/[A-Z][A-Z0-9_]*)?$/).max(120)).max(18).optional(),
     }).strict()).min(1).max(40),
     stageRequirements:z.record(z.string(),z.unknown()).optional(),
+    milestoneFlow:z.record(z.string(),z.unknown()).optional(),
   }).strict(),
 ]);
 
@@ -137,8 +140,18 @@ export async function POST(request:Request, {params}:{
           !incoming.stages[step.index]?.stageCodes?.includes(code)))
           return reply({message:'Choose a payment milestone linked to '+code+'.',reference:ref},422);
       }
+      let sequence='';
+      try{
+       const plan=validateMilestoneFlow(incoming.milestoneFlow??savedMilestoneFlow(current.terms),
+        overrides,incoming.stages);
+       sequence=encodeMilestoneFlow(plan);
+      }catch(error){
+       return reply({message:error instanceof Error?error.message:
+        'The milestone workflow contains a missing work stage or QC reference.',reference:ref},422);
+      }
       const custom=encodeStageRequirements(overrides);
-      terms=joinQuotationTerms({...saved,paymentPlan:[mark,links,custom].filter(Boolean).join('\n')});
+      terms=joinQuotationTerms({...saved,paymentPlan:
+       [mark,links,custom,sequence].filter(Boolean).join('\n')});
       if(!savedStagePaymentPlan(terms)||
         (hasLinks&&!savedStagePaymentLinks(terms)))
         return reply({message:'Invalid payment schedule. Check all stages and percentages.',reference:ref},422);
