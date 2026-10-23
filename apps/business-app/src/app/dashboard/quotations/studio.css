@@ -2106,3 +2106,39 @@ border-radius:7px;padding:5px 8px;font-size:10px;font-weight:800;cursor:pointer}
  .qs-stage-flow-item .qs-stage-flow-actions button[aria-label^="Edit"],
  .qs-stage-flow-item .qs-stage-flow-delete{min-width:72px}
 }
+
+
+/* One customer payment stage, one editable construction execution sequence. */
+.qs-payment-row>.qs-one-flow{grid-column:1/-1;min-width:0;margin:9px 0 4px}
+.qs-one-flow{border:1px solid #eee1d6;border-radius:14px;padding:13px;background:#fffaf7}
+.qs-one-flow-intro{display:flex;gap:6px 14px;align-items:baseline;flex-wrap:wrap}
+.qs-one-flow-intro strong{font-weight:850;color:#3d2f27;font-size:14px}
+.qs-one-flow-intro small,.qs-one-flow-empty{font-size:11px;line-height:1.45;color:#6e7784}
+.qs-one-flow-empty{padding:12px 0 4px;margin:0}
+.qs-one-flow-list{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:7px}
+.qs-one-flow-item{display:flex;flex-wrap:wrap;align-items:flex-start;gap:8px;padding:11px;border-radius:10px;border:1px solid #e9e2dc;background:white}
+.qs-one-flow-num{display:grid;place-items:center;flex:none;width:26px;height:26px;border-radius:50%;background:#ffeadc;color:#b15117;font-weight:850;font-size:11px}
+.qs-one-flow-detail{display:flex;flex-direction:column;gap:4px;flex:1 1 175px;min-width:0}
+.qs-one-flow-detail>small{font-size:10px;color:#97633b;font-weight:700}
+.qs-one-flow-detail>strong{font-size:12px;font-weight:780;color:#303f4f;overflow-wrap:anywhere;line-height:1.45}
+.qs-one-flow-controls{display:flex;flex-wrap:wrap;align-items:center;gap:5px}
+.qs-one-flow-controls button,.qs-one-flow-footer button,.qs-one-flow-buttons button{border:1px solid #edd1bf;background:#fff5ed;color:#a8511b;padding:7px 11px;min-height:36px;border-radius:8px;font-size:11px;font-weight:780;cursor:pointer}
+.qs-one-flow-controls button:disabled{opacity:.35;cursor:default}
+.qs-one-flow-controls button:nth-last-child(2){background:#fff7f6;color:#b23e2d;border-color:#f0c9c2}
+.qs-one-flow-footer{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+.qs-one-flow-footer button:first-child,.qs-one-flow-buttons button:first-child{background:#f97316;color:#fff;border-color:#f97316}
+.qs-one-flow-form{width:100%;display:grid;gap:10px;padding:11px;border:1px solid #efcfb7;border-radius:10px;background:#fff6f0}
+.qs-one-flow-form label{display:grid;gap:5px;color:#35445a;font-size:11px;font-weight:750}
+.qs-one-flow-form input,.qs-one-flow-form select{display:block;width:100%;min-width:0;min-height:40px;padding:8px 10px;border:1px solid #ddd5cf;border-radius:8px;background:#fff;color:#283548;font:inherit;font-size:12px}
+.qs-one-flow-form p,.qs-one-flow-error{margin:0;color:#a33b24;font-size:11px;line-height:1.45}
+.qs-one-flow-buttons{display:flex;gap:8px;flex-wrap:wrap}
+@media(max-width:750px){
+ .qs-payment-row{grid-template-areas:"grip stage stage remove" ". percent amount amount" "flow flow flow flow"}
+ .qs-payment-row>.qs-one-flow{grid-area:flow;margin:5px 0}
+ .qs-one-flow{padding:9px}
+ .qs-one-flow-item{padding:9px}
+ .qs-one-flow-detail{flex-basis:calc(100% - 45px)}
+ .qs-one-flow-controls{width:100%;gap:6px}
+ .qs-one-flow-controls button{min-width:46px;flex:0 1 auto}
+ .qs-one-flow-controls button:last-child{flex:1 1 80px}
+}
