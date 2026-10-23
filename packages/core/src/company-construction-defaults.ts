@@ -7,7 +7,7 @@ export const companyConstructionPaymentRows=z.array(z.object({
  if(Math.abs(rows.reduce((sum,item)=>sum+item.percent,0)-100)>0.001)
   ctx.addIssue({code:'custom',message:'Total payment percentage must be exactly 100%'});
 });
-export type CompanyConstructionPaymentRow=z.infer<typeof companyConstructionPaymentRows>;
+export type CompanyConstructionPaymentRow=z.infer<typeof companyConstructionPaymentRows>[number];
 export function applyCompanyPaymentDefaults(
  suggested:readonly {name:string;percent:string;stageCodes:string[]}[],
  defaults:readonly CompanyConstructionPaymentRow[],
