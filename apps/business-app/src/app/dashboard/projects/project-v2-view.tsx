@@ -477,7 +477,8 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
         kind="check" index={i} title={name} status={stringValue(existing?.status)||'pending'}
         notes={stringValue(existing?.notes)} photoId={stringValue(existing?.photo_id)}
         photos={photos} canEdit={checksAllowed&&!complete}
-        schedule={planFor(stage.id,kind,i)} canPlan={canPlan&&!complete}/>;
+        schedule={planFor(stage.id,kind,i)} canPlan={canPlan&&!complete}
+        scheduleKind={kind}/>;
       };
       const renderWorkItem=(work:string,i:number)=>{
 
