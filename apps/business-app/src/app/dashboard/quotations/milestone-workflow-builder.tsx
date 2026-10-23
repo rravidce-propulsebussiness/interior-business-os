@@ -173,7 +173,7 @@ export function MilestoneWorkflowBuilder({paymentIndex,steps,codes,allCodes,requ
  };
  const button=(text:string,onClick:()=>void,disabled=false)=><button type="button" disabled={disabled} onClick={onClick}>{text}</button>;
  return <div className="qs-one-flow">
-  <div className="qs-one-flow-intro"><strong>Work sequence</strong>
+  <div className="qs-one-flow-intro"><strong>{'Stage '+(paymentIndex+1)+' · Work sequence'}</strong>
    <small>One list for this payment stage. Add only the work, materials, checks and QC you need.</small>
   </div>
   {steps.length===0&&<p className="qs-one-flow-empty">No steps added. Start with + Add to plan work after this payment milestone.</p>}
