@@ -8,9 +8,6 @@
 .crf-heading p{font-size:14px;color:#657a9a;margin:0 0 16px}
 .crf-info{display:flex;align-items:flex-start;gap:10px;padding:14px 15px;border-radius:14px;background:#edf3fb;color:#435b7d;line-height:1.6;font-size:12px;margin:16px 0 20px}
 .crf-info svg{color:var(--crf-orange);flex-shrink:0}
-.crf-nav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;border-bottom:1px solid #e4e9ee;margin:0 0 18px}
-.crf-nav>a{display:flex;justify-content:center;align-items:center;gap:7px;padding:13px 4px;color:#536780;text-decoration:none;font-size:12px;white-space:nowrap;border-bottom:3px solid transparent}
-.crf-nav>a.active{color:#f45f1b;border-bottom-color:#f45f1b;font-weight:800}
 .crf-tools{display:grid;gap:11px;margin-bottom:15px}
 .crf-search{display:flex;align-items:center;gap:9px;border:1px solid #d9e1e9;background:#fff;border-radius:11px;padding:0 12px;color:#637b9d;min-height:43px}
 .crf-search:focus-within{border-color:#f8692d;box-shadow:0 0 0 3px #fb751219}
@@ -47,7 +44,6 @@
 .crf-feedback{padding:9px 11px;border-radius:9px;background:#f0f5fd;border:1px solid #dce8fa;color:#375374}
 .crf-add{width:100%;min-height:48px;display:flex;align-items:center;justify-content:center;gap:9px;background:var(--crf-orange);color:#fff;border:1px solid var(--crf-orange);border-radius:12px;font-weight:850;margin-top:16px;font-size:13px;box-shadow:0 4px 15px #fe651c26}
 .crf-add:hover,.crf-editor-actions button:last-child:hover{background:#ea5a15}
-.crf-back{display:flex;align-items:center;gap:13px;border:0;background:transparent;color:#1b2c45;font-weight:850;font-size:19px;padding:4px 0;margin-bottom:5px}
 .crf-editor-intro{padding-left:34px;margin:0 0 18px;color:#697e9e;font-size:12px;line-height:1.5}
 .crf-editor{display:grid;gap:17px;border:1px solid #e7e9eb;border-radius:17px;background:#fff;padding:19px}
 .crf-editor>label,.crf-editor-group,.crf-options{display:grid;gap:7px;color:#182b47;font-size:12px;font-weight:800;min-width:0}
@@ -92,3 +88,61 @@
 @media(max-width:700px){.crf-root{padding:17px 12px 30px}.crf-heading h1{font-size:26px}.crf-row{padding:10px 8px;gap:7px}.crf-type-icon{height:40px;width:40px;flex-basis:40px}.crf-row-name strong{font-size:12px}.crf-row-name small{font-size:10px}.crf-status{padding:4px 8px}.crf-icon-button{min-width:27px}.crf-nav>a{font-size:10px;gap:3px}.crf-editor{padding:13px}.crf-filterline{align-items:center}}
 @media(max-width:400px){.crf-row{flex-wrap:wrap}.crf-grip{display:none}.crf-row-name{flex:1 1 110px}.crf-icon-button{min-width:29px}.crf-nav svg{display:none}.crf-chips button{padding:7px 10px}.crf-status{margin-left:auto}}
 @media(prefers-reduced-motion:reduce){.crf-switch>span,.crf-switch>span::after{transition:none}}
+
+
+/* Canonical Main Settings > Lead Requirement Fields — premium white dashboard.
+   One field library and one editor, not separate CRM configuration tabs. */
+.us-shell:has(.crf-root){max-width:1560px}
+.crf-root{color:#203047;background:#fbfcfe;max-width:none;width:100%;margin:0;padding:6px 0 18px;min-width:0}
+.crf-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(340px,390px);align-items:start;gap:22px;min-width:0}
+.crf-library{min-width:0}
+.crf-heading{margin:10px 0 18px}
+.crf-heading h1{font-size:clamp(25px,2.8vw,33px);line-height:1.15;letter-spacing:-.03em;color:#172744;font-weight:880}
+.crf-heading p{margin:6px 0 0;max-width:570px;font-size:13px;color:#6a7f9e}
+.crf-info{border-radius:12px;margin:0 0 20px;background:#fff5ee;border:1px solid #ffebda;color:#455a7a;line-height:1.6}
+.crf-tools{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;background:#fff;padding:14px;border:1px solid #e6ebf2;border-radius:15px 15px 0 0;margin:0}
+.crf-search{min-width:0;margin:0}
+.crf-add-top{margin:0;width:auto;min-height:43px;padding:9px 18px;white-space:nowrap;border-radius:10px}
+.crf-filterline{grid-column:1/-1;gap:7px}
+.crf-list{display:grid;gap:0;padding:0 12px 12px;border:1px solid #e6ebf2;border-top:0;background:#fff;border-radius:0 0 15px 15px}
+.crf-row{border-radius:11px;border-color:#e8ecf3;box-shadow:none;margin-top:8px}
+.crf-row-name small{color:#637998}
+.crf-row-name strong{color:#233350}
+.crf-status.active{background:#e5f8ed;color:#12804e}
+.crf-required{display:inline-flex}
+.crf-sidepanel{position:sticky;top:18px;min-width:0;max-height:calc(100vh - 36px);overflow:auto;overscroll-behavior:contain;padding:20px;background:#fff;border:1px solid #e4eaf2;border-radius:17px;box-shadow:0 10px 28px #28394e0d}
+.crf-panel-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:0 0 5px}
+.crf-panel-head h2{margin:0;color:#1c2d48;font-size:19px;line-height:1.25;font-weight:850}
+.crf-panel-head button{display:grid;place-items:center;border:0;background:transparent;color:#435675;min-height:39px;min-width:39px;border-radius:8px;cursor:pointer}
+.crf-panel-head button:hover{background:#f3f6fb}
+.crf-editor-intro{padding:0;margin:0 0 17px;color:#6d81a0}
+.crf-editor{padding:0;border:none;border-radius:0;gap:14px;background:#fff}
+.crf-editor-actions{position:sticky;bottom:-20px;background:#fff;z-index:2;margin-top:15px;padding:15px 0 4px}
+.crf-mobile-scrim{display:none}
+.crf-empty{background:#fcfdff;color:#617893;margin:14px 0;min-height:115px;display:grid;place-items:center}
+.crf-root .crf-editor label input,.crf-root .crf-editor label select{color:#243651;background:#fff}
+.crf-root .crf-editor label input:disabled{background:#f4f6fa}
+.crf-root .crf-editor .crf-switch input{opacity:0;background:transparent}
+.crf-root .crf-editor .crf-switch>span{background:#b8c5d4}
+.crf-root .crf-editor .crf-switch input:checked+span{background:#ff691e}
+@media(max-width:1150px){.crf-layout{grid-template-columns:minmax(0,1fr) 335px;gap:13px}.crf-sidepanel{padding:14px}}
+@media(max-width:920px){
+ .crf-layout{grid-template-columns:minmax(0,1fr)}
+ .crf-sidepanel{position:fixed;inset:0 0 0 auto;z-index:1001;width:min(100%,460px);max-height:100dvh;height:100dvh;border-radius:16px 0 0 16px;padding:19px 17px 35px;box-shadow:-15px 0 45px #17243930}
+ .crf-mobile-scrim{display:block;position:fixed;inset:0;border:0;z-index:1000;background:#17243d70;cursor:pointer}
+ .crf-editor-actions{bottom:-35px}
+}
+@media(max-width:530px){
+ .crf-root{padding:0 0 10px}
+ .crf-heading{margin:2px 0 12px}
+ .crf-heading h1{font-size:24px}
+ .crf-info{font-size:11px;padding:11px 12px}
+ .crf-tools{gap:8px;padding:10px}
+ .crf-add-top{min-height:41px;padding:8px 12px;font-size:11px}
+ .crf-chips{gap:4px}
+ .crf-chips button{font-size:10px;padding:7px 9px}
+ .crf-filterline{gap:5px}
+ .crf-list{padding:0 8px 9px}
+ .crf-row{gap:6px}
+ .crf-sidepanel{border-radius:0;width:100%;padding:17px 13px 32px}
+}
