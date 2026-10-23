@@ -5,7 +5,7 @@ import { canAccess } from '@business-os/auth';
 import { activeOrganization, pageServices } from '@business-os/auth/server';
 import { emptyAddress } from '@business-os/core/commercial';
 import { proposedConstructionPayments } from '@business-os/core/construction-payment-schedule';
-import {companyConstructionPaymentRows} from '@business-os/core/company-construction-defaults';
+import {companyConstructionPaymentRows,defaultCompanyWorkRows,hydrateCompanyWorkDefaults} from '@business-os/core/company-construction-defaults';
 import { createGstRepository } from '@business-os/database/gst';
 import { ActionForm } from '@business-os/ui/action-form';
 import { MasterForm } from '../commercial/master-form';
@@ -324,9 +324,11 @@ export default async function SettingsPage({searchParams}:{
       {constructionDefaultsResponse.error?
        <p className="us-info">Company payment defaults are temporarily unavailable.</p>:
        <ConstructionPaymentDefaults canEdit={canEdit}
-        initial={(companyConstructionPaymentRows.safeParse(constructionDefaultsResponse.data).success?
-         companyConstructionPaymentRows.parse(constructionDefaultsResponse.data):
-         proposedConstructionPayments(['Ground']).map(row=>({name:row.name,percent:Number(row.percent)}))
+        initial={hydrateCompanyWorkDefaults(
+         companyConstructionPaymentRows.safeParse(constructionDefaultsResponse.data).success?
+          companyConstructionPaymentRows.parse(constructionDefaultsResponse.data):
+          defaultCompanyWorkRows(proposedConstructionPayments(['Ground'])),
+         defaultCompanyWorkRows(proposedConstructionPayments(['Ground']))
         )}/>}
      </div>
     <Cards items={[{label:'Edit company bank details',href:'/dashboard/settings?tab=company#bank-details'},
