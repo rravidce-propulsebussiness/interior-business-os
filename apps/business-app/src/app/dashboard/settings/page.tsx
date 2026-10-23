@@ -331,9 +331,7 @@ export default async function SettingsPage({searchParams}:{
          defaultCompanyWorkRows(proposedConstructionPayments(['Ground']))
         )}/>}
      </div>
-    <Cards items={[{label:'Edit company bank details',href:'/dashboard/settings?tab=company#bank-details'},
-     {label:'Payment methods',href:'/dashboard/finance/payment_methods'},
-     {label:'Invoices & stage collections',href:'/dashboard/finance'}]}/>
+
    </section>}
    {tab==='team'&&<section className="us-card us-wide">
     <Header icon="♙" title="Team & Access" detail="Manage employees, roles and permissions."/>
