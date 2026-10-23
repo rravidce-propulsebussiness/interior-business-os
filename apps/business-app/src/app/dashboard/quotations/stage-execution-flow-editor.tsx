@@ -20,6 +20,8 @@ export function StageExecutionFlowEditor({value,editable,onChange}:{
  const [kind,setKind]=useState<Kind>('check');
  const [title,setTitle]=useState('');
  const [qcIndex,setQcIndex]=useState('0');
+ const [source,setSource]=useState<'existing'|'new'>('existing');
+ const [existingIndex,setExistingIndex]=useState('0');
  const [error,setError]=useState('');
  const commit=(next:StageRequirements)=>{onChange(next);setError('');};
  const move=(index:number,direction:number)=>{
@@ -33,7 +35,9 @@ export function StageExecutionFlowEditor({value,editable,onChange}:{
  const insert=(after:number)=>{
   const trimmed=title.replace(/\s+/g,' ').trim();
   let nextWork=[...value.work],nextChecks=[...value.checks];
-  const flow=[...steps];let added:StageFlowStep;
+  const flow=[...steps];
+  const candidates=kind==='work'?value.work:value.checks;
+  const useExisting=source==='existing'&&kind!=='qc'&&candidates.length>0;
   if(kind==='qc'){
    if(!value.checks.length){setError('Add a site check or test before adding company QC.');return;}
    const index=Number(qcIndex);
@@ -51,7 +55,23 @@ export function StageExecutionFlowEditor({value,editable,onChange}:{
    const checkPosition=flow.findIndex(step=>step.index===index&&
     (step.kind==='check'||step.kind==='test'));
    flow.splice(Math.max(after+1,checkPosition+1),0,{kind:'qc',index});
-   added={kind:'qc',index};
+  }else if(useExisting){
+   const index=Number(existingIndex);
+   if(!Number.isInteger(index)||index<0||index>=candidates.length){
+    setError('Select the work or check to move here.');return;
+   }
+   const currentPosition=flow.findIndex(step=>step.index===index&&
+    (kind==='work'?step.kind==='work':['check','test'].includes(step.kind)));
+   if(currentPosition<0){setError('This item is not available in the sequence.');return;}
+   const [selected]=flow.splice(currentPosition,1);
+   const destination=currentPosition<=after?after:after+1;
+   flow.splice(destination,0,{...selected!,kind});
+   if(flow.some((step,i)=>step.kind==='qc'&&
+      !flow.slice(0,i).some(previous=>previous.index===step.index&&
+       (previous.kind==='check'||previous.kind==='test'))){
+    setError('This item has a linked QC review. Keep its check before that QC checkpoint.');
+    return;
+   }
   }else{
    const min=kind==='work'?2:3;
    if(trimmed.length<min||trimmed.length>180){
@@ -62,7 +82,7 @@ export function StageExecutionFlowEditor({value,editable,onChange}:{
     setError('This item already exists. Move its row using the arrows instead.');return;
    }
    if(field.length>=50){setError('This stage already has 50 items in that category.');return;}
-   added={kind,index:field.length};
+   const added:StageFlowStep={kind,index:field.length};
    field.push(trimmed);
    flow.splice(after+1,0,added);
   }
@@ -104,7 +124,8 @@ export function StageExecutionFlowEditor({value,editable,onChange}:{
        </button>:null}
       {step.kind==='qc'&&<button type="button" onClick={()=>removeQc(i)}>Remove QC step</button>}
       <button type="button" onClick={()=>{
-       setInsertAfter(insertAfter===i?null:i);setKind('check');setTitle('');setError('');
+       setInsertAfter(insertAfter===i?null:i);setKind('check');setSource('existing');
+       setExistingIndex('0');setTitle('');setError('');
       }}>+ Next</button>
      </div>}
      {editable&&insertAfter===i&&<div className="qs-stage-flow-new">
@@ -116,17 +137,30 @@ export function StageExecutionFlowEditor({value,editable,onChange}:{
         <option value="qc">Company QC</option>
        </select>
       </label>
+      {kind!=='qc'&&<label>Choose existing item or create new
+       <select value={source} onChange={e=>{setSource(e.target.value as 'existing'|'new');setError('');}}>
+        <option value="existing" disabled={!(kind==='work'?value.work:value.checks).length}>Use an existing selected item</option>
+        <option value="new">Create new item</option>
+       </select>
+      </label>}
       {kind==='qc'?<label>QC for existing site check/test
        <select value={qcIndex} onChange={e=>setQcIndex(e.target.value)}>
         {value.checks.map((check,index)=><option key={index} value={index}>{check}</option>)}
        </select>
-      </label>:<label>New {labels[kind].toLowerCase()} item
-       <input maxLength={180} value={title} onChange={e=>{setTitle(e.target.value);setError('');}}
-        placeholder={kind==='work'?'e.g. Excavation':'e.g. Verify excavation depth and width'}/>
-      </label>}
+      </label>:source==='existing'&&(kind==='work'?value.work:value.checks).length>0?
+       <label>Move this {labels[kind].toLowerCase()} after the selected step
+        <select value={existingIndex} onChange={e=>setExistingIndex(e.target.value)}>
+         {(kind==='work'?value.work:value.checks).map((item,index)=>
+          <option key={index} value={index}>{item}</option>)}
+        </select>
+       </label>:
+       <label>New {labels[kind].toLowerCase()} item
+        <input maxLength={180} value={title} onChange={e=>{setTitle(e.target.value);setError('');}}
+         placeholder={kind==='work'?'e.g. Excavation':'e.g. Verify excavation depth and width'}/>
+       </label>}
       {error&&<p role="alert" className="qs-stage-flow-error">{error}</p>}
       <div className="qs-stage-flow-buttons">
-       <button type="button" onClick={()=>insert(i)} disabled={kind==='qc'&&!value.checks.length}>Add step</button>
+       <button type="button" onClick={()=>insert(i)} disabled={kind==='qc'&&!value.checks.length}>{kind==='qc'?'Add QC checkpoint':source==='existing'?'Move selected item here':'Add new step'}</button>
        <button type="button" onClick={()=>{setInsertAfter(null);setError('');}}>Cancel</button>
       </div>
      </div>}
@@ -135,7 +169,7 @@ export function StageExecutionFlowEditor({value,editable,onChange}:{
   </ol>
   {!editable&&<p className="qs-stage-flow-info">Create a quotation revision to change this execution sequence.</p>}
   {editable&&insertAfter===null&&<button type="button" className="qs-stage-flow-add-end"
-    onClick={()=>{setInsertAfter(steps.length-1);setKind('check');setError('');}}>
+    onClick={()=>{setInsertAfter(steps.length-1);setKind('check');setSource('existing');setExistingIndex('0');setError('');}}>
     + Add step after the last item
    </button>}
   {error&&insertAfter===null&&<p role="alert" className="qs-stage-flow-error">{error}</p>}
