@@ -33,12 +33,10 @@ export async function saveProjectItemSchedule(
    p_start:start,p_finish:finish,p_note:note,p_expected_version:item.version,
   } as never);
   if(response.error)throw new Error(response.error.message);
-  const result=(response.data&&typeof response.data==='object'&&!Array.isArray(response.data))
-   ?response.data as Record<string,unknown>:{};
   revalidatePath('/dashboard/projects/'+item.projectId);
   revalidatePath('/dashboard/projects/'+item.projectId+'/timeline');
   return {saved:true,message:'Planned dates saved. Physical work and QC remain unchanged.',
-   version:Number(result.version)||item.version+1};
+   version:item.version+1};
  }catch(error){
   return {saved:false,message:error instanceof Error?error.message:'Unable to schedule work'};
  }
