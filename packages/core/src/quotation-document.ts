@@ -6,7 +6,8 @@ import { premiumCss, premiumSections } from './premium-quotation';
 import { savedStagePaymentPlan,savedStagePaymentLinks } from './quotation-payment-plan';
 import { guidanceForConstructionStage } from './construction-payment-schedule';
 import { customerTermSections } from './quotation-terms';
-import { savedStageRequirements } from './quotation-stage-requirements';
+import { savedStageRequirements,defaultStageRequirements } from './quotation-stage-requirements';
+import { savedMilestoneFlow } from './quotation-milestone-flow';
 const money = z.string().regex(/^(0|[1-9]\d{0,79})(\.\d{1,100})?$/);
 export const documentHeaderSchema = z.object({
   branding: brandingSchema,
@@ -92,6 +93,25 @@ export function renderQuotationDocument(input: unknown): string {
   const savedTerms = customerTermSections(d.terms);
   const paymentRows = savedStagePaymentPlan(d.terms) ?? [];
   const paymentStageLinks = savedStagePaymentLinks(d.terms);
+  const quotedRequirements=savedStageRequirements(d.terms);
+  const milestoneOrder=savedMilestoneFlow(d.terms);
+  const hasMilestoneOrder=Object.values(milestoneOrder).some(items=>items.length>0);
+  const stepLabel=(index:number)=>{
+    const steps=milestoneOrder[String(index)]??[];
+    if(!steps.length)return '';
+    const line=(step:typeof steps[number])=>{
+      const scope=quotedRequirements[step.code]??defaultStageRequirements(step.code);
+      const key=step.kind==='work'?'work':step.kind==='material'?'materials':'checks';
+      const item=scope[key][step.index]??'Specified work item';
+      const type=step.kind==='qc'?'Company QC':
+       step.kind==='material'?'Material':step.kind==='test'?'Test':
+       step.kind==='check'?'Site check':'Work';
+      return '<li><strong>'+escape(type)+':</strong> '+escape(item)+'</li>';
+    };
+    return '<tr class="pb-milestone-work"><td colspan="3">'+
+      '<p class="muted"><strong>Work, material &amp; inspection order</strong></p>'+
+      '<ol>'+steps.map(line).join('')+'</ol></td></tr>';
+  };
   const paymentValid = paymentRows.length > 0;
   const fullCents = Math.round(Number(d.totals.final_amount) * 100);
   let paidCents = 0;
@@ -105,7 +125,8 @@ export function renderQuotationDocument(input: unknown): string {
           : Math.round(fullCents * row.percent / 100);
         paidCents += cents;
         return '<tr><td>' + escape(row.name) + '</td><td>' + row.percent.toFixed(2) +
-          '%</td><td class="amount">' + money((cents / 100).toFixed(2)) + '</td></tr>';
+          '%</td><td class="amount">' + money((cents / 100).toFixed(2)) + '</td></tr>'+
+          stepLabel(index);
       }).join('') +
       '<tr class="total"><td>Total</td><td>100%</td><td class="amount">' +
         money((fullCents / 100).toFixed(2)) + '</td></tr>' +
@@ -362,13 +383,12 @@ export function renderQuotationDocument(input: unknown): string {
     brochure.pageFooter('Payments / terms') + '</section>';
   // Only saved quote-stage associations produce this proposed QA annexure.
   // Never infer test completion, certification or material quantities.
-  const quotedRequirements=savedStageRequirements(d.terms);
   const qualityCodes=[...new Set((paymentStageLinks??[]).flat())].filter(stageCode=>{
     const info=guidanceForConstructionStage(stageCode.split('/')[0]??stageCode);
     return Boolean(quotedRequirements[stageCode]) || info.checks.length>0 ||
       info.reports.length>0;
   });
-  const qualityPage=isFloorQuote&&qualityCodes.length>0
+  const qualityPage=isFloorQuote&&!hasMilestoneOrder&&qualityCodes.length>0
     ? '<section class="pb-page pb-quality-page">' +
       brochure.pageHeader('Construction quality plan') +
       '<div class="pb-section-title"><h2>Stage-wise quality &amp; material plan</h2></div>' +
