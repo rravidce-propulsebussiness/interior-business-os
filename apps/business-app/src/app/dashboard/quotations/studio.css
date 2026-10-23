@@ -2167,3 +2167,15 @@ border-radius:7px;padding:5px 8px;font-size:10px;font-weight:800;cursor:pointer}
  .qs-one-flow-form>label:first-child input{min-height:49px;font-size:14px}
  .qs-one-flow-buttons button:first-child{min-width:120px}
 }
+
+/* Existing template data stays accessible without reintroducing full duplicate checklists. */
+.qs-one-flow-catalog{border:1px solid #ebddcd;border-radius:10px;background:#fff;padding:10px;margin:12px 0}
+.qs-one-flow-catalog summary{font-size:12px;line-height:1.5;font-weight:800;color:#87532b;cursor:pointer}
+.qs-one-flow-catalog>p,.qs-one-flow-catalog>small{font-size:11px;color:#738095;line-height:1.45;margin:8px 0}
+.qs-one-flow-catalog>input{width:100%;min-height:42px;border:1px solid #e5d9cb;background:#fff;border-radius:8px;padding:9px;font-size:12px;color:#34445a}
+.qs-one-flow-catalog>ul{list-style:none;padding:0;margin:9px 0;max-height:330px;overflow-y:auto;display:grid;gap:5px}
+.qs-one-flow-catalog>ul>li{display:flex;align-items:center;gap:10px;justify-content:space-between;border:1px solid #f1e8e0;border-radius:8px;padding:8px}
+.qs-one-flow-catalog>ul>li>div{display:grid;gap:3px;min-width:0;flex:1}
+.qs-one-flow-catalog>ul>li strong{font-size:11px;color:#344255;overflow-wrap:anywhere}
+.qs-one-flow-catalog>ul>li small{font-size:10px;color:#7b8794}
+.qs-one-flow-catalog>ul>li button{flex:none;min-height:34px;padding:6px 10px;border:1px solid #edc5a8;border-radius:8px;background:#fff4ec;color:#a9531a;font-size:11px;font-weight:800}
