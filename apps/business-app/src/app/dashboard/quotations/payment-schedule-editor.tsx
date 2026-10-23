@@ -4,8 +4,8 @@ import { useMemo, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { savedStagePaymentPlan,savedStagePaymentLinks } from '@business-os/core/quotation-payment-plan';
 import { proposedConstructionPayments } from '@business-os/core/construction-payment-schedule';
-import { savedStageRequirements,mergeStageRequirementOverrides,encodeStageRequirements,validateStageRequirementsDraft,remapStageFlowPayments,
- type StageRequirements,type StageRequirementsMap } from '@business-os/core/quotation-stage-requirements';
+import { savedStageRequirements,encodeStageRequirements,validateStageRequirementsDraft,remapStageFlowPayments,
+ type StageRequirementsMap } from '@business-os/core/quotation-stage-requirements';
 import { MilestoneWorkflowBuilder } from './milestone-workflow-builder';
 import {savedMilestoneFlow,encodeMilestoneFlow,validateMilestoneFlow,
  remapMilestoneFlow,projectStageFlowFromMilestones,
@@ -102,28 +102,6 @@ export function PaymentScheduleEditor({
     setFeedback({type:'error',text:error instanceof Error?error.message:
       'These stage requirements exceed the quotation limits.'});
     return null;
-   }
-  }
-  function editRequirements(code:string,value:StageRequirements){
-   try{
-    const changed=mergeStageRequirementOverrides(visibleRequirements,code,value);
-    const next=candidateRequirements(changed);
-    if(next){setStageRequirements(next);setFeedback(null);}
-   }catch(error){
-    setFeedback({type:'error',text:error instanceof Error?error.message:
-      'Unable to update this stage. Check the entered requirements.'});
-   }
-  }
-  function applyRelated(code:string,value:StageRequirements){
-   const related=stageCodes.filter(item=>item.split('/')[0]===code.split('/')[0]);
-   try{
-    let candidate=visibleRequirements;
-    for(const stage of related)candidate=mergeStageRequirementOverrides(candidate,stage,value);
-    const next=candidateRequirements(candidate);
-    if(next){setStageRequirements(next);setFeedback(null);}
-   }catch(error){
-    setFeedback({type:'error',text:error instanceof Error?error.message:
-      'Unable to apply requirements to every floor.'});
    }
   }
   const [feedback, setFeedback] = useState<Feedback>(null);
