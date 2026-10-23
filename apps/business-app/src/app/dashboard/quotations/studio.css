@@ -2051,3 +2051,38 @@ border-radius:7px;padding:5px 8px;font-size:10px;font-weight:800;cursor:pointer}
  .qs-stage-add-line button{flex:1 1 auto}
  .qs-stage-requirements-actions button{width:100%}
 }
+
+
+/* Ordered construction work / check / test / QC planner. Inherits quotation orange accent. */
+.qs-stage-flow-editor{background:#fffaf6;border:1px solid #f1ded0;border-radius:12px;padding:12px;margin:12px 0}
+.qs-stage-flow-heading{display:grid;gap:4px}
+.qs-stage-flow-heading strong{font-size:14px;color:#26384a}
+.qs-stage-flow-heading small,.qs-stage-flow-info,.qs-stage-requirements-hint{font-size:11px;line-height:1.5;color:#67778b}
+.qs-stage-flow-info{margin:9px 0}
+.qs-stage-flow-list{padding:0;margin:8px 0;list-style:none;display:grid;gap:7px}
+.qs-stage-flow-item{display:flex;align-items:flex-start;flex-wrap:wrap;gap:8px;padding:10px;border-radius:10px;border:1px solid #e9e4e0;background:#fff}
+.qs-stage-flow-position{flex:none;border-radius:50%;background:#ffe6d4;color:#a34d15;min-width:24px;height:24px;display:grid;place-items:center;font-size:11px;font-weight:800}
+.qs-stage-flow-copy{flex:1;min-width:125px;display:grid;align-content:center;gap:4px;font-size:12px;line-height:1.4}
+.qs-stage-flow-copy>strong{overflow-wrap:anywhere;color:#293a4b}
+.qs-stage-flow-copy>small{font-size:10px;color:#6e7885}
+.qs-stage-flow-kind{font-size:10px;font-weight:800;letter-spacing:.015em;color:#a4511b}
+.qs-stage-flow-kind.is-test{color:#8c5a31}
+.qs-stage-flow-kind.is-qc{color:#5a4c83}
+.qs-stage-flow-kind.is-check{color:#286a68}
+.qs-stage-flow-actions{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}
+.qs-stage-flow-actions button,.qs-stage-flow-buttons button,.qs-stage-flow-add-end{border:1px solid #e6cdbc;background:#fff6ef;border-radius:7px;min-height:32px;padding:5px 8px;color:#a55119;font-size:11px;font-weight:750;cursor:pointer}
+.qs-stage-flow-actions button:disabled{opacity:.35;cursor:not-allowed}
+.qs-stage-flow-new{width:100%;display:grid;gap:7px;padding:10px;background:#fffaf6;border-radius:8px;border:1px solid #f6e2d3}
+.qs-stage-flow-new label{display:grid;gap:4px;font-size:11px;font-weight:700;color:#48576a}
+.qs-stage-flow-new input,.qs-stage-flow-new select{display:block;width:100%;min-height:40px;padding:7px;border-radius:7px;border:1px solid #ddd4ca;background:#fff;color:#293748;font-size:12px;min-width:0}
+.qs-stage-flow-buttons{display:flex;gap:7px}
+.qs-stage-flow-buttons button:first-child{background:#f97316;color:#fff;border-color:#f97316}
+.qs-stage-flow-error{font-size:11px;color:#b33921;line-height:1.4}
+.qs-stage-flow-add-end{width:100%;margin:4px 0}
+@media(max-width:640px){
+ .qs-stage-flow-editor{padding:8px}
+ .qs-stage-flow-item{gap:6px;padding:8px}
+ .qs-stage-flow-copy{min-width:150px}
+ .qs-stage-flow-actions{width:100%;justify-content:flex-start;padding-left:30px}
+ .qs-stage-flow-actions button{min-height:36px}
+}
