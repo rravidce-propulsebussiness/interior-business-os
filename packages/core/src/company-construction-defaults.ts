@@ -171,11 +171,29 @@ export function applyCompanyWorkDefaults(
  }
 }
 
+/** The first priced Planning milestone. Payment is already represented by
+ * the milestone amount in Finance; do not duplicate it as a work task. */
+export const planningWorkDefaults:readonly CompanyWorkStep[]=[
+ {kind:'work',name:'Price Freeze',area:'PRECONSTRUCTION'},
+ {kind:'work',name:'Agreement',area:'PRECONSTRUCTION'},
+ {kind:'work',name:'Floor Plan',area:'DESIGN'},
+ {kind:'work',name:'Structural Design',area:'DESIGN'},
+ {kind:'work',name:'MEP Plans',area:'DESIGN'},
+ {kind:'check',name:'Site Inspection',area:'PRECONSTRUCTION'},
+];
+
 export function defaultCompanyWorkRows(
  payments:readonly {name:string;percent:string;stageCodes:string[]}[],
 ):CompanyConstructionPaymentRow[] {
- const result:CompanyConstructionPaymentRow[]=payments.map(payment=>{
+ const result:CompanyConstructionPaymentRow[]=payments.map((payment,index)=>{
   const areas=[...new Set(payment.stageCodes.map(family))];
+  // Only the standard Planning stage receives this sequence. Company-owned
+  // customized payment templates and all other milestone defaults are retained.
+  if(index===0&&payment.name==='Planning'&&
+    areas.includes('PRECONSTRUCTION')&&areas.includes('DESIGN')){
+   return {name:payment.name,percent:Number(payment.percent),areas,
+    steps:planningWorkDefaults.map(step=>({...step}))};
+  }
   const steps:CompanyWorkStep[]=[];
   for(const area of areas){
    const base=defaultStageRequirements(area);
