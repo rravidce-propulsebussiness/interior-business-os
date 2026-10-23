@@ -101,6 +101,7 @@ function DefaultPaymentStage({row,index,canEdit,onChange,onRemove}:{
    </button>}
   </div>
   <details className="us-payment-stage-work">
+   <summary>Work, materials, checks, tests &amp; QC <strong>{steps.length} included</strong></summary>
    {canEdit&&<div className="us-payment-work-areas">
     <small>Construction work areas included in this payment stage</small>
     <div className="us-payment-area-tags">
@@ -121,7 +122,7 @@ function DefaultPaymentStage({row,index,canEdit,onChange,onRemove}:{
       <option key={value} value={value}>{prettify(value)}</option>)}
     </select>
    </div>}
-   <summary>Work, materials, checks, tests &amp; QC <strong>{steps.length} included</strong></summary>
+
    <p className="us-info">These steps will be copied into new quotations. Edit the sequence here once;
     modify a quotation separately for any particular project.</p>
    {steps.length? <ol className="us-payment-step-list">{steps.map((item,position)=>
