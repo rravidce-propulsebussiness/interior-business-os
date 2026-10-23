@@ -850,7 +850,11 @@ describe('quotation stage requirements inline editing', () => {
  });
 
  it('persists customized stage labels with the payment schedule', () => {
-  expect(schedule).toContain('onChange={value=>editRequirements(code,value)}');
+  expect(schedule).toContain('onChange={(steps,changed)=>changeWorkflow(index,steps,changed)}');
+  expect(schedule).toContain('milestoneFlow');
+  expect(schedule).toContain('encodeMilestoneFlow(milestoneFlow)');
+  expect(schedule).toContain('<MilestoneWorkflowBuilder');
+  expect(schedule).not.toContain('<StageRequirementsEditor');
   expect(schedule).toContain('stageRequirements:visibleRequirements');
   expect(schedule).toContain('encodeStageRequirements(visibleRequirements)');
  });

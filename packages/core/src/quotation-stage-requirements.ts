@@ -5,7 +5,7 @@ import { guidanceForConstructionStage, milestoneConstructionStages } from './con
 const list = z.array(z.string().trim().min(2).max(180)).max(50);
 const checkList = z.array(z.string().trim().min(3).max(180)).max(50);
 export const stageFlowStepSchema=z.object({
- kind:z.enum(['work','check','test','qc','payment']),
+ kind:z.enum(['work','material','check','test','qc','payment']),
  index:z.number().int().min(0).max(49),
 }).strict();
 export type StageFlowStep=z.infer<typeof stageFlowStepSchema>;
@@ -51,13 +51,16 @@ function validateRequirements(value:unknown,legacyRead:boolean):StageRequirement
   // The ordered sequence is an execution plan, never an extra inspection or
   // independent progress record. QC refers to a previously placed site check.
   if(input.flow){
-   const works=new Set<number>();const checks=new Set<number>();const qcs=new Set<number>();
+   const works=new Set<number>();const checks=new Set<number>();const materials=new Set<number>();const qcs=new Set<number>();
    for(const item of input.flow){
-    if(item.index>=(item.kind==='payment'?40:item.kind==='work'?input.work.length:input.checks.length))
+    if(item.index>=(item.kind==='payment'?40:item.kind==='work'?input.work.length:item.kind==='material'?input.materials.length:input.checks.length))
      throw new Error('Execution step refers to a missing stage item in '+code);
     if(item.kind==='payment'){
      if(qcs.has(-item.index-1))throw new Error('Duplicate payment milestone in execution order');
      qcs.add(-item.index-1);
+    }else if(item.kind==='material'){
+     if(materials.has(item.index))throw new Error('Duplicate material in execution order');
+     materials.add(item.index);
     }else if(item.kind==='work'){
      if(works.has(item.index))throw new Error('Duplicate work in execution order');
      works.add(item.index);
@@ -159,6 +162,7 @@ export function reconcileStageExecutionFlow(
  };
  const reordered:StageFlowStep[]=original.flatMap(item=>{
   if(item.kind==='payment')return [item];
+  if(item.kind==='material')return [item];
   const nextIndex=mapIndex(item.kind==='work'?'work':'checks',item.index);
   return nextIndex===-1?[]:[{...item,index:nextIndex}];
  });
@@ -186,7 +190,7 @@ export function deleteStageExecutionStep(
  if(!step)throw new Error('Execution step was not found');
  if(step.kind==='qc'||step.kind==='payment')
   return {...stage,flow:flow.filter((_,index)=>index!==position)};
- const field=step.kind==='work'?'work':'checks';
+ const field=step.kind==='work'?'work':step.kind==='material'?'materials':'checks';
  const entries=stage[field];
  if(field==='work'&&entries.length===1)
   throw new Error('At least one work item is required per stage');
@@ -199,6 +203,8 @@ export function deleteStageExecutionStep(
  const shortened=entries.filter((_,index)=>index!==step.index);
  const next=flow.flatMap(item=>{
   if(item.kind==='payment')return [item];
+  if(item.kind==='material'&&field!=='materials')return [item];
+  if(item.kind!=='material'&&field==='materials')return [item];
   if(item.kind==='work'&&field!=='work')return [item];
   if(item.kind!=='work'&&field==='work')return [item];
   if(item.index===step.index)return [];

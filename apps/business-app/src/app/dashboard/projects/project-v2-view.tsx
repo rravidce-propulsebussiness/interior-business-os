@@ -438,6 +438,7 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
       const orderedFlow=(customGuidance?.flow??[]).filter(step=>
        step.kind==='payment'?Boolean(d.quotePaymentTriggers[step.index]?.stageCodes.includes(stage.instance_code)):
        step.kind==='work'?Boolean(stage.activities[step.index]):
+       step.kind==='material'?Boolean(plannedMaterials[step.index]):
        Boolean(stage.inspectionTopics[step.index]));
       const unpositionedPayments=payment.filter(p=>
        !orderedFlow.some(step=>step.kind==='payment'&&d.quotePaymentTriggers[step.index]===p));
@@ -588,6 +589,21 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
              <strong>{milestone.name} · {milestone.percent}%</strong>
              <p className="pv2-hint">From the signed quotation. Payment requests follow the agreed stage certification rules; only Finance records an actual receipt.</p>
              {d.permissions.finance&&<Link href={cur(d.project.id,'payments')}>View payment status in Finance</Link>}
+            </div>;
+           }
+           if(step.kind==='material'){
+            const material=plannedMaterials[step.index];
+            if(!material)return null;
+            return <div key={'flow-'+position} className="pv2-flow-step">
+             <span className="pv2-flow-step-number">{position+1} · Material required</span>
+             <strong>{material}</strong>
+             <p className="pv2-hint">Confirm the brand, quantity and required delivery date. Procurement and Finance remain the source of order status.</p>
+             <StageMaterialRows d={d} rows={stageMaterials.filter(x=>
+              stringValue(x.item).toLowerCase()===material.toLowerCase())}/>
+             {allowMaterials&&<details className="pv2-stage-material-entry">
+              <summary>+ Request / arrange this material</summary>
+              <MaterialRequestForm id={d.project.id} stageId={stage.id} suggestions={[material]}/>
+             </details>}
             </div>;
            }
            if(step.kind==='work'){
