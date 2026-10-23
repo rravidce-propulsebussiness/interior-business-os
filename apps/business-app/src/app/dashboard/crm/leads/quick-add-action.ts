@@ -4,7 +4,8 @@ import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { safeFailure } from '@business-os/shared';
 import { crmSchemas } from '@business-os/core/crm';
-import { crmServices } from '../service';
+import { crmServices,resultSchema } from '../service';
+import {mapRequirementField,quickRequirementFields,type QuickRequirementField} from '../requirement-fields';
 import { leadServiceFromIndustryKey } from './lead-service-options';
 
 const constructionFields = z
@@ -69,6 +70,9 @@ const leadInput = z
     interior: interiorFields.optional(),
     sourceId: z.uuid(),
     stageId: z.uuid(),
+    extraRequirements:z.record(z.string().max(64),
+      z.union([z.string().max(2000),z.number().finite(),z.boolean()]))
+      .default({}),
   })
   .strict();
 
@@ -150,6 +154,40 @@ export async function createQuickLead(
         message: 'This service is not enabled for your company.',
       };
 
+    // The company controls which optional/required questions are allowed.
+    // Re-check from the database: a crafted browser payload must not invent
+    // a requirement key or bypass active/industry/type/choice restrictions.
+    const definitions=resultSchema.parse(await s.crm.search(
+      'crm_requirement_fields',{active:true},1,
+    )).rows.map(mapRequirementField);
+    const configured:QuickRequirementField[]=definitions.map(field=>({
+      ...field,
+      service:field.industryId===null?null:
+        leadServiceFromIndustryKey(industries.find(entry=>entry.id===field.industryId)?.key??''),
+    })).filter(field=>field.industryId===null||field.service!==null);
+    const allowed=quickRequirementFields(configured,data.service);
+    const validExtra:Record<string,string|number|boolean>={};
+    for(const field of allowed){
+      const answer=data.extraRequirements[field.key];
+      if(answer===undefined||answer===''){
+        if(field.required)return {ok:false,message:'Answer required: '+field.name};
+        continue;
+      }
+      if(field.fieldType==='number'){
+        if(typeof answer!=='number'||!Number.isFinite(answer))
+          return {ok:false,message:'Enter a valid number for '+field.name};
+      }else if(field.fieldType==='boolean'){
+        if(typeof answer!=='boolean')
+          return {ok:false,message:'Choose Yes or No for '+field.name};
+      }else if(typeof answer!=='string'||
+        (field.fieldType==='select'&&!field.options.includes(answer))){
+        return {ok:false,message:'Choose a valid answer for '+field.name};
+      }
+      validExtra[field.key]=answer;
+    }
+    if(Object.keys(data.extraRequirements).some(key=>!(key in validExtra)))
+      return {ok:false,message:'Some requirement fields changed. Refresh and review the lead form.'};
+
     const [
       { data: source, error: sourceError },
       { data: stage, error: stageError },
@@ -198,7 +236,7 @@ export async function createQuickLead(
 
     const c = data.service === 'construction' ? data.construction : undefined;
     const i = data.service === 'interior' ? data.interior : undefined;
-    const requirements: Record<string, string> =
+    const requirements: Record<string, string|number|boolean> =
       data.service === 'construction' && c
         ? {
             service: 'construction',
@@ -225,6 +263,7 @@ export async function createQuickLead(
               ...(i.timeline ? { timeline: i.timeline } : {}),
             }
           : {};
+    Object.assign(requirements,validExtra);
 
     const saved = crmSchemas.leads.safeParse({
       name: data.name,
