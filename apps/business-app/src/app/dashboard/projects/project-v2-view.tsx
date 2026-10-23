@@ -11,6 +11,7 @@ import { suggestedStageMaterials,suggestedActivityMaterials } from './stage-mate
 import { MaterialMarketplaceOrder } from './project-material-marketplace-order';
 import { MaterialOrderingAccess,MaterialDeliveryActions } from './project-material-delivery';
 import { StageChecklistItem } from './project-stage-checklist-item';
+import { ProjectItemSchedule } from './project-item-schedule';
 import { BulkStageChecks } from './project-stage-bulk-checks';
 import { StageOnsiteQcReview } from './project-onsite-qc-review';
 import { ProjectDailyCommand } from './project-daily-command';
@@ -384,11 +385,31 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
   (site.canManage||['manager','project_manager','procurement','site_engineer'].includes(site.role));
  const allowChecks=site?.stage==='execution'&&
   (site.canManage||['manager','project_manager','quality_inspector','site_engineer'].includes(site.role));
+ const canPlan=Boolean(site?.canManage||['manager','project_manager','site_engineer','supervisor'].includes(site?.role??''));
+ const planFor=(stageId:string,kind:'work'|'material'|'check'|'test'|'qc',i:number)=>
+  d.itemPlans.find(x=>x.stageId===stageId&&x.kind===kind&&x.index===i);
+ const todayInIndia=new Intl.DateTimeFormat('en-CA',{
+  timeZone:'Asia/Kolkata',year:'numeric',month:'2-digit',day:'2-digit',
+ }).format(new Date());
+ const upcoming=[...d.itemPlans].sort((a,b)=>a.plannedStart.localeCompare(b.plannedStart))
+  .filter(x=>x.plannedFinish>=todayInIndia).slice(0,12);
  return <section className="pv2-panel pv2-command-stages" id="project-timeline">
   <div className="pv2-command-head">
    <div><h2>Project timeline</h2>
     <p>Manage stages, work, payments, materials, labour, photos and checks in one place.</p></div>
    <span className="pv2-timeline-counter">{activeStages} active · {timelineStages.length} stages</span>
+  </div>
+  <div className="pv2-planned-overview">
+   <div className="pv2-planned-overview-head">
+    <strong>Upcoming planned work</strong><small>{d.itemPlans.length} scheduled items · work dates do not activate a stage</small>
+   </div>
+   {upcoming.length>0?<div className="pv2-planned-overview-grid">
+    {upcoming.map(x=><div key={x.stageId+'-'+x.kind+'-'+x.index} className="pv2-planned-upcoming">
+     <span>{shortDate(x.plannedStart)} – {shortDate(x.plannedFinish)}</span>
+     <strong>{x.title}</strong>
+     <small>{timelineStages.find(s=>s.id===x.stageId)?.title??'Construction stage'} · {pretty(x.kind)}</small>
+    </div>)}
+   </div>:<p className="pv2-hint">Nothing planned yet. Open work, material or check items below to set dates. Current and next stages may overlap.</p>}
   </div>
   {d.quotations.length>0&&d.permissions.quotation&&<p className="pv2-timeline-quote-note">
    Quotation {d.quotations[0]?.number} is linked automatically in <a href={cur(d.project.id,'documents')}>Quote & Agreement</a>, not repeated as construction work.
@@ -455,7 +476,8 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
        return <StageChecklistItem key={'site-check-'+i} projectId={d.project.id} stageId={stage.id}
         kind="check" index={i} title={name} status={stringValue(existing?.status)||'pending'}
         notes={stringValue(existing?.notes)} photoId={stringValue(existing?.photo_id)}
-        photos={photos} canEdit={checksAllowed&&!complete}/>;
+        photos={photos} canEdit={checksAllowed&&!complete}
+        schedule={planFor(stage.id,'check',i)} canPlan={canPlan&&!complete}/>;
       };
       const renderWorkItem=(work:string,i:number)=>{
 
@@ -490,6 +512,7 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
              kind="work" index={i} title={work} status={stringValue(record?.status)||'pending'}
              notes={stringValue(record?.notes)} photoId={stringValue(record?.photo_id)}
              photos={photos} canEdit={workAllowed&&!complete}
+             schedule={planFor(stage.id,'work',i)} canPlan={canPlan&&!complete}
              checksHref={orderedFlow.length?'':'#pv2-stage-checks-'+stage.id} materialPanel={materialPanel}/>;
           
       };
@@ -567,7 +590,8 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
            return <StageChecklistItem key={name} projectId={d.project.id} stageId={stage.id}
              kind="check" index={i} title={name} status={stringValue(existing?.status)||'pending'}
              notes={stringValue(existing?.notes)} photoId={stringValue(existing?.photo_id)}
-             photos={photos} canEdit={checksAllowed&&!complete}/>;
+             photos={photos} canEdit={checksAllowed&&!complete}
+             schedule={planFor(stage.id,'check',i)} canPlan={canPlan&&!complete}/>;
           })}
          </div></details>}
         </div>}
@@ -614,6 +638,9 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
             return <div key={'flow-'+position} className="pv2-flow-step">
              <span className="pv2-flow-step-number">{position+1} · Material required</span>
              <strong>{material}</strong>
+             <ProjectItemSchedule projectId={d.project.id} stageId={stage.id} kind="material"
+              index={step.index} title={material} item={planFor(stage.id,'material',step.index)}
+              canPlan={canPlan&&!complete}/>
              <p className="pv2-hint">Confirm the brand, quantity and required delivery date. Procurement and Finance remain the source of order status.</p>
              <StageMaterialRows d={d} rows={stageMaterials.filter(x=>
               stringValue(x.item).toLowerCase()===material.toLowerCase())}/>
@@ -636,6 +663,9 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
            if(!title)return null;
            if(step.kind==='qc')return <div key={'flow-'+position} className="pv2-flow-step">
             <span className="pv2-flow-step-number">{position+1} · Company QC</span>
+            <ProjectItemSchedule projectId={d.project.id} stageId={stage.id} kind="qc"
+             index={step.index} title={title} item={planFor(stage.id,'qc',step.index)}
+             canPlan={canPlan&&!complete}/>
             <StageOnsiteQcReview projectId={d.project.id} stageId={stage.id}
              stageName={title} topics={[title]} topicIndices={[step.index]} earlyQc
              stageStatus={stageExecution?.status??'not_started'}
@@ -646,6 +676,9 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
            </div>;
            return <div key={'flow-'+position} className="pv2-flow-step">
             <span className="pv2-flow-step-number">{position+1} · {step.kind==='test'?'Test':'Site check'}</span>
+            {step.kind==='test'&&<ProjectItemSchedule projectId={d.project.id} stageId={stage.id}
+             kind="test" index={step.index} title={title} item={planFor(stage.id,'test',step.index)}
+             canPlan={canPlan&&!complete}/>}
             {renderCheckItem(title,step.index)}
            </div>;
           }):stage.activities.map((work,i)=>renderWorkItem(work,i))}
