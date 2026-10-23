@@ -436,8 +436,11 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
       // The accepted quotation can interleave real work items, site checks,
       // tests, and a separately evidenced QC visit without cloning records.
       const orderedFlow=(customGuidance?.flow??[]).filter(step=>
+       step.kind==='payment'?Boolean(d.quotePaymentTriggers[step.index]?.stageCodes.includes(stage.instance_code)):
        step.kind==='work'?Boolean(stage.activities[step.index]):
        Boolean(stage.inspectionTopics[step.index]));
+      const unpositionedPayments=payment.filter(p=>
+       !orderedFlow.some(step=>step.kind==='payment'&&d.quotePaymentTriggers[step.index]===p));
       const qcPlaced=new Set(orderedFlow.filter(x=>x.kind==='qc').map(x=>x.index));
       const remainingQc=stage.inspectionTopics.map((name,i)=>({name,i}))
        .filter(item=>!qcPlaced.has(item.i));
@@ -577,6 +580,16 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
          <p className="pv2-hint">{orderedFlow.length?'Follow the quoted order. Site checks and tests use actual photo evidence; company QC is a separate on-site pass/fail, not an automatic tick.':'Open any work item to record progress/photos, request materials, or view existing orders.'}</p>
          <div className="pv2-stage-task-entries">
           {orderedFlow.length>0?orderedFlow.map((step,position)=>{
+           if(step.kind==='payment'){
+            const milestone=d.quotePaymentTriggers[step.index];
+            if(!milestone)return null;
+            return <div key={'flow-'+position} className="pv2-flow-step pv2-flow-payment">
+             <span className="pv2-flow-step-number">{position+1} · Payment milestone</span>
+             <strong>{milestone.name} · {milestone.percent}%</strong>
+             <p className="pv2-hint">From the signed quotation. Payment requests follow the agreed stage certification rules; only Finance records an actual receipt.</p>
+             {d.permissions.finance&&<Link href={cur(d.project.id,'payments')}>View payment status in Finance</Link>}
+            </div>;
+           }
            if(step.kind==='work'){
             const work=stage.activities[step.index];
             return work?<div key={'flow-'+position} className="pv2-flow-step">
@@ -602,9 +615,9 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
           }):stage.activities.map((work,i)=>renderWorkItem(work,i))}
          </div>
         </div>}
-        {payment.length>0&&d.permissions.finance&&<div className="pv2-command-payments">
+        {unpositionedPayments.length>0&&d.permissions.finance&&<div className="pv2-command-payments">
          <OwnerIcon name="billing" size={17}/><div><strong>Linked quotation payments</strong>
-          <p>{payment.map(p=>p.name+' ('+p.percent+'%)').join(' · ')}</p>
+          <p>{unpositionedPayments.map(p=>p.name+' ('+p.percent+'%)').join(' · ')}</p>
           <small>After linked stages pass QC, one agreed payment request is issued. Payment is only recorded in Finance.</small></div>
          </div>}
         {(formalInspections.length>0||formalReviews.length>0)&&<details className="pv2-stage-secondary pv2-formal-quality">
