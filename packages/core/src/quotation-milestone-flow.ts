@@ -166,8 +166,23 @@ export function visibleMilestoneFlow(
  savedRequirements:StageRequirementsMap,
 ):QuotationMilestoneFlow {
  const explicit=savedMilestoneFlow(terms);
- return Object.keys(explicit).length?explicit:
-  restoreLegacyMilestoneFlow(payments,savedRequirements);
+ const legacy=restoreLegacyMilestoneFlow(payments,savedRequirements);
+ if(!Object.keys(explicit).length)return legacy;
+ // A saved newer sequence may have been created before all old work and
+ // materials were migrated into it. Reconcile by reference, never by title,
+ // preserving every explicit step's chosen order.
+ const merged:QuotationMilestoneFlow={...explicit};
+ const seen=new Set(Object.values(explicit).flat().map(step=>
+  step.code+':'+(step.kind==='test'?'check':step.kind)+':'+step.index));
+ for(const [row,steps] of Object.entries(legacy)){
+  const missing=steps.filter(step=>{
+   const key=step.code+':'+(step.kind==='test'?'check':step.kind)+':'+step.index;
+   if(seen.has(key))return false;
+   seen.add(key);return true;
+  });
+  if(missing.length)merged[row]=[...(merged[row]??[]),...missing];
+ }
+ return merged;
 }
 
 /** A typing-first convenience hint. The stored stage code is unchanged and
