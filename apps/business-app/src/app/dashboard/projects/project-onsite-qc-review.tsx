@@ -106,7 +106,7 @@ export function StageOnsiteQcReview(props:Props){
  const passed=indices.filter(index=>byIndex(index)[0]?.decision==='passed').length;
  const failed=indices.filter(index=>byIndex(index)[0]?.decision==='failed').length;
  const stageReady=stageStatus==='ready_for_qc';
- const earlyReady=earlyQc&&stageStatus==='in_progress'&&indices.some((index,i)=>
+ const earlyReady=earlyQc&&stageStatus==='in_progress'&&indices.some((_,i)=>
   existingChecks.some(check=>check.title.toLowerCase()===topics[i]?.toLowerCase()&&check.status==='passed'));
  if(!topics.length)return null;
  return <details className="pv2-on-site-qc" open={stageReady||earlyReady||failed>0}>
