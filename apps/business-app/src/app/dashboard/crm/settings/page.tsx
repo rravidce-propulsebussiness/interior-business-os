@@ -57,41 +57,12 @@ export default async function Settings({
         label: value,
       })),
     });
-  if (entity === 'crm_requirement_fields')
-    fields.push(
-      {
-        key: 'industry_id',
-        label: 'Industry',
-        nullable: true,
-        options: [
-          { value: '', label: 'Any industry' },
-          ...industries.map((i) => ({ value: i.id, label: i.name })),
-        ],
-      },
-      {
-        key: 'field_type',
-        label: 'Field type',
-        options: ['text', 'number', 'select', 'boolean'].map((value) => ({
-          value,
-          label: value,
-        })),
-      },
-      {
-        key: 'options',
-        label: 'Select choices (one per line)',
-        type: 'textarea',
-      },
-      { key: 'required', label: 'Required answer', type: 'checkbox' },
-    );
   const blank = {
     name: '',
     key: '',
     sort_order: 0,
     active: true,
     ...(entity === 'crm_pipeline_stages' ? { outcome: 'open' } : {}),
-    ...(entity === 'crm_requirement_fields'
-      ? { industry_id: null, field_type: 'text', options: '', required: false }
-      : {}),
   };
   return (
     <main id="main-content" className="mx-auto max-w-5xl p-6">
