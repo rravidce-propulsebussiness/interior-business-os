@@ -149,3 +149,18 @@ export function defaultCompanyWorkRows(
  });
  return result;
 }
+
+/** Adds default editable steps to legacy name+percentage-only Settings rows.
+ * Never replaces the owner's existing names, percentages, or custom steps.
+ */
+export function hydrateCompanyWorkDefaults(
+ saved:readonly CompanyConstructionPaymentRow[],
+ standard:readonly CompanyConstructionPaymentRow[],
+):CompanyConstructionPaymentRow[] {
+ return saved.map((row,index)=>{
+  if(row.steps!==undefined)return {...row,steps:[...row.steps]};
+  const example=saved.length===standard.length?standard[index]:undefined;
+  return {...row,areas:[...(row.areas??example?.areas??[])],
+   steps:[...(example?.steps??[])]};
+ });
+}
