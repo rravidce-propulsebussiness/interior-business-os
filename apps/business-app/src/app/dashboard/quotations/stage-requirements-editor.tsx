@@ -2,15 +2,16 @@
 
 import { useId, useState } from 'react';
 import {
-  defaultStageRequirements, type StageRequirements,
+  defaultStageRequirements, reconcileStageExecutionFlow, type StageRequirements,
 } from '@business-os/core/quotation-stage-requirements';
 import { milestoneConstructionStages } from '@business-os/core/construction-payment-schedule';
+import { StageExecutionFlowEditor } from './stage-execution-flow-editor';
 
 const fields = [
   { key: 'work', title: 'Work items', hint: 'Activities completed one by one on site' },
   { key: 'materials', title: 'Materials to arrange', hint: 'Choose quantities separately when requesting materials' },
   { key: 'checks', title: 'Quality checks & tests', hint: 'Photo evidence and formal approval remain separate' },
-  { key: 'reports', title: 'Evidence & reports', hint: 'Documents and photos to collect' },
+  { key: 'reports', title: 'Test & QC reports', hint: 'Supporting report requirements for site tests and QC evidence' },
 ] as const;
 type Field = typeof fields[number]['key'];
 
@@ -162,11 +163,16 @@ export function StageRequirementsEditor({ code, value, editable, onChange, onApp
     <div className="qs-stage-requirements-title">
       <strong>{title}</strong><small>{value ? 'Project customized' : 'Standard requirements'}</small>
     </div>
-    {fields.map((section) => <Section key={section.key} field={section.key}
+    <StageExecutionFlowEditor value={requirements} editable={editable} onChange={onChange} />
+    <details className="qs-stage-requirements-library">
+      <summary>Manage included work, materials, checks & reports</summary>
+      <p className="qs-stage-requirements-hint">Choose or rename the available items here. Arrange their execution order above. Site test and QC evidence is recorded against the corresponding check rather than as a second approval.</p>
+      {fields.map((section) => <Section key={section.key} field={section.key}
       title={section.title} hint={section.hint}
       base={defaults[section.key]} requirements={requirements}
       locked={section.key === 'checks' && Boolean(structural)}
-      editable={editable} onUpdate={onChange} />)}
+      editable={editable} onUpdate={(next) => onChange(reconcileStageExecutionFlow(requirements,next))} />)}
+    </details>
     {editable && <div className="qs-stage-requirements-actions">
       {value && <button type="button" onClick={() => onChange(defaults)}>
         Restore standard requirements for this stage

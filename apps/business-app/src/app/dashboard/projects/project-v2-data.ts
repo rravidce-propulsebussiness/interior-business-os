@@ -7,6 +7,7 @@ import { workCompletionByProject } from './work-progress';
 import { createMarketplaceRepository, type MarketplaceProduct } from '@business-os/database/marketplace';
 import type { ProjectEntry } from './project-v2-types';
 import { savedStagePaymentPlan,savedStagePaymentLinks } from '@business-os/core/quotation-payment-plan';
+import { stageFlowStepSchema,type StageFlowStep } from '@business-os/core/quotation-stage-requirements';
 export type { ProjectEntry } from './project-v2-types';
 
 export type SiteRow = Record<string,unknown> & {id:string};
@@ -14,13 +15,17 @@ export type Stage = {id:string;title:string;status:string;phase:string;floor_cod
  explanation:string;activities:string[];task_count:number;
  instance_code:string;template_code:string;dependencies:string[];inspectionTopics:string[]};
 export type StageLink = {stage_id:string;kind:string;record_id:string};
-export type StageGuidance={stageId:string;materials:string[];reports:string[]};
+export type StageGuidance={stageId:string;materials:string[];reports:string[];flow:StageFlowStep[]};
 function stageGuidanceRows(raw:unknown):StageGuidance[]{
  if(!Array.isArray(raw))return [];
  return raw.map(row=>{
   const x=obj(row);const strings=(value:unknown)=>Array.isArray(value)?
    value.map(stringValue).filter(Boolean):[];
-  return {stageId:stringValue(x.stage_id),materials:strings(x.materials),reports:strings(x.reports)};
+  return {stageId:stringValue(x.stage_id),materials:strings(x.materials),reports:strings(x.reports),
+   flow:Array.isArray(x.flow)?x.flow.flatMap(item=>{
+    const parsed=stageFlowStepSchema.safeParse(item);
+    return parsed.success?[parsed.data]:[];
+   }):[]};
  }).filter(row=>row.stageId);
 }
 export type StageExecution={stageId:string;status:string;blockers:string[];startedAt:string|null;fieldFinishedAt:string|null};

@@ -3,6 +3,7 @@ import { customerTermSections } from './quotation-terms';
 import {
  defaultStageRequirements,encodeStageRequirements,savedStageRequirements,
  mergeStageRequirementOverrides,validateStageRequirements,validateStageRequirementsDraft,
+ stageExecutionFlow,reconcileStageExecutionFlow,
 } from './quotation-stage-requirements';
 
 describe('project-specific construction stage requirements',()=>{
@@ -110,4 +111,73 @@ it('does not allow renaming mandatory structural QC checks', () => {
    'Changed mandatory structural inspection',...defaults.checks.slice(1),
   ]},
  })).toThrow(/Mandatory structural/);
+});
+
+
+describe('quotation-driven alternating construction work, site checks, tests and QC',()=>{
+ it('defaults to work followed by site checks until explicitly reordered',()=>{
+  const initial=defaultStageRequirements('SITE_PREP');
+  const plan=stageExecutionFlow(initial);
+  expect(plan[0]).toEqual({kind:'work',index:0});
+  expect(plan[initial.work.length]).toEqual({kind:'check',index:0});
+ });
+
+ it('saves excavation then dimensions test then QC then the next work',()=>{
+  const base=defaultStageRequirements('SITE_PREP');
+  const updated={
+   ...base,
+   flow:[
+    {kind:'work' as const,index:0},
+    {kind:'test' as const,index:0},
+    {kind:'qc' as const,index:0},
+    ...base.work.slice(1).map((_,i)=>({kind:'work' as const,index:i+1})),
+    ...base.checks.slice(1).map((_,i)=>({kind:'check' as const,index:i+1})),
+   ],
+  };
+  const changes=mergeStageRequirementOverrides({},'SITE_PREP',updated);
+  expect(savedStageRequirements(encodeStageRequirements(changes)).SITE_PREP?.flow?.slice(0,3))
+   .toEqual([{kind:'work',index:0},{kind:'test',index:0},{kind:'qc',index:0}]);
+  expect(defaultStageRequirements('SITE_PREP').flow).toBeUndefined();
+ });
+
+ it('rejects QC before its check, duplicate checks and missing stage work',()=>{
+  const base=defaultStageRequirements('FOUNDATION');
+  const full=stageExecutionFlow(base);
+  expect(()=>validateStageRequirements({FOUNDATION:{
+   ...base,flow:[{kind:'qc',index:0},...full],
+  }})).toThrow(/precede/);
+  expect(()=>validateStageRequirements({FOUNDATION:{
+   ...base,flow:[...full,{kind:'check',index:0}],
+  }})).toThrow(/Duplicate check/);
+  expect(()=>validateStageRequirements({FOUNDATION:{
+   ...base,flow:full.slice(1),
+  }})).toThrow(/include every selected/);
+ });
+
+ it('keeps a QC reference when its work or check label is renamed',()=>{
+  const base=defaultStageRequirements('SITE_PREP');
+  const old={
+   ...base,flow:[
+    ...stageExecutionFlow(base),
+    {kind:'qc' as const,index:0},
+   ],
+  };
+  const renamed=reconcileStageExecutionFlow(old,{
+   ...old,checks:['Verify excavation width and depth on site',...old.checks.slice(1)],
+  });
+  expect(renamed.flow?.filter(step=>step.kind==='qc')).toEqual([{kind:'qc',index:0}]);
+  expect(()=>validateStageRequirements({SITE_PREP:renamed})).not.toThrow();
+ });
+
+ it('appends a newly selected test after existing ordered steps without changing QC',()=>{
+  const base=defaultStageRequirements('SITE_PREP');
+  const previous={
+   ...base,flow:[...stageExecutionFlow(base),{kind:'qc' as const,index:0}],
+  };
+  const next=reconcileStageExecutionFlow(previous,{
+   ...previous,checks:[...base.checks,'Verify dewatering test result'],
+  });
+  expect(next.flow?.at(-1)).toEqual({kind:'check',index:base.checks.length});
+  expect(next.flow?.filter(step=>step.kind==='qc')).toEqual([{kind:'qc',index:0}]);
+ });
 });
