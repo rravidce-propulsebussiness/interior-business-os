@@ -934,7 +934,8 @@ describe('Settings category dashboard keeps one canonical settings workspace',()
   for(const label of ['Business & Company','Project & Construction','People & Access',
    'Documents & Templates','System & Preferences'])expect(page).toContain(label);
   const home=page.split('const sections:SettingSection[]=')[1]?.split('.filter(section=>section.cards.length>0)')[0]??'';
-  expect((home.match(/\bid:'[^']+',title:/g)??[]).length).toBe(18);
+  // Five section headings plus the eighteen category cards share this shape.
+  expect((home.match(/\bid:'[^']+',title:/g)??[]).length-5).toBe(18);
   expect(page).toContain("href:'/dashboard/settings?tab=payments#company-payment-stages'");
   expect(page).toContain("href:'/dashboard/settings?tab=branding#quotation-template-settings'");
   expect(page).toContain("href:'/dashboard/settings?tab=invoice'");
