@@ -877,7 +877,7 @@ describe('Payment Settings keeps work-area entry textual and removes unrelated s
   expect(stageEditor).not.toContain('<label>Work area');
   expect(stageEditor).not.toContain('Type default step work area');
   expect(stageEditor).toContain('workAreaFor(title,after??steps.length-1)');
-  expect(stageEditor).toContain("setError('This item belongs to a different construction stage.");
+  expect(stageEditor).toContain("setError('This work belongs to another construction stage.");
   expect(stageEditor).toContain('steps:updated');
  });
  it('renders one accordion per payment milestone, first open only',()=>{
