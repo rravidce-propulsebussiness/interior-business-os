@@ -8,12 +8,12 @@ import {ProjectItemSchedule,type ProjectItemScheduleRow} from './project-item-sc
 type Result={saved:boolean;message:string};
 type Photo={id:string;filename:string};
 export function StageChecklistItem({projectId,stageId,kind,index,title,status,notes,photos,
-  canEdit=false,photoId='',materialPanel,checksHref,schedule,canPlan=false,scheduleKind}:{
+  canEdit=false,photoId='',materialPanel,checksHref,schedule,canPlan=false,scheduleKind,planningMode,today}:{
   projectId:string;stageId:string;kind:'work'|'check';index:number;title:string;
   status:string;notes?:string;photos:Photo[];canEdit?:boolean;photoId?:string;
   materialPanel?:ReactNode;checksHref?:string;
   schedule?:ProjectItemScheduleRow|undefined;canPlan?:boolean;
-  scheduleKind?:'work'|'check'|'test';
+  scheduleKind?:'work'|'check'|'test';planningMode?:'full'|'daily';today?:string;
 }) {
  const router=useRouter();
  const [selectedPhotoId,setSelectedPhotoId]=useState(photoId);
@@ -51,7 +51,7 @@ export function StageChecklistItem({projectId,stageId,kind,index,title,status,no
   </summary>
   <div className="pv2-item-checklist-inner">
    <ProjectItemSchedule projectId={projectId} stageId={stageId} kind={scheduleKind??kind}
-    index={index} title={title} item={schedule} canPlan={canPlan}/>
+    index={index} title={title} item={schedule} canPlan={canPlan} planningMode={planningMode} today={today}/>
    {kind==='work'&&(materialPanel||checksHref)&&<div className="pv2-item-inline-quick" role="group" aria-label="Work item actions">
     {materialPanel&&<button type="button" aria-controls={'activity-materials-'+stageId+'-'+index}
       aria-expanded={materialsOpen} className={materialsOpen?'is-active':''}
