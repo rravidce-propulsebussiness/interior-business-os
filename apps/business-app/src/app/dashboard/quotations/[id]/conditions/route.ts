@@ -143,7 +143,7 @@ export async function POST(request:Request, {params}:{
       let sequence='';
       try{
        const plan=validateMilestoneFlow(incoming.milestoneFlow??savedMilestoneFlow(current.terms),
-        overrides,incoming.stages);
+        overrides,incoming.stages.map(row=>({stageCodes:row.stageCodes??[]})));
        sequence=encodeMilestoneFlow(plan);
       }catch(error){
        return reply({message:error instanceof Error?error.message:
