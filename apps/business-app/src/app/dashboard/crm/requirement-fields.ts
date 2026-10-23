@@ -27,3 +27,24 @@ export function applicableFields(fields:readonly RequirementField[],industryId:s
  return fields.filter(field=>field.active&&(!field.industryId||field.industryId===industryId))
   .sort((a,b)=>a.sortOrder-b.sortOrder||a.name.localeCompare(b.name));
 }
+
+export type QuickRequirementField=RequirementField&{
+ service:'construction'|'interior'|null;
+};
+// These questions already have dedicated inputs in Add Lead. A configured
+// field must not render as a duplicate question next to its existing input.
+const builtInKeys=new Set([
+ 'service','project_type','plot_area_sq_yards','floors','built_up_area_sq_ft',
+ 'budget','timeline','property_type','bhk','interior_scope','selected_work','design_style',
+]);
+export function isBuiltInRequirementKey(key:string){return builtInKeys.has(key);}
+export function quickRequirementFields(
+ fields:readonly QuickRequirementField[],service:'construction'|'interior',
+):QuickRequirementField[]{
+ const seen=new Set<string>();
+ return fields.filter(field=>{
+  if(!field.active||isBuiltInRequirementKey(field.key)||
+     (field.service!==null&&field.service!==service)||seen.has(field.key))return false;
+  seen.add(field.key);return true;
+ }).sort((a,b)=>a.sortOrder-b.sortOrder||a.name.localeCompare(b.name));
+}
