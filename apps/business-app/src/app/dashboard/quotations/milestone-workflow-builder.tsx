@@ -46,6 +46,8 @@ export function MilestoneWorkflowBuilder({paymentIndex,paymentName,steps,codes,a
  const stage=requirements[selectedCode]??defaultStageRequirements(selectedCode);
  const field=kind==='work'?'work':kind==='material'?'materials':'checks';
  const existingChoices=stage[field];
+ const preservedReports=codes.flatMap(area=>(requirements[area]?.reports??[])
+  .map(report=>({area,report})));
  const priorChecks=(position:number)=>steps.slice(0,position+1).filter(item=>isCheck(item.kind));
  const reset=()=>{
   setAfter(null);setEditing(null);setName('');setChoice('new');setError('');
@@ -123,7 +125,9 @@ export function MilestoneWorkflowBuilder({paymentIndex,paymentName,steps,codes,a
   const listField=key==='work'?'work':key==='material'?'materials':'checks';
   // The first manually added step replaces the old bulky template selection
   // for this real work area. Structural hold-point checks stay mandatory.
-  let base=plannedCodes.includes(chosen)?requirements[chosen]:undefined;
+  // Always reuse persisted quotation requirements. Switching to a typed
+  // editor must never clear previously selected work, materials, or reports.
+  let base=requirements[chosen];
   // A preparatory Material may appear before its first Work. Do not retain
   // a hidden placeholder template work once the user adds actual work.
   if(base&&key==='work'&&!plannedWorkCodes.includes(chosen)&&
@@ -213,6 +217,13 @@ export function MilestoneWorkflowBuilder({paymentIndex,paymentName,steps,codes,a
     {allCodes.filter(value=>!codes.includes(value)).map(value=>
      <option key={value} value={value}>{label(value)}</option>)}
    </select>
+  </details>}
+  {preservedReports.length>0&&<details className="qs-one-flow-advanced qs-one-flow-reports">
+   <summary>Previously saved reports & evidence ({preservedReports.length})</summary>
+   <ul>{preservedReports.map((item,index)=><li key={item.area+'-'+index}>
+    {item.report} <small>({label(item.area)})</small>
+   </li>)}</ul>
+   <small>These reports are retained in the quotation and project record.</small>
   </details>}
   {steps.length===0&&<p className="qs-one-flow-empty">No saved work items in this payment stage. Type an activity below to add it.</p>}
   <ol className="qs-one-flow-list">
