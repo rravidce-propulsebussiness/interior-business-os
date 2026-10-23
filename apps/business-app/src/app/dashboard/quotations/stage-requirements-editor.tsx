@@ -11,7 +11,7 @@ const fields = [
   { key: 'work', title: 'Work items', hint: 'Activities completed one by one on site' },
   { key: 'materials', title: 'Materials to arrange', hint: 'Choose quantities separately when requesting materials' },
   { key: 'checks', title: 'Quality checks & tests', hint: 'Photo evidence and formal approval remain separate' },
-  { key: 'reports', title: 'Evidence & reports', hint: 'Documents and photos to collect' },
+  { key: 'reports', title: 'Test & QC reports', hint: 'Supporting report requirements for site tests and QC evidence' },
 ] as const;
 type Field = typeof fields[number]['key'];
 
@@ -164,12 +164,15 @@ export function StageRequirementsEditor({ code, value, editable, onChange, onApp
       <strong>{title}</strong><small>{value ? 'Project customized' : 'Standard requirements'}</small>
     </div>
     <StageExecutionFlowEditor value={requirements} editable={editable} onChange={onChange} />
-    <p className="qs-stage-requirements-hint">Use the ordered sequence above for the site workflow. The expandable lists below manage which work, materials, checks, tests and reports are included.</p>
-    {fields.map((section) => <Section key={section.key} field={section.key}
+    <details className="qs-stage-requirements-library">
+      <summary>Manage included work, materials, checks & reports</summary>
+      <p className="qs-stage-requirements-hint">Choose or rename the available items here. Arrange their execution order above. Site test and QC evidence is recorded against the corresponding check rather than as a second approval.</p>
+      {fields.map((section) => <Section key={section.key} field={section.key}
       title={section.title} hint={section.hint}
       base={defaults[section.key]} requirements={requirements}
       locked={section.key === 'checks' && Boolean(structural)}
       editable={editable} onUpdate={(next) => onChange(reconcileStageExecutionFlow(requirements,next))} />)}
+    </details>
     {editable && <div className="qs-stage-requirements-actions">
       {value && <button type="button" onClick={() => onChange(defaults)}>
         Restore standard requirements for this stage
