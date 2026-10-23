@@ -63,13 +63,13 @@ if p_action='done' and exists (
           and lower(trim(ch.title))=lower(trim(
             v_stage.inspection_topics->>(previous.step->>'index')::integer))
           and ch.status='passed')
-      when previous.step->>'kind'='qc' then (
+      when previous.step->>'kind'='qc' then coalesce((
         select q.decision='passed'
         from private.construction_stage_qc_item_reviews q
         where q.organization_id=p_org and q.project_id=p_project
           and q.stage_id=p_stage
           and q.check_index=(previous.step->>'index')::integer
-        order by q.reviewed_at desc,q.id desc limit 1)
+        order by q.reviewed_at desc,q.id desc limit 1),false)
       else false
       end
     )
