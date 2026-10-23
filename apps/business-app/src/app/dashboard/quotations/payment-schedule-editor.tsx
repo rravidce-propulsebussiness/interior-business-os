@@ -315,10 +315,11 @@ export function PaymentScheduleEditor({
             onClick={resetMilestones}>
             <span aria-hidden="true">↺</span> Reset suggestions
           </button>
-          <button type="button" className="qs-payment-add" disabled={pending || rows.length >= MAX_STAGES}
-            onClick={addStage}>
-            <span aria-hidden="true">＋</span> Add milestone
-          </button>
+          {(industry!=='construction'||rows.length===0)&&
+           <button type="button" className="qs-payment-add" disabled={pending || rows.length >= MAX_STAGES}
+             onClick={addStage}>
+             <span aria-hidden="true">＋</span> Add payment stage
+           </button>}
         </div>
       )}
 
