@@ -10,7 +10,7 @@ import { milestoneConstructionStages } from '@business-os/core/construction-paym
 type Kind=StageFlowStep['kind'];
 type PaymentOption={index:number;name:string;percent:string};
 const labels:Record<Kind,string>={
- work:'Work',check:'Site check',test:'Test',qc:'Company QC',payment:'Payment',
+ work:'Work',material:'Material',check:'Site check',test:'Test',qc:'Company QC',payment:'Payment',
 };
 const isFieldCheck=(kind:Kind)=>kind==='check'||kind==='test';
 
