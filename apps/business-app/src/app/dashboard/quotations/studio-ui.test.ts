@@ -916,3 +916,48 @@ describe('Payment Settings keeps work-area entry textual and removes unrelated s
   expect(stageEditor).not.toContain('<ol className="us-payment-step-list">');
  });
 });
+
+
+describe('Settings category dashboard keeps one canonical settings workspace',()=>{
+ const page=file('../settings/page.tsx');
+ const cards=file('../settings/settings-home.tsx');
+ const css=file('../settings/settings.css');
+ it('opens the new card dashboard by default and preserves seven original detail tabs',()=>{
+  expect(page).toContain("const tab=tabs.find(t=>t.id===params.tab)?.id??null;");
+  expect(page).toContain('tab===null?<SettingsHome sections={sections}/>');
+  for(const tab of ['company','branding','invoice','documents','payments','team','preferences'])
+   expect(page).toContain("id:'"+tab+"'");
+  expect(page).not.toContain('<nav className="us-tabs"');
+  expect(page).toContain('href="/dashboard/settings" className="ush-back"');
+ });
+ it('matches five grouped sections with 18 visual category cards, without new forms',()=>{
+  for(const label of ['Business & Company','Project & Construction','People & Access',
+   'Documents & Templates','System & Preferences'])expect(page).toContain(label);
+  const home=page.split('const sections:SettingSection[]=')[1]?.split('.filter(section=>section.cards.length>0)')[0]??'';
+  expect((home.match(/\bid:'[^']+',title:/g)??[]).length).toBe(18);
+  expect(page).toContain("href:'/dashboard/settings?tab=payments#company-payment-stages'");
+  expect(page).toContain("href:'/dashboard/settings?tab=branding#quotation-template-settings'");
+  expect(page).toContain("href:'/dashboard/settings?tab=invoice'");
+  expect(page).toContain("href:'/dashboard/settings?tab=company'");
+  expect(page).toContain("href:'/dashboard/settings?tab=documents'");
+  expect(page).toContain("href:'/dashboard/settings?tab=preferences'");
+  expect(page).not.toContain('create table');
+ });
+ it('supports live keyword search and only links to real destination pages',()=>{
+  expect(cards).toContain('useState');
+  expect(cards).toContain('useMemo');
+  expect(cards).toContain('onChange={event=>setSearch(event.target.value)}');
+  expect(cards).toContain('aria-label="Search settings"');
+  expect(cards).toContain('className="ush-grid"');
+  expect(cards).toContain('card.href?');
+  expect(cards).toContain('className="ush-tile is-planned"');
+  expect(cards).toContain('No settings match');
+ });
+ it('keeps compact responsive card grid and retires the horizontal tab strip',()=>{
+  expect(css).toContain('.ush-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))');
+  expect(css).toContain('.ush-tile{display:flex');
+  expect(css).toContain('.ush-search');
+  expect(css).toContain('@media(max-width:455px)');
+  expect(css).not.toContain('.us-tabs{display:flex');
+ });
+});
