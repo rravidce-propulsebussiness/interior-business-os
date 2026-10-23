@@ -1,5 +1,5 @@
 import {describe,it,expect} from 'vitest';
-import {companyConstructionPaymentRows,applyCompanyPaymentDefaults,applyCompanyWorkDefaults,defaultCompanyWorkRows,hydrateCompanyWorkDefaults} from './company-construction-defaults';
+import {companyConstructionPaymentRows,applyCompanyPaymentDefaults,applyCompanyWorkDefaults,defaultCompanyWorkRows,hydrateCompanyWorkDefaults,inferCompanyWorkAreaCode,companyWorkAreaLabel} from './company-construction-defaults';
 import {defaultStageRequirements} from './quotation-stage-requirements';
 import {standardMilestoneWorkflow,validateMilestoneFlow} from './quotation-milestone-flow';
 
@@ -97,5 +97,39 @@ describe('editable work inside company payment defaults',()=>{
     {kind:'check',name:'Check steel',area:'FOUNDATION'},
    ],
   }]).success).toBe(false);
+ });
+});
+
+
+describe('editable text labels for technical company work areas',()=>{
+ it('preserves project-stage code while allowing arbitrary readable labels',()=>{
+  const template=companyConstructionPaymentRows.parse([{
+   name:'Foundation fee',percent:100,areas:['FOUNDATION','SITE_PREP'],
+   areaLabels:{FOUNDATION:'Footing & pit work',SITE_PREP:'Excavation and setting out'},
+   steps:[
+    {kind:'work',area:'SITE_PREP',name:'Mark and excavate foundations'},
+    {kind:'work',area:'FOUNDATION',name:'Place footing reinforcement'},
+   ],
+  }]);
+  expect(companyWorkAreaLabel(template[0]!,'FOUNDATION')).toBe('Footing & pit work');
+  const quote=applyCompanyWorkDefaults([
+   {stageCodes:['SITE_PREP','FOUNDATION']},
+  ],template);
+  expect(quote.flow['0']?.map(item=>item.code).slice(0,2))
+   .toEqual(['SITE_PREP','FOUNDATION']);
+  expect(quote.requirements.FOUNDATION?.work).toContain('Place footing reinforcement');
+ });
+ it('rejects custom labels that are not associated with this milestone',()=>{
+  expect(companyConstructionPaymentRows.safeParse([{
+   name:'Foundation fee',percent:100,areas:['FOUNDATION'],
+   areaLabels:{DESIGN:'Hidden unrelated stage'},
+  }]).success).toBe(false);
+ });
+ it('infers canonical stage from natural typed names without changing the label',()=>{
+  expect(inferCompanyWorkAreaCode('Site marking and layout')).toBe('SITE_PREP');
+  expect(inferCompanyWorkAreaCode('Footing bar bending')).toBe('FOUNDATION');
+  expect(inferCompanyWorkAreaCode('Structural design')).toBe('DESIGN');
+  expect(inferCompanyWorkAreaCode('Outer plastering')).toBe('EXTERNAL_PLASTER');
+  expect(inferCompanyWorkAreaCode('Unspecified other activity')).toBeNull();
  });
 });
