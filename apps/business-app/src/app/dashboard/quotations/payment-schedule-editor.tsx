@@ -433,7 +433,6 @@ export function PaymentScheduleEditor({
                 {industry==='construction'&&<MilestoneWorkflowBuilder
                   paymentIndex={index} paymentName={row.name} steps={milestoneFlow[String(index)]??[]}
                   codes={row.stageCodes} allCodes={allCodes}
-                  plannedCodes={Object.values(milestoneFlow).flatMap(items=>items.map(item=>item.code))}
                   plannedWorkCodes={Object.values(milestoneFlow).flatMap(items=>
                    items.filter(item=>item.kind==='work').map(item=>item.code))}
                   requirements={visibleRequirements} editable={editable}
