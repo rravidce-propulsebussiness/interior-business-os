@@ -49,12 +49,18 @@ export function RequirementFieldsWorkspace({initial,industries,canManage,total}:
  const [query,setQuery]=useState('');
  const [filter,setFilter]=useState<Filter>('all');
  const [orderBy,setOrderBy]=useState<'position'|'name'>('position');
- const [editing,setEditing]=useState<RequirementField|null>(blank());
+ const [editing,setEditing]=useState<RequirementField|null>(null);
  const [draft,setDraft]=useState<RequirementField>(blank());
  const [busy,setBusy]=useState(false);
  const [feedback,setFeedback]=useState('');
  const [menu,setMenu]=useState<string|null>(null);
  useEffect(()=>setFields(initial),[initial]);
+ // Match the approved side-editor preview on desktop; on mobile open it only
+ // when the user selects Add/Edit, so the field library is not obstructed.
+ useEffect(()=>{
+  if(canManage&&window.matchMedia('(min-width: 921px)').matches)
+   setEditing(current=>current??blank());
+ },[canManage]);
  const matchIndustry=(field:RequirementField)=>{
   if(filter==='all'||field.industryId===null)return true;
   const industry=industries.find(i=>i.id===field.industryId);
