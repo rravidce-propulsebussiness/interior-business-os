@@ -461,9 +461,16 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
 
            const record=stageWork.find(x=>Number(x.index)===i);
            const workMaterials=stageMaterials.filter(m=>stringValue(m.activity_index)===String(i));
+           const hasExplicitMaterials=orderedFlow.some(step=>step.kind==='material');
+           const namedMaterials=new Set(orderedFlow.filter(step=>step.kind==='material')
+            .map(step=>(plannedMaterials[step.index]??'').toLowerCase()));
+           const legacyWorkMaterials=workMaterials.filter(material=>
+            !namedMaterials.has(stringValue(material.item).toLowerCase()));
            const requiredSuggestions=suggestedActivityMaterials(work,suggestedMaterials);
            const requestOptions=[...new Set([...requiredSuggestions,...suggestedMaterials])];
-           const materialPanel=(allowMaterials||workMaterials.length>0)?<div className="pv2-activity-material-content">
+           const materialPanel=hasExplicitMaterials?
+             (legacyWorkMaterials.length>0?<StageMaterialRows d={d} rows={legacyWorkMaterials}/>:null):
+             (allowMaterials||workMaterials.length>0)?<div className="pv2-activity-material-content">
               <div className="pv2-activity-material-required">
                <h5>Materials required for this work</h5>
                {requiredSuggestions.length>0?<ul>
@@ -483,7 +490,7 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
              kind="work" index={i} title={work} status={stringValue(record?.status)||'pending'}
              notes={stringValue(record?.notes)} photoId={stringValue(record?.photo_id)}
              photos={photos} canEdit={workAllowed&&!complete}
-             checksHref={'#pv2-stage-checks-'+stage.id} materialPanel={materialPanel}/>;
+             checksHref={orderedFlow.length?'':'#pv2-stage-checks-'+stage.id} materialPanel={materialPanel}/>;
           
       };
       const availableRecords:StageLinkOption[]=[
