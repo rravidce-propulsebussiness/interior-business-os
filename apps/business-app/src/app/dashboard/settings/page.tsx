@@ -228,7 +228,7 @@ export default async function SettingsPage({searchParams}:{
     {id:'activity',title:'Activity Log',description:'Recent account activity and configuration changes',
      icon:'activity',tone:'orange'},
   ]},
- ].filter(section=>section.cards.length>0);
+ ];
 
  const logo=typeof branding.logo_data_uri==='string'&&
    /^data:image\/(?:png|jpeg);base64,/.test(branding.logo_data_uri)?branding.logo_data_uri:null;
