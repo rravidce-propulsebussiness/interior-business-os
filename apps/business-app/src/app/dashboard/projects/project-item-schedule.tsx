@@ -8,7 +8,7 @@ export type ProjectItemScheduleRow={
 };
 type Props={
  projectId:string;stageId:string;kind:ProjectItemScheduleRow['kind'];
- index:number;title:string;item?:ProjectItemScheduleRow;canPlan:boolean;
+ index:number;title:string;item?:ProjectItemScheduleRow|undefined;canPlan:boolean;
 };
 const readable=(date:string)=>{
  if(!date)return '';
