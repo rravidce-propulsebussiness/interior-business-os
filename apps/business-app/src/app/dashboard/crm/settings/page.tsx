@@ -5,6 +5,9 @@ import { MasterForm, type Field } from '../../commercial/master-form';
 import { saveCrm } from '../actions';
 import { Pagination } from '../pagination';
 import type { CrmEntity } from '@business-os/core/crm';
+import {mapRequirementField} from '../requirement-fields';
+import {RequirementFieldsWorkspace} from './requirement-fields-workspace';
+import './requirement-fields.css';
 export default async function Settings({
   searchParams,
 }: {
@@ -25,6 +28,20 @@ export default async function Settings({
     await s.crm.search(entity, { q: p.q ?? '' }, page),
   );
   const industries = await s.repository.industries();
+  if (entity === 'crm_requirement_fields') {
+    return <main id="main-content">
+      <RequirementFieldsWorkspace
+        initial={result.rows.map(mapRequirementField)}
+        industries={industries.map(i=>({id:i.id,name:i.name,key:i.key}))}
+        canManage={s.allowed('crm.pipeline.manage')}
+        total={result.total}
+      />
+      <div className="mx-auto max-w-5xl px-5 pb-6">
+        <Pagination path="/dashboard/crm/settings" params={p}
+          page={page} total={result.total}/>
+      </div>
+    </main>;
+  }
   const fields: Field[] = [
     { key: 'name', label: 'Name', required: true },
     { key: 'key', label: 'Stable key', required: true },
@@ -40,41 +57,12 @@ export default async function Settings({
         label: value,
       })),
     });
-  if (entity === 'crm_requirement_fields')
-    fields.push(
-      {
-        key: 'industry_id',
-        label: 'Industry',
-        nullable: true,
-        options: [
-          { value: '', label: 'Any industry' },
-          ...industries.map((i) => ({ value: i.id, label: i.name })),
-        ],
-      },
-      {
-        key: 'field_type',
-        label: 'Field type',
-        options: ['text', 'number', 'select', 'boolean'].map((value) => ({
-          value,
-          label: value,
-        })),
-      },
-      {
-        key: 'options',
-        label: 'Select choices (one per line)',
-        type: 'textarea',
-      },
-      { key: 'required', label: 'Required answer', type: 'checkbox' },
-    );
   const blank = {
     name: '',
     key: '',
     sort_order: 0,
     active: true,
     ...(entity === 'crm_pipeline_stages' ? { outcome: 'open' } : {}),
-    ...(entity === 'crm_requirement_fields'
-      ? { industry_id: null, field_type: 'text', options: '', required: false }
-      : {}),
   };
   return (
     <main id="main-content" className="mx-auto max-w-5xl p-6">

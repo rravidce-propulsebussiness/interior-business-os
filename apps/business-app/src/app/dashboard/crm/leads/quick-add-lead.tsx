@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { createQuickLead } from './quick-add-action';
 import { initializeCrmForImports } from './import/actions';
 import type { LeadService, LeadServiceOption } from './lead-service-options';
+import {quickRequirementFields,type QuickRequirementField} from '../requirement-fields';
 
 type Option = { value: string; label: string };
 type Construction = {
@@ -85,12 +86,14 @@ export function QuickAddLead({
   sources,
   stages,
   services,
+  requirementFields,
   canConfigureCrm,
   onClose,
 }: {
   sources: Option[];
   stages: Option[];
   services: LeadServiceOption[];
+  requirementFields: QuickRequirementField[];
   canConfigureCrm: boolean;
   onClose: () => void;
 }) {
@@ -103,6 +106,7 @@ export function QuickAddLead({
   const [pincode, setPincode] = useState('');
   const [location, setLocation] = useState('');
   const [notes, setNotes] = useState('');
+  const [customAnswers,setCustomAnswers]=useState<Record<string,string>>({});
   const [construction, setConstruction] = useState<Construction>({
     projectType: 'residential',
     plotArea: '',
@@ -133,12 +137,14 @@ export function QuickAddLead({
   const isBusiness = ['office', 'commercial_space'].includes(
     interior.propertyType,
   );
+  const configuredFields=service?quickRequirementFields(requirementFields,service):[];
   const valid = Boolean(
     service &&
     name.trim() &&
     phone.trim() &&
     sourceId &&
     stageId &&
+    configuredFields.every(field=>!field.required||Boolean((customAnswers[field.key]??'').trim())) &&
     (!pincode || /^[0-9]{6}$/.test(pincode)) &&
     (service !== 'construction' || Number(construction.plotArea) > 0) &&
     (service !== 'interior' ||
@@ -188,6 +194,12 @@ export function QuickAddLead({
               construction:
                 service === 'construction' ? construction : undefined,
               interior: service === 'interior' ? interior : undefined,
+              extraRequirements:Object.fromEntries(configuredFields.flatMap(field=>{
+                const answer=(customAnswers[field.key]??'').trim();
+                if(!answer)return [];
+                return [[field.key,field.fieldType==='number'?Number(answer):
+                  field.fieldType==='boolean'?answer==='yes':answer]];
+              })),
             });
             setFeedback(result.message);
             if (result.ok) window.location.reload();
@@ -562,6 +574,33 @@ export function QuickAddLead({
           </section>
         )}
 
+        {configuredFields.length>0&&<section className="crm-lead-section" aria-label="Additional project requirements">
+          <div className="crm-lead-section-title">
+            <span className="crm-lead-section-icon" aria-hidden="true">＋</span>
+            <div><h3>Project Requirement Questions</h3>
+              <p>Questions configured for this service in CRM Settings.</p></div>
+          </div>
+          <div className="crm-quick-add-form">
+            {configuredFields.map(field=><label key={field.key}>
+              {field.name}{field.required?' *':''}
+              {field.fieldType==='select'?<select required={field.required}
+                value={customAnswers[field.key]??''}
+                onChange={event=>setCustomAnswers(current=>({...current,[field.key]:event.target.value}))}>
+                <option value="">Select an option</option>
+                {field.options.map(option=><option key={option} value={option}>{option}</option>)}
+              </select>:field.fieldType==='boolean'?<select required={field.required}
+                value={customAnswers[field.key]??''}
+                onChange={event=>setCustomAnswers(current=>({...current,[field.key]:event.target.value}))}>
+                <option value="">Select Yes or No</option><option value="yes">Yes</option>
+                <option value="no">No</option>
+              </select>:<input type={field.fieldType==='number'?'number':'text'}
+                required={field.required} maxLength={field.fieldType==='text'?2000:undefined}
+                value={customAnswers[field.key]??''}
+                onChange={event=>setCustomAnswers(current=>({...current,[field.key]:event.target.value}))}
+                placeholder={field.fieldType==='number'?'Enter number':'Enter answer'}/>}
+            </label>)}
+          </div>
+        </section>}
         <section className="crm-lead-section">
           <div className="crm-lead-section-title">
             <span className="crm-lead-section-icon" aria-hidden="true">
