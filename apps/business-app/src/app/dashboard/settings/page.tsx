@@ -20,9 +20,15 @@ import { InvoiceTemplateSelector } from './template-selector';
 import { ResetTestDataPanel } from './reset-test-data-panel';
 import {ConstructionPaymentDefaults} from './construction-payment-defaults';
 import {SettingsHome,type SettingSection} from './settings-home';
+import {crmServices,resultSchema} from '../crm/service';
+import {pageNumber} from '../crm/lookups';
+import {Pagination} from '../crm/pagination';
+import {mapRequirementField} from '../crm/requirement-fields';
+import {RequirementFieldsWorkspace} from '../crm/settings/requirement-fields-workspace';
+import '../crm/settings/requirement-fields.css';
 
 export const dynamic='force-dynamic';
-type Tab='company'|'branding'|'invoice'|'documents'|'payments'|'team'|'preferences';
+type Tab='company'|'branding'|'invoice'|'documents'|'payments'|'team'|'preferences'|'lead-fields';
 const tabs:{id:Tab;label:string;icon:string}[]=[
   {id:'company',label:'Company Details',icon:'▣'},
   {id:'branding',label:'Branding',icon:'◈'},
@@ -31,6 +37,7 @@ const tabs:{id:Tab;label:string;icon:string}[]=[
   {id:'payments',label:'Payment Settings',icon:'♧'},
   {id:'team',label:'Team & Access',icon:'♙'},
   {id:'preferences',label:'Preferences',icon:'⚙'},
+  {id:'lead-fields',label:'Lead Requirement Fields',icon:'▤'},
 ];
 const sourceSchema=z.object({
  description:z.string().nullable().optional(),
@@ -68,7 +75,7 @@ function Cards({items}:{items:{label:string;href:string}[]}){
  return <div className="us-link-cards">{items.map(i=><Link key={i.href} href={i.href}>{i.label}<b>→</b></Link>)}</div>;
 }
 export default async function SettingsPage({searchParams}:{
- searchParams:Promise<{tab?:string;status?:string}>;
+ searchParams:Promise<{tab?:string;status?:string;page?:string}>;
 }){
  const params=await searchParams;
  const tab=tabs.find(t=>t.id===params.tab)?.id??null;
@@ -218,9 +225,9 @@ export default async function SettingsPage({searchParams}:{
     ...(has('automation.manage')?[{id:'integrations',title:'Integrations',
      description:'Automations, communication and service connections',
      icon:'integrations',tone:'blue',href:'/dashboard/automations/settings'}] as const:[]),
-    ...(has('lead.view','crm')?[{id:'custom-fields',title:'Custom Fields',
-     description:'Configure lead requirement fields and choices',
-     icon:'custom',tone:'mint',href:'/dashboard/crm/settings?entity=crm_requirement_fields'}] as const:[]),
+    ...(has('lead.view','crm')?[{id:'custom-fields',title:'Lead Requirement Fields',
+     description:'Manage the questions shown in Add Lead and Edit Lead',
+     icon:'custom',tone:'mint',href:'/dashboard/settings?tab=lead-fields'}] as const:[]),
     {id:'backups',title:'Data & Backup',description:'Data export, backup and restore',
      icon:'backup',tone:'amber'},
     {id:'subscription',title:'Subscription & Billing',description:'Business OS plan details and billing',
@@ -230,6 +237,26 @@ export default async function SettingsPage({searchParams}:{
   ]},
  ];
 
+ let leadFieldsContent:React.ReactNode=null;
+ if(tab==='lead-fields'){
+  const crm=await crmServices('lead.view',true);
+  const page=pageNumber(params.page);
+  const [fieldsResult,industryRows]=await Promise.all([
+   crm.crm.search('crm_requirement_fields',{},page),
+   crm.repository.industries(),
+  ]);
+  const result=resultSchema.parse(fieldsResult);
+  leadFieldsContent=<>
+   <RequirementFieldsWorkspace
+    initial={result.rows.map(mapRequirementField)}
+    industries={industryRows.map(item=>({id:item.id,name:item.name,key:item.key}))}
+    canManage={crm.allowed('crm.pipeline.manage')}
+    total={result.total}
+   />
+   {result.total>25&&<Pagination path="/dashboard/settings"
+     params={{tab:'lead-fields'}} page={page} total={result.total}/>}
+  </>;
+ }
  const logo=typeof branding.logo_data_uri==='string'&&
    /^data:image\/(?:png|jpeg);base64,/.test(branding.logo_data_uri)?branding.logo_data_uri:null;
  return <OwnerShell companyName={org.name} accountLabel={(user.email??'Account').split('@')[0]||'Account'}
@@ -410,7 +437,8 @@ export default async function SettingsPage({searchParams}:{
       {label:'Website studio',href:'/dashboard/website'}]}/>
    </section>}
    {tab==='preferences'&&isOwner&&canEdit&&
-     <ResetTestDataPanel/>} 
+     <ResetTestDataPanel/>}
+    {tab==='lead-fields'&&leadFieldsContent}
   </main>
  </OwnerShell>;
 }

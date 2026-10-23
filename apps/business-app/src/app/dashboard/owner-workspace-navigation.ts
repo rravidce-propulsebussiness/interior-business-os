@@ -18,10 +18,6 @@ export function ownerWorkspaceNavigation(context: TenantAccessContext | null): O
     });
   if (has('lead.view','crm')) items.push({
     label:'Leads',href:'/dashboard/crm/leads',icon:'leads',
-    children:[
-      {label:'All Leads',href:'/dashboard/crm/leads'},
-      ...(has('crm.pipeline.manage') ? [{label:'Lead Settings',href:'/dashboard/crm/settings'}] : []),
-    ],
   });
   if (has('quotation.view','quotation')) items.push({
     label:'Quotations',href:'/dashboard/quotations',icon:'quotations',
