@@ -7,7 +7,7 @@ import { proposedConstructionPayments } from '@business-os/core/construction-pay
 import { savedStageRequirements,encodeStageRequirements,validateStageRequirementsDraft,remapStageFlowPayments,
  type StageRequirementsMap } from '@business-os/core/quotation-stage-requirements';
 import { MilestoneWorkflowBuilder } from './milestone-workflow-builder';
-import {applyCompanyPaymentDefaults,companyConstructionPaymentRows,type CompanyConstructionPaymentRow} from '@business-os/core/company-construction-defaults';
+import {applyCompanyPaymentDefaults,applyCompanyWorkDefaults,companyConstructionPaymentRows,type CompanyConstructionPaymentRow} from '@business-os/core/company-construction-defaults';
 import {encodeMilestoneFlow,validateMilestoneFlow,
  remapMilestoneFlow,projectStageFlowFromMilestones,visibleMilestoneFlow,standardMilestoneWorkflow,
  type QuotationMilestoneFlow,type QuotationMilestoneStep} from '@business-os/core/quotation-milestone-flow';
@@ -77,13 +77,18 @@ export function PaymentScheduleEditor({
   const parsedDefaults=companyConstructionPaymentRows.safeParse(companyDefaults);
   const defaultCompanyRows=parsedDefaults.success?parsedDefaults.data:[];
   const initialRows=readPlan(initial.terms,industry,editable,floorNames,defaultCompanyRows);
+  const originalRequirements=savedStageRequirements(initial.terms);
+  const freshConstructionQuote=industry==='construction'&&editable&&
+    !savedStagePaymentPlan(initial.terms);
+  const inheritedWork=freshConstructionQuote&&defaultCompanyRows.some(row=>(row.steps??[]).length>0)
+    ?applyCompanyWorkDefaults(initialRows,defaultCompanyRows,originalRequirements):null;
   const [rows, setRows] = useState<Milestone[]>(()=>initialRows);
   const [stageRequirements,setStageRequirements]=useState<StageRequirementsMap>(
-    ()=>savedStageRequirements(initial.terms));
-  const seededFlow=visibleMilestoneFlow(initial.terms,initialRows,savedStageRequirements(initial.terms));
+    ()=>inheritedWork?.requirements??originalRequirements);
+  const seededFlow=visibleMilestoneFlow(initial.terms,initialRows,originalRequirements);
   const prefilledFlow=industry==='construction'&&
     !Object.keys(seededFlow).length&&editable
-      ?standardMilestoneWorkflow(initialRows,savedStageRequirements(initial.terms)):seededFlow;
+      ?(inheritedWork?.flow??standardMilestoneWorkflow(initialRows,originalRequirements)):seededFlow;
   const [milestoneFlow,setMilestoneFlow]=useState<QuotationMilestoneFlow>(()=>prefilledFlow);
   const stageCodes=[...new Set(rows.flatMap(row=>row.stageCodes))];
   const allCodes=[...new Set(suggestions(industry,floorNames).flatMap(row=>row.stageCodes))];
@@ -119,7 +124,7 @@ export function PaymentScheduleEditor({
   const router = useRouter();
   const savedPlan = savedStagePaymentPlan(initial.terms);
   const hasChanges = JSON.stringify(rows) !== JSON.stringify(initialRows)
-    || JSON.stringify(visibleRequirements)!==JSON.stringify(savedStageRequirements(initial.terms))
+    || JSON.stringify(visibleRequirements)!==JSON.stringify(inheritedWork?.requirements??originalRequirements)
     || JSON.stringify(milestoneFlow)!==JSON.stringify(prefilledFlow)
     || (industry==='construction'&&Object.keys(prefilledFlow).length>0&&
        !initial.terms.includes('[QUOTATION_MILESTONE_FLOW]'));

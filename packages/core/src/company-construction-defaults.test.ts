@@ -1,5 +1,5 @@
 import {describe,it,expect} from 'vitest';
-import {companyConstructionPaymentRows,applyCompanyPaymentDefaults} from './company-construction-defaults';
+import {companyConstructionPaymentRows,applyCompanyPaymentDefaults,applyCompanyWorkDefaults,defaultCompanyWorkRows,hydrateCompanyWorkDefaults} from './company-construction-defaults';
 import {defaultStageRequirements} from './quotation-stage-requirements';
 import {standardMilestoneWorkflow,validateMilestoneFlow} from './quotation-milestone-flow';
 
@@ -37,5 +37,65 @@ describe('company construction defaults vs quotation snapshot',()=>{
   expect(plan['1']?.some(x=>x.kind==='check')).toBe(true);
   expect(validateMilestoneFlow(plan,{},rows)).toEqual(plan);
   expect(defaultStageRequirements('FOUNDATION')).toEqual(before);
+ });
+});
+
+
+describe('editable work inside company payment defaults',()=>{
+ it('hydrates earlier company payment rows with construction work without changing fees',()=>{
+  const ground=defaultCompanyWorkRows([
+   {name:'Advance',percent:'20',stageCodes:['PRECONSTRUCTION','DESIGN']},
+   {name:'Foundation',percent:'80',stageCodes:['FOUNDATION']},
+  ]);
+  const legacy=companyConstructionPaymentRows.parse([
+   {name:'Owner advance fee',percent:20},{name:'Foundation fee',percent:80},
+  ]);
+  const migrated=hydrateCompanyWorkDefaults(legacy,ground);
+  expect(migrated[0]?.name).toBe('Owner advance fee');
+  expect(migrated[1]?.percent).toBe(80);
+  expect(migrated[0]?.steps?.some(s=>s.kind==='work')).toBe(true);
+  expect(companyConstructionPaymentRows.parse(migrated)).toEqual(migrated);
+ });
+ it('clones ordered material/check/QC against real quotation stage codes',()=>{
+  const payments=[{stageCodes:['PRECONSTRUCTION']},{stageCodes:['FOUNDATION']}];
+  const defaults=companyConstructionPaymentRows.parse([
+   {name:'Advance',percent:20,areas:['PRECONSTRUCTION'],steps:[
+    {kind:'work',name:'Agreement preparation',area:'PRECONSTRUCTION'},
+   ]},
+   {name:'Foundation fee',percent:80,areas:['FOUNDATION'],steps:[
+    {kind:'work',name:'Excavation',area:'FOUNDATION'},
+    {kind:'material',name:'TMT steel',area:'FOUNDATION'},
+    {kind:'work',name:'Bar bending',area:'FOUNDATION'},
+    {kind:'check',name:'Check rebar spacing',area:'FOUNDATION'},
+    {kind:'qc',name:'Check rebar spacing',area:'FOUNDATION'},
+    {kind:'work',name:'Footing concrete',area:'FOUNDATION'},
+   ]},
+  ]);
+  const result=applyCompanyWorkDefaults(payments,defaults);
+  expect(result.flow['1']?.slice(0,6).map(item=>item.kind))
+   .toEqual(['work','material','work','check','qc','work']);
+  expect(result.requirements.FOUNDATION?.work).toContain('Bar bending');
+  expect(result.requirements.FOUNDATION?.materials).toContain('TMT steel');
+  expect(result.requirements.FOUNDATION?.checks).toContain('Check rebar spacing');
+  expect(validateMilestoneFlow(result.flow,result.requirements,payments)).toEqual(result.flow);
+ });
+ it('reuses the same company slab work for a floor with a different code',()=>{
+  const payments=[{stageCodes:['RCC/FIRST_FLOOR']}];
+  const company=companyConstructionPaymentRows.parse([{
+   name:'Ground slab',percent:100,areas:['RCC'],steps:[
+    {kind:'work',name:'Column reinforcement',area:'RCC'},
+    {kind:'check',name:'Check slab alignment',area:'RCC'},
+   ],
+  }]);
+  const result=applyCompanyWorkDefaults(payments,company);
+  expect(result.flow['0']?.[0]).toMatchObject({code:'RCC/FIRST_FLOOR',kind:'work'});
+ });
+ it('rejects QC before site check and enforces total payment percentage',()=>{
+  expect(companyConstructionPaymentRows.safeParse([{
+   name:'Stage one',percent:100,areas:['FOUNDATION'],steps:[
+    {kind:'qc',name:'Check steel',area:'FOUNDATION'},
+    {kind:'check',name:'Check steel',area:'FOUNDATION'},
+   ],
+  }]).success).toBe(false);
  });
 });
