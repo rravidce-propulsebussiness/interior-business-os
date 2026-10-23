@@ -213,6 +213,41 @@ export const planningWorkDefaults:readonly CompanyWorkStep[]=[
  {kind:'check',name:'Site Inspection',area:'PRECONSTRUCTION'},
 ];
 
+/** Stage 2 Foundation default: one payment, one site-execution sequence.
+ * These are SCOPE/TEMPLATE items only, not completed work or QC certificates.
+ * Stage-specific engineering hold-point checks are additionally mandatory
+ * when a quotation becomes an executable project.
+ * Do not repeat cement under separate generic/specific material entries.
+ */
+export const foundationWorkDefaults:readonly CompanyWorkStep[]=[
+ {kind:'work',name:'Site marking',area:'SITE_PREP'},
+ {kind:'work',name:'Excavation',area:'SITE_PREP'},
+ {kind:'work',name:'Foundation pit dressing',area:'SITE_PREP'},
+ {kind:'material',name:'Sand (PCC, footings and columns)',area:'FOUNDATION'},
+ {kind:'material',name:'Cement (PCC, footings and columns)',area:'FOUNDATION'},
+ {kind:'material',name:'40 mm aggregate (PCC)',area:'FOUNDATION'},
+ {kind:'work',name:'PCC',area:'FOUNDATION'},
+ {kind:'check',name:'Mix ratio check',area:'FOUNDATION'},
+ {kind:'qc',name:'Mix ratio check',area:'FOUNDATION'},
+ {kind:'material',name:'Reinforcement steel (footings, columns, plinth beam and sump)',area:'FOUNDATION'},
+ {kind:'work',name:'Bar bending',area:'FOUNDATION'},
+ {kind:'work',name:'Footing marking',area:'FOUNDATION'},
+ {kind:'check',name:'Footing marking checks',area:'FOUNDATION'},
+ {kind:'qc',name:'Footing marking checks',area:'FOUNDATION'},
+ {kind:'work',name:'Reinforcement installation',area:'FOUNDATION'},
+ {kind:'check',name:'Bar bending checks',area:'FOUNDATION'},
+ {kind:'qc',name:'Bar bending checks',area:'FOUNDATION'},
+ {kind:'material',name:'20 mm aggregate (footings and columns)',area:'FOUNDATION'},
+ {kind:'work',name:'Footings',area:'FOUNDATION'},
+ {kind:'work',name:'Plinth level columns',area:'PLINTH'},
+ {kind:'work',name:'Soil backfilling',area:'PLINTH'},
+ {kind:'work',name:'Soil compaction',area:'PLINTH'},
+ {kind:'work',name:'Basement preparation for plinth beam',area:'PLINTH'},
+ {kind:'work',name:'Soil leveling and compaction',area:'PLINTH'},
+ {kind:'work',name:'Anti-termite treatment',area:'PLINTH'},
+ {kind:'work',name:'PCC bed',area:'PLINTH'},
+];
+
 export function defaultCompanyWorkRows(
  payments:readonly {name:string;percent:string;stageCodes:string[]}[],
 ):CompanyConstructionPaymentRow[] {
@@ -224,6 +259,13 @@ export function defaultCompanyWorkRows(
     areas.includes('PRECONSTRUCTION')&&areas.includes('DESIGN')){
    return {name:payment.name,percent:Number(payment.percent),areas,
     steps:planningWorkDefaults.map(step=>({...step}))};
+  }
+  // Fixed reference for the Foundation payment, not a new/parallel workflow.
+  // Project-specific changes still belong to the quotation's own snapshot.
+  if(index===1&&areas.includes('SITE_PREP')&&
+    areas.includes('FOUNDATION')&&areas.includes('PLINTH')){
+   return {name:payment.name,percent:Number(payment.percent),areas,
+    steps:foundationWorkDefaults.map(step=>({...step}))};
   }
   const steps:CompanyWorkStep[]=[];
   for(const area of areas){
