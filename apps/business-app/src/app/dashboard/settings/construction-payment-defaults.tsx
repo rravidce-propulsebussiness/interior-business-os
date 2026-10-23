@@ -1,6 +1,6 @@
 'use client';
 import {useActionState,useState} from 'react';
-import {type CompanyConstructionPaymentRow,type CompanyWorkStep} from '@business-os/core/company-construction-defaults';
+import {companyWorkAreaLabel,inferCompanyWorkAreaCode,type CompanyConstructionPaymentRow,type CompanyWorkStep} from '@business-os/core/company-construction-defaults';
 import {milestoneConstructionStages} from '@business-os/core/construction-payment-schedule';
 import {saveConstructionPaymentDefaults} from './payment-default-actions';
 
@@ -23,33 +23,45 @@ function DefaultPaymentStage({row,index,canEdit,onChange,onRemove}:{
  const [kind,setKind]=useState<Kind>('work');
  const [name,setName]=useState('');
  const [area,setArea]=useState('');
+ const [areaText,setAreaText]=useState('');
+ const [newAreaText,setNewAreaText]=useState('');
  const [checkRef,setCheckRef]=useState('');
  const [error,setError]=useState('');
  const [after,setAfter]=useState<number|null>(null);
  const chosenArea=areas.includes(area)?area:areas[0]??'PRECONSTRUCTION';
+ const areaName=(code:string)=>companyWorkAreaLabel(row,code);
+ const typedTarget=areas.find(code=>areaName(code).toLowerCase()===areaText.trim().toLowerCase())
+  ??inferCompanyWorkAreaCode(areaText)??chosenArea;
+ const typedArea=areas.includes(typedTarget)?typedTarget:chosenArea;
  const prior=steps.slice(0,after===null?steps.length:after+1).filter(isCheck);
- const available=prior.filter(x=>x.area===chosenArea);
+ const available=prior.filter(x=>x.area===typedArea);
  const current=checkRef?available.find(x=>link(x)===checkRef):available.at(-1);
  const editRows=(next:CompanyWorkStep[])=>{onChange({...row,steps:next});setError('');};
  const add=(position:number)=>{
   setAfter(position);setName('');setKind('work');
-  setArea(steps[position]?.area??areas[0]??'PRECONSTRUCTION');
+  const initial=steps[position]?.area??areas[0]??'PRECONSTRUCTION';
+  setArea(initial);setAreaText(areaName(initial));
   setCheckRef('');setError('');
  };
  const save=()=>{
+  const labelText=areaText.trim().replace(/\s+/g,' ');
+  if(labelText.length<2||labelText.length>80){
+   setError('Type a work-area name (2–80 characters).');return;
+  }
   const title=kind==='qc'?current?.name:name.trim().replace(/\s+/g,' ');
   if(!title||title.length<2||title.length>180){setError('Enter a work/check name or select an earlier check for QC.');return;}
   if(kind==='qc'&&!current){setError('Select an earlier site check or test for company QC.');return;}
   if(kind==='check'||kind==='test'){
    if(title.length<3){setError('Check/test needs at least 3 characters.');return;}
   }
-  const next={kind,name:title,area:chosenArea} as CompanyWorkStep;
+  const next={kind,name:title,area:typedArea} as CompanyWorkStep;
   if(steps.some(x=>x.area===next.area&&x.name.toLowerCase()===next.name.toLowerCase()&&
     (x.kind===next.kind||(['check','test'].includes(x.kind)&&['check','test'].includes(next.kind))))){
    setError('This item is already in the payment stage.');return;
   }
   const updated=[...steps];updated.splice((after??steps.length-1)+1,0,next);
-  editRows(updated);setAfter(null);setName('');setCheckRef('');
+  onChange({...row,areaLabels:{...(row.areaLabels??{}),[typedArea]:labelText},
+   steps:updated});setAfter(null);setName('');setCheckRef('');setError('');
  };
  const edit=(position:number,changes:Partial<CompanyWorkStep>)=>{
   const currentItem=steps[position]!;
@@ -103,31 +115,53 @@ function DefaultPaymentStage({row,index,canEdit,onChange,onRemove}:{
   <details className="us-payment-stage-work">
    <summary>Work, materials, checks, tests &amp; QC <strong>{steps.length} included</strong></summary>
    {canEdit&&<div className="us-payment-work-areas">
-    <small>Construction work areas included in this payment stage</small>
+    <small>Work areas for this payment stage — type names directly</small>
     <div className="us-payment-area-tags">
-     {areas.map(value=><span key={value}>
-      {prettify(value)}
-      {!steps.some(step=>step.area===value)&&<button type="button"
-       aria-label={'Remove work area '+prettify(value)}
-       onClick={()=>onChange({...row,areas:areas.filter(x=>x!==value)})}>×</button>}
-     </span>)}
+     {areas.map(code=><label className="us-payment-area-name" key={code}>
+      <span>Work area</span>
+      <input type="text" maxLength={80} value={areaName(code)}
+       aria-label={'Rename construction work area '+prettify(code)}
+       onChange={event=>onChange({...row,areaLabels:{
+        ...(row.areaLabels??{}),[code]:event.target.value,
+       }})}/>
+      {!steps.some(step=>step.area===code)&&<button type="button"
+       aria-label={'Remove work area '+areaName(code)}
+       onClick={()=>onChange({...row,
+        areas:areas.filter(value=>value!==code),
+        areaLabels:Object.fromEntries(Object.entries(row.areaLabels??{}).filter(([key])=>key!==code)),
+       })}>×</button>}
+     </label>)}
     </div>
-    <select aria-label={'Add work area to milestone '+(index+1)}
-     value="" onChange={event=>{
-      const value=event.target.value;
-      if(value&&!areas.includes(value))onChange({...row,areas:[...areas,value]});
-     }}>
-     <option value="">+ Add construction work area</option>
-     {allAreas.filter(value=>!areas.includes(value)).map(value=>
-      <option key={value} value={value}>{prettify(value)}</option>)}
-    </select>
+    <div className="us-payment-area-add">
+     <input type="text" value={newAreaText} maxLength={80}
+      aria-label="Type construction work area name"
+      placeholder="Type work area, e.g. Foundation or Site marking"
+      onChange={event=>{setNewAreaText(event.target.value);setError('');}}/>
+     <button type="button" onClick={()=>{
+      const typed=newAreaText.trim().replace(/\s+/g,' ');
+      if(typed.length<2){setError('Enter the new work-area name.');return;}
+      const mapped=inferCompanyWorkAreaCode(typed);
+      if(!mapped){
+       setError('Include the construction type in the name, such as Design, Site marking, Foundation, RCC or Plumbing, to link it to the correct project stage.');
+       return;
+      }
+      if(areas.includes(mapped)){
+       onChange({...row,areaLabels:{...(row.areaLabels??{}),[mapped]:typed}});
+      }else{
+       if(areas.length>=15){setError('This payment already has 15 work areas.');return;}
+       onChange({...row,areas:[...areas,mapped],
+        areaLabels:{...(row.areaLabels??{}),[mapped]:typed}});
+      }
+      setNewAreaText('');setError('');
+     }}>+ Add area</button>
+    </div>
+    <small className="us-info">Your names are displayed in this template. Existing project stage links are preserved automatically.</small>
    </div>}
-
    <p className="us-info">These steps will be copied into new quotations. Edit the sequence here once;
     modify a quotation separately for any particular project.</p>
    {steps.length? <ol className="us-payment-step-list">{steps.map((item,position)=>
     <li key={position} className="us-payment-step">
-     <small>{position+1}. {labels[item.kind]} · {prettify(item.area)}</small>
+     <small>{position+1}. {labels[item.kind]} · {areaName(item.area)}</small>
      <div className="us-payment-step-edit">
       {canEdit&&item.kind!=='qc'?<input aria-label={'Edit '+labels[item.kind]+' '+(position+1)}
        value={item.name} maxLength={180}
@@ -157,10 +191,10 @@ function DefaultPaymentStage({row,index,canEdit,onChange,onRemove}:{
      </select>
     </label>
     <label>Work area
-     <select aria-label="Default step construction area" value={chosenArea}
-      onChange={e=>{setArea(e.target.value);setCheckRef('');}}>
-      {areas.map(value=><option key={value} value={value}>{prettify(value)}</option>)}
-     </select>
+     <input type="text" maxLength={80} aria-label="Type default step work area"
+      value={areaText} onChange={event=>setAreaText(event.target.value)}
+      placeholder="e.g. Foundation, Site marking, Design"/>
+     <small>Linked internally to {prettify(typedArea)}</small>
     </label>
     {kind==='qc'?<label>QC for which earlier site check/test?
      <select value={current?link(current):''} onChange={e=>setCheckRef(e.target.value)}
