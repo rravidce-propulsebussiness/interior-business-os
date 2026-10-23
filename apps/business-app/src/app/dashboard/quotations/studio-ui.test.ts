@@ -870,12 +870,21 @@ describe('Payment Settings keeps work-area entry textual and removes unrelated s
   expect(section).not.toContain("Payment methods',href:");
   expect(section).not.toContain("Invoices & stage collections");
  });
- it('edits construction work-area names using text fields, not technical dropdowns',()=>{
-  expect(stageEditor).toContain('aria-label="Type construction work area name"');
-  expect(stageEditor).toContain('aria-label="Type default step work area"');
-  expect(stageEditor).toContain('Rename construction work area');
-  expect(stageEditor).not.toContain('Default step construction area"');
-  expect(stageEditor).not.toContain('<option value="">+ Add construction work area</option>');
+ it('keeps internal stage mapping but removes all repetitive work-area fields',()=>{
+  expect(stageEditor).not.toContain('className="us-payment-work-areas"');
+  expect(stageEditor).not.toContain('className="us-payment-area-tags"');
+  expect(stageEditor).not.toContain('Type construction work area name');
+  expect(stageEditor).not.toContain('<label>Work area');
+  expect(stageEditor).not.toContain('Type default step work area');
+  expect(stageEditor).toContain('workAreaFor(title,after??steps.length-1)');
+  expect(stageEditor).toContain("setError('This item belongs to a different construction stage.");
+  expect(stageEditor).toContain('steps:updated');
+ });
+ it('uses only one ordered list and collapses long sequences on mobile',()=>{
+  expect(stageEditor).toContain('us-payment-step-expand');
+  expect(stageEditor).toContain('steps.slice(0,showAll?undefined:8)');
+  expect(stageEditor).toContain('New default work item name');
+  expect(stageEditor).toContain('Company QC');
  });
  it('does not double number the work items',()=>{
   expect(stageEditor).toContain('<div className="us-payment-step-list">');
