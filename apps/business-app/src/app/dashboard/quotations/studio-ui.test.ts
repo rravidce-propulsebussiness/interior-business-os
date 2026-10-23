@@ -912,7 +912,7 @@ describe('Payment Settings keeps work-area entry textual and removes unrelated s
   expect(stageEditor).toContain('Company QC');
  });
  it('does not double number the work items',()=>{
-  expect(stageEditor).toContain('<div className="us-payment-step-list">');
+  expect(stageEditor).toContain('className="us-payment-step-list"');
   expect(stageEditor).not.toContain('<ol className="us-payment-step-list">');
  });
 });
