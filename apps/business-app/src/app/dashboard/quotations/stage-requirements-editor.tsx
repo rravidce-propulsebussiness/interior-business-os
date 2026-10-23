@@ -145,13 +145,14 @@ function Section({ field, title, hint, base, requirements, locked, onUpdate, edi
   </details>;
 }
 
-export function StageRequirementsEditor({ code, value, editable, onChange, onApplyRelated, relatedCount }: {
+export function StageRequirementsEditor({ code, value, editable, onChange, onApplyRelated, relatedCount,payments=[] }: {
   code: string;
   value: StageRequirements | undefined;
   editable: boolean;
   onChange: (value: StageRequirements) => void;
   onApplyRelated?: (value: StageRequirements) => void;
   relatedCount: number;
+  payments?:{index:number;name:string;percent:string}[];
 }) {
   const defaults = defaultStageRequirements(code);
   const requirements = value ?? defaults;
@@ -163,7 +164,7 @@ export function StageRequirementsEditor({ code, value, editable, onChange, onApp
     <div className="qs-stage-requirements-title">
       <strong>{title}</strong><small>{value ? 'Project customized' : 'Standard requirements'}</small>
     </div>
-    <StageExecutionFlowEditor value={requirements} editable={editable} onChange={onChange} />
+    <StageExecutionFlowEditor code={code} value={requirements} payments={payments} editable={editable} onChange={onChange} />
     <details className="qs-stage-requirements-library">
       <summary>Manage included work, materials, checks & reports</summary>
       <p className="qs-stage-requirements-hint">Choose or rename the available items here. Arrange their execution order above. Site test and QC evidence is recorded against the corresponding check rather than as a second approval.</p>
