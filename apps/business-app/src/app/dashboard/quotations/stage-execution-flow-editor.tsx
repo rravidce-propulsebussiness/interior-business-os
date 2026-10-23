@@ -2,131 +2,219 @@
 
 import { useState } from 'react';
 import {
- stageExecutionFlow, type StageFlowStep, type StageRequirements,
+ defaultStageRequirements,deleteStageExecutionStep,stageExecutionFlow,
+ type StageFlowStep,type StageRequirements,
 } from '@business-os/core/quotation-stage-requirements';
+import { milestoneConstructionStages } from '@business-os/core/construction-payment-schedule';
 
 type Kind=StageFlowStep['kind'];
+type PaymentOption={index:number;name:string;percent:string};
 const labels:Record<Kind,string>={
- work:'Work',check:'Site check',test:'Test',qc:'Company QC',
+ work:'Work',check:'Site check',test:'Test',qc:'Company QC',payment:'Payment',
 };
+const isFieldCheck=(kind:Kind)=>kind==='check'||kind==='test';
 
-/** Ordered references to the canonical work and site-check arrays.
- * QC never creates another check or marks any result as approved. */
-export function StageExecutionFlowEditor({value,editable,onChange}:{
+/** One ordered view over canonical work, checks, and the existing payment plan.
+ * Payment here only points to Finance; it never creates an invoice or receipt. */
+export function StageExecutionFlowEditor({value,editable,onChange,code,payments=[]}:{
  value:StageRequirements;editable:boolean;onChange:(next:StageRequirements)=>void;
+ code:string;payments?:PaymentOption[];
 }){
  const steps=stageExecutionFlow(value);
  const [insertAfter,setInsertAfter]=useState<number|null>(null);
+ const [editing,setEditing]=useState<number|null>(null);
  const [kind,setKind]=useState<Kind>('check');
  const [title,setTitle]=useState('');
  const [qcIndex,setQcIndex]=useState('0');
+ const [paymentIndex,setPaymentIndex]=useState('0');
  const [source,setSource]=useState<'existing'|'new'>('existing');
  const [existingIndex,setExistingIndex]=useState('0');
  const [error,setError]=useState('');
+ const template=milestoneConstructionStages().find(x=>x.code===code.split('/')[0]);
+ const requiredChecks=template?.holdPoint==='structural'?defaultStageRequirements(code).checks:[];
+ const selectedPayments=payments.filter(row=>!steps.some(step=>step.kind==='payment'&&step.index===row.index));
  const commit=(next:StageRequirements)=>{onChange(next);setError('');};
- const move=(index:number,direction:number)=>{
-  const other=index+direction;if(other<0||other>=steps.length)return;
-  const next=[...steps];[next[index],next[other]]=[next[other]!,next[index]!];
-  const qcBeforeSiteCheck=next.some((item,i)=>item.kind==='qc'&&
-   !next.slice(0,i).some(prev=>['check','test'].includes(prev.kind)&&prev.index===item.index));
-  if(qcBeforeSiteCheck){setError('Move the site check or test before its company QC review.');return;}
+ const labelOf=(step:StageFlowStep)=>step.kind==='payment'
+  ?payments.find(row=>row.index===step.index)?.name??'Unlinked payment milestone'
+  :value[step.kind==='work'?'work':'checks'][step.index]??'Missing step';
+ const checkBefore=(flow:StageFlowStep[])=>flow.every((item,i)=>item.kind!=='qc'||
+  flow.slice(0,i).some(previous=>isFieldCheck(previous.kind)&&previous.index===item.index));
+ const openInsert=(position:number)=>{
+  setInsertAfter(position);setEditing(null);setKind('check');
+  setSource('existing');setTitle('');setExistingIndex('0');setError('');
+  setPaymentIndex(String(selectedPayments[0]?.index??0));setQcIndex('0');
+ };
+ const openEdit=(position:number)=>{
+  const step=steps[position];if(!step)return;
+  setEditing(position);setInsertAfter(null);setTitle(labelOf(step));setError('');
+  if(step.kind==='payment')setPaymentIndex(String(step.index));
+  if(step.kind==='qc')setQcIndex(String(step.index));
+ };
+ const move=(position:number,direction:number)=>{
+  const next=[...steps];const other=position+direction;
+  if(other<0||other>=next.length)return;
+  [next[position],next[other]]=[next[other]!,next[position]!];
+  if(!checkBefore(next)){setError('A site check/test must remain before its QC review.');return;}
   commit({...value,flow:next});
  };
  const insert=(after:number)=>{
-  const trimmed=title.replace(/\s+/g,' ').trim();
-  let nextWork=[...value.work],nextChecks=[...value.checks];
   const flow=[...steps];
-  const candidates=kind==='work'?value.work:value.checks;
-  const useExisting=source==='existing'&&kind!=='qc'&&candidates.length>0;
-  if(kind==='qc'){
-   if(!value.checks.length){setError('Add a site check or test before adding company QC.');return;}
+  const trimmed=title.replace(/\s+/g,' ').trim();
+  let work=[...value.work],checks=[...value.checks];
+  if(kind==='payment'){
+   const index=Number(paymentIndex);
+   if(!payments.some(row=>row.index===index)||flow.some(row=>row.kind==='payment'&&row.index===index)){
+    setError('Choose a linked milestone that is not already in this stage.');return;
+   }
+   flow.splice(after+1,0,{kind:'payment',index});
+  }else if(kind==='qc'){
    const index=Number(qcIndex);
-   if(!Number.isInteger(index)||index<0||index>=nextChecks.length)return;
-   if(flow.some(step=>step.kind==='qc'&&step.index===index)){
-    setError('This check already has an explicitly positioned QC review.');return;
+   if(!Number.isInteger(index)||index<0||index>=checks.length||
+    flow.some(row=>row.kind==='qc'&&row.index===index)){
+    setError('Choose one site check that does not already have QC.');return;
    }
-   // A QC checkpoint must follow its matching field check or test. Reposition
-   // the existing check before this QC if it was later in the default plan.
-   const existing=flow.findIndex(step=>step.index===index&&
-    (step.kind==='check'||step.kind==='test'));
-   if(existing<0)return;
-   const target=existing>after?after+1:after+1;
-   if(existing>after){const [check]=flow.splice(existing,1);flow.splice(target,0,check!);}
-   const checkPosition=flow.findIndex(step=>step.index===index&&
-    (step.kind==='check'||step.kind==='test'));
-   flow.splice(Math.max(after+1,checkPosition+1),0,{kind:'qc',index});
-  }else if(useExisting){
-   const index=Number(existingIndex);
-   if(!Number.isInteger(index)||index<0||index>=candidates.length){
-    setError('Select the work or check to move here.');return;
+   const checkPosition=flow.findIndex(row=>isFieldCheck(row.kind)&&row.index===index);
+   if(checkPosition<0){setError('Select a site check before adding QC.');return;}
+   // Move the referenced check forward when necessary; never duplicate it.
+   if(checkPosition>after){
+    const [check]=flow.splice(checkPosition,1);
+    flow.splice(after+1,0,check!);
    }
-   const currentPosition=flow.findIndex(step=>step.index===index&&
-    (kind==='work'?step.kind==='work':['check','test'].includes(step.kind)));
-   if(currentPosition<0){setError('This item is not available in the sequence.');return;}
-   const [selected]=flow.splice(currentPosition,1);
-   const destination=currentPosition<=after?after:after+1;
-   flow.splice(destination,0,{...selected!,kind});
-   if(flow.some((step,i)=>step.kind==='qc'&&
-      !flow.slice(0,i).some(previous=>previous.index===step.index&&
-       (previous.kind==='check'||previous.kind==='test')))){
-    setError('This item has a linked QC review. Keep its check before that QC checkpoint.');
-    return;
-   }
+   const updatedCheck=flow.findIndex(row=>isFieldCheck(row.kind)&&row.index===index);
+   flow.splice(Math.max(after+1,updatedCheck+1),0,{kind:'qc',index});
   }else{
-   const min=kind==='work'?2:3;
-   if(trimmed.length<min||trimmed.length>180){
-    setError('Enter a descriptive item name ('+min+'–180 characters).');return;
+   const field=kind==='work'?work:checks;
+   if(source==='existing'&&field.length>0){
+    const index=Number(existingIndex);
+    if(!Number.isInteger(index)||index<0||index>=field.length){
+     setError('Choose an existing work or check.');return;
+    }
+    const from=flow.findIndex(step=>step.index===index&&
+     (kind==='work'?step.kind==='work':isFieldCheck(step.kind)));
+    if(from<0){setError('Item is not in the execution sequence.');return;}
+    const [selected]=flow.splice(from,1);
+    const position=from<=after?after:after+1;
+    flow.splice(position,0,{...selected!,kind});
+   }else{
+    const minimum=kind==='work'?2:3;
+    if(trimmed.length<minimum||trimmed.length>180||field.length>=50){
+     setError('Enter a valid new item name, up to 180 characters.');return;
+    }
+    if(field.some(s=>s.toLowerCase()===trimmed.toLowerCase())){
+     setError('Already selected. Move the existing item instead.');return;
+    }
+    flow.splice(after+1,0,{kind,index:field.length});
+    field.push(trimmed);
    }
-   const field=kind==='work'?nextWork:nextChecks;
-   if(field.some(label=>label.toLowerCase()===trimmed.toLowerCase())){
-    setError('This item already exists. Move its row using the arrows instead.');return;
-   }
-   if(field.length>=50){setError('This stage already has 50 items in that category.');return;}
-   const added:StageFlowStep={kind,index:field.length};
-   field.push(trimmed);
-   flow.splice(after+1,0,added);
   }
-  if(flow.length>150){setError('This stage cannot have more than 150 flow steps.');return;}
-  commit({...value,work:nextWork,checks:nextChecks,flow});
-  setTitle('');setInsertAfter(null);
+  if(flow.length>150||!checkBefore(flow)){
+   setError('Keep every site check before its company QC. Maximum 150 steps.');return;
+  }
+  commit({...value,work,checks,flow});
+  setInsertAfter(null);setTitle('');
  };
- const removeQc=(index:number)=>{
-  commit({...value,flow:steps.filter((_,i)=>i!==index)});
+ const saveEdit=(position:number)=>{
+  const step=steps[position];if(!step)return;
+  let next:StageRequirements;
+  if(step.kind==='payment'||step.kind==='qc'){
+   const index=Number(step.kind==='payment'?paymentIndex:qcIndex);
+   if(step.kind==='payment'&&!payments.some(row=>row.index===index)){
+    setError('Select a payment milestone linked to this stage.');return;
+   }
+   if(step.kind==='qc'){
+    const earlier=steps.slice(0,position).some(row=>isFieldCheck(row.kind)&&row.index===index);
+    if(!earlier){setError('First place the matching site check above this QC.');return;}
+   }
+   if(steps.some((row,i)=>i!==position&&row.kind===step.kind&&row.index===index)){
+    setError('This payment or QC review is already in the sequence.');return;
+   }
+   next={...value,flow:steps.map((row,i)=>i===position?{...row,index}:row)};
+  }else{
+   const field=step.kind==='work'?'work':'checks';
+   const normalized=title.replace(/\s+/g,' ').trim();
+   const min=field==='work'?2:3;
+   if(normalized.length<min||normalized.length>180){
+    setError('Item name must be '+min+'–180 characters long.');return;
+   }
+   if(field==='checks'&&requiredChecks.includes(value.checks[step.index]??'')){
+    setError('Mandatory structural check names cannot be changed.');return;
+   }
+   if(value[field].some((name,i)=>i!==step.index&&name.toLowerCase()===normalized.toLowerCase())){
+    setError('An item with this name already exists.');return;
+   }
+   const entries=[...value[field]];entries[step.index]=normalized;
+   next={...value,[field]:entries};
+  }
+  commit(next);setEditing(null);
  };
- return <section className="qs-stage-flow-editor" aria-label="Ordered work and inspection flow">
+ const deleteItem=(position:number)=>{
+  const step=steps[position];if(!step)return;
+  const name=labelOf(step);
+  const confirmText=step.kind==='payment'
+   ?'Remove "'+name+'" from this execution order? The quotation payment schedule will stay unchanged.'
+   :isFieldCheck(step.kind)
+   ?'Delete "'+name+'" from the selected site checks and the execution order? Its linked QC step, if any, will also be removed.'
+   :step.kind==='qc'
+   ?'Remove this QC checkpoint from the sequence? The original site check remains.'
+   :'Delete "'+name+'" from the selected work and the execution order?';
+  if(!window.confirm(confirmText))return;
+  try{commit(deleteStageExecutionStep(value,position,code));setEditing(null);setInsertAfter(null);}
+  catch(e){setError(e instanceof Error?e.message:'Unable to delete this step.');}
+ };
+ return <section className="qs-stage-flow-editor" aria-label="Ordered work, payment and quality flow">
   <div className="qs-stage-flow-heading">
    <strong>Execution order</strong>
-   <small>Work → site check / test → company QC → next work, in any required order</small>
+   <small>Work → site check / test → company QC → payment → next work, as needed</small>
   </div>
   <p className="qs-stage-flow-info">
-   Arrange steps in the order they should happen on site. Each check/test uses one
-   site record; Company QC reviews that same check separately with on-site evidence.
-   Structural approvals and final stage certification still apply.
+   Arrange each site step. Payment uses an existing quotation milestone and remains
+   recorded in Finance. Site checks and company QC remain separately evidenced.
   </p>
   <ol className="qs-stage-flow-list">
    {steps.map((step,i)=>{
-    const name=step.kind==='work'?value.work[step.index]:value.checks[step.index];
-    if(!name)return null;
+    const name=labelOf(step);
+    const isProtected=isFieldCheck(step.kind)&&requiredChecks.includes(value.checks[step.index]??'');
+    const activeEdit=editing===i;
     return <li key={step.kind+'-'+step.index} className="qs-stage-flow-item">
      <span className="qs-stage-flow-position">{i+1}</span>
      <div className="qs-stage-flow-copy">
       <span className={'qs-stage-flow-kind is-'+step.kind}>{labels[step.kind]}</span>
-      <strong>{name}</strong>
-      {step.kind==='qc'&&<small>Formal on-site review; does not repeat or automatically pass the site check</small>}
+      {activeEdit?<div className="qs-stage-flow-new qs-stage-flow-inline-edit">
+       {step.kind==='payment'?<label>Linked payment milestone
+        <select value={paymentIndex} onChange={e=>setPaymentIndex(e.target.value)}>
+         {payments.map(row=><option value={row.index} key={row.index}>{row.name} · {row.percent}%</option>)}
+        </select></label>:step.kind==='qc'?<label>Company QC for site check/test
+        <select value={qcIndex} onChange={e=>setQcIndex(e.target.value)}>
+         {value.checks.map((name,index)=><option key={index} value={index}>{name}</option>)}
+        </select></label>:<label>Edit {labels[step.kind].toLowerCase()}
+        <input value={title} maxLength={180} onChange={e=>setTitle(e.target.value)}
+         onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();saveEdit(i);}}}/>
+        </label>}
+       {error&&<p className="qs-stage-flow-error" role="alert">{error}</p>}
+       <div className="qs-stage-flow-buttons">
+        <button type="button" onClick={()=>saveEdit(i)}>Save changes</button>
+        <button type="button" onClick={()=>{setEditing(null);setError('');}}>Cancel</button>
+       </div>
+      </div>:<>
+       <strong>{name}</strong>
+       {step.kind==='payment'&&<small>{
+        payments.find(row=>row.index===step.index)?.percent??'—'
+       }% · Linked to the payment schedule; payment status is managed in Finance</small>}
+       {step.kind==='qc'&&<small>Site visit and separate QC Pass/Fail required</small>}
+       {isProtected&&<small>Mandatory structural check</small>}
+      </>}
      </div>
-     {editable&&<div className="qs-stage-flow-actions">
+     {editable&&!activeEdit&&<div className="qs-stage-flow-actions">
       <button type="button" disabled={i===0} aria-label={'Move '+name+' earlier'} onClick={()=>move(i,-1)}>↑</button>
       <button type="button" disabled={i===steps.length-1} aria-label={'Move '+name+' later'} onClick={()=>move(i,1)}>↓</button>
-      {step.kind==='check'||step.kind==='test'?
-       <button type="button" onClick={()=>commit({...value,flow:steps.map((x,n)=>
-        n===i?{...x,kind:x.kind==='test'?'check':'test'}:x)})}>
-        {step.kind==='check'?'Mark test':'Mark check'}
-       </button>:null}
-      {step.kind==='qc'&&<button type="button" onClick={()=>removeQc(i)}>Remove QC step</button>}
-      <button type="button" onClick={()=>{
-       setInsertAfter(insertAfter===i?null:i);setKind('check');setSource('existing');
-       setExistingIndex('0');setTitle('');setError('');
-      }}>+ Next</button>
+      {isFieldCheck(step.kind)&&<button type="button" onClick={()=>commit({...value,
+       flow:steps.map((item,n)=>n===i?{...item,kind:item.kind==='test'?'check':'test'}:item)
+      })}>{step.kind==='test'?'Mark check':'Mark test'}</button>}
+      <button type="button" disabled={isProtected} title={isProtected?'Required structural check':undefined}
+       aria-label={'Edit '+name} onClick={()=>openEdit(i)}>✎ Edit</button>
+      <button type="button" disabled={isProtected||(step.kind==='work'&&value.work.length===1)}
+       className="qs-stage-flow-delete" aria-label={'Delete '+name} onClick={()=>deleteItem(i)}>Delete</button>
+      <button type="button" onClick={()=>openInsert(i)}>+ Next</button>
      </div>}
      {editable&&insertAfter===i&&<div className="qs-stage-flow-new">
       <label>Next step type
@@ -135,43 +223,52 @@ export function StageExecutionFlowEditor({value,editable,onChange}:{
         <option value="check">Site check</option>
         <option value="test">Test</option>
         <option value="qc">Company QC</option>
+        <option value="payment">Payment</option>
        </select>
       </label>
-      {kind!=='qc'&&<label>Choose existing item or create new
-       <select value={source} onChange={e=>{setSource(e.target.value as 'existing'|'new');setError('');}}>
-        <option value="existing" disabled={!(kind==='work'?value.work:value.checks).length}>Use an existing selected item</option>
-        <option value="new">Create new item</option>
-       </select>
-      </label>}
-      {kind==='qc'?<label>QC for existing site check/test
+      {kind==='payment'?<label>Existing quotation payment milestone
+       {selectedPayments.length?<select value={paymentIndex} onChange={e=>setPaymentIndex(e.target.value)}>
+        {selectedPayments.map(row=><option value={row.index} key={row.index}>{row.name} · {row.percent}%</option>)}
+       </select>:<small>No unused payment milestones are linked to this construction stage.</small>}
+      </label>:kind==='qc'?<label>Company QC for existing site check/test
        <select value={qcIndex} onChange={e=>setQcIndex(e.target.value)}>
-        {value.checks.map((check,index)=><option key={index} value={index}>{check}</option>)}
+        {value.checks.map((check,index)=><option value={index} key={index}>{check}</option>)}
        </select>
-      </label>:source==='existing'&&(kind==='work'?value.work:value.checks).length>0?
-       <label>Move this {labels[kind].toLowerCase()} after the selected step
-        <select value={existingIndex} onChange={e=>setExistingIndex(e.target.value)}>
-         {(kind==='work'?value.work:value.checks).map((item,index)=>
-          <option key={index} value={index}>{item}</option>)}
+      </label>:<>
+       <label>Use selected item or create new
+        <select value={source} onChange={e=>setSource(e.target.value as 'existing'|'new')}>
+         <option value="existing" disabled={!(kind==='work'?value.work:value.checks).length}>Choose existing</option>
+         <option value="new">Create new</option>
         </select>
-       </label>:
-       <label>New {labels[kind].toLowerCase()} item
-        <input maxLength={180} value={title} onChange={e=>{setTitle(e.target.value);setError('');}}
-         placeholder={kind==='work'?'e.g. Excavation':'e.g. Verify excavation depth and width'}/>
-       </label>}
+       </label>
+       {source==='existing'&&(kind==='work'?value.work:value.checks).length>0?
+        <label>Move this {labels[kind].toLowerCase()} here
+         <select value={existingIndex} onChange={e=>setExistingIndex(e.target.value)}>
+          {(kind==='work'?value.work:value.checks).map((name,index)=>
+           <option value={index} key={index}>{name}</option>)}
+         </select>
+        </label>:<label>New {labels[kind].toLowerCase()}
+         <input value={title} maxLength={180} onChange={e=>setTitle(e.target.value)}
+          placeholder={kind==='work'?'e.g. Excavation':'e.g. Check excavation width and depth'}/>
+        </label>}
+      </>}
       {error&&<p role="alert" className="qs-stage-flow-error">{error}</p>}
       <div className="qs-stage-flow-buttons">
-       <button type="button" onClick={()=>insert(i)} disabled={kind==='qc'&&!value.checks.length}>{kind==='qc'?'Add QC checkpoint':source==='existing'?'Move selected item here':'Add new step'}</button>
+       <button type="button" disabled={kind==='payment'&&!selectedPayments.length||
+        kind==='qc'&&!value.checks.length}
+        onClick={()=>insert(i)}>{kind==='payment'?'Link payment':kind==='qc'?'Add QC':
+         source==='existing'?'Move item here':'Add step'}</button>
        <button type="button" onClick={()=>{setInsertAfter(null);setError('');}}>Cancel</button>
       </div>
      </div>}
     </li>;
    })}
   </ol>
-  {!editable&&<p className="qs-stage-flow-info">Create a quotation revision to change this execution sequence.</p>}
-  {editable&&insertAfter===null&&<button type="button" className="qs-stage-flow-add-end"
-    onClick={()=>{setInsertAfter(steps.length-1);setKind('check');setSource('existing');setExistingIndex('0');setError('');}}>
-    + Add step after the last item
-   </button>}
-  {error&&insertAfter===null&&<p role="alert" className="qs-stage-flow-error">{error}</p>}
+  {!editable&&<p className="qs-stage-flow-info">Create a quotation revision to edit the execution sequence.</p>}
+  {editable&&insertAfter===null&&editing===null&&<button type="button"
+   className="qs-stage-flow-add-end" onClick={()=>openInsert(steps.length-1)}>
+   + Add step after the last item
+  </button>}
+  {error&&editing===null&&insertAfter===null&&<p className="qs-stage-flow-error" role="alert">{error}</p>}
  </section>;
 }
