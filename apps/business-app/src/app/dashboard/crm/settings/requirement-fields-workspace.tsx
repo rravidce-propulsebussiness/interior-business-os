@@ -167,7 +167,10 @@ export function RequirementFieldsWorkspace({initial,industries,canManage,total}:
    </div>
    {total>fields.length&&<p className="crf-hint">Showing {fields.length} of {total} configured fields. Use pagination below to access other records.</p>}
    </section>
-   {editing!==null&&<aside className="crf-sidepanel" role="dialog"
+   {editing!==null&&<>
+    <button className="crf-mobile-scrim" type="button" aria-label="Close requirement editor"
+     onClick={()=>{setEditing(null);setFeedback('');}}/>
+    <aside className="crf-sidepanel" role="dialog"
       aria-label={draft.id?'Edit Requirement Field':'Add Requirement Field'}>
     <div className="crf-panel-head">
      <h2>{draft.id?'Edit Requirement Field':'Add Requirement Field'}</h2>
@@ -257,7 +260,7 @@ export function RequirementFieldsWorkspace({initial,industries,canManage,total}:
     <button type="button" disabled={busy||!canManage} onClick={()=>void save()}>
      {busy?'Saving…':'Save Field'}</button>
    </div>
-   </aside>}
+   </aside></>}
   </div>
  </div>;
 }
