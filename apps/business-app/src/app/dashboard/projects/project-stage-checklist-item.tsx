@@ -3,14 +3,16 @@
 import { useActionState, useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { saveProjectStageItem } from './[id]/site/stage-checklist-actions';
+import {ProjectItemSchedule,type ProjectItemScheduleRow} from './project-item-schedule';
 
 type Result={saved:boolean;message:string};
 type Photo={id:string;filename:string};
 export function StageChecklistItem({projectId,stageId,kind,index,title,status,notes,photos,
-  canEdit=false,photoId='',materialPanel,checksHref}:{
+  canEdit=false,photoId='',materialPanel,checksHref,schedule,canPlan=false}:{
   projectId:string;stageId:string;kind:'work'|'check';index:number;title:string;
   status:string;notes?:string;photos:Photo[];canEdit?:boolean;photoId?:string;
   materialPanel?:ReactNode;checksHref?:string;
+  schedule?:ProjectItemScheduleRow;canPlan?:boolean;
 }) {
  const router=useRouter();
  const [selectedPhotoId,setSelectedPhotoId]=useState(photoId);
@@ -47,6 +49,8 @@ export function StageChecklistItem({projectId,stageId,kind,index,title,status,no
    <span aria-hidden="true" className="pv2-item-checklist-chevron">⌄</span>
   </summary>
   <div className="pv2-item-checklist-inner">
+   <ProjectItemSchedule projectId={projectId} stageId={stageId} kind={kind}
+    index={index} title={title} item={schedule} canPlan={canPlan}/>
    {kind==='work'&&(materialPanel||checksHref)&&<div className="pv2-item-inline-quick" role="group" aria-label="Work item actions">
     {materialPanel&&<button type="button" aria-controls={'activity-materials-'+stageId+'-'+index}
       aria-expanded={materialsOpen} className={materialsOpen?'is-active':''}
