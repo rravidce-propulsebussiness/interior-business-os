@@ -4,7 +4,7 @@ import { useMemo, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { savedStagePaymentPlan,savedStagePaymentLinks } from '@business-os/core/quotation-payment-plan';
 import { proposedConstructionPayments } from '@business-os/core/construction-payment-schedule';
-import { savedStageRequirements,mergeStageRequirementOverrides,encodeStageRequirements,validateStageRequirementsDraft,
+import { savedStageRequirements,mergeStageRequirementOverrides,encodeStageRequirements,validateStageRequirementsDraft,remapStageFlowPayments,
  type StageRequirements,type StageRequirementsMap } from '@business-os/core/quotation-stage-requirements';
 import { StageRequirementsEditor } from './stage-requirements-editor';
 
@@ -85,6 +85,13 @@ export function PaymentScheduleEditor({
     // editing another stage. Count/size checks still apply to the entire draft.
     // New saves must pass the strict check-title rule.
     validateStageRequirementsDraft(onlyLinked);
+    for(const [code,item] of Object.entries(onlyLinked)){
+     for(const step of item.flow??[]){
+      if(step.kind==='payment'&&(!rows[step.index]||
+       !rows[step.index]!.stageCodes.includes(code)))
+       throw new Error('The linked payment must belong to '+code+'. Choose a valid milestone.');
+     }
+    }
     return onlyLinked;
    }catch(error){
     setFeedback({type:'error',text:error instanceof Error?error.message:
@@ -151,6 +158,28 @@ export function PaymentScheduleEditor({
     setRows((all) => all.map((row, i) => i === index ? { ...row, [key]: value } : row));
   }
 
+  // Payment flow steps reference existing payment rows: remap when rows move.
+  function remapMilestones(next:Milestone[],mapping:(oldIndex:number)=>number|null){
+   setRows(next);
+   setStageRequirements(previous=>remapStageFlowPayments(previous,mapping));
+   setFeedback(null);
+  }
+  function reorderMilestones(from:number,to:number){
+   const next=moveStage(rows,from,to);
+   remapMilestones(next,oldIndex=>{
+    const old=rows[oldIndex];
+    if(!old)return null;
+    const found=next.indexOf(old);
+    return found<0?null:found;
+   });
+  }
+  function removeMilestone(index:number){
+   remapMilestones(rows.filter((_,i)=>i!==index),oldIndex=>
+    oldIndex===index?null:oldIndex>index?oldIndex-1:oldIndex);
+  }
+  function resetMilestones(){
+   remapMilestones(suggestions(industry,floorNames),()=>null);
+  }
   function addStage() {
     if (rows.length >= MAX_STAGES) return;
     setFeedback(null);
@@ -260,7 +289,7 @@ export function PaymentScheduleEditor({
       {editable && (
         <div className="qs-payment-actions">
           <button type="button" className="qs-payment-reset" disabled={pending}
-            onClick={() => { setRows(suggestions(industry,floorNames)); setFeedback(null); }}>
+            onClick={resetMilestones}>
             <span aria-hidden="true">↺</span> Reset suggestions
           </button>
           <button type="button" className="qs-payment-add" disabled={pending || rows.length >= MAX_STAGES}
@@ -290,8 +319,7 @@ export function PaymentScheduleEditor({
                   event.preventDefault();
                   if (dragging.current !== null) {
                     const from = dragging.current;
-                    setRows((all) => moveStage(all, from, index));
-                    setFeedback(null);
+                    reorderMilestones(from,index);
                   }
                   dragging.current = null;
                 }}
@@ -299,7 +327,7 @@ export function PaymentScheduleEditor({
                 <button type="button" className="qs-payment-grip" disabled={!editable || pending || index === 0}
                   title="Move up one stage (or drag the row to reorder)"
                   aria-label={'Move milestone ' + (index + 1) + ' up'}
-                  onClick={() => { setRows((all) => moveStage(all, index, index - 1)); setFeedback(null); }}>
+                  onClick={() => reorderMilestones(index,index-1)}>
                   <span aria-hidden="true">⠿</span>
                 </button>
                 <div className="qs-payment-stage-name">
@@ -322,6 +350,8 @@ export function PaymentScheduleEditor({
                     {[...new Set(row.stageCodes)].map(code=>
                      <StageRequirementsEditor key={code} code={code}
                       value={visibleRequirements[code]} editable={editable}
+                      payments={rows.flatMap((payment,paymentIndex)=>
+                       payment.stageCodes.includes(code)?[{index:paymentIndex,name:payment.name,percent:payment.percent}]:[])}
                       onChange={value=>editRequirements(code,value)}
                       relatedCount={stageCodes.filter(c=>c.split('/')[0]===code.split('/')[0]).length}
                       onApplyRelated={value=>applyRelated(code,value)}/>)}
@@ -344,7 +374,7 @@ export function PaymentScheduleEditor({
                 {editable && (
                   <button type="button" className="qs-payment-remove" disabled={pending}
                     title="Remove milestone" aria-label={'Remove milestone ' + (index + 1)}
-                    onClick={() => { setRows((all) => all.filter((_, i) => i !== index)); setFeedback(null); }}>
+                    onClick={() => removeMilestone(index)}>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                       <path d="M4 7h16M9 7V4h6v3m3 0-1 13H7L6 7m4 4v5m4-5v5" />
                     </svg>
