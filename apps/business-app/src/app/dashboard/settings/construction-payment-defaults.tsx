@@ -1,13 +1,12 @@
 'use client';
 import {useActionState,useState} from 'react';
-import {companyWorkAreaLabel,inferCompanyWorkAreaCode,type CompanyConstructionPaymentRow,type CompanyWorkStep} from '@business-os/core/company-construction-defaults';
+import {inferCompanyWorkAreaCode,type CompanyConstructionPaymentRow,type CompanyWorkStep} from '@business-os/core/company-construction-defaults';
 import {saveConstructionPaymentDefaults} from './payment-default-actions';
 
 type Kind=CompanyWorkStep['kind'];
 const labels:Record<Kind,string>={
  work:'Work',material:'Material',check:'Site check',test:'Test',qc:'Company QC',
 };
-const prettify=(code:string)=>code.replaceAll('_',' ');
 const isCheck=(step:CompanyWorkStep)=>step.kind==='check'||step.kind==='test';
 const link=(step:CompanyWorkStep)=>step.area+'|'+step.name.toLowerCase();
 
@@ -20,49 +19,50 @@ function DefaultPaymentStage({row,index,canEdit,onChange,onRemove}:{
   [...new Set(steps.map(item=>item.area))];
  const [kind,setKind]=useState<Kind>('work');
  const [name,setName]=useState('');
- const [area,setArea]=useState('');
- const [areaText,setAreaText]=useState('');
- const [newAreaText,setNewAreaText]=useState('');
  const [checkRef,setCheckRef]=useState('');
  const [error,setError]=useState('');
  const [after,setAfter]=useState<number|null>(null);
- const chosenArea=areas.includes(area)?area:areas[0]??'PRECONSTRUCTION';
- const areaName=(code:string)=>companyWorkAreaLabel(row,code);
- const typedTarget=areas.find(code=>areaName(code).toLowerCase()===areaText.trim().toLowerCase())
-  ??inferCompanyWorkAreaCode(areaText)??chosenArea;
- const typedArea=typedTarget;
+ // Internal construction codes are retained in saved data and never shown as
+ // editable "work area" rows. A new step inherits its neighboring code;
+ // recognizable work names can select an existing matching stage automatically.
  const prior=steps.slice(0,after===null?steps.length:after+1).filter(isCheck);
- const available=prior.filter(x=>x.area===typedArea);
- const current=checkRef?available.find(x=>link(x)===checkRef):available.at(-1);
+ const current=checkRef?prior.find(x=>link(x)===checkRef):prior.at(-1);
+ const [showAll,setShowAll]=useState(false);
+ const workAreaFor=(title:string,position:number):string|null=>{
+  const inferred=inferCompanyWorkAreaCode(title);
+  if(inferred&&areas.includes(inferred))return inferred;
+  // Do not silently put footing/structural work into Site Prep, for example.
+  if(inferred&&!areas.includes(inferred))return null;
+  return steps[position]?.area??steps[position+1]?.area??areas[0]??null;
+ };
  const editRows=(next:CompanyWorkStep[])=>{onChange({...row,steps:next});setError('');};
  const add=(position:number)=>{
   setAfter(position);setName('');setKind('work');
-  const initial=steps[position]?.area??areas[0]??'PRECONSTRUCTION';
-  setArea(initial);setAreaText(areaName(initial));
+  // The work description, not a second technical category, is the only text input.
   setCheckRef('');setError('');
  };
  const save=()=>{
-  const labelText=areaText.trim().replace(/\s+/g,' ');
-  if(labelText.length<2||labelText.length>80){
-   setError('Type a work-area name (2–80 characters).');return;
-  }
-  if(!areas.includes(typedArea)){
-   setError('Add this construction work area above first so it stays linked to the correct project stage.');return;
-  }
   const title=kind==='qc'?current?.name:name.trim().replace(/\s+/g,' ');
-  if(!title||title.length<2||title.length>180){setError('Enter a work/check name or select an earlier check for QC.');return;}
-  if(kind==='qc'&&!current){setError('Select an earlier site check or test for company QC.');return;}
-  if(kind==='check'||kind==='test'){
-   if(title.length<3){setError('Check/test needs at least 3 characters.');return;}
+  if(!title||title.length<2||title.length>180){
+   setError('Type a work, material or check name; for QC choose the earlier site check.');return;
   }
-  const next={kind,name:title,area:typedArea} as CompanyWorkStep;
-  if(steps.some(x=>x.area===next.area&&x.name.toLowerCase()===next.name.toLowerCase()&&
-    (x.kind===next.kind||(['check','test'].includes(x.kind)&&['check','test'].includes(next.kind))))){
-   setError('This item is already in the payment stage.');return;
+  if((kind==='check'||kind==='test')&&title.length<3){
+   setError('Enter a descriptive site check or test name.');return;
+  }
+  if(kind==='qc'&&!current){
+   setError('First add a site check or test, then select it for company QC.');return;
+  }
+  const chosen=kind==='qc'?current!.area:workAreaFor(title,after??steps.length-1);
+  if(!chosen){
+   setError('This item belongs to a different construction stage. Add it under the matching payment milestone so work is not assigned incorrectly.');return;
+  }
+  const next:CompanyWorkStep={kind,name:title,area:chosen};
+  if(steps.some(item=>item.area===next.area&&item.name.toLowerCase()===next.name.toLowerCase()&&
+    (item.kind===next.kind||(isCheck(item)&&isCheck(next))))){
+   setError('This item already exists in the payment stage.');return;
   }
   const updated=[...steps];updated.splice((after??steps.length-1)+1,0,next);
-  onChange({...row,areaLabels:{...(row.areaLabels??{}),[typedArea]:labelText},
-   steps:updated});setAfter(null);setName('');setCheckRef('');setError('');
+  editRows(updated);setAfter(null);setName('');setCheckRef('');
  };
  const edit=(position:number,changes:Partial<CompanyWorkStep>)=>{
   const currentItem=steps[position]!;
@@ -115,54 +115,15 @@ function DefaultPaymentStage({row,index,canEdit,onChange,onRemove}:{
   </div>
   <details className="us-payment-stage-work">
    <summary>Work, materials, checks, tests &amp; QC <strong>{steps.length} included</strong></summary>
-   {canEdit&&<div className="us-payment-work-areas">
-    <small>Work areas for this payment stage — type names directly</small>
-    <div className="us-payment-area-tags">
-     {areas.map(code=><label className="us-payment-area-name" key={code}>
-      <span>Work area</span>
-      <input type="text" maxLength={80} value={areaName(code)}
-       aria-label={'Rename construction work area '+prettify(code)}
-       onChange={event=>onChange({...row,areaLabels:{
-        ...(row.areaLabels??{}),[code]:event.target.value,
-       }})}/>
-      {!steps.some(step=>step.area===code)&&<button type="button"
-       aria-label={'Remove work area '+areaName(code)}
-       onClick={()=>onChange({...row,
-        areas:areas.filter(value=>value!==code),
-        areaLabels:Object.fromEntries(Object.entries(row.areaLabels??{}).filter(([key])=>key!==code)),
-       })}>×</button>}
-     </label>)}
-    </div>
-    <div className="us-payment-area-add">
-     <input type="text" value={newAreaText} maxLength={80}
-      aria-label="Type construction work area name"
-      placeholder="Type work area, e.g. Foundation or Site marking"
-      onChange={event=>{setNewAreaText(event.target.value);setError('');}}/>
-     <button type="button" onClick={()=>{
-      const typed=newAreaText.trim().replace(/\s+/g,' ');
-      if(typed.length<2){setError('Enter the new work-area name.');return;}
-      const mapped=inferCompanyWorkAreaCode(typed)??(areas.length===1?areas[0]:null);
-      if(!mapped){
-       setError('Include a construction type in the name (Foundation, Design, RCC, etc.) so it links to the correct project stage, or rename an existing work area above.');
-       return;
-      }
-      if(areas.includes(mapped)){
-       onChange({...row,areaLabels:{...(row.areaLabels??{}),[mapped]:typed}});
-      }else{
-       if(areas.length>=15){setError('This payment already has 15 work areas.');return;}
-       onChange({...row,areas:[...areas,mapped],
-        areaLabels:{...(row.areaLabels??{}),[mapped]:typed}});
-      }
-      setNewAreaText('');setError('');
-     }}>+ Add area</button>
-    </div>
-    <small className="us-info">Your names are displayed in this template. Existing project stage links are preserved automatically.</small>
-   </div>}
    <p className="us-info">These steps will be copied into new quotations. Edit the sequence here once;
     modify a quotation separately for any particular project.</p>
-   {steps.length? <div className="us-payment-step-list">{steps.map((item,position)=>
+   {steps.length>8&&<button className="us-payment-step-expand" type="button"
+    onClick={()=>setShowAll(value=>!value)}>
+    {showAll?'Show fewer items':'Show all '+steps.length+' included steps'}
+   </button>}
+   {steps.length? <div className="us-payment-step-list">{steps.slice(0,showAll?undefined:8).map((item,position)=>
     <div key={position} className="us-payment-step">
-     <small>{position+1}. {labels[item.kind]} · {areaName(item.area)}</small>
+     <small>{position+1}. {labels[item.kind]}</small>
      <div className="us-payment-step-edit">
       {canEdit&&item.kind!=='qc'?<input aria-label={'Edit '+labels[item.kind]+' '+(position+1)}
        value={item.name} maxLength={180}
@@ -191,17 +152,11 @@ function DefaultPaymentStage({row,index,canEdit,onChange,onRemove}:{
       <option value="qc">Company QC</option>
      </select>
     </label>
-    <label>Work area
-     <input type="text" maxLength={80} aria-label="Type default step work area"
-      value={areaText} onChange={event=>setAreaText(event.target.value)}
-      placeholder="e.g. Foundation, Site marking, Design"/>
-     <small>Linked internally to {prettify(typedArea)}</small>
-    </label>
     {kind==='qc'?<label>QC for which earlier site check/test?
      <select value={current?link(current):''} onChange={e=>setCheckRef(e.target.value)}
       aria-label="QC linked site check">
-      {available.length===0&&<option value="">Add site check first</option>}
-      {available.map(step=><option key={link(step)} value={link(step)}>{step.name}</option>)}
+      {prior.length===0&&<option value="">Add site check first</option>}
+      {prior.map(step=><option key={link(step)} value={link(step)}>{step.name}</option>)}
      </select>
     </label>:
      <label>Item name
