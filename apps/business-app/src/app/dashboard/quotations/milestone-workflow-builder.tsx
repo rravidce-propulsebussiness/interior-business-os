@@ -28,7 +28,7 @@ const belongs=(step:QuotationMilestoneStep)=>step.kind==='work'?'work':
  step.kind==='material'?'materials':'checks';
 const minLength=(kind:Kind)=>isCheck(kind as QuotationMilestoneStep['kind'])?3:2;
 
-export function MilestoneWorkflowBuilder({paymentIndex,paymentName,steps,codes,allCodes,plannedCodes,plannedWorkCodes,requirements,
+export function MilestoneWorkflowBuilder({paymentIndex,paymentName,steps,codes,allCodes,plannedWorkCodes,requirements,
  editable,onChange,onAddPayment,onLinkStage}:Props){
  const [after,setAfter]=useState<number|null>(null);
  const [editing,setEditing]=useState<number|null>(null);
