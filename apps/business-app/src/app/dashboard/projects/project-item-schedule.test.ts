@@ -14,6 +14,8 @@ describe('Existing project stage item dates, no second execution system',()=>{
   expect(view).toContain('kind="material"');
   expect(view).toContain('kind="qc"');
   expect(view).toContain("step.kind==='test'?'test':'check'");
+  expect(view).toContain('scheduleKind={kind}');
+  expect(read('./project-stage-checklist-item.tsx')).toContain('kind={scheduleKind??kind}');
   expect(view).toContain('Upcoming planned work');
   expect(view).toContain('canPlan={canPlan&&!complete}');
   expect(component).toContain('Planned start');
