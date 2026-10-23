@@ -2,6 +2,7 @@ import { expect, it } from 'vitest';
 import { renderQuotationDocument } from './quotation-document';
 import { encodeStagePaymentLinks } from './quotation-payment-plan';
 import { defaultStageRequirements,encodeStageRequirements,mergeStageRequirementOverrides } from './quotation-stage-requirements';
+import { encodeMilestoneFlow } from './quotation-milestone-flow';
 import { quotationDocumentFixture } from './quotation-document.fixture';
 import { calculateSftEstimate, encodeSftEstimate } from './sft-quotation';
 it('escapes customer text and excludes all unlisted/internal payload fields', () => {
@@ -472,4 +473,30 @@ it('shows customer-approved custom stage work, materials, tests and reports by a
  expect(html).toContain('RCC · GROUND FLOOR');
  expect(html).not.toContain('[STAGE_CUSTOM_REQUIREMENTS]');
  expect(html).not.toContain('"stages":{"RCC/GROUND_FLOOR"');
+});
+
+
+it('prints priced execution steps once under the matching payment stage without leaking workflow JSON',()=>{
+ const d=quotationDocumentFixture();
+ const stage={...defaultStageRequirements('DESIGN'),
+  work:['Architectural floor plan','Structural drawing'],
+  materials:['Approved plan drawing sheets'],
+  checks:['Verify layout and dimensions']};
+ d.terms='[STAGE_PAYMENT_PLAN]\nDesign Fee|100.00\n[/STAGE_PAYMENT_PLAN]\n'+
+  encodeStageRequirements({DESIGN:stage})+'\n'+
+  encodeMilestoneFlow({'0':[
+   {kind:'work',code:'DESIGN',index:0},
+   {kind:'work',code:'DESIGN',index:1},
+   {kind:'material',code:'DESIGN',index:0},
+   {kind:'check',code:'DESIGN',index:0},
+   {kind:'qc',code:'DESIGN',index:0},
+  ]});
+ const html=renderQuotationDocument(d);
+ expect(html).toContain('Design Fee');
+ expect(html).toContain('Work, material &amp; inspection order');
+ expect(html).toContain('Architectural floor plan');
+ expect(html).toContain('Approved plan drawing sheets');
+ expect(html).toContain('Company QC');
+ expect(html).not.toContain('[QUOTATION_MILESTONE_FLOW]');
+ expect(html).not.toContain('"version":1');
 });
