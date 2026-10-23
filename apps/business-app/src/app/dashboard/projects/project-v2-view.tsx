@@ -393,7 +393,7 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
  const allowChecks=site?.stage==='execution'&&
   (site.canManage||['manager','project_manager','quality_inspector','site_engineer'].includes(site.role));
  const canPlan=Boolean(site?.canManage||['manager','project_manager','site_engineer','supervisor'].includes(site?.role??''));
- const planningMode:'full'|'daily'=(['site_engineer','supervisor','site_supervisor'].includes(site?.role??'')&&!d.permissions.manage)?'daily':'full';
+ const planningMode:'full'|'daily'=(['site_engineer','supervisor','site_supervisor'].includes(site?.role??''))?'daily':'full';
  const planFor=(stageId:string,kind:'work'|'material'|'check'|'test'|'qc',i:number)=>
   d.itemPlans.find(x=>x.stageId===stageId&&x.kind===kind&&x.index===i);
  const todayInIndia=new Intl.DateTimeFormat('en-CA',{
