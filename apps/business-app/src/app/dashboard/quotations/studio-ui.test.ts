@@ -859,3 +859,26 @@ describe('quotation stage requirements inline editing', () => {
   expect(schedule).toContain('encodeStageRequirements(visibleRequirements)');
  });
 });
+
+
+describe('Payment Settings keeps work-area entry textual and removes unrelated shortcuts',()=>{
+ const paymentSettings=file('../settings/page.tsx');
+ const stageEditor=file('../settings/construction-payment-defaults.tsx');
+ it('does not display extra bank-details, payment-method, or invoice navigation in Payment Settings',()=>{
+  const section=paymentSettings.split("{tab==='payments'&&")[1]?.split("{tab==='team'&&")[0]??'';
+  expect(section).not.toContain("Edit company bank details");
+  expect(section).not.toContain("Payment methods',href:");
+  expect(section).not.toContain("Invoices & stage collections");
+ });
+ it('edits construction work-area names using text fields, not technical dropdowns',()=>{
+  expect(stageEditor).toContain('aria-label="Type construction work area name"');
+  expect(stageEditor).toContain('aria-label="Type default step work area"');
+  expect(stageEditor).toContain('Rename construction work area');
+  expect(stageEditor).not.toContain('Default step construction area"');
+  expect(stageEditor).not.toContain('<option value="">+ Add construction work area</option>');
+ });
+ it('does not double number the work items',()=>{
+  expect(stageEditor).toContain('<div className="us-payment-step-list">');
+  expect(stageEditor).not.toContain('<ol className="us-payment-step-list">');
+ });
+});
