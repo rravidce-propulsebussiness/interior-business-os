@@ -45,13 +45,13 @@ if v_existing.status is distinct from 'ready_for_qc'
                 and lower(trim(sc.title))=lower(trim(v_stage.inspection_topics->>(
                   before.value->>'index')::integer))
                 and sc.status='passed')
-            when before.value->>'kind'='qc' then (
+            when before.value->>'kind'='qc' then coalesce((
               select review.decision='passed'
               from private.construction_stage_qc_item_reviews review
               where review.organization_id=p_org and review.project_id=p_project
                 and review.stage_id=p_stage
                 and review.check_index=(before.value->>'index')::integer
-              order by review.reviewed_at desc,review.id desc limit 1)
+              order by review.reviewed_at desc,review.id desc limit 1),false)
             else false
           end
         )
