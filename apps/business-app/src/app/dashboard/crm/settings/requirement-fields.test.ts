@@ -8,16 +8,27 @@ describe('Premium Requirement Fields reuse single CRM configuration',()=>{
  const workspace=read('./requirement-fields-workspace.tsx');
  const lead=read('../leads/quick-add-lead.tsx');
  const action=read('../leads/quick-add-action.ts');
- it('replaces requirement list on same route while preserving other three configuration pages',()=>{
-  expect(page).toContain("if (entity === 'crm_requirement_fields')");
-  expect(page).toContain('<RequirementFieldsWorkspace');
-  for(const name of ['lead_sources','crm_pipeline_stages','crm_lost_reasons'])
-   expect(page).toContain("'"+name+"'");
-  expect(page).toContain('<MasterForm');
-  expect(page).toContain('canManage={s.allowed');
+ it('keeps one canonical Lead Requirement Fields screen under Main Settings',()=>{
+  const settings=read('../../settings/page.tsx');
+  const sidebar=read('../../owner-workspace-navigation.ts');
+  const leadsNav=read('../../leads-navigation.ts');
+  expect(settings).toContain("tab==='lead-fields'&&leadFieldsContent");
+  expect(settings).toContain('<RequirementFieldsWorkspace');
+  expect(settings).toContain("href:'/dashboard/settings?tab=lead-fields'");
+  expect(settings).toContain("crm.crm.search('crm_requirement_fields'");
+  expect(settings).toContain("canManage={crm.allowed('crm.pipeline.manage')}");
+  expect(page).toContain("redirect('/dashboard/settings?tab=lead-fields')");
+  expect(page).toContain("redirect('/dashboard/crm/leads')");
+  expect(page).not.toContain('MasterForm');
+  expect(sidebar).not.toContain('Lead Settings');
+  expect(sidebar).not.toContain("href:'/dashboard/crm/settings'");
+  expect(leadsNav).not.toContain('Lead Settings');
+  expect(workspace).not.toContain('crf-nav');
+  for(const hidden of ['lead_sources','crm_pipeline_stages','crm_lost_reasons'])
+   expect(workspace).not.toContain(hidden);
  });
  it('renders mockup library and actual field editor with one persistence action',()=>{
-  for(const text of ['Requirement Fields','Search fields','Construction','Interiors',
+  for(const text of ['Lead Requirement Fields','Search fields','Construction','Interiors',
     'Add Field','New Requirement Field','Question label','Stable key',
     'Answer type','Select (Dropdown)','Required field','Active field',
     'Display order','Lead form preview','Save Field'])
@@ -26,6 +37,15 @@ describe('Premium Requirement Fields reuse single CRM configuration',()=>{
   expect(workspace).toContain('router.refresh()');
   expect(workspace).not.toContain('deleteCrm');
   expect(workspace).toContain("disabled={Boolean(draft.id)}");
+  expect(workspace).toContain('className="crf-layout"');
+  expect(workspace).toContain('className="crf-sidepanel"');
+  expect(workspace).toContain('className="crf-add crf-add-top"');
+  expect(workspace).toContain("window.matchMedia('(min-width: 921px)')");
+  const css=read('./requirement-fields.css');
+  expect(css).toContain('grid-template-columns:minmax(0,1fr) minmax(340px,390px)');
+  expect(css).toContain('.crf-mobile-scrim');
+  expect(css).not.toContain('.crf-nav');
+  expect(workspace).not.toContain('href="/dashboard/crm/leads"');
  });
  it('uses same fields in original Add Lead form and validates on the server',()=>{
   expect(lead).toContain('quickRequirementFields(requirementFields,service)');
