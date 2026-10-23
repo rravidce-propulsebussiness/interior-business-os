@@ -32,7 +32,7 @@ function DefaultPaymentStage({row,index,canEdit,onChange,onRemove}:{
  const areaName=(code:string)=>companyWorkAreaLabel(row,code);
  const typedTarget=areas.find(code=>areaName(code).toLowerCase()===areaText.trim().toLowerCase())
   ??inferCompanyWorkAreaCode(areaText)??chosenArea;
- const typedArea=areas.includes(typedTarget)?typedTarget:chosenArea;
+ const typedArea=typedTarget;
  const prior=steps.slice(0,after===null?steps.length:after+1).filter(isCheck);
  const available=prior.filter(x=>x.area===typedArea);
  const current=checkRef?available.find(x=>link(x)===checkRef):available.at(-1);
@@ -47,6 +47,9 @@ function DefaultPaymentStage({row,index,canEdit,onChange,onRemove}:{
   const labelText=areaText.trim().replace(/\s+/g,' ');
   if(labelText.length<2||labelText.length>80){
    setError('Type a work-area name (2–80 characters).');return;
+  }
+  if(!areas.includes(typedArea)){
+   setError('Add this construction work area above first so it stays linked to the correct project stage.');return;
   }
   const title=kind==='qc'?current?.name:name.trim().replace(/\s+/g,' ');
   if(!title||title.length<2||title.length>180){setError('Enter a work/check name or select an earlier check for QC.');return;}
@@ -140,9 +143,9 @@ function DefaultPaymentStage({row,index,canEdit,onChange,onRemove}:{
      <button type="button" onClick={()=>{
       const typed=newAreaText.trim().replace(/\s+/g,' ');
       if(typed.length<2){setError('Enter the new work-area name.');return;}
-      const mapped=inferCompanyWorkAreaCode(typed);
+      const mapped=inferCompanyWorkAreaCode(typed)??(areas.length===1?areas[0]:null);
       if(!mapped){
-       setError('Include the construction type in the name, such as Design, Site marking, Foundation, RCC or Plumbing, to link it to the correct project stage.');
+       setError('Include a construction type in the name (Foundation, Design, RCC, etc.) so it links to the correct project stage, or rename an existing work area above.');
        return;
       }
       if(areas.includes(mapped)){
@@ -159,8 +162,8 @@ function DefaultPaymentStage({row,index,canEdit,onChange,onRemove}:{
    </div>}
    <p className="us-info">These steps will be copied into new quotations. Edit the sequence here once;
     modify a quotation separately for any particular project.</p>
-   {steps.length? <ol className="us-payment-step-list">{steps.map((item,position)=>
-    <li key={position} className="us-payment-step">
+   {steps.length? <div className="us-payment-step-list">{steps.map((item,position)=>
+    <div key={position} className="us-payment-step">
      <small>{position+1}. {labels[item.kind]} · {areaName(item.area)}</small>
      <div className="us-payment-step-edit">
       {canEdit&&item.kind!=='qc'?<input aria-label={'Edit '+labels[item.kind]+' '+(position+1)}
@@ -176,7 +179,7 @@ function DefaultPaymentStage({row,index,canEdit,onChange,onRemove}:{
        <button type="button" onClick={()=>removeStep(position)}>Delete</button>
       </div>}
      </div>
-    </li>)}</ol>:<p className="us-info">No steps yet. Add work in the order it should happen on site.</p>}
+    </div>)}</div>:<p className="us-info">No steps yet. Add work in the order it should happen on site.</p>}
    {canEdit&&<button type="button" className="us-payment-add-work"
      onClick={()=>add(steps.length-1)}>+ Add work, material or check</button>}
    {canEdit&&after!==null&&<div className="us-payment-step-form">
