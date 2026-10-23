@@ -134,3 +134,10 @@
  .us-payment-step-actions{width:100%}
  .us-payment-step-actions button{flex:1 1 45px}
 }
+
+.us-payment-work-areas{display:grid;gap:8px;margin:12px 0;padding:10px;border:1px dashed #e9d3c3;border-radius:9px;background:#fff}
+.us-payment-work-areas>small{font-size:11px;color:#64748b;font-weight:750}
+.us-payment-area-tags{display:flex;flex-wrap:wrap;gap:6px}
+.us-payment-area-tags>span{display:inline-flex;align-items:center;gap:5px;border-radius:7px;background:#fff0e4;border:1px solid #e8c9b4;color:#a25424;padding:4px 7px;font-size:10px;font-weight:750}
+.us-payment-area-tags button{border:none;background:transparent;color:#af4823;font-size:15px;cursor:pointer}
+.us-payment-work-areas>select{padding:8px;min-height:38px;border:1px solid #e8d6c9;border-radius:8px;background:#fff;color:#344356;font-size:11px}
