@@ -4,6 +4,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { OwnerIcon, type OwnerIconName } from '../../owner-shell';
 import { QuickAddLead } from './quick-add-lead';
+import type {QuickRequirementField} from '../requirement-fields';
 import { LeadRemovalButton } from './lead-removal-button';
 import { LeadStageSelect, LeadPrioritySelect, LeadFollowUpSetter } from './lead-inline-controls';
 import { LeadQuotePreview } from './lead-quote-preview';
@@ -206,6 +207,7 @@ export function LeadsWorkspace({
   stages,
   sources,
   services,
+  requirementFields,
   assignees,
   branches,
   params,
@@ -244,6 +246,7 @@ export function LeadsWorkspace({
   stages: LeadStage[];
   sources: LeadOption[];
   services: LeadServiceOption[];
+  requirementFields: QuickRequirementField[];
   assignees: LeadOption[];
   branches: LeadOption[];
   lostReasons: LeadOption[];
@@ -388,6 +391,7 @@ export function LeadsWorkspace({
           <QuickAddLead
             canConfigureCrm={canConfigureCrm}
             services={services}
+            requirementFields={requirementFields}
             sources={sources.filter(
               (source) => !/propulse/i.test(source.label),
             )}
