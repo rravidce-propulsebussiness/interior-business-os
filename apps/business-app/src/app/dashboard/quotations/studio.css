@@ -2142,3 +2142,8 @@ border-radius:7px;padding:5px 8px;font-size:10px;font-weight:800;cursor:pointer}
  .qs-one-flow-controls button{min-width:46px;flex:0 1 auto}
  .qs-one-flow-controls button:last-child{flex:1 1 80px}
 }
+
+.qs-one-flow-area-picker{margin:8px 0;border:1px solid #f0e5dc;background:#fff;border-radius:9px;padding:8px 10px}
+.qs-one-flow-area-picker summary{cursor:pointer;color:#91532d;font-size:11px;font-weight:780}
+.qs-one-flow-area-picker p,.qs-one-flow-area-picker small{font-size:10px;line-height:1.45;color:#718095;display:block;margin:8px 0}
+.qs-one-flow-area-picker select{width:100%;min-height:39px;border:1px solid #e1d5ca;background:#fff;border-radius:8px;padding:7px;color:#314155;font-size:11px}
