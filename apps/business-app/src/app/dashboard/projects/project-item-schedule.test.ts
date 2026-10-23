@@ -1,5 +1,6 @@
 import {describe,it,expect} from 'vitest';
 import {readFileSync} from 'node:fs';
+import {forecastWork} from './project-work-forecast';
 const read=(name:string)=>readFileSync(new URL(name,import.meta.url),'utf8');
 const component=read('./project-item-schedule.tsx');
 const view=read('./project-v2-view.tsx');
@@ -44,5 +45,57 @@ describe('Existing project stage item dates, no second execution system',()=>{
   expect(data).toContain('itemPlans:parseStageItemPlans(scheduleResult.error?null:scheduleResult.data)');
   expect(migration).toContain('project_stage_item_schedule_history');
   expect(migration).toContain("auth.uid() is null");
+ });
+});
+
+describe('Automatic project work forecast and owner/engineer schedule boundaries',()=>{
+ const limits=read('../../../../../../packages/database/supabase/migrations/20261023223500_project_stage_site_engineer_daily_plan.sql');
+ it('enforces today/tomorrow planning on the server for site engineers while managers plan future work',()=>{
+  expect(limits).toContain("v_full_planner=coalesce(private.construction_can_manage(p_org,p_project),false)");
+  expect(limits).toContain("v_today=(now() at time zone 'Asia/Kolkata')::date");
+  expect(limits).toContain("p_start<v_today or p_finish>v_today+1");
+  expect(limits).toContain("p_kind not in ('work','check','test','qc','material')");
+  expect(limits).toContain('v_existing.version');
+  expect(component).toContain("planningMode==='daily'");
+  expect(component).toContain('min={minimum} max={maximum}');
+  expect(view).toContain('planningMode={planningMode} today={todayInIndia}');
+ });
+ it('calculates actual physical work completion and detects late items without approving QC',()=>{
+  const stages=[{id:'f',activities:['Mark','Excavate','PCC','Footing']}];
+  const plans=[
+   {stageId:'f',kind:'work',index:0,plannedStart:'2026-10-20',plannedFinish:'2026-10-21'},
+   {stageId:'f',kind:'work',index:1,plannedStart:'2026-10-21',plannedFinish:'2026-10-22'},
+   {stageId:'f',kind:'work',index:2,plannedStart:'2026-10-22',plannedFinish:'2026-10-24'},
+   {stageId:'f',kind:'work',index:3,plannedStart:'2026-10-23',plannedFinish:'2026-10-26'},
+  ];
+  const result=forecastWork(stages,plans,[{stage_id:'f',index:0,status:'completed'}],'2026-10-23');
+  expect(result).toMatchObject({completed:1,total:4,progressPct:25,scheduled:4,
+   scheduledCompleted:1,due:2,late:1,pace:'delayed',originalFinish:'2026-10-26'});
+  expect(result.forecastFinish).toBe('2026-11-03');
+  expect(view).toContain('Recorded physical work');
+  expect(view).toContain('Indicative finish at current recorded pace');
+ });
+ it('shows ahead of plan for work completed before its planned finish',()=>{
+  const stages=[{id:'a',activities:['Site marking','Excavation']}];
+  const plans=[
+   {stageId:'a',kind:'work',index:0,plannedStart:'2026-10-23',plannedFinish:'2026-10-26'},
+   {stageId:'a',kind:'work',index:1,plannedStart:'2026-10-24',plannedFinish:'2026-10-27'},
+  ];
+  const result=forecastWork(stages,plans,[{stage_id:'a',index:0,status:'completed'}],'2026-10-23');
+  expect(result).toMatchObject({progressPct:50,early:1,late:0,pace:'ahead'});
+  const allDone=forecastWork(stages,plans,[
+   {stage_id:'a',index:0,status:'completed'},
+   {stage_id:'a',index:1,status:'completed'},
+  ],'2026-10-25');
+  expect(allDone.pace).toBe('completed');
+  expect(allDone.progressPct).toBe(100);
+ });
+ it('never treats a material, test, QC or payment as physical work completed',()=>{
+  const result=forecastWork([{id:'stage',activities:['Footing']}],[
+   {stageId:'stage',kind:'material',index:0,plannedStart:'2026-10-23',plannedFinish:'2026-10-23'},
+   {stageId:'stage',kind:'qc',index:0,plannedStart:'2026-10-23',plannedFinish:'2026-10-23'},
+  ],[{stage_id:'stage',index:0,status:'passed'}],'2026-10-23');
+  expect(result).toMatchObject({completed:0,total:1,progressPct:0,scheduled:0,pace:'not_planned'});
+  expect(read('./project-work-forecast.ts')).not.toContain('update ');
  });
 });

@@ -1185,3 +1185,11 @@
 .pv2-item-schedule-form .pv2-button{max-width:200px}
 @media(max-width:900px){.pv2-planned-overview-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:530px){.pv2-planned-overview-grid{grid-template-columns:1fr}.pv2-item-schedule-dates{grid-template-columns:1fr}.pv2-planned-overview-head{align-items:flex-start}.pv2-item-schedule{padding:9px}}
+
+/* Live site progress derived from the canonical project work checklist. */
+.pv2-work-forecast{display:flex;flex-wrap:wrap;align-items:center;gap:8px 13px;border:1px solid #f0d8c8;background:#fffaf6;padding:12px 14px;border-radius:12px;margin-bottom:13px;color:#304057}
+.pv2-work-forecast>strong{font-size:14px;font-weight:850;color:#223149}
+.pv2-work-forecast>small,.pv2-work-forecast>span{font-size:11px;color:#64748b;line-height:1.5}
+.pv2-work-forecast>span{border-radius:8px;padding:6px 9px;background:#fdf0e4;color:#9c4d22}
+.pv2-work-forecast>p{flex:1 0 100%;font-size:10px;color:#8792a4;margin:0;line-height:1.5}
+@media(max-width:540px){.pv2-work-forecast{align-items:flex-start;gap:8px;flex-direction:column}.pv2-work-forecast>p{flex-basis:auto}}
