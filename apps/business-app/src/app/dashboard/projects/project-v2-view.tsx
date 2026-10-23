@@ -432,6 +432,55 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
         'work_recorded':visualStatus;
       const photos=(site?.media??[]).filter(x=>stringValue(x.mime).startsWith('image/'))
        .map(x=>({id:x.id,filename:stringValue(x.filename)}));
+
+      // The accepted quotation can interleave real work items, site checks,
+      // tests, and a separately evidenced QC visit without cloning records.
+      const orderedFlow=(customGuidance?.flow??[]).filter(step=>
+       step.kind==='work'?Boolean(stage.activities[step.index]):
+       Boolean(stage.inspectionTopics[step.index]));
+      const qcPlaced=new Set(orderedFlow.filter(x=>x.kind==='qc').map(x=>x.index));
+      const remainingQc=stage.inspectionTopics.map((name,i)=>({name,i}))
+       .filter(item=>!qcPlaced.has(item.i));
+      const checkRecords=stageChecks.map(check=>({
+       title:stringValue(check.title),photoId:stringValue(check.photo_id),status:stringValue(check.status),
+      }));
+      const renderCheckItem=(name:string,i:number)=>{
+       const existing=stageChecks.find(x=>stringValue(x.title).toLowerCase()===name.toLowerCase())??
+        (site?.checks??[]).find(x=>stringValue(x.title).toLowerCase()===name.toLowerCase());
+       return <StageChecklistItem key={'site-check-'+i} projectId={d.project.id} stageId={stage.id}
+        kind="check" index={i} title={name} status={stringValue(existing?.status)||'pending'}
+        notes={stringValue(existing?.notes)} photoId={stringValue(existing?.photo_id)}
+        photos={photos} canEdit={checksAllowed&&!complete}/>;
+      };
+      const renderWorkItem=(work:string,i:number)=>{
+
+           const record=stageWork.find(x=>Number(x.index)===i);
+           const workMaterials=stageMaterials.filter(m=>stringValue(m.activity_index)===String(i));
+           const requiredSuggestions=suggestedActivityMaterials(work,suggestedMaterials);
+           const requestOptions=[...new Set([...requiredSuggestions,...suggestedMaterials])];
+           const materialPanel=(allowMaterials||workMaterials.length>0)?<div className="pv2-activity-material-content">
+              <div className="pv2-activity-material-required">
+               <h5>Materials required for this work</h5>
+               {requiredSuggestions.length>0?<ul>
+                {requiredSuggestions.map(material=><li key={material}>{material}</li>)}
+               </ul>:<p>Materials for this activity are not pre-defined. Choose applicable items from the stage catalogue or add your own.</p>}
+               <small>Suggested materials only. Confirm approved brands, sizes and quantities against the quotation/BOQ before requesting.</small>
+              </div>
+              {workMaterials.length>0&&<StageMaterialRows d={d} rows={workMaterials}/>}
+              {allowMaterials&&<details className="pv2-stage-material-entry">
+               <summary>+ Request materials for this work item</summary>
+               <MaterialRequestForm id={d.project.id} stageId={stage.id}
+                activityIndex={i} activityLabel={work} suggestions={requestOptions}/>
+              </details>}
+              {!workMaterials.length&&!allowMaterials&&<p className="pv2-hint">No material requests yet.</p>}
+             </div>:undefined;
+           return <StageChecklistItem key={i} projectId={d.project.id} stageId={stage.id}
+             kind="work" index={i} title={work} status={stringValue(record?.status)||'pending'}
+             notes={stringValue(record?.notes)} photoId={stringValue(record?.photo_id)}
+             photos={photos} canEdit={workAllowed&&!complete}
+             checksHref={'#pv2-stage-checks-'+stage.id} materialPanel={materialPanel}/>;
+          
+      };
       const availableRecords:StageLinkOption[]=[
        ...(site?.reports??[]).map(x=>({kind:'report' as const,id:x.id,title:shortDate(x.report_date)+' — '+stringValue(x.completed_work)})),
        ...(site?.materials??[]).map(x=>({kind:'material' as const,id:x.id,title:stringValue(x.item)})),
@@ -465,7 +514,7 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
          <summary><span>Site checks & company QC</span><strong>{passed}/{checks.length} checks passed</strong></summary>
          <div className="pv2-stage-quality-inner">
         {!!checks.length&&<div className="pv2-stage-task-group">
-         <BulkStageChecks projectId={d.project.id} stageId={stage.id} photos={photos}
+         {orderedFlow.length===0&&<BulkStageChecks projectId={d.project.id} stageId={stage.id} photos={photos}
           canEdit={checksAllowed&&!complete} workCompleted={finishedActivities}
           workTotal={stage.activities.length} stageStatus={stageExecution?.status??'not_started'}
           checks={checks.map((title,index)=>{
@@ -473,7 +522,7 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
             (site?.checks??[]).find(x=>stringValue(x.title).toLowerCase()===title.toLowerCase());
            return {index,title,status:stringValue(record?.status)||'pending',
             photoId:stringValue(record?.photo_id),notes:stringValue(record?.notes)};
-          })}/>
+          })}/>}
          <h4>Site checks & tests <small>{passed}/{checks.length} passed</small></h4>
          {stageExecution?.status==='ready_for_qc'&&
           <p className="pv2-stage-ready-note">
@@ -488,7 +537,7 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
            above to unlock the next eligible stage.
           </p>}
          <p className="pv2-hint">Complete checks one by one, with photo evidence. A passed site check must still be reviewed by the assigned company QC inspector when the stage is submitted.</p>
-         <details className="pv2-single-checks">
+         {orderedFlow.length===0&&<details className="pv2-single-checks">
           <summary>Review / edit individual checks</summary>
          <div className="pv2-stage-task-entries">
           {checks.map((name,i)=>{
@@ -499,22 +548,21 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
              notes={stringValue(existing?.notes)} photoId={stringValue(existing?.photo_id)}
              photos={photos} canEdit={checksAllowed&&!complete}/>;
           })}
-         </div></details>
+         </div></details>}
         </div>}
 
         {physicalStage&&
           (stageExecution?.status==='ready_for_qc'||
            d.stageQc.records.some(review=>review.stage_id===stage.id))&&
           <StageOnsiteQcReview projectId={d.project.id} stageId={stage.id}
-           stageName={stage.title} topics={stage.inspectionTopics}
+           stageName={stage.title} topics={remainingQc.map(item=>item.name)}
+           topicIndices={remainingQc.map(item=>item.i)}
            stageStatus={stageExecution?.status??'not_started'}
            canReview={d.stageQc.canReview} isOwner={d.stageQc.isOwner} canManage={site?.canManage===true}
            inspectorAssigned={d.stageQc.inspectorAssigned}
            records={d.stageQc.records.filter(review=>review.stage_id===stage.id)}
            photos={photos}
-           existingChecks={stageChecks.map(check=>({
-            title:stringValue(check.title),photoId:stringValue(check.photo_id)
-           }))}/>}
+           existingChecks={checkRecords}/>}
 
         {!!plannedReports.length&&<details className="pv2-stage-secondary">
           <summary>Evidence & reports to collect ({plannedReports.length})</summary>
@@ -525,36 +573,33 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
          </div>
         </details>}
         {!!stage.activities.length&&<div className="pv2-stage-task-group">
-         <h4>Work checklist <small>{finishedActivities}/{stage.activities.length} completed</small></h4>
-         <p className="pv2-hint">Open any work item to record progress/photos, request materials, or view existing orders. The stage checklist is shared once below its heading.</p>
+         <h4>{orderedFlow.length?'Work & inspections in execution order':'Work checklist'} <small>{finishedActivities}/{stage.activities.length} work completed</small></h4>
+         <p className="pv2-hint">{orderedFlow.length?'Follow the quoted order. Site checks and tests use actual photo evidence; company QC is a separate on-site pass/fail, not an automatic tick.':'Open any work item to record progress/photos, request materials, or view existing orders.'}</p>
          <div className="pv2-stage-task-entries">
-          {stage.activities.map((work,i)=>{
-           const record=stageWork.find(x=>Number(x.index)===i);
-           const workMaterials=stageMaterials.filter(m=>stringValue(m.activity_index)===String(i));
-           const requiredSuggestions=suggestedActivityMaterials(work,suggestedMaterials);
-           const requestOptions=[...new Set([...requiredSuggestions,...suggestedMaterials])];
-           const materialPanel=(allowMaterials||workMaterials.length>0)?<div className="pv2-activity-material-content">
-              <div className="pv2-activity-material-required">
-               <h5>Materials required for this work</h5>
-               {requiredSuggestions.length>0?<ul>
-                {requiredSuggestions.map(material=><li key={material}>{material}</li>)}
-               </ul>:<p>Materials for this activity are not pre-defined. Choose applicable items from the stage catalogue or add your own.</p>}
-               <small>Suggested materials only. Confirm approved brands, sizes and quantities against the quotation/BOQ before requesting.</small>
-              </div>
-              {workMaterials.length>0&&<StageMaterialRows d={d} rows={workMaterials}/>}
-              {allowMaterials&&<details className="pv2-stage-material-entry">
-               <summary>+ Request materials for this work item</summary>
-               <MaterialRequestForm id={d.project.id} stageId={stage.id}
-                activityIndex={i} activityLabel={work} suggestions={requestOptions}/>
-              </details>}
-              {!workMaterials.length&&!allowMaterials&&<p className="pv2-hint">No material requests yet.</p>}
-             </div>:undefined;
-           return <StageChecklistItem key={i} projectId={d.project.id} stageId={stage.id}
-             kind="work" index={i} title={work} status={stringValue(record?.status)||'pending'}
-             notes={stringValue(record?.notes)} photoId={stringValue(record?.photo_id)}
-             photos={photos} canEdit={workAllowed&&!complete}
-             checksHref={'#pv2-stage-checks-'+stage.id} materialPanel={materialPanel}/>;
-          })}
+          {orderedFlow.length>0?orderedFlow.map((step,position)=>{
+           if(step.kind==='work'){
+            const work=stage.activities[step.index];
+            return work?<div key={'flow-'+position} className="pv2-flow-step">
+             <span className="pv2-flow-step-number">{position+1} · Work</span>
+             {renderWorkItem(work,step.index)}</div>:null;
+           }
+           const title=stage.inspectionTopics[step.index];
+           if(!title)return null;
+           if(step.kind==='qc')return <div key={'flow-'+position} className="pv2-flow-step">
+            <span className="pv2-flow-step-number">{position+1} · Company QC</span>
+            <StageOnsiteQcReview projectId={d.project.id} stageId={stage.id}
+             stageName={title} topics={[title]} topicIndices={[step.index]} earlyQc
+             stageStatus={stageExecution?.status??'not_started'}
+             canReview={d.stageQc.canReview} isOwner={d.stageQc.isOwner} canManage={site?.canManage===true}
+             inspectorAssigned={d.stageQc.inspectorAssigned}
+             records={d.stageQc.records.filter(review=>review.stage_id===stage.id)}
+             photos={photos} existingChecks={checkRecords}/>
+           </div>;
+           return <div key={'flow-'+position} className="pv2-flow-step">
+            <span className="pv2-flow-step-number">{position+1} · {step.kind==='test'?'Test':'Site check'}</span>
+            {renderCheckItem(title,step.index)}
+           </div>;
+          }):stage.activities.map((work,i)=>renderWorkItem(work,i))}
          </div>
         </div>}
         {payment.length>0&&d.permissions.finance&&<div className="pv2-command-payments">
