@@ -1160,3 +1160,28 @@
 .pv2-stage-payment-start p{margin:0;font-size:12px}
 .pv2-stage-payment-start>a{width:fit-content;min-height:36px;display:inline-flex;align-items:center;border:1px solid #efbd9c;background:#fff2e8;padding:8px 12px;border-radius:8px;color:#a44e1b;font-size:11px;font-weight:800}
 @media(max-width:640px){.pv2-stage-payment-start{padding:11px}.pv2-stage-payment-start>a{width:100%;justify-content:center}}
+
+
+/* Dates live on the existing stage checklist, not a separate task module. */
+.pv2-planned-overview{border:1px solid #f0ddcb;background:#fffcf9;padding:13px;border-radius:15px;margin:14px 0 16px}
+.pv2-planned-overview-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:7px;margin-bottom:10px}
+.pv2-planned-overview-head strong{font-size:14px;font-weight:850;color:#24334b}
+.pv2-planned-overview-head small{color:#728198;font-size:11px}
+.pv2-planned-overview-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.pv2-planned-upcoming{display:grid;gap:5px;border:1px solid #efdfd2;background:#fff;border-radius:11px;padding:10px;min-width:0}
+.pv2-planned-upcoming>span{font-size:11px;font-weight:850;color:#be591f}
+.pv2-planned-upcoming>strong{font-size:12px;line-height:1.4;color:#2d3950;overflow-wrap:anywhere}
+.pv2-planned-upcoming>small{font-size:10px;color:#718099;line-height:1.4}
+.pv2-item-schedule{background:#fbfcfe;border:1px solid #e8ecf3;border-radius:12px;padding:10px;margin:8px 0 12px;min-width:0}
+.pv2-item-schedule-current{display:flex;align-items:center;flex-wrap:wrap;gap:7px;font-size:11px;color:#627590}
+.pv2-item-schedule-current>span:first-child{font-size:17px;color:#f96a1e}
+.pv2-item-schedule-current>span:nth-child(2){flex:1;min-width:105px;line-height:1.4}
+.pv2-item-schedule-toggle{padding:7px 12px;border:1px solid #f4c9ad;border-radius:9px;background:#fff5ec;color:#b95418;font-size:11px;font-weight:850;min-height:34px;cursor:pointer}
+.pv2-item-schedule-toggle:hover{background:#ffeade}
+.pv2-item-schedule-form{display:grid;gap:10px;margin-top:11px;padding-top:12px;border-top:1px solid #e6e8ed}
+.pv2-item-schedule-dates{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.pv2-item-schedule-form label{display:grid;gap:5px;font-size:11px;font-weight:800;color:#4a5970;min-width:0}
+.pv2-item-schedule-form input{background:#fff;color:#263b52;border:1px solid #dce2eb;border-radius:9px;width:100%;min-width:0;min-height:41px;padding:8px;font:inherit;font-size:12px}
+.pv2-item-schedule-form .pv2-button{max-width:200px}
+@media(max-width:900px){.pv2-planned-overview-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:530px){.pv2-planned-overview-grid{grid-template-columns:1fr}.pv2-item-schedule-dates{grid-template-columns:1fr}.pv2-planned-overview-head{align-items:flex-start}.pv2-item-schedule{padding:9px}}

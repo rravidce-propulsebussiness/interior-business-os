@@ -12186,6 +12186,25 @@ export interface Database {
         Args: { p_org: string; p_project: string };
         Returns: Json;
       };
+      project_stage_item_schedule_read: {
+        Args: { p_org: string; p_project: string };
+        Returns: Json;
+      };
+      project_stage_item_schedule_save: {
+        Args: {
+          p_org: string;
+          p_project: string;
+          p_stage: string;
+          p_kind: string;
+          p_index: number;
+          p_title: string;
+          p_start: string;
+          p_finish: string;
+          p_note?: string;
+          p_expected_version?: number;
+        };
+        Returns: Json;
+      };
       project_stage_material_batch: {
         Args: {
           p_org: string;
