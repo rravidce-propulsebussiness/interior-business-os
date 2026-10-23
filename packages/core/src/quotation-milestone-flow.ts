@@ -199,7 +199,7 @@ export function suggestWorkArea(
  const hints:[RegExp,string][]=[
   [/\b(floor\s*plan|architecture|architectural|structural\s*(design|drawing)|drawing\s*revision)\b/,'DESIGN'],
   [/\b(site\s*(mark\w*|survey|clearing)|excavat\w*|setting\s*out|layout\s*mark\w*|levelling)\b/,'SITE_PREP'],
-  [/\b(footing|pcc|pit\s*dress|bar\s*bend|reinforc|rebar|column\s*base|foundation)\b/,'FOUNDATION'],
+  [/\b(footings?|pcc|pit\s*dress\w*|bar\s*bend\w*|reinforc\w*|rebar|column\s*base|foundation)\b/,'FOUNDATION'],
   [/\b(plinth|basement)\b/,'PLINTH'],
   [/\b(slab|rcc|beam\s*casting)\b/,'RCC'],
   [/\b(brickwork|masonry|door\s*frame)\b/,'MASONRY'],
