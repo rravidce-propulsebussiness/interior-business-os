@@ -11,6 +11,7 @@ type Props={
  steps:QuotationMilestoneStep[];
  codes:string[];
  allCodes:string[];
+ plannedCodes:string[];
  requirements:StageRequirementsMap;
  editable:boolean;
  onChange:(steps:QuotationMilestoneStep[],requirements:StageRequirementsMap)=>void;
@@ -26,7 +27,7 @@ const belongs=(step:QuotationMilestoneStep)=>step.kind==='work'?'work':
  step.kind==='material'?'materials':'checks';
 const minLength=(kind:Kind)=>isCheck(kind as QuotationMilestoneStep['kind'])?3:2;
 
-export function MilestoneWorkflowBuilder({paymentIndex,steps,codes,allCodes,requirements,
+export function MilestoneWorkflowBuilder({paymentIndex,steps,codes,allCodes,plannedCodes,requirements,
  editable,onChange,onAddPayment,onLinkStage}:Props){
  const [after,setAfter]=useState<number|null>(null);
  const [editing,setEditing]=useState<number|null>(null);
@@ -109,7 +110,9 @@ export function MilestoneWorkflowBuilder({paymentIndex,steps,codes,allCodes,requ
   }
   const key=kind as Exclude<Kind,'payment'>;
   const listField=key==='work'?'work':key==='material'?'materials':'checks';
-  let base=requirements[chosen];
+  // The first manually added step replaces the old bulky template selection
+  // for this real work area. Structural hold-point checks stay mandatory.
+  let base=plannedCodes.includes(chosen)?requirements[chosen]:undefined;
   if(!base){
    const original=defaultStageRequirements(chosen);
    const template=milestoneConstructionStages().find(s=>s.code===chosen.split('/')[0]);
@@ -119,9 +122,15 @@ export function MilestoneWorkflowBuilder({paymentIndex,steps,codes,allCodes,requ
   }
   const values=[...base[listField]];
   let index:number;
-  if(choice==='existing'&&values.length){
-   index=Number(existing);
-   if(!values[index]){setError('Choose an existing item.');return;}
+  if(choice==='existing'){
+   const previous=existingChoices[Number(existing)];
+   if(!previous){setError('Choose an existing item.');return;}
+   const found=values.indexOf(previous);
+   if(found!==-1)index=found;
+   else{
+    if(values.length>=50){setError('Too many selected items.');return;}
+    index=values.length;values.push(previous);
+   }
   }else{
    const clean=name.replace(/\s+/g,' ').trim();
    if(clean.length<minLength(key)||clean.length>180||values.length>=50){
@@ -174,7 +183,7 @@ export function MilestoneWorkflowBuilder({paymentIndex,steps,codes,allCodes,requ
  const button=(text:string,onClick:()=>void,disabled=false)=><button type="button" disabled={disabled} onClick={onClick}>{text}</button>;
  return <div className="qs-one-flow">
   <div className="qs-one-flow-intro"><strong>{'Stage '+(paymentIndex+1)+' · Work sequence'}</strong>
-   <small>One list for this payment stage. Add only the work, materials, checks and QC you need.</small>
+   <small>Only steps you add appear here. Standard template items are replaced for a work area once you start customizing it; required structural checks stay protected.</small>
   </div>
   {steps.length===0&&<p className="qs-one-flow-empty">No steps added. Start with + Add to plan work after this payment milestone.</p>}
   <ol className="qs-one-flow-list">
