@@ -4,7 +4,7 @@ import {defaultStageRequirements} from './quotation-stage-requirements';
 import {standardMilestoneWorkflow,validateMilestoneFlow} from './quotation-milestone-flow';
 
 describe('company construction defaults vs quotation snapshot',()=>{
- it('validates percentage and doesn't bind outdated floor codes from company template',()=>{
+ it('validates percentages and preserves current quotation floor codes',()=>{
   const saved=companyConstructionPaymentRows.parse([
    {name:'Advance & Design Fee',percent:20},{name:'Foundation Fee',percent:'80'},
   ]);
