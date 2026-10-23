@@ -6,10 +6,6 @@
 .us-breadcrumb a{font-size:20px;line-height:15px;color:#486384}
 .us-heading h1{font-size:clamp(25px,2.7vw,35px);font-weight:850;letter-spacing:-.045em;line-height:1.16;margin:0 0 6px}
 .us-heading p{font-size:13px;color:#697992;margin:0}
-.us-tabs{display:flex;gap:3px;padding:4px;margin:23px 0 16px;background:#fff;box-shadow:0 3px 14px #19284209;border:1px solid #edf0f6;border-radius:12px;overflow:auto;scrollbar-width:thin}
-.us-tabs a{white-space:nowrap;padding:15px 13px;min-height:47px;display:inline-flex;align-items:center;gap:9px;font-size:12px;font-weight:760;color:#4b5c75;border-bottom:2px solid transparent;border-radius:9px 9px 0 0}
-.us-tabs a span{font-size:16px;line-height:1}
-.us-tabs a.selected{background:#fff4ee;color:#f15c20;border-bottom-color:#fb5a19}
 .us-columns{display:grid;grid-template-columns:minmax(0,1.92fr) minmax(275px,.77fr);align-items:start;gap:14px}
 .us-stack{display:flex;flex-direction:column;gap:14px;min-width:0}
 .us-preview{min-width:0;position:sticky;top:16px}
@@ -63,9 +59,6 @@
 .us-status{padding:12px 14px;border-radius:9px;font-size:12px;margin:0 0 14px}
 .us-status.ok{color:#116741;background:#e7fbf2;border:1px solid #d4f1e1}
 .us-status.bad{color:#ab3d26;background:#fff1ea;border:1px solid #ffd4c2}
-@media(max-width:1190px){.us-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.us-categories{grid-template-columns:repeat(2,minmax(0,1fr))}.us-tabs a{padding:13px 11px}}
-@media(max-width:850px){.us-columns{grid-template-columns:1fr}.us-preview{position:static}.us-card{padding:17px}.us-tabs{margin-top:19px;scroll-snap-type:x proximity}.us-tabs a{scroll-snap-align:start}.us-heading h1{font-size:26px}}
-@media(max-width:550px){.us-shell{padding:17px 12px 90px}.us-grid{grid-template-columns:1fr 1fr;gap:11px}.us-field:has(textarea),.us-field:has(input[name="tradeName"]),.us-field:has(input[name="businessType"]),.us-field:has(input[name="email"]),.us-field:has(input[name="website"]),.us-field:has(input[name="bankAccount"]),.us-field:has(input[name="bankHolder"]){grid-column:1/-1}.us-card{padding:16px 13px}.us-card-heading{gap:9px;flex-wrap:wrap}.us-extra{margin-left:0}.us-synced{font-size:9px}.us-categories{grid-template-columns:1fr 1fr;gap:13px 8px}.us-categories label{font-size:10px}.us-link-cards{grid-template-columns:1fr}.us-master form{grid-template-columns:1fr}.us-heading p{font-size:12px}.us-actions{position:sticky;bottom:5px;background:#fffefef7;border-radius:11px;border:1px solid #e7ebf3;box-shadow:0 -6px 24px #2e3e6017;padding:10px}.us-actions>*{flex:1}.us-tabs a{font-size:11px;padding:12px 10px}}
 @media(prefers-reduced-motion:reduce){.us-shell *{scroll-behavior:auto!important;transition:none!important}}
 
 
@@ -200,3 +193,56 @@
  .us-payment-step-actions button{width:34px;min-width:34px;height:34px}
 }
 @media(prefers-reduced-motion:reduce){.us-payment-chevron{transition:none}}
+
+
+/* Settings category dashboard – original seven modules and future categories
+   share a single searchable navigation surface. No duplicate forms or tabs. */
+.ush-home{width:100%;min-width:0}
+.ush-top{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap;padding:3px 3px 23px}
+.ush-top h1{font-size:clamp(25px,2.5vw,35px);letter-spacing:-.035em;line-height:1.15;margin:0 0 6px;font-weight:850;color:#1f2a45}
+.ush-top p{margin:0;font-size:13px;line-height:1.55;color:#6b7c98}
+.ush-search{display:flex;align-items:center;gap:8px;flex:0 1 290px;min-height:44px;padding:10px 12px;border:1px solid #e1e7f0;background:#fff;border-radius:11px;color:#6c7c99;box-shadow:0 2px 9px #213b5b06}
+.ush-search:focus-within{border-color:#fb7d43;box-shadow:0 0 0 3px #f8732516}
+.ush-search svg{flex-shrink:0}
+.ush-search input{min-width:0;flex:1;width:100%;font:inherit;font-size:12px;color:#263652;background:transparent;border:0;outline:0;box-shadow:none}
+.ush-search input::placeholder{color:#92a0b5}
+.ush-search button{border:none;background:transparent;font-size:20px;color:#62718a;padding:0 3px;cursor:pointer}
+.ush-section{margin:0 0 14px;border:1px solid #e7ecf3;background:#fff;border-radius:14px;padding:18px 16px;box-shadow:0 3px 16px #30486005;min-width:0}
+.ush-section-head{display:flex;align-items:flex-start;gap:12px;margin:0 0 14px}
+.ush-section-mark{display:grid;place-items:center;color:#fb6424;width:32px;height:32px;flex:0 0 32px}
+.ush-section:nth-of-type(3) .ush-section-mark{color:#2473d8}
+.ush-section:nth-of-type(4) .ush-section-mark{color:#f87a49}
+.ush-section:nth-of-type(5) .ush-section-mark{color:#f66b32}
+.ush-section-head h2{margin:0 0 3px;font-size:17px;line-height:1.3;letter-spacing:-.017em;font-weight:850;color:#1d2941}
+.ush-section-head p{margin:0;color:#68809e;font-size:11px;line-height:1.5}
+.ush-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;min-width:0}
+.ush-tile{display:flex;align-items:center;gap:12px;min-width:0;min-height:101px;padding:12px;border:1px solid #e4eaf2;border-radius:12px;background:#fff;color:#253249;text-decoration:none;box-shadow:0 1px 2px #2b456107;transition:border-color .15s,transform .15s,box-shadow .15s}
+a.ush-tile:hover{border-color:#ffc3a4;box-shadow:0 5px 20px #fb6c1e13;transform:translateY(-1px)}
+a.ush-tile:focus-visible{outline:2px solid #f76b25;outline-offset:3px}
+.ush-icon{height:54px;width:54px;flex:0 0 54px;display:grid;place-items:center;border-radius:13px}
+.ush-icon.is-orange{background:#ffede5;color:#e95513}
+.ush-icon.is-rose{background:#fff0f4;color:#e3447b}
+.ush-icon.is-purple{background:#f0eaff;color:#7049d9}
+.ush-icon.is-blue{background:#e8f1ff;color:#2470d7}
+.ush-icon.is-green{background:#e8f8ee;color:#15975c}
+.ush-icon.is-mint{background:#e6faf2;color:#159779}
+.ush-icon.is-amber{background:#fff6dd;color:#d18c13}
+.ush-copy{display:flex;min-width:0;flex:1;flex-direction:column;gap:5px}
+.ush-copy strong{font-size:13px;line-height:1.3;font-weight:850;color:#1e2940;overflow-wrap:anywhere}
+.ush-copy>span{font-size:11px;line-height:1.45;color:#6b7e99;overflow-wrap:anywhere}
+.ush-chevron{color:#617595;font-size:26px;font-weight:300;line-height:1;margin-left:auto}
+.ush-tile.is-planned{background:#fafbfd;opacity:.73;cursor:default}
+.ush-unavailable{white-space:nowrap;align-self:flex-start;font-size:10px;color:#8190a6;font-weight:700;margin-left:auto}
+.ush-empty{background:#fff;border:1px solid #e4eaf2;border-radius:14px;color:#677a94;padding:28px 22px;font-size:13px;text-align:center}
+.ush-footnote{font-size:11px;color:#8796aa;text-align:center;margin:17px 0 4px}
+.ush-detail-heading{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin:0 0 18px;padding:0 2px 13px;border-bottom:1px solid #e8edf4}
+.ush-back{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:800;color:#e85b20;background:#fff5ed;border:1px solid #ffe0ca;border-radius:10px;padding:9px 13px;min-height:40px}
+.ush-back:hover{background:#ffeadb}
+.ush-detail-current{display:flex;align-items:center;gap:8px;font-size:12px;color:#74839a}
+.ush-detail-current strong{font-size:13px;color:#273750}
+#company-payment-stages,#brand-identity,#quotation-template-settings{scroll-margin-top:28px}
+@media(max-width:1120px){.ush-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:720px){.ush-top{gap:12px;padding-bottom:18px}.ush-top p{font-size:12px}.ush-search{flex:1 1 100%;max-width:none}.ush-section{padding:14px 12px}.ush-grid{gap:9px}.ush-icon{width:43px;height:43px;flex-basis:43px;border-radius:12px}.ush-tile{min-height:100px;gap:8px;padding:10px}.ush-copy strong{font-size:12px}.ush-copy>span{font-size:10px}.ush-section-head h2{font-size:16px}.ush-section-head{gap:8px}}
+@media(max-width:455px){.ush-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.ush-tile{min-height:127px;align-items:flex-start;flex-wrap:wrap;position:relative}.ush-icon{height:39px;width:39px;flex-basis:39px}.ush-copy{flex:1 0 100%;gap:4px}.ush-copy strong{font-size:11px;padding-right:11px}.ush-copy>span{font-size:10px}.ush-chevron{position:absolute;top:13px;right:10px}.ush-unavailable{position:absolute;right:9px;top:11px;font-size:9px}.ush-top h1{font-size:27px}}
+@media(max-width:340px){.ush-grid{grid-template-columns:1fr}.ush-tile{min-height:85px}.ush-copy{flex:1 1 110px}.ush-chevron{position:static}}
+@media(prefers-reduced-motion:reduce){.ush-tile{transition:none}.ush-tile:hover{transform:none}}
