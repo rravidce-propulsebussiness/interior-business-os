@@ -196,6 +196,17 @@ export function MilestoneWorkflowBuilder({paymentIndex,steps,codes,allCodes,plan
   <div className="qs-one-flow-intro"><strong>{'Stage '+(paymentIndex+1)+' · Work sequence'}</strong>
    <small>Only steps you add appear here. Standard template items are replaced for a work area once you start customizing it; required structural checks stay protected.</small>
   </div>
+  {editable&&<details className="qs-one-flow-area-picker">
+   <summary>Choose or move construction work areas for this payment stage</summary>
+   <p>Assign each work area to the payment milestone when its work begins. An area must belong to only one payment milestone.</p>
+   <small>Currently linked: {codes.length?codes.map(label).join(' · '):'Choose an area below'}</small>
+   <select aria-label="Add or move construction work area" defaultValue=""
+    onChange={event=>{if(event.target.value)onLinkStage(event.target.value);event.target.value='';}}>
+    <option value="" disabled>Link another work area</option>
+    {allCodes.filter(value=>!codes.includes(value)).map(value=>
+     <option key={value} value={value}>{label(value)}</option>)}
+   </select>
+  </details>}
   {steps.length===0&&<p className="qs-one-flow-empty">No steps added. Start with + Add to plan work after this payment milestone.</p>}
   <ol className="qs-one-flow-list">
    {steps.map((item,index)=><li key={item.kind+'-'+item.code+'-'+item.index} className="qs-one-flow-item">
