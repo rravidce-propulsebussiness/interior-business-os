@@ -1179,6 +1179,10 @@
 .pv2-item-schedule-toggle{padding:7px 12px;border:1px solid #f4c9ad;border-radius:9px;background:#fff5ec;color:#b95418;font-size:11px;font-weight:850;min-height:34px;cursor:pointer}
 .pv2-item-schedule-toggle:hover{background:#ffeade}
 .pv2-item-schedule-form{display:grid;gap:10px;margin-top:11px;padding-top:12px;border-top:1px solid #e6e8ed}
+.pv2-item-schedule-shortcuts{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.pv2-item-schedule-shortcuts>span{font-size:11px;color:#63758c;font-weight:750;margin-right:3px}
+.pv2-item-schedule-shortcuts>button{min-height:35px;border:1px solid #f2cab0;border-radius:9px;background:#fff6ef;color:#ad501e;font-size:11px;font-weight:800;padding:7px 10px;cursor:pointer}
+.pv2-item-schedule-shortcuts>button:hover,.pv2-item-schedule-shortcuts>button:focus-visible{background:#ffe9d8;outline-color:#f76b27}
 .pv2-item-schedule-dates{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .pv2-item-schedule-form label{display:grid;gap:5px;font-size:11px;font-weight:800;color:#4a5970;min-width:0}
 .pv2-item-schedule-form input{background:#fff;color:#263b52;border:1px solid #dce2eb;border-radius:9px;width:100%;min-width:0;min-height:41px;padding:8px;font:inherit;font-size:12px}

@@ -1,12 +1,33 @@
 import {describe,it,expect} from 'vitest';
 import {readFileSync} from 'node:fs';
 import {forecastWork} from './project-work-forecast';
+import {offsetPlanDate} from './project-schedule-dates';
 const read=(name:string)=>readFileSync(new URL(name,import.meta.url),'utf8');
 const component=read('./project-item-schedule.tsx');
 const view=read('./project-v2-view.tsx');
 const data=read('./project-v2-data.ts');
 const action=read('./[id]/site/stage-schedule-actions.ts');
 const migration=read('../../../../../../packages/database/supabase/migrations/20261023190000_project_stage_item_schedule.sql');
+describe('Fast planned-date shortcuts for every stage item',()=>{
+ it('offers Today, Tomorrow and a seven-day span in the existing item editor',()=>{
+  expect(component).toContain('aria-label="Quick planned dates"');
+  for(const label of ['Today','Tomorrow','Next 7 days'])
+   expect(component).toContain(label);
+  expect(component).toContain('setStart(today);setFinish(today)');
+  expect(component).toContain('setFinish(offsetPlanDate(today,6))');
+  expect(view).toContain('planningMode={planningMode}');
+  expect(component).not.toContain('complete this work automatically');
+ });
+ it('preserves calendar dates across month and year boundaries',()=>{
+  expect(offsetPlanDate('2026-10-24',1)).toBe('2026-10-25');
+  expect(offsetPlanDate('2026-10-31',1)).toBe('2026-11-01');
+  expect(offsetPlanDate('2026-12-30',6)).toBe('2027-01-05');
+  expect(offsetPlanDate('2026-02-28',1)).toBe('2026-03-01');
+  expect(offsetPlanDate('2028-02-28',1)).toBe('2028-02-29');
+  expect(offsetPlanDate('2026-02-31',1)).toBe('');
+  expect(offsetPlanDate('2026-02-28',0.5)).toBe('');
+ });
+});
 describe('Existing project stage item dates, no second execution system',()=>{
  it('keeps one date editor on work/check, tests, materials and company QC across every stage',()=>{
   expect(view).toContain("const planFor=(stageId:string");
