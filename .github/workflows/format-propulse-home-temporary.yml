@@ -1,0 +1,33 @@
+name: Format light orange homepage
+on:
+  push:
+    branches:
+      - design/light-orange-business-os-home-20261024
+    paths:
+      - 'apps/business-app/src/app/page.tsx'
+      - 'apps/business-app/src/app/home-landing.css'
+permissions:
+  contents: write
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec prettier --write apps/business-app/src/app/page.tsx apps/business-app/src/app/home-landing.css
+      - name: Commit formatted files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/business-app/src/app/page.tsx apps/business-app/src/app/home-landing.css
+          if ! git diff --cached --quiet; then
+            git commit -m "Format public orange homepage files"
+            git push origin HEAD:design/light-orange-business-os-home-20261024
+          fi
