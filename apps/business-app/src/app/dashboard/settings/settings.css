@@ -250,3 +250,17 @@ a.ush-tile:focus-visible{outline:2px solid #f76b25;outline-offset:3px}
 @media(max-width:1190px){.us-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.us-categories{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:850px){.us-columns{grid-template-columns:1fr}.us-preview{position:static}.us-card{padding:17px}.us-heading h1{font-size:26px}}
 @media(max-width:550px){.us-shell{padding:17px 12px 90px}.us-grid{grid-template-columns:1fr 1fr;gap:11px}.us-field:has(textarea),.us-field:has(input[name="tradeName"]),.us-field:has(input[name="businessType"]),.us-field:has(input[name="email"]),.us-field:has(input[name="website"]),.us-field:has(input[name="bankAccount"]),.us-field:has(input[name="bankHolder"]){grid-column:1/-1}.us-card{padding:16px 13px}.us-card-heading{gap:9px;flex-wrap:wrap}.us-extra{margin-left:0}.us-synced{font-size:9px}.us-categories{grid-template-columns:1fr 1fr;gap:13px 8px}.us-categories label{font-size:10px}.us-link-cards{grid-template-columns:1fr}.us-master form{grid-template-columns:1fr}.us-heading p{font-size:12px}.us-actions{position:sticky;bottom:5px;background:#fffefef7;border-radius:11px;border:1px solid #e7ebf3;box-shadow:0 -6px 24px #2e3e6017;padding:10px}.us-actions>*{flex:1}}
+
+/* Foundation company-payment substages; light/orange dashboard palette. */
+.us-payment-upgrade{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding:13px 15px;margin:16px 0;border:1px solid #edc8a8;border-radius:13px;background:#fff8f2}
+.us-payment-upgrade>div{flex:1 1 250px;min-width:0}
+.us-payment-upgrade strong{font-size:13px;color:#713a19}
+.us-payment-upgrade p{margin:5px 0 0;font-size:11px;line-height:1.55;color:#795c4a}
+.us-payment-upgrade button{padding:10px 14px;border-radius:10px;background:#ed711d;border:1px solid #ed711d;color:#fff;font-weight:700;font-size:12px;cursor:pointer}
+.us-payment-substages{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,166px),1fr));gap:7px;margin:14px 0}
+.us-payment-substages button{display:flex;align-items:center;justify-content:space-between;gap:6px;text-align:left;border:1px solid #ebdfd5;background:#fff;color:#4e5260;border-radius:11px;padding:10px 11px;min-height:44px;font-size:11px;font-weight:700;line-height:1.45;cursor:pointer}
+.us-payment-substages button small{display:inline-flex;align-items:center;justify-content:center;border-radius:99px;background:#f7efe8;padding:2px 7px;color:#875a40;font-size:10px;flex-shrink:0}
+.us-payment-substages button.is-selected{background:#fff0e5;border-color:#ee8139;color:#a54a13}
+.us-payment-substages button:focus-visible,.us-payment-upgrade button:focus-visible{outline:2px solid #dd6820;outline-offset:2px}
+.us-payment-optional{display:block;font-size:10px;font-weight:600;color:#9a673f;margin-top:4px}
+@media(max-width:600px){.us-payment-substages{grid-template-columns:repeat(2,minmax(0,1fr))}.us-payment-substages button{padding:9px 8px;font-size:10px}.us-payment-upgrade button{width:100%}}
