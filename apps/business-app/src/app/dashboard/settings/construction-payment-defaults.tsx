@@ -42,7 +42,7 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
  const areas=row.areas?.length?row.areas:[...new Set(steps.map(item=>item.area))];
  const isFoundation=index===1&&['SITE_PREP','FOUNDATION','PLINTH'].every(area=>areas.includes(area));
  const isRcc=areas.length===1&&areas.includes('RCC')&&/slab payment/i.test(row.name);
- const isMasonry=areas.length===1&&areas.includes('MASONRY')&&/brickwork/i.test(row.name);
+ const isMasonry=areas.length===1&&areas.includes('MASONRY');
  const [kind,setKind]=useState<Kind>('work');
  const [name,setName]=useState('');
  const [checkRef,setCheckRef]=useState('');
@@ -350,7 +350,7 @@ export function ConstructionPaymentDefaults({initial,canEdit}:{
    rccSlabSubstageNames.some(group=>!groups.has(group));
  });
  const masonryIndexes=rows.flatMap((row,index)=>
-  row.areas?.length===1&&row.areas[0]==='MASONRY'&&/brickwork/i.test(row.name)?[index]:[]);
+  row.areas?.length===1&&row.areas[0]==='MASONRY'?[index]:[]);
  const outdatedMasonry=masonryIndexes.filter(index=>{
   const items=rows[index]?.steps??[];
   const groups=new Set(items.map(item=>item.substage));
