@@ -53,17 +53,17 @@ function Brand() {
 }
 
 /** Pure vector scene; decorative only. Light SVG motion is CSS driven and reduced-motion aware. */
-function ConstructionIllustration() {
+function ConstructionIllustration({ prefix = 'pp-login-site' }: { prefix?: string }) {
   return (
     <svg className="pp-login-construction-svg" viewBox="0 0 880 540" aria-hidden="true" focusable="false" fill="none" preserveAspectRatio="xMidYMax meet">
       <defs>
-        <linearGradient id="pp-login-wall" x1="0" y1="0" x2="1" y2="1">
+        <linearGradient id={`${prefix}-wall`} x1="0" y1="0" x2="1" y2="1">
           <stop stopColor="#f5d1b2"/><stop offset=".55" stopColor="#ffead9"/><stop offset="1" stopColor="#de9f75"/>
         </linearGradient>
-        <linearGradient id="pp-login-floor" x1="0" x2="1" y1="0" y2="1">
+        <linearGradient id={`${prefix}-floor`} x1="0" x2="1" y1="0" y2="1">
           <stop stopColor="#ffe4d2"/><stop offset="1" stopColor="#f2a56e"/>
         </linearGradient>
-        <linearGradient id="pp-login-vest" x1="0" x2="1">
+        <linearGradient id={`${prefix}-vest`} x1="0" x2="1">
           <stop stopColor="#f36c17"/><stop offset="1" stopColor="#ff953f"/>
         </linearGradient>
       </defs>
@@ -89,7 +89,7 @@ function ConstructionIllustration() {
       </g>
       {/* Building structure */}
       <g strokeLinejoin="round" strokeLinecap="round">
-        <path d="M383 421V217l180-69 133 44v229" fill="url(#pp-login-wall)" stroke="#d58b52" strokeWidth="3"/>
+        <path d="M383 421V217l180-69 133 44v229" fill={`url(#${prefix}-wall)`} stroke="#d58b52" strokeWidth="3"/>
         <path d="M563 148v273" stroke="#d49a74" strokeWidth="3"/>
         <path d="m383 217 180-69 133 44-178 71z" fill="#ffe4cf" stroke="#d69b73" strokeWidth="3"/>
         <path d="m383 284 135 39 178-64M383 355l135 39 178-63" stroke="#e58c50" strokeWidth="10"/>
@@ -118,7 +118,7 @@ function ConstructionIllustration() {
       {/* Engineer silhouette */}
       <g transform="translate(138 297)">
         <path d="M51 74c-23 2-35 25-40 53L0 226h146l-20-108c-6-27-26-41-49-44z" fill="#444b4b"/>
-        <path d="M50 72c-20 4-34 21-38 54L7 205l69 12 64-17-17-77c-9-32-26-45-47-51z" fill="url(#pp-login-vest)"/>
+        <path d="M50 72c-20 4-34 21-38 54L7 205l69 12 64-17-17-77c-9-32-26-45-47-51z" fill={`url(#${prefix}-vest)`}/>
         <path d="m49 73 23 92-10 40M85 73 72 165l14 42" stroke="#ffd3a6" strokeWidth="10"/>
         <path d="M48 60V83l23 20 22-22V58" fill="#e7a074"/>
         <path d="M42 38c0-27 40-34 52-7v24c-9 19-27 22-45 11z" fill="#de9f73"/>
@@ -160,7 +160,7 @@ function PhoneIllustration() {
         <div className="pp-login-phone-input">✉ &nbsp; Enter your email</div>
         <div className="pp-login-phone-input">♙ &nbsp; •••••••••</div>
         <div className="pp-login-phone-submit">Sign in <SymbolIcon name="arrow" size={11}/></div>
-        <div className="pp-login-phone-scene"><ConstructionIllustration/></div>
+        <div className="pp-login-phone-scene"><ConstructionIllustration prefix="pp-login-phone-site"/></div>
       </div>
     </div>
   );
