@@ -888,7 +888,7 @@ describe('Payment Settings keeps work-area entry textual and removes unrelated s
   expect(stageEditor).toContain('expanded={expandedIndex===index}');
   expect(stageEditor).not.toContain('className="us-payment-stage-work"');
   expect(stageEditor).toContain('us-payment-stage-stats');
-  expect(stageEditor).toContain("kinds.filter(type=>!(isFoundation||isRcc)||type!=='qc')");
+  expect(stageEditor).toContain("kinds.filter(type=>!(isFoundation||isRcc||isMasonry)||type!=='qc')");
  });
  it('Show all and Show fewer actually change the rendered item count with no scrollbar cap',()=>{
   const style=file('../settings/settings.css');
@@ -909,6 +909,16 @@ describe('Payment Settings keeps work-area entry textual and removes unrelated s
   expect(stageEditor).toContain('Apply to all slab floors');
   expect(stageEditor).toContain('window.confirm');
   expect(stageEditor).toContain('targets.has(index)?{...row,steps:rccSlabWorkDefaults');
+ });
+ it('shows brickwork substages, existing grouped payments and switchable sill-band scope',()=>{
+  expect(stageEditor).toContain("const isMasonry=areas.length===1&&areas.includes('MASONRY')");
+  expect(stageEditor).toContain('masonrySubstageNames');
+  expect(stageEditor).toContain('selectedSubstage===group');
+  expect(stageEditor).toContain('Apply to all brickwork payments');
+  expect(stageEditor).toContain('masonryWorkDefaults.map(step=>({...step}))');
+  expect(stageEditor).toContain('Include in new quotations');
+  expect(stageEditor).toContain('checked={!item.optional}');
+  expect(stageEditor).toContain('optional:!e.target.checked');
  });
  it('renders one compact action row with edit, move and delete for each work step',()=>{
   expect(stageEditor).toContain('us-payment-step-name');
