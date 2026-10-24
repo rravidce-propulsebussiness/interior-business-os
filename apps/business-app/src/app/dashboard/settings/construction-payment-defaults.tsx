@@ -70,7 +70,8 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
   if(inferred&&areas.includes(inferred))return inferred;
   if(inferred&&!areas.length)return inferred;
   if(inferred&&!areas.includes(inferred))return null;
-  return steps[position]?.area??steps[position+1]?.area??areas[0]??inferCompanyWorkAreaCode(row.name);
+  return (selectedSubstage?steps.find(item=>item.substage===selectedSubstage)?.area:undefined)??
+   steps[position]?.area??steps[position+1]?.area??areas[0]??inferCompanyWorkAreaCode(row.name);
  };
  const editRows=(next:CompanyWorkStep[])=>{onChange({...row,steps:next});setError('');};
  const add=(position:number)=>{
@@ -97,7 +98,9 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
    (item.kind===next.kind||(isCheck(item)&&isCheck(next))))){
    setError('This item already exists in the payment stage.');return;
   }
-  const updated=[...steps];updated.splice((after??steps.length-1)+1,0,next);
+  const insertion=selectedSubstage?steps.map(item=>item.substage).lastIndexOf(selectedSubstage):
+   (after??steps.length-1);
+  const updated=[...steps];updated.splice(insertion+1,0,next);
   onChange({...row,steps:updated,areas:areas.includes(chosen)?row.areas:[...areas,chosen]});
   if(updated.length>limit)setShowAll(true);
   setError('');setAfter(null);setName('');setCheckRef('');
