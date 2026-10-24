@@ -140,12 +140,6 @@ function SiteIllustration({ className = '' }: { className?: string }) {
       focusable="false"
       preserveAspectRatio="xMidYMax meet"
     >
-      <defs>
-        <linearGradient id="pp-sky" x1="0" x2="0" y1="0" y2="1">
-          <stop stopColor="#fff1e5" />
-          <stop offset="1" stopColor="#fffbf8" />
-        </linearGradient>
-      </defs>
       <path
         d="M0 225Q160 178 320 228T660 214V300H0Z"
         fill="#ffe6d1"
