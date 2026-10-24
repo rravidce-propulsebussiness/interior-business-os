@@ -99,14 +99,14 @@ export function validateStageRequirements(value:unknown):StageRequirementsMap {
 export function validateStageRequirementsDraft(value:unknown):StageRequirementsMap {
  const draft=validateRequirements(value,true);
  const body=JSON.stringify({version:1,stages:draft});
- if(body.length>7500)throw new Error('Too many project-specific requirements; reduce long descriptions');
+ if(body.length>18000)throw new Error('Too many project-specific requirements; reduce long descriptions');
  return draft;
 }
 export function encodeStageRequirements(overrides:StageRequirementsMap):string {
  const cleaned=validateStageRequirements(overrides);
  if(!Object.keys(cleaned).length)return '';
  const body=JSON.stringify({version:1,stages:cleaned});
- if(body.length>7500)throw new Error('Too many project-specific requirements; reduce long descriptions');
+ if(body.length>18000)throw new Error('Too many project-specific requirements; reduce long descriptions');
  return REQUIREMENTS_MARKER+body+'[/STAGE_CUSTOM_REQUIREMENTS]';
 }
 export function savedStageRequirements(terms:string):StageRequirementsMap {
