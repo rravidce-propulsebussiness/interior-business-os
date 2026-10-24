@@ -40,6 +40,7 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
 }) {
  const steps=row.steps??[];
  const areas=row.areas?.length?row.areas:[...new Set(steps.map(item=>item.area))];
+ const isFoundation=index===1&&['SITE_PREP','FOUNDATION','PLINTH'].every(area=>areas.includes(area));
  const [kind,setKind]=useState<Kind>('work');
  const [name,setName]=useState('');
  const [checkRef,setCheckRef]=useState('');
@@ -51,13 +52,13 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
  const [editDraft,setEditDraft]=useState('');
  const prior=steps.slice(0,after===null?steps.length:after+1).filter(isCheck);
  const current=checkRef?prior.find(x=>link(x)===checkRef):prior.at(-1);
- const counts=kinds.map(type=>({type,count:steps.filter(item=>item.kind===type).length}));
+ const counts=kinds.filter(type=>!isFoundation||type!=='qc')
+  .map(type=>({type,count:steps.filter(item=>item.kind===type).length}));
  const limit=6;
  const groups=[...new Set(steps.map(item=>item.substage).filter((value):value is string=>Boolean(value)))];
  const indexed=steps.map((item,position)=>({item,position}));
  const visible=selectedSubstage?indexed.filter(({item})=>item.substage===selectedSubstage):
   showAll?indexed:indexed.slice(0,limit);
- const isFoundation=index===1&&['SITE_PREP','FOUNDATION','PLINTH'].every(area=>areas.includes(area));
  const oldFoundation=isFoundation&&(
   foundationSubstageNames.some(group=>!groups.includes(group))||
   steps.filter(item=>!item.optional).length<foundationWorkDefaults.filter(item=>!item.optional).length
@@ -163,7 +164,7 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
   </button>
   <div className="us-payment-stage-stats" aria-label={'Included item counts for stage '+(index+1)}>
    {counts.map(({type,count})=><span className={'us-payment-stat is-'+type} key={type}>
-    <ItemIcon kind={type}/><strong>{count}</strong><small>{descriptions[type]}</small>
+    <ItemIcon kind={type}/><strong>{count}</strong><small>{isFoundation&&type==='check'?'Checks & QC':descriptions[type]}</small>
    </span>)}
   </div>
   {expanded&&<div id={'company-payment-stage-'+index} className="us-payment-stage-content">
