@@ -393,7 +393,7 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
  const allowChecks=site?.stage==='execution'&&
   (site.canManage||['manager','project_manager','quality_inspector','site_engineer'].includes(site.role));
  const canPlan=Boolean(site?.canManage||['manager','project_manager','site_engineer','supervisor'].includes(site?.role??''));
- const planningMode:'full'|'daily'=(['site_engineer','supervisor','site_supervisor'].includes(site?.role??''))?'daily':'full';
+ const planningMode:'full'|'site'=(['site_engineer','supervisor','site_supervisor'].includes(site?.role??''))?'site':'full';
  const planFor=(stageId:string,kind:'work'|'material'|'check'|'test'|'qc',i:number)=>
   d.itemPlans.find(x=>x.stageId===stageId&&x.kind===kind&&x.index===i);
  const todayInIndia=new Intl.DateTimeFormat('en-CA',{
@@ -433,7 +433,7 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
      <strong>{x.title}</strong>
      <small>{timelineStages.find(s=>s.id===x.stageId)?.title??'Construction stage'} · {pretty(x.kind)}</small>
     </div>)}
-   </div>:<p className="pv2-hint">No upcoming dated items. Company stage sequencing is configured in Settings → Payment Settings. Owners and project managers schedule future dates here; site engineers plan only today and tomorrow.</p>}
+   </div>:<p className="pv2-hint">No upcoming dated items. Company stage sequencing is configured in Settings → Payment Settings. Owners and project managers schedule future dates here; site engineers can plan upcoming stages as well.</p>}
   </div>
   {d.agreement&&<p className="pv2-timeline-quote-note">
     Work on this project follows its accepted quotation and original saved stage snapshot.
