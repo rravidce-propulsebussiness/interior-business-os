@@ -1,5 +1,5 @@
 import {describe,it,expect} from 'vitest';
-import {companyConstructionPaymentRows,applyCompanyPaymentDefaults,applyCompanyWorkDefaults,defaultCompanyWorkRows,hydrateCompanyWorkDefaults,inferCompanyWorkAreaCode,companyWorkAreaLabel,planningWorkDefaults,foundationWorkDefaults,foundationSubstageNames,rccSlabWorkDefaults,rccSlabSubstageNames} from './company-construction-defaults';
+import {companyConstructionPaymentRows,applyCompanyPaymentDefaults,applyCompanyWorkDefaults,defaultCompanyWorkRows,hydrateCompanyWorkDefaults,inferCompanyWorkAreaCode,companyWorkAreaLabel,planningWorkDefaults,foundationWorkDefaults,foundationSubstageNames,rccSlabWorkDefaults,rccSlabSubstageNames,masonryWorkDefaults,masonrySubstageNames} from './company-construction-defaults';
 import {defaultStageRequirements,encodeStageRequirements,savedStageRequirements} from './quotation-stage-requirements';
 import {proposedConstructionPayments} from './construction-payment-schedule';
 import {standardMilestoneWorkflow,validateMilestoneFlow,encodeMilestoneFlow,savedMilestoneFlow} from './quotation-milestone-flow';
@@ -325,5 +325,109 @@ describe('Reusable RCC slab scope on G+4: one template, five distinct payment st
   const restored=hydrateCompanyWorkDefaults(saved,company);
   expect(restored[2]?.steps?.[0]?.name).toBe('Custom ground column activity');
   expect(restored[3]?.steps).toEqual(rccSlabWorkDefaults);
+ });
+});
+
+
+describe('Reusable brickwork work, materials, openings and electrical provisions',()=>{
+ const floors=['Ground','First','Second','Third','Fourth'];
+ const payments=proposedConstructionPayments(floors);
+ const company=defaultCompanyWorkRows(payments);
+ const brickMilestones=company.filter(row=>row.areas?.length===1&&row.areas[0]==='MASONRY');
+ it('adds an identical four-substage brickwork template to every configured floor payment',()=>{
+  expect(brickMilestones).toHaveLength(5);
+  expect(brickMilestones.map(row=>row.name)).toEqual(floors.map(name=>
+   name+' brickwork & door frames payment'));
+  expect(brickMilestones.map(row=>row.percent)).toEqual([3,3,3,3,3]);
+  expect(brickMilestones.every(row=>row.steps?.length===masonryWorkDefaults.length)).toBe(true);
+  expect(brickMilestones[0]?.steps).toEqual(masonryWorkDefaults);
+  expect([...new Set(masonryWorkDefaults.map(step=>step.substage))])
+   .toEqual([...masonrySubstageNames]);
+  expect(companyConstructionPaymentRows.safeParse(company).success).toBe(true);
+  expect(company.reduce((sum,row)=>sum+row.percent,0)).toBeCloseTo(100,2);
+ });
+ it('includes structural floor-plan checks and all masonry electrical provisions without double QC',()=>{
+  const names=masonryWorkDefaults.map(item=>item.name);
+  for(const required of [
+   'Approved bricks or blocks for this floor',
+   'Sand and cement for masonry mortar',
+   'Build brickwalls and partitions with required bonding and joints',
+   'Check positions, widths and heights of doors, windows and ventilators',
+   'Mark door, window and ventilator lintel levels and bearing locations',
+   'Install or cast lintels over openings according to structural drawings',
+   'Electrical conduit pipes, bends, junction boxes and wall boxes for this floor',
+   'Install masonry-stage electrical wall boxes, sleeves and conduit provisions before plaster',
+   'Check electrical provisions, box levels, routes, safe chases and completeness',
+  ])expect(names).toContain(required);
+  const selectable=masonryWorkDefaults.filter(item=>item.optional);
+  expect(selectable).toHaveLength(3);
+  expect(selectable.every(item=>item.substage==='Sill band and lintels')).toBe(true);
+  expect(masonryWorkDefaults.filter(item=>item.kind==='qc')).toHaveLength(0);
+ });
+ it('copies the complete floor-mapped brickwork sequence without duplicating foundation or RCC',()=>{
+  const quote=applyCompanyWorkDefaults(payments,company);
+  for(const [floorIndex,floor] of floors.entries()){
+   const code='MASONRY/'+floor.toUpperCase();
+   const payIndex=2+floors.length+floorIndex;
+   const flow=quote.flow[String(payIndex)]??[];
+   expect(flow.length).toBe(masonryWorkDefaults.filter(item=>!item.optional).length);
+   expect(flow.every(item=>item.code===code)).toBe(true);
+   expect(flow.some(item=>item.substage==='Electrical provisions and handover')).toBe(true);
+   expect(flow.some(item=>item.substage==='Sill band and lintels')).toBe(true);
+   const requirements=quote.requirements[code]!;
+   expect(requirements.work).toContain('Build brickwalls and partitions with required bonding and joints');
+   expect(requirements.checks).toContain('Check positions, widths and heights of doors, windows and ventilators');
+   expect(requirements.work.some(text=>text.includes('reinforced sill-level band'))).toBe(false);
+  }
+  expect(savedMilestoneFlow(encodeMilestoneFlow(quote.flow))).toEqual(quote.flow);
+  expect(savedStageRequirements(encodeStageRequirements(quote.requirements))).toEqual(quote.requirements);
+  expect(validateMilestoneFlow(quote.flow,quote.requirements,payments)).toEqual(quote.flow);
+ });
+ it('copies brickwork for BOTH floors if owner combines two floors into a single payment',()=>{
+  const first=payments.findIndex(row=>row.name.includes('Ground brickwork'));
+  const second=payments.findIndex(row=>row.name.includes('First brickwork'));
+  expect(first).toBeGreaterThanOrEqual(0);
+  expect(second).toBe(first+1);
+  const combined=payments.flatMap((row,index)=>index===first?[
+   {name:'Ground + First brickwork & door frames payment',
+    percent:(Number(row.percent)+Number(payments[second]!.percent)).toFixed(2),
+    stageCodes:[...row.stageCodes,...payments[second]!.stageCodes]},
+  ]:index===second?[]:[row]);
+  const templates=defaultCompanyWorkRows(combined);
+  const joined=templates[first]!;
+  expect(joined.areas).toEqual(['MASONRY']);
+  expect(joined.steps).toEqual(masonryWorkDefaults);
+  expect(companyConstructionPaymentRows.safeParse(templates).success).toBe(true);
+  const quote=applyCompanyWorkDefaults(combined,templates);
+  const flow=quote.flow[String(first)]??[];
+  const perFloor=masonryWorkDefaults.filter(item=>!item.optional).length;
+  expect(flow.length).toBe(perFloor*2);
+  expect(flow.slice(0,perFloor).every(item=>item.code==='MASONRY/GROUND')).toBe(true);
+  expect(flow.slice(perFloor).every(item=>item.code==='MASONRY/FIRST')).toBe(true);
+  expect(quote.requirements['MASONRY/GROUND']?.work).toEqual(quote.requirements['MASONRY/FIRST']?.work);
+  expect(validateMilestoneFlow(quote.flow,quote.requirements,combined)).toEqual(quote.flow);
+  expect(savedMilestoneFlow(encodeMilestoneFlow(quote.flow))).toEqual(quote.flow);
+ });
+ it('includes drawing-approved sill-band checks only when company explicitly enables them',()=>{
+  const single=proposedConstructionPayments(['Ground']);
+  const defaults=defaultCompanyWorkRows(single);
+  const masonryIndex=defaults.findIndex(row=>row.areas?.includes('MASONRY'));
+  const orig=defaults[masonryIndex]!;
+  defaults[masonryIndex]={...orig,steps:orig.steps?.map(item=>item.optional?
+   {...item,optional:false}:item)};
+  const quote=applyCompanyWorkDefaults(single,defaults);
+  const code='MASONRY/GROUND';
+  expect(quote.requirements[code]?.work).toContain(
+   'Construct reinforced sill-level band at drawing-approved elevation where specified');
+  expect(quote.requirements[code]?.checks).toContain(
+   'Verify sill-band height, steel, cover, anchorage and pre-pour clearance per structural design');
+ });
+ it('preserves a saved custom masonry template for one floor without changing others',()=>{
+  const saved=companyConstructionPaymentRows.parse(company);
+  const index=saved.findIndex(row=>row.name.startsWith('Ground brickwork'));
+  saved[index]={...saved[index]!,steps:[{kind:'work',name:'Owner custom wall quality task',area:'MASONRY'}]};
+  const hydrated=hydrateCompanyWorkDefaults(saved,company);
+  expect(hydrated[index]?.steps?.[0]?.name).toBe('Owner custom wall quality task');
+  expect(hydrated[index+1]?.steps).toEqual(masonryWorkDefaults);
  });
 });
