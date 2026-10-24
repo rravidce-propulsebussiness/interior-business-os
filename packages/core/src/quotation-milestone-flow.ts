@@ -11,7 +11,7 @@ export const quotationMilestoneStep=z.object({
 }).strict();
 export type QuotationMilestoneStep=z.infer<typeof quotationMilestoneStep>;
 export type QuotationMilestoneFlow=Record<string,QuotationMilestoneStep[]>;
-const MAX_SERIALIZED=7000;
+const MAX_SERIALIZED=12000;
 const MARK=/\[QUOTATION_MILESTONE_FLOW\]([\s\S]*?)\[\/QUOTATION_MILESTONE_FLOW\]/g;
 const data=z.object({
  version:z.literal(1),
