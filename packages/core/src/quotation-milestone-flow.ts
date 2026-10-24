@@ -27,13 +27,13 @@ const data=z.object({
 const compactKinds=['work','material','check','test','qc'] as const;
 const compactStep=z.tuple([
  z.number().int().min(0).max(4),
- z.number().int().min(0).max(39),
+ z.number().int().min(0).max(199),
  z.number().int().min(0).max(49),
  z.number().int().min(-1).max(49),
 ]);
 const compactData=z.object({
  version:z.literal(2),
- codes:z.array(quotationMilestoneStep.shape.code).max(40),
+ codes:z.array(quotationMilestoneStep.shape.code).max(200),
  groups:z.array(z.string().trim().min(2).max(90)).max(50),
  rows:z.record(z.string().regex(/^(0|[1-9]\\d?)$/),z.array(compactStep).max(100)),
 }).strict();
