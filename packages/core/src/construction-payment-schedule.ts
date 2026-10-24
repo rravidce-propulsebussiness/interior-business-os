@@ -137,10 +137,18 @@ const guidance: Record<string, StageSiteGuidance> = {
       'Curing and deshuttering report'],
   },
   MASONRY: {
-    materials: ['Approved bricks/blocks, mortar and lintel materials', 'Door-frame material and anchors'],
-    checks: ['Brick/block quality and dimensions', 'Wall line, level, plumb and bonding',
-      'Door/window openings, frame position and fixing', 'Lintel and chajja support if applicable'],
-    reports: ['Masonry site photos', 'Wall alignment and door frame checklist'],
+    materials: ['Approved bricks/blocks, sand and cement mortar',
+      'Approved lintel components, reinforcement, formwork and concrete materials',
+      'Electrical conduit sleeves, wall boxes and junction boxes for masonry-stage provisions'],
+    checks: ['Wall setting-out, dimensions and approved floor plan alignment',
+      'Door, window and ventilator opening position and clear sizes',
+      'Brick/block quality, mortar, wall line, level, plumb and bonding',
+      'Sill band (only if designed), lintel height, anchorage and concrete cover per approved drawings',
+      'Electrical wall provisions and junction-box positions against approved MEP layout',
+      'Concealed provision photographs before wall closure or plaster'],
+    reports: ['Room-wise wall, opening and lintel inspection photographs',
+      'Masonry electrical provision layout and concealed-route photographs',
+      'Masonry and lintel curing records'],
   },
   INTERNAL_PLASTER: {
     materials: ['Electrical conduit boxes/pipes', 'Plumbing concealed pipes and fittings',
@@ -231,6 +239,8 @@ export function milestoneConstructionStages(): ConstructionStageTemplate[] {
         'Pressure and leakage tests',
       ].includes(activity)),
       'Door frames and frame-anchor inspection per quoted floor',
+      'Masonry-stage electrical wall boxes, conduit sleeves and outlets before plaster',
+      'Lintels and sill-level reinforced bands only at drawing-approved locations',
     ];
     // The old combined FINISHES stage is replaced with individually tracked
     // floor-level activities instead of rendering duplicate finishing work.

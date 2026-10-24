@@ -124,8 +124,14 @@ export function applyCompanyWorkDefaults(
   if(!template.length){planned[String(i)]=fallback[String(i)]??[];continue;}
   const steps:QuotationMilestoneStep[]=[];
   const activeCodes=new Set<string>();
-  for(const item of template){
-   const code=payment.stageCodes.find(x=>family(x)===item.area);
+  // Combined brickwork payment: apply the exact same company checklist to
+  // EACH linked floor, in floor order, without sharing inspection records.
+  const masonryCodes=payment.stageCodes.filter(code=>family(code)==='MASONRY');
+  const repeatMasonry=masonryCodes.length>1&&template.every(item=>item.area==='MASONRY');
+  const assignments=repeatMasonry
+   ?masonryCodes.flatMap(code=>template.map(item=>({item,code})))
+   :template.map(item=>({item,code:payment.stageCodes.find(x=>family(x)===item.area)}));
+  for(const {item,code} of assignments){
    if(!code||seenCodes.has(code))continue;
    if(!activeCodes.has(code)){
     activeCodes.add(code);
@@ -347,6 +353,47 @@ export const rccSlabWorkDefaults:readonly CompanyWorkStep[]=[
  {kind:'check',name:'Deshuttering and reshoring only after engineer clearance',area:'RCC',substage:'Beams and slab'},
 ];
 
+/** The brickwork payment may combine two adjacent floors. This company template
+ * is authored once and applied to each actual MASONRY/FLOOR stage independently.
+ * A reinforced sill band is *not* damp-proof course (DPC). A nominal 3-ft
+ * sill height is never assumed: the approved floor and structural drawings
+ * control elevations, steel and concrete requirements.
+ * Electrical work here means masonry-stage provisions, not final wiring or
+ * the later internal-plaster concealed-service pressure / closure checks.
+ */
+export const masonrySubstageNames = ['Floor plan and wall marking','Brickwork and alignment','Sill band and lintels','Electrical provisions and handover'] as const;
+export const masonryWorkDefaults:readonly CompanyWorkStep[]=[
+ {kind:'work',name:'Review the approved floor plan and room wall schedule',area:'MASONRY',substage:'Floor plan and wall marking'},
+ {kind:'work',name:'Mark brick walls, partitions and wall thicknesses on slab',area:'MASONRY',substage:'Floor plan and wall marking'},
+ {kind:'check',name:'Verify brickwall grid, wall marking, room dimensions and thickness against floor plan',area:'MASONRY',substage:'Floor plan and wall marking'},
+ {kind:'check',name:'Check positions, widths and heights of doors, windows and ventilators',area:'MASONRY',substage:'Floor plan and wall marking'},
+ {kind:'check',name:'Check masonry start condition, supporting slab and reference levels',area:'MASONRY',substage:'Floor plan and wall marking'},
+ {kind:'material',name:'Approved bricks or blocks for this floor',area:'MASONRY',substage:'Brickwork and alignment'},
+ {kind:'material',name:'Sand and cement for masonry mortar',area:'MASONRY',substage:'Brickwork and alignment'},
+ {kind:'work',name:'Prepare brick/block units and approved mortar mix',area:'MASONRY',substage:'Brickwork and alignment'},
+ {kind:'work',name:'Build brickwalls and partitions with required bonding and joints',area:'MASONRY',substage:'Brickwork and alignment'},
+ {kind:'check',name:'Verify brick quality, mortar mix, bond, joint thickness and workmanship',area:'MASONRY',substage:'Brickwork and alignment'},
+ {kind:'check',name:'Check wall line, level, plumb, verticality and opening clearances',area:'MASONRY',substage:'Brickwork and alignment'},
+ {kind:'work',name:'Cure and protect new brickwork per approved specifications',area:'MASONRY',substage:'Brickwork and alignment'},
+ {kind:'material',name:'TMT steel, binding wire, cover blocks and formwork for reinforced sill band where specified',area:'MASONRY',substage:'Sill band and lintels',optional:true},
+ {kind:'work',name:'Construct reinforced sill-level band at drawing-approved elevation where specified',area:'MASONRY',substage:'Sill band and lintels',optional:true},
+ {kind:'check',name:'Verify sill-band height, steel, cover, anchorage and pre-pour clearance per structural design',area:'MASONRY',substage:'Sill band and lintels',optional:true},
+ {kind:'material',name:'Lintel steel, formwork, cement, sand and specified concrete aggregate where required',area:'MASONRY',substage:'Sill band and lintels'},
+ {kind:'work',name:'Mark door, window and ventilator lintel levels and bearing locations',area:'MASONRY',substage:'Sill band and lintels'},
+ {kind:'check',name:'Check lintel elevation, width, depth, end bearing and reinforcement against approved design',area:'MASONRY',substage:'Sill band and lintels'},
+ {kind:'work',name:'Install or cast lintels over openings according to structural drawings',area:'MASONRY',substage:'Sill band and lintels'},
+ {kind:'check',name:'Check lintel shuttering, reinforcement, cover blocks, supports and pour quality',area:'MASONRY',substage:'Sill band and lintels'},
+ {kind:'work',name:'Cure masonry lintels and reinforced bands where cast',area:'MASONRY',substage:'Sill band and lintels'},
+ {kind:'material',name:'Electrical conduit pipes, bends, junction boxes and wall boxes for this floor',area:'MASONRY',substage:'Electrical provisions and handover'},
+ {kind:'work',name:'Mark electrical switchboards, sockets, outlets and conduit routes from approved MEP layout',area:'MASONRY',substage:'Electrical provisions and handover'},
+ {kind:'check',name:'Confirm electrical outlet, box and conduit positions against approved electrical drawings',area:'MASONRY',substage:'Electrical provisions and handover'},
+ {kind:'work',name:'Install masonry-stage electrical wall boxes, sleeves and conduit provisions before plaster',area:'MASONRY',substage:'Electrical provisions and handover'},
+ {kind:'check',name:'Check electrical provisions, box levels, routes, safe chases and completeness',area:'MASONRY',substage:'Electrical provisions and handover'},
+ {kind:'check',name:'Verify no unauthorized cutting of structural columns, beams or reinforcement',area:'MASONRY',substage:'Electrical provisions and handover'},
+ {kind:'work',name:'Record photos of concealed electrical provisions and completed brickwork',area:'MASONRY',substage:'Electrical provisions and handover'},
+ {kind:'check',name:'Final floor wall alignment, openings and rough-in provisions inspection',area:'MASONRY',substage:'Electrical provisions and handover'},
+];
+
 export function defaultCompanyWorkRows(
  payments:readonly {name:string;percent:string;stageCodes:string[]}[],
 ):CompanyConstructionPaymentRow[] {
@@ -372,6 +419,13 @@ export function defaultCompanyWorkRows(
     payment.stageCodes.length===1&&payment.stageCodes[0]?.startsWith('RCC/')){
    return {name:payment.name,percent:Number(payment.percent),areas,
     steps:rccSlabWorkDefaults.map(step=>({...step}))};
+  }
+  // Preserve the existing one- or two-floor brickwork payment; never create
+  // a second duplicate payment just because two floors share this milestone.
+  if(areas.length===1&&areas[0]==='MASONRY'&&
+    payment.stageCodes.length>0&&payment.stageCodes.every(code=>code.startsWith('MASONRY/'))){
+   return {name:payment.name,percent:Number(payment.percent),areas,
+    steps:masonryWorkDefaults.map(step=>({...step}))};
   }
   const steps:CompanyWorkStep[]=[];
   for(const area of areas){

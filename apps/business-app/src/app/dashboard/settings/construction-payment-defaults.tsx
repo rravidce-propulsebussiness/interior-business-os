@@ -1,7 +1,7 @@
 'use client';
 
 import {useActionState,useState} from 'react';
-import {inferCompanyWorkAreaCode,foundationWorkDefaults,foundationSubstageNames,rccSlabWorkDefaults,rccSlabSubstageNames,type CompanyConstructionPaymentRow,type CompanyWorkStep} from '@business-os/core/company-construction-defaults';
+import {inferCompanyWorkAreaCode,foundationWorkDefaults,foundationSubstageNames,rccSlabWorkDefaults,rccSlabSubstageNames,masonryWorkDefaults,masonrySubstageNames,type CompanyConstructionPaymentRow,type CompanyWorkStep} from '@business-os/core/company-construction-defaults';
 import {saveConstructionPaymentDefaults} from './payment-default-actions';
 
 type Kind=CompanyWorkStep['kind'];
@@ -42,6 +42,7 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
  const areas=row.areas?.length?row.areas:[...new Set(steps.map(item=>item.area))];
  const isFoundation=index===1&&['SITE_PREP','FOUNDATION','PLINTH'].every(area=>areas.includes(area));
  const isRcc=areas.length===1&&areas.includes('RCC')&&/slab payment/i.test(row.name);
+ const isMasonry=areas.length===1&&areas.includes('MASONRY');
  const [kind,setKind]=useState<Kind>('work');
  const [name,setName]=useState('');
  const [checkRef,setCheckRef]=useState('');
@@ -53,7 +54,7 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
  const [editDraft,setEditDraft]=useState('');
  const prior=steps.slice(0,after===null?steps.length:after+1).filter(isCheck);
  const current=checkRef?prior.find(x=>link(x)===checkRef):prior.at(-1);
- const counts=kinds.filter(type=>!(isFoundation||isRcc)||type!=='qc')
+ const counts=kinds.filter(type=>!(isFoundation||isRcc||isMasonry)||type!=='qc')
   .map(type=>({type,count:steps.filter(item=>item.kind===type).length}));
  const limit=6;
  const groups=[...new Set(steps.map(item=>item.substage).filter((value):value is string=>Boolean(value)))];
@@ -67,6 +68,10 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
  const oldRcc=isRcc&&(
   rccSlabSubstageNames.some(group=>!groups.includes(group))||
   steps.length<rccSlabWorkDefaults.length
+ );
+ const oldMasonry=isMasonry&&(
+  masonrySubstageNames.some(group=>!groups.includes(group))||
+  steps.length<masonryWorkDefaults.length
  );
 
  // Preserve the internal project stage mapping, without asking users to
@@ -169,7 +174,7 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
   </button>
   <div className="us-payment-stage-stats" aria-label={'Included item counts for stage '+(index+1)}>
    {counts.map(({type,count})=><span className={'us-payment-stat is-'+type} key={type}>
-    <ItemIcon kind={type}/><strong>{count}</strong><small>{(isFoundation||isRcc)&&type==='check'?'Checks & QC':descriptions[type]}</small>
+    <ItemIcon kind={type}/><strong>{count}</strong><small>{(isFoundation||isRcc||isMasonry)&&type==='check'?'Checks & QC':descriptions[type]}</small>
    </span>)}
   </div>
   {expanded&&<div id={'company-payment-stage-'+index} className="us-payment-stage-content">
@@ -195,6 +200,16 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
     These items define the scope of this payment stage. Edit the order here, or
     customize a new quotation separately without changing your company defaults.
    </p>
+   {isMasonry&&oldMasonry&&canEdit&&<div className="us-payment-upgrade">
+    <div><strong>Updated floor brickwork checklist available</strong>
+     <p>Wall marking, masonry, drawing-approved sill band/lintels, and electrical provisions. One checklist is reused for each floor, even if two floors share a payment.</p>
+    </div>
+    <button type="button" onClick={()=>{
+     if(!window.confirm('Replace this company brickwork checklist with the grouped masonry template? Existing quotations and projects remain unchanged.'))return;
+     onChange({...row,steps:masonryWorkDefaults.map(step=>({...step}))});
+     setSelectedSubstage('');setShowAll(false);setEditing(null);setAfter(null);
+    }}>Apply brickwork template</button>
+   </div>}
    {isRcc&&oldRcc&&canEdit&&<div className="us-payment-upgrade">
     <div><strong>Updated RCC slab checklist available</strong>
      <p>Apply to this floor only: columns, staircase and beams/slab. Its percentage stays the same. Issued quotations remain unchanged.</p>
@@ -252,7 +267,14 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
         <button type="button" onClick={saveEdit}>Save</button>
         <button type="button" onClick={()=>{setEditing(null);setError('');}}>Cancel</button>
        </div>:
-       <span>{item.name}{item.optional&&<small className="us-payment-optional">Optional — not copied to quotations</small>}</span>}
+       <span>{item.name}
+        {item.optional!==undefined&&<label className="us-payment-optional-toggle">
+         <input type="checkbox" checked={!item.optional} disabled={!canEdit}
+          onChange={e=>editRows(steps.map((step,i)=>i===position?
+           {...step,optional:!e.target.checked}:step))}/>
+         Include in new quotations
+        </label>}
+       </span>}
      </div>
      {canEdit&&<div className="us-payment-step-actions">
       <button type="button" aria-label={'Move step '+(position+1)+' up'} title="Move up"
@@ -327,10 +349,29 @@ export function ConstructionPaymentDefaults({initial,canEdit}:{
   return steps.length<rccSlabWorkDefaults.length||
    rccSlabSubstageNames.some(group=>!groups.has(group));
  });
+ const masonryIndexes=rows.flatMap((row,index)=>
+  row.areas?.length===1&&row.areas[0]==='MASONRY'?[index]:[]);
+ const outdatedMasonry=masonryIndexes.filter(index=>{
+  const items=rows[index]?.steps??[];
+  const groups=new Set(items.map(item=>item.substage));
+  return items.length<masonryWorkDefaults.length||
+   masonrySubstageNames.some(group=>!groups.has(group));
+ });
  return <div className="us-payment-defaults">
   <p className="us-info">Each payment stage includes its work, materials, checks, tests and company QC.
    These defaults are copied into new construction quotations and can be customized per project.</p>
-  {canEdit&&outdatedRcc.length>0&&<div className="us-payment-upgrade">
+  {canEdit&&outdatedMasonry.length>0&&<div className="us-payment-upgrade">
+    <div><strong>Apply reusable brickwork template to all configured floor payments</strong>
+     <p>{masonryIndexes.length} brickwork payment stage(s), {outdatedMasonry.length} using an older checklist. The work repeats independently for each linked floor. Percentages and issued quotations stay unchanged.</p>
+    </div>
+    <button type="button" onClick={()=>{
+     if(!window.confirm('Replace '+outdatedMasonry.length+' older brickwork company checklists? Your saved stage percentages and issued quotations remain unchanged.'))return;
+     const chosen=new Set(outdatedMasonry);
+     setRows(previous=>previous.map((row,index)=>chosen.has(index)?
+      {...row,steps:masonryWorkDefaults.map(step=>({...step}))}:row));
+    }}>Apply to all brickwork payments</button>
+   </div>}
+   {canEdit&&outdatedRcc.length>0&&<div className="us-payment-upgrade">
    <div><strong>Apply reusable slab template to all configured floors</strong>
     <p>{rccIndexes.length} slab milestone(s) detected; {outdatedRcc.length} have an older checklist. Their payment percentages and issued quotations remain unchanged.</p>
    </div>
