@@ -2,7 +2,7 @@ import {describe,it,expect} from 'vitest';
 import {companyConstructionPaymentRows,applyCompanyPaymentDefaults,applyCompanyWorkDefaults,defaultCompanyWorkRows,hydrateCompanyWorkDefaults,inferCompanyWorkAreaCode,companyWorkAreaLabel,planningWorkDefaults,foundationWorkDefaults,foundationSubstageNames} from './company-construction-defaults';
 import {defaultStageRequirements} from './quotation-stage-requirements';
 import {proposedConstructionPayments} from './construction-payment-schedule';
-import {standardMilestoneWorkflow,validateMilestoneFlow} from './quotation-milestone-flow';
+import {standardMilestoneWorkflow,validateMilestoneFlow,encodeMilestoneFlow,savedMilestoneFlow} from './quotation-milestone-flow';
 
 describe('company construction defaults vs quotation snapshot',()=>{
  it('validates percentages and preserves current quotation floor codes',()=>{
@@ -233,8 +233,17 @@ describe('Stage 2 Foundation payment: seven grouped, editable substages',()=>{
   expect(described).not.toContain('Anti-termite treatment per approved method and locations');
   expect(described).toContain('Plinth beam concreting and vibration');
   expect(described).toContain('Footing concreting and vibration');
+  expect(quote.flow['1']?.some(item=>item.substage==='Footings')).toBe(true);
+  expect(quote.flow['1']?.some(item=>item.substage==='Plinth beam')).toBe(true);
+  expect(savedMilestoneFlow(encodeMilestoneFlow(quote.flow))).toEqual(quote.flow);
   expect(validateMilestoneFlow(quote.flow,quote.requirements,plans.slice(0,2)))
    .toEqual(quote.flow);
+ });
+ it('keeps four-floor company payment defaults inside the supported step budget',()=>{
+  const floors=['Ground','First','Second','Third'];
+  const multi=defaultCompanyWorkRows(proposedConstructionPayments(floors));
+  expect(companyConstructionPaymentRows.safeParse(multi).success).toBe(true);
+  expect(multi[1]?.percent).toBe(18);
  });
  it('preserves existing company customizations and percentages instead of silently overwriting them',()=>{
   const saved=companyConstructionPaymentRows.parse([
