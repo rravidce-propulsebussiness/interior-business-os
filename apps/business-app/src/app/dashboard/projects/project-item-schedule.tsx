@@ -17,7 +17,7 @@ const readable=(date:string)=>{
  return d&&m&&y?d+'/'+m+'/'+y:date;
 };
 /** One date editor per canonical stage item; no second progress checklist. */
-export function ProjectItemSchedule({projectId,stageId,kind,index,title,item,canPlan,planningMode='full',today}:Props){
+export function ProjectItemSchedule({projectId,stageId,kind,index,title,item,canPlan,planningMode='full'}:Props){
  const router=useRouter();
  const [open,setOpen]=useState(false);
  const [currentVersion,setCurrentVersion]=useState(item?.version??0);
