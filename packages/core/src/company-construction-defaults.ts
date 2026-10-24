@@ -306,6 +306,47 @@ export const foundationWorkDefaults:readonly CompanyWorkStep[]=[
  {kind:'check',name:'Foundation completion photos and engineer review',area:'PLINTH',substage:'Ground PCC and completion'},
 ];
 
+/** Repeat this one approved RCC sequence against the actual floor codes
+ * RCC/GROUND, RCC/FIRST, etc. Five slabs = five existing payment milestones,
+ * never five copies of the template definition. Per-project edits stay local.
+ * Concrete/testing values and hold points follow approved engineer QA plans. */
+export const rccSlabSubstageNames = ['Columns and starters','Staircase','Beams and slab'] as const;
+export const rccSlabWorkDefaults:readonly CompanyWorkStep[]=[
+ {kind:'work',name:'Column marking, position and starters as per structural plan',area:'RCC',substage:'Columns and starters'},
+ {kind:'material',name:'TMT steel for columns, binding wire and cover blocks',area:'RCC',substage:'Columns and starters'},
+ {kind:'work',name:'Column bar bending, reinforcement and ties',area:'RCC',substage:'Columns and starters'},
+ {kind:'check',name:'Column bar bending, lap zones, ring spacing and cover as per design',area:'RCC',substage:'Columns and starters'},
+ {kind:'work',name:'Column shuttering and reinforcement supports',area:'RCC',substage:'Columns and starters'},
+ {kind:'check',name:'Column and staircase-column heights, levels, dimensions and alignment',area:'RCC',substage:'Columns and starters'},
+ {kind:'check',name:'Column reinforcement and shuttering pre-pour structural clearance',area:'RCC',substage:'Columns and starters'},
+ {kind:'material',name:'Sand, cement and 20 mm aggregate for column concrete',area:'RCC',substage:'Columns and starters'},
+ {kind:'work',name:'Column concreting with proper vibration',area:'RCC',substage:'Columns and starters'},
+ {kind:'check',name:'Column concrete mix grade, compaction and vibrator checks',area:'RCC',substage:'Columns and starters'},
+ {kind:'test',name:'Column concrete slump and cube sampling per approved QA plan',area:'RCC',substage:'Columns and starters'},
+ {kind:'work',name:'Column deshuttering, plumb verification and daily curing',area:'RCC',substage:'Columns and starters'},
+ {kind:'work',name:'Staircase and landing shuttering with supports',area:'RCC',substage:'Staircase'},
+ {kind:'material',name:'TMT bars, ties and cover blocks for staircase',area:'RCC',substage:'Staircase'},
+ {kind:'work',name:'Staircase reinforcement cutting, bending and fixing',area:'RCC',substage:'Staircase'},
+ {kind:'check',name:'Stair flight width, riser height, tread depth and landing level as per design',area:'RCC',substage:'Staircase'},
+ {kind:'check',name:'Stair reinforcement anchorage, cover and shuttering stability',area:'RCC',substage:'Staircase'},
+ {kind:'work',name:'Staircase concreting with slab or separate approved pour',area:'RCC',substage:'Staircase'},
+ {kind:'work',name:'Staircase curing and concrete protection',area:'RCC',substage:'Staircase'},
+ {kind:'work',name:'Beam and slab shuttering, centering and propping',area:'RCC',substage:'Beams and slab'},
+ {kind:'material',name:'TMT bars, binding wire and cover blocks for beams and slab',area:'RCC',substage:'Beams and slab'},
+ {kind:'work',name:'Beam and slab bar bending and reinforcement placing',area:'RCC',substage:'Beams and slab'},
+ {kind:'work',name:'Electrical conduit, fan-box and embedded-service layout',area:'RCC',substage:'Beams and slab'},
+ {kind:'check',name:'Beam and slab rebar size, spacing, bends, laps, anchorage and cover per design',area:'RCC',substage:'Beams and slab'},
+ {kind:'check',name:'Beam/slab shuttering dimensions, levels, supports and stability',area:'RCC',substage:'Beams and slab'},
+ {kind:'check',name:'Electrical layout, conduits, sleeves and embedments match approved MEP design',area:'RCC',substage:'Beams and slab'},
+ {kind:'check',name:'Structural engineer pre-pour reinforcement and shuttering clearance',area:'RCC',substage:'Beams and slab'},
+ {kind:'material',name:'Sand, cement and 20 mm aggregate for beams and slab concrete',area:'RCC',substage:'Beams and slab'},
+ {kind:'work',name:'Beam and slab concreting, level control and vibrator compaction',area:'RCC',substage:'Beams and slab'},
+ {kind:'test',name:'Slab concrete slump/workability and cube samples per QA plan',area:'RCC',substage:'Beams and slab'},
+ {kind:'check',name:'Slab mix grade/ratio, vibration, levels and finish',area:'RCC',substage:'Beams and slab'},
+ {kind:'work',name:'Daily slab curing and concrete protection',area:'RCC',substage:'Beams and slab'},
+ {kind:'check',name:'Deshuttering and reshoring only after engineer clearance',area:'RCC',substage:'Beams and slab'},
+];
+
 export function defaultCompanyWorkRows(
  payments:readonly {name:string;percent:string;stageCodes:string[]}[],
 ):CompanyConstructionPaymentRow[] {
@@ -324,6 +365,13 @@ export function defaultCompanyWorkRows(
     areas.includes('FOUNDATION')&&areas.includes('PLINTH')){
    return {name:payment.name,percent:Number(payment.percent),areas,
     steps:foundationWorkDefaults.map(step=>({...step}))};
+  }
+  // Generate the same editable RCC work, inspection and material scope for
+  // every floor supplied by its real quotation, not a hardcoded G+4 count.
+  if(areas.length===1&&areas[0]==='RCC'&&
+    payment.stageCodes.length===1&&payment.stageCodes[0]?.startsWith('RCC/')){
+   return {name:payment.name,percent:Number(payment.percent),areas,
+    steps:rccSlabWorkDefaults.map(step=>({...step}))};
   }
   const steps:CompanyWorkStep[]=[];
   for(const area of areas){
