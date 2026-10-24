@@ -142,7 +142,8 @@ export function applyCompanyWorkDefaults(
     index=scope[field].length;
     scope[field].push(item.name);
    }
-   const value={kind:item.kind,code,index} as QuotationMilestoneStep;
+   const value:QuotationMilestoneStep={kind:item.kind,code,index,
+    ...(item.substage?{substage:item.substage}:{})};
    if(steps.some(x=>x.code===value.code&&x.index===value.index&&
       (x.kind===value.kind||(value.kind==='test'&&x.kind==='check')||
         (value.kind==='check'&&x.kind==='test'))))continue;
