@@ -1197,3 +1197,14 @@
 .pv2-work-forecast>span{border-radius:8px;padding:6px 9px;background:#fdf0e4;color:#9c4d22}
 .pv2-work-forecast>p{flex:1 0 100%;font-size:10px;color:#8792a4;margin:0;line-height:1.5}
 @media(max-width:540px){.pv2-work-forecast{align-items:flex-start;gap:8px;flex-direction:column}.pv2-work-forecast>p{flex-basis:auto}}
+
+
+/* One compact stage date summary: reads canonical work-item schedule only.
+   Shows cross-stage overlap without creating another timeline or task list. */
+.pv2-stage-schedule-summary{display:flex;gap:6px;align-items:flex-start;font-weight:650;
+ font-size:10px;line-height:1.55;color:#8490a3;margin-top:4px;overflow-wrap:anywhere}
+.pv2-stage-schedule-summary.is-planned{color:#536d88}
+.pv2-stage-schedule-summary>span:first-child{color:#e36b2b;flex-shrink:0}
+.pv2-stage-schedule-summary b{font-weight:750;color:#18754a}
+.pv2-stage-schedule-summary em{font-style:normal;color:#b25c24}
+@media(max-width:540px){.pv2-stage-schedule-summary{font-size:10px;margin-top:5px}}

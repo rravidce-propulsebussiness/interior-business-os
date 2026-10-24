@@ -21,6 +21,7 @@ import { ProjectClientAccess } from './project-client-access';
 import { ProjectSiteSurvey,ProjectAdvanceAction } from './project-next-forms';
 import { effectiveProjectStageStatus } from './project-stage-status';
 import { projectTimelineStages } from './project-visible-stages';
+import {stagePlanPreview} from './project-stage-schedule-preview';
 import { MasterForm } from '../commercial/master-form';
 import { activeOrganization } from '@business-os/auth/server';
 import { projectWorkspace,formatMoney,pretty,shortDate,stringValue,
@@ -453,6 +454,7 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
     {timelineStages.map((stage,index)=>{
       const visualStatus=visualStatuses[index]??stage.status;
       const stageExecution=executionById.get(stage.id);
+      const stagePlan=stagePlanPreview(d.itemPlans,stage.id,todayInIndia);
       const physicalStage=!['QUOTED_SCOPE','PRECONSTRUCTION','DESIGN','DESIGN_APPROVAL','SITE_SURVEY'].includes(stage.template_code);
       const workAllowed=allowWork&&stageExecution?.status==='in_progress';
       const checksAllowed=allowChecks&&stageExecution?.status==='in_progress';
@@ -557,7 +559,15 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
        <summary className="pv2-command-stage-summary">
         <span className="pv2-stage-number">{complete?'✓':index+1}</span>
         <span className="pv2-stage-title-block"><strong>{stage.title}</strong>
-         <small>{stage.floor_code?pretty(stage.floor_code)+' · ':''}{stage.phase?pretty(stage.phase)+' · ':''}{stage.activities.length} work items</small></span>
+         <small>{stage.floor_code?pretty(stage.floor_code)+' · ':''}{stage.phase?pretty(stage.phase)+' · ':''}{stage.activities.length} work items</small>
+         <span className={'pv2-stage-schedule-summary '+(stagePlan.count?'is-planned':'')}>
+          <span aria-hidden="true">▦</span>
+          {stagePlan.count
+           ?<span>{stagePlan.count} item{stagePlan.count===1?'':'s'} planned · {shortDate(stagePlan.start)} – {shortDate(stagePlan.finish)}
+            {stagePlan.hasWorkToday&&<b> · Scheduled today</b>}
+            {stagePlan.overlapsAnotherStage&&<em> · Overlaps another stage</em>}</span>
+           :<span>Work dates not planned</span>}
+         </span></span>
         <Status value={displayStatus}/>
         <span className="pv2-stage-meta">{payment.length} payment milestone{payment.length===1?'':'s'}</span>
         <OwnerIcon name="arrow" size={15}/>

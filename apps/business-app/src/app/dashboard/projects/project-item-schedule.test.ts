@@ -2,6 +2,7 @@ import {describe,it,expect} from 'vitest';
 import {readFileSync} from 'node:fs';
 import {forecastWork} from './project-work-forecast';
 import {offsetPlanDate} from './project-schedule-dates';
+import {stagePlanPreview} from './project-stage-schedule-preview';
 const read=(name:string)=>readFileSync(new URL(name,import.meta.url),'utf8');
 const component=read('./project-item-schedule.tsx');
 const view=read('./project-v2-view.tsx');
@@ -124,5 +125,39 @@ describe('Automatic project work forecast and owner/engineer schedule boundaries
   ],[{stage_id:'stage',index:0,status:'passed'}],'2026-10-23');
   expect(result).toMatchObject({completed:0,total:1,progressPct:0,scheduled:0,pace:'not_planned'});
   expect(read('./project-work-forecast.ts')).not.toContain('update ');
+ });
+});
+
+
+describe('Visible schedules in every collapsed project stage',()=>{
+ const sample=[
+  {stageId:'foundation',kind:'work' as const,index:0,title:'Footing layout',
+   plannedStart:'2026-10-24',plannedFinish:'2026-10-24',note:'',version:1},
+  {stageId:'foundation',kind:'check' as const,index:0,title:'Footing marking check',
+   plannedStart:'2026-10-24',plannedFinish:'2026-10-25',note:'',version:1},
+  {stageId:'plinth',kind:'work' as const,index:0,title:'Backfilling',
+   plannedStart:'2026-10-25',plannedFinish:'2026-10-26',note:'',version:1},
+ ];
+ it('summarizes inclusive same-day work and another-stage overlap without changing progress',()=>{
+  expect(stagePlanPreview(sample,'foundation','2026-10-24')).toMatchObject({
+   count:2,start:'2026-10-24',finish:'2026-10-25',
+   overlapsAnotherStage:true,hasWorkToday:true,
+  });
+  expect(stagePlanPreview(sample,'plinth','2026-10-24')).toMatchObject({
+   count:1,start:'2026-10-25',finish:'2026-10-26',
+   overlapsAnotherStage:true,hasWorkToday:false,
+  });
+  expect(stagePlanPreview(sample,'unknown','2026-10-24')).toEqual({
+   count:0,start:null,finish:null,overlapsAnotherStage:false,hasWorkToday:false,
+  });
+ });
+ it('shows planned range in existing stage summary, including future-stage overlap',()=>{
+  expect(view).toContain("const stagePlan=stagePlanPreview(d.itemPlans,stage.id,todayInIndia)");
+  expect(view).toContain("className={'pv2-stage-schedule-summary '");
+  expect(view).toContain('Scheduled today');
+  expect(view).toContain('Overlaps another stage');
+  expect(view).toContain('Work dates not planned');
+  const css=read('./project-v2.css');
+  expect(css).toContain('.pv2-stage-schedule-summary');
  });
 });
