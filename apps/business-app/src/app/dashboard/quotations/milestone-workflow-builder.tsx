@@ -295,6 +295,8 @@ export function MilestoneWorkflowBuilder({paymentIndex,paymentName,steps,codes,a
    {(showAllWork?steps:steps.slice(0,8)).map((item,index)=><li key={item.kind+'-'+item.code+'-'+item.index} className="qs-one-flow-item">
     <span className="qs-one-flow-num">{index+1}</span>
     <div className="qs-one-flow-detail">
+     {item.substage&&item.substage!==steps[index-1]?.substage&&
+      <small className="qs-one-flow-substage">{item.substage}</small>}
      <small>{names[item.kind]} · {label(item.code)}</small>
      <strong>{itemName(item)}</strong>
      {item.kind==='material'&&<small>Quantity, order and delivery tracked under this work stage</small>}
