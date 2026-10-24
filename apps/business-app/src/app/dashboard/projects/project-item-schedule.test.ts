@@ -49,16 +49,17 @@ describe('Existing project stage item dates, no second execution system',()=>{
 });
 
 describe('Automatic project work forecast and owner/engineer schedule boundaries',()=>{
- const limits=read('../../../../../../packages/database/supabase/migrations/20261023223500_project_stage_site_engineer_daily_plan.sql');
- it('enforces today/tomorrow planning on the server for site engineers while managers plan future work',()=>{
-  expect(limits).toContain("v_full_planner=coalesce(private.construction_can_manage(p_org,p_project),false)");
-  expect(limits).toContain("v_today=(now() at time zone 'Asia/Kolkata')::date");
-  expect(limits).toContain("p_start<v_today or p_finish>v_today+1");
-  expect(limits).toContain("p_kind not in ('work','check','test','qc','material')");
+ const limits=read('../../../../../../packages/database/supabase/migrations/20261024120000_site_engineer_future_stage_plan.sql');
+ it('permits site engineer planning ahead while preserving project roles and execution checks',()=>{
+  expect(limits).toContain('private.project_can_plan_item(p_org,p_project)');
   expect(limits).toContain('v_existing.version');
-  expect(component).toContain("planningMode==='daily'");
-  expect(component).toContain('min={minimum} max={maximum}');
+  expect(limits).toContain("p_kind not in ('work','check','test','qc','material')");
+  expect(limits).toContain('Stage item changed; refresh the project timeline');
+  expect(limits).not.toContain('p_start<v_today or p_finish>v_today+1');
+  expect(component).toContain("planningMode==='site'");
+  expect(component).not.toContain('max={maximum}');
   expect(view).toContain('planningMode={planningMode} today={todayInIndia}');
+  expect(view).toContain("site engineers can plan upcoming stages as well.");
  });
  it('calculates actual physical work completion and detects late items without approving QC',()=>{
   const stages=[{id:'f',activities:['Mark','Excavate','PCC','Footing']}];

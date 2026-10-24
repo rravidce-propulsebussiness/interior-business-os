@@ -13,7 +13,7 @@ export function StageChecklistItem({projectId,stageId,kind,index,title,status,no
   status:string;notes?:string;photos:Photo[];canEdit?:boolean;photoId?:string;
   materialPanel?:ReactNode;checksHref?:string;
   schedule?:ProjectItemScheduleRow|undefined;canPlan?:boolean;
-  scheduleKind?:'work'|'check'|'test';planningMode?:'full'|'daily';today?:string;
+  scheduleKind?:'work'|'check'|'test';planningMode?:'full'|'site';today?:string;
 }) {
  const router=useRouter();
  const [selectedPhotoId,setSelectedPhotoId]=useState(photoId);
