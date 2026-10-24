@@ -8,6 +8,7 @@ export const quotationMilestoneStep=z.object({
  kind:z.enum(['work','material','check','test','qc']),
  code:z.string().regex(/^[A-Z][A-Z0-9_]*(?:\/[A-Z][A-Z0-9_]*)?$/).max(120),
  index:z.number().int().min(0).max(49),
+ substage:z.string().trim().min(2).max(90).optional(),
 }).strict();
 export type QuotationMilestoneStep=z.infer<typeof quotationMilestoneStep>;
 export type QuotationMilestoneFlow=Record<string,QuotationMilestoneStep[]>;
