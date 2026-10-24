@@ -1,7 +1,7 @@
 'use client';
 
 import {useActionState,useState} from 'react';
-import {inferCompanyWorkAreaCode,type CompanyConstructionPaymentRow,type CompanyWorkStep} from '@business-os/core/company-construction-defaults';
+import {inferCompanyWorkAreaCode,foundationWorkDefaults,foundationSubstageNames,type CompanyConstructionPaymentRow,type CompanyWorkStep} from '@business-os/core/company-construction-defaults';
 import {saveConstructionPaymentDefaults} from './payment-default-actions';
 
 type Kind=CompanyWorkStep['kind'];
@@ -46,13 +46,22 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
  const [error,setError]=useState('');
  const [after,setAfter]=useState<number|null>(null);
  const [showAll,setShowAll]=useState(false);
+ const [selectedSubstage,setSelectedSubstage]=useState('');
  const [editing,setEditing]=useState<number|null>(null);
  const [editDraft,setEditDraft]=useState('');
  const prior=steps.slice(0,after===null?steps.length:after+1).filter(isCheck);
  const current=checkRef?prior.find(x=>link(x)===checkRef):prior.at(-1);
  const counts=kinds.map(type=>({type,count:steps.filter(item=>item.kind===type).length}));
  const limit=6;
- const visible=showAll?steps:steps.slice(0,limit);
+ const groups=[...new Set(steps.map(item=>item.substage).filter((value):value is string=>Boolean(value)))];
+ const indexed=steps.map((item,position)=>({item,position}));
+ const visible=selectedSubstage?indexed.filter(({item})=>item.substage===selectedSubstage):
+  showAll?indexed:indexed.slice(0,limit);
+ const isFoundation=index===1&&['SITE_PREP','FOUNDATION','PLINTH'].every(area=>areas.includes(area));
+ const oldFoundation=isFoundation&&(
+  foundationSubstageNames.some(group=>!groups.includes(group))||
+  steps.filter(item=>!item.optional).length<foundationWorkDefaults.filter(item=>!item.optional).length
+ );
 
  // Preserve the internal project stage mapping, without asking users to
  // repeatedly select PRECONSTRUCTION / DESIGN / FOUNDATION for every work item.
@@ -82,7 +91,8 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
   if(!chosen){
    setError('This work belongs to another construction stage. Add it under the corresponding payment milestone.');return;
   }
-  const next:CompanyWorkStep={kind,name:title,area:chosen};
+  const group=selectedSubstage||steps[after??steps.length-1]?.substage;
+  const next:CompanyWorkStep={kind,name:title,area:chosen,...(group?{substage:group}:{})};
   if(steps.some(item=>item.area===next.area&&item.name.toLowerCase()===next.name.toLowerCase()&&
    (item.kind===next.kind||(isCheck(item)&&isCheck(next))))){
    setError('This item already exists in the payment stage.');return;
@@ -176,9 +186,31 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
     These items define the scope of this payment stage. Edit the order here, or
     customize a new quotation separately without changing your company defaults.
    </p>
+   {isFoundation&&oldFoundation&&canEdit&&<div className="us-payment-upgrade">
+    <div><strong>Updated foundation checklist available</strong>
+     <p>Apply the 7-substage template to this company only. Your milestone name and percentage stay unchanged; existing quotations and projects are untouched.</p>
+    </div>
+    <button type="button" onClick={()=>{
+     if(!window.confirm('Replace ONLY this company foundation checklist with the updated 7-substage template? This overwrites edits to these foundation items after you save. Existing quotations and projects are unchanged.'))return;
+     onChange({...row,steps:foundationWorkDefaults.map(step=>({...step}))});
+     setSelectedSubstage('');setShowAll(false);setEditing(null);setAfter(null);
+    }}>Apply 7 substages</button>
+   </div>}
+   {groups.length>0&&<div className="us-payment-substages" role="group" aria-label="Foundation work substages">
+    <button type="button" aria-pressed={!selectedSubstage}
+     className={!selectedSubstage?'is-selected':''}
+     onClick={()=>{setSelectedSubstage('');setShowAll(false);setEditing(null);setAfter(null);}}>
+     All items
+    </button>
+    {groups.map((group,groupIndex)=><button type="button" key={group}
+     className={selectedSubstage===group?'is-selected':''} aria-pressed={selectedSubstage===group}
+     onClick={()=>{setSelectedSubstage(group);setShowAll(true);setEditing(null);setAfter(null);}}>
+     {groupIndex+1}. {group}<small>{steps.filter(step=>step.substage===group).length}</small>
+    </button>)}
+   </div>}
    <div className="us-payment-items-heading">
     <strong>Items in this stage</strong>
-    {steps.length>limit&&<button className="us-payment-step-expand" type="button"
+    {!selectedSubstage&&steps.length>limit&&<button className="us-payment-step-expand" type="button"
      aria-expanded={showAll} aria-controls={'company-payment-items-'+index}
      onClick={()=>{setShowAll(value=>!value);setEditing(null);setAfter(null);}}>
      {showAll?'Show fewer items':'Show all '+steps.length+' items'}
@@ -186,7 +218,7 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
     </button>}
    </div>
    <div id={'company-payment-items-'+index} className="us-payment-step-list">
-    {visible.map((item,position)=><div key={position} className="us-payment-step">
+    {visible.map(({item,position})=><div key={position} className="us-payment-step">
      <span className="us-payment-step-number">{position+1}</span>
      <span className={'us-payment-step-kind is-'+item.kind}><ItemIcon kind={item.kind}/>
       <small>{labels[item.kind]}</small>
@@ -201,7 +233,7 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
         <button type="button" onClick={saveEdit}>Save</button>
         <button type="button" onClick={()=>{setEditing(null);setError('');}}>Cancel</button>
        </div>:
-       <span>{item.name}</span>}
+       <span>{item.name}{item.optional&&<small className="us-payment-optional">Optional — not copied to quotations</small>}</span>}
      </div>
      {canEdit&&<div className="us-payment-step-actions">
       <button type="button" aria-label={'Move step '+(position+1)+' up'} title="Move up"
@@ -214,7 +246,9 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
        className="us-payment-step-delete" onClick={()=>removeStep(position)}><ActionIcon action="delete"/></button>
      </div>}
     </div>)}
-    {!steps.length&&<p className="us-payment-empty">No steps yet. Add the first work item below.</p>}
+    {!visible.length&&<p className="us-payment-empty">
+     {steps.length?'No items in this substage.':'No steps yet. Add the first work item below.'}
+    </p>}
    </div>
    {canEdit&&<button type="button" className="us-payment-add-work"
     onClick={()=>add(steps.length-1)}>＋ Add work, material or check</button>}
