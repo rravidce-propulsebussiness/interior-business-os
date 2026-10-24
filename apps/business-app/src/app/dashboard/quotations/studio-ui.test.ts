@@ -888,18 +888,27 @@ describe('Payment Settings keeps work-area entry textual and removes unrelated s
   expect(stageEditor).toContain('expanded={expandedIndex===index}');
   expect(stageEditor).not.toContain('className="us-payment-stage-work"');
   expect(stageEditor).toContain('us-payment-stage-stats');
-  expect(stageEditor).toContain('kinds.map(type=>');
+  expect(stageEditor).toContain("kinds.filter(type=>!(isFoundation||isRcc)||type!=='qc')");
  });
  it('Show all and Show fewer actually change the rendered item count with no scrollbar cap',()=>{
   const style=file('../settings/settings.css');
   expect(stageEditor).toContain('const limit=6');
-  expect(stageEditor).toContain('const visible=showAll?steps:steps.slice(0,limit)');
+  expect(stageEditor).toContain('const indexed=steps.map((item,position)=>({item,position}))');
+  expect(stageEditor).toContain('const visible=selectedSubstage?indexed.filter');
   expect(stageEditor).toContain("{showAll?'Show fewer items':'Show all '+steps.length+' items'}");
   expect(stageEditor).toContain('setShowAll(value=>!value)');
-  expect(stageEditor).toContain('visible.map((item,position)');
+  expect(stageEditor).toContain('visible.map(({item,position})');
   expect(style).toContain('.us-payment-step-list{');
   expect(style).toContain('overflow:visible;max-height:none');
   expect(style).not.toContain('overflow-y:auto');
+ });
+ it('exposes grouped RCC substages and an explicit all-floors upgrade without changing payments',()=>{
+  expect(stageEditor).toContain("const isRcc=areas.length===1&&areas.includes('RCC')");
+  expect(stageEditor).toContain('rccSlabSubstageNames');
+  expect(stageEditor).toContain('selectedSubstage===group');
+  expect(stageEditor).toContain('Apply to all slab floors');
+  expect(stageEditor).toContain('window.confirm');
+  expect(stageEditor).toContain('targets.has(index)?{...row,steps:rccSlabWorkDefaults');
  });
  it('renders one compact action row with edit, move and delete for each work step',()=>{
   expect(stageEditor).toContain('us-payment-step-name');
