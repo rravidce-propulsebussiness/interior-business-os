@@ -13,6 +13,11 @@ describe('Existing project stage item dates, no second execution system',()=>{
   expect(view).toContain("stage.activities.map((work,i)=>renderWorkItem(work,i)");
   expect(view).toContain('schedule={planFor(stage.id,');
   expect(view).toContain('kind="material"');
+  expect(view).toContain('orderedFlow.length===0&&plannedMaterials.length>0');
+  expect(view).toContain('pv2-legacy-material-planning');
+  expect(view).toContain('Plan material delivery dates');
+  expect(view).toContain('kind="material" index={i} title={material}');
+  expect(view).toContain('Procurement, delivery updates');
   expect(view).toContain('kind="qc"');
   expect(view).toContain("step.kind==='test'?'test':'check'");
   expect(view).toContain('scheduleKind={kind}');

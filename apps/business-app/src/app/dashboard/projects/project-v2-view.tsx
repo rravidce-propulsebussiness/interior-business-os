@@ -584,6 +584,22 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
          projectId={d.project.id} stageId={stage.id} state={stageExecution}
          canManage={allowWork} workCompleted={finishedActivities} workTotal={stage.activities.length}
          checksPassed={passed} checksTotal={checks.length}/>}
+        {orderedFlow.length===0&&plannedMaterials.length>0&&
+         <details className="pv2-stage-secondary pv2-legacy-material-planning">
+          <summary>Plan material delivery dates ({plannedMaterials.length})</summary>
+          <p className="pv2-hint">Plan when each material is needed. Procurement, delivery updates
+           and marketplace/outside supplier orders remain attached to the work items below.</p>
+          <div className="pv2-stage-task-entries">
+           {plannedMaterials.map((material,i)=><div key={stage.id+'-material-'+i}
+             className="pv2-flow-step">
+             <strong>{material}</strong>
+             <ProjectItemSchedule projectId={d.project.id} stageId={stage.id}
+              kind="material" index={i} title={material}
+              item={planFor(stage.id,'material',i)} canPlan={canPlan&&!complete}
+              planningMode={planningMode} today={todayInIndia}/>
+            </div>)}
+          </div>
+         </details>}
         {orderedFlow.length===0&&remainingQc.length>0&&<details className="pv2-stage-secondary">
          <summary>Plan company QC visits ({remainingQc.length})</summary>
          {remainingQc.map(item=><ProjectItemSchedule key={item.i} projectId={d.project.id}
