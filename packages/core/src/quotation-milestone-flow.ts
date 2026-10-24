@@ -33,7 +33,7 @@ export function validateMilestoneFlow(
   const passedChecks=new Set<string>();
   for(const step of steps){
    total++;
-   if(total>150)throw new Error('Too many execution steps; simplify the sequence');
+   if(total>300)throw new Error('Too many execution steps; simplify the sequence');
    if(!row.stageCodes.includes(step.code))
     throw new Error('Choose a construction stage linked to this payment');
    const stage=stages[step.code]??defaultStageRequirements(step.code);
