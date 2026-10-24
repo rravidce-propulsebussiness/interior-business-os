@@ -50,7 +50,7 @@ export const companyConstructionPaymentRows=z.array(row).min(1).max(40).superRef
     ctx.addIssue({code:'custom',message:'Company QC must follow the matching site check or test',path:[position,'steps']});
   }
  }
- if(total>150)ctx.addIssue({code:'custom',message:'A company template supports up to 150 steps'});
+ if(total>300)ctx.addIssue({code:'custom',message:'A company template supports up to 300 steps'});
 });
 export type CompanyConstructionPaymentRow=z.infer<typeof companyConstructionPaymentRows>[number];
 
