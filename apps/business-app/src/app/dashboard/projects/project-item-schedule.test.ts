@@ -15,7 +15,7 @@ describe('Fast planned-date shortcuts for every stage item',()=>{
    expect(component).toContain(label);
   expect(component).toContain('setStart(today);setFinish(today)');
   expect(component).toContain('setFinish(offsetPlanDate(today,6))');
-  expect(component).toContain('planningMode={planningMode}');
+  expect(view).toContain('planningMode={planningMode}');
   expect(component).not.toContain('complete this work automatically');
  });
  it('preserves calendar dates across month and year boundaries',()=>{
