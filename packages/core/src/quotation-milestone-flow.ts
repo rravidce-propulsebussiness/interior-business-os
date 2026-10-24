@@ -20,6 +20,50 @@ const data=z.object({
   z.array(quotationMilestoneStep).max(100)),
 }).strict();
 
+/** Compact repeated floor stage codes and substage labels once.
+ * The decoded shape is exactly the existing QuotationMilestoneFlow interface;
+ * version 1 is retained for historical quotation snapshots.
+ */
+const compactKinds=['work','material','check','test','qc'] as const;
+const compactStep=z.tuple([
+ z.number().int().min(0).max(4),
+ z.number().int().min(0).max(199),
+ z.number().int().min(0).max(49),
+ z.number().int().min(-1).max(49),
+]);
+const compactData=z.object({
+ version:z.literal(2),
+ codes:z.array(quotationMilestoneStep.shape.code).max(200),
+ groups:z.array(z.string().trim().min(2).max(90)).max(50),
+ rows:z.record(z.string().regex(/^(0|[1-9]\d?)$/),z.array(compactStep).max(100)),
+}).strict();
+function compactMilestoneFlow(rows:QuotationMilestoneFlow){
+ const codes=[...new Set(Object.values(rows).flatMap(steps=>steps.map(step=>step.code)))];
+ const groups=[...new Set(Object.values(rows).flatMap(steps=>
+  steps.flatMap(step=>step.substage?[step.substage]:[])))];
+ const packed=Object.fromEntries(Object.entries(rows).map(([key,steps])=>[key,
+  steps.map(step=>[
+   compactKinds.indexOf(step.kind),codes.indexOf(step.code),step.index,
+   step.substage?groups.indexOf(step.substage):-1,
+  ] as [number,number,number,number]),
+ ]));
+ return {version:2 as const,codes,groups,rows:packed};
+}
+function unpackMilestoneFlow(raw:unknown):QuotationMilestoneFlow{
+ const parsed=compactData.parse(raw);
+ const decoded:QuotationMilestoneFlow={};
+ for(const [key,steps] of Object.entries(parsed.rows)){
+  decoded[key]=steps.map(([kind,code,index,group])=>{
+   const source=parsed.codes[code];
+   const groupName=group===-1?undefined:parsed.groups[group];
+   const type=compactKinds[kind];
+   if(!source||!type||(group!==-1&&!groupName))throw new Error('Invalid compact milestone reference');
+   return {kind:type,code:source,index,...(groupName?{substage:groupName}:{})};
+  });
+ }
+ return data.parse({version:1,rows:decoded}).rows;
+}
+
 export function validateMilestoneFlow(
  raw:unknown,stages:StageRequirementsMap,payments:readonly {stageCodes:readonly string[]}[],
 ):QuotationMilestoneFlow {
@@ -34,7 +78,7 @@ export function validateMilestoneFlow(
   const passedChecks=new Set<string>();
   for(const step of steps){
    total++;
-   if(total>300)throw new Error('Too many execution steps; simplify the sequence');
+   if(total>650)throw new Error('Too many execution steps; simplify the sequence');
    if(!row.stageCodes.includes(step.code))
     throw new Error('Choose a construction stage linked to this payment');
    const stage=stages[step.code]??defaultStageRequirements(step.code);
@@ -64,12 +108,15 @@ export function savedMilestoneFlow(terms:string):QuotationMilestoneFlow {
  if(found.length!==1)throw new Error('Duplicate saved milestone sequences');
  const raw=JSON.parse(found[0]![1]??'null') as unknown;
  if(!raw||typeof raw!=='object'||Array.isArray(raw))throw new Error('Invalid saved milestone flow');
+ if('version' in raw&&raw.version===2)return unpackMilestoneFlow(raw);
  return data.parse(raw).rows;
 }
 export function encodeMilestoneFlow(raw:QuotationMilestoneFlow):string {
  if(!Object.values(raw).some(steps=>steps.length))return '';
  const parsed=data.parse({version:1,rows:raw});
- const json=JSON.stringify(parsed);
+ const regular=JSON.stringify(parsed);
+ const compact=JSON.stringify(compactMilestoneFlow(parsed.rows));
+ const json=compact.length<regular.length?compact:regular;
  if(json.length>MAX_SERIALIZED)
   throw new Error('Milestone workflow exceeds the quotation limit');
  return '[QUOTATION_MILESTONE_FLOW]'+json+'[/QUOTATION_MILESTONE_FLOW]';

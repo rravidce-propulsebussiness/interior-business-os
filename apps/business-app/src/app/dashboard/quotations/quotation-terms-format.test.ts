@@ -42,8 +42,8 @@ describe('premium quotation terms sections', () => {
   });
   it('rejects oversized strings before sending the edit_revision command', () => {
     expect(() => joinQuotationTerms({
-      inclusions:'a'.repeat(11000), exclusions:'',warranty:'',additional:'',paymentPlan:'',
-    })).toThrow(/10,000/);
+      inclusions:'a'.repeat(36000), exclusions:'',warranty:'',additional:'',paymentPlan:'',
+    })).toThrow(/35,000/);
   });
 });
 

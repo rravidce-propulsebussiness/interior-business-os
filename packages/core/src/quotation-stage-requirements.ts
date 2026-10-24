@@ -88,6 +88,43 @@ function validateRequirements(value:unknown,legacyRead:boolean):StageRequirement
  }
  return result;
 }
+/** Deduplicate identical per-floor structural checklists in quotation text.
+ * The editor and execution APIs still work with independent RCC/FLOOR maps.
+ * Older version-1 quotation markers remain readable and unchanged. */
+function compactRequirements(value:StageRequirementsMap){
+ const templates:StageRequirements[]=[];
+ const indexes:Record<string,number>={};
+ const byJson=new Map<string,number>();
+ for(const [code,stage] of Object.entries(value)){
+  const key=JSON.stringify(stage);
+  let index=byJson.get(key);
+  if(index===undefined){
+   index=templates.length;templates.push(stage);byJson.set(key,index);
+  }
+  indexes[code]=index;
+ }
+ return {version:2 as const,templates,stages:indexes};
+}
+function readCompactRequirements(raw:unknown):StageRequirementsMap{
+ const parsed=z.object({
+  version:z.literal(2),
+  templates:z.array(legacyRequirements).max(35),
+  stages:z.record(z.string(),z.number().int().min(0).max(34)),
+ }).strict().parse(raw);
+ const mapped:StageRequirementsMap={};
+ for(const [code,index] of Object.entries(parsed.stages)){
+  const template=parsed.templates[index];
+  if(!template)throw new Error('Missing compact work template for '+code);
+  mapped[code]=template;
+ }
+ return validateRequirements(mapped,true);
+}
+function serializedRequirements(value:StageRequirementsMap):string{
+ const regular=JSON.stringify({version:1,stages:value});
+ const compact=JSON.stringify(compactRequirements(value));
+ return compact.length<regular.length?compact:regular;
+}
+
 export function validateStageRequirements(value:unknown):StageRequirementsMap {
  return validateRequirements(value,false);
 }
@@ -98,15 +135,15 @@ export function validateStageRequirements(value:unknown):StageRequirementsMap {
  */
 export function validateStageRequirementsDraft(value:unknown):StageRequirementsMap {
  const draft=validateRequirements(value,true);
- const body=JSON.stringify({version:1,stages:draft});
- if(body.length>18000)throw new Error('Too many project-specific requirements; reduce long descriptions');
+ const body=serializedRequirements(draft);
+ if(body.length>22000)throw new Error('Too many project-specific requirements; reduce long descriptions');
  return draft;
 }
 export function encodeStageRequirements(overrides:StageRequirementsMap):string {
  const cleaned=validateStageRequirements(overrides);
  if(!Object.keys(cleaned).length)return '';
- const body=JSON.stringify({version:1,stages:cleaned});
- if(body.length>18000)throw new Error('Too many project-specific requirements; reduce long descriptions');
+ const body=serializedRequirements(cleaned);
+ if(body.length>22000)throw new Error('Too many project-specific requirements; reduce long descriptions');
  return REQUIREMENTS_MARKER+body+'[/STAGE_CUSTOM_REQUIREMENTS]';
 }
 export function savedStageRequirements(terms:string):StageRequirementsMap {
@@ -114,6 +151,8 @@ export function savedStageRequirements(terms:string):StageRequirementsMap {
  if(!matches.length)return {};
  if(matches.length!==1)throw new Error('Ambiguous saved construction requirements');
  const raw=JSON.parse(matches[0]![1]??'null') as unknown;
+ if(raw&&typeof raw==='object'&&!Array.isArray(raw)&&'version' in raw&&raw.version===2)
+  return readCompactRequirements(raw);
  const record=z.object({version:z.literal(1),stages:z.unknown()}).strict().parse(raw);
  return validateRequirements(record.stages,true);
 }

@@ -39,7 +39,7 @@ export const quotationCommandSchema = z.discriminatedUnion('action', [
       action: z.literal('edit_revision'),
       revision_id: z.uuid(),
       version: z.number().int().positive(),
-      terms: z.string().max(10000),
+      terms: z.string().max(35000),
       customer_notes: z.string().max(10000),
       internal_notes: z.string().max(10000),
       valid_until: z.iso.date(),

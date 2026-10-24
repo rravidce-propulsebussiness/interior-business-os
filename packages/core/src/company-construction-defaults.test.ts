@@ -1,6 +1,6 @@
 import {describe,it,expect} from 'vitest';
-import {companyConstructionPaymentRows,applyCompanyPaymentDefaults,applyCompanyWorkDefaults,defaultCompanyWorkRows,hydrateCompanyWorkDefaults,inferCompanyWorkAreaCode,companyWorkAreaLabel,planningWorkDefaults,foundationWorkDefaults,foundationSubstageNames} from './company-construction-defaults';
-import {defaultStageRequirements} from './quotation-stage-requirements';
+import {companyConstructionPaymentRows,applyCompanyPaymentDefaults,applyCompanyWorkDefaults,defaultCompanyWorkRows,hydrateCompanyWorkDefaults,inferCompanyWorkAreaCode,companyWorkAreaLabel,planningWorkDefaults,foundationWorkDefaults,foundationSubstageNames,rccSlabWorkDefaults,rccSlabSubstageNames} from './company-construction-defaults';
+import {defaultStageRequirements,encodeStageRequirements,savedStageRequirements} from './quotation-stage-requirements';
 import {proposedConstructionPayments} from './construction-payment-schedule';
 import {standardMilestoneWorkflow,validateMilestoneFlow,encodeMilestoneFlow,savedMilestoneFlow} from './quotation-milestone-flow';
 
@@ -258,5 +258,72 @@ describe('Stage 2 Foundation payment: seven grouped, editable substages',()=>{
   expect(rebuilt[1]?.name).toBe('Customized foundation');
   expect(rebuilt[1]?.steps).toEqual(saved[1]?.steps);
   expect(rebuilt[1]?.percent).toBe(90);
+ });
+});
+
+
+describe('Reusable RCC slab scope on G+4: one template, five distinct payment stages',()=>{
+ const floors=['Ground','First','Second','Third','Fourth'];
+ const payments=proposedConstructionPayments(floors);
+ const company=defaultCompanyWorkRows(payments);
+ const slabs=company.filter(row=>row.areas?.length===1&&row.areas[0]==='RCC');
+ it('creates five slab milestones only for configured floors with original pricing intact',()=>{
+  expect(slabs).toHaveLength(5);
+  expect(slabs.map(row=>row.name)).toEqual(floors.map(floor=>floor+' slab payment'));
+  expect(slabs.every(row=>row.percent===5.4)).toBe(true);
+  expect(company[1]?.percent).toBe(18);
+  expect(company.reduce((sum,row)=>sum+row.percent,0)).toBeCloseTo(100,2);
+  expect(companyConstructionPaymentRows.safeParse(company).success).toBe(true);
+  expect(slabs.every(row=>row.steps?.length===rccSlabWorkDefaults.length)).toBe(true);
+ });
+ it('holds 33 ordered items inside three repeatable, editable groups',()=>{
+  expect(rccSlabWorkDefaults).toHaveLength(33);
+  expect([...new Set(rccSlabWorkDefaults.map(item=>item.substage))])
+   .toEqual([...rccSlabSubstageNames]);
+  expect(rccSlabWorkDefaults.filter(item=>item.kind==='qc')).toHaveLength(0);
+  const names=rccSlabWorkDefaults.map(item=>item.name);
+  for(const part of [
+   'Column marking, position and starters as per structural plan',
+   'Column bar bending, reinforcement and ties',
+   'Column and staircase-column heights, levels, dimensions and alignment',
+   'Column concreting with proper vibration',
+   'Column deshuttering, plumb verification and daily curing',
+   'Staircase and landing shuttering with supports',
+   'Stair flight width, riser height, tread depth and landing level as per design',
+   'Staircase concreting with slab or separate approved pour',
+   'Beam and slab shuttering, centering and propping',
+   'Electrical conduit, fan-box and embedded-service layout',
+   'Beam and slab rebar size, spacing, bends, laps, anchorage and cover per design',
+   'Slab mix grade/ratio, vibration, levels and finish',
+   'Daily slab curing and concrete protection',
+  ])expect(names).toContain(part);
+ });
+ it('clones full RCC work independently for each actual floor, without crossing floor codes',()=>{
+  const quote=applyCompanyWorkDefaults(payments,company);
+  for(const [floorIndex,floor] of floors.entries()){
+   const pay=2+floorIndex;
+   const code='RCC/'+floor.toUpperCase();
+   const flow=quote.flow[String(pay)]??[];
+   expect(flow.filter(item=>item.code===code&&item.kind==='work').length)
+    .toBe(rccSlabWorkDefaults.filter(item=>item.kind==='work').length);
+   expect(flow.some(item=>item.code===code&&item.substage==='Staircase')).toBe(true);
+   expect(flow.some(item=>item.code===code&&item.substage==='Beams and slab')).toBe(true);
+   expect(flow.every(item=>item.code===code)).toBe(true);
+  }
+  expect(validateMilestoneFlow(quote.flow,quote.requirements,payments)).toEqual(quote.flow);
+  expect(savedMilestoneFlow(encodeMilestoneFlow(quote.flow))).toEqual(quote.flow);
+  expect(savedStageRequirements(encodeStageRequirements(quote.requirements)))
+   .toEqual(quote.requirements);
+  // Legacy 10K all-floor terms could silently restore obsolete work.
+  // Verify compact payload sizes, never permit automatic fallback.
+  expect(encodeMilestoneFlow(quote.flow).length).toBeLessThan(12000);
+  expect(encodeStageRequirements(quote.requirements).length).toBeLessThan(22000);
+ });
+ it('keeps explicit saved company edits and earlier issued quotation stage requirements',()=>{
+  const saved=companyConstructionPaymentRows.parse(company);
+  saved[2]={...saved[2]!,steps:[{kind:'work',name:'Custom ground column activity',area:'RCC'}]};
+  const restored=hydrateCompanyWorkDefaults(saved,company);
+  expect(restored[2]?.steps?.[0]?.name).toBe('Custom ground column activity');
+  expect(restored[3]?.steps).toEqual(rccSlabWorkDefaults);
  });
 });

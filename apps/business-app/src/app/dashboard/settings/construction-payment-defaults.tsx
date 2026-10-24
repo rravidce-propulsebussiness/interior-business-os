@@ -1,7 +1,7 @@
 'use client';
 
 import {useActionState,useState} from 'react';
-import {inferCompanyWorkAreaCode,foundationWorkDefaults,foundationSubstageNames,type CompanyConstructionPaymentRow,type CompanyWorkStep} from '@business-os/core/company-construction-defaults';
+import {inferCompanyWorkAreaCode,foundationWorkDefaults,foundationSubstageNames,rccSlabWorkDefaults,rccSlabSubstageNames,type CompanyConstructionPaymentRow,type CompanyWorkStep} from '@business-os/core/company-construction-defaults';
 import {saveConstructionPaymentDefaults} from './payment-default-actions';
 
 type Kind=CompanyWorkStep['kind'];
@@ -41,6 +41,7 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
  const steps=row.steps??[];
  const areas=row.areas?.length?row.areas:[...new Set(steps.map(item=>item.area))];
  const isFoundation=index===1&&['SITE_PREP','FOUNDATION','PLINTH'].every(area=>areas.includes(area));
+ const isRcc=areas.length===1&&areas.includes('RCC')&&/slab payment/i.test(row.name);
  const [kind,setKind]=useState<Kind>('work');
  const [name,setName]=useState('');
  const [checkRef,setCheckRef]=useState('');
@@ -52,7 +53,7 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
  const [editDraft,setEditDraft]=useState('');
  const prior=steps.slice(0,after===null?steps.length:after+1).filter(isCheck);
  const current=checkRef?prior.find(x=>link(x)===checkRef):prior.at(-1);
- const counts=kinds.filter(type=>!isFoundation||type!=='qc')
+ const counts=kinds.filter(type=>!(isFoundation||isRcc)||type!=='qc')
   .map(type=>({type,count:steps.filter(item=>item.kind===type).length}));
  const limit=6;
  const groups=[...new Set(steps.map(item=>item.substage).filter((value):value is string=>Boolean(value)))];
@@ -62,6 +63,10 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
  const oldFoundation=isFoundation&&(
   foundationSubstageNames.some(group=>!groups.includes(group))||
   steps.filter(item=>!item.optional).length<foundationWorkDefaults.filter(item=>!item.optional).length
+ );
+ const oldRcc=isRcc&&(
+  rccSlabSubstageNames.some(group=>!groups.includes(group))||
+  steps.length<rccSlabWorkDefaults.length
  );
 
  // Preserve the internal project stage mapping, without asking users to
@@ -164,7 +169,7 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
   </button>
   <div className="us-payment-stage-stats" aria-label={'Included item counts for stage '+(index+1)}>
    {counts.map(({type,count})=><span className={'us-payment-stat is-'+type} key={type}>
-    <ItemIcon kind={type}/><strong>{count}</strong><small>{isFoundation&&type==='check'?'Checks & QC':descriptions[type]}</small>
+    <ItemIcon kind={type}/><strong>{count}</strong><small>{(isFoundation||isRcc)&&type==='check'?'Checks & QC':descriptions[type]}</small>
    </span>)}
   </div>
   {expanded&&<div id={'company-payment-stage-'+index} className="us-payment-stage-content">
@@ -190,6 +195,16 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
     These items define the scope of this payment stage. Edit the order here, or
     customize a new quotation separately without changing your company defaults.
    </p>
+   {isRcc&&oldRcc&&canEdit&&<div className="us-payment-upgrade">
+    <div><strong>Updated RCC slab checklist available</strong>
+     <p>Apply to this floor only: columns, staircase and beams/slab. Its percentage stays the same. Issued quotations remain unchanged.</p>
+    </div>
+    <button type="button" onClick={()=>{
+     if(!window.confirm("Replace this floor's saved company RCC checklist with the new slab template? Issued quotations remain unchanged."))return;
+     onChange({...row,steps:rccSlabWorkDefaults.map(step=>({...step}))});
+     setSelectedSubstage('');setShowAll(false);setEditing(null);setAfter(null);
+    }}>Apply floor template</button>
+   </div>}
    {isFoundation&&oldFoundation&&canEdit&&<div className="us-payment-upgrade">
     <div><strong>Updated foundation checklist available</strong>
      <p>Apply the 7-substage template to this company only. Your milestone name and percentage stay unchanged; existing quotations and projects are untouched.</p>
@@ -304,9 +319,28 @@ export function ConstructionPaymentDefaults({initial,canEdit}:{
   setRows(previous=>previous.filter((_,i)=>i!==index));
   setExpandedIndex(value=>value===null?null:value===index?null:value>index?value-1:value);
  };
+ const rccIndexes=rows.flatMap((row,index)=>
+  row.areas?.length===1&&row.areas[0]==='RCC'&&/slab payment/i.test(row.name)?[index]:[]);
+ const outdatedRcc=rccIndexes.filter(index=>{
+  const steps=rows[index]?.steps??[];
+  const groups=new Set(steps.map(step=>step.substage));
+  return steps.length<rccSlabWorkDefaults.length||
+   rccSlabSubstageNames.some(group=>!groups.has(group));
+ });
  return <div className="us-payment-defaults">
   <p className="us-info">Each payment stage includes its work, materials, checks, tests and company QC.
    These defaults are copied into new construction quotations and can be customized per project.</p>
+  {canEdit&&outdatedRcc.length>0&&<div className="us-payment-upgrade">
+   <div><strong>Apply reusable slab template to all configured floors</strong>
+    <p>{rccIndexes.length} slab milestone(s) detected; {outdatedRcc.length} have an older checklist. Their payment percentages and issued quotations remain unchanged.</p>
+   </div>
+   <button type="button" onClick={()=>{
+    if(!window.confirm('Replace the older company slab checklists for '+outdatedRcc.length+' floor(s) with the reusable RCC template? Issued quotations and projects remain unchanged.'))return;
+    const targets=new Set(outdatedRcc);
+    setRows(previous=>previous.map((row,index)=>
+     targets.has(index)?{...row,steps:rccSlabWorkDefaults.map(step=>({...step}))}:row));
+   }}>Apply to all slab floors</button>
+  </div>}
   <form action={action}>
    <input type="hidden" name="rows" value={JSON.stringify(rows)}/>
    <ol className="us-payment-default-list">

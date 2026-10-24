@@ -71,12 +71,12 @@ export async function POST(request:Request, {params}:{
     } else if (!['same-origin','none'].includes(request.headers.get('sec-fetch-site')??'')) {
       return reply({message:'Quotation update requires a same-origin request.',reference:ref},403);
     }
-    if (Number(request.headers.get('content-length')??0)>45000)
+    if (Number(request.headers.get('content-length')??0)>120000)
       return reply({message:'Quotation conditions exceed the allowed size.',reference:ref},413);
     const {id}=await params;
     idSchema.parse(id);
     const body=await request.text();
-    if(body.length>45000)return reply({message:'Quotation conditions exceed the allowed size.',reference:ref},413);
+    if(body.length>120000)return reply({message:'Quotation conditions exceed the allowed size.',reference:ref},413);
     const parsed=payload.safeParse(JSON.parse(body));
     if(!parsed.success){
       const issue=parsed.error.issues[0];

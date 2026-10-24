@@ -8,7 +8,7 @@ export async function saveConstructionPaymentDefaults(
  _previous:DefaultPaymentState,form:FormData,
 ):Promise<DefaultPaymentState> {
  const raw=form.get('rows');
- if(typeof raw!=='string'||raw.length>45000)return {saved:false,message:'Invalid payment schedule.'};
+ if(typeof raw!=='string'||raw.length>75000)return {saved:false,message:'Invalid payment schedule.'};
  let payload:unknown;
  try{payload=JSON.parse(raw);}catch{return {saved:false,message:'Invalid payment schedule.'};}
  const validated=companyConstructionPaymentRows.safeParse(payload);

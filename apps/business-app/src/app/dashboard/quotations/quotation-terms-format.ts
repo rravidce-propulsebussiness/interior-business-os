@@ -55,6 +55,6 @@ export function joinQuotationTerms(
     parts[key].trim() ? [title + ':\n' + parts[key].trim()] : []);
   if (parts.paymentPlan.trim()) result.push(parts.paymentPlan.trim());
   const text = result.join('\n\n');
-  if (text.length > 10000) throw new Error('Terms exceed the 10,000-character limit.');
+  if (text.length > 35000) throw new Error('Terms exceed the 35,000-character limit.');
   return text;
 }
