@@ -60,6 +60,9 @@
 .pp-mobile-nav nav a { display:block; padding:12px; font-size:13px; font-weight:700; border-radius:7px; }
 .pp-mobile-nav nav a:hover { background:#fff0e6; }
 
+/* Clear selection and form contrast stay inside the light public theme. */
+.pp-home ::selection { background: #ffe0c5; color: #483122; }
+
 /* Hero */
 .pp-hero { position:relative; min-height:535px; background: radial-gradient(ellipse at 34% 43%, #fff8f1 0, transparent 50%); }
 .pp-hero::before { content:""; position:absolute; width:420px; height:420px; left:-140px; top:-165px; background:radial-gradient(circle,#ffdfca,transparent 69%); opacity:.58; pointer-events:none; }
