@@ -35,7 +35,7 @@ const compactData=z.object({
  version:z.literal(2),
  codes:z.array(quotationMilestoneStep.shape.code).max(200),
  groups:z.array(z.string().trim().min(2).max(90)).max(50),
- rows:z.record(z.string().regex(/^(0|[1-9]\\d?)$/),z.array(compactStep).max(100)),
+ rows:z.record(z.string().regex(/^(0|[1-9]\d?)$/),z.array(compactStep).max(100)),
 }).strict();
 function compactMilestoneFlow(rows:QuotationMilestoneFlow){
  const codes=[...new Set(Object.values(rows).flatMap(steps=>steps.map(step=>step.code)))];
