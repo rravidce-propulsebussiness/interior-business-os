@@ -2,6 +2,7 @@
 import {useActionState,useEffect,useState} from 'react';
 import {useRouter} from 'next/navigation';
 import {saveProjectItemSchedule} from './[id]/site/stage-schedule-actions';
+import {offsetPlanDate} from './project-schedule-dates';
 export type ProjectItemScheduleRow={
  stageId:string;kind:'work'|'check'|'test'|'qc'|'material';index:number;
  title:string;plannedStart:string;plannedFinish:string;note:string;version:number;
@@ -11,15 +12,6 @@ type Props={
  index:number;title:string;item?:ProjectItemScheduleRow|undefined;canPlan:boolean;
  planningMode?:'full'|'site'|undefined;today?:string|undefined;
 };
-/** Project-local calendar arithmetic, stable across browser timezones/DST. */
-export function offsetPlanDate(iso:string,days:number):string {
- if(!/^\d{4}-\d{2}-\d{2}$/.test(iso)||!Number.isInteger(days))return '';
- const [year,month,day]=iso.split('-').map(Number);
- const at=new Date(Date.UTC(year!,month!-1,day!));
- if(!Number.isFinite(at.getTime())||at.toISOString().slice(0,10)!==iso)return '';
- at.setUTCDate(at.getUTCDate()+days);
- return at.toISOString().slice(0,10);
-}
 const readable=(date:string)=>{
  if(!date)return '';
  const [y,m,d]=date.split('-');
