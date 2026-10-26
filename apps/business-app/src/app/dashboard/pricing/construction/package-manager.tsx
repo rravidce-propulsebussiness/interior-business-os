@@ -66,7 +66,7 @@ export function ConstructionPackagesManager({
           <h2 className="text-xl font-extrabold tracking-tight text-slate-950">Construction <span className="text-slate-500">({packages.length})</span></h2>
         </div>
         {canManage && <div className="flex flex-wrap gap-2">
-          {!['STANDARD', 'PREMIUM', 'LUXURY', 'ROYAL'].every((code) => packages.some((pkg) => pkg.code === code)) && <button type="button" disabled={pending} onClick={() => run(installConstructionBrochurePackages)}
+          {!['STANDARD', 'PREMIUM', 'ROYAL'].every((code) => packages.some((pkg) => pkg.code === code)) && <button type="button" disabled={pending} onClick={() => run(installConstructionBrochurePackages)}
             className="rounded-xl border border-orange-200 bg-orange-50 px-4 py-3 text-xs font-bold text-orange-700 hover:bg-orange-100 disabled:opacity-50">
             Add starter packages
           </button>}
