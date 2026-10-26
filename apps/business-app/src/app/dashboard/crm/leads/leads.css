@@ -2654,10 +2654,9 @@ body:has(.crm-leads-root) .crm-shared-navigation {
 @media(max-width:640px){.crm-project-inline {grid-column:1 / -1;}.crm-project-open,.crm-project-create {min-height:46px;}}
 .crm-mobile-inline-grid > .crm-mobile-stage {display:grid;gap:5px;color:#657895;font-size:11px;font-weight:700;min-width:0;align-content:start;}
 
-/* Phone and tablet lead cards must not be a scaled desktop table. Android
-   desktop-view settings can report a 980px layout viewport. Reuse the existing
-   card controls, which include stage, project, quote, history and follow-ups. */
-@media (max-width: 1024px), (hover: none) and (pointer: coarse) {
+/* Phone-size cards only. Desktop and tablet widths retain a horizontal
+   single-row-per-lead table, regardless of touch input or pointer type. */
+@media (max-width: 800px) {
   .crm-leads-table-wrap { display: none !important; }
   .crm-mobile-list { display: grid !important; min-width: 0; padding: 8px; gap: 10px; }
   .crm-workspace-grid, .crm-leads-root, .crm-list-panel { min-width: 0; max-width: 100%; }

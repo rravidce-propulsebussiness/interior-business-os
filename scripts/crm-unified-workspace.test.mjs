@@ -17,6 +17,18 @@ const root = new URL(
   import.meta.url,
 );
 
+test('Leads desktop uses single horizontal rows and offers a real filter reset', () => {
+  const premiumCss = readFileSync(fileURLToPath(new URL('leads-premium.css', root)), 'utf8');
+  const leadsCss = readFileSync(fileURLToPath(new URL('leads.css', root)), 'utf8');
+  assert.match(leads, /className="crm-leads-table-wrap"/);
+  assert.match(leads, /crm-col-quote/);
+  assert.match(leads, /crm-lead-row/);
+  assert.match(leads, /Showing \{number\.format\(count\)\} filtered/);
+  assert.match(leads, /href=\{allLeadsHref\}/);
+  assert.doesNotMatch(premiumCss, /@media\s*\(max-width:\s*1600px\)/);
+  assert.doesNotMatch(leadsCss, /@media\s*\(max-width:\s*1024px\),\s*\(hover:\s*none\)/);
+});
+
 test('lead list retains inline Add and ProPulse but uses separate import routes', () => {
   for (const panel of ['add', 'propulse']) {
     assert.match(leads, new RegExp("leadTool === '" + panel + "'"));
@@ -475,8 +487,15 @@ test('one lead supports multiple package quotations and previews newest, with si
   assert.doesNotMatch(createQuote, /existingQuotes\?\.\[0\]/);
   assert.match(createQuote, /action: 'create'/);
   assert.match(createQuote, /await attachLead\(newRevision\.quotation_id\)/);
-  assert.match(leads, /\+ New quotation/);
-  assert.match(leads, /\+ New quote/);
+  const quotePreview = readFileSync(
+    fileURLToPath(new URL('crm/leads/lead-quote-preview.tsx', appRoot)), 'utf8',
+  );
+  // A new quote stays available but uses one compact action row, rather
+  // than a second button stacking below every lead's quotation.
+  assert.match(leads, /newQuoteHref=\{canQuote/);
+  assert.match(quotePreview, /crm-quote-new-inline/);
+  assert.match(quotePreview, /href=\{newQuoteHref\}/);
+  assert.match(quotePreview, /\+ New/);
   assert.match(leadPage, /lead_quotation_summary/);
   assert.match(summarySql, /order by l\.created_at desc,q\.created_at desc/);
   assert.match(summarySql, /quotation_shared_revisions/);
