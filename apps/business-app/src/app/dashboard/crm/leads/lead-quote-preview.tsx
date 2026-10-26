@@ -18,7 +18,7 @@ export function LeadQuotePreview({
   amount: string | null;
   shared?: boolean;
   canShare?: boolean;
-  newQuoteHref?: string;
+  newQuoteHref?: string | undefined;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const activeRequest = useRef<AbortController | null>(null);
