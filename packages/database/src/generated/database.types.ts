@@ -11032,6 +11032,10 @@ export interface Database {
         Args: { p_org: string };
         Returns: number;
       };
+      construction_package_install_three_starters: {
+        Args: { p_org: string };
+        Returns: number;
+      };
       construction_package_list: { Args: { p_org: string }; Returns: Json };
       construction_package_owner_options: {
         Args: { p_org: string };
