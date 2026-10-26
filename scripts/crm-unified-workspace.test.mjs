@@ -475,8 +475,15 @@ test('one lead supports multiple package quotations and previews newest, with si
   assert.doesNotMatch(createQuote, /existingQuotes\?\.\[0\]/);
   assert.match(createQuote, /action: 'create'/);
   assert.match(createQuote, /await attachLead\(newRevision\.quotation_id\)/);
-  assert.match(leads, /\+ New quotation/);
-  assert.match(leads, /\+ New quote/);
+  const quotePreview = readFileSync(
+    fileURLToPath(new URL('crm/leads/lead-quote-preview.tsx', appRoot)), 'utf8',
+  );
+  // A new quote stays available but uses one compact action row, rather
+  // than a second button stacking below every lead's quotation.
+  assert.match(leads, /newQuoteHref=\{canQuote/);
+  assert.match(quotePreview, /crm-quote-new-inline/);
+  assert.match(quotePreview, /href=\{newQuoteHref\}/);
+  assert.match(quotePreview, /\+ New/);
   assert.match(leadPage, /lead_quotation_summary/);
   assert.match(summarySql, /order by l\.created_at desc,q\.created_at desc/);
   assert.match(summarySql, /quotation_shared_revisions/);
