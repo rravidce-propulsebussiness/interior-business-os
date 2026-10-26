@@ -10,6 +10,7 @@ import {
 
 export function LeadQuotePreview({
   revisionId, number, status, amount, shared = false, canShare = false,
+  newQuoteHref,
 }: {
   revisionId: string;
   number: string;
@@ -17,6 +18,7 @@ export function LeadQuotePreview({
   amount: string | null;
   shared?: boolean;
   canShare?: boolean;
+  newQuoteHref?: string;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const activeRequest = useRef<AbortController | null>(null);
@@ -142,6 +144,10 @@ export function LeadQuotePreview({
             disabled={sharing} onClick={() => void shareOnWhatsApp()}>
             {sharing ? 'Preparing PDF…' : preparedPdf ? 'Share PDF File' : 'WhatsApp PDF'}
           </button>}
+        {newQuoteHref && <a className="crm-quote-new-inline"
+          title="Create another quotation for this lead" href={newQuoteHref}>
+          + New
+        </a>}
       </div>
       {shareError && <p className="crm-quote-share-error" role="alert">{shareError}</p>}
       {shareMessage && <div className="crm-quote-share-ready" role="status">
