@@ -13,6 +13,7 @@ export default defineConfig({
       'apps/business-app/src/app/dashboard/website/cloudflare-domains.test.ts',
       'apps/business-app/src/app/dashboard/quotations/studio-ui.test.ts',
       'apps/business-app/src/app/dashboard/crm/leads/lead-quote-display.test.ts',
+      'apps/business-app/src/app/dashboard/crm/leads/lead-filter-links.test.ts',
       'apps/business-app/src/app/dashboard/billing/billing-ui.test.ts',
       'apps/business-app/src/app/dashboard/billing/stage-invoice.test.ts',
       'apps/business-app/src/app/dashboard/settings/settings.test.ts',
