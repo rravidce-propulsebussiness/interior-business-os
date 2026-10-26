@@ -671,8 +671,8 @@ export function LeadsWorkspace({
                         <col className="crm-col-status" />
                         <col className="crm-col-priority" />
                         <col className="crm-col-followup" />
-                        <col className="crm-col-quote" />
                         <col className="crm-col-actions" />
+                        <col className="crm-col-quote" />
                       </colgroup>
                       <thead>
                         <tr>
@@ -692,8 +692,8 @@ export function LeadsWorkspace({
                           <th>Status</th>
                           <th>Priority</th>
                           <th>Next follow-up</th>
-                          <th>Quotation</th>
-                          <th>Actions</th>
+                          <th>Daily actions</th>
+                          <th>Quotation · optional</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -766,36 +766,6 @@ export function LeadsWorkspace({
                               <LeadFollowUpSetter lead={lead} canFollowUp={canFollowUp} />
                             </td>
                             <td>
-                              {lead.quoteRevisionId && (!lead.quoteAmount || Number(lead.quoteAmount) <= 0) && !lead.quoteShared ? (
-                                <div className="crm-quote-pending">
-                                  <span>No priced quotation yet</span>
-                                  <a href={'/dashboard/quotations/' + encodeURIComponent(lead.quoteRevisionId) + '/studio?step=quote'}>
-                                    Continue quotation
-                                  </a>
-                                </div>
-                              ) : lead.quoteRevisionId ? (
-                                <div className="crm-quote-stack">
-                                  <LeadQuotePreview
-                                    revisionId={lead.quoteRevisionId}
-                                    number={lead.quoteNumber || 'Quotation'}
-                                    status={lead.quoteStatus}
-                                    amount={lead.quoteAmount}
-                                    shared={lead.quoteShared} canShare={canShareQuote}
-                                    newQuoteHref={canQuote
-                                      ? '/dashboard/quotations/new?lead=' + encodeURIComponent(lead.id)
-                                      : undefined}
-                                  />
-                                </div>
-                              ) : canQuote ? (
-                                <div className="crm-quote-pending">
-                                  <span>No quote yet</span>
-                                  <a href={'/dashboard/quotations/new?lead=' + encodeURIComponent(lead.id)}>
-                                    + Create Quote
-                                  </a>
-                                </div>
-                              ) : <span className="crm-muted">No quotation</span>}
-                            </td>
-                            <td>
                               <div className="crm-row-actions">
                                 {canNote && lead.lifecycle !== 'archived' &&
                                   <LeadUpdateComposer leadId={lead.id} leadName={lead.name} canFollowUp={canFollowUp}/>}
@@ -840,6 +810,36 @@ export function LeadsWorkspace({
                                 </div>
                               </div>
                             </td>
+                            <td>
+                              {lead.quoteRevisionId && (!lead.quoteAmount || Number(lead.quoteAmount) <= 0) && !lead.quoteShared ? (
+                                <div className="crm-quote-pending">
+                                  <span>No priced quotation yet</span>
+                                  <a href={'/dashboard/quotations/' + encodeURIComponent(lead.quoteRevisionId) + '/studio?step=quote'}>
+                                    Continue quotation
+                                  </a>
+                                </div>
+                              ) : lead.quoteRevisionId ? (
+                                <div className="crm-quote-stack">
+                                  <LeadQuotePreview compact
+                                    revisionId={lead.quoteRevisionId}
+                                    number={lead.quoteNumber || 'Quotation'}
+                                    status={lead.quoteStatus}
+                                    amount={lead.quoteAmount}
+                                    shared={lead.quoteShared} canShare={canShareQuote}
+                                    newQuoteHref={canQuote
+                                      ? '/dashboard/quotations/new?lead=' + encodeURIComponent(lead.id)
+                                      : undefined}
+                                  />
+                                </div>
+                              ) : canQuote ? (
+                                <div className="crm-quote-pending">
+                                  <span>No quote yet</span>
+                                  <a href={'/dashboard/quotations/new?lead=' + encodeURIComponent(lead.id)}>
+                                    + Create Quote
+                                  </a>
+                                </div>
+                              ) : <span className="crm-muted">No quotation</span>}
+                            </td>
                           </tr>
                         ))}
                       </tbody>
@@ -874,21 +874,6 @@ export function LeadsWorkspace({
                           {lead.category === 'construction' && quoteFloorsFromLead(lead.requirements) &&
                             <span>{leadFloorLabel(quoteFloorsFromLead(lead.requirements))}</span>}
                         </div>
-                        {pricedQuote ? (
-                          <button className="crm-compact-quote-toggle" type="button"
-                            aria-expanded={expanded} onClick={() => setExpandedMobileId(expanded ? null : lead.id)}>
-                            <span>Quote {lead.quoteNumber || ''} · {lead.quoteAmount && Number(lead.quoteAmount)>0
-                              ? '₹' + Number(lead.quoteAmount).toLocaleString('en-IN') : 'Shared'}</span>
-                            <span>{expanded ? 'Less −' : 'Details +'}</span>
-                          </button>
-                        ) : <div className="crm-compact-quote-empty">
-                          <span>{lead.quoteRevisionId ? 'Quotation not priced yet' : 'No quote yet'}</span>
-                          {canQuote && <a href={lead.quoteRevisionId
-                            ? '/dashboard/quotations/'+encodeURIComponent(lead.quoteRevisionId)+'/studio?step=quote'
-                            : quoteHref}>
-                            {lead.quoteRevisionId ? 'Continue' : '+ Create Quote'}
-                          </a>}
-                        </div>}
                         <div className="crm-compact-actions">
                           {canNote && lead.lifecycle !== 'archived' &&
                             <LeadUpdateComposer leadId={lead.id} leadName={lead.name} canFollowUp={canFollowUp}/>}
@@ -915,18 +900,33 @@ export function LeadsWorkspace({
                             <label className="crm-mobile-followup">Next follow-up
                               <LeadFollowUpSetter lead={lead} canFollowUp={canFollowUp}/></label>
                           </div>
-                          {pricedQuote && lead.quoteRevisionId && <LeadQuotePreview
-                            revisionId={lead.quoteRevisionId}
-                            number={lead.quoteNumber || 'Quotation'} status={lead.quoteStatus}
-                            amount={lead.quoteAmount} shared={lead.quoteShared}
-                            canShare={canShareQuote}
-                            newQuoteHref={canQuote ? quoteHref : undefined}/>}
                           <div className="crm-compact-secondary">
                             <a href={path + '/' + encodeURIComponent(lead.id)}>View history</a>
                             {canManage && lead.lifecycle !== 'archived' &&
                               <LeadRemovalButton id={lead.id} name={lead.name} version={lead.version}/>}
                           </div>
-                        </div>}
+                          <section className="crm-compact-quotation-last" aria-label={'Quotation for ' + lead.name}>
+                            <strong>Quotation · optional</strong>
+                            {pricedQuote && lead.quoteRevisionId ? (
+                              <LeadQuotePreview
+                                revisionId={lead.quoteRevisionId}
+                                number={lead.quoteNumber || 'Quotation'}
+                                status={lead.quoteStatus} amount={lead.quoteAmount}
+                                shared={lead.quoteShared} canShare={canShareQuote}
+                                newQuoteHref={canQuote ? quoteHref : undefined}
+                              />
+                            ) : (
+                              <div className="crm-compact-quote-empty">
+                                <span>{lead.quoteRevisionId ? 'Not priced yet' : 'No quotation yet'}</span>
+                                {canQuote && <a href={lead.quoteRevisionId
+                                  ? '/dashboard/quotations/' + encodeURIComponent(lead.quoteRevisionId) + '/studio?step=quote'
+                                  : quoteHref}>
+                                  {lead.quoteRevisionId ? 'Continue quote' : 'Create quote'}
+                                </a>}
+                              </div>
+                            )}
+                          </section>
+                        </div>
                       </article>
                     );})}
                   </div>
