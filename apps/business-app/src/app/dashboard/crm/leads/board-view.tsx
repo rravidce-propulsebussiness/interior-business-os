@@ -198,11 +198,16 @@ export function LeadsBoardView({
                         <strong>Latest update</strong>
                         <p>{lead.latestUpdate || 'No contact recorded yet'}</p>
                       </div>
-                      {lead.quoteRevisionId && (
+                      {lead.quoteRevisionId && (lead.quoteShared || (lead.quoteAmount && Number(lead.quoteAmount)>0)) ? (
                         <LeadQuotePreview revisionId={lead.quoteRevisionId}
                           number={lead.quoteNumber || 'Quotation'} status={lead.quoteStatus}
                           amount={lead.quoteAmount} shared={lead.quoteShared}/>
-                      )}
+                      ) : lead.quoteRevisionId ? (
+                        <a className="crm-quote-create"
+                          href={'/dashboard/quotations/'+encodeURIComponent(lead.quoteRevisionId)+'/studio?step=quote'}>
+                          Continue unpriced quote
+                        </a>
+                      ) : <span className="crm-muted">No quote yet</span>}
                       <div className="crm-board-contact">
                         {phoneLink(lead.phoneNormalized || lead.phone) && (
                           <a
