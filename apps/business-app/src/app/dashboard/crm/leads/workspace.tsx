@@ -645,6 +645,18 @@ export function LeadsWorkspace({
                 <>
                   <div className="crm-leads-table-wrap">
                     <table className="crm-leads-table">
+                      <colgroup>
+                        <col className="crm-col-check" />
+                        <col className="crm-col-customer" />
+                        <col className="crm-col-requirement" />
+                        <col className="crm-col-location" />
+                        <col className="crm-col-update" />
+                        <col className="crm-col-status" />
+                        <col className="crm-col-priority" />
+                        <col className="crm-col-followup" />
+                        <col className="crm-col-quote" />
+                        <col className="crm-col-actions" />
+                      </colgroup>
                       <thead>
                         <tr>
                           <th className="crm-checkbox-col">
@@ -658,8 +670,9 @@ export function LeadsWorkspace({
                               }
                             />
                           </th>
-                          <th>Lead</th>
+                          <th>Customer / Details</th>
                           <th>Requirement</th>
+                          <th>Location</th>
                           <th>Latest update</th>
                           <th>Status</th>
                           <th>Priority</th>
@@ -670,7 +683,7 @@ export function LeadsWorkspace({
                       </thead>
                       <tbody>
                         {rows.map((lead, i) => (
-                          <tr key={lead.id}>
+                          <tr key={lead.id} className={checked.includes(lead.id) ? 'crm-lead-row crm-row-selected' : 'crm-lead-row'}>
                             <td>
                               <input
                                 aria-label={'Select ' + lead.name}
@@ -707,7 +720,6 @@ export function LeadsWorkspace({
                                   <small>
                                     {lead.phone || lead.number || 'No number'}
                                   </small>
-                                  {lead.location && <small className="crm-premium-location">{lead.location}</small>}
                                 </span>
                               </button>
                             </td>
@@ -716,6 +728,12 @@ export function LeadsWorkspace({
                                 {lead.requirement ||
                                   lead.projectSize ||
                                   'Not specified'}
+                              </span>
+                            </td>
+                            <td className="crm-lead-location">
+                              <span className="crm-lead-location-label">
+                                <Icon name="pin" size={15} />
+                                <span>{lead.location || 'Not specified'}</span>
                               </span>
                             </td>
                             <td className="crm-last-update">
@@ -891,7 +909,7 @@ export function LeadsWorkspace({
                                   amount={lead.quoteAmount} shared={lead.quoteShared} canShare={canShareQuote} />
                                 {canQuote && <a className="crm-quote-alternative"
                                   href={'/dashboard/quotations/new?lead=' + encodeURIComponent(lead.id)}>
-                                  + New quotation
+                                  + New quote
                                 </a>}
                               </div>
                             ) : canQuote ? (
