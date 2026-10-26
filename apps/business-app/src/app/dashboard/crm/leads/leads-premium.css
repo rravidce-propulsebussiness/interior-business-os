@@ -1256,3 +1256,67 @@
   .crm-leads-root .crm-row-actions .crm-update-open,
   .crm-leads-root .crm-compact-actions .crm-update-open {transition:none;transform:none}
 }
+
+
+/* Quotations are occasional work. Put them last and visually quieter than
+   log updates, follow-ups, calls, WhatsApp, and lead history. */
+.crm-leads-root .crm-col-actions {width:160px;}
+.crm-leads-root .crm-col-quote {width:155px;}
+.crm-leads-root .crm-leads-table {min-width:1050px;}
+.crm-leads-root .crm-leads-table th:last-child {
+  color:#718096;
+  font-weight:700;
+}
+.crm-leads-root .crm-leads-table .crm-quote-secondary,
+.crm-leads-root .crm-leads-table .crm-quote-pending {
+  width:100%;min-width:0;max-width:none;
+  padding:8px 9px;gap:4px;
+  background:#fcfaf9;
+  border:1px solid #eee9e6;
+  border-radius:10px;
+  box-shadow:none;
+  text-align:left;
+}
+.crm-leads-root .crm-leads-table .crm-quote-secondary {
+  display:grid;
+  align-content:center;
+  min-height:64px;
+}
+.crm-leads-root .crm-quote-secondary-label {
+  font-size:10px;line-height:1.25;
+  color:#53647a;font-weight:800;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.crm-leads-root .crm-quote-secondary-meta {
+  font-size:10px;color:#8c9099;
+  line-height:1.25;
+  overflow-wrap:anywhere;
+}
+.crm-leads-root .crm-leads-table .crm-quote-secondary a,
+.crm-leads-root .crm-leads-table .crm-quote-pending a {
+  display:inline-block;width:fit-content;min-height:0;
+  border:0;box-shadow:none;
+  background:transparent!important;color:#b95726!important;
+  text-align:left;text-decoration:underline;text-underline-offset:2px;
+  padding:4px 0 0;font-size:11px;font-weight:750;
+}
+.crm-leads-root .crm-leads-table .crm-quote-pending span {
+  color:#737d8b;font-size:11px;
+}
+.crm-leads-root .crm-compact-quotation-last {
+  display:grid;gap:8px;
+  margin-top:3px;padding-top:12px;
+  border-top:1px solid #eee7e1;
+}
+.crm-leads-root .crm-compact-quotation-last > strong {
+  color:#8290a2;font-size:11px;
+}
+.crm-leads-root .crm-compact-quotation-last .crm-quote-summary {
+  width:100%;max-width:none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .crm-leads-root .crm-leads-table .crm-quote-secondary a,
+  .crm-leads-root .crm-leads-table .crm-quote-pending a {
+    transition:none;
+  }
+}
