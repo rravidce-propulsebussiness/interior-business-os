@@ -279,6 +279,15 @@ export function LeadsWorkspace({
     initialTool,
   );
   const viewMode = params.view === 'board' ? 'board' : 'list';
+  // Filter reset must not preserve stage_id (or any other active filters).
+  // Previously the "Clear" action called viewLink(), keeping the same one-lead
+  // stage selection and making users think other leads had disappeared.
+  const allLeadsHref = viewMode === 'board' ? path + '?view=board' : path;
+  const activeStageName = stages.find((stage) => stage.id === params.stage_id)?.name;
+  const hasActiveFilters = [
+    'q','stage_id','source_id','branch_id','priority','due','range','from',
+    'until','lifecycle','assigned_to','unassigned',
+  ].some((key) => Boolean(params[key]));
   const [dateRange, setDateRange] = useState<LeadDateRange>(() =>
     leadDateRangeSelection(params),
   );
@@ -589,8 +598,8 @@ export function LeadsWorkspace({
           <button type="submit" className="crm-filter-apply">
             Apply
           </button>
-          <a className="crm-filter-clear" href={viewLink(viewMode)}>
-            Clear
+          <a className="crm-filter-clear" href={allLeadsHref}>
+            Clear all filters
           </a>
         </form>
       </section>
@@ -610,6 +619,13 @@ export function LeadsWorkspace({
               </a>
             ))}
           </nav>
+          {hasActiveFilters && <div className="crm-active-filter-notice" role="status">
+            <span>
+              Showing {number.format(count)} filtered {count === 1 ? 'lead' : 'leads'}
+              {activeStageName ? ' · Stage: ' + activeStageName : ''}
+            </span>
+            <a href={allLeadsHref}>View all leads</a>
+          </div>}
           <div className="crm-premium-selection">
             <div className="crm-premium-select-actions">
               <label><input type="checkbox" checked={allSelected}
@@ -980,7 +996,7 @@ export function LeadsWorkspace({
                 pipeline.
               </p>
               <div>
-                <a href={viewLink(viewMode)}>Clear filters</a>
+                <a href={allLeadsHref}>View all leads</a>
                 {canCreate && (
                   <button
                     type="button"
