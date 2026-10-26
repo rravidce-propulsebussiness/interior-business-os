@@ -1018,8 +1018,10 @@
   background: #fff0e5;
   border-color: #ffb997;
 }
-/* Compact widths see the existing mobile lead cards, never a squeezed table. */
-@media (max-width: 1600px) {
+/* Never replace the desktop table with a tall mobile card just because the
+   window is narrower than 1600px. Keep one lead per horizontal row, with a
+   scrollable table if the workspace does not have enough width. */
+@media (max-width: 800px) {
   .crm-leads-root .crm-leads-table-wrap {display:none!important;}
   .crm-leads-root .crm-mobile-list {display:grid!important;}
 }
