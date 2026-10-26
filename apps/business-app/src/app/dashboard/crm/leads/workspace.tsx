@@ -8,6 +8,7 @@ import type {QuickRequirementField} from '../requirement-fields';
 import { LeadRemovalButton } from './lead-removal-button';
 import { LeadStageSelect, LeadPrioritySelect, LeadFollowUpSetter } from './lead-inline-controls';
 import { LeadQuotePreview } from './lead-quote-preview';
+import { quoteFloorsFromLead, leadFloorLabel } from '../../quotations/lead-floor-count';
 import { allLeadsHref as resetLeadsHref } from './lead-filter-links';
 import { LeadUpdateComposer } from './lead-update-composer';
 import type { LeadServiceOption } from './lead-service-options';
@@ -744,6 +745,8 @@ export function LeadsWorkspace({
                                 {lead.requirement ||
                                   lead.projectSize ||
                                   'Not specified'}
+                                {lead.category === 'construction' && quoteFloorsFromLead(lead.requirements) &&
+                                  <small className="crm-lead-floor-chip">{leadFloorLabel(quoteFloorsFromLead(lead.requirements))}</small>}
                               </span>
                             </td>
                             <td>
@@ -868,7 +871,8 @@ export function LeadsWorkspace({
                         <div className="crm-compact-chips">
                           <span>{lead.stageName}</span>
                           <span className={'crm-premium-priority crm-premium-priority-' + lead.priority}>{lead.priority}</span>
-                          {lead.requirements.floors && <span>{lead.requirements.floors.toUpperCase()} floors</span>}
+                          {lead.category === 'construction' && quoteFloorsFromLead(lead.requirements) &&
+                            <span>{leadFloorLabel(quoteFloorsFromLead(lead.requirements))}</span>}
                         </div>
                         {pricedQuote ? (
                           <button className="crm-compact-quote-toggle" type="button"
