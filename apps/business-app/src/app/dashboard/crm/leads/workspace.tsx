@@ -8,6 +8,7 @@ import type {QuickRequirementField} from '../requirement-fields';
 import { LeadRemovalButton } from './lead-removal-button';
 import { LeadStageSelect, LeadPrioritySelect, LeadFollowUpSetter } from './lead-inline-controls';
 import { LeadQuotePreview } from './lead-quote-preview';
+import { allLeadsHref as resetLeadsHref } from './lead-filter-links';
 import { LeadUpdateComposer } from './lead-update-composer';
 import type { LeadServiceOption } from './lead-service-options';
 import { leadCategoryLabel, type LeadCategory } from './lead-category';
@@ -282,7 +283,7 @@ export function LeadsWorkspace({
   // Filter reset must not preserve stage_id (or any other active filters).
   // Previously the "Clear" action called viewLink(), keeping the same one-lead
   // stage selection and making users think other leads had disappeared.
-  const allLeadsHref = viewMode === 'board' ? path + '?view=board' : path;
+  const allLeadsHref = resetLeadsHref(viewMode);
   const activeStageName = stages.find((stage) => stage.id === params.stage_id)?.name;
   const hasActiveFilters = [
     'q','stage_id','source_id','branch_id','priority','due','range','from',
