@@ -9,7 +9,7 @@ import type { ConstructionPackage } from '@business-os/database/construction-pac
 import type { QuotationPackage } from '@business-os/database/quotation-packages';
 import { PremiumPackageEditor } from '../../pricing/construction/premium-package-editor';
 import {
-  duplicateConstructionPackage, deleteConstructionPackage,
+  duplicateConstructionPackage, deleteConstructionPackage, installConstructionBrochurePackages,
 } from '../../pricing/construction/package-actions';
 import { IndustryPackageEditor } from '../package-manager';
 import { duplicateQuotationPackage, deleteQuotationPackage } from '../package-actions';
@@ -79,7 +79,7 @@ export function PackageLibrary({
     : construction.map((item) => ({kind:'construction', item}));
   const sorted = [...currentItems].sort((a,b) => {
     if (a.kind === 'construction' && b.kind === 'construction') {
-      const order = ['STANDARD', 'PREMIUM', 'LUXURY', 'ROYAL'];
+      const order = ['STANDARD', 'PREMIUM', 'ROYAL', 'LUXURY'];
       const ia = order.indexOf(a.item.code), ib = order.indexOf(b.item.code);
       return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib) ||
         a.item.name.localeCompare(b.item.name);
@@ -139,6 +139,8 @@ export function PackageLibrary({
       : deleteQuotationPackage(entry.item.id, entry.item.version));
   }
   const addAllowed = canManage && (tab === 'construction' || activeIndustries.length > 0);
+  const missingStarterCodes = ['STANDARD','PREMIUM','ROYAL']
+    .filter(code => !construction.some(item => item.code === code));
 
 
   return (
@@ -204,13 +206,24 @@ export function PackageLibrary({
         </div>
       </div>}
       {message && <div role="status" className="qpl-message">{message}</div>}
+      {!showCustomManagement && tab === 'construction' && canManage && missingStarterCodes.length > 0 && (
+        <section className="qpl-starter" aria-label="Construction starter package templates">
+          <span><strong>Standard · Premium · Royal</strong><br />
+            Add {missingStarterCodes.length === 3 ? 'the three original' : 'the missing'} editable construction package templates.
+            Existing packages, quotations and your edits stay unchanged.</span>
+          <button type="button" disabled={pending}
+            onClick={() => refreshWith(installConstructionBrochurePackages)}>
+            {pending ? 'Adding…' : 'Add Missing Templates'}
+          </button>
+        </section>
+      )}
       {!showCustomManagement && <>
         <section className="qpl-cards" role="tabpanel"
           aria-label={tab==='construction'?'Construction package cards':'Interior package cards'}>
           {visible.map((entry,index)=>renderCard(entry,index))}
         </section>
         {visible.length===0&&<p className="qpl-empty">
-          No matching saved packages. {canManage?'Use Add Package to create one.':'Try another filter.'}
+          No matching saved packages. {canManage?'Add the original templates above or create your own.':'Try another filter.'}
         </p>}
         {other===null&&tab==='other'&&<p className="qpl-warning">
           Interior package storage is unavailable. Ask your administrator to apply the package migration.
