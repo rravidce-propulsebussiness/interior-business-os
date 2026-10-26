@@ -1053,3 +1053,79 @@
     animation: none!important;
   }
 }
+
+
+/* Filter visibility: a stage_id in the URL shows only that stage; make the
+   filtered count explicit and provide a true all-leads reset. */
+.crm-leads-root .crm-active-filter-notice {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:9px;
+  padding:9px 15px;
+  color:#6a4a33;
+  background:#fff9f3;
+  border-bottom:1px solid #f6e4d6;
+  font-size:12px;
+  font-weight:650;
+}
+.crm-leads-root .crm-active-filter-notice a {
+  display:inline-flex;
+  align-items:center;
+  min-height:30px;
+  padding:5px 10px;
+  border:1px solid #ffbf98;
+  border-radius:8px;
+  color:#dc5411;
+  background:#fff;
+  text-decoration:none;
+  font-weight:850;
+  transition: background .16s ease, border-color .16s ease;
+}
+.crm-leads-root .crm-active-filter-notice a:hover,
+.crm-leads-root .crm-active-filter-notice a:focus-visible {
+  background:#fff0e4;
+  border-color:#f87c3d;
+}
+
+/* Four actions share one line, instead of making every quotation two rows
+   taller. On desktop a lead stays one horizontal record, never a full card. */
+.crm-leads-root .crm-quote-summary .crm-quote-buttons:has(.crm-quote-new-inline) {
+  grid-template-columns:repeat(4,minmax(0,1fr));
+}
+.crm-leads-root .crm-quote-summary .crm-quote-buttons .crm-quote-new-inline {
+  background:#fff2e7;
+  border:1px solid #ffc5a3;
+  color:#d34b09;
+}
+.crm-leads-root .crm-quote-summary .crm-quote-buttons .crm-quote-new-inline:hover {
+  background:#ffe4d1;
+}
+@media(min-width:801px) {
+  .crm-leads-root .crm-leads-table td {padding-block:9px;}
+  .crm-leads-root .crm-quote-summary {
+    padding:8px 9px;
+    border-radius:11px;
+  }
+  .crm-leads-root .crm-quote-summary-heading {font-size:10px;}
+  .crm-leads-root .crm-quote-summary-top {margin-top:3px;}
+  .crm-leads-root .crm-quote-amount {font-size:16px;margin:2px 0 0;}
+  .crm-leads-root .crm-quote-summary .crm-quote-buttons {margin-top:6px;gap:4px;}
+  .crm-leads-root .crm-quote-summary .crm-quote-buttons > :is(button,a) {
+    min-height:30px;
+    padding:6px 2px;
+    font-size:9px;
+  }
+  .crm-leads-root .crm-quote-summary .crm-quote-buttons .crm-quote-whatsapp {
+    font-size:9px;
+  }
+}
+@media(max-width:800px) {
+  .crm-leads-root .crm-quote-summary .crm-quote-buttons:has(.crm-quote-new-inline) {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  .crm-leads-root .crm-active-filter-notice a {transition:none;}
+}
