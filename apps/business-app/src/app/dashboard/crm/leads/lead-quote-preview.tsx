@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
+import { leadQuoteLabel } from './lead-quote-display';
 import { authorizeWhatsAppPdfAttachment } from '../../quotations/sharing-actions';
 import {
   fetchQuotationPdfFile, supportsPdfFileSharing, sharePdfFile,
@@ -28,10 +29,7 @@ export function LeadQuotePreview({
   const [preparedPdf, setPreparedPdf] = useState<File | null>(null);
 
   const base = '/dashboard/quotations/' + encodeURIComponent(revisionId);
-  const visibleStatus = shared ? 'Shared' :
-    status === 'issued' ? 'Ready to share' :
-    status === 'superseded' ? 'Previous version' :
-    status === 'cancelled' ? 'Archived' : 'Draft';
+  const visibleStatus = leadQuoteLabel(status, shared);
   const formatted = amount !== null && Number.isFinite(Number(amount))
     ? '₹' + Number(amount).toLocaleString('en-IN', { maximumFractionDigits: 0 })
     : null;
@@ -103,7 +101,7 @@ export function LeadQuotePreview({
       return;
     }
     if (status === 'draft' && !window.confirm(
-      'This quotation is a draft. Finalize it for customer sharing and prepare the PDF file?',
+      'Prepare this saved quotation for customer sharing? It will be finalized before the PDF is shared.',
     )) return;
     setSharing(true);
     setShareMessage('');
@@ -126,11 +124,14 @@ export function LeadQuotePreview({
 
   return (
     <div className="crm-quote-summary">
-      <div className="crm-quote-summary-top">
-        <strong title={number}>{number}</strong>
+      <div className="crm-quote-summary-heading">
+        <span>Latest quotation</span>
         <span className={shared ? 'crm-quote-shared' : 'crm-quote-status'}>
           {visibleStatus}
         </span>
+      </div>
+      <div className="crm-quote-summary-top">
+        <strong title={number}>{number}</strong>
       </div>
       {formatted && <strong className="crm-quote-amount">{formatted}</strong>}
       <div className="crm-quote-buttons">
