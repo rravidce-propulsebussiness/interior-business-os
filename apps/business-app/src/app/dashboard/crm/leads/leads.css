@@ -2665,3 +2665,17 @@ body:has(.crm-leads-root) .crm-shared-navigation {
   .crm-mobile-card { min-width: 0; overflow-wrap: anywhere; }
   .crm-stage-tabs { max-width: 100%; overflow-x: auto; }
 }
+
+/* Shared unpriced quotation state: listing, board, history and lead drawer. */
+.crm-quote-summary.crm-quote-incomplete {
+  display:flex; flex-wrap:wrap; gap:9px; align-items:center;
+  justify-content:space-between; min-width:0; max-width:none;
+  color:#66778d; background:#fffaf7;
+  font-size:11px;font-weight:750;
+}
+.crm-quote-summary.crm-quote-incomplete a {
+  display:inline-flex;align-items:center;justify-content:center;
+  padding:8px 11px;border-radius:8px;min-height:33px;
+  background:#ff5b0b;color:white;font-weight:800;
+  text-decoration:none;
+}
