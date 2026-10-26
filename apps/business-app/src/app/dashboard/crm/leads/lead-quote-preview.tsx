@@ -10,7 +10,7 @@ import {
 
 export function LeadQuotePreview({
   revisionId, number, status, amount, shared = false, canShare = false,
-  newQuoteHref,
+  newQuoteHref, compact = false,
 }: {
   revisionId: string;
   number: string;
@@ -19,6 +19,7 @@ export function LeadQuotePreview({
   shared?: boolean;
   canShare?: boolean;
   newQuoteHref?: string | undefined;
+  compact?: boolean;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const activeRequest = useRef<AbortController | null>(null);
@@ -130,6 +131,17 @@ export function LeadQuotePreview({
     return <div className="crm-quote-summary crm-quote-incomplete">
       <span>Quotation not priced yet</span>
       <a href={base + '/studio?step=quote'}>Continue quotation</a>
+    </div>;
+  }
+
+  // On the Leads table, sharing is intentionally a secondary workflow:
+  // open the quotation when it is needed instead of showing a large PDF CTA
+  // beside every daily follow-up action.
+  if (compact) {
+    return <div className="crm-quote-summary crm-quote-secondary">
+      <span className="crm-quote-secondary-label" title={number}>{number}</span>
+      <span className="crm-quote-secondary-meta">{formatted || 'Saved'} · {visibleStatus}</span>
+      <a href={base} aria-label={'Open quotation ' + number}>View quote</a>
     </div>;
   }
 
