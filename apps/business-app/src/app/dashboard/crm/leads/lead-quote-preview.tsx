@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
+import { leadQuoteLabel } from './lead-quote-display';
 import { authorizeWhatsAppPdfAttachment } from '../../quotations/sharing-actions';
 import {
   fetchQuotationPdfFile, supportsPdfFileSharing, sharePdfFile,
@@ -28,13 +29,7 @@ export function LeadQuotePreview({
   const [preparedPdf, setPreparedPdf] = useState<File | null>(null);
 
   const base = '/dashboard/quotations/' + encodeURIComponent(revisionId);
-  // "draft" is a private revision state, not a status a company user should
-  // have to manage in the Leads workspace. Saved quotations can be opened
-  // and reviewed; explicit sharing follows the existing approval gate.
-  const visibleStatus = shared ? 'Shared' :
-    status === 'issued' ? 'Ready to share' :
-    status === 'superseded' ? 'Previous version' :
-    status === 'cancelled' ? 'Archived' : 'Saved';
+  const visibleStatus = leadQuoteLabel(status, shared);
   const formatted = amount !== null && Number.isFinite(Number(amount))
     ? '₹' + Number(amount).toLocaleString('en-IN', { maximumFractionDigits: 0 })
     : null;
