@@ -9,6 +9,7 @@ type Industry = { key: string; name: string };
 type QuoteLead = {
   id: string; lead_number: string; name: string; phone: string; email: string;
   location: string; project_size: string; service_type: string; industryKey: string;
+  floorCount: number | null;
 };
 
 export function QuotationStudioStart({
@@ -84,6 +85,7 @@ export function QuotationStudioStart({
         const mode = industry === 'construction' && !initialCustomizedQuote ? 'sft' : 'custom';
         const route = new URLSearchParams({ mode, step: 'quote' });
         if (allowedPackage) route.set('package', initialPackageId);
+        if (industry === 'construction' && selectedLead?.floorCount) route.set('floors', String(selectedLead.floorCount));
         if (initialCustomizedQuote) route.set('package', 'custom');
         router.push('/dashboard/quotations/' + result.revisionId + '/studio?' + route.toString());
       });
@@ -113,6 +115,9 @@ export function QuotationStudioStart({
             No leads available. <Link href="/dashboard/crm/leads">Add a lead</Link> before creating a quote.
           </p>
         )}
+        {industry === 'construction' && selectedLead?.floorCount && <p className="qs-source-service" role="status">
+          {selectedLead.floorCount} construction floors will be prefilled in the quotation editor. You can edit them for this project.
+        </p>}
         {initialPackageId && industry && initialPackageIndustry &&
           initialPackageIndustry !== industry && (
             <p className="qs-source-warning" role="status">
