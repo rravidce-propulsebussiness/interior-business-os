@@ -29,6 +29,23 @@ test('Leads desktop uses single horizontal rows and offers a real filter reset',
   assert.doesNotMatch(leadsCss, /@media\s*\(max-width:\s*1024px\),\s*\(hover:\s*none\)/);
 });
 
+test('daily lead actions stay before occasional quotations on desktop and mobile', () => {
+  const quotePreview = readFileSync(fileURLToPath(new URL('lead-quote-preview.tsx', root)), 'utf8');
+  const desktopHeaders = leads.slice(leads.indexOf('<colgroup>'), leads.indexOf('</thead>'));
+  assert.match(desktopHeaders, /crm-col-actions[^]*crm-col-quote/);
+  assert.match(desktopHeaders, /<th>Daily actions<\/th>\s*<th>Quotation · optional<\/th>/);
+  const desktopRows = leads.slice(leads.indexOf('<tbody>'), leads.indexOf('</tbody>'));
+  assert.ok(desktopRows.indexOf('className="crm-row-actions"') < desktopRows.indexOf('className="crm-quote-pending"'));
+  assert.match(desktopRows, /<LeadQuotePreview compact/);
+  assert.match(quotePreview, /if \(compact\)/);
+  assert.match(quotePreview, /href=\{base\}/);
+  const mobileCards = leads.slice(leads.indexOf('className="crm-mobile-list"'), leads.indexOf('className="crm-leads-empty"'));
+  assert.ok(mobileCards.indexOf('className="crm-compact-actions"') < mobileCards.indexOf('className="crm-compact-quotation-last"'));
+  assert.ok(mobileCards.indexOf('className="crm-compact-secondary"') < mobileCards.indexOf('className="crm-compact-quotation-last"'));
+  assert.doesNotMatch(mobileCards, /className="crm-compact-quote-toggle"/);
+  assert.match(mobileCards, /\{expanded && <div className="crm-compact-expanded">/);
+});
+
 test('lead list retains inline Add and ProPulse but uses separate import routes', () => {
   for (const panel of ['add', 'propulse']) {
     assert.match(leads, new RegExp("leadTool === '" + panel + "'"));
