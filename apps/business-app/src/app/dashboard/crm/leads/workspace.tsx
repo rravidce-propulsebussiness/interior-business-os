@@ -926,7 +926,7 @@ export function LeadsWorkspace({
                               </div>
                             )}
                           </section>
-                        </div>
+                        </div>}
                       </article>
                     );})}
                   </div>
