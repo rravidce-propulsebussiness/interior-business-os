@@ -186,6 +186,7 @@ export function ConstructionSelector({
   version,
   initialMode = 'sft',
   initialPackageId,
+  initialFloorCount = null,
   quoteNumber,
   canSharePdf = false,
 }: {
@@ -197,6 +198,7 @@ export function ConstructionSelector({
   version: number;
   initialMode?: 'sft' | 'custom';
   initialPackageId?: string;
+  initialFloorCount?: number | null;
   quoteNumber?: string;
   canSharePdf?: boolean;
 }) {
@@ -251,6 +253,7 @@ export function ConstructionSelector({
         <PremiumSftBuilder key={selected}
           selectedPackageId={chosen.id}
           rates={rates} packages={packages} initialSchedule={initialSchedule}
+          initialFloorCount={initialFloorCount}
           revisionId={revisionId} version={version}
           quoteNumber={quoteNumber || 'Quotation'} canSharePdf={canSharePdf} />
       ) : (

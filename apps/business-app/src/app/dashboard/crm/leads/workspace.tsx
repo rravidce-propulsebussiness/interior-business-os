@@ -8,6 +8,7 @@ import type {QuickRequirementField} from '../requirement-fields';
 import { LeadRemovalButton } from './lead-removal-button';
 import { LeadStageSelect, LeadPrioritySelect, LeadFollowUpSetter } from './lead-inline-controls';
 import { LeadQuotePreview } from './lead-quote-preview';
+import { quoteFloorsFromLead, leadFloorLabel } from '../../quotations/lead-floor-count';
 import { allLeadsHref as resetLeadsHref } from './lead-filter-links';
 import { LeadUpdateComposer } from './lead-update-composer';
 import type { LeadServiceOption } from './lead-service-options';
@@ -276,6 +277,7 @@ export function LeadsWorkspace({
   initialTool: 'none' | 'add' | 'propulse';
 }) {
   const [openedId, setOpenedId] = useState<string | null>(null);
+  const [expandedMobileId, setExpandedMobileId] = useState<string | null>(null);
   const [leadTool, setLeadTool] = useState<'none' | 'add' | 'propulse'>(
     initialTool,
   );
@@ -666,8 +668,6 @@ export function LeadsWorkspace({
                         <col className="crm-col-check" />
                         <col className="crm-col-customer" />
                         <col className="crm-col-requirement" />
-                        <col className="crm-col-location" />
-                        <col className="crm-col-update" />
                         <col className="crm-col-status" />
                         <col className="crm-col-priority" />
                         <col className="crm-col-followup" />
@@ -689,8 +689,6 @@ export function LeadsWorkspace({
                           </th>
                           <th>Customer / Details</th>
                           <th>Requirement</th>
-                          <th>Location</th>
-                          <th>Latest update</th>
                           <th>Status</th>
                           <th>Priority</th>
                           <th>Next follow-up</th>
@@ -734,9 +732,11 @@ export function LeadsWorkspace({
                                   >
                                     {leadCategoryLabel(lead.category)}
                                   </span>
-                                  <small>
-                                    {lead.phone || lead.number || 'No number'}
-                                  </small>
+                                  <small>{lead.phone || lead.number || 'No number'}</small>
+                                  {lead.location && <small className="crm-premium-location">{lead.location}</small>}
+                                  {lead.latestUpdate && <small className="crm-lead-update-peek" title={lead.latestUpdate}>
+                                    {lead.latestUpdateSubject || 'Update'}: {lead.latestUpdate}
+                                  </small>}
                                 </span>
                               </button>
                             </td>
@@ -745,22 +745,9 @@ export function LeadsWorkspace({
                                 {lead.requirement ||
                                   lead.projectSize ||
                                   'Not specified'}
+                                {lead.category === 'construction' && quoteFloorsFromLead(lead.requirements) &&
+                                  <small className="crm-lead-floor-chip">{leadFloorLabel(quoteFloorsFromLead(lead.requirements))}</small>}
                               </span>
-                            </td>
-                            <td className="crm-lead-location">
-                              <span className="crm-lead-location-label">
-                                <Icon name="pin" size={15} />
-                                <span>{lead.location || 'Not specified'}</span>
-                              </span>
-                            </td>
-                            <td className="crm-last-update">
-                              {lead.latestUpdate ? (
-                                <>
-                                  <strong>{lead.latestUpdateSubject || 'Latest contact'}</strong>
-                                  <span>{lead.latestUpdate}</span>
-                                  {lead.latestUpdateAt && <small>{date(lead.latestUpdateAt, true, timeZone)}</small>}
-                                </>
-                              ) : <span className="crm-muted">No contact logged yet</span>}
                             </td>
                             <td>
                               <LeadStageSelect
@@ -779,7 +766,14 @@ export function LeadsWorkspace({
                               <LeadFollowUpSetter lead={lead} canFollowUp={canFollowUp} />
                             </td>
                             <td>
-                              {lead.quoteRevisionId ? (
+                              {lead.quoteRevisionId && (!lead.quoteAmount || Number(lead.quoteAmount) <= 0) && !lead.quoteShared ? (
+                                <div className="crm-quote-pending">
+                                  <span>No priced quotation yet</span>
+                                  <a href={'/dashboard/quotations/' + encodeURIComponent(lead.quoteRevisionId) + '/studio?step=quote'}>
+                                    Continue quotation
+                                  </a>
+                                </div>
+                              ) : lead.quoteRevisionId ? (
                                 <div className="crm-quote-stack">
                                   <LeadQuotePreview
                                     revisionId={lead.quoteRevisionId}
@@ -793,13 +787,19 @@ export function LeadsWorkspace({
                                   />
                                 </div>
                               ) : canQuote ? (
-                                <a className="crm-quote-create" href={'/dashboard/quotations/new?lead='+lead.id}>
-                                  + Prepare quote
-                                </a>
+                                <div className="crm-quote-pending">
+                                  <span>No quote yet</span>
+                                  <a href={'/dashboard/quotations/new?lead=' + encodeURIComponent(lead.id)}>
+                                    + Create Quote
+                                  </a>
+                                </div>
                               ) : <span className="crm-muted">No quotation</span>}
                             </td>
                             <td>
                               <div className="crm-row-actions">
+                                {canNote && lead.lifecycle !== 'archived' &&
+                                  <LeadUpdateComposer leadId={lead.id} leadName={lead.name} canFollowUp={canFollowUp}/>}
+                                <div className="crm-row-icon-actions">
                                 {lead.phoneNormalized && (
                                   <a
                                     title={'Call ' + lead.name}
@@ -833,12 +833,11 @@ export function LeadsWorkspace({
                                   <summary aria-label={'More actions for ' + lead.name} title="More">•••</summary>
                                   <div className="crm-premium-row-menu">
                                     <a href={path + '/' + encodeURIComponent(lead.id)}>View history</a>
-                                    {canNote && lead.lifecycle !== 'archived' &&
-                                      <LeadUpdateComposer leadId={lead.id} leadName={lead.name} canFollowUp={canFollowUp}/>}
                                     {canManage && lead.lifecycle !== 'archived' &&
                                       <LeadRemovalButton id={lead.id} name={lead.name} version={lead.version}/>}
                                   </div>
                                 </details>
+                                </div>
                               </div>
                             </td>
                           </tr>
@@ -847,141 +846,89 @@ export function LeadsWorkspace({
                     </table>
                   </div>
                   <div className="crm-mobile-list">
-                    {rows.map((lead, i) => (
-                      <article className="crm-mobile-card" key={lead.id}>
-                        <div className="crm-mobile-header">
+                    {rows.map((lead, i) => {
+                      const expanded = expandedMobileId === lead.id;
+                      const quoteHref = '/dashboard/quotations/new?lead=' + encodeURIComponent(lead.id);
+                      const pricedQuote = Boolean(lead.quoteRevisionId &&
+                        (lead.quoteShared || (lead.quoteAmount && Number(lead.quoteAmount) > 0)));
+                      return (
+                      <article className="crm-mobile-card crm-compact-lead" key={lead.id}>
+                        <div className="crm-compact-top">
                           <input type="checkbox" aria-label={'Select ' + lead.name}
                             checked={checked.includes(lead.id)}
                             disabled={lead.lifecycle !== 'open'}
                             onChange={() => toggle(lead.id)}/>
-                          <span className={'crm-avatar crm-avatar-' + (i % 5)}>
-                            {firstLetters(lead.name)}
-                          </span>
-                          <div>
+                          <span className={'crm-avatar crm-avatar-' + (i % 5)}>{firstLetters(lead.name)}</span>
+                          <button className="crm-compact-identity" type="button" onClick={() => open(lead)}
+                            aria-label={'Open lead ' + lead.name}>
                             <strong>{lead.name}</strong>
-                            <small>{lead.number || lead.phone}</small>
-                            <span
-                              className={
-                                'crm-lead-service-badge crm-lead-service-' +
-                                (lead.category ?? 'unclassified')
-                              }
-                            >
-                              {leadCategoryLabel(lead.category)}
-                            </span>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => open(lead)}
-                            aria-label={'Open lead details for ' + lead.name}
-                          >
-                            <Icon name="chevron" />
+                            <small>{lead.phone || lead.number}</small>
+                            {lead.location && <small>{lead.location}</small>}
                           </button>
+                          <span className="crm-compact-date">{lead.nextFollowUpAt ? date(lead.nextFollowUpAt,false,timeZone) : 'No follow-up'}</span>
                         </div>
-                        <p>
-                          {lead.requirement ||
-                            lead.projectSize ||
-                            'No requirement specified'}
-                        </p>
-                        <div className="crm-mobile-summary">
-                          <span>{lead.location || 'Location not set'} · {lead.phone}</span>
-                          <div className="crm-mobile-latest">
-                            <strong>Latest update</strong>
-                            <p>{lead.latestUpdate || 'No conversations recorded yet'}</p>
-                            {lead.latestUpdateAt && <small>{date(lead.latestUpdateAt,true,timeZone)}</small>}
-                          </div>
+                        <p className="crm-compact-requirement">{lead.requirement || lead.projectSize || 'Requirement not specified'}</p>
+                        <div className="crm-compact-chips">
+                          <span>{lead.stageName}</span>
+                          <span className={'crm-premium-priority crm-premium-priority-' + lead.priority}>{lead.priority}</span>
+                          {lead.category === 'construction' && quoteFloorsFromLead(lead.requirements) &&
+                            <span>{leadFloorLabel(quoteFloorsFromLead(lead.requirements))}</span>}
                         </div>
-                        <div className="crm-mobile-inline-grid">
-                          <div className="crm-mobile-stage">
-                            <span>Stage</span>
-                            <LeadStageSelect lead={lead} stages={stages} lostReasons={lostReasons}
-                              canManage={canManage} canWin={canWin} canConvert={canConvert}
-                              canViewProject={canViewProject}/>
-                          </div>
-                          <label>Priority
-                            <LeadPrioritySelect lead={lead} canManage={canManage}/>
-                          </label>
-                          <label className="crm-mobile-followup">Next follow-up
-                            <LeadFollowUpSetter lead={lead} canFollowUp={canFollowUp}/>
-                          </label>
-                          <div
-                            className="crm-mobile-quotation"
-                            style={{
-                              gridColumn: '1 / -1',
-                              display: 'grid',
-                              gridTemplateColumns: 'minmax(0, 1fr)',
-                              gap: 6,
-                              width: '100%',
-                              minWidth: 0,
-                            }}
-                          >
-                            <span className="crm-mobile-field-label" style={{
-                              display: 'block', fontSize: 11, fontWeight: 700,
-                              color: '#657895', lineHeight: '1.4',
-                            }}>Quotation</span>
-                            {lead.quoteRevisionId ? (
-                              <div className="crm-quote-stack">
-                                <LeadQuotePreview revisionId={lead.quoteRevisionId}
-                                  number={lead.quoteNumber || 'Quotation'} status={lead.quoteStatus}
-                                  amount={lead.quoteAmount} shared={lead.quoteShared} canShare={canShareQuote}
-                                  newQuoteHref={canQuote
-                                    ? '/dashboard/quotations/new?lead=' + encodeURIComponent(lead.id)
-                                    : undefined} />
-                              </div>
-                            ) : canQuote ? (
-                              <a
-                                className="crm-quote-create"
-                                aria-label={'Prepare quotation for ' + lead.name}
-                                href={'/dashboard/quotations/new?lead=' + encodeURIComponent(lead.id)}
-                                style={{
-                                  boxSizing: 'border-box',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'space-between',
-                                  gap: 12,
-                                  width: '100%',
-                                  minWidth: 0,
-                                  minHeight: 46,
-                                  padding: '10px 12px',
-                                  border: '1px solid #e2e6ed',
-                                  borderRadius: 12,
-                                  background: '#f7f8fb',
-                                  color: '#233653',
-                                  fontSize: 13,
-                                  fontWeight: 700,
-                                  textDecoration: 'none',
-                                  textAlign: 'left',
-                                }}
-                              >
-                                <span>+ Prepare quotation</span>
-                                <span aria-hidden="true" style={{ flexShrink: 0 }}>↗</span>
-                              </a>
-                            ) : (
-                              <span className="crm-muted">No quotation yet</span>
-                            )}
-                          </div>
-                        </div>
-                        <div className="crm-premium-mobile-actions">
-                          {lead.phoneNormalized && <a href={'tel:' + safePhone(lead.phoneNormalized)}
-                            aria-label={'Call ' + lead.name}><Icon name="phone"/> Call</a>}
-                          {whatsapp(lead.phoneNormalized || lead.phone) && <a
-                            href={'https://wa.me/' + whatsapp(lead.phoneNormalized || lead.phone)}
-                            target="_blank" rel="noopener noreferrer" aria-label={'WhatsApp ' + lead.name}>
-                            <Icon name="whatsapp"/> WhatsApp</a>}
-                          <a href={path + '/' + encodeURIComponent(lead.id)}>History</a>
+                        {pricedQuote ? (
+                          <button className="crm-compact-quote-toggle" type="button"
+                            aria-expanded={expanded} onClick={() => setExpandedMobileId(expanded ? null : lead.id)}>
+                            <span>Quote {lead.quoteNumber || ''} · {lead.quoteAmount && Number(lead.quoteAmount)>0
+                              ? '₹' + Number(lead.quoteAmount).toLocaleString('en-IN') : 'Shared'}</span>
+                            <span>{expanded ? 'Less −' : 'Details +'}</span>
+                          </button>
+                        ) : <div className="crm-compact-quote-empty">
+                          <span>{lead.quoteRevisionId ? 'Quotation not priced yet' : 'No quote yet'}</span>
+                          {canQuote && <a href={lead.quoteRevisionId
+                            ? '/dashboard/quotations/'+encodeURIComponent(lead.quoteRevisionId)+'/studio?step=quote'
+                            : quoteHref}>
+                            {lead.quoteRevisionId ? 'Continue' : '+ Create Quote'}
+                          </a>}
+                        </div>}
+                        <div className="crm-compact-actions">
                           {canNote && lead.lifecycle !== 'archived' &&
                             <LeadUpdateComposer leadId={lead.id} leadName={lead.name} canFollowUp={canFollowUp}/>}
+                          {lead.phoneNormalized && <a href={'tel:' + safePhone(lead.phoneNormalized)}
+                            aria-label={'Call '+lead.name}><Icon name="phone"/></a>}
+                          {whatsapp(lead.phoneNormalized || lead.phone) && <a
+                            href={'https://wa.me/' + whatsapp(lead.phoneNormalized || lead.phone)}
+                            target="_blank" rel="noopener noreferrer" aria-label={'WhatsApp '+lead.name}>
+                            <Icon name="whatsapp"/></a>}
+                          <button className="crm-compact-expand" type="button"
+                            aria-expanded={expanded}
+                            onClick={() => setExpandedMobileId(expanded ? null : lead.id)}>
+                            {expanded ? 'Less −' : 'More +'}
+                          </button>
                         </div>
-                        {canManage && lead.lifecycle !== 'archived' && (
-                          <div className="crm-mobile-delete">
-                            <LeadRemovalButton
-                              id={lead.id}
-                              name={lead.name}
-                              version={lead.version}
-                            />
+                        {expanded && <div className="crm-compact-expanded">
+                          {lead.latestUpdate && <p className="crm-compact-last"><strong>Last update:</strong> {lead.latestUpdate}</p>}
+                          <div className="crm-mobile-inline-grid">
+                            <div className="crm-mobile-stage"><span>Stage</span>
+                              <LeadStageSelect lead={lead} stages={stages} lostReasons={lostReasons}
+                                canManage={canManage} canWin={canWin} canConvert={canConvert}
+                                canViewProject={canViewProject}/></div>
+                            <label>Priority <LeadPrioritySelect lead={lead} canManage={canManage}/></label>
+                            <label className="crm-mobile-followup">Next follow-up
+                              <LeadFollowUpSetter lead={lead} canFollowUp={canFollowUp}/></label>
                           </div>
-                        )}
+                          {pricedQuote && lead.quoteRevisionId && <LeadQuotePreview
+                            revisionId={lead.quoteRevisionId}
+                            number={lead.quoteNumber || 'Quotation'} status={lead.quoteStatus}
+                            amount={lead.quoteAmount} shared={lead.quoteShared}
+                            canShare={canShareQuote}
+                            newQuoteHref={canQuote ? quoteHref : undefined}/>}
+                          <div className="crm-compact-secondary">
+                            <a href={path + '/' + encodeURIComponent(lead.id)}>View history</a>
+                            {canManage && lead.lifecycle !== 'archived' &&
+                              <LeadRemovalButton id={lead.id} name={lead.name} version={lead.version}/>}
+                          </div>
+                        </div>}
                       </article>
-                    ))}
+                    );})}
                   </div>
                 </>
               )}

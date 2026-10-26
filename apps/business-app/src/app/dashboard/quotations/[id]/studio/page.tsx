@@ -25,7 +25,7 @@ export default async function QuotationStudio({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ mode?: string; step?: string; package?: string }>;
+  searchParams: Promise<{ mode?: string; step?: string; package?: string; floors?: string }>;
 }) {
   const [{ id }, query] = await Promise.all([params, searchParams]);
   // Old studio deep links no longer open a duplicate Preview & Share page.
@@ -194,7 +194,8 @@ export default async function QuotationStudio({
               initialSchedule={existingSft}
               initialCustomQuote={existingCustomQuote}
               initialMode={mode === 'custom' ? 'custom' : 'sft'}
-               initialPackageId={query.package ?? ''}
+              initialPackageId={query.package ?? ''}
+              initialFloorCount={query.floors && /^[1-8]$/.test(query.floors) ? Number(query.floors) : null}
               canSharePdf={s.allowed('quotation.share', 'quotation')}
               quoteNumber={root.quotation_number}
             />

@@ -95,11 +95,12 @@ const measured = (row:Work) => {
 const nonempty=(s:string|undefined)=>Boolean(s?.trim());
 
 export function PremiumSftBuilder({
-  rates,packages,initialSchedule,revisionId,version,selectedPackageId,quoteNumber,canSharePdf,
+  rates,packages,initialSchedule,initialFloorCount,revisionId,version,selectedPackageId,quoteNumber,canSharePdf,
 }:{
   rates:ConstructionRate[];
   packages:ConstructionPackage[];
   initialSchedule:SftEstimateDetails|null;
+  initialFloorCount?:number|null;
   revisionId:string; version:number; selectedPackageId?:string; quoteNumber:string; canSharePdf:boolean;
 }){
   const router=useRouter();
@@ -113,7 +114,13 @@ export function PremiumSftBuilder({
   const activeRates=rates.filter(r=>r.status==='active');
   const [rows,setRows]=useState<Work[]>(()=>{
     const initial=initialSchedule ? editableSftRows(initialSchedule) : undefined;
-    if(!initial?.length)return [floor('Ground Floor',packageRate)];
+    if(!initial?.length){
+      const count = initialFloorCount && initialFloorCount >= 1 && initialFloorCount <= 8 ? initialFloorCount : 1;
+      return Array.from({length:count},(_,level)=>({
+        ...floor(floorLabel(level),packageRate),
+        inheritFromPrevious:level>0,
+      }));
+    }
     return normalizePenthouseFloors(initial.map((item, index)=>({
       // Existing legacy floor rows remain editable; special zone names are
       // persisted inside the existing signed floor-wise quotation schedule.

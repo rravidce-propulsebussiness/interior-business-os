@@ -124,6 +124,15 @@ export function LeadQuotePreview({
     })();
   }
 
+  // Do not represent an unpriced private revision as a ₹0 quotation.
+  // Reuse this state across the lead list, drawer, board and history.
+  if (!shared && status === 'draft' && (!amount || Number(amount) <= 0)) {
+    return <div className="crm-quote-summary crm-quote-incomplete">
+      <span>Quotation not priced yet</span>
+      <a href={base + '/studio?step=quote'}>Continue quotation</a>
+    </div>;
+  }
+
   return (
     <div className="crm-quote-summary">
       <div className="crm-quote-summary-heading">

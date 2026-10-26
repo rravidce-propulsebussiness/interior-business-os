@@ -1,6 +1,7 @@
 import { idSchema } from '@business-os/shared';
 import { commercialServices } from '../../commercial/service';
 import { resolveLeadCategory } from '../../crm/leads/lead-category';
+import { quoteFloorsFromLead } from '../lead-floor-count';
 import { QuotationStudioFrame } from '../studio-frame';
 import { QuotationStudioStart } from '../studio-start';
 import '../clean-create.css';
@@ -69,7 +70,7 @@ export default async function NewQuotation({
       : null;
     const industry = assignedIndustry ?? enabledIndustries.find((candidate) =>
       candidate.key === legacyCategory);
-    return { ...entry, industryKey: industry?.key ?? '' };
+    return { ...entry, industryKey: industry?.key ?? '', floorCount: industry?.key === 'construction' ? quoteFloorsFromLead(entry.requirements) : null };
   });
 
   return (

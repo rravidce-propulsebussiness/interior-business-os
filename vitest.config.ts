@@ -12,6 +12,7 @@ export default defineConfig({
       'packages/*/src/**/*.test.ts',
       'apps/business-app/src/app/dashboard/website/cloudflare-domains.test.ts',
       'apps/business-app/src/app/dashboard/quotations/studio-ui.test.ts',
+      'apps/business-app/src/app/dashboard/quotations/lead-floor-count.test.ts',
       'apps/business-app/src/app/dashboard/crm/leads/lead-quote-display.test.ts',
       'apps/business-app/src/app/dashboard/crm/leads/lead-filter-links.test.ts',
       'apps/business-app/src/app/dashboard/billing/billing-ui.test.ts',
