@@ -17,6 +17,18 @@ const root = new URL(
   import.meta.url,
 );
 
+test('Leads desktop uses single horizontal rows and offers a real filter reset', () => {
+  const premiumCss = readFileSync(fileURLToPath(new URL('leads-premium.css', root)), 'utf8');
+  const leadsCss = readFileSync(fileURLToPath(new URL('leads.css', root)), 'utf8');
+  assert.match(leads, /className="crm-leads-table-wrap"/);
+  assert.match(leads, /crm-col-quote/);
+  assert.match(leads, /crm-lead-row/);
+  assert.match(leads, /Showing \{number\.format\(count\)\} filtered/);
+  assert.match(leads, /href=\{allLeadsHref\}/);
+  assert.doesNotMatch(premiumCss, /@media\s*\(max-width:\s*1600px\)/);
+  assert.doesNotMatch(leadsCss, /@media\s*\(max-width:\s*1024px\),\s*\(hover:\s*none\)/);
+});
+
 test('lead list retains inline Add and ProPulse but uses separate import routes', () => {
   for (const panel of ['add', 'propulse']) {
     assert.match(leads, new RegExp("leadTool === '" + panel + "'"));
