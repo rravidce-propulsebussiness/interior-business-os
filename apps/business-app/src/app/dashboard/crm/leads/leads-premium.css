@@ -1018,8 +1018,8 @@
   background: #fff0e5;
   border-color: #ffb997;
 }
-/* A tablet should see the real lead cards, not a squashed table. */
-@media (max-width: 1470px) {
+/* Compact widths see the existing mobile lead cards, never a squeezed table. */
+@media (max-width: 1600px) {
   .crm-leads-root .crm-leads-table-wrap {display:none!important;}
   .crm-leads-root .crm-mobile-list {display:grid!important;}
 }
