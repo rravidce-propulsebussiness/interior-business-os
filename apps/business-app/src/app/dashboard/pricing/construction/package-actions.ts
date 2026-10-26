@@ -112,14 +112,14 @@ export async function installConstructionBrochurePackages(): Promise<{ ok: boole
     const rpc = client.rpc.bind(client) as unknown as (
       name: string, args: Record<string, unknown>
     ) => Promise<{ data: number | null; error: { message?: string } | null }>;
-    const { data, error } = await rpc('construction_package_install_starters', { p_org: org.organizationId });
+    const { data, error } = await rpc('construction_package_install_three_starters', { p_org: org.organizationId });
     if (error) throw new Error(error.message || 'Import unavailable. Apply the latest database migration.');
     revalidatePath('/dashboard/quotations/packages');
     revalidatePath('/dashboard/pricing/construction');
     revalidatePath('/dashboard/quotations', 'layout');
     return { ok: true, message: data
-      ? String(data) + ' construction brochure package(s) added to your company.'
-      : 'All four brochure package codes already exist. Your custom packages were not changed.' };
+      ? String(data) + ' editable company construction template(s) added.'
+      : 'Standard, Premium and Royal already exist. Your existing packages were not changed.' };
   } catch (error) { return { ok: false, message: safeFailure(error).message }; }
 }
 
