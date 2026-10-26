@@ -786,11 +786,10 @@ export function LeadsWorkspace({
                                     status={lead.quoteStatus}
                                     amount={lead.quoteAmount}
                                     shared={lead.quoteShared} canShare={canShareQuote}
+                                    newQuoteHref={canQuote
+                                      ? '/dashboard/quotations/new?lead=' + encodeURIComponent(lead.id)
+                                      : undefined}
                                   />
-                                  {canQuote && <a className="crm-quote-alternative"
-                                    href={'/dashboard/quotations/new?lead=' + encodeURIComponent(lead.id)}>
-                                    + New quote
-                                  </a>}
                                 </div>
                               ) : canQuote ? (
                                 <a className="crm-quote-create" href={'/dashboard/quotations/new?lead='+lead.id}>
@@ -922,11 +921,10 @@ export function LeadsWorkspace({
                               <div className="crm-quote-stack">
                                 <LeadQuotePreview revisionId={lead.quoteRevisionId}
                                   number={lead.quoteNumber || 'Quotation'} status={lead.quoteStatus}
-                                  amount={lead.quoteAmount} shared={lead.quoteShared} canShare={canShareQuote} />
-                                {canQuote && <a className="crm-quote-alternative"
-                                  href={'/dashboard/quotations/new?lead=' + encodeURIComponent(lead.id)}>
-                                  + New quote
-                                </a>}
+                                  amount={lead.quoteAmount} shared={lead.quoteShared} canShare={canShareQuote}
+                                  newQuoteHref={canQuote
+                                    ? '/dashboard/quotations/new?lead=' + encodeURIComponent(lead.id)
+                                    : undefined} />
                               </div>
                             ) : canQuote ? (
                               <a
