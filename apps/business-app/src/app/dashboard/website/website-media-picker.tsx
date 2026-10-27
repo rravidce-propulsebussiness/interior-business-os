@@ -16,7 +16,7 @@ export function WebsiteMediaPicker({
 }: {
   id: string;
   assets: WebsiteDocument['assets'];
-  value?: string;
+  value?: string | undefined;
   onChange: (next: string | undefined) => void;
   label?: string;
   disabled?: boolean;
