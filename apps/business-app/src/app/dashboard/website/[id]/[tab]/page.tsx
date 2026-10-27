@@ -17,6 +17,7 @@ const permissions: Record<string, string> = {
   versions: 'website.view',
   team: 'website.scope.manage',
   metrics: 'website.view',
+  enquiries: 'website.view',
 };
 export default async function WebsiteTab({
   params,
@@ -29,7 +30,52 @@ export default async function WebsiteTab({
   const s = await websiteServices(permission, true);
   const site = await s.website.read(id);
   let content;
-  if (tab === 'metrics') {
+  if (tab === 'enquiries') {
+    const result = await s.client.rpc('website_enquiries_read', {
+      p_organization_id: s.context.organizationId,
+      p_website_id: id,
+      p_limit: 50,
+    });
+    if (result.error) throw new Error('Website enquiries unavailable');
+    const records = Array.isArray(result.data) ?
+      result.data.filter((entry): entry is {
+        id: string; name: string; phone: string; email: string;
+        location: string; notes: string; page_path: string; received_at: string;
+      } => !!entry && typeof entry === 'object' && !Array.isArray(entry)
+        && typeof entry.id === 'string'
+        && typeof entry.name === 'string'
+        && typeof entry.phone === 'string'
+        && typeof entry.email === 'string'
+        && typeof entry.location === 'string'
+        && typeof entry.notes === 'string'
+        && typeof entry.page_path === 'string'
+        && typeof entry.received_at === 'string'
+      ) : [];
+    content = (
+      <section className="space-y-4">
+        <p className="text-sm text-muted-foreground">
+          Latest 50 website enquiries. Contact details belong to your company
+          and are visible only to authorized website team members.
+        </p>
+        {records.length === 0 && <p>No website enquiries yet.</p>}
+        {records.map((entry) => (
+          <article key={entry.id} className="rounded-lg border p-4 space-y-1">
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <h2 className="font-semibold">{entry.name}</h2>
+              <time className="text-xs text-muted-foreground">
+                {new Date(entry.received_at).toLocaleString('en-IN')}
+              </time>
+            </div>
+            <p className="text-sm">Phone: {entry.phone}</p>
+            {entry.email && <p className="text-sm">Email: {entry.email}</p>}
+            {entry.location && <p className="text-sm">Location: {entry.location}</p>}
+            {entry.notes && <p className="whitespace-pre-wrap text-sm">{entry.notes}</p>}
+            <p className="text-xs text-muted-foreground">Page: {entry.page_path}</p>
+          </article>
+        ))}
+      </section>
+    );
+  } else if (tab === 'metrics') {
     const result = await s.client.rpc('website_metrics_read', {
       p_organization_id: s.context.organizationId,
       p_website_id: id,
