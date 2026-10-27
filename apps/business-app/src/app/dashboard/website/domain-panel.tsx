@@ -10,6 +10,7 @@ export function DomainPanel({
   base,
   domains,
   canManage,
+  isPublished,
   organizationId,
 }: {
   organizationId?: string;
@@ -25,6 +26,7 @@ export function DomainPanel({
     version: number;
   }[];
   canManage: boolean;
+  isPublished: boolean;
 }) {
   const [message, setMessage] = useState('');
   const [records, setRecords] = useState<
@@ -46,11 +48,13 @@ export function DomainPanel({
             <p className="mt-2 break-all font-mono text-sm">{includedSubdomain.hostname}</p>
             <p className="mt-2 text-sm text-muted-foreground">
               {subdomainLive
-                ? 'Hosting and HTTPS are configured. Publish your website to make this address live.'
+                ? isPublished
+                  ? 'Your hosted website is published with managed HTTPS.'
+                  : 'Hosting and HTTPS are ready. Publish your website to make this address live.'
                 : 'This address is reserved for your website. Platform hosting or HTTPS activation is pending.'}
               {' '}No separate domain purchase is required for your included subdomain.
             </p>
-            {subdomainLive && (
+            {subdomainLive && isPublished && (
               <a
                 href={`https://${includedSubdomain.hostname}`}
                 target="_blank"
