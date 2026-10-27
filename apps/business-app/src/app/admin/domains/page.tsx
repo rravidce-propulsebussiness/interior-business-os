@@ -74,8 +74,8 @@ export default async function DomainManagement({
         </p>
         <h1 className="os-secondary-heading">Domain Configuration</h1>
         <p className="os-secondary-subtitle">
-          Each company uses its own workspace path. A verified custom domain can
-          also open the same company dashboard.
+          Each company uses its own secure Business OS workspace. Custom
+          domains connect to published, Business OS-hosted websites.
         </p>
       </header>
       <section className="grid gap-4 md:grid-cols-2">
@@ -92,11 +92,13 @@ export default async function DomainManagement({
         <div className="rounded-xl border bg-card p-5">
           <h2 className="font-semibold">Custom domain</h2>
           <p className="mt-3 break-all font-mono text-sm">
-            www.rvconstruction.com/dashboard
+            https://www.rvconstruction.com
           </p>
           <p className="mt-2 text-sm text-muted-foreground">
-            Use a full domain you own. DNS ownership, HTTPS, a published website
-            and hosting routes must all be ready.
+            Customers buy and renew this domain independently. Business OS
+            verifies DNS ownership, configures hosting routes and HTTPS, and
+            serves the published website. The company dashboard remains in its
+            authenticated Business OS workspace.
           </p>
         </div>
       </section>
@@ -187,6 +189,7 @@ export default async function DomainManagement({
                 </div>
                 <DomainPanel
                   site={site.id}
+                  isPublished={site.status === 'published'}
                   organizationId={company.id}
                   domains={site.domains}
                   base={settings.data.base_domain ?? ''}
