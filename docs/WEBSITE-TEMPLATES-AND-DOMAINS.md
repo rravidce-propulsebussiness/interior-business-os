@@ -26,8 +26,9 @@ websites and unavailable entitlements are rejected.
 
 ## Company workflow
 
-In Website Builder, owners can create a blank website, select a published template,
-or open the custom HTML/CSS/JavaScript editor. Template selection copies the layout
+In Website Builder, a published template is selected by default when available.
+Owners can still select a blank website. Custom HTML/CSS/JavaScript creation is available
+only under the optional Developer options for users with code permission. Template selection copies the layout
 into a new company draft in one database transaction. The existing authoring APIs
 enforce module access, site/page limits, section permissions and custom-code plan
 capabilities. Failure rolls back the whole copy. Later template edits do not change
