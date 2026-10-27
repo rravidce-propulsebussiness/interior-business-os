@@ -162,6 +162,13 @@ export function WebsiteHome({
           allowed: canDesign,
         },
         {
+          title: 'Enquiries',
+          desc: 'View messages received from your website',
+          icon: 'leads' as const,
+          href: `${base}/enquiries`,
+          allowed: canForms,
+        },
+        {
           title: 'Forms',
           desc: 'Set up customer enquiry forms',
           icon: 'leads' as const,
