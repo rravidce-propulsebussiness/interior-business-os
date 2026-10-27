@@ -18,6 +18,10 @@ create table private.website_basic_payment_verifications (
 );
 create index website_basic_verified_org_time
   on private.website_basic_payment_verifications(organization_id,verified_at desc);
+alter table private.website_basic_payment_verifications enable row level security;
+alter table private.website_basic_payment_verifications force row level security;
+revoke all on private.website_basic_payment_verifications
+  from public,anon,authenticated;
 
 -- Assigning the catalog identifier by itself is NOT a purchase.
 -- Direct Website Basic is granted only by the bounded paid entitlement below.
@@ -93,6 +97,11 @@ begin
   then
     raise exception 'Another paid website add-on already exists'
       using errcode='42501';
+  end if;
+  if found and v_previous.enabled and v_previous.valid_until>now()
+    and p_valid_until<=v_previous.valid_until then
+    raise exception 'Renewal must extend, not shorten, the paid period'
+      using errcode='22023';
   end if;
 
   insert into private.website_basic_payment_verifications(
