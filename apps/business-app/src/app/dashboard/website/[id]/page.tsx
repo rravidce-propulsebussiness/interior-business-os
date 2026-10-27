@@ -1,7 +1,5 @@
 import { websiteServices } from '../service';
-import { TemplateEditor } from '../template-editor';
 import { WebsiteEditor } from '../studio';
-import { templatePages, templateSources } from '../template-workspace';
 import { OwnerShell } from '../../owner-shell';
 import { ownerWorkspaceNavigation } from '../../owner-workspace-navigation';
 import { canAccess } from '@business-os/auth';
@@ -9,9 +7,10 @@ import '../../owner-dashboard.css';
 import '../website-studio.css';
 
 export default async function WebsiteStudio({
-  params,
+  params, searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ page?: string }>;
 }) {
   const { id } = await params;
   const s = await websiteServices('website.view', true);
@@ -22,7 +21,7 @@ export default async function WebsiteStudio({
   ]);
   if (!organization) throw new Error('Company workspace unavailable');
   const email = user.email ?? '';
-  const canViewSource = s.allowed('website.custom_code.view');
+  const { page } = await searchParams;
   return (
     <OwnerShell
       companyName={organization.name}
@@ -39,18 +38,7 @@ export default async function WebsiteStudio({
       dashboardBrand
       searchPlaceholder="Search leads, projects, quotations..."
     >
-      {canViewSource ? <TemplateEditor
-        id={id}
-        name={site.name}
-        initial={templateSources(site.document)}
-        pages={templatePages(site.document)}
-        version={site.version}
-        canEdit={s.allowed('website.custom_code.edit')}
-        canEditCss={s.allowed('website.custom_css.manage')}
-        canCreatePage={s.allowed('website.page.create') &&
-          s.allowed('website.page.edit') && s.allowed('website.seo.manage')}
-        canPublish={s.allowed('website.page.publish')}
-      /> : <div className="site-studio-page">
+      <div className="site-studio-page">
         <WebsiteEditor
           key={site.version}
           id={id}
@@ -58,10 +46,12 @@ export default async function WebsiteStudio({
           version={site.version}
           name={site.name}
           status={site.status}
+          {...(page ? { initialPageId: page } : {})}
           canEdit={s.allowed('website.page.edit')}
           canPublish={s.allowed('website.page.publish')}
+          canViewSource={s.allowed('website.custom_code.view') && site.document.code.length > 0}
         />
-      </div>}
+      </div>
     </OwnerShell>
   );
 }

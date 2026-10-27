@@ -157,7 +157,6 @@ export function WebsiteDesignStudio({
     <div className="wd-tabs">
       <span className="wd-tab selected">◈ &nbsp;Design</span>
       <Link href={`/dashboard/website/${id}`}>▣ &nbsp; Pages &amp; layout</Link>
-      <Link href={`/dashboard/website/${id}/developer`}>⌘ &nbsp; Code editor</Link>
       <Link href={`/dashboard/website/${id}/seo`}>⚙ &nbsp; SEO settings</Link>
       <Link href={`/dashboard/website/${id}/versions`}>↶ &nbsp; Versions</Link>
     </div>
