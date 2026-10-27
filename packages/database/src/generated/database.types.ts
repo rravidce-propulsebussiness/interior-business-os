@@ -12246,6 +12246,21 @@ export interface Database {
         };
         Returns: Json;
       };
+      website_enquiries_read: {
+        Args: { p_organization_id: string; p_website_id: string; p_limit?: number };
+        Returns: Json;
+      };
+      website_submit_enquiry: {
+        Args: {
+          p_hostname: string;
+          p_page: string;
+          p_form: string;
+          p_values: Json;
+          p_honeypot?: string;
+          p_attribution?: Json;
+        };
+        Returns: Json;
+      };
       propulse_company_profile: {
         Args: { p_organization_id: string };
         Returns: Json;
