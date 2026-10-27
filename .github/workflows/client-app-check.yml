@@ -57,5 +57,3 @@ jobs:
       - run: pnpm exec vitest run packages/core/src/custom-brand-quote.test.ts apps/business-app/src/app/dashboard/quotations/studio-ui.test.ts apps/business-app/src/app/dashboard/billing/billing-ui.test.ts apps/business-app/src/app/dashboard/billing/labour/labour.test.ts apps/business-app/src/app/dashboard/billing/stage-invoice.test.ts apps/business-app/src/app/dashboard/projects/work-progress.test.ts apps/business-app/src/app/dashboard/settings/settings.test.ts apps/business-app/src/app/client/client-auth.test.ts
       - run: pnpm --filter @business-os/business-app typecheck
       - run: pnpm --filter @business-os/business-app build
-
-
