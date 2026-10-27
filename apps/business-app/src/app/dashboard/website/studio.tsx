@@ -52,7 +52,11 @@ export function WebsiteEditor({
   templateMode?: boolean;
 }) {
   const frame = useRef<HTMLIFrameElement>(null);
-  const [selection, setSelection] = useState<string | null>(null);
+  const [selection, setSelection] = useState<string | null>(
+    initial.pages[0]?.nodes.find((node) => node.type === 'hero')?.id ??
+      initial.pages[0]?.nodes[0]?.id ??
+      null,
+  );
   useEffect(() => {
     const select = (event: MessageEvent) => {
       if (
@@ -435,7 +439,7 @@ export function WebsiteEditor({
           <div className="ss-inspector-top"><h2>Inspector</h2><span>{selected ? '✣ Selected' : 'Page settings'}</span></div>
           {selected && <div className="ss-selected-card">
             <span className="ss-selected-icon" aria-hidden="true">▣</span>
-            <div><strong>{selected.props.title || selected.type.replaceAll('_', ' ')}</strong>
+            <div><strong>{selected.type.replaceAll('_', ' ').replace(/\b\w/g, (letter) => letter.toUpperCase()) + ' Section'}</strong>
               <small>Customize content and appearance</small>
             </div>
           </div>}
