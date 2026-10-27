@@ -65,10 +65,44 @@ select private.propulse_sync_assert(
       and m.status='active'
   ), 'ProPulse identity receives the Owner role');
 select private.propulse_sync_assert(
- (select count(*) > 0 from public.organization_entitlements
-  where organization_id=(:'first_result'::jsonb->>'organizationId')::uuid
-    and source='promotion' and valid_until>now()+interval '89 days'),
- 'self-service test entitlements are granted only to new owner company');
+  exists(select 1 from private.propulse_company_links
+    where propulse_subject='propulse:9101' and membership_managed)
+  and not private.entitled((:'first_result'::jsonb->>'organizationId')::uuid,'projects'),
+  'new ProPulse company starts with no unrestricted project access');
+
+-- Only the service role can apply a provider-verified membership assertion.
+set local role authenticated;
+select private.propulse_sync_denied(
+  format('select public.propulse_membership_sync(%L::uuid,%L,%L::uuid,%L,%L::timestamptz)',
+    '00000000-0000-4000-8000-000000000091','propulse:9101',
+    (:'first_result'::jsonb->>'organizationId'),'scale',
+    (now()+interval '30 days')::text),
+  'browser cannot forge ProPulse Scale membership');
+reset role;
+select public.propulse_membership_sync(
+  '00000000-0000-4000-8000-000000000091','propulse:9101',
+  (:'first_result'::jsonb->>'organizationId')::uuid,'growth',
+  now()+interval '30 days') as growth_result \gset
+select private.propulse_sync_assert(
+  (:'growth_result'::jsonb->>'tier')='growth'
+  and private.entitled((:'first_result'::jsonb->>'organizationId')::uuid,'website')
+  and not private.entitled((:'first_result'::jsonb->>'organizationId')::uuid,'projects'),
+  'Growth grants website hosting only');
+select public.propulse_membership_sync(
+  '00000000-0000-4000-8000-000000000091','propulse:9101',
+  (:'first_result'::jsonb->>'organizationId')::uuid,'scale',
+  now()+interval '30 days');
+select private.propulse_sync_assert(
+  private.entitled((:'first_result'::jsonb->>'organizationId')::uuid,'projects')
+  and private.entitled((:'first_result'::jsonb->>'organizationId')::uuid,'website'),
+  'Scale unlocks complete Business OS modules');
+select public.propulse_membership_sync(
+  '00000000-0000-4000-8000-000000000091','propulse:9101',
+  (:'first_result'::jsonb->>'organizationId')::uuid,'none',null);
+select private.propulse_sync_assert(
+  not private.entitled((:'first_result'::jsonb->>'organizationId')::uuid,'projects')
+  and not private.entitled((:'first_result'::jsonb->>'organizationId')::uuid,'website'),
+  'expired subscription revokes only tier-managed module access');
 select private.propulse_sync_assert(
  (select count(*) = 1 from private.propulse_company_links
   where propulse_subject='propulse:9101'),
@@ -123,6 +157,13 @@ select private.propulse_sync_assert(
  (:'link_result'::jsonb->>'status')='linked_existing'
  and (:'link_result'::jsonb->>'organizationId')=:'existing_org',
  'exact matching owner company is reused');
+select public.propulse_membership_sync(
+  '00000000-0000-4000-8000-000000000092','propulse:9102',
+  (:'link_result'::jsonb->>'organizationId')::uuid,'scale',
+  now()+interval '30 days') as linked_membership_result \gset
+select private.propulse_sync_assert(
+  (:'linked_membership_result'::jsonb->>'status')='existing_company_unmodified',
+  'linking an already owned company does not overwrite separate paid plans');
 
 set local role authenticated;
 select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000091',true);
