@@ -132,11 +132,11 @@ export function WebsiteCreate({
           </p>
           {canCode && <div className="website-create-advanced">
             <button type="button" aria-expanded={showAdvanced}
-              onClick={() => setShowAdvanced(wasOpen => {
-                if (wasOpen && template === 'custom')
+              onClick={() => {
+                if (showAdvanced && template === 'custom')
                   setTemplate(templates[0]?.id || '');
-                return !wasOpen;
-              })}>
+                setShowAdvanced(!showAdvanced);
+              }}>
               {showAdvanced ? 'Hide developer options' : 'Developer options'}
             </button>
             {showAdvanced && <p>Custom code is optional and intended for developers.
