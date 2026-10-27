@@ -576,7 +576,7 @@ test('one lead supports multiple package quotations and previews newest, with si
   );
   // A new quote stays available but uses one compact action row, rather
   // than a second button stacking below every lead's quotation.
-  assert.match(leads, /newQuoteHref=\{canQuote/);
+  assert.match(leads, /newQuoteHref\s*=\s*\{\s*canQuote/);
   assert.match(quotePreview, /crm-quote-new-inline/);
   assert.match(quotePreview, /href=\{newQuoteHref\}/);
   assert.match(quotePreview, /\+ New/);
