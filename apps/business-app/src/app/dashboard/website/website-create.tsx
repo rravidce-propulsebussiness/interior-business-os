@@ -20,7 +20,8 @@ export function WebsiteCreate({
   initialTemplate?: string;
 }) {
   const [message, setMessage] = useState('');
-  const [template, setTemplate] = useState(initialTemplate);
+  const [template, setTemplate] = useState(initialTemplate || templates[0]?.id || '');
+  const [showAdvanced, setShowAdvanced] = useState(initialTemplate === 'custom');
   const [name, setName] = useState('');
   const [slug, setSlug] = useState('');
   const [slugChanged, setSlugChanged] = useState(false);
@@ -76,7 +77,7 @@ export function WebsiteCreate({
             <p>NEW WEBSITE</p>
             <h2 id="website-create-title">Create your website</h2>
             <span>
-              Choose a starting point and give your new website a name.
+              Start with a ready-to-edit template and add your business details.
             </span>
           </div>
           <button
@@ -109,23 +110,38 @@ export function WebsiteCreate({
             })
           }
         >
-          <label htmlFor="website-template">Starting point</label>
+          <label htmlFor="website-template">Website template</label>
           <select
             id="website-template"
             name="template"
             value={template}
             onChange={(event) => setTemplate(event.target.value)}
           >
-            <option value="">Blank visual canvas</option>
-            {templates.map((entry) => (
-              <option key={entry.id} value={entry.id}>
-                {entry.name}
-              </option>
+            {templates.map(entry => (
+              <option key={entry.id} value={entry.id}>{entry.name}</option>
             ))}
-            {canCode && (
-              <option value="custom">Custom HTML, CSS and JavaScript</option>
+            <option value="">Start with a blank website</option>
+            {canCode && showAdvanced && (
+              <option value="custom">Advanced: custom HTML/CSS/JavaScript</option>
             )}
           </select>
+          <p className="website-form-hint">
+            {templates.length
+              ? 'Template content, images and design are editable after creation.'
+              : 'Published templates are not available yet. You can create a blank website.'}
+          </p>
+          {canCode && <div className="website-create-advanced">
+            <button type="button" aria-expanded={showAdvanced}
+              onClick={() => {
+                if (showAdvanced && template === 'custom')
+                  setTemplate(templates[0]?.id || '');
+                setShowAdvanced(!showAdvanced);
+              }}>
+              {showAdvanced ? 'Hide developer options' : 'Developer options'}
+            </button>
+            {showAdvanced && <p>Custom code is optional and intended for developers.
+              Regular websites use the visual editor, without HTML or CSS.</p>}
+          </div>}
           <label htmlFor="website-name">Website name</label>
           <input
             ref={nameRef}

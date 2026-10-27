@@ -1030,3 +1030,8 @@
     font-size: 10px;
   }
 }
+
+/* Hide developer-only creation controls until explicitly requested. */
+.website-create-advanced{margin:0 0 12px;display:grid;gap:7px}
+.owner-layout .website-create-advanced button{justify-self:start;padding:7px 0;background:none;border:0;color:#79645b;font-size:12px;font-weight:700;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.website-create-advanced p{max-width:450px;font-size:12px;line-height:1.5;color:#788394;margin:0}
