@@ -15,8 +15,7 @@ export default async function SubscriptionBilling() {
   const plans = await repository.plans().catch(() => []);
   const plan = plans.find((item) => item.id === org.plan_id);
   const navigation: OwnerNavItem[] = [
-    { label: 'Dashboard', href: '/dashboard', icon: 'dashboard' },
-    { label: 'Finance', href: '/dashboard/finance', icon: 'billing' },
+    ...(ctx.entitlements.includes('website') ? [{ label: 'Website', href: '/dashboard/website', icon: 'globe' as const }] : []),
     { label: 'Billing & Plans', href: '/dashboard/billing', icon: 'billing' },
     { label: 'Settings', href: '/dashboard/settings', icon: 'settings' },
   ];
@@ -32,7 +31,7 @@ export default async function SubscriptionBilling() {
         <OwnerIcon name="billing" size={31}/>
         <h2>Current plan: {plan?.name ?? 'Not assigned'}</h2>
         <p>Business OS platform subscriptions are separate from your company&apos;s customer invoices, supplier expenses and GST.</p>
-        <Link href="/dashboard/finance" className="fw-primary">Open company Finance →</Link>
+        {ctx.entitlements.includes('website') ? <Link href="/dashboard/website" className="fw-primary">Open Website →</Link> : <p>Website access is pending plan activation. The platform administrator can activate Website Basic after payment verification.</p>}
         <small>Plan changes and subscription payments must use an authorized subscription checkout or administrator. No payment is taken on this page.</small>
       </section>
     </main>
