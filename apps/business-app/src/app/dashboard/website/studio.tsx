@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useRef, useState, useTransition } from 'react';
+import Link from 'next/link';
 import {
   componentTypes,
   createNode,
@@ -51,7 +52,11 @@ export function WebsiteEditor({
   templateMode?: boolean;
 }) {
   const frame = useRef<HTMLIFrameElement>(null);
-  const [selection, setSelection] = useState<string | null>(null);
+  const [selection, setSelection] = useState<string | null>(
+    initial.pages[0]?.nodes.find((node) => node.type === 'hero')?.id ??
+      initial.pages[0]?.nodes[0]?.id ??
+      null,
+  );
   useEffect(() => {
     const select = (event: MessageEvent) => {
       if (
@@ -76,11 +81,18 @@ export function WebsiteEditor({
     [message, setMessage] = useState(''),
     [preview, setPreview] = useState(''),
     [pending, start] = useTransition(),
-    [palette, setPalette] = useState('');
+    [palette, setPalette] = useState(''),
+    [sideTab, setSideTab] = useState<'layers' | 'components'>('layers'),
+    [fullPreview, setFullPreview] = useState(false),
+    [savedDocument, setSavedDocument] = useState(initial);
   const document = history.present,
     page = document.pages.find((p) => p.id === pageId) ?? document.pages[0]!,
     activeNodes = area === 'pages' ? page.nodes : document[area],
     selected = selection ? locateNode(activeNodes, selection) : undefined;
+  const unsavedSections = (['pages', 'header', 'footer'] as const).filter(
+    (key) => JSON.stringify(document[key]) !== JSON.stringify(savedDocument[key]),
+  );
+  const hasUnsavedChanges = unsavedSections.length > 0;
   const edit = (next: WebsiteDocument) =>
     setHistory((h) => editHistory(h, next));
   const nodes = (next: WebsiteNode[]) =>
@@ -132,11 +144,11 @@ export function WebsiteEditor({
   };
   function layers(list: WebsiteNode[], parent: string | null = null) {
     return (
-      <ol className="space-y-1">
+      <ol className="ss-layers-list">
         {list.map((node, i) => (
-          <li key={node.id} className="rounded border-l pl-2">
+          <li key={node.id} className="ss-layer-item">
             <div
-              className={`group flex items-center gap-1 rounded p-1 ${selection === node.id ? 'bg-primary/10' : 'hover:bg-muted'}`}
+              className={`ss-layer-row ${selection === node.id ? 'selected' : ''}`}
               draggable={canEdit}
               onDragStart={(e) => e.dataTransfer.setData('text/plain', node.id)}
               onDragOver={(e) => e.preventDefault()}
@@ -153,7 +165,7 @@ export function WebsiteEditor({
               }}
             >
               <button
-                className="min-w-0 flex-1 truncate py-1 text-left text-xs capitalize"
+                className="ss-layer-name"
                 onClick={() => setSelection(node.id)}
               >
                 {node.type} {node.props.title || node.props.text?.slice(0, 20)}
@@ -162,7 +174,7 @@ export function WebsiteEditor({
                 <>
                   <button
                     aria-label={`Move ${node.type} up`}
-                    className="px-1 text-xs"
+                    className="ss-layer-move"
                     disabled={i === 0}
                     onClick={() => move(node, parent, i - 1)}
                   >
@@ -206,264 +218,233 @@ export function WebsiteEditor({
     }
   }
   collect(activeNodes);
+  const saveDraft = () =>
+    start(async () => {
+      let nextVersion = version;
+      for (const section of unsavedSections) {
+        const result = await saveAction(id, nextVersion, section, document[section]);
+        if (!result.version) {
+          setMessage(result.message || 'Draft save failed. Reload before retrying.');
+          if (nextVersion !== version) {
+            setVersion(nextVersion);
+            setMessage('Part of the draft saved. Reload to avoid conflicting changes.');
+          }
+          return;
+        }
+        nextVersion = result.version;
+      }
+      setVersion(nextVersion);
+      setSavedDocument(document);
+      setMessage(unsavedSections.length
+        ? 'Draft saved. Published website remains unchanged.'
+        : 'All changes are already saved.');
+    });
   return (
-    <>
-      <header className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-3 border-b bg-background px-5 py-3">
-        <div>
-          <h1 className="font-semibold">{name}</h1>
-          <p className="text-xs capitalize text-muted-foreground">
-            {status} · Draft {version}
-          </p>
+    <div className="ss-studio-editor">
+      <header className="ss-heading">
+        <div className="ss-heading-title">
+          <span className="ss-heading-icon" aria-hidden="true">▣</span>
+          <div>
+            <span className="ss-eyebrow">WEBSITE BUILDER</span>
+            <h1>Website Studio</h1>
+            <p>Design, customize and publish your company's website from one workspace.</p>
+          </div>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            className="rounded border px-3 py-2 text-sm"
-            disabled={!history.past.length}
-            onClick={() => setHistory(undoHistory)}
-          >
-            Undo
-          </button>
-          <button
-            className="rounded border px-3 py-2 text-sm"
-            disabled={!history.future.length}
-            onClick={() => setHistory(redoHistory)}
-          >
-            Redo
-          </button>
-          <select
-            aria-label="Preview device"
-            className="rounded border bg-background px-3 py-2 text-sm"
-            value={device}
-            onChange={(e) => setDevice(e.target.value as typeof device)}
-          >
-            <option value="desktop">Desktop</option>
-            <option value="tablet">Tablet</option>
-            <option value="mobile">Mobile</option>
-          </select>
-          <select
-            aria-label="Editing area"
-            value={area}
-            onChange={(e) => {
-              setArea(e.target.value as typeof area);
-              setSelection(null);
-            }}
-            className="rounded border bg-background px-3 py-2 text-sm"
-          >
-            <option value="pages">Page content</option>
-            <option value="header">Global header</option>
-            <option value="footer">Global footer</option>
-          </select>
-          {canEdit && (
-            <button
-              disabled={pending}
-              className="rounded border px-4 py-2 text-sm"
-              onClick={() =>
-                start(async () => {
-                  const r = await saveAction(id, version, area, document[area]);
-                  setMessage(r.message);
-                  if (r.version) setVersion(r.version);
-                })
-              }
-            >
-              Save draft
-            </button>
-          )}
-          {canPublish && (
-            <button
-              disabled={pending}
-              className="rounded bg-primary px-4 py-2 text-sm text-primary-foreground"
-              onClick={() =>
-                start(async () => {
-                  const r = await publishAction(
-                    id,
-                    version,
-                    'Published from website studio',
-                  );
-                  setMessage(r.message);
-                  if (r.id) setVersion((v) => v + 1);
-                })
-              }
-            >
-              {templateMode ? 'Publish template' : 'Publish saved draft'}
-            </button>
-          )}
+        <div className="ss-heading-actions">
+          <span className={hasUnsavedChanges ? 'ss-save-state dirty' : 'ss-save-state'}>
+            {hasUnsavedChanges ? '● Unsaved changes' : '✓ All changes saved'}
+          </span>
+          <button type="button" className="ss-btn ss-preview-action" onClick={() => setFullPreview(true)}
+            disabled={!preview}>◉ &nbsp; Preview</button>
+          {canEdit && <button type="button" className="ss-btn ss-save-action"
+            disabled={pending || !hasUnsavedChanges} onClick={saveDraft}>
+            ↓ &nbsp; {pending ? 'Saving…' : 'Save draft'}
+          </button>}
+          {canPublish && <button type="button" className="ss-btn ss-publish-action"
+            disabled={pending || hasUnsavedChanges}
+            onClick={() => start(async () => {
+              const result = await publishAction(id, version, 'Published from website studio');
+              setMessage(result.message);
+              if (result.id) setVersion((current) => current + 1);
+            })}>
+            ↗ &nbsp; {templateMode ? 'Publish template' : 'Publish website'}
+          </button>}
         </div>
       </header>
-      <p role="status" className="min-h-7 px-5 py-1 text-xs">
-        {message}
-      </p>
-      <div className="grid min-h-[80vh] lg:grid-cols-[240px_minmax(0,1fr)_280px]">
-        <aside className="space-y-5 border-r bg-background p-4">
-          <label className="block text-xs font-semibold uppercase tracking-wider">
-            Pages
-            <select
-              aria-label="Page"
-              className={`${controls} mt-2`}
-              value={page.id}
-              onChange={(e) => {
-                setPageId(e.target.value);
-                setSelection(null);
-              }}
-            >
-              {document.pages.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.title}
-                </option>
-              ))}
+      {!templateMode && <nav className="ss-modebar" aria-label="Website editing modes">
+        <div className="ss-modebar-left">
+          <span className="ss-mode-active">▣ &nbsp; Template Builder</span>
+          <Link className="ss-mode-link" href={`/dashboard/website/${id}/developer`}>
+            ⌘ &nbsp; Code Editor ↗
+          </Link>
+        </div>
+        <div className="ss-modebar-right">
+          <span className="ss-mode-hint">Website settings</span>
+          <Link href={`/dashboard/website/${id}/design`}>⚙ Design</Link>
+          <Link href={`/dashboard/website/${id}/seo`}>SEO</Link>
+          <Link href={`/dashboard/website/${id}/versions`}>⌁ Versions</Link>
+        </div>
+      </nav>}
+      {message && <p className="ss-message" role="status">{message}</p>}
+      <div className="ss-board">
+        <div className="ss-toolbar">
+          <div className="ss-toolbar-group">
+            <span className="ss-toolbar-label">EDITING</span>
+            <select aria-label="Page" className="ss-page-select" value={page.id}
+              onChange={(event) => { setPageId(event.target.value); setSelection(null); }}>
+              {document.pages.map((item) => <option key={item.id} value={item.id}>
+                {item.path === '/' ? '⌂ ' : ''}{item.title}
+              </option>)}
             </select>
-          </label>
-          {canEdit && (
-            <div className="flex gap-2 text-xs">
-              <button
-                className="rounded border p-2"
-                onClick={() => {
-                  const n = uid();
-                  edit({
-                    ...document,
-                    pages: [
-                      ...document.pages,
-                      {
-                        id: n,
-                        path: `/page-${document.pages.length + 1}`,
-                        title: 'New page',
-                        visibility: 'draft',
-                        seo: {
-                          title: 'New page',
-                          description: '',
-                          noindex: false,
-                        },
-                        nodes: [],
-                      },
-                    ],
-                  });
-                  setPageId(n);
-                }}
-              >
-                + Page
-              </button>
-              <button
-                className="rounded border p-2"
-                onClick={() => {
-                  const n = uid();
-                  edit({
-                    ...document,
-                    pages: [
-                      ...document.pages,
-                      {
-                        ...structuredClone(page),
-                        id: n,
-                        path: `/copy-${n.slice(0, 8)}`,
-                        title: `${page.title} copy`,
-                        visibility: 'draft',
-                        nodes: activeNodes.map((node) =>
-                          duplicateNode(node, uid),
-                        ),
-                      },
-                    ],
-                  });
-                  setPageId(n);
-                }}
-              >
-                Duplicate
-              </button>
+            {canEdit && <button type="button" className="ss-btn ss-small-action" onClick={() => {
+              const n = uid();
+              edit({ ...document, pages: [...document.pages, {
+                id: n, path: `/page-${document.pages.length + 1}`,
+                title: 'New page', visibility: 'draft',
+                seo: { title: 'New page', description: '', noindex: false },
+                nodes: [],
+              }] });
+              setPageId(n);
+              setArea('pages');
+              setSelection(null);
+            }}>+ Page</button>}
+            <span className="ss-toolbar-separator" />
+            <div className="ss-history-controls">
+              <button type="button" aria-label="Undo" title="Undo" disabled={!history.past.length}
+                onClick={() => setHistory(undoHistory)}>↶</button>
+              <button type="button" aria-label="Redo" title="Redo" disabled={!history.future.length}
+                onClick={() => setHistory(redoHistory)}>↷</button>
             </div>
-          )}
-          <div>
-            <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider">
-              Components
-            </h2>
-            <input
-              aria-label="Find component"
-              placeholder="Find a component…"
-              className={controls}
-              value={palette}
-              onChange={(e) => setPalette(e.target.value)}
-            />
-            <div className="mt-3 grid max-h-64 grid-cols-2 gap-2 overflow-auto">
-              {componentTypes
-                .filter((t) => t.includes(palette.toLowerCase()))
-                .map((type) => (
-                  <button
-                    key={type}
-                    draggable={canEdit}
-                    disabled={!canEdit}
-                    onDragStart={(e) =>
-                      e.dataTransfer.setData(
-                        'application/website-component',
-                        type,
-                      )
-                    }
-                    onClick={() => {
-                      const n = uid();
-                      nodes(insertNode(activeNodes, type, n));
-                      setSelection(n);
-                    }}
-                    className="rounded-lg border px-2 py-3 text-xs capitalize hover:border-primary"
-                  >
-                    {type.replaceAll('_', ' ')}
-                  </button>
-                ))}
-            </div>
+            <select aria-label="Editing area" className="ss-area-select" value={area}
+              onChange={(event) => { setArea(event.target.value as typeof area); setSelection(null); }}>
+              <option value="pages">Page content</option>
+              <option value="header">Global header</option>
+              <option value="footer">Global footer</option>
+            </select>
           </div>
-          <div>
-            <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider">
-              Layers
-            </h2>
-            {layers(activeNodes)}
+          <div className="ss-toolbar-group">
+            <span className="ss-toolbar-label">PREVIEW</span>
+            <div className="ss-device-controls" role="group" aria-label="Preview device">
+              {(['desktop', 'tablet', 'mobile'] as const).map((size) =>
+                <button type="button" key={size} aria-label={size + ' preview'}
+                  title={size} aria-pressed={device === size}
+                  className={device === size ? 'active' : ''}
+                  onClick={() => setDevice(size)}>
+                  {size === 'desktop' ? '▣' : size === 'tablet' ? '▥' : '▯'}
+                </button>)}
+            </div>
+            <span className="ss-draft-badge">● {status === 'published' ? 'Published / draft' : 'Draft'}</span>
+          </div>
+        </div>
+        <div className="ss-workspace">
+
+        <aside className="ss-left-panel">
+          <div className="ss-left-tabs" role="tablist" aria-label="Editor sidebar">
+            <button type="button" role="tab" aria-selected={sideTab === 'layers'}
+              className={sideTab === 'layers' ? 'active' : ''}
+              onClick={() => setSideTab('layers')}>Page layers</button>
+            <button type="button" role="tab" aria-selected={sideTab === 'components'}
+              className={sideTab === 'components' ? 'active' : ''}
+              onClick={() => setSideTab('components')}>Components</button>
+          </div>
+          {sideTab === 'layers' ? <div className="ss-left-content" role="tabpanel">
+            <h2 className="ss-panel-label">{area === 'pages' ? 'CURRENT PAGE' : area === 'header' ? 'GLOBAL HEADER' : 'GLOBAL FOOTER'}</h2>
+            {activeNodes.length ? layers(activeNodes) : <p className="ss-empty-layers">
+              Nothing on this page yet. Choose Components to add your first section.
+            </p>}
+            {canEdit && <div className="ss-layer-actions">
+              <button type="button" onClick={() => setSideTab('components')}>+ Add section</button>
+              <button type="button" disabled={!selected} onClick={() => {
+                if (!selected) return;
+                nodes([...activeNodes, duplicateNode(selected, uid)]);
+              }}>▣ Duplicate</button>
+            </div>}
+            <h2 className="ss-panel-label ss-shared-label">SHARED ELEMENTS</h2>
+            <button type="button" className="ss-shared-row" onClick={() => {
+              setArea('header'); setSelection(null); }}>
+              <span>☰</span> Global header <b>›</b>
+            </button>
+            <button type="button" className="ss-shared-row" onClick={() => {
+              setArea('footer'); setSelection(null); }}>
+              <span>▣</span> Global footer <b>›</b>
+            </button>
+          </div> : <div className="ss-left-content" role="tabpanel">
+            <h2 className="ss-panel-label">ADD COMPONENT</h2>
+            <input aria-label="Find component" placeholder="Find a component…"
+              className="ss-palette-search" value={palette}
+              onChange={(event) => setPalette(event.target.value)} />
+            <div className="ss-palette-grid">
+              {componentTypes.filter((type) => type.includes(palette.toLowerCase())).map(type =>
+                <button type="button" key={type} disabled={!canEdit}
+                  draggable={canEdit}
+                  onDragStart={(event) => event.dataTransfer.setData('application/website-component', type)}
+                  onClick={() => {
+                    const n = uid();
+                    nodes(insertNode(activeNodes, type, n));
+                    setSelection(n); setSideTab('layers');
+                  }}>
+                  <span aria-hidden="true">▣</span>{type.replaceAll('_', ' ')}
+                </button>)}
+            </div>
+            {document.sections.length > 0 && <div className="ss-saved-sections">
+              <h2 className="ss-panel-label">SAVED SECTIONS</h2>
+              {document.sections.map(section =>
+                <button type="button" disabled={!canEdit} key={section.id} onClick={() => {
+                  const node = duplicateNode(section.node, uid);
+                  nodes([...activeNodes, node]);setSelection(node.id);setSideTab('layers');
+                }}>{section.name}</button>)}
+            </div>}
+          </div>}
+          <div className="ss-left-tip"><strong>✦ &nbsp; Quick tip</strong>
+            <p>Click any section in the preview to edit it. Drag or add components from the library.</p>
           </div>
         </aside>
-        <section
-          className="min-w-0 overflow-auto bg-[#e8e7e3] p-5"
-          aria-label="Website canvas"
-          onDragOver={(e) => e.preventDefault()}
-          onDrop={(e) => {
-            e.preventDefault();
-            const type = e.dataTransfer.getData(
-              'application/website-component',
-            );
-            if (
-              canEdit &&
-              componentTypes.includes(type as (typeof componentTypes)[number])
-            )
-              nodes([
-                ...activeNodes,
-                createNode(type as (typeof componentTypes)[number], uid()),
-              ]);
-          }}
-        >
-          <div className="mx-auto mb-3 flex max-w-full items-center justify-between text-xs text-muted-foreground">
-            <span>
-              {page.path} · {page.visibility}
-            </span>
-            <span>
-              {device === 'mobile'
-                ? '390'
-                : device === 'tablet'
-                  ? '768'
-                  : '1200'}{' '}
-              px
-            </span>
-          </div>
-          <iframe
-            ref={frame}
-            title="Website preview"
-            sandbox="allow-scripts"
-            referrerPolicy="no-referrer"
-            srcDoc={
-              preview ||
-              '<!doctype html><p style="font:16px sans-serif;padding:24px">Building preview…</p>'
+        <section className="ss-canvas" aria-label="Website canvas"
+          onDragOver={(event) => event.preventDefault()}
+          onDrop={(event) => {
+            event.preventDefault();
+            const type = event.dataTransfer.getData('application/website-component');
+            if (canEdit && componentTypes.includes(type as (typeof componentTypes)[number])) {
+              const n = uid();
+              nodes([...activeNodes, createNode(type as (typeof componentTypes)[number], n)]);
+              setSelection(n);
             }
-            className="mx-auto block h-[80vh] max-w-full border-0 bg-white shadow-xl"
-            style={{
-              width:
-                device === 'mobile' ? 390 : device === 'tablet' ? 768 : 1200,
-            }}
-          />
+          }}>
+          <div className="ss-canvas-head">
+            <span className="ss-canvas-path">⌂ &nbsp; {page.path} &nbsp; · &nbsp; {page.visibility === 'public' ? 'Public on publish' : 'Private draft'}</span>
+            <span>Click a section to edit</span>
+          </div>
+          <div className={`ss-browser ss-browser-${device}`}>
+            <div className="ss-browser-bar" aria-hidden="true">
+              <span className="ss-traffic"><i/><i/><i/></span>
+              <span className="ss-browser-address">{name.toLowerCase().replace(/[^a-z0-9-]/g,'-')}.example / {page.path === '/' ? '' : page.path.slice(1)}</span>
+              <span className="ss-browser-empty" />
+            </div>
+            <iframe
+              ref={frame}
+              title="Website preview"
+              sandbox="allow-scripts"
+              referrerPolicy="no-referrer"
+              srcDoc={preview ||
+                '<!doctype html><html><body style="font:16px sans-serif;padding:24px">Building preview…</body></html>'}
+              className="ss-preview-frame"
+            />
+          </div>
+          <div className="ss-canvas-foot">▣ &nbsp; Responsive canvas &nbsp; · &nbsp;
+            {device === 'mobile' ? '390' : device === 'tablet' ? '768' : '1200'} px &nbsp; · &nbsp;
+            Select an element to edit its properties
+          </div>
         </section>
-        <aside className="space-y-4 border-l bg-background p-4">
-          <h2 className="text-xs font-semibold uppercase tracking-wider">
-            {selected ? 'Component properties' : 'Page properties'}
-          </h2>
+        <aside className="ss-inspector">
+          <div className="ss-inspector-top"><h2>Inspector</h2><span>{selected ? '✣ Selected' : 'Page settings'}</span></div>
+          {selected && <div className="ss-selected-card">
+            <span className="ss-selected-icon" aria-hidden="true">▣</span>
+            <div><strong>{selected.type.replaceAll('_', ' ').replace(/\b\w/g, (letter) => letter.toUpperCase()) + ' Section'}</strong>
+              <small>Customize content and appearance</small>
+            </div>
+          </div>}
+          <div className="ss-inspector-content">
+
           {!selected ? (
             <>
               <label className="block text-xs">
@@ -539,7 +520,7 @@ export function WebsiteEditor({
             </>
           ) : (
             <fieldset disabled={!canEdit} className="space-y-4">
-              <p className="text-sm capitalize">{selected.type}</p>
+              <h3 className="ss-inspector-section-title">Content</h3>
               {(
                 [
                   'title',
@@ -552,9 +533,11 @@ export function WebsiteEditor({
                   'code',
                   'embed',
                 ] as const
-              ).map((key) => (
-                <label key={key} className="block text-xs capitalize">
-                  {key}
+              ).filter((key) => ['title', 'text', 'subtitle', 'href'].includes(key) ||
+                selected.props[key] !== undefined).map((key) => (
+                <label key={key} className="ss-field-label">
+                  {key === 'title' ? 'Heading' : key === 'subtitle' ? 'Description' :
+                    key === 'href' ? 'Button link' : key}
                   <input
                     className={`${controls} mt-1`}
                     value={selected.props[key] ?? ''}
@@ -597,85 +580,69 @@ export function WebsiteEditor({
                   ))}
                 </select>
               </label>
-              <h3 className="border-t pt-4 text-xs font-semibold uppercase">
-                {device} styles
-              </h3>
-              {(
-                [
-                  'fontSize',
-                  'padding',
-                  'gap',
-                  'margin',
-                  'radius',
-                  'columns',
-                  'maxWidth',
-                  'minHeight',
-                ] as const
-              ).map((key) => (
-                <label key={key} className="block text-xs">
-                  {key}
-                  <input
-                    type="number"
-                    min="0"
-                    max="2000"
-                    className={`${controls} mt-1`}
-                    value={
-                      (device === 'desktop'
-                        ? selected.style
-                        : selected[device])[key] ?? ''
-                    }
-                    onChange={(e) =>
-                      update((n) => {
-                        const s = device === 'desktop' ? n.style : n[device];
-                        if (e.target.value === '') delete s[key];
-                        else s[key] = Number(e.target.value);
-                      })
-                    }
-                  />
+              <h3 className="ss-inspector-section-title ss-appearance-label">Appearance</h3>
+              {(['background', 'color'] as const).map(key => (
+                <label key={key} className="ss-color-field">
+                  {key === 'background' ? 'Background' : 'Text color'}
+                  <input type="color" value={(device === 'desktop' ? selected.style : selected[device])[key] ?? '#ffffff'}
+                    onChange={event => update(node => {
+                      (device === 'desktop' ? node.style : node[device])[key] = event.target.value;
+                    })} />
                 </label>
               ))}
-              {(['color', 'background', 'border'] as const).map((key) => (
-                <label
-                  key={key}
-                  className="flex items-center justify-between text-xs"
-                >
-                  {key}
-                  <input
-                    type="color"
-                    value={
-                      (device === 'desktop'
-                        ? selected.style
-                        : selected[device])[key] ?? '#ffffff'
-                    }
-                    onChange={(e) =>
-                      update((n) => {
-                        (device === 'desktop' ? n.style : n[device])[key] =
-                          e.target.value;
-                      })
-                    }
-                  />
+              <div className="ss-two-col-fields">
+                {(['padding', 'radius'] as const).map(key => (
+                  <label key={key} className="ss-field-label">
+                    {key === 'radius' ? 'Border radius' : 'Padding'}
+                    <input type="number" min="0" max="2000" className={controls}
+                      value={(device === 'desktop' ? selected.style : selected[device])[key] ?? ''}
+                      onChange={event => update(node => {
+                        const style = device === 'desktop' ? node.style : node[device];
+                        if (event.target.value === '') delete style[key];
+                        else style[key] = Number(event.target.value);
+                      })} />
+                  </label>
+                ))}
+              </div>
+              <details className="ss-inspector-advanced">
+                <summary>Advanced layout options</summary>
+                {(['fontSize','gap','margin','columns','maxWidth','minHeight'] as const).map(key => (
+                  <label key={key} className="ss-field-label">
+                    {key}
+                    <input type="number" min="0" max="2000" className={controls}
+                      value={(device === 'desktop' ? selected.style : selected[device])[key] ?? ''}
+                      onChange={event => update(node => {
+                        const style = device === 'desktop' ? node.style : node[device];
+                        if(event.target.value === '') delete style[key];
+                        else style[key] = Number(event.target.value);
+                      })} />
+                  </label>
+                ))}
+                <label className="ss-color-field">Border color
+                  <input type="color" value={(device === 'desktop' ? selected.style : selected[device]).border ?? '#ffffff'}
+                    onChange={event => update(node => {
+                      (device === 'desktop' ? node.style : node[device]).border = event.target.value;
+                    })}/>
                 </label>
-              ))}
-              <label className="block text-xs">
-                Visibility / display
-                <select
-                  className={controls}
-                  value={
-                    (device === 'desktop' ? selected.style : selected[device])
-                      .display ?? 'block'
-                  }
-                  onChange={(e) =>
-                    update((n) => {
-                      (device === 'desktop' ? n.style : n[device]).display = e
-                        .target.value as NodeStyle['display'];
-                    })
-                  }
-                >
-                  {['block', 'flex', 'grid', 'none'].map((k) => (
-                    <option key={k}>{k}</option>
-                  ))}
-                </select>
-              </label>
+                <label className="ss-field-label">Display
+                  <select className={controls}
+                    value={(device === 'desktop' ? selected.style : selected[device]).display ?? 'block'}
+                    onChange={event => update(node => {
+                      (device === 'desktop' ? node.style : node[device]).display =
+                        event.target.value as NodeStyle['display'];
+                    })}>
+                    {['block','flex','grid','none'].map(value => <option key={value}>{value}</option>)}
+                  </select>
+                </label>
+              </details>
+              <h3 className="ss-inspector-section-title ss-appearance-label">Responsive</h3>
+              <div className="ss-inspector-responsive">
+                {(['desktop','tablet','mobile'] as const).map(size => (
+                  <button type="button" key={size} className={device === size ? 'active' : ''}
+                    onClick={() => setDevice(size)}>{size}</button>
+                ))}
+              </div>
+              <p className="ss-responsive-tip">Adjust styles for the selected device without changing other layouts.</p>
               <label className="block text-xs">
                 Move into container
                 <select
@@ -767,8 +734,23 @@ export function WebsiteEditor({
               </select>
             </label>
           )}
+          </div>
         </aside>
+        </div>
       </div>
-    </>
+      <div className="ss-studio-foot">🔒 &nbsp; Draft preview only. Website changes are published only when you choose Publish.</div>
+      {fullPreview && <div className="ss-preview-overlay" role="presentation" onMouseDown={(event) => {
+        if (event.currentTarget === event.target) setFullPreview(false);
+      }}>
+        <div className="ss-preview-dialog" role="dialog" aria-modal="true" aria-label="Full website preview">
+          <div className="ss-preview-dialog-bar">
+            <div><strong>{name} · Website preview</strong><span>Sandboxed draft · {page.path}</span></div>
+            <button type="button" onClick={() => setFullPreview(false)}>Close ×</button>
+          </div>
+          <iframe title="Full website preview" sandbox="allow-scripts"
+            referrerPolicy="no-referrer" srcDoc={preview} />
+        </div>
+      </div>}
+    </div>
   );
 }

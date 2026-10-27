@@ -1,7 +1,12 @@
-import Link from 'next/link';
 import { websiteServices } from '../service';
 import { WebsiteEditor } from '../studio';
 import { InteriorStarter } from '../starter-panel';
+import { OwnerShell } from '../../owner-shell';
+import { ownerWorkspaceNavigation } from '../../owner-workspace-navigation';
+import { canAccess } from '@business-os/auth';
+import '../../owner-dashboard.css';
+import '../website-studio.css';
+
 export default async function WebsiteStudio({
   params,
 }: {
@@ -9,51 +14,45 @@ export default async function WebsiteStudio({
 }) {
   const { id } = await params;
   const s = await websiteServices('website.view', true);
-  const site = await s.website.read(id);
+  const [site, organization, user] = await Promise.all([
+    s.website.read(id),
+    s.repository.organization(s.context.organizationId),
+    s.authorization.requireAuthenticatedUser(),
+  ]);
+  if (!organization) throw new Error('Company workspace unavailable');
+  const email = user.email ?? '';
   return (
-    <main id="main-content" className="min-h-screen bg-muted/30">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b bg-background px-5 py-3">
-        <Link href="/dashboard/website" className="text-sm">
-          ← Websites
-        </Link>
-        <nav className="flex flex-wrap gap-4 text-sm">
-          {[
-            'design',
-            'navigation',
-            'content',
-            'forms',
-            'seo',
-            'media',
-            'domains',
-            'versions',
-            'developer',
-            'team',
-            'metrics',
-          ].map((tab) => (
-            <Link
-              key={tab}
-              className="capitalize"
-              href={`/dashboard/website/${id}/${tab}`}
-            >
-              {tab}
-            </Link>
-          ))}
-        </nav>
+    <OwnerShell
+      companyName={organization.name}
+      accountLabel={email.split('@')[0] || 'Company member'}
+      accountEmail={email}
+      planLabel="Business workspace"
+      navigation={ownerWorkspaceNavigation(s.context)}
+      currentHref="/dashboard/website"
+      search=""
+      notificationsEnabled={canAccess(s.context, {
+        organizationId: s.context.organizationId,
+        permission: 'notification.view',
+      })}
+      dashboardBrand
+      searchPlaceholder="Search leads, projects, quotations..."
+    >
+      <div className="site-studio-page">
+        <WebsiteEditor
+          key={site.version}
+          id={id}
+          initial={site.document}
+          version={site.version}
+          name={site.name}
+          status={site.status}
+          canEdit={s.allowed('website.page.edit')}
+          canPublish={s.allowed('website.page.publish')}
+        />
+        {s.allowed('website.manage') &&
+          site.document.pages.every((p) => !p.nodes.length) && (
+            <InteriorStarter id={id} version={site.version} />
+          )}
       </div>
-      <WebsiteEditor
-        key={site.version}
-        id={id}
-        initial={site.document}
-        version={site.version}
-        name={site.name}
-        status={site.status}
-        canEdit={s.allowed('website.page.edit')}
-        canPublish={s.allowed('website.page.publish')}
-      />
-      {s.allowed('website.manage') &&
-        site.document.pages.every((p) => !p.nodes.length) && (
-          <InteriorStarter id={id} version={site.version} />
-        )}
-    </main>
+    </OwnerShell>
   );
 }
