@@ -65,7 +65,8 @@ export default async function WebsiteTab({
       canCreatePage={s.allowed('website.page.create') &&
         s.allowed('website.page.edit') && s.allowed('website.seo.manage')}
       canPublish={s.allowed('website.page.publish')}
-    />;  } else if (tab === 'design') {
+    />;
+  } else if (tab === 'design') {
     content = <WebsiteDesignStudio
       id={id}
       name={site.name}
