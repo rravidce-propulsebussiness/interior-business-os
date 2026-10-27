@@ -38,6 +38,7 @@ jobs:
           # Keep those changes out of the automated commit for separate review.
           echo 'Workflow formatting still needing separate authorized changes:'
           git diff --name-only -- .github/workflows
+          git diff -- .github/workflows/client-app-check.yml
           git add -u -- . ':!.github/workflows/**'
           if ! git diff --cached --quiet; then
             git commit -m "Normalize existing Prettier formatting debt"
