@@ -5,6 +5,7 @@ begin;
 insert into public.plans(key,name,status)
 values
   ('propulse_linked','ProPulse linked (membership-controlled)','active'),
+  ('website_pending','Direct signup (activation pending)','active'),
   ('website_basic','Website Basic (paid direct)','active'),
   ('business_os_complete','Business OS Complete (paid direct)','active')
 on conflict (key) do nothing;
