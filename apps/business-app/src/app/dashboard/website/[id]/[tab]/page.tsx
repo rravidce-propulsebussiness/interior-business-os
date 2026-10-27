@@ -213,6 +213,7 @@ export default async function WebsiteTab({
         version={site.version}
         tab={tab}
         canEdit={s.allowed(permission)}
+        canPreviewMedia={s.allowed('website.media.manage')}
       />
     );
   return (
