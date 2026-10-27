@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import type { MouseEvent } from 'react';
 import type { WebsiteDocument } from '@business-os/website-builder';
 import './website-media-picker.css';
 
@@ -26,8 +27,8 @@ export function WebsiteMediaPicker({
   const recent = assets.slice(-24).reverse();
   const visible = chosen && !recent.some(asset => asset.id === chosen.id)
     ? [chosen, ...recent] : recent;
-  const allowLeaving = (event: React.MouseEvent<HTMLAnchorElement>) => {
-    if (unsaved && !window.confirm('You have unsaved website changes. Save your draft before opening the media library?'))
+  const allowLeaving = (event: MouseEvent<HTMLAnchorElement>) => {
+    if (unsaved && !window.confirm('Opening the media library will discard unsaved website changes. Continue?'))
       event.preventDefault();
   };
   return <div className="site-media-picker">
