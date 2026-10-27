@@ -59,7 +59,7 @@ for each row execute function private.website_ensure_included_subdomains();
 -- Existing sites created before base-domain setup receive their reserved
 -- platform hostname when this migration is applied to a configured host.
 update public.website_platform_settings
-set updated_at=now()
+set base_domain=base_domain,updated_at=now()
 where id and base_domain is not null;
 
 commit;
