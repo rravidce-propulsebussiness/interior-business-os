@@ -35,6 +35,7 @@ assertionFile('isolation');
 assertionFile('company-applications');
 assertionFile('self-service-companies');
 assertionFile('propulse-company-sync');
+assertionFile('website-first-plans');
 assertionFile('employee-invitations');
 assertionFile('employee-invite-codes');
 // This file creates the documented demo organization required by later seeds.

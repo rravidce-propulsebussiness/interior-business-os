@@ -65,10 +65,91 @@ select private.propulse_sync_assert(
       and m.status='active'
   ), 'ProPulse identity receives the Owner role');
 select private.propulse_sync_assert(
- (select count(*) > 0 from public.organization_entitlements
-  where organization_id=(:'first_result'::jsonb->>'organizationId')::uuid
-    and source='promotion' and valid_until>now()+interval '89 days'),
- 'self-service test entitlements are granted only to new owner company');
+  exists(select 1 from private.propulse_company_links
+    where propulse_subject='propulse:9101' and membership_managed)
+  and not private.entitled((:'first_result'::jsonb->>'organizationId')::uuid,'projects'),
+  'new ProPulse company starts with no unrestricted project access');
+
+-- Only the service role can apply a provider-verified membership assertion.
+set local role authenticated;
+select private.propulse_sync_denied(
+  format('select public.propulse_membership_sync(%L::uuid,%L,%L::uuid,%L,%L::timestamptz)',
+    '00000000-0000-4000-8000-000000000091','propulse:9101',
+    (:'first_result'::jsonb->>'organizationId'),'scale',
+    (now()+interval '30 days')::text),
+  'browser cannot forge ProPulse Scale membership');
+reset role;
+select public.propulse_membership_sync(
+  '00000000-0000-4000-8000-000000000091','propulse:9101',
+  (:'first_result'::jsonb->>'organizationId')::uuid,'growth',
+  now()+interval '30 days') as growth_result \gset
+select private.propulse_sync_assert(
+  (:'growth_result'::jsonb->>'tier')='growth'
+  and private.entitled((:'first_result'::jsonb->>'organizationId')::uuid,'website')
+  and not private.entitled((:'first_result'::jsonb->>'organizationId')::uuid,'projects'),
+  'Growth grants website hosting only');
+select private.propulse_sync_assert(
+  (private.website_config((:'first_result'::jsonb->>'organizationId')::uuid)->>'template_only')='true'
+  and (private.website_config((:'first_result'::jsonb->>'organizationId')::uuid)->>'custom_domain')='true'
+  and (private.website_config((:'first_result'::jsonb->>'organizationId')::uuid)->>'forms')='true'
+  and (private.website_config((:'first_result'::jsonb->>'organizationId')::uuid)->>'custom_code')='false',
+  'Growth effective config allows hosted templates, custom domain and enquiries without code');
+-- Customer website and verified custom hostname must survive tier changes.
+-- DNS proof is tested separately; these rows simulate already-verified
+-- customer resources to check that membership updates never delete them.
+insert into public.websites(
+  id,organization_id,name,slug,document
+) values (
+  '00000000-0000-4000-8000-000000009911',
+  (:'first_result'::jsonb->>'organizationId')::uuid,
+  'Customer site retained on upgrade',
+  'upgrade-keeps-website-9911',
+  '{"schemaVersion":1,"pages":[]}'::jsonb
+);
+insert into public.website_domains(
+  organization_id,website_id,hostname,kind,status,tls_status,verified_at
+) values (
+  (:'first_result'::jsonb->>'organizationId')::uuid,
+  '00000000-0000-4000-8000-000000009911',
+  'upgrade-retain.example.org',
+  'custom','active','ready',now()
+);
+
+select public.propulse_membership_sync(
+  '00000000-0000-4000-8000-000000000091','propulse:9101',
+  (:'first_result'::jsonb->>'organizationId')::uuid,'scale',
+  now()+interval '30 days');
+select private.propulse_sync_assert(
+  private.entitled((:'first_result'::jsonb->>'organizationId')::uuid,'projects')
+  and private.entitled((:'first_result'::jsonb->>'organizationId')::uuid,'website'),
+  'Scale unlocks complete Business OS modules');
+select private.propulse_sync_assert(
+  (private.website_config((:'first_result'::jsonb->>'organizationId')::uuid)->>'template_only')='false'
+  and (private.website_config((:'first_result'::jsonb->>'organizationId')::uuid)->>'custom_domain')='true',
+  'Scale effective config allows full website builder and custom domains');
+select private.propulse_sync_assert(
+  exists(select 1 from public.websites
+    where id='00000000-0000-4000-8000-000000009911'
+      and organization_id=(:'first_result'::jsonb->>'organizationId')::uuid)
+  and exists(select 1 from public.website_domains
+    where website_id='00000000-0000-4000-8000-000000009911'
+      and hostname='upgrade-retain.example.org'
+      and status='active' and tls_status='ready'),
+  'Growth to Scale upgrade preserves website and verified customer domain');
+select public.propulse_membership_sync(
+  '00000000-0000-4000-8000-000000000091','propulse:9101',
+  (:'first_result'::jsonb->>'organizationId')::uuid,'none',null);
+select private.propulse_sync_assert(
+  not private.entitled((:'first_result'::jsonb->>'organizationId')::uuid,'projects')
+  and not private.entitled((:'first_result'::jsonb->>'organizationId')::uuid,'website'),
+  'expired subscription revokes only tier-managed module access');
+select private.propulse_sync_assert(
+  exists(select 1 from public.websites
+    where id='00000000-0000-4000-8000-000000009911')
+  and exists(select 1 from public.website_domains
+    where website_id='00000000-0000-4000-8000-000000009911'
+      and hostname='upgrade-retain.example.org'),
+  'Membership expiry keeps existing pages, site and connected domain records');
 select private.propulse_sync_assert(
  (select count(*) = 1 from private.propulse_company_links
   where propulse_subject='propulse:9101'),
@@ -123,6 +204,13 @@ select private.propulse_sync_assert(
  (:'link_result'::jsonb->>'status')='linked_existing'
  and (:'link_result'::jsonb->>'organizationId')=:'existing_org',
  'exact matching owner company is reused');
+select public.propulse_membership_sync(
+  '00000000-0000-4000-8000-000000000092','propulse:9102',
+  (:'link_result'::jsonb->>'organizationId')::uuid,'scale',
+  now()+interval '30 days') as linked_membership_result \gset
+select private.propulse_sync_assert(
+  (:'linked_membership_result'::jsonb->>'status')='existing_company_unmodified',
+  'linking an already owned company does not overwrite separate paid plans');
 
 set local role authenticated;
 select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000091',true);

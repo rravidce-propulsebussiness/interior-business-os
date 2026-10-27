@@ -79,7 +79,7 @@ export async function POST(request: Request) {
           ? fields[f.key] === true || fields[f.key] === 'true'
           : fields[f.key];
     }
-    const result = await createPublicDatabase().rpc('website_submit_lead', {
+    const result = await createPublicDatabase().rpc('website_submit_enquiry', {
       p_hostname: host,
       p_page: page,
       p_form: formId,

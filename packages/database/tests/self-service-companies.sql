@@ -61,16 +61,26 @@ select private.self_signup_assert(
    where organization_id = (:'created_a'::jsonb->>'organizationId')::uuid),
   'multiple industries share one tenant');
 select private.self_signup_assert(
-  public.has_entitlement((:'created_a'::jsonb->>'organizationId')::uuid,'projects'),
-  'testing grant enables projects outside the default Starter plan');
+  not public.has_entitlement((:'created_a'::jsonb->>'organizationId')::uuid,'projects')
+  and not public.has_entitlement((:'created_a'::jsonb->>'organizationId')::uuid,'website'),
+  'direct signup has no paid modules before verified plan activation');
 select private.self_signup_assert(
-  exists(select 1 from public.organization_entitlements
+  not exists(select 1 from public.organization_entitlements
     where organization_id = (:'created_a'::jsonb->>'organizationId')::uuid
-    and source='promotion' and enabled and valid_until > now()+interval '89 days'),
-  'testing entitlements expire automatically');
+    and source='promotion' and enabled),
+  'direct signup receives no broad testing promotion');
+select private.self_signup_assert(
+  exists(select 1 from public.organizations o join public.plans p on p.id=o.plan_id
+    where o.id=(:'created_a'::jsonb->>'organizationId')::uuid
+      and p.key='website_unsubscribed'),
+  'direct signup is awaiting website plan purchase');
 select private.self_signup_assert(
   not private.has_platform_permission('platform.organizations.manage'),
   'company creator does not gain platform admin privileges');
+select private.self_signup_denied(format(
+  'select public.platform_website_basic_verify_payment(%L::uuid,%L,10000,now()+interval ''30 days'')',
+  (:'created_a'::jsonb->>'organizationId'),'BANK-NOT-VERIFIED-001'),
+  'direct owner cannot self-activate website by submitting a bank reference');
 
 select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000082',true);
 select public.company_self_register(
@@ -83,6 +93,72 @@ select private.self_signup_assert(
   not exists(select 1 from public.organizations where slug='self-registered-a'),
   'organization read RLS remains tenant-scoped');
 
+select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000084',true);
+select public.platform_website_basic_verify_payment(
+  (:'created_a'::jsonb->>'organizationId')::uuid,
+  'BANK-VERIFIED-001',10000,now()+interval '30 days'
+) as direct_paid_result \gset
+reset role;
+select private.self_signup_assert(
+  (:'direct_paid_result'::jsonb->>'status')='activated'
+  and private.entitled((:'created_a'::jsonb->>'organizationId')::uuid,'website')
+  and not private.entitled((:'created_a'::jsonb->>'organizationId')::uuid,'projects'),
+  'verified direct bank payment enables only website hosting');
+select private.self_signup_assert(
+  (private.website_config((:'created_a'::jsonb->>'organizationId')::uuid)->>'custom_domain')='true'
+  and (private.website_config((:'created_a'::jsonb->>'organizationId')::uuid)->>'template_only')='true'
+  and (private.website_config((:'created_a'::jsonb->>'organizationId')::uuid)->>'forms')='true',
+  'paid Direct Basic permits custom-domain connection and template enquiries');
+select private.self_signup_assert(
+  (select count(*)=1 from private.website_basic_payment_verifications
+   where organization_id=(:'created_a'::jsonb->>'organizationId')::uuid
+     and payment_reference='BANK-VERIFIED-001'),
+  'bank credit activation stores unique auditable verification');
+-- Renewal requires a fresh paid reference and may not shorten active access.
+do $assert_payment_duplicate$
+begin
+ begin
+  perform public.platform_website_basic_verify_payment(
+    (select id from public.organizations where slug='self-registered-a'),
+    'BANK-VERIFIED-001',10000,now()+interval '60 days'
+  );
+  raise exception 'FAILED: duplicate bank reference was accepted';
+ exception when unique_violation then null;
+ end;
+end
+$assert_payment_duplicate$;
+select private.self_signup_assert(
+  (select count(*)=1 from private.website_basic_payment_verifications
+   where payment_reference='BANK-VERIFIED-001'),
+  'duplicate bank reference cannot activate another subscription');
+
+-- Simulate passage of time without sleeping or touching a production clock.
+update public.organization_entitlements
+set valid_from=now()-interval '31 days',
+    valid_until=now()-interval '1 day'
+where organization_id=(:'created_a'::jsonb->>'organizationId')::uuid
+  and source='addon'
+  and configuration->>'campaign'='direct-website-basic';
+select private.self_signup_assert(
+  not private.entitled((:'created_a'::jsonb->>'organizationId')::uuid,'website')
+  and exists(select 1 from private.website_basic_payment_verifications
+    where organization_id=(:'created_a'::jsonb->>'organizationId')::uuid),
+  'expired direct paid hosting disables access but retains payment history');
+
+set local role authenticated;
+select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000084',true);
+select public.platform_website_basic_verify_payment(
+  (:'created_a'::jsonb->>'organizationId')::uuid,
+  'BANK-RENEWAL-002',10000,now()+interval '40 days'
+);
+reset role;
+select private.self_signup_assert(
+  private.entitled((:'created_a'::jsonb->>'organizationId')::uuid,'website')
+  and (select count(*)=2 from private.website_basic_payment_verifications
+     where organization_id=(:'created_a'::jsonb->>'organizationId')::uuid),
+  'verified new bank reference renews expired Basic hosting without re-creating tenant');
+
+set local role authenticated;
 select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000084',true);
 select public.company_onboarding_set_policy(true);
 select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000081',true);

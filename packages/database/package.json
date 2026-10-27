@@ -32,18 +32,18 @@
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "zod": "4.6.5",
+    "@business-os/brochure-builder": "workspace:*",
     "@business-os/core": "workspace:*",
+    "@business-os/quotation-engine": "workspace:*",
     "@business-os/shared": "workspace:*",
+    "@business-os/website-builder": "workspace:*",
     "@supabase/ssr": "0.12.7",
     "@supabase/supabase-js": "2.117.2",
     "server-only": "0.0.1",
-    "@business-os/quotation-engine": "workspace:*",
-    "@business-os/website-builder": "workspace:*",
-    "@business-os/brochure-builder": "workspace:*"
+    "zod": "4.6.6"
   },
   "devDependencies": {
-    "next": "16.3.8"
+    "next": "16.4.1"
   },
   "peerDependencies": {
     "next": "16.3.8"

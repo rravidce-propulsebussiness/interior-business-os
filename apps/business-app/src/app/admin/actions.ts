@@ -33,6 +33,15 @@ export async function changeOrganization(
       'platform.organizations.manage',
     );
     const id = idSchema.parse(form.get('organizationId'));
+    const requestedPlanId = form.get('planId');
+    if (typeof requestedPlanId === 'string' && requestedPlanId) {
+      const selectedPlan = (await repository.plans()).find((p) => p.id === requestedPlanId);
+      if (!selectedPlan) throw new Error('Unavailable plan');
+      if (['website_basic','propulse_growth','propulse_scale','propulse_managed']
+        .includes(selectedPlan.key)) {
+        return { message: 'This plan needs payment verification or verified ProPulse membership. Use the dedicated activation workflow.' };
+      }
+    }
     await repository.setOrganization({
       organizationId: id,
       status: form.get('status'),

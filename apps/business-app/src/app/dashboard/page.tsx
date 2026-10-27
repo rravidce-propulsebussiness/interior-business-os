@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-html-link-for-pages -- Intentional full-document navigation avoids incomplete RSC Flight streams on Hostinger. */
 import { notFound, redirect } from 'next/navigation';
 import {
   pageServices,
@@ -134,6 +133,15 @@ export default async function Dashboard({
   const canWebsite = has('website.view', 'website');
   const canSettings = has('organization.view');
   const canSites = context.entitlements.includes('projects');
+
+  // Website-only owners go straight to their hosted-site controls.
+  // Company dashboard and project-only clients retain existing routing.
+  const operationalModules = ['crm', 'quotation', 'projects', 'billing', 'purchasing', 'reports']
+    .some((key) => context.entitlements.includes(key));
+  if (canWebsite && !operationalModules && !scope)
+    redirect('/dashboard/website');
+  if (!canWebsite && !operationalModules && !scope)
+    redirect('/dashboard/billing');
   const query = (await searchParams).q?.trim().slice(0, 80) ?? '';
 
   // Fetch only the active company's data, with its existing server/RLS guards.
@@ -232,7 +240,16 @@ export default async function Dashboard({
       : [];
   const siteById = new Map(sites.map((site) => [site.id, site]));
   const plan = rawPlans?.find((item) => item.id === organization.plan_id);
-  const planLabel = plan?.name || 'Business plan';
+  const planLabel =
+    plan?.key === 'website_unsubscribed' && canWebsite
+      ? 'Website Basic (active)'
+      : plan?.key === 'propulse_managed'
+        ? context.entitlements.includes('projects')
+          ? 'ProPulse Scale'
+          : context.entitlements.includes('website')
+            ? 'ProPulse Growth'
+            : 'ProPulse membership inactive'
+        : plan?.name || 'Business plan';
   const accountEmail = user.email ?? '';
   const accountLabel = emailDisplayName(accountEmail);
 

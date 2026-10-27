@@ -28,10 +28,16 @@ const companySchema = z.object({
     )
     .max(30),
 });
+const membershipSchema = z.discriminatedUnion('tier', [
+  z.object({ tier: z.literal('none'), expires_at: z.null() }),
+  z.object({ tier: z.literal('growth'), expires_at: z.iso.datetime() }),
+  z.object({ tier: z.literal('scale'), expires_at: z.iso.datetime() }),
+]);
 const userInfoSchema = z.object({
   sub: z.string().regex(/^propulse:[1-9][0-9]{0,18}$/),
   email_verified: z.literal(true),
   company: companySchema.nullable(),
+  membership: membershipSchema.optional(),
 });
 const importResultSchema = z.object({
   status: z.enum([
@@ -109,6 +115,22 @@ export async function syncCompanyFromPropulse(
   if (error) throw new Error('ProPulse company import unavailable');
   const result = importResultSchema.parse(data);
   if (!result.organizationId) return null;
+
+  // Never infer a tier from a role, email, company record or query parameter.
+  // Only the access-token-bound provider UserInfo response is authoritative.
+  // Legacy ProPulse deployments omit membership; do not grant anything from it.
+  if (source.data.membership) {
+    const { tier, expires_at } = source.data.membership;
+    const synced = await admin.rpc('propulse_membership_sync', {
+      p_user_id: userId,
+      p_subject: source.data.sub,
+      p_organization_id: result.organizationId,
+      p_tier: tier,
+      ...(expires_at ? { p_expires_at: expires_at } : {}),
+    });
+    if (synced.error)
+      throw new Error('ProPulse membership verification unavailable');
+  }
   const cookieOptions = {
     httpOnly: true,
     sameSite: 'lax' as const,

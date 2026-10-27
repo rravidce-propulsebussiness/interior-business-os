@@ -53,6 +53,20 @@ export async function createWebsite(
       slug.length > 63
     )
       throw new Error('Enter a name and a safe subdomain slug');
+    const plan = await s.client.rpc('website_configuration', {
+      p_organization_id: s.context.organizationId,
+    });
+    if (plan.error) throw new Error('Website plan unavailable');
+    const limits =
+      plan.data && typeof plan.data === 'object' && !Array.isArray(plan.data)
+        ? plan.data.limits
+        : null;
+    const templateOnly =
+      !!limits && typeof limits === 'object' &&
+      !Array.isArray(limits) && limits.template_only === true;
+    if (templateOnly && !templateId)
+      throw new Error('Choose a published website template on your plan.');
+
     let id: string;
     if (templateId) {
       const result = await s.client.rpc('website_from_template', {
@@ -88,7 +102,7 @@ export async function saveWebsiteSection(
     if (site.version !== version)
       throw new Error('Draft changed. Reload before saving.');
     const document = validateDocument({ ...site.document, [section]: value });
-    if (section === 'forms' && document.forms.some((f) => f.enabled)) {
+    if (section === 'forms' && document.forms.some((f) => f.enabled) && s.context.entitlements.includes('crm')) {
       const crm = await s.client.rpc('website_prepare_crm', {
         p_organization_id: s.context.organizationId,
         p_website_id: id,

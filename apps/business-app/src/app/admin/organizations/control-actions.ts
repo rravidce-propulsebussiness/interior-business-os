@@ -238,3 +238,56 @@ export async function updateCompanyIndustry(_state: State, form: FormData) {
     return { message: safeFailure(error).message };
   }
 }
+
+/**
+ * Manual bridge until an authorized website subscription checkout is live.
+ * This is an administrator's declaration that bank credit was independently
+ * verified, not a payment-proof upload or customer-submitted activation.
+ */
+export async function verifyWebsiteBasicBankPayment(_state: State, form: FormData) {
+  void _state;
+  try {
+    const { authorization, client } = await serverServices();
+    await authorization.requirePlatformPermission('platform.organizations.manage');
+    await authorization.requirePlatformPermission('platform.entitlements.manage');
+    const organizationId = idSchema.parse(form.get('organizationId'));
+    const paymentReference = z.string().trim()
+      .regex(/^[A-Za-z0-9][A-Za-z0-9.:/_-]{7,99}$/)
+      .parse(form.get('paymentReference'));
+    if (form.get('confirmBankCredit') !== 'yes')
+      return { message: 'Confirm settled bank credit in the actual receiving account before activating.' };
+    const amount = z.string()
+      .regex(/^\d{1,10}(?:\.\d{1,2})?$/)
+      .parse(form.get('amountRupees'));
+    const [rupees = '0', fractional = ''] = amount.split('.');
+    const amountMinor = Number(rupees) * 100 + Number(fractional.padEnd(2, '0'));
+    if (!Number.isSafeInteger(amountMinor) || amountMinor < 1 || amountMinor > 1e12)
+      throw new Error('Invalid settled payment amount');
+    const expiryDate = z.string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/)
+      .parse(form.get('validUntilDate'));
+    const expiry = new Date(expiryDate + 'T23:59:59Z');
+    if (!Number.isFinite(expiry.valueOf()) || expiry.toISOString().slice(0, 10) !== expiryDate)
+      throw new Error('Invalid subscription expiry date');
+
+    const result = await client.rpc('platform_website_basic_verify_payment', {
+      p_organization_id: organizationId,
+      p_payment_reference: paymentReference,
+      p_amount_minor: amountMinor,
+      p_valid_until: expiry.toISOString(),
+    });
+    if (result.error) {
+      if (result.error.code === '23505')
+        return { message: 'This bank payment reference was already used for another activation.' };
+      if (result.error.code === '42501')
+        return { message: 'This company is not eligible for Direct Website Basic activation.' };
+      return { message: 'Payment activation rejected. Verify the payment details and company state.' };
+    }
+    revalidatePath('/admin/organizations/' + organizationId);
+    revalidatePath('/dashboard/billing');
+    revalidatePath('/dashboard/website');
+    return { message: 'Verified bank payment recorded. Website Basic access is active until ' + expiryDate + ' (UTC).' };
+  } catch (error) {
+    return { message: safeFailure(error).message };
+  }
+}

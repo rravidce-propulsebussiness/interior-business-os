@@ -1,0 +1,41 @@
+name: Website-first Typecheck and Build
+on:
+  pull_request:
+    paths:
+      - 'apps/business-app/src/app/dashboard/website/**'
+      - 'apps/business-app/src/app/dashboard/billing/page.tsx'
+      - 'apps/business-app/src/app/dashboard/page.tsx'
+      - 'apps/business-app/src/app/auth/callback/propulse-company-sync.ts'
+      - 'apps/websites/**'
+      - 'packages/database/**'
+      - 'packages/website-builder/**'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/website-first-verify.yml'
+permissions:
+  contents: read
+jobs:
+  types-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm build
+      - name: Lint changed website and subscription source (full lint in main CI)
+        run: |
+          pnpm exec eslint --max-warnings=0 \
+            apps/business-app/src/app/auth/callback/propulse-company-sync.ts \
+            apps/business-app/src/app/dashboard/billing/page.tsx \
+            apps/business-app/src/app/dashboard/page.tsx \
+            apps/business-app/src/app/dashboard/website/actions.ts \
+            apps/business-app/src/app/dashboard/website/page.tsx \
+            apps/business-app/src/app/dashboard/website/website-create.tsx \
+            apps/business-app/src/app/dashboard/website/website-home.tsx \
+            'apps/business-app/src/app/dashboard/website/[id]/[tab]/page.tsx' \
+            apps/websites/src/app/api/enquiry/route.ts

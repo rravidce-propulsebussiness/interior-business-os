@@ -9,12 +9,14 @@ type Template = { id: string; name: string; description: string };
 export function WebsiteCreate({
   templates,
   canCode,
+  canBlank,
   open,
   onClose,
   initialTemplate = '',
 }: {
   templates: Template[];
   canCode: boolean;
+  canBlank: boolean;
   open: boolean;
   onClose: () => void;
   initialTemplate?: string;
@@ -92,6 +94,10 @@ export function WebsiteCreate({
           className="website-create-form"
           action={(form) =>
             start(async () => {
+              if (!canBlank && !String(form.get('template') ?? '').trim()) {
+                setMessage('Choose a published website template.');
+                return;
+              }
               const result = await createWebsite(
                 String(form.get('name') ?? '').trim(),
                 String(form.get('slug') ?? '').trim(),
@@ -116,13 +122,13 @@ export function WebsiteCreate({
             value={template}
             onChange={(event) => setTemplate(event.target.value)}
           >
-            <option value="">Blank visual canvas</option>
+            {canBlank && <option value="">Blank visual canvas</option>}
             {templates.map((entry) => (
               <option key={entry.id} value={entry.id}>
                 {entry.name}
               </option>
             ))}
-            {canCode && (
+            {canCode && canBlank && (
               <option value="custom">Custom HTML, CSS and JavaScript</option>
             )}
           </select>
