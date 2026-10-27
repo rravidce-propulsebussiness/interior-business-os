@@ -5,8 +5,9 @@
 Business OS hosts published customer websites. The customer purchases and owns
 any custom domain at an external registrar. Business OS supplies optional
 DNS/domain connection, verification and managed HTTPS **only where hosting
-routes and certificates are configured and tested**. A platform-hosted subdomain
-is available when the platform base domain is configured.
+routes and certificates are configured and tested**. Every entitled website customer receives an included Business OS subdomain once
+its platform base domain and managed HTTPS are configured. Connecting a
+customer-owned custom domain is optional and does not replace that address.
 
 | Cohort | Included features | Excluded by default |
 | --- | --- | --- |
@@ -14,10 +15,28 @@ is available when the platform base domain is configured.
 | ProPulse Scale | Full Business OS modules; hosted website; domain connection | Domain registration/renewal |
 | Direct Website Basic | Separately purchased template website; hosted enquiry inbox; domain connection | Full Business OS modules |
 
-Direct Basic requires an authorized paid plan assignment. The current billing
+Direct Basic requires an independently verified paid activation. The current billing
 page is read-only; **an automated self-service checkout and amount have not
 been implemented**. Until a trusted checkout exists, activation is manual.
 No price has been invented.
+
+## Final plan entitlement matrix
+
+| Feature | ProPulse Growth | ProPulse Scale | Direct Website Basic |
+| --- | --- | --- | --- |
+| Published template website | Included | Included | Included after verified payment |
+| Business OS website hosting | Included | Included | Included after verified payment |
+| Included Business OS subdomain | Included | Included | Included after verified payment |
+| Connect existing custom domain | Included | Included | Included after verified payment |
+| Domain registration or renewal | **Never supplied** | **Never supplied** | **Never supplied** |
+| Customer enquiries | Website-only inbox | Website plus full CRM | Website-only inbox |
+| Project management and full Business OS | Upgrade to Scale | Included | Upgrade required |
+| Website + domains retained on upgrade | Yes | Yes | Yes |
+
+Custom domain flow: buy the domain independently → Website → Domains →
+enter a hostname → add ownership TXT + routing CNAME → verify DNS and
+platform-managed HTTPS → publish and view on that address. A customer can
+publish on their included platform subdomain first.
 
 ## Implemented on feature branch
 
@@ -46,6 +65,14 @@ No price has been invented.
   fresh payment verification. Expiry retains stored pages/domains. This is a
   **manual verification bridge**, not online checkout or automated bank
   reconciliation. Admin UI is available on the organization details page.
+- `20261027000600_included_platform_subdomains.sql`: allocates included
+  platform subdomains when the platform hostname is configured **after**
+  sites were created; activates previously reserved platform addresses after
+  managed TLS is enabled. Does not purchase domains or modify existing
+  customer-owned domain records.
+- Domain settings distinguish included Business OS subdomains from optional
+  customer-owned custom domains. A public link is shown only for a published
+  site with HTTPS configured.
 - Website create action and publish RPC enforce published template provenance
   for template-only subscriptions. Growth/Basic users cannot publish an
   arbitrary blank site by calling the lower-level create RPC.
@@ -60,7 +87,7 @@ No price has been invented.
    no browser-supplied field can grant Scale.
 2. Verify **actual** Business OS production Supabase project identity and
    migration history. Make a restorable backup before applying migrations.
-3. Apply the four new migrations in order, regenerate DB types, run DB/security
+3. Apply the six new migrations in order, regenerate DB types, run DB/security
    regression tests, and check existing businesses retained their assignments.
 4. Confirm platform `base_domain`, managed TLS, custom-domain routing, and
    Websites app deployment. DNS and HTTPS must be verified independently.
