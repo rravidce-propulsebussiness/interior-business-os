@@ -138,6 +138,7 @@ export function FileDeveloperStudio({
     start(async () => {
       try {
         const html = await renderDraftPreview(id, doc, fileRoute);
+        if (!html) throw new Error('No preview for this page');
         setPreview(html);
         setPreviewPath(fileRoute);
         setShowPreview(true);
