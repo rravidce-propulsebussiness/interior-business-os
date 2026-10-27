@@ -12313,7 +12313,7 @@ export interface Database {
           p_subject: string;
           p_organization_id: string;
           p_tier: string;
-          p_expires_at: string | null;
+          p_expires_at?: string;
         };
         Returns: Json;
       };
