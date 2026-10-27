@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useMemo, useState, useTransition } from 'react';
+import { useRef, useState, useTransition } from 'react';
 import Link from 'next/link';
 import type { WebsiteDocument } from '@business-os/website-builder';
 import { defaultTheme } from '@business-os/website-builder';
-import { renderDraftPreview, saveWebsiteSection } from './actions';
+import { saveWebsiteSection } from './actions';
+import { renderWebsiteThemePreview } from './design-preview';
 import './design-studio.css';
 
 type Theme = WebsiteDocument['theme'];
@@ -54,55 +55,73 @@ const isLight = (hex: string) => {
 };
 
 export function WebsiteDesignStudio({
-  id, name, initial, initialVersion, canEdit,
+  id, name, initialTheme, pages, initialVersion, canEdit,
 }: {
-  id: string; name: string; initial: WebsiteDocument; initialVersion: number; canEdit: boolean;
+  id: string;
+  name: string;
+  initialTheme: Theme;
+  pages: { id: string; title: string; path: string }[];
+  initialVersion: number;
+  canEdit: boolean;
 }) {
-  const [theme, setTheme] = useState<Theme>(initial.theme);
-  const [saved, setSaved] = useState<Theme>(initial.theme);
+  const [theme, setTheme] = useState<Theme>(initialTheme);
+  const [saved, setSaved] = useState<Theme>(initialTheme);
   const [version, setVersion] = useState(initialVersion);
   const [device, setDevice] = useState<Device>('desktop');
-  const [previewMode, setPreviewMode] = useState<'site' | 'sample'>('site');
+  const [previewMode, setPreviewMode] = useState<'site' | 'sample'>('sample');
   const [preview, setPreview] = useState('');
   const [previewError, setPreviewError] = useState('');
-  const [pagePath, setPagePath] = useState(initial.pages.find(p => p.path === '/')?.path ?? initial.pages[0]?.path ?? '/');
+  const [pagePath, setPagePath] = useState(pages.find(p => p.path === '/')?.path ?? pages[0]?.path ?? '/');
   const [message, setMessage] = useState('');
   const [saving, startSaving] = useTransition();
   const [previewPending, startPreview] = useTransition();
+  const requestRef = useRef(0);
   const changed = JSON.stringify(saved) !== JSON.stringify(theme);
-  const previewDocument = useMemo(() => ({ ...initial, theme }), [initial, theme]);
   const foreground = isLight(theme.primary) ? '#302D2A' : '#FFFFFF';
 
-  useEffect(() => {
-    if (previewMode !== 'site') return;
-    let valid = true;
-    const handle = setTimeout(() => {
-      startPreview(async () => {
-        try {
-          const html = await renderDraftPreview(id, previewDocument, pagePath);
-          if (valid) {
-            setPreview(html ?? '');
-            setPreviewError(html ? '' : 'There is no preview for this page.');
-          }
-        } catch {
-          if (valid) {
-            setPreview('');
-            setPreviewError('Live preview is unavailable for this draft. The sample preview still reflects your theme.');
-          }
-        }
-      });
-    }, 650);
-    return () => { valid = false; clearTimeout(handle); };
-  }, [id, previewDocument, pagePath, previewMode]);
+  // Full preview is opt-in. Instant style sample never waits for the server.
+  const loadPreview = (path: string, nextTheme: Theme) => {
+    const request = ++requestRef.current;
+    setPreviewError('');
+    startPreview(async () => {
+      try {
+        const html = await renderWebsiteThemePreview(id, nextTheme, path);
+        if (request !== requestRef.current) return;
+        setPreview(html ?? '');
+        setPreviewError(html ? '' : 'There is no preview for this page.');
+      } catch {
+        if (request !== requestRef.current) return;
+        setPreview('');
+        setPreviewError('Website preview is temporarily unavailable. The style sample is still interactive.');
+      }
+    });
+  };
+  const choosePreviewMode = (mode: 'site' | 'sample') => {
+    setPreviewMode(mode);
+    if (mode === 'site') loadPreview(pagePath, theme);
+    else ++requestRef.current; // Ignore stale preview responses if user exits.
+  };
+  const selectPreviewPage = (path: string) => {
+    setPagePath(path);
+    loadPreview(path, theme);
+  };
+  const showInstantSample = () => {
+    if (previewMode === 'site') {
+      setPreviewMode('sample');
+      ++requestRef.current;
+    }
+  };
 
   const edit = <K extends keyof Theme>(key: K, value: Theme[K]) => {
     if (!canEdit) return;
     setTheme(current => ({ ...current, [key]: value }));
+    showInstantSample();
     setMessage('');
   };
   const applyPreset = (values: Pick<Theme, ColorKey>) => {
     if (!canEdit) return;
     setTheme(current => ({ ...current, ...values }));
+    showInstantSample();
     setMessage('');
   };
   const save = () => {
@@ -239,10 +258,10 @@ export function WebsiteDesignStudio({
               </label>)}
           </div>
           <div className="wd-reset-actions">
-            <button disabled={!canEdit || !changed} type="button" onClick={() => {setTheme(saved);setMessage('Unsaved theme edits discarded.');}}>
+            <button disabled={!canEdit || !changed} type="button" onClick={() => {setTheme(saved);showInstantSample();setMessage('Unsaved theme edits discarded.');}}>
               Discard unsaved changes
             </button>
-            <button disabled={!canEdit} type="button" onClick={() => {setTheme({ ...defaultTheme });setMessage('Default palette loaded in your draft. Save to keep it.');}}>
+            <button disabled={!canEdit} type="button" onClick={() => {setTheme({ ...defaultTheme });showInstantSample();setMessage('Default palette loaded in your draft. Save to keep it.');}}>
               Use original website defaults
             </button>
           </div>
@@ -266,16 +285,23 @@ export function WebsiteDesignStudio({
             </div>
             <div className="wd-device-group" role="group" aria-label="Preview content">
               <button className={previewMode === 'site' ? 'active' : ''}
-                onClick={() => setPreviewMode('site')}>My site</button>
+                onClick={() => choosePreviewMode('site')}>My site</button>
               <button className={previewMode === 'sample' ? 'active' : ''}
-                onClick={() => setPreviewMode('sample')}>Style sample</button>
+                onClick={() => choosePreviewMode('sample')}>Style sample</button>
             </div>
           </div>
           {previewMode === 'site' && <label className="wd-page-picker">Preview page
-            <select value={pagePath} onChange={event => setPagePath(event.target.value)}>
-              {initial.pages.map(page => <option key={page.id} value={page.path}>{page.title} ({page.path})</option>)}
+            <select value={pagePath} onChange={event => selectPreviewPage(event.target.value)}>
+              {pages.map(page => <option key={page.id} value={page.path}>{page.title} ({page.path})</option>)}
             </select>
           </label>}
+          {previewMode === 'site' && <div className="wd-preview-refresh">
+            <span>{previewPending ? 'Rendering your website…' : 'Real website preview is generated only when requested.'}</span>
+            <button type="button" disabled={previewPending}
+              onClick={() => loadPreview(pagePath, theme)}>
+              ↻ Refresh website preview
+            </button>
+          </div>}
           <div className="wd-preview-stage">
             <div className={`wd-preview-browser ${device}`}>
               <div className="wd-browser-top"><span>● ● ●</span><small>{name} · {pagePath}</small><span>↗</span></div>
@@ -313,7 +339,7 @@ export function WebsiteDesignStudio({
             </div>
           </div>
           {previewError && previewMode === 'site' && <p className="wd-preview-warning" role="status">{previewError}</p>}
-          <p className="wd-preview-note">Your changes are previewed before saving. Publishing is a separate action in Website Studio.</p>
+          <p className="wd-preview-note">Style sample updates instantly without a server request. Open My site for the actual website preview. Publishing remains separate.</p>
         </section>
         <section className="wd-guide">
           <strong>✦ &nbsp; Design tips</strong>

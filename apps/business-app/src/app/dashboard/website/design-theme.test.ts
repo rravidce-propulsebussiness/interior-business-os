@@ -26,7 +26,12 @@ describe('Website settings color and layout regression', () => {
 
   it('provides editable theme settings and the current secured draft preview', () => {
     expect(designStudio).toContain("saveWebsiteSection(id, version, 'theme', theme)");
-    expect(designStudio).toContain('renderDraftPreview(id, previewDocument, pagePath)');
+    expect(designStudio).toContain('renderWebsiteThemePreview(id, nextTheme, path)');
+    expect(designStudio).toContain("useState<'site' | 'sample'>('sample')");
+    expect(designStudio).not.toContain('renderDraftPreview(');
+    expect(designStudio).not.toContain('useEffect(');
+    expect(settingsRoute).toContain('initialTheme={site.document.theme}');
+    expect(settingsRoute).not.toContain('initial={site.document}\n      initialVersion={site.version}');
     expect(designStudio).toContain("sandbox=\"allow-scripts\"");
     expect(designStudio).toContain('Discard unsaved changes');
   });
