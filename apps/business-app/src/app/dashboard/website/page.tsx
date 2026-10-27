@@ -13,7 +13,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function Websites() {
   const s = await websiteServices('website.view', true);
-  const [sites, templates, organization, user] = await Promise.all([
+  const [sites, templates, organization, user, websiteConfig] = await Promise.all([
     s.website.list(),
     s.client
       .from('website_templates')
@@ -23,6 +23,9 @@ export default async function Websites() {
       .limit(100),
     s.repository.organization(s.context.organizationId),
     s.authorization.requireAuthenticatedUser(),
+    s.client.rpc('website_configuration', {
+      p_organization_id: s.context.organizationId,
+    }),
   ]);
   if (!organization) throw new Error('Company workspace unavailable');
   const pendingSetup = websiteSchemaPending(templates.error);
@@ -122,6 +125,7 @@ export default async function Websites() {
     >
       <WebsiteHome
         sites={rows}
+        templateOnly={Boolean((websiteConfig.data as { limits?: { template_only?: boolean } } | null)?.limits?.template_only)}
         previewHtml={previewHtml}
         pages={pages}
         enquiries={enquiries}
