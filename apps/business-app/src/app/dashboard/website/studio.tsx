@@ -38,6 +38,7 @@ export function WebsiteEditor({
   previewAction = renderDraftPreview,
   publishAction = publishWebsite,
   templateMode = false,
+  initialPageId,
 }: {
   id: string;
   initial: WebsiteDocument;
@@ -50,6 +51,7 @@ export function WebsiteEditor({
   previewAction?: typeof renderDraftPreview;
   publishAction?: typeof publishWebsite;
   templateMode?: boolean;
+  initialPageId?: string;
 }) {
   const frame = useRef<HTMLIFrameElement>(null);
   const [selection, setSelection] = useState<string | null>(
@@ -75,7 +77,7 @@ export function WebsiteEditor({
       future: [],
     }),
     [version, setVersion] = useState(initialVersion),
-    [pageId, setPageId] = useState(initial.pages[0]!.id),
+    [pageId, setPageId] = useState(initial.pages.find(p => p.id === initialPageId)?.id ?? initial.pages[0]!.id),
     [area, setArea] = useState<'pages' | 'header' | 'footer'>('pages'),
     [device, setDevice] = useState<'desktop' | 'tablet' | 'mobile'>('desktop'),
     [message, setMessage] = useState(''),
@@ -246,8 +248,8 @@ export function WebsiteEditor({
           <span className="ss-heading-icon" aria-hidden="true">▣</span>
           <div>
             <span className="ss-eyebrow">WEBSITE BUILDER</span>
-            <h1>Website Studio</h1>
-            <p>Design, customize and publish your company's website from one workspace.</p>
+            <h1>Page Layout Editor</h1>
+            <p>Edit visual sections for this website page. Your source files stay in Template Editor.</p>
           </div>
         </div>
         <div className="ss-heading-actions">
@@ -273,10 +275,10 @@ export function WebsiteEditor({
       </header>
       {!templateMode && <nav className="ss-modebar" aria-label="Website editing modes">
         <div className="ss-modebar-left">
-          <span className="ss-mode-active">▣ &nbsp; Template Builder</span>
-          <Link className="ss-mode-link" href={`/dashboard/website/${id}/developer`}>
-            ⌘ &nbsp; Code Editor ↗
+          <Link className="ss-mode-link" href={`/dashboard/website/${id}`}>
+            ← &nbsp; Template Editor
           </Link>
+          <span className="ss-mode-active">▣ &nbsp; Edit page sections</span>
         </div>
         <div className="ss-modebar-right">
           <span className="ss-mode-hint">Website settings</span>
