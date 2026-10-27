@@ -12028,6 +12028,15 @@ export interface Database {
         Args: { p_user_id: string; p_status: string };
         Returns: undefined;
       };
+      platform_website_basic_verify_payment: {
+        Args: {
+          p_organization_id: string;
+          p_payment_reference: string;
+          p_amount_minor: number;
+          p_valid_until: string;
+        };
+        Returns: Json;
+      };
       project_advance_proforma_prepare: {
         Args: { p_org: string; p_project: string; p_percent: number };
         Returns: string;
