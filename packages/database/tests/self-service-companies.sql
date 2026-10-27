@@ -98,6 +98,7 @@ select public.platform_website_basic_verify_payment(
   (:'created_a'::jsonb->>'organizationId')::uuid,
   'BANK-VERIFIED-001',10000,now()+interval '30 days'
 ) as direct_paid_result \gset
+reset role;
 select private.self_signup_assert(
   (:'direct_paid_result'::jsonb->>'status')='activated'
   and private.entitled((:'created_a'::jsonb->>'organizationId')::uuid,'website')
@@ -130,6 +131,8 @@ select private.self_signup_assert(
   (select count(*)=1 from private.website_basic_payment_verifications
    where payment_reference='BANK-VERIFIED-001'),
   'duplicate bank reference cannot activate another subscription');
+set local role authenticated;
+select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000084',true);
 select public.company_onboarding_set_policy(true);
 select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000081',true);
 select public.company_self_register(
