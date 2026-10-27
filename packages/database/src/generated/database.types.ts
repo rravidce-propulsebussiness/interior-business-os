@@ -12570,7 +12570,11 @@ export interface Database {
         Returns: undefined;
       };
       website_enquiries_read: {
-        Args: { p_organization_id: string; p_website_id: string; p_limit?: number };
+        Args: {
+          p_organization_id: string;
+          p_website_id: string;
+          p_limit?: number;
+        };
         Returns: Json;
       };
       website_from_template: {
