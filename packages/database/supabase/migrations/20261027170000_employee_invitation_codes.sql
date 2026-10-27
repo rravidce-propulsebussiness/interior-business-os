@@ -7,7 +7,6 @@ create table private.employee_invitation_codes (
  code_hash bytea not null unique,
  created_at timestamptz not null default now()
 );
-create index employee_invitation_codes_hash_lookup on private.employee_invitation_codes(code_hash);
 alter table private.employee_invitation_codes enable row level security;
 revoke all on private.employee_invitation_codes from public, anon, authenticated, business_os_worker;
 
