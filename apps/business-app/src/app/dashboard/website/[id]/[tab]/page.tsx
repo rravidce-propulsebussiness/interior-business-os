@@ -1,5 +1,6 @@
 import { WebsiteTeam } from '../../team-panel';
-import { WebsiteEditor } from '../../studio';
+import { TemplateEditor } from '../../template-editor';
+import { templatePages, templateSources } from '../../template-workspace';
 import { WebsiteDesignStudio } from '../../design-studio';
 import '../../website-studio.css';
 import '../../design-studio.css';
@@ -37,8 +38,11 @@ export default async function WebsiteTab({
   const permission = permissions[tab];
   if (!permission) notFound();
   const s = await websiteServices(permission, true);
-  // Existing deep links continue to open the one canonical Template Editor.
-  if (tab === 'developer') redirect(`/dashboard/website/${id}`);
+  // The visual editor has one canonical URL. Preserve old layout deep links.
+  if (tab === 'layout') {
+    const query = await searchParams;
+    redirect(`/dashboard/website/${id}${query.page ? `?page=${encodeURIComponent(query.page)}` : ''}`);
+  }
   // These independent scoped reads run concurrently to reduce navigation
   // latency, particularly on small shared hosting instances.
   const [site, organization, user] = await Promise.all([
@@ -49,20 +53,19 @@ export default async function WebsiteTab({
   if (!organization) notFound();
   const email = user.email ?? '';
   let content;
-  if (tab === 'layout') {
-    const query = await searchParams;
-    content = <div className="site-studio-page"><WebsiteEditor
-      key={site.version}
+  if (tab === 'developer') {
+    content = <TemplateEditor
       id={id}
       name={site.name}
-      initial={site.document}
+      initial={templateSources(site.document)}
+      pages={templatePages(site.document)}
       version={site.version}
-      status={site.status}
-      {...(query.page ? { initialPageId: query.page } : {})}
-      canEdit={s.allowed('website.page.edit')}
+      canEdit={s.allowed('website.custom_code.edit')}
+      canEditCss={s.allowed('website.custom_css.manage')}
+      canCreatePage={s.allowed('website.page.create') &&
+        s.allowed('website.page.edit') && s.allowed('website.seo.manage')}
       canPublish={s.allowed('website.page.publish')}
-    /></div>;
-  } else if (tab === 'design') {
+    />;  } else if (tab === 'design') {
     content = <WebsiteDesignStudio
       id={id}
       name={site.name}
@@ -208,9 +211,7 @@ export default async function WebsiteTab({
         initial={site.document}
         version={site.version}
         tab={tab}
-        canEdit={s.allowed(
-          tab === 'developer' ? 'website.custom_code.edit' : permission,
-        )}
+        canEdit={s.allowed(permission)}
       />
     );
   return (
@@ -229,7 +230,7 @@ export default async function WebsiteTab({
       dashboardBrand
       searchPlaceholder="Search leads, projects, quotations..."
     >
-      {tab === 'layout' || tab === 'design' ? content : (
+      {tab === 'developer' || tab === 'design' ? content : (
         <main id="main-content" className="website-settings-workspace">
           <div className="website-settings-back"><Link href={`/dashboard/website/${id}`}>← Website Studio</Link></div>
           <header className="website-settings-title">
