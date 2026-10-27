@@ -1,4 +1,9 @@
 import { WebsiteTeam } from '../../team-panel';
+import { FileDeveloperStudio } from '../../file-developer-studio';
+import { OwnerShell } from '../../../owner-shell';
+import { ownerWorkspaceNavigation } from '../../../owner-workspace-navigation';
+import { canAccess } from '@business-os/auth';
+import '../../../owner-dashboard.css';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { websiteServices } from '../../service';
@@ -28,6 +33,39 @@ export default async function WebsiteTab({
   if (!permission) notFound();
   const s = await websiteServices(permission, true);
   const site = await s.website.read(id);
+  if (tab === 'developer') {
+    const [organization, user] = await Promise.all([
+      s.repository.organization(s.context.organizationId),
+      s.authorization.requireAuthenticatedUser(),
+    ]);
+    if (!organization) notFound();
+    const email = user.email ?? '';
+    return <OwnerShell
+      companyName={organization.name}
+      accountLabel={email.split('@')[0] || 'Company member'}
+      accountEmail={email}
+      planLabel="Business workspace"
+      navigation={ownerWorkspaceNavigation(s.context)}
+      currentHref="/dashboard/website"
+      search=""
+      notificationsEnabled={canAccess(s.context, {
+        organizationId: s.context.organizationId,
+        permission: 'notification.view',
+      })}
+      dashboardBrand
+      searchPlaceholder="Search leads, projects, quotations..."
+    >
+      <FileDeveloperStudio
+        id={id}
+        name={site.name}
+        initial={site.document}
+        version={site.version}
+        canEdit={s.allowed('website.custom_code.edit')}
+        canEditCss={s.allowed('website.custom_css.manage')}
+        canPublish={s.allowed('website.page.publish')}
+      />
+    </OwnerShell>;
+  }
   let content;
   if (tab === 'metrics') {
     const result = await s.client.rpc('website_metrics_read', {
