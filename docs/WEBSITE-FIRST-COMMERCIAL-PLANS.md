@@ -1,30 +1,73 @@
-# Website-first commercial plan rollout
+# Business OS hosted website plans: Growth, Scale and Direct Basic
 
-## Entitlement contract
+## Product contract
 
-- **ProPulse Growth:** one template-based website hosted by Business OS, with a platform subdomain and the option to connect a customer-owned custom domain. No domain registration, purchase or renewals. Project management and full CRM are not part of this tier.
-- **ProPulse Scale:** all active Business OS modules, website hosting and customer-owned custom-domain connection.
-- **Direct Basic:** separately purchased, affordable hosted template website with custom-domain connection. No full Business OS modules by default.
-- Upgrades preserve website, organization and domain records; change only the authorized entitlements/plan.
-- The customer supplies and owns the custom domain. Business OS supplies DNS instructions, verification, routing and managed HTTPS when infrastructure is configured.
+Business OS hosts published customer websites. The customer purchases and owns
+any custom domain at an external registrar. Business OS supplies optional
+DNS/domain connection, verification and managed HTTPS **only where hosting
+routes and certificates are configured and tested**. A platform-hosted subdomain
+is available when the platform base domain is configured.
 
-## Current implementation state
+| Cohort | Included features | Excluded by default |
+| --- | --- | --- |
+| ProPulse Growth | One published-template website; website-only enquiry inbox; Business OS hosting; connect own domain | Project management, finance, full CRM, custom code |
+| ProPulse Scale | Full Business OS modules; hosted website; domain connection | Domain registration/renewal |
+| Direct Website Basic | Separately purchased template website; hosted enquiry inbox; domain connection | Full Business OS modules |
 
-Migration `20261027000100_website_first_plans.sql` establishes the three catalog plans and website capabilities without changing current live customer assignments. Custom domains are enabled for all three catalog plans. This is the first additive release, **not** end-to-end activation.
+Direct Basic requires an authorized paid plan assignment. The current billing
+page is read-only; **an automated self-service checkout and amount have not
+been implemented**. Until a trusted checkout exists, activation is manual.
+No price has been invented.
 
-**Critical blocker:** ProPulse `/api/oauth/userinfo` currently returns authenticated company details but no Growth/Scale membership assertion. Never infer paid status from role, email, membership name in the browser, or query parameters. The ProPulse server must provide a signed/server-authenticated active tier and expiration, derived from canonical membership records, for Business OS to check on login and at renewal/expiry. Prefer a separate scoped service endpoint or explicit profile claim with server-side verification; do not put membership authority in editable `user_metadata`.
+## Implemented on feature branch
 
-**Another blocker:** `website_prepare_crm`, `website_submit_lead`, and `website_publish` require a CRM entitlement for active lead forms. Growth/Basic cannot receive website enquiries using the current form architecture when CRM is disabled. Build a tenant-scoped website enquiry inbox/limited website leads capability (or securely scoped form ingestion) without granting the complete CRM application. Do not pretend enquiries work until this is tested.
+- `20261027000100_website_first_plans.sql`: catalog tiers and capabilities
+  (published-template requirement on Growth/Basic).
+- `20261027000200_propulse_verified_membership.sql`: server-only verified
+  membership synchronization. The ProPulse OAuth UserInfo integration is in
+  the paired `propulse-business` PR; only the linked account may be
+  synchronized. Membership-managed organizations use a plan with **zero
+  permanent module entitlements** and receive time-limited grants. Scale
+  upgrades, Growth downgrades and expiration never delete website data.
+  Existing, separately purchased companies are not automatically overwritten.
+- `20261027000300_website_only_enquiries.sql`: validated, tenant-scoped website
+  enquiry capture with a separate inbox on Basic/Growth. Existing full-CRM
+  sites continue writing canonical CRM leads; anti-spam, consent and
+  published-domain verification are preserved.
+- `20261027000400_website_first_onboarding.sql`: new direct registrations get
+  no all-module trial. New ProPulse organizations receive no unrestricted
+  promo and acquire only verified, expiring provider entitlements.
+- Website create action and publish RPC enforce published template provenance
+  for template-only subscriptions. Growth/Basic users cannot publish an
+  arbitrary blank site by calling the lower-level create RPC.
+- UI links to website enquiry inbox; Website Builder retains domain connection.
+- Canonical DB verification adds Growth/Scale, direct registration and RLS
+  assertions. Source compatibility with existing code is required.
 
-**Existing grants:** `20261013000000_self_service_company_onboarding.sql` and `20261013000100_propulse_company_owner_sync.sql` currently grant a 90-day promotion for all active modules to newly created companies. Remove or replace that promotional behavior *in a coordinated follow-up migration* once the ProPulse membership provider and self-service default selection are verified. Existing grants need a controlled transition; this migration intentionally does not revoke them.
+## Critical launch gates
 
-## Deployment and acceptance
+1. Deploy ProPulse provider changes first, after its own CI/security review.
+   A short-lived OAuth provider token attests tier and expiry on UserInfo;
+   no browser-supplied field can grant Scale.
+2. Verify **actual** Business OS production Supabase project identity and
+   migration history. Make a restorable backup before applying migrations.
+3. Apply the four new migrations in order, regenerate DB types, run DB/security
+   regression tests, and check existing businesses retained their assignments.
+4. Confirm platform `base_domain`, managed TLS, custom-domain routing, and
+   Websites app deployment. DNS and HTTPS must be verified independently.
+5. Complete direct Website Basic subscription checkout and renewal/cancellation
+   lifecycle, including price selection and payment confirmation. Admin-only
+   activation is a temporary controlled path, not automated checkout.
+6. Verify existing ProPulse-linked organizations' grandfathered promotions and
+   carry out a careful transition. Untouched existing direct companies should
+   retain legitimate purchases.
+7. Test on disposable Growth, Scale, expired, cancelled and direct Basic
+   accounts; ensure server-side denial of unauthorized project/CRM routes,
+   website form submission, template-only publishing and tenant isolation.
+8. Periodic or event-driven ProPulse membership refresh must handle
+   mid-term cancellations while users are logged out. Expiry of the
+   time-bound module grants works independently of login.
+9. Resolve dependency security advisories and all CI failures before merging
+   or deploying.
 
-1. Verify actual runtime Supabase project and migration history first; do not assume the source repo's documented project is production. Back up and restore-test before migration.
-2. Apply the additive plan migration in sequence; verify module mappings and plan limits for each new plan.
-3. Deploy provider membership verification and tests for Growth, Scale, lapsed, cancelled and forged-tier inputs.
-4. Gate direct signup/payment with a verified subscription purchase. Protect database RPCs and RLS, not only sidebar items.
-5. Provide a true enquiry inbox for website-only customers, including rate limits and tenant isolation.
-6. Confirm base domain, managed TLS, custom domain DNS verification and public routing in the hosted environment. A custom domain's DNS and HTTPS status are independently checked.
-7. Test upgrades/downgrades and ensure existing content, website and domain records remain intact.
-8. Release only after CI, migration tests, live disposable-user end-to-end tests and deployment verification pass.
+**This branch is an implementation candidate, not production activation.**
