@@ -16,7 +16,7 @@ export default async function SubscriptionBilling() {
   const plan = plans.find((item) => item.id === org.plan_id);
   const linked = await client.rpc('propulse_company_profile', {
     p_organization_id: ctx.organizationId,
-  }).catch(() => null);
+  });
   const profile = linked && !linked.error
     ? linked.data as { tier?: string; accessExpiresAt?: string | null } | null
     : null;
