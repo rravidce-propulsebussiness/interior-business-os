@@ -11,7 +11,7 @@ create function pg_temp.template_signature(body jsonb) returns text language sql
 $$;
 insert into private.website_build_keys(key_id,secret) values('template-test',convert_to('template-test-signing-key-local-only-123456','UTF8'));
 insert into public.organization_entitlements(organization_id,module_id,enabled,source,configuration)
- select 'dddddddd-dddd-4ddd-8ddd-dddddddddddd',id,true,'manual','{"sites":20,"pages":100,"custom_code":false,"developer_mode":false,"forms":true,"custom_domain":true}'
+ select 'dddddddd-dddd-4ddd-8ddd-dddddddddddd',id,true,'manual','{"sites":20,"pages":100,"custom_code":false,"developer_mode":false,"forms":true,"custom_domain":true,"template_only":true}'
  from public.modules where key='website'
  on conflict(organization_id,module_id,source) do update set enabled=true,configuration=excluded.configuration;
 select set_config('test.template_document',/*DOCUMENT*/::text,true);
@@ -40,6 +40,9 @@ do $$declare t uuid=current_setting('test.template_id')::uuid;doc jsonb;proof js
 end$$;
 set local request.jwt.claim.sub='11111111-1111-4111-8111-111111111111';
 do $$declare t uuid=current_setting('test.template_id')::uuid;site uuid;doc jsonb=current_setting('test.template_document')::jsonb;begin
+ perform pg_temp.template_denied(format('select public.website_create(%L,%L,%L,%L)',
+   'dddddddd-dddd-4ddd-8ddd-dddddddddddd','Bypass','template-bypass-denied',doc),
+   'template-only plan cannot create a blank website through the RPC');
  perform pg_temp.template_assert(exists(select 1 from public.website_templates where id=t and status='published'),'owner sees published templates');
  site=public.website_from_template('dddddddd-dddd-4ddd-8ddd-dddddddddddd',t,'RV Construction','rv-template-test',doc);
  perform set_config('test.template_site',site::text,true);
