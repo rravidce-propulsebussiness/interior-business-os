@@ -39,9 +39,9 @@ test('premium quotation is a complete multi-page A4 PDF with a cover and closing
   expect(first.height).toBeLessThan(843);
   await page.setViewportSize({ width: 390, height: 844 });
   const metrics = await page.evaluate(() => ({
-    viewport: document.documentElement.clientWidth,
-    scrollWidth: document.documentElement.scrollWidth,
-    pageWidths: Array.from(document.querySelectorAll('.pb-cover,.pb-page,.pb-end'))
+    viewport: globalThis.document.documentElement.clientWidth,
+    scrollWidth: globalThis.document.documentElement.scrollWidth,
+    pageWidths: Array.from(globalThis.document.querySelectorAll('.pb-cover,.pb-page,.pb-end'))
       .map((element) => element.getBoundingClientRect().width),
   }));
   expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.viewport + 1);

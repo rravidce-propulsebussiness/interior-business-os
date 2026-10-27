@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { pageServices } from '@business-os/auth/server';
 import { ActionForm } from '@business-os/ui/action-form';
-import { acceptEmployeeEmailInvitation } from './actions';
+import { acceptEmployeeEmailInvitation, acceptEmployeeInvitationByCode } from './actions';
+import './invite-entry.css';
 
 type Invitation = {
   id: string;
@@ -37,7 +38,7 @@ export default async function MyEmployeeInvitations() {
     <main
       id="main-content"
       tabIndex={-1}
-      className="min-h-screen bg-slate-50 px-5 py-10 text-slate-900 sm:px-8"
+      className="invite-entry min-h-screen px-5 py-10 sm:px-8"
     >
       <div className="mx-auto max-w-3xl space-y-7">
         <Link
@@ -46,26 +47,45 @@ export default async function MyEmployeeInvitations() {
         >
           ← Business dashboard
         </Link>
-        <header className="rounded-3xl bg-slate-950 p-8 text-white">
-          <p className="text-xs font-semibold uppercase tracking-widest text-sky-300">
-            Account onboarding
+        <header className="invite-entry-hero rounded-3xl p-8">
+          <p className="text-xs font-semibold uppercase tracking-widest">
+            WORKSPACE ACCESS
           </p>
           <h1 className="mt-3 text-3xl font-semibold">
-            Your company invitations
+            Join your company
           </h1>
           <p className="mt-3 text-sm text-slate-300">
-            Invitations are visible only to the matching, email-verified
-            account. Register or sign in with the exact invited email and
-            confirm it before accepting. A forwarded link alone never grants
-            workspace access.
+            Enter the code shared by your company owner, or accept an
+            email invitation already assigned to you. Access is limited to
+            your verified email and the approved company role.
           </p>
         </header>
+        <section className="invite-entry-code rounded-2xl p-6" aria-label="Redeem an invitation code">
+          <div className="invite-entry-code-icon" aria-hidden="true">✦</div>
+          <h2 className="text-xl font-semibold">Have an invitation code?</h2>
+          <p className="mt-2 text-sm">
+            Enter the one-time code from your company administrator. Sign in
+            with the same verified email address they invited.
+          </p>
+          <ActionForm action={acceptEmployeeInvitationByCode} label="Join company">
+            <label className="invite-entry-label" htmlFor="company-invite-code">Invitation code</label>
+            <input id="company-invite-code" type="text" name="code"
+              required minLength={32} maxLength={50} autoComplete="off"
+              spellCheck={false} autoCapitalize="characters"
+              placeholder="XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX"
+              aria-describedby="invite-code-help" />
+            <span id="invite-code-help" className="invite-entry-help">
+              Company access only; client projects continue through their existing project invitation.
+            </span>
+          </ActionForm>
+        </section>
+        <div className="invite-entry-divider"><span>Or use an email invitation</span></div>
         {invitations.length > 0 ? (
           <section className="space-y-4" aria-label="Available invitations">
             {invitations.map((invitation) => (
               <article
                 key={invitation.id}
-                className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+                className="invite-entry-card rounded-2xl p-6 shadow-sm"
               >
                 <h2 className="text-xl font-semibold">
                   {invitation.organizationName}
@@ -99,11 +119,10 @@ export default async function MyEmployeeInvitations() {
             ))}
           </section>
         ) : (
-          <section className="rounded-2xl border border-slate-200 bg-white p-6">
-            <h2 className="text-xl font-semibold">No pending invitations</h2>
+          <section className="invite-entry-card rounded-2xl p-6">
+            <h2 className="text-xl font-semibold">No email invitations waiting</h2>
             <p className="mt-2 text-sm text-slate-600">
-              To join an existing company, ask its owner to invite your verified
-              email address. Or create your own workspace now.
+              If your owner supplied a code, enter it above. Otherwise ask them to invite your verified email, or create your own company.
             </p>
             <Link
               href="/dashboard/company/apply"
