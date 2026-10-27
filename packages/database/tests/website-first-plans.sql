@@ -84,4 +84,23 @@ begin
     raise exception 'Scale does not include project management';
   end if;
 end $$;
+-- Only an independently authorized platform administrator may attest a
+-- settled bank credit and enable paid hosted-site access.
+set local role authenticated;
+do $denied$
+begin
+  begin
+    perform public.platform_website_basic_verify_payment(
+      '00000000-0000-4000-8000-000000000001',
+      'test-bank-reference-123',
+      10000,now()+interval '30 days'
+    );
+    raise exception 'Unauthorized website payment verification was accepted';
+  exception
+    when insufficient_privilege then null;
+  end;
+end
+$denied$;
+reset role;
+
 rollback;
