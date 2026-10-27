@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useRef, useState, useTransition } from 'react';
 import Link from 'next/link';
+import { WebsiteMediaPicker } from './website-media-picker';
 import {
   componentTypes,
   createNode,
@@ -35,6 +36,7 @@ export function WebsiteEditor({
   canEdit,
   canPublish,
   canViewSource = false,
+  canPreviewMedia = false,
   saveAction = saveWebsiteSection,
   previewAction = renderDraftPreview,
   publishAction = publishWebsite,
@@ -49,6 +51,7 @@ export function WebsiteEditor({
   canEdit: boolean;
   canPublish: boolean;
   canViewSource?: boolean;
+  canPreviewMedia?: boolean;
   saveAction?: typeof saveWebsiteSection;
   previewAction?: typeof renderDraftPreview;
   publishAction?: typeof publishWebsite;
@@ -530,7 +533,6 @@ export function WebsiteEditor({
                   'text',
                   'subtitle',
                   'href',
-                  'asset',
                   'alt',
                   'form',
                   'code',
@@ -553,6 +555,25 @@ export function WebsiteEditor({
                   />
                 </label>
               ))}
+              {(selected.type === 'image' || selected.type === 'hero' ||
+                selected.type === 'logo' || selected.props.asset !== undefined) && (
+                <WebsiteMediaPicker
+                  id={id}
+                  assets={document.assets}
+                  value={selected.props.asset}
+                  label={selected.type === 'logo' ? 'Logo image' : 'Section image'}
+                  disabled={!canEdit || pending}
+                  canPreview={canPreviewMedia}
+                  unsaved={hasUnsavedChanges}
+                  onChange={assetId => update(node => {
+                    if (assetId) {
+                      node.props.asset = assetId;
+                      const asset = document.assets.find(item => item.id === assetId);
+                      if (asset?.alt && !node.props.alt) node.props.alt = asset.alt;
+                    } else delete node.props.asset;
+                  })}
+                />
+              )}
               <label className="block text-xs">
                 Public data
                 <select
