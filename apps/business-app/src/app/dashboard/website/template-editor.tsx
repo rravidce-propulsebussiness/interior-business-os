@@ -196,7 +196,7 @@ export function TemplateEditor({
       <div className="te-title">
         <span className="te-logo" aria-hidden="true">◈</span>
         <div><span className="te-eyebrow">WEBSITE STUDIO</span>
-          <h1>Template Editor</h1><p>{name} · Pages, components and website files in one place</p>
+          <h1>Advanced source editor</h1><p>{name} · Developer-only HTML, CSS and JavaScript</p>
         </div>
       </div>
       <div className="te-actions">
@@ -210,7 +210,8 @@ export function TemplateEditor({
       </div>
     </header>
     <nav className="te-nav" aria-label="Website tools">
-      <span className="te-current">▣ &nbsp; Template Editor</span>
+      <Link href={`/dashboard/website/${id}`}>← &nbsp; Visual editor</Link>
+      <span className="te-current">⌘ &nbsp; Developer mode</span>
       <Link href={`/dashboard/website/${id}/design`}>Design & colors</Link>
       <Link href={`/dashboard/website/${id}/media`}>Images & assets</Link>
       <Link href={`/dashboard/website/${id}/seo`}>SEO</Link>
@@ -256,7 +257,7 @@ export function TemplateEditor({
           </button>
         </div>
         <div className="te-side-bottom"><strong>Quick start</strong>
-          <p>Choose a page or component. Edit HTML, CSS and JavaScript together, then save your draft.</p>
+          <p>Custom source files only. Standard pages, text, images and sections are easier to edit in Visual editor.</p>
         </div>
       </aside>
       <section className="te-main">
@@ -279,7 +280,7 @@ export function TemplateEditor({
           <div className="te-visual-icon" aria-hidden="true">▣</div>
           <h3>{currentPage.title} uses a visual website template</h3>
           <p>Its text, images and layout are stored as editable sections, not an HTML file. Edit those sections without affecting the rest of your website.</p>
-          <Link className="te-primary" href={`/dashboard/website/${id}/layout?page=${encodeURIComponent(currentPage.id)}`}>
+          <Link className="te-primary" href={`/dashboard/website/${id}?page=${encodeURIComponent(currentPage.id)}`}>
             Edit page sections
           </Link>
           <p className="te-subnote">Code pages and reusable components can be edited here using their HTML, CSS and JavaScript tabs.</p>
