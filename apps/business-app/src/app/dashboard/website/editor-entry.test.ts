@@ -10,6 +10,7 @@ describe('template-first business website editing', () => {
   const editor = source('./studio.tsx');
   const design = source('./design-studio.tsx');
   const advanced = source('./template-editor.tsx');
+  const creation = source('./website-create.tsx');
   const media = source('./website-media-picker.tsx');
   const settings = source('./settings-panel.tsx');
 
@@ -54,6 +55,17 @@ describe('template-first business website editing', () => {
     expect(entry).toContain("canPreviewMedia={s.allowed('website.media.manage')}");
     expect(tabs).toContain("canPreviewMedia={s.allowed('website.media.manage')}");
     expect(media).toContain("Upload / manage images");
+  });
+
+  it('prioritizes editable published templates over blank or code sites', () => {
+    expect(creation).toContain("initialTemplate || templates[0]?.id || ''");
+    expect(creation).toContain('<option value="">Start with a blank website</option>');
+    expect(creation.indexOf('{templates.map(entry => (')).toBeLessThan(
+      creation.indexOf('<option value="">Start with a blank website</option>'),
+    );
+    expect(creation).toContain('canCode && showAdvanced');
+    expect(creation).toContain('Developer options');
+    expect(creation).toContain("template === 'custom' ? '/developer' : ''");
   });
 
   it('does not promote code editor as a standard design option', () => {
