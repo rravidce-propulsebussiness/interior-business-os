@@ -34,6 +34,7 @@ export function WebsiteEditor({
   status,
   canEdit,
   canPublish,
+  canViewSource = false,
   saveAction = saveWebsiteSection,
   previewAction = renderDraftPreview,
   publishAction = publishWebsite,
@@ -47,6 +48,7 @@ export function WebsiteEditor({
   status: string;
   canEdit: boolean;
   canPublish: boolean;
+  canViewSource?: boolean;
   saveAction?: typeof saveWebsiteSection;
   previewAction?: typeof renderDraftPreview;
   publishAction?: typeof publishWebsite;
@@ -248,8 +250,8 @@ export function WebsiteEditor({
           <span className="ss-heading-icon" aria-hidden="true">▣</span>
           <div>
             <span className="ss-eyebrow">WEBSITE BUILDER</span>
-            <h1>Page Layout Editor</h1>
-            <p>Edit visual sections for this website page. Your source files stay in Template Editor.</p>
+            <h1>Edit website</h1>
+            <p>Click a section to update text, photos, buttons and layout. No coding needed.</p>
           </div>
         </div>
         <div className="ss-heading-actions">
@@ -275,16 +277,15 @@ export function WebsiteEditor({
       </header>
       {!templateMode && <nav className="ss-modebar" aria-label="Website editing modes">
         <div className="ss-modebar-left">
-          <Link className="ss-mode-link" href={`/dashboard/website/${id}`}>
-            ← &nbsp; Template Editor
-          </Link>
-          <span className="ss-mode-active">▣ &nbsp; Edit page sections</span>
+          <span className="ss-mode-active">▣ &nbsp; Visual editor</span>
         </div>
         <div className="ss-modebar-right">
           <span className="ss-mode-hint">Website settings</span>
           <Link href={`/dashboard/website/${id}/design`}>⚙ Design</Link>
           <Link href={`/dashboard/website/${id}/seo`}>SEO</Link>
+          <Link href={`/dashboard/website/${id}/media`}>Images</Link>
           <Link href={`/dashboard/website/${id}/versions`}>⌁ Versions</Link>
+          {canViewSource && <Link href={`/dashboard/website/${id}/developer`}>Advanced source</Link>}
         </div>
       </nav>}
       {message && <p className="ss-message" role="status">{message}</p>}
