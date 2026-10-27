@@ -94,6 +94,27 @@ select private.propulse_sync_assert(
   and (private.website_config((:'first_result'::jsonb->>'organizationId')::uuid)->>'forms')='true'
   and (private.website_config((:'first_result'::jsonb->>'organizationId')::uuid)->>'custom_code')='false',
   'Growth effective config allows hosted templates, custom domain and enquiries without code');
+-- Customer website and verified custom hostname must survive tier changes.
+-- DNS proof is tested separately; these rows simulate already-verified
+-- customer resources to check that membership updates never delete them.
+insert into public.websites(
+  id,organization_id,name,slug,document
+) values (
+  '00000000-0000-4000-8000-000000009911',
+  (:'first_result'::jsonb->>'organizationId')::uuid,
+  'Customer site retained on upgrade',
+  'upgrade-keeps-website-9911',
+  '{"schemaVersion":1,"pages":[]}'::jsonb
+);
+insert into public.website_domains(
+  organization_id,website_id,hostname,kind,status,tls_status,verified_at
+) values (
+  (:'first_result'::jsonb->>'organizationId')::uuid,
+  '00000000-0000-4000-8000-000000009911',
+  'upgrade-retain.example.org',
+  'custom','active','ready',now()
+);
+
 select public.propulse_membership_sync(
   '00000000-0000-4000-8000-000000000091','propulse:9101',
   (:'first_result'::jsonb->>'organizationId')::uuid,'scale',
@@ -106,6 +127,15 @@ select private.propulse_sync_assert(
   (private.website_config((:'first_result'::jsonb->>'organizationId')::uuid)->>'template_only')='false'
   and (private.website_config((:'first_result'::jsonb->>'organizationId')::uuid)->>'custom_domain')='true',
   'Scale effective config allows full website builder and custom domains');
+select private.propulse_sync_assert(
+  exists(select 1 from public.websites
+    where id='00000000-0000-4000-8000-000000009911'
+      and organization_id=(:'first_result'::jsonb->>'organizationId')::uuid)
+  and exists(select 1 from public.website_domains
+    where website_id='00000000-0000-4000-8000-000000009911'
+      and hostname='upgrade-retain.example.org'
+      and status='active' and tls_status='ready'),
+  'Growth to Scale upgrade preserves website and verified customer domain');
 select public.propulse_membership_sync(
   '00000000-0000-4000-8000-000000000091','propulse:9101',
   (:'first_result'::jsonb->>'organizationId')::uuid,'none',null);
@@ -113,6 +143,13 @@ select private.propulse_sync_assert(
   not private.entitled((:'first_result'::jsonb->>'organizationId')::uuid,'projects')
   and not private.entitled((:'first_result'::jsonb->>'organizationId')::uuid,'website'),
   'expired subscription revokes only tier-managed module access');
+select private.propulse_sync_assert(
+  exists(select 1 from public.websites
+    where id='00000000-0000-4000-8000-000000009911')
+  and exists(select 1 from public.website_domains
+    where website_id='00000000-0000-4000-8000-000000009911'
+      and hostname='upgrade-retain.example.org'),
+  'Membership expiry keeps existing pages, site and connected domain records');
 select private.propulse_sync_assert(
  (select count(*) = 1 from private.propulse_company_links
   where propulse_subject='propulse:9101'),
