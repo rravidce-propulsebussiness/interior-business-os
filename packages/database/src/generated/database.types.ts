@@ -10029,6 +10029,73 @@ export interface Database {
           },
         ];
       };
+      website_enquiries: {
+        Row: {
+          id: string;
+          organization_id: string;
+          website_id: string;
+          page_path: string;
+          form_id: string;
+          name: string;
+          phone: string;
+          email: string;
+          location: string;
+          notes: string;
+          attribution: Json;
+          received_at: string;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          website_id: string;
+          page_path: string;
+          form_id: string;
+          name: string;
+          phone: string;
+          email?: string;
+          location?: string;
+          notes?: string;
+          attribution?: Json;
+          received_at?: string;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          website_id?: string;
+          page_path?: string;
+          form_id?: string;
+          name?: string;
+          phone?: string;
+          email?: string;
+          location?: string;
+          notes?: string;
+          attribution?: Json;
+          received_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'website_enquiries_organization_id_fkey';
+            columns: ['organization_id'];
+            isOneToOne: false;
+            referencedRelation: 'organizations';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'website_enquiries_organization_id_website_id_fkey';
+            columns: ['organization_id', 'website_id'];
+            isOneToOne: false;
+            referencedRelation: 'websites';
+            referencedColumns: ['organization_id', 'id'];
+          },
+          {
+            foreignKeyName: 'website_enquiries_website_id_fkey';
+            columns: ['website_id'];
+            isOneToOne: false;
+            referencedRelation: 'websites';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       website_events: {
         Row: {
           id: string;
@@ -12236,6 +12303,10 @@ export interface Database {
         Args: { p_user_id: string; p_subject: string; p_company: Json };
         Returns: Json;
       };
+      propulse_company_profile: {
+        Args: { p_organization_id: string };
+        Returns: Json;
+      };
       propulse_membership_sync: {
         Args: {
           p_user_id: string;
@@ -12244,25 +12315,6 @@ export interface Database {
           p_tier: string;
           p_expires_at: string | null;
         };
-        Returns: Json;
-      };
-      website_enquiries_read: {
-        Args: { p_organization_id: string; p_website_id: string; p_limit?: number };
-        Returns: Json;
-      };
-      website_submit_enquiry: {
-        Args: {
-          p_hostname: string;
-          p_page: string;
-          p_form: string;
-          p_values: Json;
-          p_honeypot?: string;
-          p_attribution?: Json;
-        };
-        Returns: Json;
-      };
-      propulse_company_profile: {
-        Args: { p_organization_id: string };
         Returns: Json;
       };
       public_quotation: {
@@ -12517,6 +12569,10 @@ export interface Database {
         };
         Returns: undefined;
       };
+      website_enquiries_read: {
+        Args: { p_organization_id: string; p_website_id: string; p_limit?: number };
+        Returns: Json;
+      };
       website_from_template: {
         Args: {
           p_organization_id: string;
@@ -12605,6 +12661,17 @@ export interface Database {
           p_status: string;
         };
         Returns: undefined;
+      };
+      website_submit_enquiry: {
+        Args: {
+          p_hostname: string;
+          p_page: string;
+          p_form: string;
+          p_values: Json;
+          p_honeypot?: string;
+          p_attribution?: Json;
+        };
+        Returns: Json;
       };
       website_submit_lead: {
         Args: {
