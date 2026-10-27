@@ -56,6 +56,39 @@ after update of base_domain, managed_subdomain_tls
 on public.website_platform_settings
 for each row execute function private.website_ensure_included_subdomains();
 
+-- Customers may disconnect a domain they own. The included Business OS
+-- hostname is infrastructure-owned and must not be removable from an API
+-- call; removing it would break the guaranteed platform publishing address.
+create or replace function public.website_domain_remove(
+  p_organization_id uuid,p_domain_id uuid,p_version integer
+)
+returns void
+language plpgsql security definer set search_path = ''
+as $remove$
+declare
+  d public.website_domains%rowtype;
+begin
+  select * into d from public.website_domains
+    where organization_id=p_organization_id and id=p_domain_id;
+  perform private.website_require(
+    p_organization_id,'website.domain.manage',d.website_id
+  );
+  if d.id is null or d.version is distinct from p_version then
+    raise exception 'Stale domain' using errcode='40001';
+  end if;
+  if d.kind <> 'custom' then
+    raise exception 'Included Business OS subdomains cannot be disconnected'
+      using errcode='42501';
+  end if;
+  update public.website_domains set status='removed',version=version+1
+    where id=d.id;
+  perform private.website_event(
+    p_organization_id,d.website_id,'domain.removed',
+    jsonb_build_object('domainId',d.id)
+  );
+end
+$remove$;
+
 -- Existing sites created before base-domain setup receive their reserved
 -- platform hostname when this migration is applied to a configured host.
 update public.website_platform_settings
