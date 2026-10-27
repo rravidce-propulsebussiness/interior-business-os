@@ -50,6 +50,7 @@ $list$;
 -- Keep the existing extensive field/consent/anti-spam validation from the
 -- production CRM form function. Only persistence branches by CRM entitlement.
 create or replace function public.website_submit_enquiry(p_hostname text,p_page text,p_form text,p_values jsonb,p_honeypot text default '',p_attribution jsonb default '{}') returns jsonb language plpgsql security definer set search_path='' as $$
+<<website_submission>>
 declare w public.websites;v public.website_versions;form jsonb;field jsonb;answer jsonb;k text;name text;phone text;email text='';location text='';notes text='';consent boolean=false;source uuid;stage uuid;lead uuid;bucket timestamptz;hits integer;counter bigint;prefix text;yr integer;attrs jsonb='{}';begin
  select * into w from public.websites where id=private.website_resolve(p_hostname);
  if w.id is null or not coalesce((private.website_config(w.organization_id)->>'forms')::boolean,false) then raise exception 'Form unavailable' using errcode='42501';end if;
@@ -62,9 +63,9 @@ declare w public.websites;v public.website_versions;form jsonb;field jsonb;answe
  if form is null or not exists(select 1 from jsonb_array_elements(v.snapshot->'document'->'pages') p where p->>'path'=p_page and jsonb_path_exists(p,'$.nodes.** ? (@.type == "lead_form" && @.props.form == $form)',jsonb_build_object('form',p_form))) then raise exception 'Form unavailable' using errcode='42501';end if;
  if jsonb_typeof(p_values) is distinct from 'object' or octet_length(p_values::text)>16000 or jsonb_typeof(p_attribution) is distinct from 'object' or octet_length(p_attribution::text)>3000 then raise exception 'Invalid enquiry' using errcode='22023';end if;
  bucket=date_trunc('minute',now());
- insert into private.website_form_limits(website_id,bucket,hits) values(w.id,bucket,1) on conflict(website_id,bucket) do update set hits=private.website_form_limits.hits+1 returning private.website_form_limits.hits into hits;
+ insert into private.website_form_limits(website_id,bucket,hits) values(w.id,bucket,1) on conflict on constraint website_form_limits_pkey do update set hits=private.website_form_limits.hits+1 returning private.website_form_limits.hits into hits;
  if hits>60 then return jsonb_build_object('accepted',false,'message','Please try again shortly.');end if;
- delete from private.website_form_limits where website_id=w.id and bucket<now()-interval '1 day';
+ delete from private.website_form_limits limits where limits.website_id=w.id and limits.bucket<now()-interval '1 day';
  if coalesce(p_honeypot,'')<>'' then return jsonb_build_object('accepted',true,'message',form->>'confirmation');end if;
  for k in select jsonb_object_keys(p_values) loop if not exists(select 1 from jsonb_array_elements(form->'fields') f where f->>'key'=k and f->>'type'<>'hidden') then raise exception 'Unknown enquiry field' using errcode='22023';end if;end loop;
  for field in select value from jsonb_array_elements(form->'fields') loop
@@ -83,17 +84,15 @@ declare w public.websites;v public.website_versions;form jsonb;field jsonb;answe
    when 'email' then email=lower(trim(answer#>>'{}'));
    when 'location' then location=left(answer#>>'{}',500);
    when 'consent' then consent=answer='true'::jsonb;
-   else notes=notes||field->>'label'||': '||(answer#>>'{}')||E'\n';
+   else notes=notes||(field->>'label')||': '||(answer#>>'{}')||E'\n';
   end case;
  end loop;
  if not consent or name is null or length(name) not between 1 and 200 or phone is null or phone !~ '^\+?[0-9]{7,15}$' or length(email)>254 then raise exception 'Name, valid phone and consent required' using errcode='22023';end if;
  foreach k in array array['utm_source','utm_medium','utm_campaign','utm_content','utm_term','referrer'] loop if p_attribution ? k then attrs=attrs||jsonb_build_object(k,left(p_attribution->>k,200));end if;end loop;
-
- -- Website-only tiers store validated enquiries separately without unlocking CRM.
+ -- Website-only company: store the fully validated enquiry separately.
  if not private.entitled(w.organization_id,'crm') then
-   insert into public.website_enquiries (
-     organization_id,website_id,page_path,form_id,name,phone,email,
-     location,notes,attribution
+   insert into public.website_enquiries(
+     organization_id,website_id,page_path,form_id,name,phone,email,location,notes,attribution
    ) values (
      w.organization_id,w.id,left(p_page,180),left(p_form,120),
      name,phone,email,location,left(notes,10000),attrs
@@ -107,7 +106,7 @@ declare w public.websites;v public.website_versions;form jsonb;field jsonb;answe
  select id into source from public.lead_sources where organization_id=w.organization_id and key='website' and active;
  select id into stage from public.crm_pipeline_stages where organization_id=w.organization_id and active and outcome='open' order by sort_order,id limit 1;
  if source is null or stage is null then raise exception 'Enquiries are temporarily unavailable' using errcode='23514';end if;
- select id into lead from public.leads where organization_id=w.organization_id and lifecycle<>'archived' and (phone_normalized=phone or email<>'' and email_normalized=email) order by created_at,id limit 1;
+ select id into lead from public.leads where organization_id=w.organization_id and lifecycle<>'archived' and (phone_normalized=website_submission.phone or website_submission.email<>'' and email_normalized=website_submission.email) order by created_at,id limit 1;
  if lead is null then
   yr=extract(year from current_date);insert into private.lead_number_sequences(organization_id,year,last_number) values(w.organization_id,yr,1) on conflict(organization_id,year) do update set last_number=private.lead_number_sequences.last_number+1 returning last_number,private.lead_number_sequences.prefix into counter,prefix;
   insert into public.leads(organization_id,lead_number,name,phone,email,source_id,source_detail,stage_id,location,notes) values(w.organization_id,prefix||'-'||yr||'-'||lpad(counter::text,6,'0'),name,phone,email,source,w.name||' — '||left(p_page,180),stage,location,left(notes,10000)) returning id into lead;
