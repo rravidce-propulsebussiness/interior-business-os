@@ -11,15 +11,22 @@ export const dynamic = 'force-dynamic';
  * activeOrganization is React request-cached, so pages that also read it
  * reuse that same server request; no secondary navigation RPC.
  */
-export default async function DashboardLayout({children}:{children:ReactNode}) {
+export default async function DashboardLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
   let context: Awaited<ReturnType<typeof activeOrganization>> = null;
   try {
     context = await activeOrganization();
-  } catch(error) {
+  } catch (error) {
     // Let individual pages perform their established sign-in redirect.
-    if (!(error instanceof DomainError && error.code === 'UNAUTHENTICATED')) throw error;
+    if (!(error instanceof DomainError && error.code === 'UNAUTHENTICATED'))
+      throw error;
   }
-  return <CompanyNavigationProvider navigation={ownerWorkspaceNavigation(context)}>
-    {children}
-  </CompanyNavigationProvider>;
+  return (
+    <CompanyNavigationProvider navigation={ownerWorkspaceNavigation(context)}>
+      {children}
+    </CompanyNavigationProvider>
+  );
 }

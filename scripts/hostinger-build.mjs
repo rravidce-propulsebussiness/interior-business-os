@@ -49,20 +49,35 @@ runPnpm(['install', '--frozen-lockfile', '--prod=false']);
 // Browser Rendering PDF provider is not configured. Install in the deployed
 // project root, not a transient HOME cache that Hostinger may discard.
 if (service === 'business-app') {
-  const useCloudflare = process.env.PDF_RENDERER === 'cloudflare-rest' ||
+  const useCloudflare =
+    process.env.PDF_RENDERER === 'cloudflare-rest' ||
     (process.env.PDF_RENDERER !== 'node' &&
-      Boolean(process.env.CF_BROWSER_ACCOUNT_ID && process.env.CF_BROWSER_API_TOKEN));
+      Boolean(
+        process.env.CF_BROWSER_ACCOUNT_ID && process.env.CF_BROWSER_API_TOKEN,
+      ));
   if (useCloudflare) {
-    console.log('[Business OS] Premium PDFs use configured Cloudflare Browser Rendering.');
+    console.log(
+      '[Business OS] Premium PDFs use configured Cloudflare Browser Rendering.',
+    );
   } else {
     const browserPath = resolve(root, '.playwright-browsers');
-    console.log('[Business OS] Installing production Chromium headless-shell for premium PDFs.');
+    console.log(
+      '[Business OS] Installing production Chromium headless-shell for premium PDFs.',
+    );
     runPnpm(
-      ['--filter', '@business-os/business-app', 'exec', 'playwright',
-        'install', 'chromium-headless-shell'],
+      [
+        '--filter',
+        '@business-os/business-app',
+        'exec',
+        'playwright',
+        'install',
+        'chromium-headless-shell',
+      ],
       { PLAYWRIGHT_BROWSERS_PATH: browserPath },
     );
-    console.log('[Business OS] Installed premium PDF Chromium runtime at project path.');
+    console.log(
+      '[Business OS] Installed premium PDF Chromium runtime at project path.',
+    );
   }
 }
 // Next.js 16 defaults to Turbopack. On Hostinger its PostCSS child worker

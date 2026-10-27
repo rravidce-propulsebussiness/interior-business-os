@@ -21,9 +21,13 @@ export async function GET(request: Request) {
       // Determine the landing area from trusted project sharing and active
       // organization membership. Google/ProPulse logins use the same rules as
       // password login, including clients signing in from the main /login.
-      const destination = await resolveLoginDestination(client, data.session.user.id, {
-        preferClient: clientAudience,
-      });
+      const destination = await resolveLoginDestination(
+        client,
+        data.session.user.id,
+        {
+          preferClient: clientAudience,
+        },
+      );
       if (destination === '/client')
         return NextResponse.redirect(new URL(destination, origin));
       // Session login succeeds even if the external company API is unavailable.
@@ -54,6 +58,11 @@ export async function GET(request: Request) {
     }
   }
   return NextResponse.redirect(
-    new URL(clientAudience ? '/client/login?provider_error=callback' : '/login?confirmation=failed', origin),
+    new URL(
+      clientAudience
+        ? '/client/login?provider_error=callback'
+        : '/login?confirmation=failed',
+      origin,
+    ),
   );
 }

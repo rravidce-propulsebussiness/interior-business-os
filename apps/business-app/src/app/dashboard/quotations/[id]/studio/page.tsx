@@ -25,7 +25,12 @@ export default async function QuotationStudio({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ mode?: string; step?: string; package?: string; floors?: string }>;
+  searchParams: Promise<{
+    mode?: string;
+    step?: string;
+    package?: string;
+    floors?: string;
+  }>;
 }) {
   const [{ id }, query] = await Promise.all([params, searchParams]);
   // Old studio deep links no longer open a duplicate Preview & Share page.
@@ -80,9 +85,13 @@ export default async function QuotationStudio({
 
   const industry = allIndustries.find((row) => row.id === project.industry_id);
   const industryKey = industry?.key ?? 'construction';
-  const companyPayments=industryKey==='construction'
-   ?await s.client.rpc('organization_construction_payment_defaults_read' as never,
-      {p_org:s.org} as never):{data:[],error:null};
+  const companyPayments =
+    industryKey === 'construction'
+      ? await s.client.rpc(
+          'organization_construction_payment_defaults_read' as never,
+          { p_org: s.org } as never,
+        )
+      : { data: [], error: null };
   const mode =
     query.mode === 'custom' || query.mode === 'pdf'
       ? query.mode
@@ -90,10 +99,7 @@ export default async function QuotationStudio({
         ? 'sft'
         : 'custom';
   const step =
-    query.step === 'files' ||
-    query.step === 'payments'
-      ? query.step
-      : 'quote';
+    query.step === 'files' || query.step === 'payments' ? query.step : 'quote';
 
   const editable =
     revision.status === 'draft' &&
@@ -126,7 +132,8 @@ export default async function QuotationStudio({
   const existingSft =
     items.map((row) => parseSftEstimate(row.description)).find(Boolean) ?? null;
   const existingCustomQuote =
-    items.map((row) => parseCustomBrandQuote(row.description)).find(Boolean) ?? null;
+    items.map((row) => parseCustomBrandQuote(row.description)).find(Boolean) ??
+    null;
   const canPriceConstruction =
     editable &&
     s.allowed('quotation.override_rate', 'quotation') &&
@@ -195,7 +202,11 @@ export default async function QuotationStudio({
               initialCustomQuote={existingCustomQuote}
               initialMode={mode === 'custom' ? 'custom' : 'sft'}
               initialPackageId={query.package ?? ''}
-              initialFloorCount={query.floors && /^[1-8]$/.test(query.floors) ? Number(query.floors) : null}
+              initialFloorCount={
+                query.floors && /^[1-8]$/.test(query.floors)
+                  ? Number(query.floors)
+                  : null
+              }
               canSharePdf={s.allowed('quotation.share', 'quotation')}
               quoteNumber={root.quotation_number}
             />
@@ -219,7 +230,7 @@ export default async function QuotationStudio({
               version={revision.version}
               currency={revision.currency}
               initialPackageId={query.package ?? ''}
-               packages={industryPackages.filter(
+              packages={industryPackages.filter(
                 (pkg) =>
                   pkg.status === 'active' &&
                   pkg.industryKey === industryKey &&
@@ -250,8 +261,12 @@ export default async function QuotationStudio({
           <PaymentScheduleEditor
             key={revision.id + ':' + revision.version}
             industry={industryKey}
-            companyDefaults={companyPayments.error?[]:companyPayments.data}
-            floorNames={existingSft?.rows.filter(row=>row.kind!=='additional').map(row=>row.name)??[]}
+            companyDefaults={companyPayments.error ? [] : companyPayments.data}
+            floorNames={
+              existingSft?.rows
+                .filter((row) => row.kind !== 'additional')
+                .map((row) => row.name) ?? []
+            }
             total={total}
             currency={revision.currency}
             editable={editable}
@@ -266,24 +281,35 @@ export default async function QuotationStudio({
             }}
           />
         }
-        reviseEditor={['issued', 'superseded'].includes(revision.status) &&
-          s.allowed('quotation.create', 'quotation')
-          ? <CreateRevisionControl revisionId={revision.id} version={revision.version} />
-          : null}
+        reviseEditor={
+          ['issued', 'superseded'].includes(revision.status) &&
+          s.allowed('quotation.create', 'quotation') ? (
+            <CreateRevisionControl
+              revisionId={revision.id}
+              version={revision.version}
+            />
+          ) : null
+        }
       />
       {revision.status === 'issued' && (
         <section className="qs-card" style={{ marginTop: 18 }}>
           <h2>Next: agreement and advance</h2>
           <p className="qs-muted">
-            Open the Won lead's project to prepare an agreement from the finalized
-            quotation. Upload the signed agreement there; separate online
-            quotation approval is not required. Its saved payment schedule
-            carries forward into the project.
+            Open the Won lead's project to prepare an agreement from the
+            finalized quotation. Upload the signed agreement there; separate
+            online quotation approval is not required. Its saved payment
+            schedule carries forward into the project.
           </p>
           <ContractHandoff revisionId={revision.id} />
           {!project.is_sales_prospect ? (
-            <Link href={'/dashboard/projects/' + revision.project_id + '/site#agreement-readiness'}
-              className="qs-btn">
+            <Link
+              href={
+                '/dashboard/projects/' +
+                revision.project_id +
+                '/site#agreement-readiness'
+              }
+              className="qs-btn"
+            >
               Open agreement &amp; project stages →
             </Link>
           ) : (

@@ -27,7 +27,8 @@ export async function acceptEmployeeEmailInvitation(
 }
 
 export async function acceptEmployeeInvitationByCode(
-  _state: { message: string }, form: FormData,
+  _state: { message: string },
+  form: FormData,
 ) {
   void _state;
   try {

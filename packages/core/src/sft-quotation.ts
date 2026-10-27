@@ -7,7 +7,14 @@ const positive = z
   .refine((value) => Number(value) > 0, 'Enter a positive dimension');
 const rate = z.string().regex(/^(0|[1-9][0-9]{0,5})(\.[0-9]{1,2})?$/);
 const workKind = z.enum(['floor', 'additional']);
-const workUnit = z.enum(['sqft', 'wall_sqft', 'running_ft', 'cubic_ft', 'piece', 'lumpsum']);
+const workUnit = z.enum([
+  'sqft',
+  'wall_sqft',
+  'running_ft',
+  'cubic_ft',
+  'piece',
+  'lumpsum',
+]);
 const inputRow = z
   .object({
     name: z.string().trim().min(2).max(90),
@@ -109,7 +116,7 @@ export type SftEstimateDetails = z.infer<typeof detailSchema>;
 export function editableSftRows(
   saved: Pick<SftEstimateDetails, 'rows'>,
 ): z.infer<typeof inputRow>[] {
-  return saved.rows.map(row => ({
+  return saved.rows.map((row) => ({
     name: row.name,
     ...(row.kind ? { kind: row.kind } : {}),
     lengthFeet: row.lengthFeet,
@@ -119,7 +126,8 @@ export function editableSftRows(
     ...(row.unit ? { unit: row.unit } : {}),
     ratePerSqft: row.ratePerSqft,
     ...(row.inheritFromPrevious !== undefined
-      ? { inheritFromPrevious: row.inheritFromPrevious } : {}),
+      ? { inheritFromPrevious: row.inheritFromPrevious }
+      : {}),
   }));
 }
 
@@ -161,14 +169,18 @@ export function calculateSftEstimate(
     const quantity = row.quantity ? hundredths(row.quantity) : 100n;
     // Area/quantity stored with two-decimal precision, including non-SFT
     // optional works. The PDF renderer displays the correct measurement unit.
-    const area = unit === 'piece' ? quantity
-      : unit === 'lumpsum' ? 100n
-      : unit === 'running_ft' ? length
-      : unit === 'wall_sqft'
-        ? (length * height + 50n) / 100n
-        : unit === 'cubic_ft'
-          ? (length * width * height + 5000n) / 10000n
-          : (length * width + 50n) / 100n;
+    const area =
+      unit === 'piece'
+        ? quantity
+        : unit === 'lumpsum'
+          ? 100n
+          : unit === 'running_ft'
+            ? length
+            : unit === 'wall_sqft'
+              ? (length * height + 50n) / 100n
+              : unit === 'cubic_ft'
+                ? (length * width * height + 5000n) / 10000n
+                : (length * width + 50n) / 100n;
     if (area <= 0n || area > 100000000n)
       throw new Error('Invalid calculated measurement');
     if ((row.kind ?? 'floor') === 'floor' && unit !== 'sqft')

@@ -1,6 +1,9 @@
 import 'server-only';
 import type { createServerDatabase } from '@business-os/database/server';
-import { chooseLoginDestination, type LoginDestination } from './login-destination-policy';
+import {
+  chooseLoginDestination,
+  type LoginDestination,
+} from './login-destination-policy';
 
 type AuthClient = Awaited<ReturnType<typeof createServerDatabase>>;
 
@@ -17,20 +20,25 @@ export async function resolveLoginDestination(
   const preferClient = options.preferClient === true;
   try {
     const [memberships, portal] = await Promise.all([
-      client.from('organization_memberships')
+      client
+        .from('organization_memberships')
         .select('id')
         .eq('user_id', authenticatedUserId)
         .eq('status', 'active')
         .limit(1),
-      (client.rpc.bind(client) as unknown as (
-        name: string,
-      ) => Promise<{ data: unknown; error: unknown }>)('client_portal_projects'),
+      (
+        client.rpc.bind(client) as unknown as (
+          name: string,
+        ) => Promise<{ data: unknown; error: unknown }>
+      )('client_portal_projects'),
     ]);
     return chooseLoginDestination({
-      hasActiveCompanyMembership: !memberships.error &&
-        Array.isArray(memberships.data) && memberships.data.length > 0,
-      hasSharedClientProjects: !portal.error &&
-        Array.isArray(portal.data) && portal.data.length > 0,
+      hasActiveCompanyMembership:
+        !memberships.error &&
+        Array.isArray(memberships.data) &&
+        memberships.data.length > 0,
+      hasSharedClientProjects:
+        !portal.error && Array.isArray(portal.data) && portal.data.length > 0,
       preferClient,
     });
   } catch {

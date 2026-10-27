@@ -7,7 +7,9 @@ import { quotationCommand } from './actions';
 /** Shared/issued quotations remain immutable. Editing safely forks an editable
  * revision using the existing versioned, permission-checked quotation command. */
 export function QuotationReviseButton({
-  revisionId, version, number,
+  revisionId,
+  version,
+  number,
 }: {
   revisionId: string;
   version: number;
@@ -35,10 +37,16 @@ export function QuotationReviseButton({
               version,
             });
             if (result.id) {
-              router.push('/dashboard/quotations/' + encodeURIComponent(result.id) + '/studio?step=quote');
+              router.push(
+                '/dashboard/quotations/' +
+                  encodeURIComponent(result.id) +
+                  '/studio?step=quote',
+              );
               router.refresh();
             } else {
-              setMessage(result.message || 'Could not create an editable revision.');
+              setMessage(
+                result.message || 'Could not create an editable revision.',
+              );
             }
           } catch {
             setMessage('Unable to create an editable revision. Please retry.');
@@ -49,7 +57,11 @@ export function QuotationReviseButton({
       >
         {pending ? 'Creating…' : '✎ Edit'}
       </button>
-      {message && <small role="alert" className="qs-quote-revise-error">{message}</small>}
+      {message && (
+        <small role="alert" className="qs-quote-revise-error">
+          {message}
+        </small>
+      )}
     </span>
   );
 }

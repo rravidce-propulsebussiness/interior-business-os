@@ -3,7 +3,13 @@
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { activeOrganization, serverServices } from '@business-os/auth/server';
-import { r2MediaEnabled, r2MediaKey, r2MediaHash, r2MediaPut, r2MediaDelete } from './r2-media';
+import {
+  r2MediaEnabled,
+  r2MediaKey,
+  r2MediaHash,
+  r2MediaPut,
+  r2MediaDelete,
+} from './r2-media';
 
 const uuid = z.uuid();
 const allowedActions = new Set([
@@ -179,7 +185,11 @@ export async function uploadProjectSiteMedia(
         );
         if (response.error) throw new Error(response.error.message);
         revalidatePath(pathFor(project));
-        return { saved: true, message: 'Media saved privately to this project.', mediaId: String(response.data ?? '') };
+        return {
+          saved: true,
+          message: 'Media saved privately to this project.',
+          mediaId: String(response.data ?? ''),
+        };
       } catch (error) {
         await r2MediaDelete(key).catch(() => {
           console.error('[Business OS] R2 orphan cleanup failed');
@@ -203,7 +213,11 @@ export async function uploadProjectSiteMedia(
           : error.message.slice(0, 220),
       );
     revalidatePath(pathFor(project));
-    return { saved: true, message: 'Media saved privately to this project.', mediaId: String(data ?? '') };
+    return {
+      saved: true,
+      message: 'Media saved privately to this project.',
+      mediaId: String(data ?? ''),
+    };
   } catch (error) {
     return {
       saved: false,

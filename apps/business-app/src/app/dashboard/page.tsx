@@ -97,7 +97,8 @@ export default async function Dashboard({
 
   if (!context) {
     if (scope) notFound();
-    if ((await resolveLoginDestination(client, user.id)) === '/client') redirect('/client');
+    if ((await resolveLoginDestination(client, user.id)) === '/client')
+      redirect('/client');
     return <NoCompanyWorkspace />;
   }
 
@@ -181,14 +182,22 @@ export default async function Dashboard({
       ? optional(createGstRepository(client).list(orgId, 'purchase_bill'))
       : Promise.resolve(null),
     canLeads && !query
-      ? optional(createCrmRepository(client, orgId).search('leads', { due: 'today', sort: 'newest' }, 1))
+      ? optional(
+          createCrmRepository(client, orgId).search(
+            'leads',
+            { due: 'today', sort: 'newest' },
+            1,
+          ),
+        )
       : Promise.resolve(null),
     canQuotes && has('quotation.customer_response.view', 'quotation') && !query
-      ? optional(client.rpc('quotation_response_queue', {
-          p_organization_id: orgId,
-          p_status: 'awaiting',
-          p_page: 1,
-        }))
+      ? optional(
+          client.rpc('quotation_response_queue', {
+            p_organization_id: orgId,
+            p_status: 'awaiting',
+            p_page: 1,
+          }),
+        )
       : Promise.resolve(null),
     canTeam ? optional(repository.team(orgId)) : Promise.resolve(null),
     optional(repository.plans()),
@@ -213,7 +222,10 @@ export default async function Dashboard({
   const bills = Array.isArray(rawBills) ? rawBills : null;
   const dueResult = rawDueLeads ? resultSchema.safeParse(rawDueLeads) : null;
   const dueLeads = dueResult?.success ? dueResult.data : null;
-  const responseResult = rawResponses && !rawResponses.error ? resultSchema.safeParse(rawResponses.data) : null;
+  const responseResult =
+    rawResponses && !rawResponses.error
+      ? resultSchema.safeParse(rawResponses.data)
+      : null;
   const responseQueue = responseResult?.success ? responseResult.data : null;
   const team = Array.isArray(rawTeam) ? rawTeam : null;
   const sites: SiteProject[] =
@@ -265,7 +277,6 @@ export default async function Dashboard({
           : []),
         { label: 'My Quotes', href: '/dashboard/quotations' },
         { label: 'Packages', href: '/dashboard/quotations/packages' },
-
       ],
     });
   if (canProjects)
@@ -376,32 +387,44 @@ export default async function Dashboard({
 
   const money = (amount: number) =>
     Number.isFinite(amount) ? rupees.format(amount) : '—';
-  const validTotal = (value: number) =>
-    Number.isFinite(value) ? value : 0;
+  const validTotal = (value: number) => (Number.isFinite(value) ? value : 0);
   const months = Array.from({ length: 7 }, (_, index) => {
     const date = new Date();
     date.setUTCDate(1);
     date.setUTCMonth(date.getUTCMonth() - (6 - index));
     return {
       key: date.toISOString().slice(0, 7),
-      name: new Intl.DateTimeFormat('en-IN', { month: 'short', timeZone: 'UTC' }).format(date),
+      name: new Intl.DateTimeFormat('en-IN', {
+        month: 'short',
+        timeZone: 'UTC',
+      }).format(date),
     };
   });
   const monthTotals = months.map(({ key, name }) => ({
     name,
-    total: invoices?.filter((document) => document.status === 'issued' && document.date.startsWith(key))
-      .reduce((sum, document) => sum + validTotal(Number(document.total)), 0) ?? 0,
+    total:
+      invoices
+        ?.filter(
+          (document) =>
+            document.status === 'issued' && document.date.startsWith(key),
+        )
+        .reduce(
+          (sum, document) => sum + validTotal(Number(document.total)),
+          0,
+        ) ?? 0,
   }));
-  const recordedThisMonth = bills?.filter((document) =>
-    document.status === 'recorded' && document.date.startsWith(month),
+  const recordedThisMonth = bills?.filter(
+    (document) =>
+      document.status === 'recorded' && document.date.startsWith(month),
   );
   const monthlyExpenses = recordedThisMonth?.reduce(
-    (sum, document) => sum + validTotal(Number(document.total)), 0,
+    (sum, document) => sum + validTotal(Number(document.total)),
+    0,
   );
-  const activeMembers = team?.filter((member) => member.status === 'active') ?? [];
-  const outstandingDescription = invoices === null
-    ? 'Billing unavailable'
-    : 'Check billing balances';
+  const activeMembers =
+    team?.filter((member) => member.status === 'active') ?? [];
+  const outstandingDescription =
+    invoices === null ? 'Billing unavailable' : 'Check billing balances';
   const metrics: CommandMetric[] = [];
   if (canLeads)
     metrics.push({
@@ -446,7 +469,11 @@ export default async function Dashboard({
   if (canLeads && dueLeads) {
     if (dueLeads.total > 0) {
       attention.push({
-        title: number.format(dueLeads.total) + ' follow-up' + (dueLeads.total === 1 ? '' : 's') + ' due today',
+        title:
+          number.format(dueLeads.total) +
+          ' follow-up' +
+          (dueLeads.total === 1 ? '' : 's') +
+          ' due today',
         detail: 'Open the follow-up queue',
         status: 'Due today',
         tone: 'urgent',
@@ -457,7 +484,11 @@ export default async function Dashboard({
   }
   if (canQuotes && responseQueue && responseQueue.total > 0) {
     attention.push({
-      title: number.format(responseQueue.total) + ' quotation' + (responseQueue.total === 1 ? '' : 's') + ' awaiting reply',
+      title:
+        number.format(responseQueue.total) +
+        ' quotation' +
+        (responseQueue.total === 1 ? '' : 's') +
+        ' awaiting reply',
       detail: 'Final quotation needs a response',
       status: 'Waiting',
       tone: 'pending',
@@ -467,8 +498,14 @@ export default async function Dashboard({
   }
   if (canBilling && invoices?.some((document) => document.status === 'draft')) {
     attention.push({
-      title: number.format(invoices.filter((document) => document.status === 'draft').length) + ' draft invoice' +
-        (invoices.filter((document) => document.status === 'draft').length === 1 ? '' : 's'),
+      title:
+        number.format(
+          invoices.filter((document) => document.status === 'draft').length,
+        ) +
+        ' draft invoice' +
+        (invoices.filter((document) => document.status === 'draft').length === 1
+          ? ''
+          : 's'),
       detail: 'Ready for review before issue',
       status: 'Draft',
       tone: 'neutral',
@@ -480,7 +517,8 @@ export default async function Dashboard({
   const homeProjectRows = (projects?.rows ?? []).slice(0, 3);
   const homeProjectIds = homeProjectRows.map((project) => project.id);
   const homeTasks = homeProjectIds.length
-    ? await client.from('project_tasks')
+    ? await client
+        .from('project_tasks')
         .select('project_id,status,completion_percentage,weight')
         .eq('organization_id', orgId)
         .in('project_id', homeProjectIds)
@@ -538,10 +576,42 @@ export default async function Dashboard({
   }).format(new Date());
   const mobileNav = [
     { label: 'Dashboard', href: '/dashboard', icon: 'dashboard' as const },
-    ...(canProjects ? [{ label: 'Projects', href: '/dashboard/projects', icon: 'projects' as const }] : []),
-    ...(canBilling ? [{ label: 'Finance', href: '/dashboard/finance', icon: 'billing' as const }] : []),
-    ...(canTeam ? [{ label: 'Team', href: '/dashboard/company/team', icon: 'team' as const }] : []),
-    ...(canSettings ? [{ label: 'Settings', href: '/dashboard/settings', icon: 'settings' as const }] : []),
+    ...(canProjects
+      ? [
+          {
+            label: 'Projects',
+            href: '/dashboard/projects',
+            icon: 'projects' as const,
+          },
+        ]
+      : []),
+    ...(canBilling
+      ? [
+          {
+            label: 'Finance',
+            href: '/dashboard/finance',
+            icon: 'billing' as const,
+          },
+        ]
+      : []),
+    ...(canTeam
+      ? [
+          {
+            label: 'Team',
+            href: '/dashboard/company/team',
+            icon: 'team' as const,
+          },
+        ]
+      : []),
+    ...(canSettings
+      ? [
+          {
+            label: 'Settings',
+            href: '/dashboard/settings',
+            icon: 'settings' as const,
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -562,14 +632,31 @@ export default async function Dashboard({
         actions={actions}
         attention={attention}
         projects={commandProjects}
-        finance={canBilling ? {
-          invoiced: invoiceTotal === undefined ? '—' : money(invoiceTotal),
-          expenses: monthlyExpenses === undefined ? '—' : money(monthlyExpenses),
-          issuedCount: issuedThisMonth ? number.format(issuedThisMonth.length) : '—',
-          recordedCount: recordedThisMonth ? number.format(recordedThisMonth.length) : '—',
-          graph: monthTotals,
-        } : null}
-        team={canTeam ? { active: team ? activeMembers.length : null, total: team?.length ?? null } : null}
+        finance={
+          canBilling
+            ? {
+                invoiced:
+                  invoiceTotal === undefined ? '—' : money(invoiceTotal),
+                expenses:
+                  monthlyExpenses === undefined ? '—' : money(monthlyExpenses),
+                issuedCount: issuedThisMonth
+                  ? number.format(issuedThisMonth.length)
+                  : '—',
+                recordedCount: recordedThisMonth
+                  ? number.format(recordedThisMonth.length)
+                  : '—',
+                graph: monthTotals,
+              }
+            : null
+        }
+        team={
+          canTeam
+            ? {
+                active: team ? activeMembers.length : null,
+                total: team?.length ?? null,
+              }
+            : null
+        }
         invoices={recentInvoices}
         expenses={recentExpenses}
         navigation={mobileNav}

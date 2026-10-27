@@ -24,22 +24,38 @@ export async function GET(
       p_project_id: id,
       p_id: mediaId,
     });
-    if (info.error || !info.data || typeof info.data !== 'object' ||
-        Array.isArray(info.data))
+    if (
+      info.error ||
+      !info.data ||
+      typeof info.data !== 'object' ||
+      Array.isArray(info.data)
+    )
       return new Response('Not found', { status: 404 });
     const file = info.data as Record<string, unknown>;
-    if (typeof file.filename !== 'string' || typeof file.mime !== 'string' ||
-        typeof file.base64 !== 'string')
+    if (
+      typeof file.filename !== 'string' ||
+      typeof file.mime !== 'string' ||
+      typeof file.base64 !== 'string'
+    )
       return new Response('Not found', { status: 404 });
-    if (![
-      'image/jpeg', 'image/png', 'image/webp', 'video/mp4', 'application/pdf',
-    ].includes(file.mime))
+    if (
+      ![
+        'image/jpeg',
+        'image/png',
+        'image/webp',
+        'video/mp4',
+        'application/pdf',
+      ].includes(file.mime)
+    )
       return new Response('Not found', { status: 404 });
 
     const locator = await s.client.rpc(
       'project_site_media_r2_key' as never,
-      { p_organization_id: context.organizationId,
-        p_project_id: id, p_id: mediaId } as never,
+      {
+        p_organization_id: context.organizationId,
+        p_project_id: id,
+        p_id: mediaId,
+      } as never,
     );
     if (locator.error) return new Response('Not found', { status: 404 });
 
@@ -55,7 +71,9 @@ export async function GET(
           if (remote) bytes = remote;
         } catch {
           if (!bytes.length)
-            return new Response('Media temporarily unavailable', { status: 503 });
+            return new Response('Media temporarily unavailable', {
+              status: 503,
+            });
         }
       }
       if (!bytes.length)
@@ -69,7 +87,8 @@ export async function GET(
         'Content-Type': file.mime,
         'Content-Disposition':
           (file.mime === 'application/pdf' ? 'attachment' : 'inline') +
-          "; filename*=UTF-8''" + encodeURIComponent(file.filename),
+          "; filename*=UTF-8''" +
+          encodeURIComponent(file.filename),
         'Cache-Control': 'private, no-store',
         'X-Content-Type-Options': 'nosniff',
         'Content-Security-Policy': "default-src 'none'; sandbox",

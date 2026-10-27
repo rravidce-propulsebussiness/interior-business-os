@@ -21,9 +21,12 @@ export default async function FinanceList({
     query = await searchParams,
     s = await financeServices(financePermissions[entity], true);
   if (entity === 'payments' && s.allowed('invoice.view'))
-    redirect('/dashboard/finance?tab=payments' +
-      (query.contract_id && /^[0-9a-f-]{36}$/i.test(query.contract_id)
-        ? '&contract_id=' + encodeURIComponent(query.contract_id) : ''));
+    redirect(
+      '/dashboard/finance?tab=payments' +
+        (query.contract_id && /^[0-9a-f-]{36}$/i.test(query.contract_id)
+          ? '&contract_id=' + encodeURIComponent(query.contract_id)
+          : ''),
+    );
   const filter = financeFilterSchema.parse(
       Object.fromEntries(
         Object.entries(query).filter(

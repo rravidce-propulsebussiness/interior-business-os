@@ -40,16 +40,33 @@ export async function GET(request: Request, { params }: Params) {
       maximumFractionDigits: 0,
     }).format(Number(pkg.ratePerSqft) * 1000);
     const unitLabel: Record<string, string> = {
-      none: 'as specified', sqft: 'sq ft', bathroom: 'bathroom',
-      door: 'door', piece: 'piece', kg: 'kg', tonne: 'tonne',
-      bag: 'bag', cubic_meter: 'm³', running_ft: 'running ft',
-      point: 'point', lumpsum: 'lump sum', meter: 'metre', bhk: 'BHK',
+      none: 'as specified',
+      sqft: 'sq ft',
+      bathroom: 'bathroom',
+      door: 'door',
+      piece: 'piece',
+      kg: 'kg',
+      tonne: 'tonne',
+      bag: 'bag',
+      cubic_meter: 'm³',
+      running_ft: 'running ft',
+      point: 'point',
+      lumpsum: 'lump sum',
+      meter: 'metre',
+      bhk: 'BHK',
     };
     const specs = pkg.specSections.filter((s) =>
-      Boolean(s.description || s.brand || s.grade || s.allowanceValue || s.allowancePerSqft),
+      Boolean(
+        s.description ||
+        s.brand ||
+        s.grade ||
+        s.allowanceValue ||
+        s.allowancePerSqft,
+      ),
     );
     const pricingHtml = (section: (typeof specs)[number]) => {
-      const treatment = section.pricingTreatment ??
+      const treatment =
+        section.pricingTreatment ??
         (section.allowancePerSqft ? 'allowance' : 'included');
       const unit = section.unit ?? (section.allowancePerSqft ? 'sqft' : 'none');
       const value = section.allowanceValue ?? section.allowancePerSqft;
@@ -57,8 +74,15 @@ export async function GET(request: Request, { params }: Params) {
       if (treatment === 'included' || !value || unit === 'none') {
         return '<p>Included in package rate</p>';
       }
-      return '<p>' + (treatment === 'extra' ? 'Chargeable extra' : 'Included allowance') +
-        ': ₹' + escape(value) + ' / ' + escape(unitLabel[unit] ?? unit) + '</p>';
+      return (
+        '<p>' +
+        (treatment === 'extra' ? 'Chargeable extra' : 'Included allowance') +
+        ': ₹' +
+        escape(value) +
+        ' / ' +
+        escape(unitLabel[unit] ?? unit) +
+        '</p>'
+      );
     };
     const specHtml = specs
       .map(
@@ -191,7 +215,8 @@ export async function GET(request: Request, { params }: Params) {
         .eq('organization_id', ctx.orgId)
         .eq('package_id', ctx.packageId)
         .maybeSingle();
-      if (error || !attachment) throw new Error('Package source PDF metadata unavailable');
+      if (error || !attachment)
+        throw new Error('Package source PDF metadata unavailable');
       const { data: file, error: fileError } = await ctx.admin.storage
         .from(QUOTATION_PDF_BUCKET)
         .download(attachment.storage_path);
@@ -212,7 +237,8 @@ export async function GET(request: Request, { params }: Params) {
       },
     });
   } catch (error) {
-    const forbidden = error instanceof DomainError &&
+    const forbidden =
+      error instanceof DomainError &&
       (error.code === 'FORBIDDEN' || error.code === 'NOT_FOUND');
     // Keep implementation details server-side, but do not misreport every
     // storage or rendering failure as an authorization error.
@@ -222,14 +248,20 @@ export async function GET(request: Request, { params }: Params) {
         '<title>PDF preview unavailable</title></head><body style="margin:0;background:#f7f9fc;font:16px Arial,sans-serif;color:#14243e">' +
         '<main style="max-width:460px;margin:12vh auto;padding:28px;border:1px solid #e2e8f0;border-radius:16px;background:white">' +
         '<h1 style="font-size:22px">PDF preview unavailable</h1>' +
-        '<p>' + (forbidden ? 'You do not have access to this package.' :
-          'The PDF could not be loaded. Please try again or contact your administrator.') + '</p>' +
+        '<p>' +
+        (forbidden
+          ? 'You do not have access to this package.'
+          : 'The PDF could not be loaded. Please try again or contact your administrator.') +
+        '</p>' +
         '<a href="?format=pdf" style="display:inline-block;padding:12px 18px;border-radius:9px;background:#1766ee;color:white;text-decoration:none">Retry PDF</a>' +
         '</main></body></html>',
       {
         status: forbidden ? 403 : 503,
-        headers: { 'Content-Type': 'text/html; charset=utf-8',
-          'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' },
+        headers: {
+          'Content-Type': 'text/html; charset=utf-8',
+          'Cache-Control': 'no-store',
+          'X-Content-Type-Options': 'nosniff',
+        },
       },
     );
   }

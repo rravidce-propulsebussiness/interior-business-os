@@ -73,44 +73,85 @@ export async function saveQuotationPackage(
   }
 }
 
-export async function duplicateQuotationPackage(id: string): Promise<{ ok: boolean; message: string }> {
+export async function duplicateQuotationPackage(
+  id: string,
+): Promise<{ ok: boolean; message: string }> {
   try {
     const org = await activeOrganization();
     if (!org) throw new DomainError('FORBIDDEN');
     const { authorization, client } = await serverServices();
-    await authorization.requirePermission(org.organizationId, 'pricing.manage', { moduleKey: 'pricing' });
-    await authorization.requirePermission(org.organizationId, 'pricing.view', { moduleKey: 'pricing' });
-    const pkg = (await createQuotationPackagesRepository(client).list(org.organizationId))
-      .find((item) => item.id === z.uuid().parse(id));
+    await authorization.requirePermission(
+      org.organizationId,
+      'pricing.manage',
+      { moduleKey: 'pricing' },
+    );
+    await authorization.requirePermission(org.organizationId, 'pricing.view', {
+      moduleKey: 'pricing',
+    });
+    const pkg = (
+      await createQuotationPackagesRepository(client).list(org.organizationId)
+    ).find((item) => item.id === z.uuid().parse(id));
     if (!pkg) throw new DomainError('NOT_FOUND');
     await createQuotationPackagesRepository(client).save(org.organizationId, {
-      industryKey: pkg.industryKey, name: (pkg.name.slice(0, 110) + ' (Copy)').slice(0, 120),
-      code: (pkg.code.slice(0, 13) + '-C' + randomUUID().slice(0, 4)).toUpperCase(),
-      description: pkg.description, pricingBasis: pkg.pricingBasis, basePrice: pkg.basePrice,
-      currency: pkg.currency, status: 'inactive',
+      industryKey: pkg.industryKey,
+      name: (pkg.name.slice(0, 110) + ' (Copy)').slice(0, 120),
+      code: (
+        pkg.code.slice(0, 13) +
+        '-C' +
+        randomUUID().slice(0, 4)
+      ).toUpperCase(),
+      description: pkg.description,
+      pricingBasis: pkg.pricingBasis,
+      basePrice: pkg.basePrice,
+      currency: pkg.currency,
+      status: 'inactive',
     });
     revalidatePath('/dashboard/quotations/packages');
-    return { ok: true, message: 'Package duplicated as inactive. Review before activating.' };
-  } catch (error) { return { ok: false, message: safeFailure(error).message }; }
+    return {
+      ok: true,
+      message: 'Package duplicated as inactive. Review before activating.',
+    };
+  } catch (error) {
+    return { ok: false, message: safeFailure(error).message };
+  }
 }
 
-export async function deleteQuotationPackage(id: string, version: number): Promise<{ ok: boolean; message: string }> {
+export async function deleteQuotationPackage(
+  id: string,
+  version: number,
+): Promise<{ ok: boolean; message: string }> {
   try {
     const org = await activeOrganization();
     if (!org) throw new DomainError('FORBIDDEN');
-    if (!Number.isInteger(version) || version < 1) throw new DomainError('VALIDATION_FAILED');
+    if (!Number.isInteger(version) || version < 1)
+      throw new DomainError('VALIDATION_FAILED');
     const { authorization, client } = await serverServices();
-    await authorization.requirePermission(org.organizationId, 'pricing.manage', { moduleKey: 'pricing' });
-    await authorization.requirePermission(org.organizationId, 'pricing.view', { moduleKey: 'pricing' });
+    await authorization.requirePermission(
+      org.organizationId,
+      'pricing.manage',
+      { moduleKey: 'pricing' },
+    );
+    await authorization.requirePermission(org.organizationId, 'pricing.view', {
+      moduleKey: 'pricing',
+    });
     const rpc = client.rpc.bind(client) as unknown as (
-      name: string, args: Record<string, unknown>
+      name: string,
+      args: Record<string, unknown>,
     ) => Promise<{ data: boolean | null; error: { message?: string } | null }>;
     const { error } = await rpc('quotation_package_delete', {
-      p_org: org.organizationId, p_package_id: z.uuid().parse(id), p_version: version,
+      p_org: org.organizationId,
+      p_package_id: z.uuid().parse(id),
+      p_version: version,
     });
-    if (error) throw new Error(error.message || 'Could not delete this package');
+    if (error)
+      throw new Error(error.message || 'Could not delete this package');
     revalidatePath('/dashboard/quotations/packages');
     revalidatePath('/dashboard/quotations', 'layout');
-    return { ok: true, message: 'Package deleted. Issued quotations remain unchanged.' };
-  } catch (error) { return { ok: false, message: safeFailure(error).message }; }
+    return {
+      ok: true,
+      message: 'Package deleted. Issued quotations remain unchanged.',
+    };
+  } catch (error) {
+    return { ok: false, message: safeFailure(error).message };
+  }
 }

@@ -242,12 +242,17 @@ export async function renderPdf(
     let bytes: Buffer;
     if (provider === 'node') {
       try {
-        bytes = await (await import('./pdf.node')).renderNodePdf(safeHtml, options);
+        bytes = await (
+          await import('./pdf.node')
+        ).renderNodePdf(safeHtml, options);
       } catch (localError) {
         // Two trustworthy engines, *one HTML template*. When a host lacks
         // Chromium, fail over to the configured Browser Rendering provider.
         // Never downgrade to the unrelated PDF-lib quotation layout.
-        if (process.env.CF_BROWSER_ACCOUNT_ID && process.env.CF_BROWSER_API_TOKEN) {
+        if (
+          process.env.CF_BROWSER_ACCOUNT_ID &&
+          process.env.CF_BROWSER_API_TOKEN
+        ) {
           bytes = await cloudflarePdf(safeHtml, options);
         } else {
           throw localError;
@@ -276,7 +281,6 @@ export async function renderPdf(
   }
 }
 
-
 /**
  * Browser-independent package preview for deployments without Chromium.
  * Generates a real A4 PDF from the saved tenant package, preserving the
@@ -297,20 +301,24 @@ export async function renderConstructionPackageSamplePdf(input: {
     allowancePerSqft: string;
     allowanceValue?: string | undefined;
     unit?: string | undefined;
-    pricingTreatment?: 'included' | 'allowance' | 'extra' | 'excluded' | undefined;
+    pricingTreatment?:
+      'included' | 'allowance' | 'extra' | 'excluded' | undefined;
   }>;
 }): Promise<Buffer> {
   const document = await PDFDocument.create();
   const regular = await document.embedFont(StandardFonts.Helvetica);
   const strong = await document.embedFont(StandardFonts.HelveticaBold);
   const safe = (value: string) =>
-    value.normalize('NFKD')
+    value
+      .normalize('NFKD')
       .replace(/\u20b9/g, 'INR ')
       .replace(/[\u2018\u2019]/g, "'")
       .replace(/[\u2013\u2014]/g, '-')
       .replace(/[^\x20-\x7E\n]/g, '?');
   const [red, green, blue] = /^#[0-9a-fA-F]{6}$/.test(input.themeColor)
-    ? [1, 3, 5].map((index) => parseInt(input.themeColor.slice(index, index + 2), 16) / 255)
+    ? [1, 3, 5].map(
+        (index) => parseInt(input.themeColor.slice(index, index + 2), 16) / 255,
+      )
     : [0.08, 0.37, 0.85];
   const accent = rgb(red!, green!, blue!);
   const ink = rgb(0.09, 0.15, 0.25);
@@ -324,16 +332,33 @@ export async function renderConstructionPackageSamplePdf(input: {
   let pageNumber = 0;
   const header = () => {
     pageNumber++;
-    page.drawRectangle({ x: 0, y: height - 72, width, height: 72, color: accent });
+    page.drawRectangle({
+      x: 0,
+      y: height - 72,
+      width,
+      height: 72,
+      color: accent,
+    });
     page.drawText(safe(input.company).slice(0, 72), {
-      x: margin, y: height - 44, font: strong, size: 15, color: rgb(1, 1, 1),
+      x: margin,
+      y: height - 44,
+      font: strong,
+      size: 15,
+      color: rgb(1, 1, 1),
     });
     page.drawText('PACKAGE PREVIEW', {
-      x: width - margin - 115, y: height - 44,
-      font: regular, size: 9, color: rgb(1, 1, 1),
+      x: width - margin - 115,
+      y: height - 44,
+      font: regular,
+      size: 9,
+      color: rgb(1, 1, 1),
     });
     page.drawText('Sample only  |  Page ' + pageNumber, {
-      x: margin, y: 23, font: regular, size: 9, color: subdued,
+      x: margin,
+      y: 23,
+      font: regular,
+      size: 9,
+      color: subdued,
     });
   };
   header();
@@ -345,7 +370,13 @@ export async function renderConstructionPackageSamplePdf(input: {
   const ensure = (needed: number) => {
     if (y - needed < 50) nextPage();
   };
-  const line = (content: string, size = 11, bold = false, color = ink, indent = 0) => {
+  const line = (
+    content: string,
+    size = 11,
+    bold = false,
+    color = ink,
+    indent = 0,
+  ) => {
     const font = bold ? strong : regular;
     const text = safe(content);
     const words = text.split(/\s+/).filter(Boolean);
@@ -357,16 +388,25 @@ export async function renderConstructionPackageSamplePdf(input: {
     };
     for (const word of words) {
       if (font.widthOfTextAtSize(word, size) > maxWidth - indent) {
-        if (row) { draw(row); row = ''; }
+        if (row) {
+          draw(row);
+          row = '';
+        }
         let segment = '';
         for (const char of word) {
-          if (font.widthOfTextAtSize(segment + char, size) > maxWidth - indent) {
+          if (
+            font.widthOfTextAtSize(segment + char, size) >
+            maxWidth - indent
+          ) {
             if (segment) draw(segment);
             segment = char;
           } else segment += char;
         }
         row = segment;
-      } else if (font.widthOfTextAtSize(row ? row + ' ' + word : word, size) > maxWidth - indent) {
+      } else if (
+        font.widthOfTextAtSize(row ? row + ' ' + word : word, size) >
+        maxWidth - indent
+      ) {
         draw(row);
         row = word;
       } else {
@@ -381,31 +421,59 @@ export async function renderConstructionPackageSamplePdf(input: {
   y -= 4;
   line(input.code, 11, true, accent);
   y -= 12;
-  if (input.description) { line(input.description, 10); y -= 12; }
+  if (input.description) {
+    line(input.description, 10);
+    y -= 12;
+  }
   ensure(90);
   page.drawRectangle({
-    x: margin, y: y - 67, width: maxWidth, height: 82,
+    x: margin,
+    y: y - 67,
+    width: maxWidth,
+    height: 82,
     color: rgb(0.95, 0.97, 1),
   });
   const rate = Number(input.ratePerSqft);
   const formatted = Number.isFinite(rate)
-    ? rate.toLocaleString('en-IN', { maximumFractionDigits: 2 }) : input.ratePerSqft;
-  const total = Number.isFinite(rate) ? (rate * 1000).toLocaleString('en-IN', {
-    maximumFractionDigits: 2,
-  }) : '--';
+    ? rate.toLocaleString('en-IN', { maximumFractionDigits: 2 })
+    : input.ratePerSqft;
+  const total = Number.isFinite(rate)
+    ? (rate * 1000).toLocaleString('en-IN', {
+        maximumFractionDigits: 2,
+      })
+    : '--';
   page.drawText('Illustrative construction estimate', {
-    x: margin + 16, y: y - 8, font: strong, size: 12, color: ink,
+    x: margin + 16,
+    y: y - 8,
+    font: strong,
+    size: 12,
+    color: ink,
   });
   page.drawText('1,000 sq ft  x  INR ' + safe(formatted) + ' / sq ft', {
-    x: margin + 16, y: y - 32, font: regular, size: 11, color: subdued,
+    x: margin + 16,
+    y: y - 32,
+    font: regular,
+    size: 11,
+    color: subdued,
   });
   page.drawText('INR ' + safe(total), {
-    x: margin + 16, y: y - 56, font: strong, size: 17, color: accent,
+    x: margin + 16,
+    y: y - 56,
+    font: strong,
+    size: 17,
+    color: accent,
   });
   y -= 104;
-  line('The illustration does not replace a customer-specific quotation, measurement or approved scope.', 9, false, subdued);
+  line(
+    'The illustration does not replace a customer-specific quotation, measurement or approved scope.',
+    9,
+    false,
+    subdued,
+  );
   y -= 24;
-  const floorPrices = input.sections.find(section => section.title === 'Floor area price defaults');
+  const floorPrices = input.sections.find(
+    (section) => section.title === 'Floor area price defaults',
+  );
   if (floorPrices) {
     try {
       const rates: unknown = JSON.parse(floorPrices.description);
@@ -416,38 +484,82 @@ export async function renderConstructionPackageSamplePdf(input: {
           line('Parking / stilt area: INR ' + values.parking + ' / SFT', 10);
         if (typeof values.penthouse === 'string' && values.penthouse)
           line('Penthouse area: INR ' + values.penthouse + ' / SFT', 10);
-        line('These rates replace the base construction rate only for the matching area.', 9, false, subdued);
+        line(
+          'These rates replace the base construction rate only for the matching area.',
+          9,
+          false,
+          subdued,
+        );
         y -= 16;
       }
-    } catch { /* Malformed legacy price metadata is not rendered. */ }
+    } catch {
+      /* Malformed legacy price metadata is not rendered. */
+    }
   }
   line('MATERIALS AND INCLUSIONS', 14, true, accent);
   y -= 12;
-  const sections = input.sections.filter((section) =>
-    section.title !== 'Floor area price defaults' &&
-    Boolean(section.title.trim() || section.brand.trim() || section.grade.trim() ||
-      section.description.trim() || section.allowancePerSqft.trim() ||
-      Boolean(section.allowanceValue?.trim())));
-  if (!sections.length) line('No specifications entered for this package.', 11, false, subdued);
+  const sections = input.sections.filter(
+    (section) =>
+      section.title !== 'Floor area price defaults' &&
+      Boolean(
+        section.title.trim() ||
+        section.brand.trim() ||
+        section.grade.trim() ||
+        section.description.trim() ||
+        section.allowancePerSqft.trim() ||
+        Boolean(section.allowanceValue?.trim()),
+      ),
+  );
+  if (!sections.length)
+    line('No specifications entered for this package.', 11, false, subdued);
   for (const [index, section] of sections.entries()) {
     ensure(76);
-    line(String(index + 1).padStart(2, '0') + '  ' + section.title, 12, true, accent);
+    line(
+      String(index + 1).padStart(2, '0') + '  ' + section.title,
+      12,
+      true,
+      accent,
+    );
     if (section.brand) line('Brand: ' + section.brand, 10, false, ink, 18);
     if (section.grade) line('Grade: ' + section.grade, 10, false, ink, 18);
-    const treatment = section.pricingTreatment ?? (section.allowancePerSqft ? 'allowance' : 'included');
+    const treatment =
+      section.pricingTreatment ??
+      (section.allowancePerSqft ? 'allowance' : 'included');
     const unit = section.unit ?? (section.allowancePerSqft ? 'sqft' : 'none');
     const amount = section.allowanceValue ?? section.allowancePerSqft;
     const units: Record<string, string> = {
-      none: 'as specified', sqft: 'sq ft', bathroom: 'bathroom', door: 'door',
-      piece: 'piece', kg: 'kg', tonne: 'tonne', bag: 'bag',
-      cubic_meter: 'cubic metre', running_ft: 'running ft', point: 'point',
-      lumpsum: 'lump sum', meter: 'metre', bhk: 'BHK',
+      none: 'as specified',
+      sqft: 'sq ft',
+      bathroom: 'bathroom',
+      door: 'door',
+      piece: 'piece',
+      kg: 'kg',
+      tonne: 'tonne',
+      bag: 'bag',
+      cubic_meter: 'cubic metre',
+      running_ft: 'running ft',
+      point: 'point',
+      lumpsum: 'lump sum',
+      meter: 'metre',
+      bhk: 'BHK',
     };
-    if (treatment === 'excluded')
-      line('Excluded', 10, false, ink, 18);
-    else if ((treatment === 'allowance' || treatment === 'extra') && amount && unit !== 'none')
-      line((treatment === 'extra' ? 'Chargeable extra' : 'Included allowance') +
-        ': INR ' + amount + ' / ' + (units[unit] ?? unit), 10, false, ink, 18);
+    if (treatment === 'excluded') line('Excluded', 10, false, ink, 18);
+    else if (
+      (treatment === 'allowance' || treatment === 'extra') &&
+      amount &&
+      unit !== 'none'
+    )
+      line(
+        (treatment === 'extra' ? 'Chargeable extra' : 'Included allowance') +
+          ': INR ' +
+          amount +
+          ' / ' +
+          (units[unit] ?? unit),
+        10,
+        false,
+        ink,
+        18,
+      );
     else line('Included in base package price', 10, false, subdued, 18);
     if (section.description) line(section.description, 10, false, ink, 18);
     y -= 11;

@@ -27,7 +27,7 @@ export async function GET(
     // mandatory and any missing attachment fails explicitly (never silently).
     const additional: Uint8Array[] = [];
     const privilegedStorageConfigured = Boolean(
-      process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY
+      process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY,
     );
     if (privilegedStorageConfigured) {
       const ctx = await quotationAttachmentContext(id);
@@ -61,7 +61,8 @@ export async function GET(
       },
     });
   } catch (error) {
-    const denied = error instanceof DomainError &&
+    const denied =
+      error instanceof DomainError &&
       (error.code === 'FORBIDDEN' || error.code === 'NOT_FOUND');
     const requestId = crypto.randomUUID();
     // Log only failure stage and allowlisted error code. Never log customer
@@ -69,32 +70,45 @@ export async function GET(
     console.error('quotation.pdf.failed', {
       requestId,
       stage,
-      code: denied ? error.code :
-        error instanceof PdfServiceError ? error.code : 'PDF_INTERNAL_ERROR',
+      code: denied
+        ? error.code
+        : error instanceof PdfServiceError
+          ? error.code
+          : 'PDF_INTERNAL_ERROR',
     });
     // 403 is reserved for actual authentication/authorization failures.
     // Unexpected server PDF failures are 500, with sanitized error text.
     // Never leak quotation details or storage credentials in responses.
     const failure = safeFailure(error);
     const pdfCode = error instanceof PdfServiceError ? error.code : null;
-    const pdfHelp = pdfCode === 'PDF_CHROMIUM_UNAVAILABLE'
-      ? 'Premium PDF browser missing on the server. Install Chromium and its Linux dependencies or enable Cloudflare Browser Rendering.'
-      : pdfCode === 'PDF_RENDERER_UNAVAILABLE'
-        ? 'Premium PDF service is not configured. Install the browser renderer or configure Cloudflare Browser Rendering.'
-        : pdfCode === 'PDF_PRINT_HTML_INVALID'
-          ? 'Quotation contains unsupported remote media for secure PDF printing. Update the quotation branding images.'
-          : pdfCode === 'PDF_RENDERER_BUSY'
-            ? 'Premium PDF engine is busy. Please retry.'
-            : pdfCode === 'PDF_PRINT_OVERFLOW'
-              ? 'Premium document contains a section that does not fit on the printed page.'
-              : 'Premium PDF generation failed on the server. Check the Hostinger runtime PDF logs.';
+    const pdfHelp =
+      pdfCode === 'PDF_CHROMIUM_UNAVAILABLE'
+        ? 'Premium PDF browser missing on the server. Install Chromium and its Linux dependencies or enable Cloudflare Browser Rendering.'
+        : pdfCode === 'PDF_RENDERER_UNAVAILABLE'
+          ? 'Premium PDF service is not configured. Install the browser renderer or configure Cloudflare Browser Rendering.'
+          : pdfCode === 'PDF_PRINT_HTML_INVALID'
+            ? 'Quotation contains unsupported remote media for secure PDF printing. Update the quotation branding images.'
+            : pdfCode === 'PDF_RENDERER_BUSY'
+              ? 'Premium PDF engine is busy. Please retry.'
+              : pdfCode === 'PDF_PRINT_OVERFLOW'
+                ? 'Premium document contains a section that does not fit on the printed page.'
+                : 'Premium PDF generation failed on the server. Check the Hostinger runtime PDF logs.';
     return new Response(
-      denied ? failure.message :
-        pdfCode
+      denied
+        ? failure.message
+        : pdfCode
           ? pdfHelp + ' Reference ' + requestId.slice(0, 8) + '.'
-          : 'Quotation PDF unavailable (' + stage + '). Reference ' + requestId.slice(0, 8) + '.',
+          : 'Quotation PDF unavailable (' +
+            stage +
+            '). Reference ' +
+            requestId.slice(0, 8) +
+            '.',
       {
-        status: denied ? 403 : error instanceof PdfServiceError ? error.status : 500,
+        status: denied
+          ? 403
+          : error instanceof PdfServiceError
+            ? error.status
+            : 500,
         headers: {
           'Cache-Control': 'private, no-store',
           'X-Quotation-PDF-Stage': stage,

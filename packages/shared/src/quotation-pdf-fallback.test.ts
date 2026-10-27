@@ -18,10 +18,17 @@ it('renders a complete quotation PDF without Chromium on the host', async () => 
     accent: '#f16a22',
     total: '55,50,000',
     items: [
-      { heading: 'Ground Floor', price: '55,50,000', details: ['3000 SFT', '1850 per SFT'] },
+      {
+        heading: 'Ground Floor',
+        price: '55,50,000',
+        details: ['3000 SFT', '1850 per SFT'],
+      },
       ...Array.from({ length: 28 }, (_, i) => ({
         heading: 'Material section ' + (i + 1),
-        details: ['Client selected brand and grade', 'Specifications for the construction scope.'],
+        details: [
+          'Client selected brand and grade',
+          'Specifications for the construction scope.',
+        ],
       })),
     ],
     terms: 'Agreement and advance|10.00\nRCC frame|60.00\nHandover|30.00',

@@ -19,7 +19,14 @@ export function LeadRemovalButton({
   const router = useRouter();
 
   return (
-    <span style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'start', gap: 4 }}>
+    <span
+      style={{
+        display: 'inline-flex',
+        flexDirection: 'column',
+        alignItems: 'start',
+        gap: 4,
+      }}
+    >
       <button
         type="button"
         className="crm-lead-delete-btn"
@@ -27,9 +34,14 @@ export function LeadRemovalButton({
         title="Archive this lead and keep its quotations, client and project history"
         disabled={pending}
         onClick={async () => {
-          if (!window.confirm(
-            'Delete lead ' + name + '? The lead will move to Archived. Its quotations, customer, project and activity history will be kept.',
-          )) return;
+          if (
+            !window.confirm(
+              'Delete lead ' +
+                name +
+                '? The lead will move to Archived. Its quotations, customer, project and activity history will be kept.',
+            )
+          )
+            return;
           setPending(true);
           setError('');
           try {
@@ -52,7 +64,11 @@ export function LeadRemovalButton({
       >
         {pending ? 'Removing…' : 'Delete'}
       </button>
-      {error && <span role="alert" className="crm-lead-delete-error">{error}</span>}
+      {error && (
+        <span role="alert" className="crm-lead-delete-error">
+          {error}
+        </span>
+      )}
     </span>
   );
 }

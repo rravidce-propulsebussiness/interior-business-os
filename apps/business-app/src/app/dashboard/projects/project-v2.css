@@ -1,1210 +1,4654 @@
 /* SG Homes Projects v2 — matches the approved clean orange/white multi-screen design.
    Scoped to Projects: never overrides the Business OS sidebar or other modules. */
-.pv2-page{--pv2-orange:#fa5b14;--pv2-ink:#192746;--pv2-muted:#7c8ba2;--pv2-line:#e8edf2;
- background:#f7f9fc;color:var(--pv2-ink);min-height:100vh;padding:19px 22px 45px;font-size:13px}
-.pv2-page *{box-sizing:border-box}
-.pv2-page h1,.pv2-page h2,.pv2-page h3,.pv2-page p{margin:0}
-.pv2-page a{text-decoration:none}
-.pv2-page button,.pv2-page input,.pv2-page textarea,.pv2-page select{font:inherit}
-.pv2-page button{cursor:pointer}
-.pv2-page :is(button,a,input,textarea,select,summary):focus-visible{outline:3px solid #ffad79;outline-offset:2px}
-.pv2-page .pv2-button{display:inline-flex;align-items:center;justify-content:center;gap:9px;
- border-radius:9px;min-height:39px;font-size:11px;font-weight:850;white-space:nowrap;
- padding:10px 14px;border:1px solid #e7ebf0;background:#fff;color:#283d5e;text-decoration:none}
-.pv2-page .pv2-button:hover{border-color:#ffbb9d}
-.pv2-page .pv2-primary{background:#081d43;border-color:#081d43;color:#fff}
-.pv2-page .pv2-primary:hover{background:#143565;color:#fff}
-.pv2-page .pv2-outline{background:#fff;color:#344867}
-.pv2-page .pv2-crumb{display:flex;align-items:center;gap:8px;margin-bottom:15px;
- font-size:11px;color:#7c8ba2;overflow-wrap:anywhere}
-.pv2-crumb a{color:#74859a}.pv2-crumb strong{color:#284063}
-.pv2-list-heading{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:18px}
-.pv2-list-heading h1{font-size:25px;letter-spacing:-.5px;font-weight:900}
-.pv2-list-heading p{color:var(--pv2-muted);font-size:12px;margin-top:5px}
-.pv2-search{border:1px solid #e7ebf1;background:#fff;display:flex;align-items:center;gap:10px;
- color:#7b8b9f;padding:0 13px;height:42px;border-radius:9px;max-width:520px}
-.pv2-search input{min-width:0;flex:1;border:0;background:transparent;outline:0!important;color:#344964;font-size:12px}
-.pv2-filter-tabs{display:flex;gap:7px;flex-wrap:wrap;margin:17px 0 13px}
-.pv2-filter-tabs button{font-size:11px;color:#394d6c;border:1px solid transparent;
- background:#eef3f9;padding:10px 14px;border-radius:8px;font-weight:800}
-.pv2-filter-tabs button.selected{border-color:#ffc8ae;background:#fff2eb;color:#f35913}
-.pv2-filter-tabs span{font-weight:850;margin-left:4px}
-.pv2-project-list{display:grid;gap:10px}
-.pv2-project-card{display:flex;gap:15px;align-items:center;min-width:0;padding:12px;
- border:1px solid #e8edf1;background:#fff;border-radius:13px;box-shadow:0 2px 10px #0c254908;
- transition:transform .16s,box-shadow .16s}
-.pv2-project-card:hover{transform:translateY(-1px);box-shadow:0 8px 22px #0c25491a}
-.pv2-project-visual{height:96px;width:130px;flex:0 0 130px;display:grid;place-items:center;
- color:#60768e;border-radius:10px;background:linear-gradient(140deg,#c7d9dd,#f1e4c9)}
-.pv2-project-visual.tone-1{background:linear-gradient(135deg,#e0c5ba,#e2e9f5);color:#7b6c80}
-.pv2-project-visual.tone-2{background:linear-gradient(135deg,#c5dee9,#c7dbed);color:#6080a5}
-.pv2-project-visual.tone-3{background:linear-gradient(135deg,#d9e6d1,#f3dec4);color:#77936a}
-.pv2-project-card-body{flex:1;display:grid;gap:9px;min-width:0}
-.pv2-project-card-body>strong{font-size:15px;color:#1c2d4c;font-weight:850;overflow-wrap:anywhere}
-.pv2-project-card-body>small{color:#7485a0;font-size:11px;display:flex;gap:7px;align-items:center;line-height:1.4}
-.pv2-project-card-body svg{flex:0 0 auto}
-.pv2-card-end{align-self:stretch;min-width:148px;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-end;gap:10px}
-.pv2-status{border-radius:7px;padding:6px 9px;display:inline-flex;justify-content:center;
- white-space:nowrap;font-size:10px;font-weight:900;text-transform:capitalize;background:#f2f5f8;color:#6b7b91}
-.pv2-status.good{background:#dff9eb;color:#119456}
-.pv2-status.warn{background:#fff0dc;color:#db7e1b}
-.pv2-card-progress{display:flex;align-items:center;gap:9px;font-size:10px;color:#667e96;width:100%}
-.pv2-card-progress strong{white-space:nowrap}
-.pv2-bar{background:#e4eaf1;width:100%;height:6px;border-radius:40px;overflow:hidden}
-.pv2-bar>span{display:block;height:100%;background:linear-gradient(90deg,#12c983,#11ac69);border-radius:40px}
-.pv2-project-header{background:#fff;border:1px solid #e8edf1;border-radius:14px;
- padding:13px 17px 0;margin-bottom:16px;box-shadow:0 3px 12px #0c254907}
-.pv2-project-identity{display:flex;align-items:center;gap:12px;min-width:0;flex-wrap:wrap}
-.pv2-project-thumb{height:62px;width:95px;border-radius:10px;flex:0 0 95px;
- background:linear-gradient(135deg,#f0cfac,#d3e9d8);display:grid;place-items:center;color:#bd762f}
-.pv2-project-identity>div:nth-child(2){flex:1;min-width:0}
-.pv2-project-identity h1{font-size:20px;line-height:1.2;font-weight:900;letter-spacing:-.3px;overflow-wrap:anywhere}
-.pv2-project-meta{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:8px}
-.pv2-project-meta span{display:flex;align-items:center;gap:5px;color:#647995;font-size:10px}
-.pv2-project-header-actions{display:flex;gap:8px;justify-content:flex-end;margin:8px 0}
-.pv2-project-tabs{display:flex;align-items:center;gap:5px;overflow-x:auto;border-top:1px solid #f0f2f5;
- margin-top:6px;padding-top:8px;scrollbar-width:thin}
-.pv2-project-tabs a{color:#536c8c;white-space:nowrap;display:flex;gap:7px;align-items:center;
- border:1px solid transparent;border-radius:8px;padding:10px 11px;font-weight:850;font-size:10px}
-.pv2-project-tabs a:hover{background:#fff1e8;color:#f05b16}
-.pv2-project-tabs a.selected{border-color:#ff9564;background:#fff4ec;color:#f05b16}
-.pv2-content{display:grid;gap:14px;min-width:0}
-.pv2-panel{background:#fff;border:1px solid #e6ebf1;border-radius:14px;padding:18px 19px;
- box-shadow:0 2px 9px #0c254908;min-width:0}
-.pv2-section-header{display:flex;justify-content:space-between;align-items:flex-start;gap:13px;margin-bottom:15px}
-.pv2-section-header h2{font-size:16px;color:#192c4b;font-weight:900}
-.pv2-section-header p{color:#8292a8;font-size:11px;line-height:1.5;margin-top:5px}
-.pv2-action-link{display:inline-flex;gap:6px;align-items:center;color:#f26019;
- font-size:11px;font-weight:850;white-space:nowrap}
-.pv2-action-link:hover{text-decoration:underline}
-.pv2-stat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px}
-.pv2-stat{min-width:0;padding:16px 14px;background:#fff;border:1px solid #e8edf1;border-radius:12px;
- display:flex;gap:10px;align-items:center;min-height:113px;box-shadow:0 2px 9px #0c254908}
-.pv2-stat>div{display:grid;gap:8px;min-width:0}
-.pv2-stat small{color:#6c809c;font-size:11px}
-.pv2-stat strong{font-size:22px;color:#192d4b;font-weight:900;letter-spacing:-.3px;
- line-height:1.2;overflow-wrap:anywhere}
-.pv2-stat p{color:#91a0b0;font-size:9px;line-height:1.4}
-.pv2-stat-icon{width:43px;height:43px;flex:0 0 43px;display:grid;place-items:center;border-radius:10px}
-.pv2-stat-icon.green{background:#e2fbef;color:#11b777}
-.pv2-stat-icon.orange{background:#fff0e5;color:#f36d27}
-.pv2-stat-icon.blue{background:#e8f2ff;color:#2f82bf}
-.pv2-stat-icon.purple{background:#f4edff;color:#865add}
-.pv2-overview-split{display:grid;grid-template-columns:1fr 1fr;align-items:start;gap:13px}
-.pv2-stage-preview{display:flex;gap:13px;align-items:flex-start}
-.pv2-stage-preview>img{max-width:40%;height:150px;object-fit:cover;border-radius:10px;flex:0 0 40%}
-.pv2-stage-preview>div{min-width:0;flex:1;display:grid;gap:9px}
-.pv2-between{display:flex;justify-content:space-between;gap:9px;align-items:center;flex-wrap:wrap}
-.pv2-stage-preview h3{font-size:14px}
-.pv2-stage-preview p,.pv2-stage-preview li{color:#637692;font-size:11px;line-height:1.55}
-.pv2-stage-preview ul{margin:0;padding-left:15px;display:grid;gap:6px}
-.pv2-work-day{padding:10px 0;border-bottom:1px solid #edf0f4;display:grid;gap:7px}
-.pv2-work-day:last-child{border:0}
-.pv2-work-day strong{font-size:12px;color:#294260}
-.pv2-work-day small,.pv2-work-day p{font-size:10px;color:#7f8ea6;line-height:1.5}
-.pv2-day-tag{background:#f9631c;color:#fff;border-radius:6px;padding:5px 10px;display:inline-flex;
- width:max-content;font-size:10px;font-weight:900}
-.pv2-day-tag.future{background:#eef3fa;color:#516883}
-.pv2-actions-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
-.pv2-action-tile{border:1px solid #edf0f4;background:#fff;border-radius:10px;padding:12px;
- display:flex;gap:8px;align-items:center;justify-content:space-between;font-weight:800;color:#334969;font-size:11px}
-.pv2-action-tile:hover{border-color:#ffc09a;background:#fff8f2}
-.pv2-action-tile svg{color:#f56620;flex:0 0 auto}
-.pv2-timeline-grid{display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:18px}
-.pv2-timeline-entry{display:grid;grid-template-columns:95px minmax(0,1fr);gap:14px}
-.pv2-time-column{display:flex;gap:10px;align-items:start;padding-top:13px;font-size:10px;color:#6c7e9b}
-.pv2-time-dot{height:12px;width:12px;flex:0 0 12px;border-radius:50%;background:#ee621b;
- box-shadow:0 0 0 4px #fff0e5}
-.pv2-time-dot.check{background:#16b777;box-shadow:0 0 0 4px #e2fcf0}
-.pv2-time-dot.material{background:#8f60d9;box-shadow:0 0 0 4px #f2eaff}
-.pv2-timeline-details{border-left:2px solid #e1e7ef;min-width:0;padding:13px 0 22px 15px}
-.pv2-timeline-details strong{font-size:12px}
-.pv2-timeline-details p{font-size:11px;color:#7c8b9f;margin:7px 0;line-height:1.6}
-.pv2-label{display:inline-flex;align-items:center;background:#eef4fd;color:#6481a6;
- border-radius:7px;padding:5px 8px;font-size:10px;font-weight:850}
-.pv2-photo-strip{display:flex;gap:6px;flex-wrap:wrap;padding:8px 0}
-.pv2-photo-strip a{display:block;overflow:hidden;border-radius:8px}
-.pv2-photo-strip img{height:90px;width:140px;object-fit:cover}
-.pv2-stage-side{background:#f9fbfd;padding:13px;border-radius:12px;align-self:start}
-.pv2-stage-side h3{font-size:13px;margin-bottom:12px}
-.pv2-stage-step{display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid #e8edf1}
-.pv2-stage-step>b{background:#f1f4f8;color:#697f9c;display:grid;place-items:center;
- width:28px;height:28px;border-radius:99px}
-.pv2-stage-step span{display:grid;gap:5px;flex:1}
-.pv2-stage-step strong{font-size:11px}
-.pv2-stage-step small{font-size:10px;color:#8999b0}
-.pv2-two-col,.pv2-two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
-.pv2-snapshot{display:grid;gap:10px;border:1px solid #e9edf2;border-radius:12px;padding:13px}
-.pv2-snapshot strong{font-size:12px}
-.pv2-snapshot p{font-size:11px;color:#8291a7;line-height:1.5}
-.pv2-section-intro h2{font-size:20px}.pv2-section-intro p{font-size:12px;color:#75869e;margin-top:5px}
-.pv2-blank{padding:37px 14px;min-height:145px;color:#8291a7;display:grid;justify-items:center;
- gap:10px;text-align:center;align-content:center}
-.pv2-blank svg{color:#f78b4b}
-.pv2-blank h2,.pv2-blank h3{font-size:15px;color:#33486c}
-.pv2-blank p{line-height:1.6;font-size:11px;max-width:420px}
-.pv2-file-list,.pv2-material-list,.pv2-team-list,.pv2-execution-list,.pv2-history{display:grid}
-.pv2-file{display:flex;align-items:center;gap:12px;padding:13px 7px;border-bottom:1px solid #edf1f5;
- color:#283e60;min-width:0}
-.pv2-file>span:nth-child(2){display:grid;flex:1;gap:6px;min-width:0}
-.pv2-file strong{font-size:12px;overflow-wrap:anywhere}
-.pv2-file small{font-size:10px;color:#8294ac;overflow-wrap:anywhere}
-.pv2-file>b,.pv2-file>span:last-child{color:#e9672a;font-size:11px}
-.pv2-file-icon{color:#ff594c;background:#fff0ed;width:40px;height:40px;display:grid;
- place-items:center;border-radius:10px;flex:0 0 40px}
-.pv2-table-scroll{overflow-x:auto;max-width:100%}
-.pv2-table{width:100%;border-collapse:collapse;min-width:520px}
-.pv2-table th{padding:13px;text-align:left;background:#f8fafc;color:#617591;font-size:11px}
-.pv2-table td{padding:13px;border-bottom:1px solid #ecf0f5;font-size:11px;color:#3e5270;vertical-align:middle}
-.pv2-table td strong{font-weight:850;color:#233a59}
-.pv2-table td small{display:block;margin-top:5px;color:#8798ac}
-.pv2-finance-metrics{grid-template-columns:repeat(3,minmax(0,1fr))}
-.pv2-finance-metrics .pv2-stat{display:grid;min-height:90px;gap:9px}
-.pv2-material,.pv2-person{display:flex;align-items:center;gap:12px;padding:13px 8px;
- border-bottom:1px solid #edf1f5;min-width:0}
-.pv2-material>div,.pv2-person>div{display:grid;gap:7px;min-width:0;flex:1}
-.pv2-material strong,.pv2-person strong{font-size:12px;color:#284060;overflow-wrap:anywhere}
-.pv2-material small,.pv2-person small{font-size:10px;color:#8c9aaa;overflow-wrap:anywhere}
-.pv2-material-icon,.pv2-person-avatar{width:44px;height:44px;flex:0 0 44px;border-radius:10px;
- background:#f1f5f8;color:#627995;display:grid;place-items:center;font-weight:900}
-.pv2-local-tabs{display:flex;gap:7px;margin-bottom:11px}
-.pv2-local-tabs span{font-size:11px;padding:10px 12px;color:#7588a0;border-radius:8px;background:#f7f9fc}
-.pv2-local-tabs .active{background:#fff1e9;color:#ef5b11}
-.pv2-history-row{border-bottom:1px solid #edf1f5;padding:13px 0;display:flex;gap:12px;align-items:center}
-.pv2-history-row>span{display:grid;gap:4px;flex:0 0 150px}
-.pv2-history-row strong{font-size:12px}.pv2-history-row small{font-size:10px;color:#91a1b4}
-.pv2-history-row p{font-size:11px;color:#61748c;line-height:1.6}
-.pv2-execution{padding:15px 0;border-bottom:1px solid #edf0f5;display:grid;gap:8px}
-.pv2-execution>div{display:flex;gap:10px;align-items:center;justify-content:space-between}
-.pv2-execution strong{font-size:12px}.pv2-execution small{font-size:11px;color:#8595ab}
-.pv2-execution p{font-size:11px;color:#5a6f8b}
-.pv2-muted{font-size:11px;color:#778ba4;line-height:1.6}
-.pv2-edit-drawer,.pv2-subaction{border:1px solid #f3dbc9;border-radius:11px;
- background:#fff9f4;margin-top:13px;padding:13px;min-width:0}
-.pv2-edit-drawer>summary,.pv2-subaction>summary{cursor:pointer;color:#e96521;
- font-size:12px;font-weight:900}
-.pv2-form{display:grid;gap:12px;padding:11px 0 3px;min-width:0}
-.pv2-form-fields{display:grid;gap:11px;min-width:0}
-.pv2-form label{display:grid;gap:6px;color:#4a607c;font-size:11px;font-weight:800;min-width:0}
-.pv2-form :is(input,select,textarea){border:1px solid #d9e3ec;background:#fff;color:#233b5a;
- border-radius:9px;padding:11px;width:100%;min-width:0}
-.pv2-form textarea{resize:vertical}
-.pv2-form .pv2-primary{justify-self:start}
-.pv2-hint{font-size:10px;line-height:1.6;color:#8897a7}
-.pv2-form-feedback{padding:10px;border-radius:8px;background:#f2f4f7;
- font-size:11px;color:#596c84;line-height:1.5}
-.pv2-form-feedback.good{color:#148458;background:#e7faef}
-.pv2-form-feedback.bad{color:#b65b38;background:#fff0e9}
-.pv2-directory-empty{background:#fff;border:1px solid #e9edf3;border-radius:14px;margin-top:14px}
-@media(max-width:1400px){
- .pv2-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
- .pv2-project-meta{gap:9px}
+.pv2-page {
+  --pv2-orange: #fa5b14;
+  --pv2-ink: #192746;
+  --pv2-muted: #7c8ba2;
+  --pv2-line: #e8edf2;
+  background: #f7f9fc;
+  color: var(--pv2-ink);
+  min-height: 100vh;
+  padding: 19px 22px 45px;
+  font-size: 13px;
 }
-@media(max-width:1000px){
- .pv2-timeline-grid{grid-template-columns:minmax(0,1fr)}
- .pv2-stage-side{margin-top:7px}
- .pv2-overview-split{grid-template-columns:minmax(0,1fr)}
+.pv2-page * {
+  box-sizing: border-box;
 }
-@media(max-width:700px){
- .pv2-page{padding:12px 10px 30px}
- .pv2-list-heading{flex-wrap:wrap;align-items:flex-start}
- .pv2-list-heading h1{font-size:23px}
- .pv2-list-heading .pv2-primary{width:100%}
- .pv2-filter-tabs{gap:5px}
- .pv2-filter-tabs button{flex:1;min-width:0;padding:8px 5px;font-size:10px}
- .pv2-project-card{align-items:flex-start;gap:10px;padding:10px}
- .pv2-project-visual{height:70px;width:70px;flex-basis:70px}
- .pv2-project-card-body{gap:6px}
- .pv2-project-card-body>strong{font-size:12px}
- .pv2-project-card-body>small{font-size:9px;flex-wrap:wrap;gap:4px}
- .pv2-card-end{min-width:79px;align-self:stretch}
- .pv2-card-progress{display:grid;gap:4px;text-align:right}
- .pv2-project-header{padding:10px 10px 0}
- .pv2-project-thumb{width:57px;height:53px;flex-basis:57px}
- .pv2-project-identity h1{font-size:15px}
- .pv2-project-meta{gap:5px}
- .pv2-project-meta span{font-size:9px}
- .pv2-project-header-actions{justify-content:flex-start}
- .pv2-project-tabs{gap:4px}
- .pv2-project-tabs a{padding:9px 8px;font-size:10px}
- .pv2-stat-grid{gap:8px}
- .pv2-stat{min-height:100px;padding:11px;display:grid;align-content:start;gap:8px}
- .pv2-stat-icon{width:31px;height:31px;flex-basis:31px}
- .pv2-stat strong{font-size:18px}
- .pv2-stat small{font-size:10px}
- .pv2-stat p{font-size:9px}
- .pv2-panel{padding:13px}
- .pv2-section-header h2{font-size:15px}
- .pv2-section-header p{font-size:10px}
- .pv2-stage-preview>img{max-width:34%;height:120px;flex-basis:34%}
- .pv2-actions-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
- .pv2-action-tile{padding:12px 9px;font-size:10px}
- .pv2-timeline-entry{grid-template-columns:70px minmax(0,1fr);gap:6px}
- .pv2-time-column{font-size:9px;gap:4px}
- .pv2-timeline-details{padding-left:11px}
- .pv2-two,.pv2-two-col{grid-template-columns:minmax(0,1fr)}
- .pv2-material{flex-wrap:wrap}
- .pv2-material .pv2-subaction{flex-basis:100%}
- .pv2-history-row{display:grid}
- .pv2-history-row>span{flex:auto}
- .pv2-file b{font-size:10px}
+.pv2-page h1,
+.pv2-page h2,
+.pv2-page h3,
+.pv2-page p {
+  margin: 0;
 }
-@media(max-width:370px){.pv2-stat strong{font-size:15px;overflow-wrap:anywhere}
- .pv2-filter-tabs button{font-size:9px}
- .pv2-card-end{min-width:67px}
- .pv2-project-visual{width:56px;flex-basis:56px}
- .pv2-page .pv2-button{white-space:normal;text-align:center}
+.pv2-page a {
+  text-decoration: none;
 }
-@media(prefers-reduced-motion:reduce){.pv2-project-card{transition:none}}
-
+.pv2-page button,
+.pv2-page input,
+.pv2-page textarea,
+.pv2-page select {
+  font: inherit;
+}
+.pv2-page button {
+  cursor: pointer;
+}
+.pv2-page :is(button, a, input, textarea, select, summary):focus-visible {
+  outline: 3px solid #ffad79;
+  outline-offset: 2px;
+}
+.pv2-page .pv2-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border-radius: 9px;
+  min-height: 39px;
+  font-size: 11px;
+  font-weight: 850;
+  white-space: nowrap;
+  padding: 10px 14px;
+  border: 1px solid #e7ebf0;
+  background: #fff;
+  color: #283d5e;
+  text-decoration: none;
+}
+.pv2-page .pv2-button:hover {
+  border-color: #ffbb9d;
+}
+.pv2-page .pv2-primary {
+  background: #081d43;
+  border-color: #081d43;
+  color: #fff;
+}
+.pv2-page .pv2-primary:hover {
+  background: #143565;
+  color: #fff;
+}
+.pv2-page .pv2-outline {
+  background: #fff;
+  color: #344867;
+}
+.pv2-page .pv2-crumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 15px;
+  font-size: 11px;
+  color: #7c8ba2;
+  overflow-wrap: anywhere;
+}
+.pv2-crumb a {
+  color: #74859a;
+}
+.pv2-crumb strong {
+  color: #284063;
+}
+.pv2-list-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+.pv2-list-heading h1 {
+  font-size: 25px;
+  letter-spacing: -0.5px;
+  font-weight: 900;
+}
+.pv2-list-heading p {
+  color: var(--pv2-muted);
+  font-size: 12px;
+  margin-top: 5px;
+}
+.pv2-search {
+  border: 1px solid #e7ebf1;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #7b8b9f;
+  padding: 0 13px;
+  height: 42px;
+  border-radius: 9px;
+  max-width: 520px;
+}
+.pv2-search input {
+  min-width: 0;
+  flex: 1;
+  border: 0;
+  background: transparent;
+  outline: 0 !important;
+  color: #344964;
+  font-size: 12px;
+}
+.pv2-filter-tabs {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin: 17px 0 13px;
+}
+.pv2-filter-tabs button {
+  font-size: 11px;
+  color: #394d6c;
+  border: 1px solid transparent;
+  background: #eef3f9;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-weight: 800;
+}
+.pv2-filter-tabs button.selected {
+  border-color: #ffc8ae;
+  background: #fff2eb;
+  color: #f35913;
+}
+.pv2-filter-tabs span {
+  font-weight: 850;
+  margin-left: 4px;
+}
+.pv2-project-list {
+  display: grid;
+  gap: 10px;
+}
+.pv2-project-card {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #e8edf1;
+  background: #fff;
+  border-radius: 13px;
+  box-shadow: 0 2px 10px #0c254908;
+  transition:
+    transform 0.16s,
+    box-shadow 0.16s;
+}
+.pv2-project-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 22px #0c25491a;
+}
+.pv2-project-visual {
+  height: 96px;
+  width: 130px;
+  flex: 0 0 130px;
+  display: grid;
+  place-items: center;
+  color: #60768e;
+  border-radius: 10px;
+  background: linear-gradient(140deg, #c7d9dd, #f1e4c9);
+}
+.pv2-project-visual.tone-1 {
+  background: linear-gradient(135deg, #e0c5ba, #e2e9f5);
+  color: #7b6c80;
+}
+.pv2-project-visual.tone-2 {
+  background: linear-gradient(135deg, #c5dee9, #c7dbed);
+  color: #6080a5;
+}
+.pv2-project-visual.tone-3 {
+  background: linear-gradient(135deg, #d9e6d1, #f3dec4);
+  color: #77936a;
+}
+.pv2-project-card-body {
+  flex: 1;
+  display: grid;
+  gap: 9px;
+  min-width: 0;
+}
+.pv2-project-card-body > strong {
+  font-size: 15px;
+  color: #1c2d4c;
+  font-weight: 850;
+  overflow-wrap: anywhere;
+}
+.pv2-project-card-body > small {
+  color: #7485a0;
+  font-size: 11px;
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  line-height: 1.4;
+}
+.pv2-project-card-body svg {
+  flex: 0 0 auto;
+}
+.pv2-card-end {
+  align-self: stretch;
+  min-width: 148px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 10px;
+}
+.pv2-status {
+  border-radius: 7px;
+  padding: 6px 9px;
+  display: inline-flex;
+  justify-content: center;
+  white-space: nowrap;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: capitalize;
+  background: #f2f5f8;
+  color: #6b7b91;
+}
+.pv2-status.good {
+  background: #dff9eb;
+  color: #119456;
+}
+.pv2-status.warn {
+  background: #fff0dc;
+  color: #db7e1b;
+}
+.pv2-card-progress {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 10px;
+  color: #667e96;
+  width: 100%;
+}
+.pv2-card-progress strong {
+  white-space: nowrap;
+}
+.pv2-bar {
+  background: #e4eaf1;
+  width: 100%;
+  height: 6px;
+  border-radius: 40px;
+  overflow: hidden;
+}
+.pv2-bar > span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #12c983, #11ac69);
+  border-radius: 40px;
+}
+.pv2-project-header {
+  background: #fff;
+  border: 1px solid #e8edf1;
+  border-radius: 14px;
+  padding: 13px 17px 0;
+  margin-bottom: 16px;
+  box-shadow: 0 3px 12px #0c254907;
+}
+.pv2-project-identity {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+.pv2-project-thumb {
+  height: 62px;
+  width: 95px;
+  border-radius: 10px;
+  flex: 0 0 95px;
+  background: linear-gradient(135deg, #f0cfac, #d3e9d8);
+  display: grid;
+  place-items: center;
+  color: #bd762f;
+}
+.pv2-project-identity > div:nth-child(2) {
+  flex: 1;
+  min-width: 0;
+}
+.pv2-project-identity h1 {
+  font-size: 20px;
+  line-height: 1.2;
+  font-weight: 900;
+  letter-spacing: -0.3px;
+  overflow-wrap: anywhere;
+}
+.pv2-project-meta {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.pv2-project-meta span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #647995;
+  font-size: 10px;
+}
+.pv2-project-header-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin: 8px 0;
+}
+.pv2-project-tabs {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  overflow-x: auto;
+  border-top: 1px solid #f0f2f5;
+  margin-top: 6px;
+  padding-top: 8px;
+  scrollbar-width: thin;
+}
+.pv2-project-tabs a {
+  color: #536c8c;
+  white-space: nowrap;
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 10px 11px;
+  font-weight: 850;
+  font-size: 10px;
+}
+.pv2-project-tabs a:hover {
+  background: #fff1e8;
+  color: #f05b16;
+}
+.pv2-project-tabs a.selected {
+  border-color: #ff9564;
+  background: #fff4ec;
+  color: #f05b16;
+}
+.pv2-content {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+.pv2-panel {
+  background: #fff;
+  border: 1px solid #e6ebf1;
+  border-radius: 14px;
+  padding: 18px 19px;
+  box-shadow: 0 2px 9px #0c254908;
+  min-width: 0;
+}
+.pv2-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 13px;
+  margin-bottom: 15px;
+}
+.pv2-section-header h2 {
+  font-size: 16px;
+  color: #192c4b;
+  font-weight: 900;
+}
+.pv2-section-header p {
+  color: #8292a8;
+  font-size: 11px;
+  line-height: 1.5;
+  margin-top: 5px;
+}
+.pv2-action-link {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  color: #f26019;
+  font-size: 11px;
+  font-weight: 850;
+  white-space: nowrap;
+}
+.pv2-action-link:hover {
+  text-decoration: underline;
+}
+.pv2-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 11px;
+}
+.pv2-stat {
+  min-width: 0;
+  padding: 16px 14px;
+  background: #fff;
+  border: 1px solid #e8edf1;
+  border-radius: 12px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  min-height: 113px;
+  box-shadow: 0 2px 9px #0c254908;
+}
+.pv2-stat > div {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+.pv2-stat small {
+  color: #6c809c;
+  font-size: 11px;
+}
+.pv2-stat strong {
+  font-size: 22px;
+  color: #192d4b;
+  font-weight: 900;
+  letter-spacing: -0.3px;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+.pv2-stat p {
+  color: #91a0b0;
+  font-size: 9px;
+  line-height: 1.4;
+}
+.pv2-stat-icon {
+  width: 43px;
+  height: 43px;
+  flex: 0 0 43px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+}
+.pv2-stat-icon.green {
+  background: #e2fbef;
+  color: #11b777;
+}
+.pv2-stat-icon.orange {
+  background: #fff0e5;
+  color: #f36d27;
+}
+.pv2-stat-icon.blue {
+  background: #e8f2ff;
+  color: #2f82bf;
+}
+.pv2-stat-icon.purple {
+  background: #f4edff;
+  color: #865add;
+}
+.pv2-overview-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: start;
+  gap: 13px;
+}
+.pv2-stage-preview {
+  display: flex;
+  gap: 13px;
+  align-items: flex-start;
+}
+.pv2-stage-preview > img {
+  max-width: 40%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 10px;
+  flex: 0 0 40%;
+}
+.pv2-stage-preview > div {
+  min-width: 0;
+  flex: 1;
+  display: grid;
+  gap: 9px;
+}
+.pv2-between {
+  display: flex;
+  justify-content: space-between;
+  gap: 9px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.pv2-stage-preview h3 {
+  font-size: 14px;
+}
+.pv2-stage-preview p,
+.pv2-stage-preview li {
+  color: #637692;
+  font-size: 11px;
+  line-height: 1.55;
+}
+.pv2-stage-preview ul {
+  margin: 0;
+  padding-left: 15px;
+  display: grid;
+  gap: 6px;
+}
+.pv2-work-day {
+  padding: 10px 0;
+  border-bottom: 1px solid #edf0f4;
+  display: grid;
+  gap: 7px;
+}
+.pv2-work-day:last-child {
+  border: 0;
+}
+.pv2-work-day strong {
+  font-size: 12px;
+  color: #294260;
+}
+.pv2-work-day small,
+.pv2-work-day p {
+  font-size: 10px;
+  color: #7f8ea6;
+  line-height: 1.5;
+}
+.pv2-day-tag {
+  background: #f9631c;
+  color: #fff;
+  border-radius: 6px;
+  padding: 5px 10px;
+  display: inline-flex;
+  width: max-content;
+  font-size: 10px;
+  font-weight: 900;
+}
+.pv2-day-tag.future {
+  background: #eef3fa;
+  color: #516883;
+}
+.pv2-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 9px;
+}
+.pv2-action-tile {
+  border: 1px solid #edf0f4;
+  background: #fff;
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 800;
+  color: #334969;
+  font-size: 11px;
+}
+.pv2-action-tile:hover {
+  border-color: #ffc09a;
+  background: #fff8f2;
+}
+.pv2-action-tile svg {
+  color: #f56620;
+  flex: 0 0 auto;
+}
+.pv2-timeline-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 250px;
+  gap: 18px;
+}
+.pv2-timeline-entry {
+  display: grid;
+  grid-template-columns: 95px minmax(0, 1fr);
+  gap: 14px;
+}
+.pv2-time-column {
+  display: flex;
+  gap: 10px;
+  align-items: start;
+  padding-top: 13px;
+  font-size: 10px;
+  color: #6c7e9b;
+}
+.pv2-time-dot {
+  height: 12px;
+  width: 12px;
+  flex: 0 0 12px;
+  border-radius: 50%;
+  background: #ee621b;
+  box-shadow: 0 0 0 4px #fff0e5;
+}
+.pv2-time-dot.check {
+  background: #16b777;
+  box-shadow: 0 0 0 4px #e2fcf0;
+}
+.pv2-time-dot.material {
+  background: #8f60d9;
+  box-shadow: 0 0 0 4px #f2eaff;
+}
+.pv2-timeline-details {
+  border-left: 2px solid #e1e7ef;
+  min-width: 0;
+  padding: 13px 0 22px 15px;
+}
+.pv2-timeline-details strong {
+  font-size: 12px;
+}
+.pv2-timeline-details p {
+  font-size: 11px;
+  color: #7c8b9f;
+  margin: 7px 0;
+  line-height: 1.6;
+}
+.pv2-label {
+  display: inline-flex;
+  align-items: center;
+  background: #eef4fd;
+  color: #6481a6;
+  border-radius: 7px;
+  padding: 5px 8px;
+  font-size: 10px;
+  font-weight: 850;
+}
+.pv2-photo-strip {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding: 8px 0;
+}
+.pv2-photo-strip a {
+  display: block;
+  overflow: hidden;
+  border-radius: 8px;
+}
+.pv2-photo-strip img {
+  height: 90px;
+  width: 140px;
+  object-fit: cover;
+}
+.pv2-stage-side {
+  background: #f9fbfd;
+  padding: 13px;
+  border-radius: 12px;
+  align-self: start;
+}
+.pv2-stage-side h3 {
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+.pv2-stage-step {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 0;
+  border-bottom: 1px solid #e8edf1;
+}
+.pv2-stage-step > b {
+  background: #f1f4f8;
+  color: #697f9c;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 99px;
+}
+.pv2-stage-step span {
+  display: grid;
+  gap: 5px;
+  flex: 1;
+}
+.pv2-stage-step strong {
+  font-size: 11px;
+}
+.pv2-stage-step small {
+  font-size: 10px;
+  color: #8999b0;
+}
+.pv2-two-col,
+.pv2-two {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 11px;
+}
+.pv2-snapshot {
+  display: grid;
+  gap: 10px;
+  border: 1px solid #e9edf2;
+  border-radius: 12px;
+  padding: 13px;
+}
+.pv2-snapshot strong {
+  font-size: 12px;
+}
+.pv2-snapshot p {
+  font-size: 11px;
+  color: #8291a7;
+  line-height: 1.5;
+}
+.pv2-section-intro h2 {
+  font-size: 20px;
+}
+.pv2-section-intro p {
+  font-size: 12px;
+  color: #75869e;
+  margin-top: 5px;
+}
+.pv2-blank {
+  padding: 37px 14px;
+  min-height: 145px;
+  color: #8291a7;
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  text-align: center;
+  align-content: center;
+}
+.pv2-blank svg {
+  color: #f78b4b;
+}
+.pv2-blank h2,
+.pv2-blank h3 {
+  font-size: 15px;
+  color: #33486c;
+}
+.pv2-blank p {
+  line-height: 1.6;
+  font-size: 11px;
+  max-width: 420px;
+}
+.pv2-file-list,
+.pv2-material-list,
+.pv2-team-list,
+.pv2-execution-list,
+.pv2-history {
+  display: grid;
+}
+.pv2-file {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 7px;
+  border-bottom: 1px solid #edf1f5;
+  color: #283e60;
+  min-width: 0;
+}
+.pv2-file > span:nth-child(2) {
+  display: grid;
+  flex: 1;
+  gap: 6px;
+  min-width: 0;
+}
+.pv2-file strong {
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.pv2-file small {
+  font-size: 10px;
+  color: #8294ac;
+  overflow-wrap: anywhere;
+}
+.pv2-file > b,
+.pv2-file > span:last-child {
+  color: #e9672a;
+  font-size: 11px;
+}
+.pv2-file-icon {
+  color: #ff594c;
+  background: #fff0ed;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  flex: 0 0 40px;
+}
+.pv2-table-scroll {
+  overflow-x: auto;
+  max-width: 100%;
+}
+.pv2-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 520px;
+}
+.pv2-table th {
+  padding: 13px;
+  text-align: left;
+  background: #f8fafc;
+  color: #617591;
+  font-size: 11px;
+}
+.pv2-table td {
+  padding: 13px;
+  border-bottom: 1px solid #ecf0f5;
+  font-size: 11px;
+  color: #3e5270;
+  vertical-align: middle;
+}
+.pv2-table td strong {
+  font-weight: 850;
+  color: #233a59;
+}
+.pv2-table td small {
+  display: block;
+  margin-top: 5px;
+  color: #8798ac;
+}
+.pv2-finance-metrics {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.pv2-finance-metrics .pv2-stat {
+  display: grid;
+  min-height: 90px;
+  gap: 9px;
+}
+.pv2-material,
+.pv2-person {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 8px;
+  border-bottom: 1px solid #edf1f5;
+  min-width: 0;
+}
+.pv2-material > div,
+.pv2-person > div {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+  flex: 1;
+}
+.pv2-material strong,
+.pv2-person strong {
+  font-size: 12px;
+  color: #284060;
+  overflow-wrap: anywhere;
+}
+.pv2-material small,
+.pv2-person small {
+  font-size: 10px;
+  color: #8c9aaa;
+  overflow-wrap: anywhere;
+}
+.pv2-material-icon,
+.pv2-person-avatar {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  border-radius: 10px;
+  background: #f1f5f8;
+  color: #627995;
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+}
+.pv2-local-tabs {
+  display: flex;
+  gap: 7px;
+  margin-bottom: 11px;
+}
+.pv2-local-tabs span {
+  font-size: 11px;
+  padding: 10px 12px;
+  color: #7588a0;
+  border-radius: 8px;
+  background: #f7f9fc;
+}
+.pv2-local-tabs .active {
+  background: #fff1e9;
+  color: #ef5b11;
+}
+.pv2-history-row {
+  border-bottom: 1px solid #edf1f5;
+  padding: 13px 0;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.pv2-history-row > span {
+  display: grid;
+  gap: 4px;
+  flex: 0 0 150px;
+}
+.pv2-history-row strong {
+  font-size: 12px;
+}
+.pv2-history-row small {
+  font-size: 10px;
+  color: #91a1b4;
+}
+.pv2-history-row p {
+  font-size: 11px;
+  color: #61748c;
+  line-height: 1.6;
+}
+.pv2-execution {
+  padding: 15px 0;
+  border-bottom: 1px solid #edf0f5;
+  display: grid;
+  gap: 8px;
+}
+.pv2-execution > div {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+}
+.pv2-execution strong {
+  font-size: 12px;
+}
+.pv2-execution small {
+  font-size: 11px;
+  color: #8595ab;
+}
+.pv2-execution p {
+  font-size: 11px;
+  color: #5a6f8b;
+}
+.pv2-muted {
+  font-size: 11px;
+  color: #778ba4;
+  line-height: 1.6;
+}
+.pv2-edit-drawer,
+.pv2-subaction {
+  border: 1px solid #f3dbc9;
+  border-radius: 11px;
+  background: #fff9f4;
+  margin-top: 13px;
+  padding: 13px;
+  min-width: 0;
+}
+.pv2-edit-drawer > summary,
+.pv2-subaction > summary {
+  cursor: pointer;
+  color: #e96521;
+  font-size: 12px;
+  font-weight: 900;
+}
+.pv2-form {
+  display: grid;
+  gap: 12px;
+  padding: 11px 0 3px;
+  min-width: 0;
+}
+.pv2-form-fields {
+  display: grid;
+  gap: 11px;
+  min-width: 0;
+}
+.pv2-form label {
+  display: grid;
+  gap: 6px;
+  color: #4a607c;
+  font-size: 11px;
+  font-weight: 800;
+  min-width: 0;
+}
+.pv2-form :is(input, select, textarea) {
+  border: 1px solid #d9e3ec;
+  background: #fff;
+  color: #233b5a;
+  border-radius: 9px;
+  padding: 11px;
+  width: 100%;
+  min-width: 0;
+}
+.pv2-form textarea {
+  resize: vertical;
+}
+.pv2-form .pv2-primary {
+  justify-self: start;
+}
+.pv2-hint {
+  font-size: 10px;
+  line-height: 1.6;
+  color: #8897a7;
+}
+.pv2-form-feedback {
+  padding: 10px;
+  border-radius: 8px;
+  background: #f2f4f7;
+  font-size: 11px;
+  color: #596c84;
+  line-height: 1.5;
+}
+.pv2-form-feedback.good {
+  color: #148458;
+  background: #e7faef;
+}
+.pv2-form-feedback.bad {
+  color: #b65b38;
+  background: #fff0e9;
+}
+.pv2-directory-empty {
+  background: #fff;
+  border: 1px solid #e9edf3;
+  border-radius: 14px;
+  margin-top: 14px;
+}
+@media (max-width: 1400px) {
+  .pv2-stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .pv2-project-meta {
+    gap: 9px;
+  }
+}
+@media (max-width: 1000px) {
+  .pv2-timeline-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .pv2-stage-side {
+    margin-top: 7px;
+  }
+  .pv2-overview-split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 700px) {
+  .pv2-page {
+    padding: 12px 10px 30px;
+  }
+  .pv2-list-heading {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+  .pv2-list-heading h1 {
+    font-size: 23px;
+  }
+  .pv2-list-heading .pv2-primary {
+    width: 100%;
+  }
+  .pv2-filter-tabs {
+    gap: 5px;
+  }
+  .pv2-filter-tabs button {
+    flex: 1;
+    min-width: 0;
+    padding: 8px 5px;
+    font-size: 10px;
+  }
+  .pv2-project-card {
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px;
+  }
+  .pv2-project-visual {
+    height: 70px;
+    width: 70px;
+    flex-basis: 70px;
+  }
+  .pv2-project-card-body {
+    gap: 6px;
+  }
+  .pv2-project-card-body > strong {
+    font-size: 12px;
+  }
+  .pv2-project-card-body > small {
+    font-size: 9px;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .pv2-card-end {
+    min-width: 79px;
+    align-self: stretch;
+  }
+  .pv2-card-progress {
+    display: grid;
+    gap: 4px;
+    text-align: right;
+  }
+  .pv2-project-header {
+    padding: 10px 10px 0;
+  }
+  .pv2-project-thumb {
+    width: 57px;
+    height: 53px;
+    flex-basis: 57px;
+  }
+  .pv2-project-identity h1 {
+    font-size: 15px;
+  }
+  .pv2-project-meta {
+    gap: 5px;
+  }
+  .pv2-project-meta span {
+    font-size: 9px;
+  }
+  .pv2-project-header-actions {
+    justify-content: flex-start;
+  }
+  .pv2-project-tabs {
+    gap: 4px;
+  }
+  .pv2-project-tabs a {
+    padding: 9px 8px;
+    font-size: 10px;
+  }
+  .pv2-stat-grid {
+    gap: 8px;
+  }
+  .pv2-stat {
+    min-height: 100px;
+    padding: 11px;
+    display: grid;
+    align-content: start;
+    gap: 8px;
+  }
+  .pv2-stat-icon {
+    width: 31px;
+    height: 31px;
+    flex-basis: 31px;
+  }
+  .pv2-stat strong {
+    font-size: 18px;
+  }
+  .pv2-stat small {
+    font-size: 10px;
+  }
+  .pv2-stat p {
+    font-size: 9px;
+  }
+  .pv2-panel {
+    padding: 13px;
+  }
+  .pv2-section-header h2 {
+    font-size: 15px;
+  }
+  .pv2-section-header p {
+    font-size: 10px;
+  }
+  .pv2-stage-preview > img {
+    max-width: 34%;
+    height: 120px;
+    flex-basis: 34%;
+  }
+  .pv2-actions-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .pv2-action-tile {
+    padding: 12px 9px;
+    font-size: 10px;
+  }
+  .pv2-timeline-entry {
+    grid-template-columns: 70px minmax(0, 1fr);
+    gap: 6px;
+  }
+  .pv2-time-column {
+    font-size: 9px;
+    gap: 4px;
+  }
+  .pv2-timeline-details {
+    padding-left: 11px;
+  }
+  .pv2-two,
+  .pv2-two-col {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .pv2-material {
+    flex-wrap: wrap;
+  }
+  .pv2-material .pv2-subaction {
+    flex-basis: 100%;
+  }
+  .pv2-history-row {
+    display: grid;
+  }
+  .pv2-history-row > span {
+    flex: auto;
+  }
+  .pv2-file b {
+    font-size: 10px;
+  }
+}
+@media (max-width: 370px) {
+  .pv2-stat strong {
+    font-size: 15px;
+    overflow-wrap: anywhere;
+  }
+  .pv2-filter-tabs button {
+    font-size: 9px;
+  }
+  .pv2-card-end {
+    min-width: 67px;
+  }
+  .pv2-project-visual {
+    width: 56px;
+    flex-basis: 56px;
+  }
+  .pv2-page .pv2-button {
+    white-space: normal;
+    text-align: center;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pv2-project-card {
+    transition: none;
+  }
+}
 
 /* Quoted multi-floor stage styling: one expandable stage, not duplicate panels. */
-.pv2-timeline-grid{grid-template-columns:minmax(0,1fr)}
-.pv2-stages-detail{background:#fff;border:1px solid #edf0f4;border-radius:12px;padding:15px}
-.pv2-stage-associate{background:#f9fafc;border:1px solid #e7ecf1;padding:10px;border-radius:8px}
-.pv2-stage-associate-form button{justify-self:start}
-.pv2-stage-setup-notice{padding:12px;margin-top:10px;border:1px solid #ffddc8;border-radius:9px;background:#fff9f4}
-.pv2-stage-setup-notice p{font-size:11px;color:#856c5a;line-height:1.6;margin:0 0 8px}
-@media(max-width:700px){.pv2-stages-detail{padding:11px}}
+.pv2-timeline-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+.pv2-stages-detail {
+  background: #fff;
+  border: 1px solid #edf0f4;
+  border-radius: 12px;
+  padding: 15px;
+}
+.pv2-stage-associate {
+  background: #f9fafc;
+  border: 1px solid #e7ecf1;
+  padding: 10px;
+  border-radius: 8px;
+}
+.pv2-stage-associate-form button {
+  justify-self: start;
+}
+.pv2-stage-setup-notice {
+  padding: 12px;
+  margin-top: 10px;
+  border: 1px solid #ffddc8;
+  border-radius: 9px;
+  background: #fff9f4;
+}
+.pv2-stage-setup-notice p {
+  font-size: 11px;
+  color: #856c5a;
+  line-height: 1.6;
+  margin: 0 0 8px;
+}
+@media (max-width: 700px) {
+  .pv2-stages-detail {
+    padding: 11px;
+  }
+}
 
 /* Floor-specific stage plan: one expandable section per stage instead of
    displaying every checklist permanently in the Project Timeline. */
-.pv2-stages-detail{min-width:0;max-width:100%;overflow-wrap:anywhere}
-.pv2-stages-detail>.pv2-muted{margin-bottom:12px;line-height:1.65}
-.pv2-stage-detail{border:1px solid #e6eaf1;background:#fff;border-radius:10px;
- margin-bottom:8px;overflow:hidden}
-.pv2-stage-detail>summary{list-style:none;cursor:pointer;display:flex;align-items:center;
- gap:9px;min-height:58px;padding:10px 9px}
-.pv2-stage-detail>summary::-webkit-details-marker{display:none}
-.pv2-stage-detail[open]>summary{background:#fff5ef}
-.pv2-stage-index{width:28px;height:28px;flex:0 0 28px;display:grid;place-items:center;
- border-radius:999px;background:#f2f5f9;color:#6e7d96;font-size:10px;font-weight:800}
-.pv2-stage-summary{min-width:0;flex:1;display:grid;gap:6px}
-.pv2-stage-summary strong{font-size:11px;overflow-wrap:anywhere;color:#233751;line-height:1.35}
-.pv2-stage-summary small{font-size:9px;color:#8493a8;overflow-wrap:anywhere}
-.pv2-stage-chevron{font-size:16px;color:#df6b2b}
-.pv2-stage-detail[open] .pv2-stage-chevron{transform:rotate(180deg)}
-.pv2-stage-body{display:grid;gap:10px;padding:12px 11px 15px;border-top:1px solid #edf0f4}
-.pv2-stage-body p{font-size:10px;color:#677d99;line-height:1.6;overflow-wrap:anywhere}
-.pv2-stage-body h4{margin:6px 0 0;font-size:11px;color:#243a5c}
-.pv2-stage-body ul{list-style:disc;display:grid;gap:6px;padding-left:17px;margin:0}
-.pv2-stage-body li{font-size:10px;color:#687b94;line-height:1.55}
-.pv2-stage-dependencies{background:#f3f6fa;padding:9px;border-radius:8px}
-.pv2-stage-payment,.pv2-stage-evidence{border:1px solid #f4dbc8;background:#fff9f4;
- border-radius:9px;padding:10px;display:grid;gap:7px}
-.pv2-stage-payment strong,.pv2-stage-evidence strong{font-size:10px;color:#b95b20}
-.pv2-stage-payment span{font-size:10px;color:#61718c;line-height:1.5}
-.pv2-stage-links{display:flex;gap:10px;flex-wrap:wrap;line-height:1.5}
-.pv2-stage-links .pv2-action-link{white-space:normal;font-size:10px}
-.pv2-stage-associate>summary{font-size:10px;color:#dc641c;cursor:pointer;
- font-weight:800;line-height:1.5}
-.pv2-stage-associate-form{display:grid;gap:8px;padding:10px 0}
-.pv2-stage-associate-form label{font-size:10px;color:#5c718b;display:grid;gap:6px}
-.pv2-stage-associate-form select{max-width:100%;min-width:0;width:100%;
- border:1px solid #d9e3ee;background:#fff;padding:10px;border-radius:8px;color:#293c57}
-@media(max-width:700px){
- .pv2-stages-detail{padding:11px}
- .pv2-stage-body{padding:10px 9px}
- .pv2-stage-summary strong{font-size:10px}
- .pv2-stage-index{width:25px;height:25px;flex-basis:25px}
+.pv2-stages-detail {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.pv2-stages-detail > .pv2-muted {
+  margin-bottom: 12px;
+  line-height: 1.65;
+}
+.pv2-stage-detail {
+  border: 1px solid #e6eaf1;
+  background: #fff;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+.pv2-stage-detail > summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 58px;
+  padding: 10px 9px;
+}
+.pv2-stage-detail > summary::-webkit-details-marker {
+  display: none;
+}
+.pv2-stage-detail[open] > summary {
+  background: #fff5ef;
+}
+.pv2-stage-index {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #f2f5f9;
+  color: #6e7d96;
+  font-size: 10px;
+  font-weight: 800;
+}
+.pv2-stage-summary {
+  min-width: 0;
+  flex: 1;
+  display: grid;
+  gap: 6px;
+}
+.pv2-stage-summary strong {
+  font-size: 11px;
+  overflow-wrap: anywhere;
+  color: #233751;
+  line-height: 1.35;
+}
+.pv2-stage-summary small {
+  font-size: 9px;
+  color: #8493a8;
+  overflow-wrap: anywhere;
+}
+.pv2-stage-chevron {
+  font-size: 16px;
+  color: #df6b2b;
+}
+.pv2-stage-detail[open] .pv2-stage-chevron {
+  transform: rotate(180deg);
+}
+.pv2-stage-body {
+  display: grid;
+  gap: 10px;
+  padding: 12px 11px 15px;
+  border-top: 1px solid #edf0f4;
+}
+.pv2-stage-body p {
+  font-size: 10px;
+  color: #677d99;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.pv2-stage-body h4 {
+  margin: 6px 0 0;
+  font-size: 11px;
+  color: #243a5c;
+}
+.pv2-stage-body ul {
+  list-style: disc;
+  display: grid;
+  gap: 6px;
+  padding-left: 17px;
+  margin: 0;
+}
+.pv2-stage-body li {
+  font-size: 10px;
+  color: #687b94;
+  line-height: 1.55;
+}
+.pv2-stage-dependencies {
+  background: #f3f6fa;
+  padding: 9px;
+  border-radius: 8px;
+}
+.pv2-stage-payment,
+.pv2-stage-evidence {
+  border: 1px solid #f4dbc8;
+  background: #fff9f4;
+  border-radius: 9px;
+  padding: 10px;
+  display: grid;
+  gap: 7px;
+}
+.pv2-stage-payment strong,
+.pv2-stage-evidence strong {
+  font-size: 10px;
+  color: #b95b20;
+}
+.pv2-stage-payment span {
+  font-size: 10px;
+  color: #61718c;
+  line-height: 1.5;
+}
+.pv2-stage-links {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  line-height: 1.5;
+}
+.pv2-stage-links .pv2-action-link {
+  white-space: normal;
+  font-size: 10px;
+}
+.pv2-stage-associate > summary {
+  font-size: 10px;
+  color: #dc641c;
+  cursor: pointer;
+  font-weight: 800;
+  line-height: 1.5;
+}
+.pv2-stage-associate-form {
+  display: grid;
+  gap: 8px;
+  padding: 10px 0;
+}
+.pv2-stage-associate-form label {
+  font-size: 10px;
+  color: #5c718b;
+  display: grid;
+  gap: 6px;
+}
+.pv2-stage-associate-form select {
+  max-width: 100%;
+  min-width: 0;
+  width: 100%;
+  border: 1px solid #d9e3ee;
+  background: #fff;
+  padding: 10px;
+  border-radius: 8px;
+  color: #293c57;
+}
+@media (max-width: 700px) {
+  .pv2-stages-detail {
+    padding: 11px;
+  }
+  .pv2-stage-body {
+    padding: 10px 9px;
+  }
+  .pv2-stage-summary strong {
+    font-size: 10px;
+  }
+  .pv2-stage-index {
+    width: 25px;
+    height: 25px;
+    flex-basis: 25px;
+  }
 }
 
-
 /* Project-specific quotation and agreement links reuse the existing file panel. */
-.pv2-commercial-row{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:14px 4px;border-bottom:1px solid #e9eef4}
-.pv2-commercial-details{display:grid;gap:9px;min-width:0}
-.pv2-commercial-details>strong{color:#162746;font-size:14px;overflow-wrap:anywhere}
-.pv2-commercial-details>span{display:flex;align-items:center;gap:10px;flex-wrap:wrap;color:#64748b}
-.pv2-commercial-details small{font-size:11px;color:#71839a}
-.pv2-commercial-actions{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
-.pv2-quote-links .pv2-blank{padding:22px 12px}
-@media(max-width:640px){.pv2-commercial-row{align-items:flex-start;flex-direction:column;gap:9px}.pv2-commercial-actions{gap:12px}}
-
+.pv2-commercial-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 4px;
+  border-bottom: 1px solid #e9eef4;
+}
+.pv2-commercial-details {
+  display: grid;
+  gap: 9px;
+  min-width: 0;
+}
+.pv2-commercial-details > strong {
+  color: #162746;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+.pv2-commercial-details > span {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  color: #64748b;
+}
+.pv2-commercial-details small {
+  font-size: 11px;
+  color: #71839a;
+}
+.pv2-commercial-actions {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.pv2-quote-links .pv2-blank {
+  padding: 22px 12px;
+}
+@media (max-width: 640px) {
+  .pv2-commercial-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 9px;
+  }
+  .pv2-commercial-actions {
+    gap: 12px;
+  }
+}
 
 /* Keep the existing Business OS shell and every project panel inside the
    device width. Horizontal scrolling belongs only to project tabs / tables. */
-.pv2-page{box-sizing:border-box;min-width:0;max-width:100%;width:100%;overflow-x:clip}
-.pv2-project-header{min-width:0;max-width:100%;overflow:hidden}
-.pv2-project-header-actions{min-width:0;max-width:100%;flex-wrap:wrap;justify-content:flex-start}
-.pv2-project-header-actions .pv2-button{min-width:0;max-width:100%}
-.pv2-project-tabs{max-width:100%;min-width:0;overscroll-behavior-x:contain}
-.pv2-timeline,.pv2-timeline-grid,.pv2-timeline-main,.pv2-timeline-entry{min-width:0}
-.pv2-timeline-details,.pv2-panel,.pv2-stages-detail{max-width:100%}
-.pv2-design-workflow{display:grid;gap:16px;border-color:#f4d3bc}
-.pv2-design-step-head{display:flex;align-items:flex-start;gap:13px}
-.pv2-design-step-head>div{min-width:0;flex:1}
-.pv2-design-step-head h2{color:#182e4c;font-size:18px;font-weight:850;letter-spacing:-.25px}
-.pv2-design-step-head p{margin-top:6px!important;color:#63758d;font-size:12px;line-height:1.65}
-.pv2-design-step-index{flex:0 0 38px;height:38px;border-radius:12px;display:grid;place-items:center;background:#fff0e7;color:#ec651d;font-size:14px;font-weight:850}
-.pv2-drawing-form{background:#fbfcff;border:1px solid #e5ebf3;border-radius:13px;padding:15px}
-.pv2-drawing-form>label{min-width:0}
-.pv2-drawing-form input[type=file]{max-width:100%;overflow-wrap:anywhere}
-.pv2-drawing-form .pv2-primary{justify-self:start}
-.pv2-design-step-state{background:#f2f8fa;border:1px solid #dcebee;padding:12px;border-radius:10px;color:#35516a}
-.pv2-design-next{border-top:1px solid #e8ecf2;padding-top:15px;display:grid;gap:10px;min-width:0}
-.pv2-design-next h3{font-size:14px;color:#233a59}
-.pv2-design-mismatch{display:grid;gap:9px;border:1px solid #f0cdb5;background:#fff4ed;border-radius:12px;padding:14px 16px;color:#994d2a;font-size:12px;line-height:1.65;min-width:0}
-.pv2-design-mismatch .pv2-action-link{white-space:normal;justify-self:start}
-@media(max-width:700px){
- .pv2-page{padding:12px 10px 28px}
- .pv2-project-header{padding:12px 11px 0}
- .pv2-project-header-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
- .pv2-project-header-actions .pv2-button{width:100%;min-width:0;padding:9px 7px;white-space:normal;text-align:center;overflow-wrap:anywhere;line-height:1.35}
- .pv2-project-identity>div:nth-child(2){min-width:0}
- .pv2-project-meta{min-width:0}
- .pv2-project-meta span{min-width:0;overflow-wrap:anywhere}
- .pv2-project-tabs{overflow-x:auto;scrollbar-width:thin;scroll-snap-type:x proximity}
- .pv2-project-tabs a{flex:0 0 auto;scroll-snap-align:start}
- .pv2-design-step-head h2{font-size:16px}
- .pv2-design-step-head p{font-size:11px}
- .pv2-drawing-form{padding:12px}
- .pv2-design-workflow{gap:12px}
- .pv2-drawing-form .pv2-primary{width:100%;justify-self:stretch}
- .pv2-design-step-index{flex-basis:33px;height:33px;font-size:12px}
+.pv2-page {
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+  overflow-x: clip;
 }
-
+.pv2-project-header {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+.pv2-project-header-actions {
+  min-width: 0;
+  max-width: 100%;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+.pv2-project-header-actions .pv2-button {
+  min-width: 0;
+  max-width: 100%;
+}
+.pv2-project-tabs {
+  max-width: 100%;
+  min-width: 0;
+  overscroll-behavior-x: contain;
+}
+.pv2-timeline,
+.pv2-timeline-grid,
+.pv2-timeline-main,
+.pv2-timeline-entry {
+  min-width: 0;
+}
+.pv2-timeline-details,
+.pv2-panel,
+.pv2-stages-detail {
+  max-width: 100%;
+}
+.pv2-design-workflow {
+  display: grid;
+  gap: 16px;
+  border-color: #f4d3bc;
+}
+.pv2-design-step-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+}
+.pv2-design-step-head > div {
+  min-width: 0;
+  flex: 1;
+}
+.pv2-design-step-head h2 {
+  color: #182e4c;
+  font-size: 18px;
+  font-weight: 850;
+  letter-spacing: -0.25px;
+}
+.pv2-design-step-head p {
+  margin-top: 6px !important;
+  color: #63758d;
+  font-size: 12px;
+  line-height: 1.65;
+}
+.pv2-design-step-index {
+  flex: 0 0 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: #fff0e7;
+  color: #ec651d;
+  font-size: 14px;
+  font-weight: 850;
+}
+.pv2-drawing-form {
+  background: #fbfcff;
+  border: 1px solid #e5ebf3;
+  border-radius: 13px;
+  padding: 15px;
+}
+.pv2-drawing-form > label {
+  min-width: 0;
+}
+.pv2-drawing-form input[type='file'] {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.pv2-drawing-form .pv2-primary {
+  justify-self: start;
+}
+.pv2-design-step-state {
+  background: #f2f8fa;
+  border: 1px solid #dcebee;
+  padding: 12px;
+  border-radius: 10px;
+  color: #35516a;
+}
+.pv2-design-next {
+  border-top: 1px solid #e8ecf2;
+  padding-top: 15px;
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+.pv2-design-next h3 {
+  font-size: 14px;
+  color: #233a59;
+}
+.pv2-design-mismatch {
+  display: grid;
+  gap: 9px;
+  border: 1px solid #f0cdb5;
+  background: #fff4ed;
+  border-radius: 12px;
+  padding: 14px 16px;
+  color: #994d2a;
+  font-size: 12px;
+  line-height: 1.65;
+  min-width: 0;
+}
+.pv2-design-mismatch .pv2-action-link {
+  white-space: normal;
+  justify-self: start;
+}
+@media (max-width: 700px) {
+  .pv2-page {
+    padding: 12px 10px 28px;
+  }
+  .pv2-project-header {
+    padding: 12px 11px 0;
+  }
+  .pv2-project-header-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .pv2-project-header-actions .pv2-button {
+    width: 100%;
+    min-width: 0;
+    padding: 9px 7px;
+    white-space: normal;
+    text-align: center;
+    overflow-wrap: anywhere;
+    line-height: 1.35;
+  }
+  .pv2-project-identity > div:nth-child(2) {
+    min-width: 0;
+  }
+  .pv2-project-meta {
+    min-width: 0;
+  }
+  .pv2-project-meta span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .pv2-project-tabs {
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scroll-snap-type: x proximity;
+  }
+  .pv2-project-tabs a {
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+  }
+  .pv2-design-step-head h2 {
+    font-size: 16px;
+  }
+  .pv2-design-step-head p {
+    font-size: 11px;
+  }
+  .pv2-drawing-form {
+    padding: 12px;
+  }
+  .pv2-design-workflow {
+    gap: 12px;
+  }
+  .pv2-drawing-form .pv2-primary {
+    width: 100%;
+    justify-self: stretch;
+  }
+  .pv2-design-step-index {
+    flex-basis: 33px;
+    height: 33px;
+    font-size: 12px;
+  }
+}
 
 /* On narrow phones the project directory also needs to wrap its status/footer;
    otherwise the thumbnail + customer name + fixed status column exceeds 320px. */
-@media(max-width:380px){
- .pv2-project-list{min-width:0;max-width:100%}
- .pv2-project-card{width:100%;max-width:100%;flex-wrap:wrap;gap:8px;min-width:0}
- .pv2-project-visual{flex:0 0 55px;width:55px;height:60px}
- .pv2-project-card-body{flex:1 1 calc(100% - 65px);min-width:0}
- .pv2-project-card-body>small{display:block;overflow-wrap:anywhere;white-space:normal}
- .pv2-card-end{min-width:0;max-width:100%;width:100%;flex:1 1 100%;align-self:auto;flex-direction:row;align-items:center;gap:12px}
- .pv2-card-progress{width:auto;min-width:76px;display:flex;align-items:center;gap:7px}
- .pv2-card-progress .pv2-bar{width:55px;flex:0 0 55px}
+@media (max-width: 380px) {
+  .pv2-project-list {
+    min-width: 0;
+    max-width: 100%;
+  }
+  .pv2-project-card {
+    width: 100%;
+    max-width: 100%;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-width: 0;
+  }
+  .pv2-project-visual {
+    flex: 0 0 55px;
+    width: 55px;
+    height: 60px;
+  }
+  .pv2-project-card-body {
+    flex: 1 1 calc(100% - 65px);
+    min-width: 0;
+  }
+  .pv2-project-card-body > small {
+    display: block;
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+  .pv2-card-end {
+    min-width: 0;
+    max-width: 100%;
+    width: 100%;
+    flex: 1 1 100%;
+    align-self: auto;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+  }
+  .pv2-card-progress {
+    width: auto;
+    min-width: 76px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .pv2-card-progress .pv2-bar {
+    width: 55px;
+    flex: 0 0 55px;
+  }
 }
-
 
 /* The sole project-creation form belongs to Projects, never Clients. */
-.pv2-new-project{position:relative;min-width:0;flex-shrink:0}
-.pv2-new-project-panel{position:absolute;z-index:30;right:0;top:calc(100% + 12px);
- width:min(440px,calc(100vw - 36px));padding:18px;border:1px solid #eddfd4;
- border-radius:16px;background:#fff;box-shadow:0 18px 45px #1f314027}
-.pv2-new-project-panel h2{font-size:18px;line-height:1.35;font-weight:850;color:#1d304a;margin:0 0 5px}
-.pv2-new-project-panel>.pv2-muted{font-size:12px;line-height:1.6;margin-bottom:13px}
-.pv2-new-project-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;min-width:0}
-.pv2-new-project-form label{display:grid;gap:5px;font-size:12px;font-weight:750;color:#334862;min-width:0}
-.pv2-new-project-form label:first-child,.pv2-new-project-form label:nth-child(2){grid-column:1/-1}
-.pv2-new-project-form input,.pv2-new-project-form select{width:100%;min-width:0;min-height:43px;
- border:1px solid #dfdfe8;background:white;border-radius:10px;padding:9px 11px;color:#1e3350;
- font:inherit;font-weight:550}
-.pv2-new-project-form input:focus,.pv2-new-project-form select:focus{outline:2px solid #fa9a65;outline-offset:1px}
-.pv2-new-project-footer{grid-column:1/-1;display:flex;gap:11px;flex-wrap:wrap;align-items:center;justify-content:space-between;padding-top:5px}
-.pv2-new-project-footer>a{color:#52647a;font-size:12px;text-decoration:underline}
-.pv2-new-project-form>.pv2-form-feedback{grid-column:1/-1}
-@media(max-width:700px){
- .pv2-list-heading{flex-wrap:wrap;gap:12px}
- .pv2-new-project{width:100%}
- .pv2-new-project>button{width:100%;justify-content:center}
- .pv2-new-project-panel{position:relative;top:auto;right:auto;width:100%;margin-top:10px;padding:14px}
- .pv2-new-project-form{grid-template-columns:1fr}
- .pv2-new-project-form label{grid-column:1/-1}
- .pv2-new-project-footer{flex-direction:column;align-items:stretch}
- .pv2-new-project-footer>button{width:100%;justify-content:center}
+.pv2-new-project {
+  position: relative;
+  min-width: 0;
+  flex-shrink: 0;
 }
-
+.pv2-new-project-panel {
+  position: absolute;
+  z-index: 30;
+  right: 0;
+  top: calc(100% + 12px);
+  width: min(440px, calc(100vw - 36px));
+  padding: 18px;
+  border: 1px solid #eddfd4;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 18px 45px #1f314027;
+}
+.pv2-new-project-panel h2 {
+  font-size: 18px;
+  line-height: 1.35;
+  font-weight: 850;
+  color: #1d304a;
+  margin: 0 0 5px;
+}
+.pv2-new-project-panel > .pv2-muted {
+  font-size: 12px;
+  line-height: 1.6;
+  margin-bottom: 13px;
+}
+.pv2-new-project-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  min-width: 0;
+}
+.pv2-new-project-form label {
+  display: grid;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 750;
+  color: #334862;
+  min-width: 0;
+}
+.pv2-new-project-form label:first-child,
+.pv2-new-project-form label:nth-child(2) {
+  grid-column: 1/-1;
+}
+.pv2-new-project-form input,
+.pv2-new-project-form select {
+  width: 100%;
+  min-width: 0;
+  min-height: 43px;
+  border: 1px solid #dfdfe8;
+  background: white;
+  border-radius: 10px;
+  padding: 9px 11px;
+  color: #1e3350;
+  font: inherit;
+  font-weight: 550;
+}
+.pv2-new-project-form input:focus,
+.pv2-new-project-form select:focus {
+  outline: 2px solid #fa9a65;
+  outline-offset: 1px;
+}
+.pv2-new-project-footer {
+  grid-column: 1/-1;
+  display: flex;
+  gap: 11px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 5px;
+}
+.pv2-new-project-footer > a {
+  color: #52647a;
+  font-size: 12px;
+  text-decoration: underline;
+}
+.pv2-new-project-form > .pv2-form-feedback {
+  grid-column: 1/-1;
+}
+@media (max-width: 700px) {
+  .pv2-list-heading {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .pv2-new-project {
+    width: 100%;
+  }
+  .pv2-new-project > button {
+    width: 100%;
+    justify-content: center;
+  }
+  .pv2-new-project-panel {
+    position: relative;
+    top: auto;
+    right: auto;
+    width: 100%;
+    margin-top: 10px;
+    padding: 14px;
+  }
+  .pv2-new-project-form {
+    grid-template-columns: 1fr;
+  }
+  .pv2-new-project-form label {
+    grid-column: 1/-1;
+  }
+  .pv2-new-project-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .pv2-new-project-footer > button {
+    width: 100%;
+    justify-content: center;
+  }
+}
 
 /* Project command surface: one primary action, clear payment state and two
  * inline controls instead of redirect-heavy project navigation. */
-.pv2-project-header{border:1px solid #ecebf0;box-shadow:0 10px 30px #1c324010;overflow:visible}
-.pv2-project-header-actions{position:relative;gap:10px}
-.pv2-header-drawer{min-width:0;max-width:100%}
-.pv2-header-drawer>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:center;min-height:43px;gap:6px}
-.pv2-header-drawer>summary::-webkit-details-marker{display:none}
-.pv2-header-drawer[open]>summary{color:#ec661d;border-color:#f5c4a8;background:#fff8f2}
-.pv2-header-drawer-body{position:absolute;top:calc(100% + 9px);right:0;z-index:20;width:min(600px,100%);
- max-height:min(68vh,660px);overflow-y:auto;background:white;border:1px solid #e9e5e2;
- box-shadow:0 14px 40px #233b4b26;padding:19px;border-radius:15px}
-.pv2-header-drawer-body .pv2-panel{box-shadow:none;border:0;padding:0;margin:0}
-.pv2-header-drawer-body form{max-width:100%;min-width:0}
-.pv2-priority-wrap{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(240px,1fr);
- overflow:visible;border:1px solid #f0e3d8;border-radius:18px;background:white;
- box-shadow:0 12px 36px #243e4b0b;min-width:0}
-.pv2-priority-main{padding:23px 24px;min-width:0;
- background:linear-gradient(130deg,#fff 0%,#fffdfb 60%,#fff4eb 100%);border-radius:18px 0 0 18px}
-.pv2-priority-eyebrow{display:flex;align-items:center;gap:8px;font-weight:850;
- font-size:10px;letter-spacing:1.1px;color:#d6601c}
-.pv2-next-pulse{width:8px;height:8px;border-radius:50%;background:#f66a21;
- box-shadow:0 0 0 4px #f66a2118}
-.pv2-next-stage{margin-left:auto;font-size:10px;font-weight:700;letter-spacing:0;
- background:#fff0e2;color:#a85c32;border:1px solid #fce0c8;border-radius:999px;padding:6px 9px}
-.pv2-priority-main>h2{color:#172b49;font-size:clamp(21px,2.4vw,28px);
- letter-spacing:-.035em;line-height:1.2;font-weight:900;margin:14px 0 7px}
-.pv2-priority-description{max-width:680px;line-height:1.65;font-size:12px;color:#697991}
-.pv2-checklist-inline{display:flex;flex-wrap:wrap;gap:7px;margin:17px 0 0}
-.pv2-checklist-inline>span{padding:7px 10px;font-size:10px;font-weight:800;
- border:1px solid #e8eaf0;border-radius:999px;background:#f9fafc;color:#758397}
-.pv2-checklist-inline>span.done{background:#e9f9f0;border-color:#cdeed9;color:#22855b}
-.pv2-priority-payment{border-left:1px solid #f0e5dc;min-width:0;padding:23px 19px}
-.pv2-next-payment-heading{display:flex;gap:10px;align-items:center;color:#243954}
-.pv2-next-payment-heading>div{display:grid;gap:5px;min-width:0}
-.pv2-next-payment-heading strong{font-size:13px;font-weight:900}
-.pv2-next-payment-heading small{color:#8b96a6;font-size:10px}
-.pv2-priority-coin{height:37px;width:37px;border-radius:12px;background:#fff0e3;
- color:#e46222;display:grid;place-items:center;font-size:19px;font-weight:900}
-.pv2-priority-amount{display:block;color:#203650;font-size:24px;
- font-weight:900;letter-spacing:-.035em;margin:18px 0 10px}
-.pv2-priority-payment-meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
-.pv2-priority-payment-meta>span:first-child{font-size:11px;color:#6b7892;font-weight:750}
-.pv2-priority-payment-meta>p{flex-basis:100%;font-size:11px;color:#6a8092;margin-top:6px}
-.pv2-next-subtle{font-size:11px;color:#8290a2;line-height:1.55;margin:9px 0}
-.pv2-next-notice{padding:12px 14px;background:#fff2e8;border:1px solid #f8d7bb;
- border-radius:10px;color:#a65f2f;font-size:12px;line-height:1.55;margin-top:15px}
-.pv2-next-secondary{display:inline-flex;align-items:center;gap:7px;color:#d85e23;
- font-weight:800;font-size:11px;margin-top:9px}
-.pv2-next-drawer{min-width:0;margin-top:14px;border:1px solid #eecdb5;
- border-radius:11px;background:#fff}
-.pv2-next-drawer>summary{display:flex;align-items:center;justify-content:space-between;
- gap:10px;cursor:pointer;color:#d65c21;font-size:12px;font-weight:850;
- padding:12px 14px;list-style:none}
-.pv2-next-drawer>summary::-webkit-details-marker{display:none}
-.pv2-next-drawer>summary::after{content:'⌄';font-size:16px}
-.pv2-next-drawer[open]>summary::after{transform:rotate(180deg)}
-.pv2-inline-work-form{padding:0 14px 15px;display:grid;gap:10px}
-.pv2-inline-work-form>label{font-size:11px;font-weight:800;color:#52667d;
- display:grid;gap:7px;min-width:0}
-.pv2-inline-work-form textarea,.pv2-inline-work-form input{max-width:100%;width:100%;
- background:#fff;color:#1f334d;border:1px solid #dde3eb;border-radius:9px;padding:10px;
- font:inherit;font-size:12px;min-width:0;outline-offset:2px}
-.pv2-inline-work-form textarea:focus,.pv2-inline-work-form input:focus{outline:2px solid #fd975c}
-.pv2-inline-work-form>p{font-size:10px;color:#7d889b;line-height:1.55;margin:0}
-.pv2-next-primary{justify-self:start;padding:10px 15px;border:0;border-radius:9px;
- background:#f66a22;color:white;font-size:11px;font-weight:850;cursor:pointer}
-.pv2-next-primary:disabled{opacity:.55;cursor:wait}
-.pv2-next-feedback{border-radius:8px;padding:9px 11px;line-height:1.5;font-size:11px}
-.pv2-next-feedback.success{background:#ecf9ef;color:#247c4c}
-.pv2-next-feedback.error{background:#fff2ed;color:#b24931}
-.pv2-percent-input{position:relative;display:block;max-width:145px}
-.pv2-percent-input>span{position:absolute;right:11px;top:10px;color:#8a8990}
-.pv2-secondary-more{margin-top:12px;padding:11px 0;border-top:1px solid #eaedf0}
-.pv2-secondary-more>summary{color:#8b6d5b;font-size:11px;font-weight:750;cursor:pointer}
-.pv2-secondary-more .pv2-action-link{margin-top:11px}
-@media(max-width:780px){
- .pv2-priority-wrap{grid-template-columns:minmax(0,1fr)}
- .pv2-priority-main{border-radius:18px 18px 0 0;padding:19px 16px}
- .pv2-priority-payment{border-left:0;border-top:1px solid #f0e5dc;padding:17px 16px}
- .pv2-header-drawer-body{right:auto;left:0;width:100%;max-height:63vh}
+.pv2-project-header {
+  border: 1px solid #ecebf0;
+  box-shadow: 0 10px 30px #1c324010;
+  overflow: visible;
 }
-@media(max-width:500px){
- .pv2-project-header-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
- .pv2-header-drawer>summary{white-space:normal!important;font-size:11px;line-height:1.3;padding:11px 7px!important}
- .pv2-header-drawer-body{position:relative;top:6px;right:auto;left:auto;width:calc(200% + 10px);
-  max-height:58vh;padding:12px}
- .pv2-header-drawer:nth-child(2) .pv2-header-drawer-body{transform:translateX(calc(-50% - 5px))}
- .pv2-priority-main>h2{font-size:22px}
- .pv2-priority-amount{font-size:22px}
- .pv2-priority-wrap,.pv2-priority-main,.pv2-priority-payment{min-width:0}
- .pv2-next-primary{width:100%;justify-self:stretch}
+.pv2-project-header-actions {
+  position: relative;
+  gap: 10px;
+}
+.pv2-header-drawer {
+  min-width: 0;
+  max-width: 100%;
+}
+.pv2-header-drawer > summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 43px;
+  gap: 6px;
+}
+.pv2-header-drawer > summary::-webkit-details-marker {
+  display: none;
+}
+.pv2-header-drawer[open] > summary {
+  color: #ec661d;
+  border-color: #f5c4a8;
+  background: #fff8f2;
+}
+.pv2-header-drawer-body {
+  position: absolute;
+  top: calc(100% + 9px);
+  right: 0;
+  z-index: 20;
+  width: min(600px, 100%);
+  max-height: min(68vh, 660px);
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #e9e5e2;
+  box-shadow: 0 14px 40px #233b4b26;
+  padding: 19px;
+  border-radius: 15px;
+}
+.pv2-header-drawer-body .pv2-panel {
+  box-shadow: none;
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+.pv2-header-drawer-body form {
+  max-width: 100%;
+  min-width: 0;
+}
+.pv2-priority-wrap {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(240px, 1fr);
+  overflow: visible;
+  border: 1px solid #f0e3d8;
+  border-radius: 18px;
+  background: white;
+  box-shadow: 0 12px 36px #243e4b0b;
+  min-width: 0;
+}
+.pv2-priority-main {
+  padding: 23px 24px;
+  min-width: 0;
+  background: linear-gradient(130deg, #fff 0%, #fffdfb 60%, #fff4eb 100%);
+  border-radius: 18px 0 0 18px;
+}
+.pv2-priority-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 850;
+  font-size: 10px;
+  letter-spacing: 1.1px;
+  color: #d6601c;
+}
+.pv2-next-pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #f66a21;
+  box-shadow: 0 0 0 4px #f66a2118;
+}
+.pv2-next-stage {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0;
+  background: #fff0e2;
+  color: #a85c32;
+  border: 1px solid #fce0c8;
+  border-radius: 999px;
+  padding: 6px 9px;
+}
+.pv2-priority-main > h2 {
+  color: #172b49;
+  font-size: clamp(21px, 2.4vw, 28px);
+  letter-spacing: -0.035em;
+  line-height: 1.2;
+  font-weight: 900;
+  margin: 14px 0 7px;
+}
+.pv2-priority-description {
+  max-width: 680px;
+  line-height: 1.65;
+  font-size: 12px;
+  color: #697991;
+}
+.pv2-checklist-inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 17px 0 0;
+}
+.pv2-checklist-inline > span {
+  padding: 7px 10px;
+  font-size: 10px;
+  font-weight: 800;
+  border: 1px solid #e8eaf0;
+  border-radius: 999px;
+  background: #f9fafc;
+  color: #758397;
+}
+.pv2-checklist-inline > span.done {
+  background: #e9f9f0;
+  border-color: #cdeed9;
+  color: #22855b;
+}
+.pv2-priority-payment {
+  border-left: 1px solid #f0e5dc;
+  min-width: 0;
+  padding: 23px 19px;
+}
+.pv2-next-payment-heading {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  color: #243954;
+}
+.pv2-next-payment-heading > div {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+.pv2-next-payment-heading strong {
+  font-size: 13px;
+  font-weight: 900;
+}
+.pv2-next-payment-heading small {
+  color: #8b96a6;
+  font-size: 10px;
+}
+.pv2-priority-coin {
+  height: 37px;
+  width: 37px;
+  border-radius: 12px;
+  background: #fff0e3;
+  color: #e46222;
+  display: grid;
+  place-items: center;
+  font-size: 19px;
+  font-weight: 900;
+}
+.pv2-priority-amount {
+  display: block;
+  color: #203650;
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: -0.035em;
+  margin: 18px 0 10px;
+}
+.pv2-priority-payment-meta {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.pv2-priority-payment-meta > span:first-child {
+  font-size: 11px;
+  color: #6b7892;
+  font-weight: 750;
+}
+.pv2-priority-payment-meta > p {
+  flex-basis: 100%;
+  font-size: 11px;
+  color: #6a8092;
+  margin-top: 6px;
+}
+.pv2-next-subtle {
+  font-size: 11px;
+  color: #8290a2;
+  line-height: 1.55;
+  margin: 9px 0;
+}
+.pv2-next-notice {
+  padding: 12px 14px;
+  background: #fff2e8;
+  border: 1px solid #f8d7bb;
+  border-radius: 10px;
+  color: #a65f2f;
+  font-size: 12px;
+  line-height: 1.55;
+  margin-top: 15px;
+}
+.pv2-next-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #d85e23;
+  font-weight: 800;
+  font-size: 11px;
+  margin-top: 9px;
+}
+.pv2-next-drawer {
+  min-width: 0;
+  margin-top: 14px;
+  border: 1px solid #eecdb5;
+  border-radius: 11px;
+  background: #fff;
+}
+.pv2-next-drawer > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  cursor: pointer;
+  color: #d65c21;
+  font-size: 12px;
+  font-weight: 850;
+  padding: 12px 14px;
+  list-style: none;
+}
+.pv2-next-drawer > summary::-webkit-details-marker {
+  display: none;
+}
+.pv2-next-drawer > summary::after {
+  content: '⌄';
+  font-size: 16px;
+}
+.pv2-next-drawer[open] > summary::after {
+  transform: rotate(180deg);
+}
+.pv2-inline-work-form {
+  padding: 0 14px 15px;
+  display: grid;
+  gap: 10px;
+}
+.pv2-inline-work-form > label {
+  font-size: 11px;
+  font-weight: 800;
+  color: #52667d;
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+}
+.pv2-inline-work-form textarea,
+.pv2-inline-work-form input {
+  max-width: 100%;
+  width: 100%;
+  background: #fff;
+  color: #1f334d;
+  border: 1px solid #dde3eb;
+  border-radius: 9px;
+  padding: 10px;
+  font: inherit;
+  font-size: 12px;
+  min-width: 0;
+  outline-offset: 2px;
+}
+.pv2-inline-work-form textarea:focus,
+.pv2-inline-work-form input:focus {
+  outline: 2px solid #fd975c;
+}
+.pv2-inline-work-form > p {
+  font-size: 10px;
+  color: #7d889b;
+  line-height: 1.55;
+  margin: 0;
+}
+.pv2-next-primary {
+  justify-self: start;
+  padding: 10px 15px;
+  border: 0;
+  border-radius: 9px;
+  background: #f66a22;
+  color: white;
+  font-size: 11px;
+  font-weight: 850;
+  cursor: pointer;
+}
+.pv2-next-primary:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+.pv2-next-feedback {
+  border-radius: 8px;
+  padding: 9px 11px;
+  line-height: 1.5;
+  font-size: 11px;
+}
+.pv2-next-feedback.success {
+  background: #ecf9ef;
+  color: #247c4c;
+}
+.pv2-next-feedback.error {
+  background: #fff2ed;
+  color: #b24931;
+}
+.pv2-percent-input {
+  position: relative;
+  display: block;
+  max-width: 145px;
+}
+.pv2-percent-input > span {
+  position: absolute;
+  right: 11px;
+  top: 10px;
+  color: #8a8990;
+}
+.pv2-secondary-more {
+  margin-top: 12px;
+  padding: 11px 0;
+  border-top: 1px solid #eaedf0;
+}
+.pv2-secondary-more > summary {
+  color: #8b6d5b;
+  font-size: 11px;
+  font-weight: 750;
+  cursor: pointer;
+}
+.pv2-secondary-more .pv2-action-link {
+  margin-top: 11px;
+}
+@media (max-width: 780px) {
+  .pv2-priority-wrap {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .pv2-priority-main {
+    border-radius: 18px 18px 0 0;
+    padding: 19px 16px;
+  }
+  .pv2-priority-payment {
+    border-left: 0;
+    border-top: 1px solid #f0e5dc;
+    padding: 17px 16px;
+  }
+  .pv2-header-drawer-body {
+    right: auto;
+    left: 0;
+    width: 100%;
+    max-height: 63vh;
+  }
+}
+@media (max-width: 500px) {
+  .pv2-project-header-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .pv2-header-drawer > summary {
+    white-space: normal !important;
+    font-size: 11px;
+    line-height: 1.3;
+    padding: 11px 7px !important;
+  }
+  .pv2-header-drawer-body {
+    position: relative;
+    top: 6px;
+    right: auto;
+    left: auto;
+    width: calc(200% + 10px);
+    max-height: 58vh;
+    padding: 12px;
+  }
+  .pv2-header-drawer:nth-child(2) .pv2-header-drawer-body {
+    transform: translateX(calc(-50% - 5px));
+  }
+  .pv2-priority-main > h2 {
+    font-size: 22px;
+  }
+  .pv2-priority-amount {
+    font-size: 22px;
+  }
+  .pv2-priority-wrap,
+  .pv2-priority-main,
+  .pv2-priority-payment {
+    min-width: 0;
+  }
+  .pv2-next-primary {
+    width: 100%;
+    justify-self: stretch;
+  }
 }
 
 /* Unified SG Homes / ProPulse orange command workspace.
  * Uses the SAME palette as command-centre.css instead of a second blue theme.
  * White cards are deliberate, as in the approved dashboard reference. */
 .pv2-page {
- --pv2-orange:#fe5105;
- --pv2-ink:#111c34;
- --pv2-muted:#66758b;
- --pv2-line:#f1e8e2;
- background:radial-gradient(circle at 80% 0,#fff2e8 0,transparent 530px),#fffaf7;
- color:var(--pv2-ink);
- padding:20px 22px 108px;
- max-width:1640px;
- margin:0 auto;
+  --pv2-orange: #fe5105;
+  --pv2-ink: #111c34;
+  --pv2-muted: #66758b;
+  --pv2-line: #f1e8e2;
+  background:
+    radial-gradient(circle at 80% 0, #fff2e8 0, transparent 530px), #fffaf7;
+  color: var(--pv2-ink);
+  padding: 20px 22px 108px;
+  max-width: 1640px;
+  margin: 0 auto;
 }
-.pv2-page .pv2-primary,.pv2-page .pv2-next-primary{
- background:linear-gradient(125deg,#ff7719,#ff4b00);
- border-color:#fe5105;color:#fff;
- box-shadow:0 5px 12px #ff6b1b1c;
+.pv2-page .pv2-primary,
+.pv2-page .pv2-next-primary {
+  background: linear-gradient(125deg, #ff7719, #ff4b00);
+  border-color: #fe5105;
+  color: #fff;
+  box-shadow: 0 5px 12px #ff6b1b1c;
 }
-.pv2-page .pv2-primary:hover,.pv2-page .pv2-next-primary:hover{background:#ec4b07;color:#fff}
-.pv2-page .pv2-action-link,.pv2-page .pv2-next-secondary{color:#ed540d}
-.pv2-page .pv2-button:hover{border-color:#ffb17d}
-.pv2-project-header{
- border:1px solid #f3e6dc;border-radius:17px;background:#fff;
- box-shadow:0 6px 22px #7a3d1b0a;padding:17px 19px 0;margin-bottom:13px;
+.pv2-page .pv2-primary:hover,
+.pv2-page .pv2-next-primary:hover {
+  background: #ec4b07;
+  color: #fff;
 }
-.pv2-project-thumb{background:linear-gradient(140deg,#ffead7,#fff7ec);color:#ff5a0a}
-.pv2-project-identity h1{font-size:clamp(18px,2vw,25px);color:#111c34}
-.pv2-project-meta span{font-size:11px;color:#66758b}
-.pv2-project-tabs{gap:3px;margin-top:13px;border-top:1px solid #f6ebe2}
-.pv2-project-tabs a{font-size:11px;color:#46546b;padding:13px 12px;border-radius:0;border-bottom:3px solid transparent}
-.pv2-project-tabs a:hover{background:#fff4eb;color:#fe5105}
-.pv2-project-tabs a.selected{background:#fff9f5;color:#fa5106;border-color:transparent;border-bottom-color:#fe5105}
-.pv2-header-progress{margin:11px 0 6px;max-width:240px;margin-left:auto}
-.pv2-header-progress>span{display:flex;justify-content:space-between;gap:10px;
- color:#67768e;font-size:11px;font-weight:650}
-.pv2-header-progress strong{color:#f45109}
-.pv2-header-progress .pv2-bar{margin-top:7px;height:7px;background:#ffebe0}
-.pv2-header-progress .pv2-bar>span{background:linear-gradient(90deg,#ff8b31,#fe5105)}
-.pv2-project-header-actions{justify-content:flex-end}
-.pv2-panel{border:1px solid #f4e7df;background:#fff;border-radius:16px;
- box-shadow:0 5px 18px #65361309}
-.pv2-crumb{font-size:11px;color:#7c8797}
-.pv2-command-workspace{gap:13px}
-.pv2-financial-cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
-.pv2-financial-card{min-width:0;background:#fff;border:1px solid #f4e9e2;
- border-radius:15px;padding:12px;display:flex;gap:11px;align-items:flex-start;
- min-height:111px;box-shadow:0 4px 16px #71351808}
-.pv2-financial-card>div{display:flex;flex-direction:column;gap:6px;min-width:0;flex:1;padding-top:3px}
-.pv2-money-title{font-size:12px;color:#303c51;font-weight:750}
-.pv2-financial-card strong{font-size:clamp(17px,1.8vw,25px);letter-spacing:-.035em;color:#131e38;
- white-space:nowrap;font-variant-numeric:tabular-nums}
-.pv2-financial-card small{font-size:10px;color:#8090a4;line-height:1.4}
-.pv2-money-icon{width:47px;height:47px;flex:0 0 47px;display:grid;place-items:center;
- border-radius:13px;color:#f65c0b;background:#fff0e6}
-.pv2-money-green .pv2-money-icon{background:#e6fbef;color:#12a768}
-.pv2-money-red .pv2-money-icon{background:#fff0e9;color:#f05618}
-.pv2-money-purple .pv2-money-icon{background:#f5efff;color:#7c55d5}
-.pv2-money-red strong{color:#be3d21}
-.pv2-money-purple strong{color:#673fbd}
-.pv2-command-layout{display:grid;grid-template-columns:minmax(0,1.9fr) minmax(280px,.96fr);
- gap:14px;align-items:start;min-width:0}
-.pv2-command-sidebar{display:grid;gap:13px;min-width:0}
-.pv2-command-stages{min-width:0;padding:18px 15px}
-.pv2-command-head{display:flex;align-items:flex-start;justify-content:space-between;
- gap:9px;margin:0 0 15px;min-width:0}
-.pv2-command-head h2{font-size:17px;font-weight:850;letter-spacing:-.025em;color:#17213a;margin:0}
-.pv2-command-head p{font-size:11px;line-height:1.6;color:#748198;margin-top:5px}
-.pv2-timeline-counter{color:#f2570d;font-size:10px;font-weight:850;background:#fff2ea;
- border:1px solid #ffdfcb;padding:6px 9px;border-radius:8px;white-space:nowrap}
-.pv2-stage-empty{padding:20px 12px;border:1px dashed #f5d8c4;background:#fffaf5;
- border-radius:10px;display:grid;gap:12px;color:#6b7182;line-height:1.6;font-size:12px}
-.pv2-command-stage-list{position:relative;display:grid;gap:8px;padding-left:19px}
-.pv2-command-stage-list:before{content:"";position:absolute;top:21px;bottom:20px;left:13px;width:2px;background:#ffdcc7}
-.pv2-command-stage{border:1px solid #f0e8e2;background:#fff;border-radius:13px;
- position:relative;min-width:0;box-shadow:0 2px 8px #78371306}
-.pv2-command-stage[open]{border-color:#ffdcc2;box-shadow:0 5px 17px #ff681914}
-.pv2-command-stage-summary{display:flex;align-items:center;gap:12px;list-style:none;
- cursor:pointer;min-height:63px;padding:10px 12px;min-width:0}
-.pv2-command-stage-summary::-webkit-details-marker{display:none}
-.pv2-command-stage-summary>svg{color:#8e99a9;flex:0 0 auto;transition:transform .18s}
-.pv2-command-stage[open]>.pv2-command-stage-summary>svg{transform:rotate(90deg);color:#f7570d}
-.pv2-stage-number{width:33px;height:33px;flex:0 0 33px;border-radius:50%;
- display:grid;place-items:center;font-weight:900;font-size:13px;color:#fff;
- background:#a9b3c2;position:relative;margin-left:-32px;margin-right:5px;
- box-shadow:0 0 0 4px #fff}
-.pv2-command-stage.is-current .pv2-stage-number{background:linear-gradient(135deg,#ff8731,#ff4b00)}
-.pv2-command-stage.is-complete .pv2-stage-number{background:#0ab46b}
-.pv2-stage-title-block{display:flex;flex-direction:column;gap:5px;flex:1;min-width:0}
-.pv2-stage-title-block strong{color:#18213a;font-size:12px;line-height:1.35;overflow-wrap:anywhere}
-.pv2-stage-title-block small{color:#8c97a7;font-size:10px;line-height:1.4}
-.pv2-stage-meta{font-size:10px;color:#68758b;background:#fff5ee;border-radius:7px;
- padding:7px 8px;white-space:nowrap}
-.pv2-command-stage-inner{display:grid;gap:12px;padding:12px 12px 14px 21px;
- border-top:1px solid #f2eae4;background:#fffdfa;border-radius:0 0 13px 13px}
-.pv2-command-work-list{display:grid;border:1px solid #f0e5db;border-radius:11px;
- overflow:hidden;background:#fff}
-.pv2-command-work-item{min-height:40px;display:flex;align-items:center;gap:10px;
- padding:9px 11px;border-bottom:1px solid #f6eee8;color:#3e4a60;font-size:11px}
-.pv2-command-work-item:last-child{border-bottom:0}
-.pv2-command-work-item>span:nth-child(2){flex:1;min-width:0}
-.pv2-work-bullet{width:22px;height:22px;flex:0 0 22px;color:#f35b13;
- background:#fff1e6;display:grid;place-items:center;border-radius:7px}
-.pv2-command-payments{display:flex;align-items:flex-start;gap:11px;padding:12px;
- border:1px solid #fbd5b9;border-radius:10px;background:#fff5eb;color:#d75918}
-.pv2-command-payments>div{display:grid;gap:5px;min-width:0}
-.pv2-command-payments strong{font-size:11px;color:#a84916}
-.pv2-command-payments p,.pv2-command-payments small{font-size:10px;line-height:1.5;color:#926a53}
-.pv2-stage-secondary{padding:11px 12px;border-radius:10px;border:1px solid #f0e8df;background:#fff}
-.pv2-stage-secondary>summary{font-size:11px;font-weight:750;color:#e55a12;cursor:pointer}
-.pv2-stage-secondary ul{margin:10px 0 0;padding-left:18px;font-size:11px;line-height:1.7;color:#56647c}
-.pv2-stage-hint,.pv2-stage-attachment-count{font-size:10px;color:#8990a1;line-height:1.6}
-.pv2-command-stage-actions{display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap;min-width:0}
-.pv2-command-stage-actions>details{position:relative;max-width:100%;min-width:0}
-.pv2-command-stage-actions>details>summary,.pv2-command-quick-actions>details>summary,
-.pv2-command-quick-actions>a{display:flex;align-items:center;justify-content:center;gap:6px;
- list-style:none;cursor:pointer;padding:10px 12px;min-height:37px;font-size:10px;
- font-weight:800;color:#ea550f;border:1px solid #ffceb1;border-radius:9px;background:#fff}
-.pv2-command-stage-actions>details>summary::-webkit-details-marker,
-.pv2-command-quick-actions>details>summary::-webkit-details-marker{display:none}
-.pv2-command-stage-actions>details[open]{width:100%;border:1px solid #f6ddcb;
- border-radius:10px;background:#fff9f4;padding:9px}
-.pv2-command-stage-actions>details[open]>summary{justify-content:flex-start}
-.pv2-command-stage-actions>details>.pv2-form{padding:12px 0}
-.pv2-command-stage-actions>details>summary:hover,
-.pv2-command-quick-actions>details>summary:hover{background:#fff1e6}
-.pv2-command-sidebar .pv2-panel{padding:17px 15px}
-.pv2-attention-item{display:flex;gap:11px;border:1px solid #f3e9e1;border-radius:12px;
- margin-top:9px;padding:12px 9px;background:#fff}
-.pv2-attention-symbol,.pv2-activity-icon{height:35px;width:35px;flex:0 0 35px;
- display:grid;place-items:center;background:#fff0e6;color:#ff5c0e;border-radius:10px}
-.pv2-attention-item>div{min-width:0;flex:1}
-.pv2-attention-item strong,.pv2-activity-row strong{font-size:11px;color:#1d2b43}
-.pv2-attention-item p,.pv2-activity-row p{font-size:10px;color:#758297;margin-top:5px;
- line-height:1.55;overflow-wrap:anywhere}
-.pv2-command-sidebar .pv2-priority-wrap{margin-top:12px;grid-template-columns:minmax(0,1fr);
- box-shadow:none;border:1px solid #ffe0ca;border-radius:13px}
-.pv2-command-sidebar .pv2-priority-main{padding:13px 12px;border-radius:13px 13px 0 0;background:#fffaf6}
-.pv2-command-sidebar .pv2-priority-main>h2{font-size:16px;margin:7px 0}
-.pv2-command-sidebar .pv2-priority-description{font-size:11px}
-.pv2-command-sidebar .pv2-priority-payment{border:0;border-top:1px solid #f1e1d5;padding:12px}
-.pv2-command-sidebar .pv2-priority-amount{font-size:19px;margin:8px 0}
-.pv2-command-sidebar .pv2-checklist-inline{margin:10px 0 0}
-.pv2-command-sidebar .pv2-checklist-inline>span{font-size:9px;padding:5px 7px}
-.pv2-activity-row{display:flex;align-items:flex-start;gap:11px;padding:11px 0;
- border-bottom:1px solid #f6eee9}
-.pv2-activity-row:last-child{border-bottom:0}
-.pv2-activity-icon{height:32px;width:32px;flex-basis:32px}
-.pv2-activity-row>div{flex:1;min-width:0}
-.pv2-activity-row small{font-size:9px;color:#9ba4b2;display:block;margin-top:5px}
-.pv2-command-quick-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-.pv2-command-quick-actions>details{min-width:0}
-.pv2-command-quick-actions>a{min-width:0;white-space:normal}
-.pv2-command-quick-actions>details[open]{grid-column:1/-1;padding:8px;border-radius:10px;
- background:#fff9f4;border:1px solid #f6dac4}
-.pv2-command-quick-actions>details[open]>summary{margin-bottom:10px}
-.pv2-command-quick-actions>details:not([open])>summary{height:100%;white-space:normal;text-align:center}
-.pv2-page .pv2-status.good{background:#e1f9ed;color:#0c9860}
-.pv2-page .pv2-status.warn{background:#fff0e4;color:#d85b14}
-.pv2-page .pv2-label{background:#fff2ea;color:#df5b16}
-@media(max-width:1200px){
- .pv2-financial-cards{grid-template-columns:repeat(2,minmax(0,1fr))}
- .pv2-command-layout{grid-template-columns:minmax(0,1fr)}
- .pv2-command-sidebar{grid-template-columns:repeat(2,minmax(0,1fr))}
- .pv2-command-sidebar .pv2-attention{grid-row:span 2}
+.pv2-page .pv2-action-link,
+.pv2-page .pv2-next-secondary {
+  color: #ed540d;
 }
-@media(max-width:740px){
- .pv2-page{padding:13px 11px 100px}
- .pv2-financial-cards{gap:9px}
- .pv2-financial-card{padding:12px 9px;gap:8px;min-height:116px}
- .pv2-money-icon{width:33px;height:33px;flex-basis:33px;border-radius:10px}
- .pv2-money-icon svg{width:18px;height:18px}
- .pv2-financial-card strong{font-size:clamp(15px,4.3vw,21px);white-space:normal;overflow-wrap:anywhere}
- .pv2-money-title{font-size:10px}
- .pv2-financial-card small{font-size:9px}
- .pv2-command-sidebar{grid-template-columns:1fr}
- .pv2-command-sidebar .pv2-attention{grid-row:auto}
- .pv2-command-stages{padding:14px 10px}
- .pv2-command-stage-list{padding-left:17px}
- .pv2-command-stage-summary{gap:6px;padding:10px 6px}
- .pv2-stage-number{width:29px;height:29px;flex-basis:29px;margin-left:-26px;margin-right:2px}
- .pv2-stage-title-block strong{font-size:11px}
- .pv2-stage-title-block small{font-size:9px}
- .pv2-stage-meta{display:none}
- .pv2-command-stage-inner{padding:11px 8px 13px 13px}
- .pv2-command-stage-summary .pv2-status{font-size:9px;padding:6px}
- .pv2-project-header{padding:13px 12px 0}
- .pv2-project-header-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
- .pv2-header-progress{margin:14px 0 5px;max-width:100%}
- .pv2-project-tabs a{padding:11px 10px;font-size:10px}
- .pv2-command-stage-actions>details>summary{padding:9px;font-size:10px}
- .pv2-command-head h2{font-size:15px}
+.pv2-page .pv2-button:hover {
+  border-color: #ffb17d;
 }
-@media(max-width:390px){
- .pv2-financial-card{align-items:flex-start;flex-direction:column}
- .pv2-financial-card>div{gap:5px}
- .pv2-financial-card strong{font-size:17px}
- .pv2-command-quick-actions{grid-template-columns:1fr}
+.pv2-project-header {
+  border: 1px solid #f3e6dc;
+  border-radius: 17px;
+  background: #fff;
+  box-shadow: 0 6px 22px #7a3d1b0a;
+  padding: 17px 19px 0;
+  margin-bottom: 13px;
+}
+.pv2-project-thumb {
+  background: linear-gradient(140deg, #ffead7, #fff7ec);
+  color: #ff5a0a;
+}
+.pv2-project-identity h1 {
+  font-size: clamp(18px, 2vw, 25px);
+  color: #111c34;
+}
+.pv2-project-meta span {
+  font-size: 11px;
+  color: #66758b;
+}
+.pv2-project-tabs {
+  gap: 3px;
+  margin-top: 13px;
+  border-top: 1px solid #f6ebe2;
+}
+.pv2-project-tabs a {
+  font-size: 11px;
+  color: #46546b;
+  padding: 13px 12px;
+  border-radius: 0;
+  border-bottom: 3px solid transparent;
+}
+.pv2-project-tabs a:hover {
+  background: #fff4eb;
+  color: #fe5105;
+}
+.pv2-project-tabs a.selected {
+  background: #fff9f5;
+  color: #fa5106;
+  border-color: transparent;
+  border-bottom-color: #fe5105;
+}
+.pv2-header-progress {
+  margin: 11px 0 6px;
+  max-width: 240px;
+  margin-left: auto;
+}
+.pv2-header-progress > span {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  color: #67768e;
+  font-size: 11px;
+  font-weight: 650;
+}
+.pv2-header-progress strong {
+  color: #f45109;
+}
+.pv2-header-progress .pv2-bar {
+  margin-top: 7px;
+  height: 7px;
+  background: #ffebe0;
+}
+.pv2-header-progress .pv2-bar > span {
+  background: linear-gradient(90deg, #ff8b31, #fe5105);
+}
+.pv2-project-header-actions {
+  justify-content: flex-end;
+}
+.pv2-panel {
+  border: 1px solid #f4e7df;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 5px 18px #65361309;
+}
+.pv2-crumb {
+  font-size: 11px;
+  color: #7c8797;
+}
+.pv2-command-workspace {
+  gap: 13px;
+}
+.pv2-financial-cards {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+.pv2-financial-card {
+  min-width: 0;
+  background: #fff;
+  border: 1px solid #f4e9e2;
+  border-radius: 15px;
+  padding: 12px;
+  display: flex;
+  gap: 11px;
+  align-items: flex-start;
+  min-height: 111px;
+  box-shadow: 0 4px 16px #71351808;
+}
+.pv2-financial-card > div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  flex: 1;
+  padding-top: 3px;
+}
+.pv2-money-title {
+  font-size: 12px;
+  color: #303c51;
+  font-weight: 750;
+}
+.pv2-financial-card strong {
+  font-size: clamp(17px, 1.8vw, 25px);
+  letter-spacing: -0.035em;
+  color: #131e38;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.pv2-financial-card small {
+  font-size: 10px;
+  color: #8090a4;
+  line-height: 1.4;
+}
+.pv2-money-icon {
+  width: 47px;
+  height: 47px;
+  flex: 0 0 47px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  color: #f65c0b;
+  background: #fff0e6;
+}
+.pv2-money-green .pv2-money-icon {
+  background: #e6fbef;
+  color: #12a768;
+}
+.pv2-money-red .pv2-money-icon {
+  background: #fff0e9;
+  color: #f05618;
+}
+.pv2-money-purple .pv2-money-icon {
+  background: #f5efff;
+  color: #7c55d5;
+}
+.pv2-money-red strong {
+  color: #be3d21;
+}
+.pv2-money-purple strong {
+  color: #673fbd;
+}
+.pv2-command-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.9fr) minmax(280px, 0.96fr);
+  gap: 14px;
+  align-items: start;
+  min-width: 0;
+}
+.pv2-command-sidebar {
+  display: grid;
+  gap: 13px;
+  min-width: 0;
+}
+.pv2-command-stages {
+  min-width: 0;
+  padding: 18px 15px;
+}
+.pv2-command-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 9px;
+  margin: 0 0 15px;
+  min-width: 0;
+}
+.pv2-command-head h2 {
+  font-size: 17px;
+  font-weight: 850;
+  letter-spacing: -0.025em;
+  color: #17213a;
+  margin: 0;
+}
+.pv2-command-head p {
+  font-size: 11px;
+  line-height: 1.6;
+  color: #748198;
+  margin-top: 5px;
+}
+.pv2-timeline-counter {
+  color: #f2570d;
+  font-size: 10px;
+  font-weight: 850;
+  background: #fff2ea;
+  border: 1px solid #ffdfcb;
+  padding: 6px 9px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+.pv2-stage-empty {
+  padding: 20px 12px;
+  border: 1px dashed #f5d8c4;
+  background: #fffaf5;
+  border-radius: 10px;
+  display: grid;
+  gap: 12px;
+  color: #6b7182;
+  line-height: 1.6;
+  font-size: 12px;
+}
+.pv2-command-stage-list {
+  position: relative;
+  display: grid;
+  gap: 8px;
+  padding-left: 19px;
+}
+.pv2-command-stage-list:before {
+  content: '';
+  position: absolute;
+  top: 21px;
+  bottom: 20px;
+  left: 13px;
+  width: 2px;
+  background: #ffdcc7;
+}
+.pv2-command-stage {
+  border: 1px solid #f0e8e2;
+  background: #fff;
+  border-radius: 13px;
+  position: relative;
+  min-width: 0;
+  box-shadow: 0 2px 8px #78371306;
+}
+.pv2-command-stage[open] {
+  border-color: #ffdcc2;
+  box-shadow: 0 5px 17px #ff681914;
+}
+.pv2-command-stage-summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  list-style: none;
+  cursor: pointer;
+  min-height: 63px;
+  padding: 10px 12px;
+  min-width: 0;
+}
+.pv2-command-stage-summary::-webkit-details-marker {
+  display: none;
+}
+.pv2-command-stage-summary > svg {
+  color: #8e99a9;
+  flex: 0 0 auto;
+  transition: transform 0.18s;
+}
+.pv2-command-stage[open] > .pv2-command-stage-summary > svg {
+  transform: rotate(90deg);
+  color: #f7570d;
+}
+.pv2-stage-number {
+  width: 33px;
+  height: 33px;
+  flex: 0 0 33px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  font-size: 13px;
+  color: #fff;
+  background: #a9b3c2;
+  position: relative;
+  margin-left: -32px;
+  margin-right: 5px;
+  box-shadow: 0 0 0 4px #fff;
+}
+.pv2-command-stage.is-current .pv2-stage-number {
+  background: linear-gradient(135deg, #ff8731, #ff4b00);
+}
+.pv2-command-stage.is-complete .pv2-stage-number {
+  background: #0ab46b;
+}
+.pv2-stage-title-block {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+  min-width: 0;
+}
+.pv2-stage-title-block strong {
+  color: #18213a;
+  font-size: 12px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+.pv2-stage-title-block small {
+  color: #8c97a7;
+  font-size: 10px;
+  line-height: 1.4;
+}
+.pv2-stage-meta {
+  font-size: 10px;
+  color: #68758b;
+  background: #fff5ee;
+  border-radius: 7px;
+  padding: 7px 8px;
+  white-space: nowrap;
+}
+.pv2-command-stage-inner {
+  display: grid;
+  gap: 12px;
+  padding: 12px 12px 14px 21px;
+  border-top: 1px solid #f2eae4;
+  background: #fffdfa;
+  border-radius: 0 0 13px 13px;
+}
+.pv2-command-work-list {
+  display: grid;
+  border: 1px solid #f0e5db;
+  border-radius: 11px;
+  overflow: hidden;
+  background: #fff;
+}
+.pv2-command-work-item {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 11px;
+  border-bottom: 1px solid #f6eee8;
+  color: #3e4a60;
+  font-size: 11px;
+}
+.pv2-command-work-item:last-child {
+  border-bottom: 0;
+}
+.pv2-command-work-item > span:nth-child(2) {
+  flex: 1;
+  min-width: 0;
+}
+.pv2-work-bullet {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  color: #f35b13;
+  background: #fff1e6;
+  display: grid;
+  place-items: center;
+  border-radius: 7px;
+}
+.pv2-command-payments {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 12px;
+  border: 1px solid #fbd5b9;
+  border-radius: 10px;
+  background: #fff5eb;
+  color: #d75918;
+}
+.pv2-command-payments > div {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+.pv2-command-payments strong {
+  font-size: 11px;
+  color: #a84916;
+}
+.pv2-command-payments p,
+.pv2-command-payments small {
+  font-size: 10px;
+  line-height: 1.5;
+  color: #926a53;
+}
+.pv2-stage-secondary {
+  padding: 11px 12px;
+  border-radius: 10px;
+  border: 1px solid #f0e8df;
+  background: #fff;
+}
+.pv2-stage-secondary > summary {
+  font-size: 11px;
+  font-weight: 750;
+  color: #e55a12;
+  cursor: pointer;
+}
+.pv2-stage-secondary ul {
+  margin: 10px 0 0;
+  padding-left: 18px;
+  font-size: 11px;
+  line-height: 1.7;
+  color: #56647c;
+}
+.pv2-stage-hint,
+.pv2-stage-attachment-count {
+  font-size: 10px;
+  color: #8990a1;
+  line-height: 1.6;
+}
+.pv2-command-stage-actions {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+.pv2-command-stage-actions > details {
+  position: relative;
+  max-width: 100%;
+  min-width: 0;
+}
+.pv2-command-stage-actions > details > summary,
+.pv2-command-quick-actions > details > summary,
+.pv2-command-quick-actions > a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  list-style: none;
+  cursor: pointer;
+  padding: 10px 12px;
+  min-height: 37px;
+  font-size: 10px;
+  font-weight: 800;
+  color: #ea550f;
+  border: 1px solid #ffceb1;
+  border-radius: 9px;
+  background: #fff;
+}
+.pv2-command-stage-actions > details > summary::-webkit-details-marker,
+.pv2-command-quick-actions > details > summary::-webkit-details-marker {
+  display: none;
+}
+.pv2-command-stage-actions > details[open] {
+  width: 100%;
+  border: 1px solid #f6ddcb;
+  border-radius: 10px;
+  background: #fff9f4;
+  padding: 9px;
+}
+.pv2-command-stage-actions > details[open] > summary {
+  justify-content: flex-start;
+}
+.pv2-command-stage-actions > details > .pv2-form {
+  padding: 12px 0;
+}
+.pv2-command-stage-actions > details > summary:hover,
+.pv2-command-quick-actions > details > summary:hover {
+  background: #fff1e6;
+}
+.pv2-command-sidebar .pv2-panel {
+  padding: 17px 15px;
+}
+.pv2-attention-item {
+  display: flex;
+  gap: 11px;
+  border: 1px solid #f3e9e1;
+  border-radius: 12px;
+  margin-top: 9px;
+  padding: 12px 9px;
+  background: #fff;
+}
+.pv2-attention-symbol,
+.pv2-activity-icon {
+  height: 35px;
+  width: 35px;
+  flex: 0 0 35px;
+  display: grid;
+  place-items: center;
+  background: #fff0e6;
+  color: #ff5c0e;
+  border-radius: 10px;
+}
+.pv2-attention-item > div {
+  min-width: 0;
+  flex: 1;
+}
+.pv2-attention-item strong,
+.pv2-activity-row strong {
+  font-size: 11px;
+  color: #1d2b43;
+}
+.pv2-attention-item p,
+.pv2-activity-row p {
+  font-size: 10px;
+  color: #758297;
+  margin-top: 5px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+.pv2-command-sidebar .pv2-priority-wrap {
+  margin-top: 12px;
+  grid-template-columns: minmax(0, 1fr);
+  box-shadow: none;
+  border: 1px solid #ffe0ca;
+  border-radius: 13px;
+}
+.pv2-command-sidebar .pv2-priority-main {
+  padding: 13px 12px;
+  border-radius: 13px 13px 0 0;
+  background: #fffaf6;
+}
+.pv2-command-sidebar .pv2-priority-main > h2 {
+  font-size: 16px;
+  margin: 7px 0;
+}
+.pv2-command-sidebar .pv2-priority-description {
+  font-size: 11px;
+}
+.pv2-command-sidebar .pv2-priority-payment {
+  border: 0;
+  border-top: 1px solid #f1e1d5;
+  padding: 12px;
+}
+.pv2-command-sidebar .pv2-priority-amount {
+  font-size: 19px;
+  margin: 8px 0;
+}
+.pv2-command-sidebar .pv2-checklist-inline {
+  margin: 10px 0 0;
+}
+.pv2-command-sidebar .pv2-checklist-inline > span {
+  font-size: 9px;
+  padding: 5px 7px;
+}
+.pv2-activity-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 11px 0;
+  border-bottom: 1px solid #f6eee9;
+}
+.pv2-activity-row:last-child {
+  border-bottom: 0;
+}
+.pv2-activity-icon {
+  height: 32px;
+  width: 32px;
+  flex-basis: 32px;
+}
+.pv2-activity-row > div {
+  flex: 1;
+  min-width: 0;
+}
+.pv2-activity-row small {
+  font-size: 9px;
+  color: #9ba4b2;
+  display: block;
+  margin-top: 5px;
+}
+.pv2-command-quick-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.pv2-command-quick-actions > details {
+  min-width: 0;
+}
+.pv2-command-quick-actions > a {
+  min-width: 0;
+  white-space: normal;
+}
+.pv2-command-quick-actions > details[open] {
+  grid-column: 1/-1;
+  padding: 8px;
+  border-radius: 10px;
+  background: #fff9f4;
+  border: 1px solid #f6dac4;
+}
+.pv2-command-quick-actions > details[open] > summary {
+  margin-bottom: 10px;
+}
+.pv2-command-quick-actions > details:not([open]) > summary {
+  height: 100%;
+  white-space: normal;
+  text-align: center;
+}
+.pv2-page .pv2-status.good {
+  background: #e1f9ed;
+  color: #0c9860;
+}
+.pv2-page .pv2-status.warn {
+  background: #fff0e4;
+  color: #d85b14;
+}
+.pv2-page .pv2-label {
+  background: #fff2ea;
+  color: #df5b16;
+}
+@media (max-width: 1200px) {
+  .pv2-financial-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .pv2-command-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .pv2-command-sidebar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .pv2-command-sidebar .pv2-attention {
+    grid-row: span 2;
+  }
+}
+@media (max-width: 740px) {
+  .pv2-page {
+    padding: 13px 11px 100px;
+  }
+  .pv2-financial-cards {
+    gap: 9px;
+  }
+  .pv2-financial-card {
+    padding: 12px 9px;
+    gap: 8px;
+    min-height: 116px;
+  }
+  .pv2-money-icon {
+    width: 33px;
+    height: 33px;
+    flex-basis: 33px;
+    border-radius: 10px;
+  }
+  .pv2-money-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+  .pv2-financial-card strong {
+    font-size: clamp(15px, 4.3vw, 21px);
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  .pv2-money-title {
+    font-size: 10px;
+  }
+  .pv2-financial-card small {
+    font-size: 9px;
+  }
+  .pv2-command-sidebar {
+    grid-template-columns: 1fr;
+  }
+  .pv2-command-sidebar .pv2-attention {
+    grid-row: auto;
+  }
+  .pv2-command-stages {
+    padding: 14px 10px;
+  }
+  .pv2-command-stage-list {
+    padding-left: 17px;
+  }
+  .pv2-command-stage-summary {
+    gap: 6px;
+    padding: 10px 6px;
+  }
+  .pv2-stage-number {
+    width: 29px;
+    height: 29px;
+    flex-basis: 29px;
+    margin-left: -26px;
+    margin-right: 2px;
+  }
+  .pv2-stage-title-block strong {
+    font-size: 11px;
+  }
+  .pv2-stage-title-block small {
+    font-size: 9px;
+  }
+  .pv2-stage-meta {
+    display: none;
+  }
+  .pv2-command-stage-inner {
+    padding: 11px 8px 13px 13px;
+  }
+  .pv2-command-stage-summary .pv2-status {
+    font-size: 9px;
+    padding: 6px;
+  }
+  .pv2-project-header {
+    padding: 13px 12px 0;
+  }
+  .pv2-project-header-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .pv2-header-progress {
+    margin: 14px 0 5px;
+    max-width: 100%;
+  }
+  .pv2-project-tabs a {
+    padding: 11px 10px;
+    font-size: 10px;
+  }
+  .pv2-command-stage-actions > details > summary {
+    padding: 9px;
+    font-size: 10px;
+  }
+  .pv2-command-head h2 {
+    font-size: 15px;
+  }
+}
+@media (max-width: 390px) {
+  .pv2-financial-card {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .pv2-financial-card > div {
+    gap: 5px;
+  }
+  .pv2-financial-card strong {
+    font-size: 17px;
+  }
+  .pv2-command-quick-actions {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Contract/design actions belong to their quotation-derived timeline stages. */
-.pv2-stage-workflow{display:grid;gap:12px;min-width:0;padding:14px;border:1px solid #f0dfd2;border-radius:14px;background:#fffaf6}
-.pv2-stage-workflow h3{margin:0;color:#1e293b;font-size:15px;font-weight:750}
-.pv2-stage-workflow>p{margin:0}
-.pv2-stage-workflow-status{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.pv2-stage-workflow-payment,.pv2-stage-workflow-survey{display:grid;gap:8px;min-width:0}
-.pv2-stage-workflow-payment p{margin:0;color:#66758c}
-.pv2-command-stage-inner .pv2-stage-workflow .pv2-lifecycle{margin:0;padding:0;border:0;box-shadow:none;background:transparent}
-.pv2-stage-workflow .pv2-edit-drawer{max-width:100%;min-width:0}
-.pv2-stage-workflow .pv2-form{min-width:0}
-@media(max-width:680px){.pv2-stage-workflow{padding:10px;gap:10px}.pv2-stage-workflow-status{align-items:flex-start}}
+.pv2-stage-workflow {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid #f0dfd2;
+  border-radius: 14px;
+  background: #fffaf6;
+}
+.pv2-stage-workflow h3 {
+  margin: 0;
+  color: #1e293b;
+  font-size: 15px;
+  font-weight: 750;
+}
+.pv2-stage-workflow > p {
+  margin: 0;
+}
+.pv2-stage-workflow-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.pv2-stage-workflow-payment,
+.pv2-stage-workflow-survey {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+.pv2-stage-workflow-payment p {
+  margin: 0;
+  color: #66758c;
+}
+.pv2-command-stage-inner .pv2-stage-workflow .pv2-lifecycle {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+}
+.pv2-stage-workflow .pv2-edit-drawer {
+  max-width: 100%;
+  min-width: 0;
+}
+.pv2-stage-workflow .pv2-form {
+  min-width: 0;
+}
+@media (max-width: 680px) {
+  .pv2-stage-workflow {
+    padding: 10px;
+    gap: 10px;
+  }
+  .pv2-stage-workflow-status {
+    align-items: flex-start;
+  }
+}
 
 /* Compact, evidence-backed readiness inside the active design timeline only. */
-.pv2-execution-readiness{display:grid;gap:9px;padding:12px;border:1px solid #f2e0d5;border-radius:12px;background:#fff}
-.pv2-execution-readiness h3{margin:0;color:#243044;font-size:14px;font-weight:700}
-.pv2-execution-readiness-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
-.pv2-execution-readiness-grid>span{display:flex;justify-content:space-between;align-items:center;gap:7px;min-width:0;padding:9px 11px;background:#fff8f4;border-radius:9px;color:#687386;font-size:11px}
-.pv2-execution-readiness-grid strong{font-size:11px;color:#263245;font-weight:750;text-align:right}
-.pv2-execution-readiness>.pv2-hint{margin:0}
-.pv2-readiness-next{display:grid;gap:7px;padding:11px 12px;border:1px solid #f5ddcb;
- background:#fff8f3;border-radius:10px}
-.pv2-readiness-next>strong{font-size:12px;font-weight:800;color:#a44a17}
-.pv2-readiness-next>p{font-size:11px;color:#64748b;line-height:1.55;margin:0}
-.pv2-readiness-next .pv2-action-link{justify-self:start;display:inline-flex;align-items:center;gap:6px;font-size:12px}
-.pv2-ready-to-execute .pv2-form{padding:0;border:0;min-width:0}
-.pv2-ready-to-execute .pv2-hint{margin:0 0 8px;color:#637a6d}
-@media(max-width:680px){.pv2-execution-readiness-grid{grid-template-columns:1fr}}
-
+.pv2-execution-readiness {
+  display: grid;
+  gap: 9px;
+  padding: 12px;
+  border: 1px solid #f2e0d5;
+  border-radius: 12px;
+  background: #fff;
+}
+.pv2-execution-readiness h3 {
+  margin: 0;
+  color: #243044;
+  font-size: 14px;
+  font-weight: 700;
+}
+.pv2-execution-readiness-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+.pv2-execution-readiness-grid > span {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  padding: 9px 11px;
+  background: #fff8f4;
+  border-radius: 9px;
+  color: #687386;
+  font-size: 11px;
+}
+.pv2-execution-readiness-grid strong {
+  font-size: 11px;
+  color: #263245;
+  font-weight: 750;
+  text-align: right;
+}
+.pv2-execution-readiness > .pv2-hint {
+  margin: 0;
+}
+.pv2-readiness-next {
+  display: grid;
+  gap: 7px;
+  padding: 11px 12px;
+  border: 1px solid #f5ddcb;
+  background: #fff8f3;
+  border-radius: 10px;
+}
+.pv2-readiness-next > strong {
+  font-size: 12px;
+  font-weight: 800;
+  color: #a44a17;
+}
+.pv2-readiness-next > p {
+  font-size: 11px;
+  color: #64748b;
+  line-height: 1.55;
+  margin: 0;
+}
+.pv2-readiness-next .pv2-action-link {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+.pv2-ready-to-execute .pv2-form {
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+.pv2-ready-to-execute .pv2-hint {
+  margin: 0 0 8px;
+  color: #637a6d;
+}
+@media (max-width: 680px) {
+  .pv2-execution-readiness-grid {
+    grid-template-columns: 1fr;
+  }
+}
 
 /* Execution checklists extend the existing Projects design, never global theme tokens.
    Some workspace themes define --surface / --border as dark values; do not inherit them. */
-.pv2-page .pv2-stage-task-group{
- margin:9px 0;padding:11px 12px;min-width:0;
- border:1px solid #f0e8df;border-radius:12px;background:#fff;
- color:#25354b;
+.pv2-page .pv2-stage-task-group {
+  margin: 9px 0;
+  padding: 11px 12px;
+  min-width: 0;
+  border: 1px solid #f0e8df;
+  border-radius: 12px;
+  background: #fff;
+  color: #25354b;
 }
-.pv2-page .pv2-stage-task-group h4{
- display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;
- gap:8px;margin:0 0 5px;color:#192b43;font-size:13px;font-weight:800;
+.pv2-page .pv2-stage-task-group h4 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 5px;
+  color: #192b43;
+  font-size: 13px;
+  font-weight: 800;
 }
-.pv2-page .pv2-stage-task-group h4 small{
- font-size:11px;font-weight:750;color:#e45b16;white-space:nowrap;
+.pv2-page .pv2-stage-task-group h4 small {
+  font-size: 11px;
+  font-weight: 750;
+  color: #e45b16;
+  white-space: nowrap;
 }
-.pv2-page .pv2-stage-task-group > .pv2-hint{
- color:#697a90;font-size:11px;line-height:1.55;
+.pv2-page .pv2-stage-task-group > .pv2-hint {
+  color: #697a90;
+  font-size: 11px;
+  line-height: 1.55;
 }
-.pv2-page .pv2-stage-task-entries{
- display:grid;gap:6px;margin-top:10px;
+.pv2-page .pv2-stage-task-entries {
+  display: grid;
+  gap: 6px;
+  margin-top: 10px;
 }
-.pv2-page .pv2-item-checklist{
- border:1px solid #eee5dc;border-radius:10px;background:#fff;
- color:#27384e;overflow:hidden;min-width:0;
+.pv2-page .pv2-item-checklist {
+  border: 1px solid #eee5dc;
+  border-radius: 10px;
+  background: #fff;
+  color: #27384e;
+  overflow: hidden;
+  min-width: 0;
 }
-.pv2-page .pv2-item-checklist[open]{
- border-color:#ffc8a6;background:#fffaf6;box-shadow:0 2px 8px #e78a4010;
+.pv2-page .pv2-item-checklist[open] {
+  border-color: #ffc8a6;
+  background: #fffaf6;
+  box-shadow: 0 2px 8px #e78a4010;
 }
-.pv2-page .pv2-item-checklist-summary{
- cursor:pointer;display:flex;align-items:center;gap:10px;
- padding:11px 12px;list-style:none;background:#fff;color:#27384e;
+.pv2-page .pv2-item-checklist-summary {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 12px;
+  list-style: none;
+  background: #fff;
+  color: #27384e;
 }
-.pv2-page .pv2-item-checklist[open] > .pv2-item-checklist-summary{
- background:#fff7f1;
+.pv2-page .pv2-item-checklist[open] > .pv2-item-checklist-summary {
+  background: #fff7f1;
 }
-.pv2-page .pv2-item-checklist-summary::-webkit-details-marker{display:none}
-.pv2-page .pv2-item-checklist-icon{
- display:grid;place-items:center;flex:none;width:26px;height:26px;
- border:1px solid #f6d8c1;border-radius:8px;background:#fff1e7;
- color:#e76322;font-size:16px;font-weight:800;
+.pv2-page .pv2-item-checklist-summary::-webkit-details-marker {
+  display: none;
 }
-.pv2-page .pv2-item-checklist.is-done .pv2-item-checklist-icon{
- background:#e7f8ed;color:#148759;border-color:#bcdfca;
+.pv2-page .pv2-item-checklist-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border: 1px solid #f6d8c1;
+  border-radius: 8px;
+  background: #fff1e7;
+  color: #e76322;
+  font-size: 16px;
+  font-weight: 800;
 }
-.pv2-page .pv2-item-checklist-copy{display:grid;gap:3px;min-width:0;flex:1}
-.pv2-page .pv2-item-checklist-copy strong{
- color:#26364a;font-size:12px;font-weight:750;line-height:1.45;
- overflow-wrap:anywhere;
+.pv2-page .pv2-item-checklist.is-done .pv2-item-checklist-icon {
+  background: #e7f8ed;
+  color: #148759;
+  border-color: #bcdfca;
 }
-.pv2-page .pv2-item-checklist-copy small{
- font-size:10px;color:#7a899b;
+.pv2-page .pv2-item-checklist-copy {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
 }
-.pv2-page .pv2-item-checklist-chevron{color:#e05b19;font-size:19px}
-.pv2-page .pv2-item-checklist-inner{
- padding:12px;border-top:1px solid #f4e6dd;background:#fffdfb;
- color:#34445b;
+.pv2-page .pv2-item-checklist-copy strong {
+  color: #26364a;
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
 }
-.pv2-page .pv2-item-checklist-inner .pv2-form{
- max-width:100%;margin:0;padding:0;background:transparent;
+.pv2-page .pv2-item-checklist-copy small {
+  font-size: 10px;
+  color: #7a899b;
 }
-.pv2-page .pv2-item-checklist-inner .pv2-form label{
- color:#40536e;font-size:11px;font-weight:750;
+.pv2-page .pv2-item-checklist-chevron {
+  color: #e05b19;
+  font-size: 19px;
 }
-.pv2-page .pv2-item-checklist-inner .pv2-form :is(input,select,textarea){
- background:#fff;color:#23364d;border-color:#e1e6eb;
- border-radius:9px;min-height:42px;
+.pv2-page .pv2-item-checklist-inner {
+  padding: 12px;
+  border-top: 1px solid #f4e6dd;
+  background: #fffdfb;
+  color: #34445b;
 }
-.pv2-page .pv2-item-checklist-inner .pv2-form textarea::placeholder{
- color:#8492a2;
+.pv2-page .pv2-item-checklist-inner .pv2-form {
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  background: transparent;
 }
-.pv2-page .pv2-check-photo-link{
- display:inline-flex;color:#dc5b18;font-weight:750;
- font-size:11px;padding-bottom:8px;
+.pv2-page .pv2-item-checklist-inner .pv2-form label {
+  color: #40536e;
+  font-size: 11px;
+  font-weight: 750;
 }
-.pv2-page .pv2-material-line{
- padding:12px;margin:0 0 9px;border:1px solid #f0e8df;
- border-radius:11px;background:#fff;
+.pv2-page .pv2-item-checklist-inner .pv2-form :is(input, select, textarea) {
+  background: #fff;
+  color: #23364d;
+  border-color: #e1e6eb;
+  border-radius: 9px;
+  min-height: 42px;
 }
-.pv2-page .pv2-material-line-head{
- display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;
+.pv2-page .pv2-item-checklist-inner .pv2-form textarea::placeholder {
+  color: #8492a2;
 }
-.pv2-page .pv2-material-line-head .pv2-button{padding:5px 10px;font-size:11px}
-.pv2-page .pv2-material-line-controls{
- display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding-top:5px;
+.pv2-page .pv2-check-photo-link {
+  display: inline-flex;
+  color: #dc5b18;
+  font-weight: 750;
+  font-size: 11px;
+  padding-bottom: 8px;
 }
-.pv2-page .pv2-batch-material-form .pv2-material-line .pv2-two{
- grid-template-columns:minmax(0,1.6fr) minmax(100px,1fr);
+.pv2-page .pv2-material-line {
+  padding: 12px;
+  margin: 0 0 9px;
+  border: 1px solid #f0e8df;
+  border-radius: 11px;
+  background: #fff;
 }
-@media(max-width:650px){
- .pv2-page .pv2-stage-task-group{padding:10px;margin:6px 0}
- .pv2-page .pv2-item-checklist-summary{padding:10px;gap:9px}
- .pv2-page .pv2-batch-material-form .pv2-material-line .pv2-two{grid-template-columns:1fr}
- .pv2-page .pv2-material-line-controls .pv2-button{width:100%;justify-content:center}
+.pv2-page .pv2-material-line-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.pv2-page .pv2-material-line-head .pv2-button {
+  padding: 5px 10px;
+  font-size: 11px;
+}
+.pv2-page .pv2-material-line-controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  padding-top: 5px;
+}
+.pv2-page .pv2-batch-material-form .pv2-material-line .pv2-two {
+  grid-template-columns: minmax(0, 1.6fr) minmax(100px, 1fr);
+}
+@media (max-width: 650px) {
+  .pv2-page .pv2-stage-task-group {
+    padding: 10px;
+    margin: 6px 0;
+  }
+  .pv2-page .pv2-item-checklist-summary {
+    padding: 10px;
+    gap: 9px;
+  }
+  .pv2-page .pv2-batch-material-form .pv2-material-line .pv2-two {
+    grid-template-columns: 1fr;
+  }
+  .pv2-page .pv2-material-line-controls .pv2-button {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
-.pv2-formal-quality .pv2-qc-history-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 0;border-bottom:1px solid var(--border,#e6e9ee)}
-.pv2-formal-quality .pv2-qc-history-row:last-child{border-bottom:0}
-.pv2-formal-quality .pv2-qc-history-row strong{font-size:12px;flex:1;min-width:145px}
-.pv2-formal-quality .pv2-qc-history-row small{font-size:11px;color:var(--muted,#64748b)}
-.pv2-formal-quality .pv2-qc-history-row p{width:100%;margin:0;font-size:12px}
+.pv2-formal-quality .pv2-qc-history-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border, #e6e9ee);
+}
+.pv2-formal-quality .pv2-qc-history-row:last-child {
+  border-bottom: 0;
+}
+.pv2-formal-quality .pv2-qc-history-row strong {
+  font-size: 12px;
+  flex: 1;
+  min-width: 145px;
+}
+.pv2-formal-quality .pv2-qc-history-row small {
+  font-size: 11px;
+  color: var(--muted, #64748b);
+}
+.pv2-formal-quality .pv2-qc-history-row p {
+  width: 100%;
+  margin: 0;
+  font-size: 12px;
+}
 
 /* Previously uploaded inspection evidence is selected explicitly and visibly. */
-.pv2-page .pv2-check-photo-preview{
- display:flex;flex-wrap:wrap;gap:6px 12px;justify-content:space-between;
- align-items:center;margin:0;padding:9px 11px;
- border:1px solid #f6dccb;border-radius:9px;background:#fff8f3;
- color:#556174;font-size:11px;line-height:1.55;
+.pv2-page .pv2-check-photo-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0;
+  padding: 9px 11px;
+  border: 1px solid #f6dccb;
+  border-radius: 9px;
+  background: #fff8f3;
+  color: #556174;
+  font-size: 11px;
+  line-height: 1.55;
 }
-.pv2-page .pv2-check-photo-preview span{min-width:0;overflow-wrap:anywhere}
-.pv2-page .pv2-check-photo-preview a{
- color:#e65b13;font-weight:800;text-decoration:underline;
- text-underline-offset:2px;white-space:nowrap;
+.pv2-page .pv2-check-photo-preview span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.pv2-page .pv2-check-photo-preview a {
+  color: #e65b13;
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  white-space: nowrap;
 }
 
 /* Stage planning uses the existing white-and-orange Project dashboard palette. */
-.pv2-page .pv2-stage-material-plan{display:block}
-.pv2-page .pv2-stage-material-plan>summary{color:#d85b18;font-size:12px;font-weight:800}
-.pv2-page .pv2-stage-material-plan>.pv2-hint{margin:9px 0;color:#60728a;font-size:11px;line-height:1.6}
-.pv2-page .pv2-stage-material-plan ul{margin:7px 0 12px;color:#4c6175}
-.pv2-page .pv2-stage-material-requests{margin:12px 0;display:grid;gap:8px}
-.pv2-page .pv2-stage-material-requests>strong{font-size:12px;color:#243348}
-.pv2-page .pv2-stage-material-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;
- padding:11px;border:1px solid #f1e1d4;border-radius:10px;background:#fffdfb;min-width:0}
-.pv2-page .pv2-stage-material-row>div{display:grid;gap:3px;flex:1;min-width:125px}
-.pv2-page .pv2-stage-material-row b{font-size:12px;color:#25364c;overflow-wrap:anywhere}
-.pv2-page .pv2-stage-material-row small{font-size:11px;color:#6a7b90}
-.pv2-page .pv2-stage-material-row>.pv2-hint{flex-basis:100%;margin:0}
-.pv2-page .pv2-stage-material-entry,.pv2-page .pv2-marketplace-purchase{
- padding:9px 10px;border:1px solid #f5d5bd;background:#fff9f4;border-radius:9px;min-width:0;
+.pv2-page .pv2-stage-material-plan {
+  display: block;
 }
-.pv2-page .pv2-stage-material-entry>summary,.pv2-page .pv2-marketplace-purchase>summary{
- color:#d85b18;font-size:11px;font-weight:850;cursor:pointer;list-style:none;
+.pv2-page .pv2-stage-material-plan > summary {
+  color: #d85b18;
+  font-size: 12px;
+  font-weight: 800;
 }
-.pv2-page .pv2-stage-material-entry>summary::-webkit-details-marker,
-.pv2-page .pv2-marketplace-purchase>summary::-webkit-details-marker{display:none}
-.pv2-page .pv2-stage-material-entry[open],.pv2-page .pv2-marketplace-purchase[open]{
- background:#fff;border-color:#ffcda9;
+.pv2-page .pv2-stage-material-plan > .pv2-hint {
+  margin: 9px 0;
+  color: #60728a;
+  font-size: 11px;
+  line-height: 1.6;
 }
-.pv2-page .pv2-marketplace-purchase{width:100%;flex-basis:100%;background:#fff}
-.pv2-page .pv2-marketplace-purchase .pv2-form{margin-top:8px;padding:0}
-.pv2-page .pv2-marketplace-purchase .pv2-form label{color:#40536e}
-.pv2-page .pv2-marketplace-purchase .pv2-form select{color:#25354b;background:#fff}
-@media(max-width:650px){
- .pv2-page .pv2-stage-material-plan{padding:11px}
- .pv2-page .pv2-stage-material-row{align-items:flex-start}
- .pv2-page .pv2-marketplace-purchase .pv2-button{width:100%;white-space:normal}
+.pv2-page .pv2-stage-material-plan ul {
+  margin: 7px 0 12px;
+  color: #4c6175;
+}
+.pv2-page .pv2-stage-material-requests {
+  margin: 12px 0;
+  display: grid;
+  gap: 8px;
+}
+.pv2-page .pv2-stage-material-requests > strong {
+  font-size: 12px;
+  color: #243348;
+}
+.pv2-page .pv2-stage-material-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 11px;
+  border: 1px solid #f1e1d4;
+  border-radius: 10px;
+  background: #fffdfb;
+  min-width: 0;
+}
+.pv2-page .pv2-stage-material-row > div {
+  display: grid;
+  gap: 3px;
+  flex: 1;
+  min-width: 125px;
+}
+.pv2-page .pv2-stage-material-row b {
+  font-size: 12px;
+  color: #25364c;
+  overflow-wrap: anywhere;
+}
+.pv2-page .pv2-stage-material-row small {
+  font-size: 11px;
+  color: #6a7b90;
+}
+.pv2-page .pv2-stage-material-row > .pv2-hint {
+  flex-basis: 100%;
+  margin: 0;
+}
+.pv2-page .pv2-stage-material-entry,
+.pv2-page .pv2-marketplace-purchase {
+  padding: 9px 10px;
+  border: 1px solid #f5d5bd;
+  background: #fff9f4;
+  border-radius: 9px;
+  min-width: 0;
+}
+.pv2-page .pv2-stage-material-entry > summary,
+.pv2-page .pv2-marketplace-purchase > summary {
+  color: #d85b18;
+  font-size: 11px;
+  font-weight: 850;
+  cursor: pointer;
+  list-style: none;
+}
+.pv2-page .pv2-stage-material-entry > summary::-webkit-details-marker,
+.pv2-page .pv2-marketplace-purchase > summary::-webkit-details-marker {
+  display: none;
+}
+.pv2-page .pv2-stage-material-entry[open],
+.pv2-page .pv2-marketplace-purchase[open] {
+  background: #fff;
+  border-color: #ffcda9;
+}
+.pv2-page .pv2-marketplace-purchase {
+  width: 100%;
+  flex-basis: 100%;
+  background: #fff;
+}
+.pv2-page .pv2-marketplace-purchase .pv2-form {
+  margin-top: 8px;
+  padding: 0;
+}
+.pv2-page .pv2-marketplace-purchase .pv2-form label {
+  color: #40536e;
+}
+.pv2-page .pv2-marketplace-purchase .pv2-form select {
+  color: #25354b;
+  background: #fff;
+}
+@media (max-width: 650px) {
+  .pv2-page .pv2-stage-material-plan {
+    padding: 11px;
+  }
+  .pv2-page .pv2-stage-material-row {
+    align-items: flex-start;
+  }
+  .pv2-page .pv2-marketplace-purchase .pv2-button {
+    width: 100%;
+    white-space: normal;
+  }
 }
 
 /* Project-specific marketplace availability uses the existing dashboard palette. */
 .pv2-page .pv2-stage-marketplace-empty {
-  padding:10px 12px;border:1px solid #f4dfcd;border-radius:9px;
-  background:#fff8f1;color:#6d583f;font-size:11px;line-height:1.6;
-  margin:10px 0;
+  padding: 10px 12px;
+  border: 1px solid #f4dfcd;
+  border-radius: 9px;
+  background: #fff8f1;
+  color: #6d583f;
+  font-size: 11px;
+  line-height: 1.6;
+  margin: 10px 0;
 }
 
 /* Materials ordering: scoped to existing Projects white/orange design only. */
-.pv2-page .pv2-material-delivery-actions,.pv2-page .pv2-material-order-access{
- margin:9px 0;border:1px solid #f0dccd;border-radius:10px;
- background:#fffaf6;padding:10px;min-width:0;width:100%;
+.pv2-page .pv2-material-delivery-actions,
+.pv2-page .pv2-material-order-access {
+  margin: 9px 0;
+  border: 1px solid #f0dccd;
+  border-radius: 10px;
+  background: #fffaf6;
+  padding: 10px;
+  min-width: 0;
+  width: 100%;
 }
-.pv2-page .pv2-material-delivery-actions>summary,.pv2-page .pv2-material-order-access>summary{
- cursor:pointer;color:#df5e16;font-size:12px;font-weight:750;list-style:none;
+.pv2-page .pv2-material-delivery-actions > summary,
+.pv2-page .pv2-material-order-access > summary {
+  cursor: pointer;
+  color: #df5e16;
+  font-size: 12px;
+  font-weight: 750;
+  list-style: none;
 }
-.pv2-page .pv2-material-delivery-actions>summary::-webkit-details-marker,
-.pv2-page .pv2-material-order-access>summary::-webkit-details-marker{display:none}
-.pv2-page .pv2-material-delivery-actions .pv2-form,.pv2-page .pv2-material-order-access .pv2-form{
- margin-top:10px;padding:10px;background:#fff;border:1px solid #f1e7de;border-radius:9px;
+.pv2-page .pv2-material-delivery-actions > summary::-webkit-details-marker,
+.pv2-page .pv2-material-order-access > summary::-webkit-details-marker {
+  display: none;
 }
-.pv2-page .pv2-material-delivery-actions :is(input,select),.pv2-page .pv2-material-order-access :is(input,select){
- background:#fff;color:#27384e;border-color:#e2e6ed;min-height:40px;
+.pv2-page .pv2-material-delivery-actions .pv2-form,
+.pv2-page .pv2-material-order-access .pv2-form {
+  margin-top: 10px;
+  padding: 10px;
+  background: #fff;
+  border: 1px solid #f1e7de;
+  border-radius: 9px;
 }
-.pv2-page .pv2-material-eta{flex-basis:100%;color:#53677b;font-weight:650;margin:0}
-@media(max-width:650px){
- .pv2-page .pv2-material-delivery-actions .pv2-button,.pv2-page .pv2-material-order-access .pv2-button{width:100%}
+.pv2-page .pv2-material-delivery-actions :is(input, select),
+.pv2-page .pv2-material-order-access :is(input, select) {
+  background: #fff;
+  color: #27384e;
+  border-color: #e2e6ed;
+  min-height: 40px;
+}
+.pv2-page .pv2-material-eta {
+  flex-basis: 100%;
+  color: #53677b;
+  font-weight: 650;
+  margin: 0;
+}
+@media (max-width: 650px) {
+  .pv2-page .pv2-material-delivery-actions .pv2-button,
+  .pv2-page .pv2-material-order-access .pv2-button {
+    width: 100%;
+  }
 }
 
 /* Stage activation is independent for every quoted floor or zone.
    Preserve the white/orange Project dashboard styling. */
-.pv2-page .pv2-stage-activation{
- margin:11px 0 15px;padding:12px 13px;border:1px solid #f5d6c0;
- border-radius:12px;background:#fff9f4;color:#34445b;
+.pv2-page .pv2-stage-activation {
+  margin: 11px 0 15px;
+  padding: 12px 13px;
+  border: 1px solid #f5d6c0;
+  border-radius: 12px;
+  background: #fff9f4;
+  color: #34445b;
 }
-.pv2-page .pv2-stage-activation-head{
- display:flex;justify-content:space-between;gap:9px;align-items:center;flex-wrap:wrap;
- margin-bottom:9px;
+.pv2-page .pv2-stage-activation-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 9px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 9px;
 }
-.pv2-page .pv2-stage-activation-head strong{font-size:13px;color:#27374d}
-.pv2-page .pv2-stage-activation-head small{font-size:11px;color:#77869a}
-.pv2-page .pv2-stage-activation-actions{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
-.pv2-page .pv2-stage-activation-actions .pv2-button{font-size:12px;min-height:41px}
-.pv2-page .pv2-stage-activation-actions .pv2-button:disabled{opacity:.6;cursor:not-allowed}
-.pv2-page .pv2-stage-activation-blockers{
- background:#fff;border:1px solid #e8e1d9;border-radius:10px;
- padding:9px 11px;margin:10px 0;
+.pv2-page .pv2-stage-activation-head strong {
+  font-size: 13px;
+  color: #27374d;
 }
-.pv2-page .pv2-stage-activation-blockers strong{font-size:11px;color:#79491d}
-.pv2-page .pv2-stage-activation-blockers ul{margin:5px 0 0;padding-left:18px;color:#697789;font-size:11px;line-height:1.7}
-.pv2-page .pv2-stage-activation-note{padding:9px 11px;color:#5d6f80;font-size:12px;background:#fff9f5;border-radius:9px}
-.pv2-page .pv2-stage-activation-ok{color:#13815d;font-size:12px;font-weight:750}
-@media(max-width:650px){
- .pv2-page .pv2-stage-activation{padding:11px;margin:10px 0}
- .pv2-page .pv2-stage-activation-actions .pv2-button{flex:1;white-space:normal}
+.pv2-page .pv2-stage-activation-head small {
+  font-size: 11px;
+  color: #77869a;
+}
+.pv2-page .pv2-stage-activation-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.pv2-page .pv2-stage-activation-actions .pv2-button {
+  font-size: 12px;
+  min-height: 41px;
+}
+.pv2-page .pv2-stage-activation-actions .pv2-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.pv2-page .pv2-stage-activation-blockers {
+  background: #fff;
+  border: 1px solid #e8e1d9;
+  border-radius: 10px;
+  padding: 9px 11px;
+  margin: 10px 0;
+}
+.pv2-page .pv2-stage-activation-blockers strong {
+  font-size: 11px;
+  color: #79491d;
+}
+.pv2-page .pv2-stage-activation-blockers ul {
+  margin: 5px 0 0;
+  padding-left: 18px;
+  color: #697789;
+  font-size: 11px;
+  line-height: 1.7;
+}
+.pv2-page .pv2-stage-activation-note {
+  padding: 9px 11px;
+  color: #5d6f80;
+  font-size: 12px;
+  background: #fff9f5;
+  border-radius: 9px;
+}
+.pv2-page .pv2-stage-activation-ok {
+  color: #13815d;
+  font-size: 12px;
+  font-weight: 750;
+}
+@media (max-width: 650px) {
+  .pv2-page .pv2-stage-activation {
+    padding: 11px;
+    margin: 10px 0;
+  }
+  .pv2-page .pv2-stage-activation-actions .pv2-button {
+    flex: 1;
+    white-space: normal;
+  }
 }
 
 /* Commercial quote metadata is linked once in Documents, not a work stage. */
-.pv2-page .pv2-timeline-quote-note{
- margin:0 0 13px;padding:8px 12px;border:1px solid #f2e6da;
- border-radius:10px;background:#fffaf6;color:#526174;
- font-size:11px;line-height:1.55;
+.pv2-page .pv2-timeline-quote-note {
+  margin: 0 0 13px;
+  padding: 8px 12px;
+  border: 1px solid #f2e6da;
+  border-radius: 10px;
+  background: #fffaf6;
+  color: #526174;
+  font-size: 11px;
+  line-height: 1.55;
 }
-.pv2-page .pv2-timeline-quote-note a{
- color:#d95e1c;font-weight:750;text-underline-offset:2px;
+.pv2-page .pv2-timeline-quote-note a {
+  color: #d95e1c;
+  font-weight: 750;
+  text-underline-offset: 2px;
 }
-
 
 /* Multi-check inspection editing: one clean control, canonical check records. */
-.pv2-page .pv2-bulk-checks{margin:10px 0 14px;border:1px solid #f9c9a5;border-radius:13px;background:#fff9f3;min-width:0}
-.pv2-page .pv2-bulk-checks>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:9px;
- padding:14px 13px;color:#e65b12;font-weight:850;font-size:12px}
-.pv2-page .pv2-bulk-checks>summary::-webkit-details-marker{display:none}
-.pv2-page .pv2-bulk-checks>summary>span{margin-left:auto;background:#ffeadb;color:#bc551d;border-radius:40px;
- padding:5px 9px;font-size:10px;white-space:nowrap}
-.pv2-page .pv2-bulk-form{padding:0 13px 14px;display:grid;gap:11px;min-width:0}
-.pv2-page .pv2-bulk-toggle{justify-self:start;background:#fff;border:1px solid #f2d7c4;color:#d45a20;
- border-radius:9px;padding:10px 14px;font-size:11px;font-weight:800}
-.pv2-page .pv2-bulk-list{display:grid;gap:7px}
-.pv2-page .pv2-bulk-row{display:flex;align-items:center;gap:10px;cursor:pointer;background:#fff;
- border:1px solid #f0e3da;border-radius:11px;padding:12px;min-width:0;transition:border-color .2s,background .2s}
-.pv2-page .pv2-bulk-row.is-selected{background:#fff1e8;border-color:#feac73}
-.pv2-page .pv2-bulk-row input[type=checkbox],.pv2-page .pv2-bulk-confirm input[type=checkbox],
-.pv2-page .pv2-bulk-attach input[type=checkbox]{accent-color:#f5681b;width:18px;height:18px;flex:0 0 18px}
-.pv2-page .pv2-bulk-row>span{display:grid;gap:4px;min-width:0}
-.pv2-page .pv2-bulk-row strong{font-size:12px;color:#27364d;font-weight:800;line-height:1.45}
-.pv2-page .pv2-bulk-row small{font-size:10px;color:#8793a3}
-.pv2-page .pv2-bulk-label{display:grid;gap:7px;font-size:11px;font-weight:750;color:#495568}
-.pv2-page .pv2-bulk-label :is(select,textarea,input[type=file]){background:#fff;border:1px solid #e5e3df;
- border-radius:11px;padding:10px;max-width:100%;width:100%;min-width:0;color:#253148}
-.pv2-page .pv2-bulk-confirm,.pv2-page .pv2-bulk-attach{display:flex;align-items:flex-start;gap:9px;
- padding:10px 11px;border:1px solid #f0e3d6;background:#fff;border-radius:11px;
- color:#5f5960;font-size:11px;line-height:1.55;cursor:pointer}
-.pv2-page .pv2-bulk-form>.pv2-button{min-height:46px;justify-self:start;font-size:12px}
-.pv2-page .pv2-single-checks{margin-top:10px}
-.pv2-page .pv2-single-checks>summary{padding:11px 12px;border:1px solid #eee7df;background:#fff;
- border-radius:10px;cursor:pointer;font-size:11px;color:#b45d30;font-weight:800}
-.pv2-page .pv2-single-checks .pv2-stage-task-entries{margin-top:10px}
-.pv2-page .pv2-stage-ready-note{padding:11px 13px;border:1px solid #f5d3b4;
- border-radius:10px;background:#fff5ea;color:#9c4918;font-size:12px;line-height:1.5}
-@media(max-width:500px){
- .pv2-page .pv2-bulk-checks>summary{padding:12px 9px;flex-wrap:wrap}
- .pv2-page .pv2-bulk-form{padding:0 9px 12px}
- .pv2-page .pv2-bulk-form>.pv2-button{justify-self:stretch;white-space:normal}
+.pv2-page .pv2-bulk-checks {
+  margin: 10px 0 14px;
+  border: 1px solid #f9c9a5;
+  border-radius: 13px;
+  background: #fff9f3;
+  min-width: 0;
 }
-@media(prefers-reduced-motion:reduce){
- .pv2-page .pv2-bulk-row{transition:none}
+.pv2-page .pv2-bulk-checks > summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 14px 13px;
+  color: #e65b12;
+  font-weight: 850;
+  font-size: 12px;
+}
+.pv2-page .pv2-bulk-checks > summary::-webkit-details-marker {
+  display: none;
+}
+.pv2-page .pv2-bulk-checks > summary > span {
+  margin-left: auto;
+  background: #ffeadb;
+  color: #bc551d;
+  border-radius: 40px;
+  padding: 5px 9px;
+  font-size: 10px;
+  white-space: nowrap;
+}
+.pv2-page .pv2-bulk-form {
+  padding: 0 13px 14px;
+  display: grid;
+  gap: 11px;
+  min-width: 0;
+}
+.pv2-page .pv2-bulk-toggle {
+  justify-self: start;
+  background: #fff;
+  border: 1px solid #f2d7c4;
+  color: #d45a20;
+  border-radius: 9px;
+  padding: 10px 14px;
+  font-size: 11px;
+  font-weight: 800;
+}
+.pv2-page .pv2-bulk-list {
+  display: grid;
+  gap: 7px;
+}
+.pv2-page .pv2-bulk-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  background: #fff;
+  border: 1px solid #f0e3da;
+  border-radius: 11px;
+  padding: 12px;
+  min-width: 0;
+  transition:
+    border-color 0.2s,
+    background 0.2s;
+}
+.pv2-page .pv2-bulk-row.is-selected {
+  background: #fff1e8;
+  border-color: #feac73;
+}
+.pv2-page .pv2-bulk-row input[type='checkbox'],
+.pv2-page .pv2-bulk-confirm input[type='checkbox'],
+.pv2-page .pv2-bulk-attach input[type='checkbox'] {
+  accent-color: #f5681b;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+}
+.pv2-page .pv2-bulk-row > span {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+.pv2-page .pv2-bulk-row strong {
+  font-size: 12px;
+  color: #27364d;
+  font-weight: 800;
+  line-height: 1.45;
+}
+.pv2-page .pv2-bulk-row small {
+  font-size: 10px;
+  color: #8793a3;
+}
+.pv2-page .pv2-bulk-label {
+  display: grid;
+  gap: 7px;
+  font-size: 11px;
+  font-weight: 750;
+  color: #495568;
+}
+.pv2-page .pv2-bulk-label :is(select, textarea, input[type='file']) {
+  background: #fff;
+  border: 1px solid #e5e3df;
+  border-radius: 11px;
+  padding: 10px;
+  max-width: 100%;
+  width: 100%;
+  min-width: 0;
+  color: #253148;
+}
+.pv2-page .pv2-bulk-confirm,
+.pv2-page .pv2-bulk-attach {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 10px 11px;
+  border: 1px solid #f0e3d6;
+  background: #fff;
+  border-radius: 11px;
+  color: #5f5960;
+  font-size: 11px;
+  line-height: 1.55;
+  cursor: pointer;
+}
+.pv2-page .pv2-bulk-form > .pv2-button {
+  min-height: 46px;
+  justify-self: start;
+  font-size: 12px;
+}
+.pv2-page .pv2-single-checks {
+  margin-top: 10px;
+}
+.pv2-page .pv2-single-checks > summary {
+  padding: 11px 12px;
+  border: 1px solid #eee7df;
+  background: #fff;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 11px;
+  color: #b45d30;
+  font-weight: 800;
+}
+.pv2-page .pv2-single-checks .pv2-stage-task-entries {
+  margin-top: 10px;
+}
+.pv2-page .pv2-stage-ready-note {
+  padding: 11px 13px;
+  border: 1px solid #f5d3b4;
+  border-radius: 10px;
+  background: #fff5ea;
+  color: #9c4918;
+  font-size: 12px;
+  line-height: 1.5;
+}
+@media (max-width: 500px) {
+  .pv2-page .pv2-bulk-checks > summary {
+    padding: 12px 9px;
+    flex-wrap: wrap;
+  }
+  .pv2-page .pv2-bulk-form {
+    padding: 0 9px 12px;
+  }
+  .pv2-page .pv2-bulk-form > .pv2-button {
+    justify-self: stretch;
+    white-space: normal;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pv2-page .pv2-bulk-row {
+    transition: none;
+  }
 }
 
 /* Distinguish passed site inspections from formal independent stage certification. */
-.pv2-page .pv2-stage-qc-clarity{display:grid;gap:6px;margin-top:11px;padding:12px 13px;
- border:1px solid #d2ebe0;border-radius:11px;background:#f3fbf6;color:#255b42}
-.pv2-page .pv2-stage-qc-clarity strong{font-size:12px}
-.pv2-page .pv2-stage-qc-clarity p{font-size:11px;line-height:1.6;color:#416b58}
-.pv2-page .daily-next-ready{border-color:#d2eadd;background:#f8fdfa}
-.pv2-page .daily-next-ready .daily-alert-icon{background:#dff8e9;color:#178b58}
-.pv2-page .daily-next-ready b{color:#16865b}
+.pv2-page .pv2-stage-qc-clarity {
+  display: grid;
+  gap: 6px;
+  margin-top: 11px;
+  padding: 12px 13px;
+  border: 1px solid #d2ebe0;
+  border-radius: 11px;
+  background: #f3fbf6;
+  color: #255b42;
+}
+.pv2-page .pv2-stage-qc-clarity strong {
+  font-size: 12px;
+}
+.pv2-page .pv2-stage-qc-clarity p {
+  font-size: 11px;
+  line-height: 1.6;
+  color: #416b58;
+}
+.pv2-page .daily-next-ready {
+  border-color: #d2eadd;
+  background: #f8fdfa;
+}
+.pv2-page .daily-next-ready .daily-alert-icon {
+  background: #dff8e9;
+  color: #178b58;
+}
+.pv2-page .daily-next-ready b {
+  color: #16865b;
+}
 
 /* On-site QC: one official reviewer verdict per existing stage checklist item. */
-.pv2-page .pv2-on-site-qc{margin:15px 0;border:1px solid #dfd9ff;border-radius:18px;
- background:linear-gradient(135deg,#f8f6ff,#fff 58%);overflow:visible}
-.pv2-page .pv2-qc-heading{cursor:pointer;list-style:none;display:flex;gap:11px;align-items:center;
- padding:15px 13px;min-width:0}
-.pv2-page .pv2-qc-heading::-webkit-details-marker,.pv2-page .pv2-qc-item-head::-webkit-details-marker{display:none}
-.pv2-page .pv2-qc-heading-icon{display:grid;place-items:center;background:#7a64ed;color:#fff;
- width:39px;height:39px;flex:0 0 39px;border-radius:12px;font-size:22px;font-weight:900}
-.pv2-page .pv2-qc-heading>span:nth-child(2){flex:1;min-width:0;display:grid;gap:4px}
-.pv2-page .pv2-qc-heading strong{color:#203250;font-size:14px;line-height:1.25}
-.pv2-page .pv2-qc-heading small{color:#727d93;font-size:11px;line-height:1.4}
-.pv2-page .pv2-qc-score{border-radius:20px;padding:8px 9px;background:#ebe6ff;
- color:#624ad3;font-size:10px;font-weight:800;white-space:nowrap}
-.pv2-page .pv2-qc-inner{padding:0 13px 15px;display:grid;gap:10px;animation:daily-appear .22s both}
-.pv2-page .pv2-qc-metrics{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px;
- padding:12px;border-radius:11px;background:#fff;border:1px solid #e8e2fb}
-.pv2-page .pv2-qc-metrics span{color:#7a8294;font-size:11px}
-.pv2-page .pv2-qc-metrics b{color:#6354ca;font-size:11px}
-.pv2-page .pv2-qc-help{border-radius:11px;padding:12px 13px;border:1px solid #ecd9bb;
- background:#fffbf3;color:#705734;font-size:11px;line-height:1.65}
-.pv2-page .pv2-qc-help a{color:#f3661f;text-decoration:underline;font-weight:800}
-.pv2-page .pv2-qc-item{border-radius:12px;border:1px solid #e8e7e8;background:#fff}
-.pv2-page .pv2-qc-item.qc-failed{border-color:#fac5c5}
-.pv2-page .pv2-qc-item.qc-passed{border-color:#cce9dc}
-.pv2-page .pv2-qc-item-head{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:13px}
-.pv2-page .pv2-qc-item-icon{background:#f4f3f4;color:#8692a0;border-radius:10px;display:grid;place-items:center;
- width:32px;height:32px;flex:0 0 32px;font-weight:900;font-size:16px}
-.pv2-page .qc-passed .pv2-qc-item-icon{background:#e1f9ec;color:#11955c}
-.pv2-page .qc-failed .pv2-qc-item-icon{background:#ffeded;color:#db3131}
-.pv2-page .pv2-qc-item-title{flex:1;min-width:0;display:grid;gap:4px}
-.pv2-page .pv2-qc-item-title strong{font-size:12px;line-height:1.45;color:#263750}
-.pv2-page .pv2-qc-item-title small{font-size:10px;color:#808b9d}
-.pv2-page .qc-failed .pv2-qc-item-title small{color:#d33b38;font-weight:800}
-.pv2-page .qc-passed .pv2-qc-item-title small{color:#12915e;font-weight:750}
-.pv2-page .pv2-qc-chevron{color:#89789c;transition:transform .22s}
-.pv2-page .pv2-qc-item[open] .pv2-qc-chevron{transform:rotate(180deg)}
-.pv2-page .pv2-qc-item-body{display:grid;gap:11px;padding:0 13px 14px;animation:daily-appear .18s both}
-.pv2-page .pv2-qc-last{font-size:11px;color:#67748b}
-.pv2-page .pv2-qc-failure-note{background:#fff2f1;border:1px solid #ffc9c4;color:#9e322e;
- border-radius:10px;padding:12px;font-size:12px;line-height:1.5}
-.pv2-page .pv2-qc-review-form{display:grid;gap:11px}
-.pv2-page .pv2-qc-review-form>label:not(.pv2-qc-visit-confirm){display:grid;gap:6px;
- font-size:11px;color:#536178;font-weight:750}
-.pv2-page .pv2-qc-review-form :is(select,textarea,input[type=file]){min-width:0;width:100%;
- padding:11px;background:#fff;border:1px solid #d9dce3;color:#202d44;border-radius:11px;font-size:12px}
-.pv2-page .pv2-qc-review-form textarea{resize:vertical}
-.pv2-page .pv2-qc-review-form .pv2-button{justify-self:start;min-height:43px;font-size:12px}
-.pv2-page .pv2-qc-visit-confirm{display:flex;gap:10px;align-items:flex-start;cursor:pointer;
- border:1px solid #d8e9dc;background:#f3fbf5;padding:12px;border-radius:11px;
- font-size:11px;color:#365b46;line-height:1.5}
-.pv2-page .pv2-qc-visit-confirm input{width:18px;height:18px;flex:0 0 18px;accent-color:#128b56}
-.pv2-page .pv2-qc-photo{font-size:11px;color:#f36a20;text-decoration:underline;font-weight:800}
-.pv2-page .pv2-qc-history{border-radius:11px;border:1px solid #e9e6eb;padding:11px}
-.pv2-page .pv2-qc-history summary{cursor:pointer;color:#5d548e;font-size:11px;font-weight:750}
-.pv2-page .pv2-qc-history-line{display:grid;gap:4px;margin-top:10px;border-top:1px solid #eee;
- padding-top:10px;font-size:11px;color:#4c5a70}
-.pv2-page .pv2-qc-history-line a{color:#ed641c;font-weight:800;text-decoration:underline}
-@media(max-width:480px){
- .pv2-page .pv2-qc-heading{gap:7px;padding:13px 9px;flex-wrap:wrap}
- .pv2-page .pv2-qc-heading-icon{width:32px;height:32px;flex-basis:32px}
- .pv2-page .pv2-qc-score{font-size:9px}
- .pv2-page .pv2-qc-inner{padding:0 9px 13px}
- .pv2-page .pv2-qc-review-form .pv2-button{justify-self:stretch;white-space:normal}
+.pv2-page .pv2-on-site-qc {
+  margin: 15px 0;
+  border: 1px solid #dfd9ff;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #f8f6ff, #fff 58%);
+  overflow: visible;
 }
-@media(prefers-reduced-motion:reduce){
- .pv2-page .pv2-qc-inner,.pv2-page .pv2-qc-item-body{animation:none}
- .pv2-page .pv2-qc-chevron{transition:none}
+.pv2-page .pv2-qc-heading {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  gap: 11px;
+  align-items: center;
+  padding: 15px 13px;
+  min-width: 0;
 }
-
+.pv2-page .pv2-qc-heading::-webkit-details-marker,
+.pv2-page .pv2-qc-item-head::-webkit-details-marker {
+  display: none;
+}
+.pv2-page .pv2-qc-heading-icon {
+  display: grid;
+  place-items: center;
+  background: #7a64ed;
+  color: #fff;
+  width: 39px;
+  height: 39px;
+  flex: 0 0 39px;
+  border-radius: 12px;
+  font-size: 22px;
+  font-weight: 900;
+}
+.pv2-page .pv2-qc-heading > span:nth-child(2) {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+.pv2-page .pv2-qc-heading strong {
+  color: #203250;
+  font-size: 14px;
+  line-height: 1.25;
+}
+.pv2-page .pv2-qc-heading small {
+  color: #727d93;
+  font-size: 11px;
+  line-height: 1.4;
+}
+.pv2-page .pv2-qc-score {
+  border-radius: 20px;
+  padding: 8px 9px;
+  background: #ebe6ff;
+  color: #624ad3;
+  font-size: 10px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.pv2-page .pv2-qc-inner {
+  padding: 0 13px 15px;
+  display: grid;
+  gap: 10px;
+  animation: daily-appear 0.22s both;
+}
+.pv2-page .pv2-qc-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 12px;
+  border-radius: 11px;
+  background: #fff;
+  border: 1px solid #e8e2fb;
+}
+.pv2-page .pv2-qc-metrics span {
+  color: #7a8294;
+  font-size: 11px;
+}
+.pv2-page .pv2-qc-metrics b {
+  color: #6354ca;
+  font-size: 11px;
+}
+.pv2-page .pv2-qc-help {
+  border-radius: 11px;
+  padding: 12px 13px;
+  border: 1px solid #ecd9bb;
+  background: #fffbf3;
+  color: #705734;
+  font-size: 11px;
+  line-height: 1.65;
+}
+.pv2-page .pv2-qc-help a {
+  color: #f3661f;
+  text-decoration: underline;
+  font-weight: 800;
+}
+.pv2-page .pv2-qc-item {
+  border-radius: 12px;
+  border: 1px solid #e8e7e8;
+  background: #fff;
+}
+.pv2-page .pv2-qc-item.qc-failed {
+  border-color: #fac5c5;
+}
+.pv2-page .pv2-qc-item.qc-passed {
+  border-color: #cce9dc;
+}
+.pv2-page .pv2-qc-item-head {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px;
+}
+.pv2-page .pv2-qc-item-icon {
+  background: #f4f3f4;
+  color: #8692a0;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  font-weight: 900;
+  font-size: 16px;
+}
+.pv2-page .qc-passed .pv2-qc-item-icon {
+  background: #e1f9ec;
+  color: #11955c;
+}
+.pv2-page .qc-failed .pv2-qc-item-icon {
+  background: #ffeded;
+  color: #db3131;
+}
+.pv2-page .pv2-qc-item-title {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+.pv2-page .pv2-qc-item-title strong {
+  font-size: 12px;
+  line-height: 1.45;
+  color: #263750;
+}
+.pv2-page .pv2-qc-item-title small {
+  font-size: 10px;
+  color: #808b9d;
+}
+.pv2-page .qc-failed .pv2-qc-item-title small {
+  color: #d33b38;
+  font-weight: 800;
+}
+.pv2-page .qc-passed .pv2-qc-item-title small {
+  color: #12915e;
+  font-weight: 750;
+}
+.pv2-page .pv2-qc-chevron {
+  color: #89789c;
+  transition: transform 0.22s;
+}
+.pv2-page .pv2-qc-item[open] .pv2-qc-chevron {
+  transform: rotate(180deg);
+}
+.pv2-page .pv2-qc-item-body {
+  display: grid;
+  gap: 11px;
+  padding: 0 13px 14px;
+  animation: daily-appear 0.18s both;
+}
+.pv2-page .pv2-qc-last {
+  font-size: 11px;
+  color: #67748b;
+}
+.pv2-page .pv2-qc-failure-note {
+  background: #fff2f1;
+  border: 1px solid #ffc9c4;
+  color: #9e322e;
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.pv2-page .pv2-qc-review-form {
+  display: grid;
+  gap: 11px;
+}
+.pv2-page .pv2-qc-review-form > label:not(.pv2-qc-visit-confirm) {
+  display: grid;
+  gap: 6px;
+  font-size: 11px;
+  color: #536178;
+  font-weight: 750;
+}
+.pv2-page .pv2-qc-review-form :is(select, textarea, input[type='file']) {
+  min-width: 0;
+  width: 100%;
+  padding: 11px;
+  background: #fff;
+  border: 1px solid #d9dce3;
+  color: #202d44;
+  border-radius: 11px;
+  font-size: 12px;
+}
+.pv2-page .pv2-qc-review-form textarea {
+  resize: vertical;
+}
+.pv2-page .pv2-qc-review-form .pv2-button {
+  justify-self: start;
+  min-height: 43px;
+  font-size: 12px;
+}
+.pv2-page .pv2-qc-visit-confirm {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  cursor: pointer;
+  border: 1px solid #d8e9dc;
+  background: #f3fbf5;
+  padding: 12px;
+  border-radius: 11px;
+  font-size: 11px;
+  color: #365b46;
+  line-height: 1.5;
+}
+.pv2-page .pv2-qc-visit-confirm input {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  accent-color: #128b56;
+}
+.pv2-page .pv2-qc-photo {
+  font-size: 11px;
+  color: #f36a20;
+  text-decoration: underline;
+  font-weight: 800;
+}
+.pv2-page .pv2-qc-history {
+  border-radius: 11px;
+  border: 1px solid #e9e6eb;
+  padding: 11px;
+}
+.pv2-page .pv2-qc-history summary {
+  cursor: pointer;
+  color: #5d548e;
+  font-size: 11px;
+  font-weight: 750;
+}
+.pv2-page .pv2-qc-history-line {
+  display: grid;
+  gap: 4px;
+  margin-top: 10px;
+  border-top: 1px solid #eee;
+  padding-top: 10px;
+  font-size: 11px;
+  color: #4c5a70;
+}
+.pv2-page .pv2-qc-history-line a {
+  color: #ed641c;
+  font-weight: 800;
+  text-decoration: underline;
+}
+@media (max-width: 480px) {
+  .pv2-page .pv2-qc-heading {
+    gap: 7px;
+    padding: 13px 9px;
+    flex-wrap: wrap;
+  }
+  .pv2-page .pv2-qc-heading-icon {
+    width: 32px;
+    height: 32px;
+    flex-basis: 32px;
+  }
+  .pv2-page .pv2-qc-score {
+    font-size: 9px;
+  }
+  .pv2-page .pv2-qc-inner {
+    padding: 0 9px 13px;
+  }
+  .pv2-page .pv2-qc-review-form .pv2-button {
+    justify-self: stretch;
+    white-space: normal;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pv2-page .pv2-qc-inner,
+  .pv2-page .pv2-qc-item-body {
+    animation: none;
+  }
+  .pv2-page .pv2-qc-chevron {
+    transition: none;
+  }
+}
 
 /* One source of truth per work item. Legacy stage-wide requests remain available,
    but do not repeat material, photo or report actions at the bottom of the stage. */
-.pv2-page .pv2-stage-quality-hub{
- margin:11px 0 13px;border:1px solid #f0e2d6;border-radius:13px;background:#fff;overflow:hidden
+.pv2-page .pv2-stage-quality-hub {
+  margin: 11px 0 13px;
+  border: 1px solid #f0e2d6;
+  border-radius: 13px;
+  background: #fff;
+  overflow: hidden;
 }
-.pv2-page .pv2-stage-quality-hub>summary{
- display:flex;align-items:center;justify-content:space-between;gap:12px;list-style:none;
- padding:13px 14px;cursor:pointer;color:#b65521;font-size:12px;font-weight:850;background:#fffaf7
+.pv2-page .pv2-stage-quality-hub > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  list-style: none;
+  padding: 13px 14px;
+  cursor: pointer;
+  color: #b65521;
+  font-size: 12px;
+  font-weight: 850;
+  background: #fffaf7;
 }
-.pv2-page .pv2-stage-quality-hub>summary::-webkit-details-marker{display:none}
-.pv2-page .pv2-stage-quality-hub>summary>strong{font-size:11px;color:#de6323;white-space:nowrap}
-.pv2-page .pv2-stage-quality-hub[open]>summary{border-bottom:1px solid #f2e7db}
-.pv2-page .pv2-stage-quality-inner{padding:11px;display:grid;gap:11px;animation:daily-appear .2s both}
-.pv2-page .pv2-stage-quality-inner>.pv2-stage-task-group{padding:9px;margin:0}
-.pv2-page .pv2-stage-quality-inner>.pv2-stage-secondary{margin:0}
-.pv2-page .pv2-item-inline-quick{
- display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px;
+.pv2-page .pv2-stage-quality-hub > summary::-webkit-details-marker {
+  display: none;
 }
-.pv2-page .pv2-item-inline-quick>button{
- display:inline-flex;align-items:center;justify-content:center;min-height:37px;padding:8px 12px;
- border:1px solid #f3d5c0;border-radius:9px;background:#fff8f3;color:#d35b1e;
- font-size:11px;font-weight:800;text-decoration:none;
+.pv2-page .pv2-stage-quality-hub > summary > strong {
+  font-size: 11px;
+  color: #de6323;
+  white-space: nowrap;
 }
-.pv2-page .pv2-item-material-panel{
- margin:14px 0 0;border:1px solid #f3dcca;border-radius:11px;background:#fff9f4;min-width:0
+.pv2-page .pv2-stage-quality-hub[open] > summary {
+  border-bottom: 1px solid #f2e7db;
 }
-
-.pv2-page .pv2-item-inline-quick>button{cursor:pointer;font-family:inherit}
-.pv2-page .pv2-item-inline-quick>button:is(:hover,.is-active){
- border-color:#faaf78;background:#fff0e4;color:#ad4c16
+.pv2-page .pv2-stage-quality-inner {
+  padding: 11px;
+  display: grid;
+  gap: 11px;
+  animation: daily-appear 0.2s both;
 }
-.pv2-page .pv2-item-inline-quick>button:focus-visible{
- outline:2px solid #e65c17;outline-offset:3px
+.pv2-page .pv2-stage-quality-inner > .pv2-stage-task-group {
+  padding: 9px;
+  margin: 0;
 }
-.pv2-page .pv2-item-material-panel{
- margin:0 0 14px;padding:9px;border-color:#f4d4ba;scroll-margin-top:110px
+.pv2-page .pv2-stage-quality-inner > .pv2-stage-secondary {
+  margin: 0;
 }
-.pv2-page .pv2-stage-quality-hub{scroll-margin-top:110px}
-.pv2-page .pv2-activity-material-required{
- padding:12px;border:1px solid #f0dccb;background:#fff;border-radius:10px;
- display:grid;gap:8px;min-width:0
+.pv2-page .pv2-item-inline-quick {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 0 0 12px;
 }
-.pv2-page .pv2-activity-material-required h5{
- margin:0;color:#2a384d;font-size:13px;font-weight:850
+.pv2-page .pv2-item-inline-quick > button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 37px;
+  padding: 8px 12px;
+  border: 1px solid #f3d5c0;
+  border-radius: 9px;
+  background: #fff8f3;
+  color: #d35b1e;
+  font-size: 11px;
+  font-weight: 800;
+  text-decoration: none;
 }
-.pv2-page .pv2-activity-material-required ul{
- display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;
- padding:0;margin:0;list-style:none
-}
-.pv2-page .pv2-activity-material-required li{
- padding:10px;border-radius:9px;background:#fff7f0;
- color:#754926;font-size:11px;line-height:1.45;overflow-wrap:anywhere
-}
-.pv2-page .pv2-activity-material-required p,.pv2-page .pv2-activity-material-required small{
- margin:0;font-size:10px;color:#68798d;line-height:1.6
-}
-@media(max-width:390px){
- .pv2-page .pv2-activity-material-required ul{grid-template-columns:1fr}
-}
-.pv2-page .pv2-activity-material-content{display:grid;gap:10px;padding:10px;min-width:0}
-.pv2-page .pv2-activity-material-content>.pv2-stage-material-requests{margin:0}
-.pv2-page .pv2-activity-material-content>.pv2-stage-material-entry{margin:0;background:#fff}
-.pv2-page .pv2-legacy-materials{
- margin:12px 0;background:#fff;border:1px solid #e9e3de;border-radius:12px;padding:12px
-}
-.pv2-page .pv2-legacy-materials>summary{
- cursor:pointer;list-style:none;color:#56667d;font-weight:800;font-size:11px
-}
-.pv2-page .pv2-legacy-materials>summary::-webkit-details-marker{display:none}
-.pv2-page .pv2-legacy-materials .pv2-stage-material-requests{margin-top:10px}
-@media(max-width:680px){
- .pv2-page .pv2-stage-quality-inner{padding:8px}
- .pv2-page .pv2-stage-quality-hub>summary{gap:8px;padding:12px 10px}
- .pv2-page .pv2-stage-quality-hub>summary>strong{font-size:10px}
- .pv2-page .pv2-item-inline-quick>button{flex:1 1 120px;white-space:normal}
- .pv2-page .pv2-activity-material-content{padding:7px}
-}
-@media(prefers-reduced-motion:reduce){
- .pv2-page .pv2-stage-quality-inner{animation:none}
+.pv2-page .pv2-item-material-panel {
+  margin: 14px 0 0;
+  border: 1px solid #f3dcca;
+  border-radius: 11px;
+  background: #fff9f4;
+  min-width: 0;
 }
 
+.pv2-page .pv2-item-inline-quick > button {
+  cursor: pointer;
+  font-family: inherit;
+}
+.pv2-page .pv2-item-inline-quick > button:is(:hover, .is-active) {
+  border-color: #faaf78;
+  background: #fff0e4;
+  color: #ad4c16;
+}
+.pv2-page .pv2-item-inline-quick > button:focus-visible {
+  outline: 2px solid #e65c17;
+  outline-offset: 3px;
+}
+.pv2-page .pv2-item-material-panel {
+  margin: 0 0 14px;
+  padding: 9px;
+  border-color: #f4d4ba;
+  scroll-margin-top: 110px;
+}
+.pv2-page .pv2-stage-quality-hub {
+  scroll-margin-top: 110px;
+}
+.pv2-page .pv2-activity-material-required {
+  padding: 12px;
+  border: 1px solid #f0dccb;
+  background: #fff;
+  border-radius: 10px;
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+.pv2-page .pv2-activity-material-required h5 {
+  margin: 0;
+  color: #2a384d;
+  font-size: 13px;
+  font-weight: 850;
+}
+.pv2-page .pv2-activity-material-required ul {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+.pv2-page .pv2-activity-material-required li {
+  padding: 10px;
+  border-radius: 9px;
+  background: #fff7f0;
+  color: #754926;
+  font-size: 11px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.pv2-page .pv2-activity-material-required p,
+.pv2-page .pv2-activity-material-required small {
+  margin: 0;
+  font-size: 10px;
+  color: #68798d;
+  line-height: 1.6;
+}
+@media (max-width: 390px) {
+  .pv2-page .pv2-activity-material-required ul {
+    grid-template-columns: 1fr;
+  }
+}
+.pv2-page .pv2-activity-material-content {
+  display: grid;
+  gap: 10px;
+  padding: 10px;
+  min-width: 0;
+}
+.pv2-page .pv2-activity-material-content > .pv2-stage-material-requests {
+  margin: 0;
+}
+.pv2-page .pv2-activity-material-content > .pv2-stage-material-entry {
+  margin: 0;
+  background: #fff;
+}
+.pv2-page .pv2-legacy-materials {
+  margin: 12px 0;
+  background: #fff;
+  border: 1px solid #e9e3de;
+  border-radius: 12px;
+  padding: 12px;
+}
+.pv2-page .pv2-legacy-materials > summary {
+  cursor: pointer;
+  list-style: none;
+  color: #56667d;
+  font-weight: 800;
+  font-size: 11px;
+}
+.pv2-page .pv2-legacy-materials > summary::-webkit-details-marker {
+  display: none;
+}
+.pv2-page .pv2-legacy-materials .pv2-stage-material-requests {
+  margin-top: 10px;
+}
+@media (max-width: 680px) {
+  .pv2-page .pv2-stage-quality-inner {
+    padding: 8px;
+  }
+  .pv2-page .pv2-stage-quality-hub > summary {
+    gap: 8px;
+    padding: 12px 10px;
+  }
+  .pv2-page .pv2-stage-quality-hub > summary > strong {
+    font-size: 10px;
+  }
+  .pv2-page .pv2-item-inline-quick > button {
+    flex: 1 1 120px;
+    white-space: normal;
+  }
+  .pv2-page .pv2-activity-material-content {
+    padding: 7px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pv2-page .pv2-stage-quality-inner {
+    animation: none;
+  }
+}
 
 /* Quotation-defined interleaved stage execution: a single work/check record per step. */
-.pv2-flow-step{display:grid;gap:5px;padding:7px 7px 9px;border-left:2px solid #e4d5ca;margin-left:12px;min-width:0}
-.pv2-flow-step-number{font-size:11px;color:#a9531c;font-weight:800;letter-spacing:.01em;margin:0 0 3px}
-.pv2-flow-step .pv2-on-site-qc{margin:3px 0 8px;min-width:0}
-.pv2-flow-step .pv2-qc-heading{flex-wrap:wrap}
-@media(max-width:640px){
- .pv2-flow-step{padding:6px 0 9px 8px;margin-left:7px}
- .pv2-flow-step .pv2-item-checklist{min-width:0}
+.pv2-flow-step {
+  display: grid;
+  gap: 5px;
+  padding: 7px 7px 9px;
+  border-left: 2px solid #e4d5ca;
+  margin-left: 12px;
+  min-width: 0;
+}
+.pv2-flow-step-number {
+  font-size: 11px;
+  color: #a9531c;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  margin: 0 0 3px;
+}
+.pv2-flow-step .pv2-on-site-qc {
+  margin: 3px 0 8px;
+  min-width: 0;
+}
+.pv2-flow-step .pv2-qc-heading {
+  flex-wrap: wrap;
+}
+@media (max-width: 640px) {
+  .pv2-flow-step {
+    padding: 6px 0 9px 8px;
+    margin-left: 7px;
+  }
+  .pv2-flow-step .pv2-item-checklist {
+    min-width: 0;
+  }
 }
 
-.pv2-stage-payment-start{margin:10px 0 13px;padding:14px;border:1px solid #f0d2b9;background:#fffaf6;border-radius:12px;display:grid;gap:6px}
-.pv2-stage-payment-start strong{color:#a54f1d;font-size:13px}
-.pv2-stage-payment-start p{margin:0;font-size:12px}
-.pv2-stage-payment-start>a{width:fit-content;min-height:36px;display:inline-flex;align-items:center;border:1px solid #efbd9c;background:#fff2e8;padding:8px 12px;border-radius:8px;color:#a44e1b;font-size:11px;font-weight:800}
-@media(max-width:640px){.pv2-stage-payment-start{padding:11px}.pv2-stage-payment-start>a{width:100%;justify-content:center}}
-
+.pv2-stage-payment-start {
+  margin: 10px 0 13px;
+  padding: 14px;
+  border: 1px solid #f0d2b9;
+  background: #fffaf6;
+  border-radius: 12px;
+  display: grid;
+  gap: 6px;
+}
+.pv2-stage-payment-start strong {
+  color: #a54f1d;
+  font-size: 13px;
+}
+.pv2-stage-payment-start p {
+  margin: 0;
+  font-size: 12px;
+}
+.pv2-stage-payment-start > a {
+  width: fit-content;
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #efbd9c;
+  background: #fff2e8;
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: #a44e1b;
+  font-size: 11px;
+  font-weight: 800;
+}
+@media (max-width: 640px) {
+  .pv2-stage-payment-start {
+    padding: 11px;
+  }
+  .pv2-stage-payment-start > a {
+    width: 100%;
+    justify-content: center;
+  }
+}
 
 /* Dates live on the existing stage checklist, not a separate task module. */
-.pv2-planned-overview{border:1px solid #f0ddcb;background:#fffcf9;padding:13px;border-radius:15px;margin:14px 0 16px}
-.pv2-planned-overview-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:7px;margin-bottom:10px}
-.pv2-planned-overview-head strong{font-size:14px;font-weight:850;color:#24334b}
-.pv2-planned-overview-head small{color:#728198;font-size:11px}
-.pv2-planned-overview-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.pv2-planned-upcoming{display:grid;gap:5px;border:1px solid #efdfd2;background:#fff;border-radius:11px;padding:10px;min-width:0}
-.pv2-planned-upcoming>span{font-size:11px;font-weight:850;color:#be591f}
-.pv2-planned-upcoming>strong{font-size:12px;line-height:1.4;color:#2d3950;overflow-wrap:anywhere}
-.pv2-planned-upcoming>small{font-size:10px;color:#718099;line-height:1.4}
-.pv2-item-schedule{background:#fbfcfe;border:1px solid #e8ecf3;border-radius:12px;padding:10px;margin:8px 0 12px;min-width:0}
-.pv2-item-schedule-current{display:flex;align-items:center;flex-wrap:wrap;gap:7px;font-size:11px;color:#627590}
-.pv2-item-schedule-current>span:first-child{font-size:17px;color:#f96a1e}
-.pv2-item-schedule-current>span:nth-child(2){flex:1;min-width:105px;line-height:1.4}
-.pv2-item-schedule-toggle{padding:7px 12px;border:1px solid #f4c9ad;border-radius:9px;background:#fff5ec;color:#b95418;font-size:11px;font-weight:850;min-height:34px;cursor:pointer}
-.pv2-item-schedule-toggle:hover{background:#ffeade}
-.pv2-item-schedule-form{display:grid;gap:10px;margin-top:11px;padding-top:12px;border-top:1px solid #e6e8ed}
-.pv2-item-schedule-shortcuts{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
-.pv2-item-schedule-shortcuts>span{font-size:11px;color:#63758c;font-weight:750;margin-right:3px}
-.pv2-item-schedule-shortcuts>button{min-height:35px;border:1px solid #f2cab0;border-radius:9px;background:#fff6ef;color:#ad501e;font-size:11px;font-weight:800;padding:7px 10px;cursor:pointer}
-.pv2-item-schedule-shortcuts>button:hover,.pv2-item-schedule-shortcuts>button:focus-visible{background:#ffe9d8;outline-color:#f76b27}
-.pv2-item-schedule-dates{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.pv2-item-schedule-form label{display:grid;gap:5px;font-size:11px;font-weight:800;color:#4a5970;min-width:0}
-.pv2-item-schedule-form input{background:#fff;color:#263b52;border:1px solid #dce2eb;border-radius:9px;width:100%;min-width:0;min-height:41px;padding:8px;font:inherit;font-size:12px}
-.pv2-item-schedule-form .pv2-button{max-width:200px}
-@media(max-width:900px){.pv2-planned-overview-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:530px){.pv2-planned-overview-grid{grid-template-columns:1fr}.pv2-item-schedule-dates{grid-template-columns:1fr}.pv2-planned-overview-head{align-items:flex-start}.pv2-item-schedule{padding:9px}}
+.pv2-planned-overview {
+  border: 1px solid #f0ddcb;
+  background: #fffcf9;
+  padding: 13px;
+  border-radius: 15px;
+  margin: 14px 0 16px;
+}
+.pv2-planned-overview-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 10px;
+}
+.pv2-planned-overview-head strong {
+  font-size: 14px;
+  font-weight: 850;
+  color: #24334b;
+}
+.pv2-planned-overview-head small {
+  color: #728198;
+  font-size: 11px;
+}
+.pv2-planned-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.pv2-planned-upcoming {
+  display: grid;
+  gap: 5px;
+  border: 1px solid #efdfd2;
+  background: #fff;
+  border-radius: 11px;
+  padding: 10px;
+  min-width: 0;
+}
+.pv2-planned-upcoming > span {
+  font-size: 11px;
+  font-weight: 850;
+  color: #be591f;
+}
+.pv2-planned-upcoming > strong {
+  font-size: 12px;
+  line-height: 1.4;
+  color: #2d3950;
+  overflow-wrap: anywhere;
+}
+.pv2-planned-upcoming > small {
+  font-size: 10px;
+  color: #718099;
+  line-height: 1.4;
+}
+.pv2-item-schedule {
+  background: #fbfcfe;
+  border: 1px solid #e8ecf3;
+  border-radius: 12px;
+  padding: 10px;
+  margin: 8px 0 12px;
+  min-width: 0;
+}
+.pv2-item-schedule-current {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  font-size: 11px;
+  color: #627590;
+}
+.pv2-item-schedule-current > span:first-child {
+  font-size: 17px;
+  color: #f96a1e;
+}
+.pv2-item-schedule-current > span:nth-child(2) {
+  flex: 1;
+  min-width: 105px;
+  line-height: 1.4;
+}
+.pv2-item-schedule-toggle {
+  padding: 7px 12px;
+  border: 1px solid #f4c9ad;
+  border-radius: 9px;
+  background: #fff5ec;
+  color: #b95418;
+  font-size: 11px;
+  font-weight: 850;
+  min-height: 34px;
+  cursor: pointer;
+}
+.pv2-item-schedule-toggle:hover {
+  background: #ffeade;
+}
+.pv2-item-schedule-form {
+  display: grid;
+  gap: 10px;
+  margin-top: 11px;
+  padding-top: 12px;
+  border-top: 1px solid #e6e8ed;
+}
+.pv2-item-schedule-shortcuts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.pv2-item-schedule-shortcuts > span {
+  font-size: 11px;
+  color: #63758c;
+  font-weight: 750;
+  margin-right: 3px;
+}
+.pv2-item-schedule-shortcuts > button {
+  min-height: 35px;
+  border: 1px solid #f2cab0;
+  border-radius: 9px;
+  background: #fff6ef;
+  color: #ad501e;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 7px 10px;
+  cursor: pointer;
+}
+.pv2-item-schedule-shortcuts > button:hover,
+.pv2-item-schedule-shortcuts > button:focus-visible {
+  background: #ffe9d8;
+  outline-color: #f76b27;
+}
+.pv2-item-schedule-dates {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.pv2-item-schedule-form label {
+  display: grid;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #4a5970;
+  min-width: 0;
+}
+.pv2-item-schedule-form input {
+  background: #fff;
+  color: #263b52;
+  border: 1px solid #dce2eb;
+  border-radius: 9px;
+  width: 100%;
+  min-width: 0;
+  min-height: 41px;
+  padding: 8px;
+  font: inherit;
+  font-size: 12px;
+}
+.pv2-item-schedule-form .pv2-button {
+  max-width: 200px;
+}
+@media (max-width: 900px) {
+  .pv2-planned-overview-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 530px) {
+  .pv2-planned-overview-grid {
+    grid-template-columns: 1fr;
+  }
+  .pv2-item-schedule-dates {
+    grid-template-columns: 1fr;
+  }
+  .pv2-planned-overview-head {
+    align-items: flex-start;
+  }
+  .pv2-item-schedule {
+    padding: 9px;
+  }
+}
 
 /* Live site progress derived from the canonical project work checklist. */
-.pv2-work-forecast{display:flex;flex-wrap:wrap;align-items:center;gap:8px 13px;border:1px solid #f0d8c8;background:#fffaf6;padding:12px 14px;border-radius:12px;margin-bottom:13px;color:#304057}
-.pv2-work-forecast>strong{font-size:14px;font-weight:850;color:#223149}
-.pv2-work-forecast>small,.pv2-work-forecast>span{font-size:11px;color:#64748b;line-height:1.5}
-.pv2-work-forecast>span{border-radius:8px;padding:6px 9px;background:#fdf0e4;color:#9c4d22}
-.pv2-work-forecast>p{flex:1 0 100%;font-size:10px;color:#8792a4;margin:0;line-height:1.5}
-@media(max-width:540px){.pv2-work-forecast{align-items:flex-start;gap:8px;flex-direction:column}.pv2-work-forecast>p{flex-basis:auto}}
-
+.pv2-work-forecast {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 13px;
+  border: 1px solid #f0d8c8;
+  background: #fffaf6;
+  padding: 12px 14px;
+  border-radius: 12px;
+  margin-bottom: 13px;
+  color: #304057;
+}
+.pv2-work-forecast > strong {
+  font-size: 14px;
+  font-weight: 850;
+  color: #223149;
+}
+.pv2-work-forecast > small,
+.pv2-work-forecast > span {
+  font-size: 11px;
+  color: #64748b;
+  line-height: 1.5;
+}
+.pv2-work-forecast > span {
+  border-radius: 8px;
+  padding: 6px 9px;
+  background: #fdf0e4;
+  color: #9c4d22;
+}
+.pv2-work-forecast > p {
+  flex: 1 0 100%;
+  font-size: 10px;
+  color: #8792a4;
+  margin: 0;
+  line-height: 1.5;
+}
+@media (max-width: 540px) {
+  .pv2-work-forecast {
+    align-items: flex-start;
+    gap: 8px;
+    flex-direction: column;
+  }
+  .pv2-work-forecast > p {
+    flex-basis: auto;
+  }
+}
 
 /* One compact stage date summary: reads canonical work-item schedule only.
    Shows cross-stage overlap without creating another timeline or task list. */
-.pv2-stage-schedule-summary{display:flex;gap:6px;align-items:flex-start;font-weight:650;
- font-size:10px;line-height:1.55;color:#8490a3;margin-top:4px;overflow-wrap:anywhere}
-.pv2-stage-schedule-summary.is-planned{color:#536d88}
-.pv2-stage-schedule-summary>span:first-child{color:#e36b2b;flex-shrink:0}
-.pv2-stage-schedule-summary b{font-weight:750;color:#18754a}
-.pv2-stage-schedule-summary em{font-style:normal;color:#b25c24}
-@media(max-width:540px){.pv2-stage-schedule-summary{font-size:10px;margin-top:5px}}
+.pv2-stage-schedule-summary {
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+  font-weight: 650;
+  font-size: 10px;
+  line-height: 1.55;
+  color: #8490a3;
+  margin-top: 4px;
+  overflow-wrap: anywhere;
+}
+.pv2-stage-schedule-summary.is-planned {
+  color: #536d88;
+}
+.pv2-stage-schedule-summary > span:first-child {
+  color: #e36b2b;
+  flex-shrink: 0;
+}
+.pv2-stage-schedule-summary b {
+  font-weight: 750;
+  color: #18754a;
+}
+.pv2-stage-schedule-summary em {
+  font-style: normal;
+  color: #b25c24;
+}
+@media (max-width: 540px) {
+  .pv2-stage-schedule-summary {
+    font-size: 10px;
+    margin-top: 5px;
+  }
+}

@@ -2,7 +2,7 @@
 
 Cloudflare R2 bucket: **business-os-media** (private, Standard, APAC).
 
-The migration is *additive*: the legacy `private.site_media.bytes` column,
+The migration is _additive_: the legacy `private.site_media.bytes` column,
 existing PostgREST functions, and URLs stay intact. Only new site uploads use R2
 when the feature flag is enabled.
 
@@ -34,7 +34,7 @@ Do not disable access to R2 or delete the bucket while any R2-backed rows exist.
 
 ## Scope
 
-This first cutover covers *project-site media*, including owner uploads of
+This first cutover covers _project-site media_, including owner uploads of
 photos, short video, and PDFs. Website-builder assets, brochure images,
 quotation annexures, employee proofs and existing PostgreSQL bytea objects
 remain on their current safe paths pending dedicated, verifiable backfill.

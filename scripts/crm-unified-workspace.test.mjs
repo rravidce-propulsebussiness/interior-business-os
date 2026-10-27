@@ -18,32 +18,68 @@ const root = new URL(
 );
 
 test('Leads desktop uses single horizontal rows and offers a real filter reset', () => {
-  const premiumCss = readFileSync(fileURLToPath(new URL('leads-premium.css', root)), 'utf8');
-  const leadsCss = readFileSync(fileURLToPath(new URL('leads.css', root)), 'utf8');
+  const premiumCss = readFileSync(
+    fileURLToPath(new URL('leads-premium.css', root)),
+    'utf8',
+  );
+  const leadsCss = readFileSync(
+    fileURLToPath(new URL('leads.css', root)),
+    'utf8',
+  );
   assert.match(leads, /className="crm-leads-table-wrap"/);
   assert.match(leads, /crm-col-quote/);
   assert.match(leads, /crm-lead-row/);
   assert.match(leads, /Showing \{number\.format\(count\)\} filtered/);
   assert.match(leads, /href=\{allLeadsHref\}/);
   assert.doesNotMatch(premiumCss, /@media\s*\(max-width:\s*1600px\)/);
-  assert.doesNotMatch(leadsCss, /@media\s*\(max-width:\s*1024px\),\s*\(hover:\s*none\)/);
+  assert.doesNotMatch(
+    leadsCss,
+    /@media\s*\(max-width:\s*1024px\),\s*\(hover:\s*none\)/,
+  );
 });
 
 test('daily lead actions stay before occasional quotations on desktop and mobile', () => {
-  const quotePreview = readFileSync(fileURLToPath(new URL('lead-quote-preview.tsx', root)), 'utf8');
-  const desktopHeaders = leads.slice(leads.indexOf('<colgroup>'), leads.indexOf('</thead>'));
+  const quotePreview = readFileSync(
+    fileURLToPath(new URL('lead-quote-preview.tsx', root)),
+    'utf8',
+  );
+  const desktopHeaders = leads.slice(
+    leads.indexOf('<colgroup>'),
+    leads.indexOf('</thead>'),
+  );
   assert.match(desktopHeaders, /crm-col-actions[^]*crm-col-quote/);
-  assert.match(desktopHeaders, /<th>Daily actions<\/th>\s*<th>Quotation · optional<\/th>/);
-  const desktopRows = leads.slice(leads.indexOf('<tbody>'), leads.indexOf('</tbody>'));
-  assert.ok(desktopRows.indexOf('className="crm-row-actions"') < desktopRows.indexOf('className="crm-quote-pending"'));
+  assert.match(
+    desktopHeaders,
+    /<th>Daily actions<\/th>\s*<th>Quotation · optional<\/th>/,
+  );
+  const desktopRows = leads.slice(
+    leads.indexOf('<tbody>'),
+    leads.indexOf('</tbody>'),
+  );
+  assert.ok(
+    desktopRows.indexOf('className="crm-row-actions"') <
+      desktopRows.indexOf('className="crm-quote-pending"'),
+  );
   assert.match(desktopRows, /<LeadQuotePreview compact/);
   assert.match(quotePreview, /if \(compact\)/);
   assert.match(quotePreview, /href=\{base\}/);
-  const mobileCards = leads.slice(leads.indexOf('className="crm-mobile-list"'), leads.indexOf('className="crm-leads-empty"'));
-  assert.ok(mobileCards.indexOf('className="crm-compact-actions"') < mobileCards.indexOf('className="crm-compact-quotation-last"'));
-  assert.ok(mobileCards.indexOf('className="crm-compact-secondary"') < mobileCards.indexOf('className="crm-compact-quotation-last"'));
+  const mobileCards = leads.slice(
+    leads.indexOf('className="crm-mobile-list"'),
+    leads.indexOf('className="crm-leads-empty"'),
+  );
+  assert.ok(
+    mobileCards.indexOf('className="crm-compact-actions"') <
+      mobileCards.indexOf('className="crm-compact-quotation-last"'),
+  );
+  assert.ok(
+    mobileCards.indexOf('className="crm-compact-secondary"') <
+      mobileCards.indexOf('className="crm-compact-quotation-last"'),
+  );
   assert.doesNotMatch(mobileCards, /className="crm-compact-quote-toggle"/);
-  assert.match(mobileCards, /\{expanded && <div className="crm-compact-expanded">/);
+  assert.match(
+    mobileCards,
+    /\{expanded && <div className="crm-compact-expanded">/,
+  );
 });
 
 test('lead list retains inline Add and ProPulse but uses separate import routes', () => {
@@ -174,7 +210,10 @@ test('Upload Leads and Google Sheets have distinct protected pages', () => {
 });
 
 test('Leads listing has one preview drawer and keeps canonical history, without duplicate editors', () => {
-  const drawer = readFileSync(fileURLToPath(new URL('lead-details-drawer.tsx', root)), 'utf8');
+  const drawer = readFileSync(
+    fileURLToPath(new URL('lead-details-drawer.tsx', root)),
+    'utf8',
+  );
   assert.match(leads, /<LeadDetailsDrawer/);
   assert.match(drawer, /encodeURIComponent\(lead\.id\)/);
   assert.match(drawer, /<LeadQuotePreview/);
@@ -210,7 +249,10 @@ test('mobile cards are compact by default, expandable, with one optional quotati
     fileURLToPath(new URL('lead-inline-controls.tsx', root)),
     'utf8',
   );
-  const styles = readFileSync(fileURLToPath(new URL('leads-premium.css', root)), 'utf8');
+  const styles = readFileSync(
+    fileURLToPath(new URL('leads-premium.css', root)),
+    'utf8',
+  );
   assert.match(leads, /crm-compact-lead/);
   assert.match(leads, /expandedMobileId === lead.id/);
   assert.match(leads, /aria-expanded=\{expanded\}/);
@@ -319,7 +361,10 @@ test('invited clients can open only explicitly granted project records', () => {
   assert.match(inviteUi, /'\/client\/projects\/' \+ item\.project_id/);
   const clientForm = readFileSync(
     fileURLToPath(
-      new URL('../apps/business-app/src/app/client/client-auth-form.tsx', import.meta.url),
+      new URL(
+        '../apps/business-app/src/app/client/client-auth-form.tsx',
+        import.meta.url,
+      ),
     ),
     'utf8',
   );
@@ -470,10 +515,15 @@ test('premium client dashboard reads only invited-project delivery data', () => 
   assert.match(styles, /pc-mobile-tabs/);
 });
 
-
 test('filtered Leads bulk editing uses real company permissions and versioned commands', () => {
-  const bulk = readFileSync(fileURLToPath(new URL('bulk-lead-actions.ts', root)), 'utf8');
-  const toolbar = readFileSync(fileURLToPath(new URL('lead-bulk-toolbar.tsx', root)), 'utf8');
+  const bulk = readFileSync(
+    fileURLToPath(new URL('bulk-lead-actions.ts', root)),
+    'utf8',
+  );
+  const toolbar = readFileSync(
+    fileURLToPath(new URL('lead-bulk-toolbar.tsx', root)),
+    'utf8',
+  );
   assert.match(leads, /<LeadBulkToolbar/);
   assert.match(leads, /params\.priority !== 'high'/);
   assert.match(leads, /Select filtered page/);
@@ -490,12 +540,29 @@ test('filtered Leads bulk editing uses real company permissions and versioned co
 });
 
 test('one lead supports multiple package quotations and previews newest, with simple staff statuses', () => {
-  const appRoot = new URL('../apps/business-app/src/app/dashboard/', import.meta.url);
-  const quoteList = readFileSync(fileURLToPath(new URL('quotations/page.tsx', appRoot)), 'utf8');
-  const createQuote = readFileSync(fileURLToPath(new URL('quotations/studio-actions.ts', appRoot)), 'utf8');
-  const leadPage = readFileSync(fileURLToPath(new URL('crm/leads/page.tsx', appRoot)), 'utf8');
+  const appRoot = new URL(
+    '../apps/business-app/src/app/dashboard/',
+    import.meta.url,
+  );
+  const quoteList = readFileSync(
+    fileURLToPath(new URL('quotations/page.tsx', appRoot)),
+    'utf8',
+  );
+  const createQuote = readFileSync(
+    fileURLToPath(new URL('quotations/studio-actions.ts', appRoot)),
+    'utf8',
+  );
+  const leadPage = readFileSync(
+    fileURLToPath(new URL('crm/leads/page.tsx', appRoot)),
+    'utf8',
+  );
   const summarySql = readFileSync(
-    fileURLToPath(new URL('../packages/database/supabase/migrations/20261016000200_lead_latest_quote.sql', import.meta.url)),
+    fileURLToPath(
+      new URL(
+        '../packages/database/supabase/migrations/20261016000200_lead_latest_quote.sql',
+        import.meta.url,
+      ),
+    ),
     'utf8',
   );
 
@@ -504,7 +571,8 @@ test('one lead supports multiple package quotations and previews newest, with si
   assert.match(createQuote, /action: 'create'/);
   assert.match(createQuote, /await attachLead\(newRevision\.quotation_id\)/);
   const quotePreview = readFileSync(
-    fileURLToPath(new URL('crm/leads/lead-quote-preview.tsx', appRoot)), 'utf8',
+    fileURLToPath(new URL('crm/leads/lead-quote-preview.tsx', appRoot)),
+    'utf8',
   );
   // A new quote stays available but uses one compact action row, rather
   // than a second button stacking below every lead's quotation.
@@ -526,7 +594,10 @@ test('one lead supports multiple package quotations and previews newest, with si
   assert.match(quoteList, /group\.quotes\.slice\(1\)\.map/);
   assert.match(quoteList, /renderMobileQuote\(group\.quotes\[0\]!\)/);
   assert.match(quoteList, /renderTableRow\(group\.quotes\[0\]!\)/);
-  const revise = readFileSync(fileURLToPath(new URL('quotations/quotation-revise-button.tsx', appRoot)), 'utf8');
+  const revise = readFileSync(
+    fileURLToPath(new URL('quotations/quotation-revise-button.tsx', appRoot)),
+    'utf8',
+  );
   assert.match(quoteList, /<QuotationReviseButton/);
   assert.match(revise, /action: 'clone'/);
   assert.match(revise, /step=quote/);
@@ -535,13 +606,34 @@ test('one lead supports multiple package quotations and previews newest, with si
 });
 
 test('Follow-ups and Visits are handled inside Leads and legacy links redirect', () => {
-  const activity = readFileSync(fileURLToPath(new URL('lead-activity-scheduler.tsx', root)), 'utf8');
-  const actions = readFileSync(fileURLToPath(new URL('lead-activity-actions.ts', root)), 'utf8');
-  const panel = readFileSync(fileURLToPath(new URL('lead-activity-panel.tsx', root)), 'utf8');
-  const drawer = readFileSync(fileURLToPath(new URL('lead-details-drawer.tsx', root)), 'utf8');
-  const detail = readFileSync(fileURLToPath(new URL('[id]/page.tsx', root)), 'utf8');
-  const followups = readFileSync(fileURLToPath(new URL('../followups/page.tsx', root)), 'utf8');
-  const visits = readFileSync(fileURLToPath(new URL('../site-visits/page.tsx', root)), 'utf8');
+  const activity = readFileSync(
+    fileURLToPath(new URL('lead-activity-scheduler.tsx', root)),
+    'utf8',
+  );
+  const actions = readFileSync(
+    fileURLToPath(new URL('lead-activity-actions.ts', root)),
+    'utf8',
+  );
+  const panel = readFileSync(
+    fileURLToPath(new URL('lead-activity-panel.tsx', root)),
+    'utf8',
+  );
+  const drawer = readFileSync(
+    fileURLToPath(new URL('lead-details-drawer.tsx', root)),
+    'utf8',
+  );
+  const detail = readFileSync(
+    fileURLToPath(new URL('[id]/page.tsx', root)),
+    'utf8',
+  );
+  const followups = readFileSync(
+    fileURLToPath(new URL('../followups/page.tsx', root)),
+    'utf8',
+  );
+  const visits = readFileSync(
+    fileURLToPath(new URL('../site-visits/page.tsx', root)),
+    'utf8',
+  );
   assert.match(leads, /crm-activity-filters/);
   assert.match(leads, /Upcoming Visits/);
   assert.match(leads, /Due Today/);

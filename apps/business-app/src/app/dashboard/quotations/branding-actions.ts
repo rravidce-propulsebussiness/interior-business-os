@@ -23,15 +23,20 @@ export async function refreshDraftQuotationBranding(
         args: Record<string, string | number>,
       ) => Promise<{ data: number | null; error: { message: string } | null }>;
     };
-    const { data, error } = await client.rpc('quotation_refresh_draft_branding', {
-      p_organization_id: s.org,
-      p_revision_id: id,
-      p_expected_version: expected,
-    });
+    const { data, error } = await client.rpc(
+      'quotation_refresh_draft_branding',
+      {
+        p_organization_id: s.org,
+        p_revision_id: id,
+        p_expected_version: expected,
+      },
+    );
     if (error || data == null) {
       return {
         ok: false,
-        message: error?.message || 'Branding could not be updated. Save your company settings and try again.',
+        message:
+          error?.message ||
+          'Branding could not be updated. Save your company settings and try again.',
       };
     }
     revalidatePath('/dashboard/quotations/' + id + '/studio');
@@ -39,7 +44,8 @@ export async function refreshDraftQuotationBranding(
     revalidatePath('/dashboard/quotations/' + id + '/pdf');
     return {
       ok: true,
-      message: 'Draft branding refreshed. The saved logo, address and contact details now appear in this quotation.',
+      message:
+        'Draft branding refreshed. The saved logo, address and contact details now appear in this quotation.',
     };
   } catch (error) {
     return { ok: false, message: safeFailure(error).message };

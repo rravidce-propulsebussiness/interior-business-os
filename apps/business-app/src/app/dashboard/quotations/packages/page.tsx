@@ -20,7 +20,9 @@ export default async function QuotationPackagesPage() {
       repository.industries(),
       createConstructionPackagesRepository(client).list(org),
       createConstructionRatesRepository(client).list(org),
-      createQuotationPackagesRepository(client).list(org).catch(() => null),
+      createQuotationPackagesRepository(client)
+        .list(org)
+        .catch(() => null),
     ]);
   if (!organization) throw new Error('Company workspace unavailable');
   return (
@@ -32,9 +34,11 @@ export default async function QuotationPackagesPage() {
         construction={construction}
         rates={rates}
         other={configurable}
-        industries={industries.filter((i) =>
-          i.status === 'active' && i.key !== 'construction').map((i) => ({
-            key: i.key, name: i.name,
+        industries={industries
+          .filter((i) => i.status === 'active' && i.key !== 'construction')
+          .map((i) => ({
+            key: i.key,
+            name: i.name,
           }))}
         canManage={canManagePrice}
         currency={organization.default_currency || 'INR'}

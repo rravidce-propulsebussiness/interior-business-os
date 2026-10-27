@@ -44,21 +44,31 @@ export async function financeCommand(
                                 }[command.input.action]
                               : 'billing.manage';
     const s = await financeServices(permission);
-    if (command.action==='record_payment') {
-      const owner=s.context.roles.some(role=>role.name.toLowerCase()==='owner');
-      if (command.allow_partial&&!owner)
-        return {message:'Only the company Owner can authorize a partial payment.'};
+    if (command.action === 'record_payment') {
+      const owner = s.context.roles.some(
+        (role) => role.name.toLowerCase() === 'owner',
+      );
+      if (command.allow_partial && !owner)
+        return {
+          message: 'Only the company Owner can authorize a partial payment.',
+        };
       // Compare with trusted live contract ledger amounts, never with a browser
       // supplied "full" value. Existing ad-hoc receipts without a schedule
       // retain their old workflow.
-      const due=await nextMilestoneDue(s.client,s.org,command.contract_id);
+      const due = await nextMilestoneDue(s.client, s.org, command.contract_id);
       if (due) {
-        const paid=Math.round(Number(command.input.amount)*100);
-        const required=Math.round(Number(due.amount)*100);
-        if (paid>required)
-          return {message:'Amount exceeds the unpaid milestone. Review the Finance ledger.'};
-        if (paid<required&&!command.allow_partial)
-          return {message:'Full milestone payment is the default. Only the Owner may enable partial payment.'};
+        const paid = Math.round(Number(command.input.amount) * 100);
+        const required = Math.round(Number(due.amount) * 100);
+        if (paid > required)
+          return {
+            message:
+              'Amount exceeds the unpaid milestone. Review the Finance ledger.',
+          };
+        if (paid < required && !command.allow_partial)
+          return {
+            message:
+              'Full milestone payment is the default. Only the Owner may enable partial payment.',
+          };
       }
     }
     const result = await s.finance.command(command);

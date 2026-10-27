@@ -4,9 +4,13 @@
 export function leadQuoteLabel(status: string | null, shared = false): string {
   if (shared) return 'Shared';
   switch (status) {
-    case 'issued': return 'Ready to share';
-    case 'superseded': return 'Previous version';
-    case 'cancelled': return 'Archived';
-    default: return 'Saved';
+    case 'issued':
+      return 'Ready to share';
+    case 'superseded':
+      return 'Previous version';
+    case 'cancelled':
+      return 'Archived';
+    default:
+      return 'Saved';
   }
 }

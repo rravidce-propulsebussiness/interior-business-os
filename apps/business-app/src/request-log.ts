@@ -1,11 +1,29 @@
 /** Logs static route categories only; never tenant slugs, IDs or query strings. */
 const sections = new Set([
-  'billing', 'crm', 'quotations', 'projects', 'settings', 'customers',
-  'finance', 'operations', 'team', 'company', 'notifications', 'reports',
-  'marketplace', 'website', 'pricing',
+  'billing',
+  'crm',
+  'quotations',
+  'projects',
+  'settings',
+  'customers',
+  'finance',
+  'operations',
+  'team',
+  'company',
+  'notifications',
+  'reports',
+  'marketplace',
+  'website',
+  'pricing',
 ]);
 const apiSections = new Set([
-  'auth', 'billing', 'crm', 'quotations', 'projects', 'finance', 'pdf',
+  'auth',
+  'billing',
+  'crm',
+  'quotations',
+  'projects',
+  'finance',
+  'pdf',
 ]);
 
 export function requestLogCategory(pathname: string): string | null {
@@ -16,7 +34,11 @@ export function requestLogCategory(pathname: string): string | null {
     return null;
   if (first === 'api' && ['health', 'ready'].includes(parts[1] ?? ''))
     return null;
-  if (parts.some((item) => /\.(?:js|css|ico|png|jpg|jpeg|gif|svg|webp|woff2?|map)$/i.test(item)))
+  if (
+    parts.some((item) =>
+      /\.(?:js|css|ico|png|jpg|jpeg|gif|svg|webp|woff2?|map)$/i.test(item),
+    )
+  )
     return null;
 
   // Some tenant URLs have a workspace slug before the dashboard prefix.

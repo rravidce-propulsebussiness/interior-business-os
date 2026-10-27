@@ -38,10 +38,14 @@ export async function proxy(request: NextRequest) {
   const start = Date.now();
   if (category)
     console.log(
-      '[Business OS] http.request.start id=' + requestId +
-      ' category=' + category +
-      ' method=' + requestLogMethod(request.method) +
-      ' pid=' + process.pid,
+      '[Business OS] http.request.start id=' +
+        requestId +
+        ' category=' +
+        category +
+        ' method=' +
+        requestLogMethod(request.method) +
+        ' pid=' +
+        process.pid,
     );
   // A visitor must not be allowed to supply internal tenant-scope headers.
   request.headers.delete(WORKSPACE_SLUG_HEADER);
@@ -85,10 +89,14 @@ export async function proxy(request: NextRequest) {
     response = await refreshSessionWithRewrite(request, rewrite);
   } catch (error) {
     console.error(
-      '[Business OS] http.proxy.error id=' + requestId +
-      ' category=' + (category ?? 'other') +
-      ' name=' + requestErrorName(error) +
-      ' duration_ms=' + (Date.now() - start),
+      '[Business OS] http.proxy.error id=' +
+        requestId +
+        ' category=' +
+        (category ?? 'other') +
+        ' name=' +
+        requestErrorName(error) +
+        ' duration_ms=' +
+        (Date.now() - start),
     );
     throw error;
   }
@@ -105,9 +113,12 @@ export async function proxy(request: NextRequest) {
   }
   if (category)
     console.log(
-      '[Business OS] http.proxy.complete id=' + requestId +
-      ' category=' + category +
-      ' duration_ms=' + (Date.now() - start),
+      '[Business OS] http.proxy.complete id=' +
+        requestId +
+        ' category=' +
+        category +
+        ' duration_ms=' +
+        (Date.now() - start),
     );
   return response;
 }

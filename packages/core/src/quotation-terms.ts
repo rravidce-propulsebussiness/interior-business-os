@@ -3,26 +3,38 @@
  * by savedStagePaymentPlan; no mutable package/settings lookup is required.
  */
 export type CustomerTermSection = { title: string; text: string };
-const sections = ['Inclusions', 'Exclusions', 'Warranty', 'Additional terms'] as const;
-const stageBlock = /\[(STAGE_PAYMENT_PLAN|STAGE_PAYMENT_LINKS|STAGE_CUSTOM_REQUIREMENTS|QUOTATION_MILESTONE_FLOW)\][\s\S]*?\[\/\1\]/g;
-const headings = /^(Inclusions|Exclusions|Warranty|Additional terms):[ \t]*$/gim;
+const sections = [
+  'Inclusions',
+  'Exclusions',
+  'Warranty',
+  'Additional terms',
+] as const;
+const stageBlock =
+  /\[(STAGE_PAYMENT_PLAN|STAGE_PAYMENT_LINKS|STAGE_CUSTOM_REQUIREMENTS|QUOTATION_MILESTONE_FLOW)\][\s\S]*?\[\/\1\]/g;
+const headings =
+  /^(Inclusions|Exclusions|Warranty|Additional terms):[ \t]*$/gim;
 
 export function customerTermSections(source: string): CustomerTermSection[] {
   const plain = source.replace(stageBlock, '').trim();
   if (!plain) return [];
   const matches = [...plain.matchAll(headings)];
-  if (!matches.length)
-    return [{ title: 'Additional terms', text: plain }];
+  if (!matches.length) return [{ title: 'Additional terms', text: plain }];
   const found: CustomerTermSection[] = [];
   // Some saved revisions start with legacy free text before named headings.
-  const prefix=plain.slice(0,matches[0]?.index ?? 0).trim();
-  if(prefix)found.push({title:'Additional terms',text:prefix});
-  for (let i=0;i<matches.length;i++) {
-    const match=matches[i]!;
-    const label=sections.find(s => s.toLowerCase() === match[1]?.toLowerCase());
+  const prefix = plain.slice(0, matches[0]?.index ?? 0).trim();
+  if (prefix) found.push({ title: 'Additional terms', text: prefix });
+  for (let i = 0; i < matches.length; i++) {
+    const match = matches[i]!;
+    const label = sections.find(
+      (s) => s.toLowerCase() === match[1]?.toLowerCase(),
+    );
     if (!label) continue;
-    const text=plain.slice((match.index ?? 0)+match[0].length,
-      matches[i+1]?.index ?? plain.length).trim();
+    const text = plain
+      .slice(
+        (match.index ?? 0) + match[0].length,
+        matches[i + 1]?.index ?? plain.length,
+      )
+      .trim();
     if (text) found.push({ title: label, text });
   }
   return found;

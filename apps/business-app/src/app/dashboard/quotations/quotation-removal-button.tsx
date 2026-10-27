@@ -4,26 +4,47 @@ import { useRouter } from 'next/navigation';
 import { quotationCommand } from './actions';
 
 export function QuotationRemovalButton({
-  id, number, version, issued,
-}: { id: string; number: string; version: number; issued: boolean }) {
+  id,
+  number,
+  version,
+  issued,
+}: {
+  id: string;
+  number: string;
+  version: number;
+  issued: boolean;
+}) {
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState('');
   const router = useRouter();
   return (
-    <span style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'end', gap: 3 }}>
+    <span
+      style={{
+        display: 'inline-flex',
+        flexDirection: 'column',
+        alignItems: 'end',
+        gap: 3,
+      }}
+    >
       <button
         type="button"
         disabled={pending}
         className="qs-btn"
         style={{ color: '#b42318', cursor: 'pointer', whiteSpace: 'nowrap' }}
-        title={issued
-          ? 'Cancel issued quotation while retaining the customer and audit history'
-          : 'Remove quotation from the active list while retaining history'}
+        title={
+          issued
+            ? 'Cancel issued quotation while retaining the customer and audit history'
+            : 'Remove quotation from the active list while retaining history'
+        }
         onClick={async () => {
-          if (!window.confirm(
-            (issued ? 'Cancel issued ' : 'Delete quotation ') + number +
-              '? This removes the quotation from the active list but keeps the document history, related projects and customer records.',
-          )) return;
+          if (
+            !window.confirm(
+              (issued ? 'Cancel issued ' : 'Delete quotation ') +
+                number +
+                '? This removes the quotation from the active list but keeps the document history, related projects and customer records.',
+            )
+          )
+            return;
           setPending(true);
           setMessage('');
           try {
@@ -43,7 +64,11 @@ export function QuotationRemovalButton({
       >
         {pending ? 'Saving…' : issued ? 'Cancel' : 'Delete'}
       </button>
-      {message && <small role="alert" style={{ color: '#b42318', maxWidth: 160 }}>{message}</small>}
+      {message && (
+        <small role="alert" style={{ color: '#b42318', maxWidth: 160 }}>
+          {message}
+        </small>
+      )}
     </span>
   );
 }

@@ -31,10 +31,17 @@ export default async function NewFinance({
   const s = await financeServices(permissions[entity]!, true);
   // This is a compatibility URL, not another client payment workspace.
   // Keep fallback for restricted finance-only roles without main Finance access.
-  if (entity === 'payments' && s.allowed('payment.view') && s.allowed('invoice.view')) {
-    redirect('/dashboard/finance?tab=payments' +
-      (q.contract_id && /^[0-9a-f-]{36}$/i.test(q.contract_id)
-        ? '&contract_id=' + encodeURIComponent(q.contract_id) : ''));
+  if (
+    entity === 'payments' &&
+    s.allowed('payment.view') &&
+    s.allowed('invoice.view')
+  ) {
+    redirect(
+      '/dashboard/finance?tab=payments' +
+        (q.contract_id && /^[0-9a-f-]{36}$/i.test(q.contract_id)
+          ? '&contract_id=' + encodeURIComponent(q.contract_id)
+          : ''),
+    );
   }
   const contractId = q.contract_id;
   const contract =
@@ -44,16 +51,29 @@ export default async function NewFinance({
   // Legacy schedule-entry links must not reopen the same work for projects
   // whose signed quotation milestones are already the active schedule.
   // Finance-only staff retain their ordinary, permissioned Finance screens.
-  if (entity === 'payment_schedules' && contractId && contract &&
-      canAccess(s.context, { organizationId: s.org, permission: 'project.view',
-        moduleKey: 'projects' })) {
+  if (
+    entity === 'payment_schedules' &&
+    contractId &&
+    contract &&
+    canAccess(s.context, {
+      organizationId: s.org,
+      permission: 'project.view',
+      moduleKey: 'projects',
+    })
+  ) {
     const projectId = text(contract, 'project_id');
     if (projectId) {
-      const existing = await s.client.from('payment_schedules').select('id')
-        .eq('organization_id', s.org).eq('contract_id', contractId)
-        .eq('status', 'active').limit(1);
+      const existing = await s.client
+        .from('payment_schedules')
+        .select('id')
+        .eq('organization_id', s.org)
+        .eq('contract_id', contractId)
+        .eq('status', 'active')
+        .limit(1);
       if (!existing.error && existing.data?.length)
-        redirect('/dashboard/projects/' + encodeURIComponent(projectId) + '/payments');
+        redirect(
+          '/dashboard/projects/' + encodeURIComponent(projectId) + '/payments',
+        );
     }
   }
   const today = new Date().toISOString().slice(0, 10);

@@ -6,7 +6,7 @@ describe('lead floors to quotation editor', () => {
     expect(quoteFloorsFromLead({ floors: 'g1' })).toBe(2);
     expect(quoteFloorsFromLead({ floors: 'g2' })).toBe(3);
     expect(quoteFloorsFromLead({ floors: 'g3plus' })).toBe(4);
-    expect(quoteFloorsFromLead({floors:'G+2'})).toBe(3);
+    expect(quoteFloorsFromLead({ floors: 'G+2' })).toBe(3);
   });
   it('does not guess floors for unclassified or interior requirements', () => {
     expect(quoteFloorsFromLead({ bhk: '3bhk' })).toBeNull();

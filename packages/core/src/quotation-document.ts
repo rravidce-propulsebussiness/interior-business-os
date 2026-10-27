@@ -3,10 +3,16 @@ import { addressSchema, brandingSchema } from './commercial';
 import { parseSftEstimate } from './sft-quotation';
 import { parseCustomBrandQuote } from './custom-brand-quote';
 import { premiumCss, premiumSections } from './premium-quotation';
-import { savedStagePaymentPlan,savedStagePaymentLinks } from './quotation-payment-plan';
+import {
+  savedStagePaymentPlan,
+  savedStagePaymentLinks,
+} from './quotation-payment-plan';
 import { guidanceForConstructionStage } from './construction-payment-schedule';
 import { customerTermSections } from './quotation-terms';
-import { savedStageRequirements,defaultStageRequirements } from './quotation-stage-requirements';
+import {
+  savedStageRequirements,
+  defaultStageRequirements,
+} from './quotation-stage-requirements';
 import { savedMilestoneFlow } from './quotation-milestone-flow';
 const money = z.string().regex(/^(0|[1-9]\d{0,79})(\.\d{1,100})?$/);
 export const documentHeaderSchema = z.object({
@@ -80,9 +86,11 @@ export function renderQuotationDocument(input: unknown): string {
     h = d.header,
     money = (value: string) => {
       const parsed = Number(value);
-      return Number.isFinite(parsed) && Number.isSafeInteger(Math.round(parsed * 100))
+      return Number.isFinite(parsed) &&
+        Number.isSafeInteger(Math.round(parsed * 100))
         ? new Intl.NumberFormat('en-IN', {
-            style: 'currency', currency: d.currency,
+            style: 'currency',
+            currency: d.currency,
             maximumFractionDigits: 2,
           }).format(parsed)
         : `${escape(d.currency)} ${escape(value)}`;
@@ -93,45 +101,78 @@ export function renderQuotationDocument(input: unknown): string {
   const savedTerms = customerTermSections(d.terms);
   const paymentRows = savedStagePaymentPlan(d.terms) ?? [];
   const paymentStageLinks = savedStagePaymentLinks(d.terms);
-  const quotedRequirements=savedStageRequirements(d.terms);
-  const milestoneOrder=savedMilestoneFlow(d.terms);
-  const hasMilestoneOrder=Object.values(milestoneOrder).some(items=>items.length>0);
-  const stepLabel=(index:number)=>{
-    const steps=milestoneOrder[String(index)]??[];
-    if(!steps.length)return '';
-    const line=(step:typeof steps[number])=>{
-      const scope=quotedRequirements[step.code]??defaultStageRequirements(step.code);
-      const key=step.kind==='work'?'work':step.kind==='material'?'materials':'checks';
-      const item=scope[key][step.index]??'Specified work item';
-      const type=step.kind==='qc'?'Company QC':
-       step.kind==='material'?'Material':step.kind==='test'?'Test':
-       step.kind==='check'?'Site check':'Work';
-      return '<li><strong>'+escape(type)+':</strong> '+escape(item)+'</li>';
+  const quotedRequirements = savedStageRequirements(d.terms);
+  const milestoneOrder = savedMilestoneFlow(d.terms);
+  const hasMilestoneOrder = Object.values(milestoneOrder).some(
+    (items) => items.length > 0,
+  );
+  const stepLabel = (index: number) => {
+    const steps = milestoneOrder[String(index)] ?? [];
+    if (!steps.length) return '';
+    const line = (step: (typeof steps)[number]) => {
+      const scope =
+        quotedRequirements[step.code] ?? defaultStageRequirements(step.code);
+      const key =
+        step.kind === 'work'
+          ? 'work'
+          : step.kind === 'material'
+            ? 'materials'
+            : 'checks';
+      const item = scope[key][step.index] ?? 'Specified work item';
+      const type =
+        step.kind === 'qc'
+          ? 'Company QC'
+          : step.kind === 'material'
+            ? 'Material'
+            : step.kind === 'test'
+              ? 'Test'
+              : step.kind === 'check'
+                ? 'Site check'
+                : 'Work';
+      return (
+        '<li><strong>' + escape(type) + ':</strong> ' + escape(item) + '</li>'
+      );
     };
-    return '<tr class="pb-milestone-work"><td colspan="3">'+
-      '<p class="muted"><strong>Work, material &amp; inspection order</strong></p>'+
-      '<ol>'+steps.map(line).join('')+'</ol></td></tr>';
+    return (
+      '<tr class="pb-milestone-work"><td colspan="3">' +
+      '<p class="muted"><strong>Work, material &amp; inspection order</strong></p>' +
+      '<ol>' +
+      steps.map(line).join('') +
+      '</ol></td></tr>'
+    );
   };
   const paymentValid = paymentRows.length > 0;
   const fullCents = Math.round(Number(d.totals.final_amount) * 100);
   let paidCents = 0;
-  const paymentSection = paymentValid && Number.isSafeInteger(fullCents)
-    ? '<section class="terms payment-plan"><h2>Proposed stage-wise payment schedule</h2>' +
-      '<p class="muted">To be agreed in the contract. No invoice or payment has been raised.</p>' +
-      '<table><thead><tr><th>Milestone</th><th>Share</th><th class="amount">Payment amount</th></tr></thead><tbody>' +
-      paymentRows.map((row, index) => {
-        const cents = index === paymentRows.length - 1
-          ? fullCents - paidCents
-          : Math.round(fullCents * row.percent / 100);
-        paidCents += cents;
-        return '<tr><td>' + escape(row.name) + '</td><td>' + row.percent.toFixed(2) +
-          '%</td><td class="amount">' + money((cents / 100).toFixed(2)) + '</td></tr>'+
-          stepLabel(index);
-      }).join('') +
-      '<tr class="total"><td>Total</td><td>100%</td><td class="amount">' +
-        money((fullCents / 100).toFixed(2)) + '</td></tr>' +
-      '</tbody></table></section>'
-    : '';
+  const paymentSection =
+    paymentValid && Number.isSafeInteger(fullCents)
+      ? '<section class="terms payment-plan"><h2>Proposed stage-wise payment schedule</h2>' +
+        '<p class="muted">To be agreed in the contract. No invoice or payment has been raised.</p>' +
+        '<table><thead><tr><th>Milestone</th><th>Share</th><th class="amount">Payment amount</th></tr></thead><tbody>' +
+        paymentRows
+          .map((row, index) => {
+            const cents =
+              index === paymentRows.length - 1
+                ? fullCents - paidCents
+                : Math.round((fullCents * row.percent) / 100);
+            paidCents += cents;
+            return (
+              '<tr><td>' +
+              escape(row.name) +
+              '</td><td>' +
+              row.percent.toFixed(2) +
+              '%</td><td class="amount">' +
+              money((cents / 100).toFixed(2)) +
+              '</td></tr>' +
+              stepLabel(index)
+            );
+          })
+          .join('') +
+        '<tr class="total"><td>Total</td><td>100%</td><td class="amount">' +
+        money((fullCents / 100).toFixed(2)) +
+        '</td></tr>' +
+        '</tbody></table></section>'
+      : '';
   const areaOrder = [...new Set(d.lines.map((line) => line.area))];
   const grouped = [...d.lines].sort(
     (a, b) => areaOrder.indexOf(a.area) - areaOrder.indexOf(b.area),
@@ -148,35 +189,80 @@ export function renderQuotationDocument(input: unknown): string {
     const quote = parseCustomBrandQuote(line.description);
     return quote ? [quote] : [];
   });
-  const customPricingTables = customBrandQuotes.map(quote =>
-    '<section class="pb-estimate pb-custom-estimate">' +
-    '<div class="pb-section-title"><h2>Custom brand-based construction estimate</h2></div>' +
-    '<p class="pb-section-subtitle">Customer-selected brand · purchase price × usage per SFT = cost per SFT</p>' +
-    '<table><thead><tr><th>Material / selected brand</th><th>Rate / unit</th>' +
-    '<th>Usage / SFT</th><th class="amount">Cost / SFT</th></tr></thead><tbody>' +
-    quote.selections.map(item =>
-      '<tr><td><strong>' + escape(item.category) + ' · ' +
-      escape(item.name) + '</strong>' +
-      (item.specification ? '<p class="text">' + escape(item.specification) + '</p>' : '') +
-      '</td><td>' + money(item.unitPrice) + ' / ' + escape(item.priceUnit) + '</td>' +
-      '<td>' + escape(item.consumptionPerSqft) + ' ' + escape(item.priceUnit) + '</td>' +
-      '<td class="amount">' + money(item.ratePerSqft) + '</td></tr>',
-    ).join('') +
-    '<tr class="total"><td>Calculated custom package rate</td><td></td><td></td>' +
-    '<td class="amount">' + money(quote.ratePerSqft) + ' / SFT</td></tr>' +
-    '</tbody></table><p class="pb-section-subtitle">Built-up area: ' +
-    escape(quote.areaSqft) + ' SFT · Total: ' + money(quote.total) + '</p></section>',
-  ).join('');
-  const customBrandSpecifications = customBrandQuotes.map(quote =>
-    '<section class="material-choices"><h3>Custom package · selected brands</h3>' +
-    quote.selections.map(item => '<p><strong>' + escape(item.category) +
-      '</strong> · ' + escape(item.name) + ' — ' +
-      escape(item.consumptionPerSqft) + ' ' + escape(item.priceUnit) +
-      '/SFT at ' + money(item.unitPrice) + '/' + escape(item.priceUnit) +
-      ' (' + money(item.ratePerSqft) + '/SFT)' +
-      (item.specification ? ' · ' + escape(item.specification) : '') +
-      '</p>').join('') + '</section>',
-  ).join('');
+  const customPricingTables = customBrandQuotes
+    .map(
+      (quote) =>
+        '<section class="pb-estimate pb-custom-estimate">' +
+        '<div class="pb-section-title"><h2>Custom brand-based construction estimate</h2></div>' +
+        '<p class="pb-section-subtitle">Customer-selected brand · purchase price × usage per SFT = cost per SFT</p>' +
+        '<table><thead><tr><th>Material / selected brand</th><th>Rate / unit</th>' +
+        '<th>Usage / SFT</th><th class="amount">Cost / SFT</th></tr></thead><tbody>' +
+        quote.selections
+          .map(
+            (item) =>
+              '<tr><td><strong>' +
+              escape(item.category) +
+              ' · ' +
+              escape(item.name) +
+              '</strong>' +
+              (item.specification
+                ? '<p class="text">' + escape(item.specification) + '</p>'
+                : '') +
+              '</td><td>' +
+              money(item.unitPrice) +
+              ' / ' +
+              escape(item.priceUnit) +
+              '</td>' +
+              '<td>' +
+              escape(item.consumptionPerSqft) +
+              ' ' +
+              escape(item.priceUnit) +
+              '</td>' +
+              '<td class="amount">' +
+              money(item.ratePerSqft) +
+              '</td></tr>',
+          )
+          .join('') +
+        '<tr class="total"><td>Calculated custom package rate</td><td></td><td></td>' +
+        '<td class="amount">' +
+        money(quote.ratePerSqft) +
+        ' / SFT</td></tr>' +
+        '</tbody></table><p class="pb-section-subtitle">Built-up area: ' +
+        escape(quote.areaSqft) +
+        ' SFT · Total: ' +
+        money(quote.total) +
+        '</p></section>',
+    )
+    .join('');
+  const customBrandSpecifications = customBrandQuotes
+    .map(
+      (quote) =>
+        '<section class="material-choices"><h3>Custom package · selected brands</h3>' +
+        quote.selections
+          .map(
+            (item) =>
+              '<p><strong>' +
+              escape(item.category) +
+              '</strong> · ' +
+              escape(item.name) +
+              ' — ' +
+              escape(item.consumptionPerSqft) +
+              ' ' +
+              escape(item.priceUnit) +
+              '/SFT at ' +
+              money(item.unitPrice) +
+              '/' +
+              escape(item.priceUnit) +
+              ' (' +
+              money(item.ratePerSqft) +
+              '/SFT)' +
+              (item.specification ? ' · ' + escape(item.specification) : '') +
+              '</p>',
+          )
+          .join('') +
+        '</section>',
+    )
+    .join('');
 
   const sftSchedules = d.lines.flatMap((line) => {
     const details = parseSftEstimate(line.description);
@@ -184,37 +270,74 @@ export function renderQuotationDocument(input: unknown): string {
   });
   const packageAccent = h.branding.accent;
   const renderSftSchedule = sftSchedules
-    .map(({ details }) =>
-      '<section class="pb-estimate"><div class="pb-section-title"><h2>Work-wise SFT estimate</h2></div>' +
-      '<p class="pb-section-subtitle">Dimensions, units, quantities and quotation-specific rates</p>' +
-      '<table><thead><tr>' +
-      '<th>Work description</th><th>L (ft)</th><th>W (ft)</th><th>H (ft)</th><th>Area / Qty</th>' +
-      (h.display.unit_rate ? '<th class="amount">Rate</th>' : '') +
-      '<th class="amount">Amount</th></tr></thead><tbody>' +
-      details.rows.map((row) => {
-        const unit = row.unit === 'running_ft' ? 'RFT'
-          : row.unit === 'piece' ? 'Nos'
-          : row.unit === 'lumpsum' ? 'LS'
-          : row.unit === 'cubic_ft' ? 'CFT' : 'SFT';
-        const hft = row.heightFeet?.trim() || '—';
-        return '<tr><td>' +
-          (row.kind === 'additional' ? '<span class="additional-work">Additional work</span>' : '') +
-          escape(row.name) + '</td><td>' +
-          escape(row.unit === 'piece' || row.unit === 'lumpsum' ? '—' : row.lengthFeet) +
-          '</td><td>' +
-          escape(row.unit === 'running_ft' || row.unit === 'wall_sqft' ||
-            row.unit === 'piece' || row.unit === 'lumpsum' ? '—' : row.widthFeet) +
-          '</td><td>' + escape(hft) + '</td><td>' +
-          escape(row.areaSqft) + ' ' + unit + '</td>' +
-          (h.display.unit_rate ? '<td class="amount">' + money(row.ratePerSqft) + '</td>' : '') +
-          '<td class="amount">' + money(row.amount) + '</td></tr>';
-      }).join('') +
-      '<tr class="total"><td>Construction total (floors + additional works)</td>' +
-      '<td></td><td></td><td></td><td>' +
-      escape(details.totalAreaSqft) + ' SFT (floors)</td>' +
-      (h.display.unit_rate ? '<td></td>' : '') +
-      '<td class="amount">' + money(details.total) + '</td></tr></tbody></table></section>',
-    ).join('');
+    .map(
+      ({ details }) =>
+        '<section class="pb-estimate"><div class="pb-section-title"><h2>Work-wise SFT estimate</h2></div>' +
+        '<p class="pb-section-subtitle">Dimensions, units, quantities and quotation-specific rates</p>' +
+        '<table><thead><tr>' +
+        '<th>Work description</th><th>L (ft)</th><th>W (ft)</th><th>H (ft)</th><th>Area / Qty</th>' +
+        (h.display.unit_rate ? '<th class="amount">Rate</th>' : '') +
+        '<th class="amount">Amount</th></tr></thead><tbody>' +
+        details.rows
+          .map((row) => {
+            const unit =
+              row.unit === 'running_ft'
+                ? 'RFT'
+                : row.unit === 'piece'
+                  ? 'Nos'
+                  : row.unit === 'lumpsum'
+                    ? 'LS'
+                    : row.unit === 'cubic_ft'
+                      ? 'CFT'
+                      : 'SFT';
+            const hft = row.heightFeet?.trim() || '—';
+            return (
+              '<tr><td>' +
+              (row.kind === 'additional'
+                ? '<span class="additional-work">Additional work</span>'
+                : '') +
+              escape(row.name) +
+              '</td><td>' +
+              escape(
+                row.unit === 'piece' || row.unit === 'lumpsum'
+                  ? '—'
+                  : row.lengthFeet,
+              ) +
+              '</td><td>' +
+              escape(
+                row.unit === 'running_ft' ||
+                  row.unit === 'wall_sqft' ||
+                  row.unit === 'piece' ||
+                  row.unit === 'lumpsum'
+                  ? '—'
+                  : row.widthFeet,
+              ) +
+              '</td><td>' +
+              escape(hft) +
+              '</td><td>' +
+              escape(row.areaSqft) +
+              ' ' +
+              unit +
+              '</td>' +
+              (h.display.unit_rate
+                ? '<td class="amount">' + money(row.ratePerSqft) + '</td>'
+                : '') +
+              '<td class="amount">' +
+              money(row.amount) +
+              '</td></tr>'
+            );
+          })
+          .join('') +
+        '<tr class="total"><td>Construction total (floors + additional works)</td>' +
+        '<td></td><td></td><td></td><td>' +
+        escape(details.totalAreaSqft) +
+        ' SFT (floors)</td>' +
+        (h.display.unit_rate ? '<td></td>' : '') +
+        '<td class="amount">' +
+        money(details.total) +
+        '</td></tr></tbody></table></section>',
+    )
+    .join('');
   const sftSpecifications = sftSchedules
     .map(({ details }) => {
       const packageTitle = details.package
@@ -297,71 +420,138 @@ export function renderQuotationDocument(input: unknown): string {
     )
     .join('');
 
-  const additionalSpecs = d.lines.flatMap((line) =>
-    line.specifications.map((spec) => ({ item: line.name, ...spec })),
-  ).map((spec, index) =>
-    '<article class="spec-item"><div class="spec-number">' +
-    String(index + 1).padStart(2, '0') +
-    '</div><div><h3>' + escape(spec.label) + '</h3><p>' +
-    '<strong>' + escape(spec.item) + '</strong> · ' +
-    escape(spec.value) + '</p></div></article>',
-  ).join('');
+  const additionalSpecs = d.lines
+    .flatMap((line) =>
+      line.specifications.map((spec) => ({ item: line.name, ...spec })),
+    )
+    .map(
+      (spec, index) =>
+        '<article class="spec-item"><div class="spec-number">' +
+        String(index + 1).padStart(2, '0') +
+        '</div><div><h3>' +
+        escape(spec.label) +
+        '</h3><p>' +
+        '<strong>' +
+        escape(spec.item) +
+        '</strong> · ' +
+        escape(spec.value) +
+        '</p></div></article>',
+    )
+    .join('');
   const brochure = premiumSections(d);
 
-  const hasSpecs = h.display.specifications &&
-    Boolean(otherConstructionSpecs || sftSpecifications || additionalSpecs || customBrandSpecifications);
-  const mainRows = grouped.filter((line) => !parseSftEstimate(line.description) && !parseCustomBrandQuote(line.description));
+  const hasSpecs =
+    h.display.specifications &&
+    Boolean(
+      otherConstructionSpecs ||
+      sftSpecifications ||
+      additionalSpecs ||
+      customBrandSpecifications,
+    );
+  const mainRows = grouped.filter(
+    (line) =>
+      !parseSftEstimate(line.description) &&
+      !parseCustomBrandQuote(line.description),
+  );
   const isFloorQuote = sftSchedules.length > 0;
   const itemTable = mainRows.length
     ? '<section class="pb-estimate"><div class="pb-section-title"><h2>' +
-      (isFloorQuote ? 'Additional quoted items' : 'Detailed quotation') + '</h2></div>' +
+      (isFloorQuote ? 'Additional quoted items' : 'Detailed quotation') +
+      '</h2></div>' +
       '<table><thead><tr><th class="line">Item / package</th>' +
       (h.display.quantity ? '<th>Quantity</th>' : '') +
       (h.display.unit_rate ? '<th class="amount">Unit rate</th>' : '') +
       '<th class="amount">Amount</th></tr></thead><tbody>' +
-      mainRows.map((line) => '<tr' + (line.optional ? ' class="optional"' : '') + '>' +
-        '<td><strong>' + escape(line.name) + '</strong>' +
-        (line.optional ? ' <strong>(optional, excluded)</strong>' : '') +
-        (line.description && !constructionSpecs.includes(line)
-          ? '<p class="text">' + escape(line.description) + '</p>' : '') +
-        '</td>' +
-        (h.display.quantity ? '<td>' + escape(line.quantity) + ' ' + escape(line.unit) + '</td>' : '') +
-        (h.display.unit_rate ? '<td class="amount">' + money(line.rate) + '</td>' : '') +
-        '<td class="amount">' + money(line.amount) + '</td></tr>').join('') +
+      mainRows
+        .map(
+          (line) =>
+            '<tr' +
+            (line.optional ? ' class="optional"' : '') +
+            '>' +
+            '<td><strong>' +
+            escape(line.name) +
+            '</strong>' +
+            (line.optional ? ' <strong>(optional, excluded)</strong>' : '') +
+            (line.description && !constructionSpecs.includes(line)
+              ? '<p class="text">' + escape(line.description) + '</p>'
+              : '') +
+            '</td>' +
+            (h.display.quantity
+              ? '<td>' +
+                escape(line.quantity) +
+                ' ' +
+                escape(line.unit) +
+                '</td>'
+              : '') +
+            (h.display.unit_rate
+              ? '<td class="amount">' + money(line.rate) + '</td>'
+              : '') +
+            '<td class="amount">' +
+            money(line.amount) +
+            '</td></tr>',
+        )
+        .join('') +
       '</tbody></table></section>'
     : '';
   const nonZero = (value: string) => Number(value) !== 0;
   const adjustments = [
     ...(nonZero(d.totals.line_discount)
-      ? [['Line discounts', money(d.totals.line_discount)]] : []),
+      ? [['Line discounts', money(d.totals.line_discount)]]
+      : []),
     ...(nonZero(d.totals.revision_discount)
-      ? [['Quotation discount', money(d.totals.revision_discount)]] : []),
+      ? [['Quotation discount', money(d.totals.revision_discount)]]
+      : []),
     ...(nonZero(d.totals.optional_amount)
-      ? [['Optional items (excluded)', money(d.totals.optional_amount)]] : []),
+      ? [['Optional items (excluded)', money(d.totals.optional_amount)]]
+      : []),
   ];
   const adjustmentMarkup = adjustments.length
-    ? '<div class="pb-adjustments">' + adjustments.map(([name, value]) =>
-      '<p><span>' + name + '</span><strong>' + value + '</strong></p>').join('') + '</div>'
+    ? '<div class="pb-adjustments">' +
+      adjustments
+        .map(
+          ([name, value]) =>
+            '<p><span>' + name + '</span><strong>' + value + '</strong></p>',
+        )
+        .join('') +
+      '</div>'
     : '';
   const introCards =
     '<div class="pb-intro-grid">' +
     '<section class="pb-intro-card"><div class="pb-mini-head"><span class="pb-intro-icon">●</span>Prepared for</div>' +
-    '<h3>' + escape(h.customer.name) + '</h3><p>' + address(h.customer.billing_address) + '</p>' +
+    '<h3>' +
+    escape(h.customer.name) +
+    '</h3><p>' +
+    address(h.customer.billing_address) +
+    '</p>' +
     (h.customer.phone ? '<p>Tel: ' + escape(h.customer.phone) + '</p>' : '') +
-    (h.customer.email ? '<p>' + escape(h.customer.email) + '</p>' : '') + '</section>' +
+    (h.customer.email ? '<p>' + escape(h.customer.email) + '</p>' : '') +
+    '</section>' +
     '<section class="pb-intro-card project"><div class="pb-mini-head"><span class="pb-intro-icon">⌂</span>' +
-    (h.project.code?.startsWith('Q') ? 'Quotation scope' : 'Project') + '</div>' +
-    '<h3>' + escape(h.project.name) + '</h3>' +
-    (h.project.code && !h.project.code.startsWith('Q') ? '<p>Ref: ' + escape(h.project.code) + '</p>' : '') +
-    '<p>' + address(h.project.site_address) + '</p></section></div>';
-  const specificationPage = hasSpecs ?
-    '<section class="pb-page pb-specs-page">' +
-    brochure.pageHeader('Materials & specifications') + brochure.specHero +
-    '<div class="pb-section-title"><h2>Selected package inclusions</h2></div>' +
-    '<p class="pb-section-subtitle">These are the actual materials, brands, grades and allowances recorded for this quotation.</p>' +
-    otherConstructionSpecs + '<div class="pb-spec-card-grid">' +
-    additionalSpecs + sftSpecifications + customBrandSpecifications + '</div>' +
-    brochure.pageFooter('Material specifications') + '</section>'
+    (h.project.code?.startsWith('Q') ? 'Quotation scope' : 'Project') +
+    '</div>' +
+    '<h3>' +
+    escape(h.project.name) +
+    '</h3>' +
+    (h.project.code && !h.project.code.startsWith('Q')
+      ? '<p>Ref: ' + escape(h.project.code) + '</p>'
+      : '') +
+    '<p>' +
+    address(h.project.site_address) +
+    '</p></section></div>';
+  const specificationPage = hasSpecs
+    ? '<section class="pb-page pb-specs-page">' +
+      brochure.pageHeader('Materials & specifications') +
+      brochure.specHero +
+      '<div class="pb-section-title"><h2>Selected package inclusions</h2></div>' +
+      '<p class="pb-section-subtitle">These are the actual materials, brands, grades and allowances recorded for this quotation.</p>' +
+      otherConstructionSpecs +
+      '<div class="pb-spec-card-grid">' +
+      additionalSpecs +
+      sftSpecifications +
+      customBrandSpecifications +
+      '</div>' +
+      brochure.pageFooter('Material specifications') +
+      '</section>'
     : '';
   const schedulePage =
     '<section class="pb-page pb-payment-page">' +
@@ -369,66 +559,116 @@ export function renderQuotationDocument(input: unknown): string {
     '<div class="pb-section-title"><h2>Payment schedule &amp; conditions</h2></div>' +
     (paymentSection ||
       '<div class="pb-terms-panel"><h2>Stage-wise payments not specified</h2>' +
-      '<p class="text">No confirmed payment milestones are included in this quotation revision. ' +
-      'Payment terms must be agreed and documented before they are treated as part of the contract.</p></div>') +
-    (d.notes ? '<section class="pb-terms-panel"><h2>Project notes</h2>' +
-      '<p class="text">' + escape(d.notes) + '</p></section>' : '') +
+        '<p class="text">No confirmed payment milestones are included in this quotation revision. ' +
+        'Payment terms must be agreed and documented before they are treated as part of the contract.</p></div>') +
+    (d.notes
+      ? '<section class="pb-terms-panel"><h2>Project notes</h2>' +
+        '<p class="text">' +
+        escape(d.notes) +
+        '</p></section>'
+      : '') +
     '<section class="pb-terms-panel pb-quote-conditions">' +
-      '<h2>Terms &amp; Inclusions</h2>' +
-      (savedTerms.length ? savedTerms.map(section => '<div class="pb-term-section"><h3>' +
-        escape(section.title) + '</h3><p class="text">' +
-        escape(section.text) + '</p></div>').join('') :
-        '<p class="text muted">No additional quotation-specific conditions have been saved.</p>') +
-      '</section>' +
-    brochure.pageFooter('Payments / terms') + '</section>';
+    '<h2>Terms &amp; Inclusions</h2>' +
+    (savedTerms.length
+      ? savedTerms
+          .map(
+            (section) =>
+              '<div class="pb-term-section"><h3>' +
+              escape(section.title) +
+              '</h3><p class="text">' +
+              escape(section.text) +
+              '</p></div>',
+          )
+          .join('')
+      : '<p class="text muted">No additional quotation-specific conditions have been saved.</p>') +
+    '</section>' +
+    brochure.pageFooter('Payments / terms') +
+    '</section>';
   // Only saved quote-stage associations produce this proposed QA annexure.
   // Never infer test completion, certification or material quantities.
-  const qualityCodes=[...new Set((paymentStageLinks??[]).flat())].filter(stageCode=>{
-    const info=guidanceForConstructionStage(stageCode.split('/')[0]??stageCode);
-    return Boolean(quotedRequirements[stageCode]) || info.checks.length>0 ||
-      info.reports.length>0;
-  });
-  const qualityPage=isFloorQuote&&!hasMilestoneOrder&&qualityCodes.length>0
-    ? '<section class="pb-page pb-quality-page">' +
-      brochure.pageHeader('Construction quality plan') +
-      '<div class="pb-section-title"><h2>Stage-wise quality &amp; material plan</h2></div>' +
-      '<p class="pb-section-subtitle">Project-specific work, materials, required tests and evidence agreed in this quotation. The approved drawings, specifications and engineer\'s QA plan govern on-site inspections; no result or payment is automatically certified.</p>' +
-      '<div class="pb-terms-panel">' +
-      qualityCodes.map(stageCode=>{
-        const templateCode=stageCode.split('/')[0]??stageCode;
-        const info=guidanceForConstructionStage(templateCode);
-        const custom=quotedRequirements[stageCode];
-        const detail=(label:string,entries:readonly string[])=>
-          entries.length?'<p class="text"><strong>'+label+':</strong> '+
-            entries.map(escape).join(' · ')+'</p>':'';
-        const title=stageCode.replaceAll('_',' ').replace('/', ' · ');
-        return '<div class="pb-term-section" style="break-inside:avoid;page-break-inside:avoid">' +
-          '<h3>'+escape(title)+'</h3>' +
-          (custom?detail('Work activities',custom.work):'') +
-          detail('Materials',custom?.materials??info.materials) +
-          detail('Checks and tests',custom?.checks??info.checks) +
-          detail('Reports and evidence',custom?.reports??info.reports) + '</div>';
-      }).join('')+'</div>' +
-      '<p class="pb-section-subtitle">Lower-floor brickwork may proceed while upper-floor RCC continues, after required lower-floor structural and safety clearances.</p>' +
-      brochure.pageFooter('Construction quality plan')+'</section>'
-    : '';
-  const amountLabel = isFloorQuote ? 'Total proposed construction cost' : 'Total quotation amount';
-  const total = '<div class="pb-final-total"><span>' + amountLabel +
-    '</span><strong>' + money(d.totals.final_amount) + '</strong></div>';
-  const pricingPage = '<section class="pb-page pb-pricing">' +
-    brochure.pageHeader('Project details / estimate') + introCards +
-    '<p class="pb-quote-meta">Quotation ' + escape(d.number) +
-    ' · Revision ' + d.revision + ' · Valid until ' + escape(d.valid_until) + '</p>' +
-    (isFloorQuote ? renderSftSchedule + itemTable : itemTable) + customPricingTables +
-    adjustmentMarkup + total +
+  const qualityCodes = [...new Set((paymentStageLinks ?? []).flat())].filter(
+    (stageCode) => {
+      const info = guidanceForConstructionStage(
+        stageCode.split('/')[0] ?? stageCode,
+      );
+      return (
+        Boolean(quotedRequirements[stageCode]) ||
+        info.checks.length > 0 ||
+        info.reports.length > 0
+      );
+    },
+  );
+  const qualityPage =
+    isFloorQuote && !hasMilestoneOrder && qualityCodes.length > 0
+      ? '<section class="pb-page pb-quality-page">' +
+        brochure.pageHeader('Construction quality plan') +
+        '<div class="pb-section-title"><h2>Stage-wise quality &amp; material plan</h2></div>' +
+        '<p class="pb-section-subtitle">Project-specific work, materials, required tests and evidence agreed in this quotation. The approved drawings, specifications and engineer\'s QA plan govern on-site inspections; no result or payment is automatically certified.</p>' +
+        '<div class="pb-terms-panel">' +
+        qualityCodes
+          .map((stageCode) => {
+            const templateCode = stageCode.split('/')[0] ?? stageCode;
+            const info = guidanceForConstructionStage(templateCode);
+            const custom = quotedRequirements[stageCode];
+            const detail = (label: string, entries: readonly string[]) =>
+              entries.length
+                ? '<p class="text"><strong>' +
+                  label +
+                  ':</strong> ' +
+                  entries.map(escape).join(' · ') +
+                  '</p>'
+                : '';
+            const title = stageCode.replaceAll('_', ' ').replace('/', ' · ');
+            return (
+              '<div class="pb-term-section" style="break-inside:avoid;page-break-inside:avoid">' +
+              '<h3>' +
+              escape(title) +
+              '</h3>' +
+              (custom ? detail('Work activities', custom.work) : '') +
+              detail('Materials', custom?.materials ?? info.materials) +
+              detail('Checks and tests', custom?.checks ?? info.checks) +
+              detail('Reports and evidence', custom?.reports ?? info.reports) +
+              '</div>'
+            );
+          })
+          .join('') +
+        '</div>' +
+        '<p class="pb-section-subtitle">Lower-floor brickwork may proceed while upper-floor RCC continues, after required lower-floor structural and safety clearances.</p>' +
+        brochure.pageFooter('Construction quality plan') +
+        '</section>'
+      : '';
+  const amountLabel = isFloorQuote
+    ? 'Total proposed construction cost'
+    : 'Total quotation amount';
+  const total =
+    '<div class="pb-final-total"><span>' +
+    amountLabel +
+    '</span><strong>' +
+    money(d.totals.final_amount) +
+    '</strong></div>';
+  const pricingPage =
+    '<section class="pb-page pb-pricing">' +
+    brochure.pageHeader('Project details / estimate') +
+    introCards +
+    '<p class="pb-quote-meta">Quotation ' +
+    escape(d.number) +
+    ' · Revision ' +
+    d.revision +
+    ' · Valid until ' +
+    escape(d.valid_until) +
+    '</p>' +
+    (isFloorQuote ? renderSftSchedule + itemTable : itemTable) +
+    customPricingTables +
+    adjustmentMarkup +
+    total +
     '<p class="pb-pricing-caption">Only the included quoted amounts are part of the total. ' +
     'Payment terms, detailed specifications and any exclusions are shown in the following sections.</p>' +
-    brochure.pageFooter('Work-wise estimate') + '</section>';
+    brochure.pageFooter('Work-wise estimate') +
+    '</section>';
   return `<!doctype html><html lang="en"><head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>${escape(d.number)} R${d.revision}</title>
     ${premiumCss.replaceAll('__ACCENT__', packageAccent)}</head><body><main>
     ${brochure.cover}${pricingPage}${specificationPage}${schedulePage}${qualityPage}${brochure.close}
     </main></body></html>`;
-
 }

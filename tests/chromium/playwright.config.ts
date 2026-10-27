@@ -7,7 +7,13 @@ export default defineConfig({
   workers: 1,
   timeout: 30000,
   expect: { timeout: 10000 },
-  reporter: [['list'], ['html', { outputFolder: 'playwright-report/chromium-local', open: 'never' }]],
+  reporter: [
+    ['list'],
+    [
+      'html',
+      { outputFolder: 'playwright-report/chromium-local', open: 'never' },
+    ],
+  ],
   use: {
     baseURL: 'http://127.0.0.1:3001',
     trace: 'retain-on-failure',
@@ -28,7 +34,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'pnpm --filter @business-os/business-app exec next start --hostname 127.0.0.1 --port 3001',
+    command:
+      'pnpm --filter @business-os/business-app exec next start --hostname 127.0.0.1 --port 3001',
     url: 'http://127.0.0.1:3001/api/health',
     reuseExistingServer: false,
     timeout: 120000,

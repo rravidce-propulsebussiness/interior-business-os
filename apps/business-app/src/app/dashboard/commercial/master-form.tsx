@@ -7,16 +7,21 @@ import { Button } from '@business-os/ui';
 import { saveCommercial } from './actions';
 
 async function photoDataUrl(file: File, limit: number): Promise<string> {
-  if (!['image/png', 'image/jpeg'].includes(file.type) || file.size > 12_000_000)
+  if (
+    !['image/png', 'image/jpeg'].includes(file.type) ||
+    file.size > 12_000_000
+  )
     throw new Error('Choose a PNG or JPEG image under 12 MB.');
-  const toData = (blob: Blob) => new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () =>
-      typeof reader.result === 'string' ? resolve(reader.result)
-        : reject(new Error('Image could not be read.'));
-    reader.onerror = () => reject(new Error('Image could not be read.'));
-    reader.readAsDataURL(blob);
-  });
+  const toData = (blob: Blob) =>
+    new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () =>
+        typeof reader.result === 'string'
+          ? resolve(reader.result)
+          : reject(new Error('Image could not be read.'));
+      reader.onerror = () => reject(new Error('Image could not be read.'));
+      reader.readAsDataURL(blob);
+    });
   if (file.size <= limit) return toData(file);
   // Keep PDF snapshots small, but let owners select normal phone photos.
   const bitmap = await createImageBitmap(file);
@@ -32,11 +37,11 @@ async function photoDataUrl(file: File, limit: number): Promise<string> {
       context.fillStyle = '#ffffff';
       context.fillRect(0, 0, canvas.width, canvas.height);
       context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-      for (const quality of [0.78, 0.65, 0.50, 0.36]) {
+      for (const quality of [0.78, 0.65, 0.5, 0.36]) {
         const blob = await new Promise<Blob | null>((resolve) =>
-          canvas.toBlob(resolve, 'image/jpeg', quality));
-        if (blob && blob.size <= limit)
-          return toData(blob);
+          canvas.toBlob(resolve, 'image/jpeg', quality),
+        );
+        if (blob && blob.size <= limit) return toData(blob);
       }
     }
   } finally {
@@ -95,10 +100,15 @@ export function MasterForm({
       className="my-5 grid max-w-2xl gap-4"
       onSubmit={handleSubmit(async (values) => {
         setMessage('');
-        if (entity === 'organization_quotation_settings' &&
-          values.branding && typeof values.branding === 'object' &&
-          JSON.stringify(values.branding).length > 190000) {
-          setMessage('Logo and quotation photos exceed the 190 KB combined branding limit. Compress an image or replace the logo with a smaller file.');
+        if (
+          entity === 'organization_quotation_settings' &&
+          values.branding &&
+          typeof values.branding === 'object' &&
+          JSON.stringify(values.branding).length > 190000
+        ) {
+          setMessage(
+            'Logo and quotation photos exceed the 190 KB combined branding limit. Compress an image or replace the logo with a smaller file.',
+          );
           return;
         }
         try {
@@ -124,7 +134,10 @@ export function MasterForm({
       })}
     >
       {fields.map((field) => (
-        <label className="grid gap-2 rounded-xl border border-slate-100 bg-white px-3 py-3 text-sm font-semibold text-slate-800" key={field.key}>
+        <label
+          className="grid gap-2 rounded-xl border border-slate-100 bg-white px-3 py-3 text-sm font-semibold text-slate-800"
+          key={field.key}
+        >
           {field.label}
           {field.options ? (
             <select
@@ -144,38 +157,53 @@ export function MasterForm({
           ) : field.type === 'file' ? (
             <div className="grid gap-2">
               {typeof watch(field.key) === 'string' &&
-               /^data:image\/(?:png|jpeg);base64,[A-Za-z0-9+/=]+$/.test(watch(field.key) as string) && (
-                <div className="flex flex-wrap items-center gap-3 rounded-xl bg-slate-50 p-3">
-                  <img src={watch(field.key) as string} alt={field.label + ' currently saved'}
-                    className="h-20 w-28 rounded-lg border border-slate-200 bg-white object-contain p-1" />
-                  <button type="button"
-                    className="rounded-lg border border-red-200 px-3 py-2 text-xs font-bold text-red-600"
-                    onClick={() => {
-                      setValue(field.key, '', { shouldDirty: true });
-                      setMessage('Image cleared. Save company branding to apply the removal.');
-                    }}>
-                    Remove image
-                  </button>
-                </div>
-              )}
+                /^data:image\/(?:png|jpeg);base64,[A-Za-z0-9+/=]+$/.test(
+                  watch(field.key) as string,
+                ) && (
+                  <div className="flex flex-wrap items-center gap-3 rounded-xl bg-slate-50 p-3">
+                    <img
+                      src={watch(field.key) as string}
+                      alt={field.label + ' currently saved'}
+                      className="h-20 w-28 rounded-lg border border-slate-200 bg-white object-contain p-1"
+                    />
+                    <button
+                      type="button"
+                      className="rounded-lg border border-red-200 px-3 py-2 text-xs font-bold text-red-600"
+                      onClick={() => {
+                        setValue(field.key, '', { shouldDirty: true });
+                        setMessage(
+                          'Image cleared. Save company branding to apply the removal.',
+                        );
+                      }}
+                    >
+                      Remove image
+                    </button>
+                  </div>
+                )}
               <input
-              type="file"
-              accept="image/png,image/jpeg"
-              onChange={(event) => {
-                const file = event.target.files?.[0];
-                if (!file) return;
-                setMessage('Optimizing photo…');
-                void photoDataUrl(file, field.fileMaxBytes ?? 130000)
-                  .then((dataUri) => {
-                    setValue(field.key, dataUri, { shouldDirty: true });
-                    setMessage('Photo ready. Save defaults to apply it to future quotations.');
-                  })
-                  .catch((error: unknown) => setMessage(
-                    error instanceof Error ? error.message : 'Unable to prepare photo.'
-                  ));
-              }}
-              className="block w-full rounded-xl border border-dashed border-orange-200 bg-orange-50/40 p-3 text-xs text-slate-700"
-              aria-label={field.label}
+                type="file"
+                accept="image/png,image/jpeg"
+                onChange={(event) => {
+                  const file = event.target.files?.[0];
+                  if (!file) return;
+                  setMessage('Optimizing photo…');
+                  void photoDataUrl(file, field.fileMaxBytes ?? 130000)
+                    .then((dataUri) => {
+                      setValue(field.key, dataUri, { shouldDirty: true });
+                      setMessage(
+                        'Photo ready. Save defaults to apply it to future quotations.',
+                      );
+                    })
+                    .catch((error: unknown) =>
+                      setMessage(
+                        error instanceof Error
+                          ? error.message
+                          : 'Unable to prepare photo.',
+                      ),
+                    );
+                }}
+                className="block w-full rounded-xl border border-dashed border-orange-200 bg-orange-50/40 p-3 text-xs text-slate-700"
+                aria-label={field.label}
               />
             </div>
           ) : field.type === 'textarea' ? (

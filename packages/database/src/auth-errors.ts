@@ -13,8 +13,10 @@ export function isAuthServiceFailure(error: {
     status === 408 ||
     status === 429 ||
     status >= 500 ||
-    ['request_timeout', 'over_request_rate_limit', 'unexpected_failure'].includes(
-      error.code ?? '',
-    )
+    [
+      'request_timeout',
+      'over_request_rate_limit',
+      'unexpected_failure',
+    ].includes(error.code ?? '')
   );
 }

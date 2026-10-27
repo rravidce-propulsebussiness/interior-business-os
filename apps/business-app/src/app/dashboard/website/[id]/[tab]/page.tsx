@@ -40,31 +40,33 @@ export default async function WebsiteTab({
     ]);
     if (!organization) notFound();
     const email = user.email ?? '';
-    return <OwnerShell
-      companyName={organization.name}
-      accountLabel={email.split('@')[0] || 'Company member'}
-      accountEmail={email}
-      planLabel="Business workspace"
-      navigation={ownerWorkspaceNavigation(s.context)}
-      currentHref="/dashboard/website"
-      search=""
-      notificationsEnabled={canAccess(s.context, {
-        organizationId: s.context.organizationId,
-        permission: 'notification.view',
-      })}
-      dashboardBrand
-      searchPlaceholder="Search leads, projects, quotations..."
-    >
-      <FileDeveloperStudio
-        id={id}
-        name={site.name}
-        initial={site.document}
-        version={site.version}
-        canEdit={s.allowed('website.custom_code.edit')}
-        canEditCss={s.allowed('website.custom_css.manage')}
-        canPublish={s.allowed('website.page.publish')}
-      />
-    </OwnerShell>;
+    return (
+      <OwnerShell
+        companyName={organization.name}
+        accountLabel={email.split('@')[0] || 'Company member'}
+        accountEmail={email}
+        planLabel="Business workspace"
+        navigation={ownerWorkspaceNavigation(s.context)}
+        currentHref="/dashboard/website"
+        search=""
+        notificationsEnabled={canAccess(s.context, {
+          organizationId: s.context.organizationId,
+          permission: 'notification.view',
+        })}
+        dashboardBrand
+        searchPlaceholder="Search leads, projects, quotations..."
+      >
+        <FileDeveloperStudio
+          id={id}
+          name={site.name}
+          initial={site.document}
+          version={site.version}
+          canEdit={s.allowed('website.custom_code.edit')}
+          canEditCss={s.allowed('website.custom_css.manage')}
+          canPublish={s.allowed('website.page.publish')}
+        />
+      </OwnerShell>
+    );
   }
   let content;
   if (tab === 'metrics') {

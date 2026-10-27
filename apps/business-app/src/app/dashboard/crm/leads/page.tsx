@@ -18,9 +18,16 @@ import {
   type LeadServiceOption,
 } from './lead-service-options';
 import { leadRequirementLabel, resolveLeadCategory } from './lead-category';
-import {mapRequirementField,type QuickRequirementField} from '../requirement-fields';
+import {
+  mapRequirementField,
+  type QuickRequirementField,
+} from '../requirement-fields';
 import { leadDateBounds } from './date-range';
-import { LeadActivityPanel, type ActivityView, type ActivityQueueFilter } from './lead-activity-panel';
+import {
+  LeadActivityPanel,
+  type ActivityView,
+  type ActivityQueueFilter,
+} from './lead-activity-panel';
 import '../../owner-dashboard.css';
 import './leads.css';
 import './lead-category.css';
@@ -98,7 +105,8 @@ export default async function Leads({
     p.activity === 'visits' || p.activity === 'followups' ? p.activity : null;
   const queue: ActivityQueueFilter =
     p.queue === 'today' || p.queue === 'overdue' || p.queue === 'upcoming'
-      ? p.queue : '';
+      ? p.queue
+      : '';
   const [choices, organization] = await Promise.all([
     lookups(s, p),
     s.repository.organization(s.org),
@@ -106,12 +114,20 @@ export default async function Leads({
   if (!organization) throw new Error('Company workspace not available');
   const filter = Object.fromEntries(
     allowedFilters
-      .filter((key) =>
-        key !== 'view' && key !== 'range' && key !== 'from' && key !== 'until' && p[key],
+      .filter(
+        (key) =>
+          key !== 'view' &&
+          key !== 'range' &&
+          key !== 'from' &&
+          key !== 'until' &&
+          p[key],
       )
       .map((key) => [key, p[key]!]),
   );
-  Object.assign(filter, leadDateBounds(p, organization.default_timezone || 'Asia/Kolkata'));
+  Object.assign(
+    filter,
+    leadDateBounds(p, organization.default_timezone || 'Asia/Kolkata'),
+  );
   const [result, user, plans, companyIndustries, industries] =
     await Promise.all([
       s.crm
@@ -143,29 +159,34 @@ export default async function Leads({
       });
   }
 
-  const requirementFields:QuickRequirementField[]=choices.requirements.rows
+  const requirementFields: QuickRequirementField[] = choices.requirements.rows
     .map(mapRequirementField)
-    .filter(field=>field.active)
-    .map(field=>{
-      const industry=industries.find(entry=>entry.id===field.industryId);
-      return {...field,service:industry?leadServiceFromIndustryKey(industry.key):null};
-    }).filter(field=>field.industryId===null||field.service!==null);
+    .filter((field) => field.active)
+    .map((field) => {
+      const industry = industries.find(
+        (entry) => entry.id === field.industryId,
+      );
+      return {
+        ...field,
+        service: industry ? leadServiceFromIndustryKey(industry.key) : null,
+      };
+    })
+    .filter((field) => field.industryId === null || field.service !== null);
 
   // Secondary cards are optional. A failed analytics query must not make
   // the company's lead list or existing navigation unusable.
-  const [total, dueToday, overdue, converted, won, lost] =
-    await Promise.all([
-      metric(s.crm.search('leads', {})),
-      metric(
-        s.crm.search('lead_followups', { queue: 'today', status: 'pending' }),
-      ),
-      metric(
-        s.crm.search('lead_followups', { queue: 'overdue', status: 'pending' }),
-      ),
-      metric(s.crm.search('leads', { converted: true })),
-      metric(s.crm.search('leads', { lifecycle: 'won' })),
-      metric(s.crm.search('leads', { lifecycle: 'lost' })),
-    ]);
+  const [total, dueToday, overdue, converted, won, lost] = await Promise.all([
+    metric(s.crm.search('leads', {})),
+    metric(
+      s.crm.search('lead_followups', { queue: 'today', status: 'pending' }),
+    ),
+    metric(
+      s.crm.search('lead_followups', { queue: 'overdue', status: 'pending' }),
+    ),
+    metric(s.crm.search('leads', { converted: true })),
+    metric(s.crm.search('leads', { lifecycle: 'won' })),
+    metric(s.crm.search('leads', { lifecycle: 'lost' })),
+  ]);
 
   const stages: LeadStage[] = choices.stages.rows
     .filter((r) => typeof r.id === 'string' && typeof r.name === 'string')
@@ -261,7 +282,8 @@ export default async function Leads({
     // One tenant-authorized batch query keeps table and mobile quote badges
     // synchronized without creating 25 per-lead database requests.
     const rpc = s.client.rpc.bind(s.client) as unknown as (
-      name: string, params: { p_organization_id: string; p_lead_ids: string[] },
+      name: string,
+      params: { p_organization_id: string; p_lead_ids: string[] },
     ) => Promise<{ data: unknown; error: unknown }>;
     const linked = await rpc('lead_quotation_summary', {
       p_organization_id: s.org,
@@ -270,44 +292,67 @@ export default async function Leads({
     if (!linked.error && Array.isArray(linked.data)) {
       const quoteIds = linked.data.flatMap((item: unknown) => {
         if (!item || typeof item !== 'object') return [];
-        const q = item as Record<string,unknown>;
+        const q = item as Record<string, unknown>;
         return typeof q.quotation_id === 'string' && q.status !== 'cancelled'
-          ? [q.quotation_id] : [];
+          ? [q.quotation_id]
+          : [];
       });
-      const projectByQuote = new Map<string,string>();
+      const projectByQuote = new Map<string, string>();
       if (quoteIds.length) {
-        const {data: quoteProjects} = await s.client.from('quotations')
-          .select('id,project_id').eq('organization_id',s.org)
-          .in('id',[...new Set(quoteIds)]);
-        const projectIds = [...new Set((quoteProjects ?? [])
-          .flatMap(quote => quote.project_id ? [quote.project_id] : []))];
+        const { data: quoteProjects } = await s.client
+          .from('quotations')
+          .select('id,project_id')
+          .eq('organization_id', s.org)
+          .in('id', [...new Set(quoteIds)]);
+        const projectIds = [
+          ...new Set(
+            (quoteProjects ?? []).flatMap((quote) =>
+              quote.project_id ? [quote.project_id] : [],
+            ),
+          ),
+        ];
         const eligibleProjects = projectIds.length
-          ? await s.client.from('projects').select('id')
-              .eq('organization_id',s.org)
-              .eq('removed_from_workspace',false).in('id',projectIds)
-          : {data:[]};
-        const eligible = new Set((eligibleProjects.data ?? []).map(p=>p.id));
+          ? await s.client
+              .from('projects')
+              .select('id')
+              .eq('organization_id', s.org)
+              .eq('removed_from_workspace', false)
+              .in('id', projectIds)
+          : { data: [] };
+        const eligible = new Set(
+          (eligibleProjects.data ?? []).map((p) => p.id),
+        );
         for (const quote of quoteProjects ?? []) {
           if (quote.project_id && eligible.has(quote.project_id))
-            projectByQuote.set(quote.id,quote.project_id);
+            projectByQuote.set(quote.id, quote.project_id);
         }
       }
       const byId = new Map(rows.map((row) => [row.id, row]));
       for (const item of linked.data) {
         if (!item || typeof item !== 'object') continue;
         const quote = item as Record<string, unknown>;
-        if (typeof quote.lead_id !== 'string' ||
-            typeof quote.revision_id !== 'string') continue;
+        if (
+          typeof quote.lead_id !== 'string' ||
+          typeof quote.revision_id !== 'string'
+        )
+          continue;
         const row = byId.get(quote.lead_id);
-        if (!row || row.quoteRevisionId || quote.status === 'cancelled') continue;
+        if (!row || row.quoteRevisionId || quote.status === 'cancelled')
+          continue;
         row.quoteRevisionId = quote.revision_id;
-        row.quotationProjectId = typeof quote.quotation_id === 'string'
-          ? projectByQuote.get(quote.quotation_id) ?? null : null;
-        row.quoteStatus = typeof quote.status === 'string' ? quote.status : null;
-        row.quoteAmount = typeof quote.amount === 'string' ? quote.amount : null;
+        row.quotationProjectId =
+          typeof quote.quotation_id === 'string'
+            ? (projectByQuote.get(quote.quotation_id) ?? null)
+            : null;
+        row.quoteStatus =
+          typeof quote.status === 'string' ? quote.status : null;
+        row.quoteAmount =
+          typeof quote.amount === 'string' ? quote.amount : null;
         row.quoteShared = quote.shared === true;
         row.quoteNumber =
-          typeof quote.quotation_number === 'string' ? quote.quotation_number : null;
+          typeof quote.quotation_number === 'string'
+            ? quote.quotation_number
+            : null;
       }
     }
   }
@@ -407,7 +452,11 @@ export default async function Leads({
   if (may('report.view'))
     nav.push({ label: 'Reports', href: '/dashboard/reports', icon: 'reports' });
   if (may('team.manage'))
-    nav.push({ label: 'Employees', href: '/dashboard/employees', icon: 'team' });
+    nav.push({
+      label: 'Employees',
+      href: '/dashboard/employees',
+      icon: 'team',
+    });
   if (may('team.view'))
     nav.push({ label: 'Team', href: '/dashboard/company/team', icon: 'team' });
   if (may('organization.view'))
@@ -464,8 +513,12 @@ export default async function Leads({
     },
     {
       label: 'Follow-ups Due',
-      value: dueToday === null || overdue === null ? '—' : number.format(dueToday + overdue),
-      note: overdue === null ? 'Unavailable' : number.format(overdue) + ' overdue',
+      value:
+        dueToday === null || overdue === null
+          ? '—'
+          : number.format(dueToday + overdue),
+      note:
+        overdue === null ? 'Unavailable' : number.format(overdue) + ' overdue',
       icon: 'calendar' as const,
       tone: 'orange',
     },
@@ -499,10 +552,18 @@ export default async function Leads({
     >
       <LeadsWorkspace
         rows={rows}
-        activityPanel={activity ? <LeadActivityPanel
-          services={s} activity={activity} queue={queue} page={page}
-          canManageFollowups={s.allowed('crm.followup.manage')}
-          canManageVisits={s.allowed('crm.site_visit.manage')}/> : null}
+        activityPanel={
+          activity ? (
+            <LeadActivityPanel
+              services={s}
+              activity={activity}
+              queue={queue}
+              page={page}
+              canManageFollowups={s.allowed('crm.followup.manage')}
+              canManageVisits={s.allowed('crm.site_visit.manage')}
+            />
+          ) : null
+        }
         propulseConnection={propulseConnection}
         initialTool={
           p.panel === 'add' || p.panel === 'propulse' ? p.panel : 'none'
@@ -536,7 +597,7 @@ export default async function Leads({
         canFollowUp={s.allowed('crm.followup.manage')}
         canVisit={s.allowed('crm.site_visit.manage')}
         canConvert={s.allowed('lead.convert')}
-        canViewProject={s.allowed('project.view','projects')}
+        canViewProject={s.allowed('project.view', 'projects')}
         canQuote={s.allowed('quotation.create', 'quotation')}
         canShareQuote={s.allowed('quotation.share', 'quotation')}
         organizationName={organization.name}

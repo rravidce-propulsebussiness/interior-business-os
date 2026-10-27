@@ -2,8 +2,13 @@ import { expect, test } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-const css = readFileSync(resolve(process.cwd(),
-  'apps/business-app/src/app/dashboard/billing/billing-premium.css'), 'utf8');
+const css = readFileSync(
+  resolve(
+    process.cwd(),
+    'apps/business-app/src/app/dashboard/billing/billing-premium.css',
+  ),
+  'utf8',
+);
 
 // Authenticated data is tenant-scoped and cannot be faked in a public test
 // session. This fixture exercises the exact production CSS with long values,
@@ -11,19 +16,30 @@ const css = readFileSync(resolve(process.cwd(),
 const markup = [
   '<!doctype html><html lang="en"><head><meta name="viewport" content="width=device-width,initial-scale=1">',
   '<style>html,body{margin:0;padding:0;background:#fafbfd;font-family:Arial,sans-serif;}',
-  css, '</style></head><body>',
+  css,
+  '</style></head><body>',
   '<main class="billing-v2">',
   '<div class="billing-heading"><div><p class="billing-eyebrow">FINANCE / BILLING</p><h1>Billing</h1>',
   '<p>Manage invoices, supplier bills, GST details and financial records.</p></div>',
   '<form class="billing-period"><svg width="16" height="16"></svg>',
   '<select aria-label="Billing date range"><option>This month</option></select><button type="submit">Apply</button></form></div>',
   '<section class="billing-stats" aria-label="Billing summary">',
-  ...['Sales invoiced|₹1,28,54,21,000','Purchase bills|₹78,90,12,400','Documents|100','Draft documents|25']
-    .map(item => {
-      const [name,amount]=item.split('|');
-      return '<div class="billing-stat"><span class="billing-stat-symbol warm"><svg width="25" height="25"></svg></span>' +
-        '<div><p>'+name+'</p><strong>'+amount+'</strong><small>Summary of latest documents</small></div></div>';
-    }),
+  ...[
+    'Sales invoiced|₹1,28,54,21,000',
+    'Purchase bills|₹78,90,12,400',
+    'Documents|100',
+    'Draft documents|25',
+  ].map((item) => {
+    const [name, amount] = item.split('|');
+    return (
+      '<div class="billing-stat"><span class="billing-stat-symbol warm"><svg width="25" height="25"></svg></span>' +
+      '<div><p>' +
+      name +
+      '</p><strong>' +
+      amount +
+      '</strong><small>Summary of latest documents</small></div></div>'
+    );
+  }),
   '</section><p class="billing-coverage">Figures based on latest 100 register entries</p>',
   '<div class="billing-layout"><div class="billing-left">',
   '<section class="billing-panel billing-template">',
@@ -69,20 +85,25 @@ const markup = [
   '</section></aside></div></main></body></html>',
 ].join('');
 
-test('premium Billing layout never overflows mobile or desktop viewport', async ({page}) => {
+test('premium Billing layout never overflows mobile or desktop viewport', async ({
+  page,
+}) => {
   await page.setContent(markup);
-  for (const width of [320,360,390,430,600,660,768,1024,1365]) {
-    await page.setViewportSize({width,height:840});
-    const overflow=await page.evaluate(() => ({
-      scroll:document.documentElement.scrollWidth,
-      viewport:document.documentElement.clientWidth,
+  for (const width of [320, 360, 390, 430, 600, 660, 768, 1024, 1365]) {
+    await page.setViewportSize({ width, height: 840 });
+    const overflow = await page.evaluate(() => ({
+      scroll: document.documentElement.scrollWidth,
+      viewport: document.documentElement.clientWidth,
     }));
-    expect(overflow.scroll, 'billing horizontal overflow at '+width).toBeLessThanOrEqual(overflow.viewport+1);
-    const header=await page.locator('.billing-heading').boundingBox();
-    const stats=await page.locator('.billing-stats').boundingBox();
+    expect(
+      overflow.scroll,
+      'billing horizontal overflow at ' + width,
+    ).toBeLessThanOrEqual(overflow.viewport + 1);
+    const header = await page.locator('.billing-heading').boundingBox();
+    const stats = await page.locator('.billing-stats').boundingBox();
     expect(header).not.toBeNull();
     expect(stats).not.toBeNull();
-    expect(stats!.y).toBeGreaterThanOrEqual(header!.y+header!.height-1);
+    expect(stats!.y).toBeGreaterThanOrEqual(header!.y + header!.height - 1);
     if (width <= 660) {
       await expect(page.locator('.billing-mobile-doc')).toBeVisible();
       await expect(page.locator('.billing-table-wrap')).toBeHidden();
@@ -93,21 +114,25 @@ test('premium Billing layout never overflows mobile or desktop viewport', async 
   }
 });
 
-test('mobile billing exposes invoice links and editable GST identity without overlapping actions', async ({page}) => {
-  await page.setViewportSize({width:360,height:820});
+test('mobile billing exposes invoice links and editable GST identity without overlapping actions', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 360, height: 820 });
   await page.setContent(markup);
-  await expect(page.getByRole('link',{name:'New invoice'})).toHaveAttribute('href',
-    '/dashboard/billing/new?kind=sales_invoice');
-  const register=page.locator('.billing-register');
-  const profile=page.locator('.billing-profile');
-  const doc=page.locator('.billing-mobile-doc');
-  for (const el of [register,profile,doc]) {
-    const box=await el.boundingBox();
+  await expect(page.getByRole('link', { name: 'New invoice' })).toHaveAttribute(
+    'href',
+    '/dashboard/billing/new?kind=sales_invoice',
+  );
+  const register = page.locator('.billing-register');
+  const profile = page.locator('.billing-profile');
+  const doc = page.locator('.billing-mobile-doc');
+  for (const el of [register, profile, doc]) {
+    const box = await el.boundingBox();
     expect(box).not.toBeNull();
     expect(box!.x).toBeGreaterThanOrEqual(0);
-    expect(box!.x+box!.width).toBeLessThanOrEqual(361);
+    expect(box!.x + box!.width).toBeLessThanOrEqual(361);
   }
-  const details=page.locator('#billing-profile-edit');
+  const details = page.locator('#billing-profile-edit');
   await expect(details).not.toHaveAttribute('open');
   await details.locator('summary').click();
   await expect(details).toHaveAttribute('open');

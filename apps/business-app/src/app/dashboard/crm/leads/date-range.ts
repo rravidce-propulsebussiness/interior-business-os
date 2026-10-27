@@ -2,15 +2,21 @@
  * DB search uses date-only bounds: created_at >= from and created_at < until + 1 day.
  * A "week" runs Monday-Sunday, and "last month" means the previous calendar month.
  */
-export type LeadDateRange = '' | 'last_week' | 'last_month' | 'this_month' | 'custom';
+export type LeadDateRange =
+  '' | 'last_week' | 'last_month' | 'this_month' | 'custom';
 
 export function leadDateRangeSelection(input: {
   range?: string | undefined;
   from?: string | undefined;
   until?: string | undefined;
 }): LeadDateRange {
-  if (input.range === 'last_week' || input.range === 'last_month' ||
-      input.range === 'this_month' || input.range === 'custom') return input.range;
+  if (
+    input.range === 'last_week' ||
+    input.range === 'last_month' ||
+    input.range === 'this_month' ||
+    input.range === 'custom'
+  )
+    return input.range;
   // Keep older shared URLs with explicit dates usable after the UI cleanup.
   return input.from || input.until ? 'custom' : '';
 }
@@ -24,13 +30,21 @@ function validISODate(value: string | undefined): string | undefined {
 }
 
 function calendarToday(now: Date, timeZone: string): Date {
-  const format = (zone: string) => new Intl.DateTimeFormat('en-GB', {
-    timeZone: zone, year: 'numeric', month: '2-digit', day: '2-digit',
-  }).formatToParts(now);
+  const format = (zone: string) =>
+    new Intl.DateTimeFormat('en-GB', {
+      timeZone: zone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).formatToParts(now);
   let parts: Intl.DateTimeFormatPart[];
-  try { parts = format(timeZone); }
-  catch { parts = format('Asia/Kolkata'); }
-  const part = (name: string) => Number(parts.find((entry) => entry.type === name)?.value);
+  try {
+    parts = format(timeZone);
+  } catch {
+    parts = format('Asia/Kolkata');
+  }
+  const part = (name: string) =>
+    Number(parts.find((entry) => entry.type === name)?.value);
   return new Date(Date.UTC(part('year'), part('month') - 1, part('day')));
 }
 
@@ -42,7 +56,11 @@ const utcDay = (year: number, month: number, day: number) =>
  * Date filtering itself stays on the server; browsers never set clock-dependent bounds.
  */
 export function leadDateBounds(
-  input: { range?: string | undefined; from?: string | undefined; until?: string | undefined },
+  input: {
+    range?: string | undefined;
+    from?: string | undefined;
+    until?: string | undefined;
+  },
   timeZone: string,
   now: Date = new Date(),
 ): { from?: string; until?: string } {

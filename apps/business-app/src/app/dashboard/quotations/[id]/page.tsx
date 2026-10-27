@@ -19,7 +19,8 @@ export default async function QuotationDetail({
     .eq('organization_id', s.org)
     .eq('id', id)
     .maybeSingle();
-  if (revision) redirect('/dashboard/quotations/' + revision.id + '/studio?step=quote');
+  if (revision)
+    redirect('/dashboard/quotations/' + revision.id + '/studio?step=quote');
 
   const { data: quote } = await s.client
     .from('quotations')
@@ -28,6 +29,10 @@ export default async function QuotationDetail({
     .eq('id', id)
     .maybeSingle();
   if (quote?.current_revision_id)
-    redirect('/dashboard/quotations/' + quote.current_revision_id + '/studio?step=quote');
+    redirect(
+      '/dashboard/quotations/' +
+        quote.current_revision_id +
+        '/studio?step=quote',
+    );
   notFound();
 }

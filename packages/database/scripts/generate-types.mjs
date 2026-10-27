@@ -66,13 +66,15 @@ const target = file('src/generated/database.types.ts');
 if (process.argv.includes('--check')) {
   const saved = readFileSync(target, 'utf8');
   if (saved !== out) {
-    const index = Array.from({length:Math.min(saved.length,out.length)}).findIndex(
-      (_,i)=>saved[i]!==out[i],
+    const index = Array.from({
+      length: Math.min(saved.length, out.length),
+    }).findIndex((_, i) => saved[i] !== out[i]);
+    const at = index < 0 ? Math.min(saved.length, out.length) : index;
+    console.error(
+      'Generated types first differ at character ' + at,
+      'saved=' + JSON.stringify(saved.slice(Math.max(0, at - 80), at + 200)),
+      'expected=' + JSON.stringify(out.slice(Math.max(0, at - 80), at + 200)),
     );
-    const at=index<0?Math.min(saved.length,out.length):index;
-    console.error('Generated types first differ at character '+at,
-      'saved='+JSON.stringify(saved.slice(Math.max(0,at-80),at+200)),
-      'expected='+JSON.stringify(out.slice(Math.max(0,at-80),at+200)));
     throw new Error('Generated database types have drifted. Run db:types.');
   }
   console.log('Generated database types match the applied schema.');

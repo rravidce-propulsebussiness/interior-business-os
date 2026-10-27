@@ -57,32 +57,66 @@ const timelineSchema = z.array(
     activities: z.array(z.string()),
   }),
 );
-const paymentProofSchema=z.array(z.object({
- id:z.uuid(),requestId:z.uuid(),amount:z.number(),
- reference:z.string(),status:z.enum(['pending','approved','rejected','reversed']),
- date:z.string(),reviewNote:z.string(),receiptId:z.uuid().nullable(),
-}));
-const stageRequestSchema=z.array(z.object({
- id:z.uuid(),number:z.string(),label:z.string(),total:z.number(),
- date:z.string(),dueDate:z.string().nullable(),
- paymentStatus:z.literal('payment_requested'),contractNumber:z.string(),
-}));
-const invoicesSchema=z.array(z.object({
- id:z.uuid(),number:z.string(),documentType:z.string(),
- date:z.string(),dueDate:z.string().nullable(),
- total:z.number(),paymentStatus:z.literal('payment_requested'),
-}));
-const requestsSchema=z.array(z.object({
- id:z.uuid(),kind:z.string(),details:z.string(),status:z.string(),
- requested_date:z.string().nullable(),response:z.string(),created_at:z.string(),
- responded_at:z.string().nullable(),
-}));
-const siteMaterialsSchema=z.array(z.object({
- description:z.string(),unit:z.string().nullable(),ordered_quantity:z.string().nullable(),
- po_number:z.string().nullable(),expected_date:z.string().nullable(),
- expected_window:z.string().nullable(),status:z.string(),received_date:z.string().nullable(),
- sort_time:z.string().nullable(),
-}));
+const paymentProofSchema = z.array(
+  z.object({
+    id: z.uuid(),
+    requestId: z.uuid(),
+    amount: z.number(),
+    reference: z.string(),
+    status: z.enum(['pending', 'approved', 'rejected', 'reversed']),
+    date: z.string(),
+    reviewNote: z.string(),
+    receiptId: z.uuid().nullable(),
+  }),
+);
+const stageRequestSchema = z.array(
+  z.object({
+    id: z.uuid(),
+    number: z.string(),
+    label: z.string(),
+    total: z.number(),
+    date: z.string(),
+    dueDate: z.string().nullable(),
+    paymentStatus: z.literal('payment_requested'),
+    contractNumber: z.string(),
+  }),
+);
+const invoicesSchema = z.array(
+  z.object({
+    id: z.uuid(),
+    number: z.string(),
+    documentType: z.string(),
+    date: z.string(),
+    dueDate: z.string().nullable(),
+    total: z.number(),
+    paymentStatus: z.literal('payment_requested'),
+  }),
+);
+const requestsSchema = z.array(
+  z.object({
+    id: z.uuid(),
+    kind: z.string(),
+    details: z.string(),
+    status: z.string(),
+    requested_date: z.string().nullable(),
+    response: z.string(),
+    created_at: z.string(),
+    responded_at: z.string().nullable(),
+  }),
+);
+const siteMaterialsSchema = z.array(
+  z.object({
+    description: z.string(),
+    unit: z.string().nullable(),
+    ordered_quantity: z.string().nullable(),
+    po_number: z.string().nullable(),
+    expected_date: z.string().nullable(),
+    expected_window: z.string().nullable(),
+    status: z.string(),
+    received_date: z.string().nullable(),
+    sort_time: z.string().nullable(),
+  }),
+);
 const dashboardSchema = z.object({
   materials: z
     .array(
@@ -147,7 +181,16 @@ export default async function ClientProjectPage({
     name: string,
     args: Record<string, string>,
   ) => Promise<{ data: unknown; error: { message: string } | null }>;
-  const [projectResult, timelineResult, dashboardResult, requestsResult, invoicesResult, stageRequestsResult, paymentProofsResult, siteMaterialsResult] = await Promise.all([
+  const [
+    projectResult,
+    timelineResult,
+    dashboardResult,
+    requestsResult,
+    invoicesResult,
+    stageRequestsResult,
+    paymentProofsResult,
+    siteMaterialsResult,
+  ] = await Promise.all([
     rpc('client_portal_project', { p_project_id: id }),
     rpc('client_portal_timeline', { p_project_id: id }),
     rpc('client_portal_dashboard', { p_project_id: id }),
@@ -155,24 +198,31 @@ export default async function ClientProjectPage({
     rpc('client_portal_invoices', { p_project_id: id }),
     rpc('client_portal_stage_payment_requests', { p_project_id: id }),
     rpc('client_payment_proof_list', { p_project: id }),
-    rpc('client_portal_site_materials', { p_project_id:id }),
+    rpc('client_portal_site_materials', { p_project_id: id }),
   ]);
   const project = projectSchema.safeParse(projectResult.data);
   if (projectResult.error || !project.success) notFound();
 
   const parsedTimeline = timelineSchema.safeParse(timelineResult.data);
   const parsedDashboard = dashboardSchema.safeParse(dashboardResult.data);
-  const parsedRequests=requestsSchema.safeParse(requestsResult.data);
-  const siteMaterials=siteMaterialsSchema.safeParse(siteMaterialsResult.data);
+  const parsedRequests = requestsSchema.safeParse(requestsResult.data);
+  const siteMaterials = siteMaterialsSchema.safeParse(siteMaterialsResult.data);
   const latest = parsedDashboard.success ? parsedDashboard.data : null;
-  const invoices=invoicesSchema.safeParse(invoicesResult.data);
-  const stageRequests=stageRequestSchema.safeParse(stageRequestsResult.data);
-  const paymentProofs=paymentProofSchema.safeParse(paymentProofsResult.data);
-  const safeMetrics=latest&&siteMaterials.success&&!siteMaterialsResult.error?
-   {...latest,materials:[
-    ...latest.materials.filter(material=>Boolean(material.po_number)),
-    ...siteMaterials.data
-   ]}:latest;
+  const invoices = invoicesSchema.safeParse(invoicesResult.data);
+  const stageRequests = stageRequestSchema.safeParse(stageRequestsResult.data);
+  const paymentProofs = paymentProofSchema.safeParse(paymentProofsResult.data);
+  const safeMetrics =
+    latest && siteMaterials.success && !siteMaterialsResult.error
+      ? {
+          ...latest,
+          materials: [
+            ...latest.materials.filter((material) =>
+              Boolean(material.po_number),
+            ),
+            ...siteMaterials.data,
+          ],
+        }
+      : latest;
 
   return (
     <ClientDashboard
@@ -197,12 +247,27 @@ export default async function ClientProjectPage({
             }
       }
       metricsUnavailable={Boolean(
-        dashboardResult.error || !parsedDashboard.success || siteMaterialsResult.error || !siteMaterials.success,
+        dashboardResult.error ||
+        !parsedDashboard.success ||
+        siteMaterialsResult.error ||
+        !siteMaterials.success,
       )}
-      requests={parsedRequests.success&&!requestsResult.error?parsedRequests.data:[]}
-      invoices={invoices.success&&!invoicesResult.error?invoices.data:[]}
-      paymentRequests={stageRequests.success&&!stageRequestsResult.error?stageRequests.data:[]}
-      paymentProofs={paymentProofs.success&&!paymentProofsResult.error?paymentProofs.data:[]}
+      requests={
+        parsedRequests.success && !requestsResult.error
+          ? parsedRequests.data
+          : []
+      }
+      invoices={invoices.success && !invoicesResult.error ? invoices.data : []}
+      paymentRequests={
+        stageRequests.success && !stageRequestsResult.error
+          ? stageRequests.data
+          : []
+      }
+      paymentProofs={
+        paymentProofs.success && !paymentProofsResult.error
+          ? paymentProofs.data
+          : []
+      }
       clientEmail={auth.user.email ?? ''}
     />
   );

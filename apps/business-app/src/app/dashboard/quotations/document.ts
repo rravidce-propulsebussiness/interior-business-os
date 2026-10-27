@@ -74,6 +74,8 @@ export async function quotationDocument(id: string) {
       };
     }),
   });
-  const html = await inlinePremiumConceptImages(renderQuotationDocument(document));
+  const html = await inlinePremiumConceptImages(
+    renderQuotationDocument(document),
+  );
   return { document, html };
 }

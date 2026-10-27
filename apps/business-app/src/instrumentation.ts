@@ -25,7 +25,9 @@ export const onRequestError: Instrumentation.onRequestError = (
   context,
 ) => {
   const category = requestLogCategory(context.routePath) ?? 'other';
-  const type = ['render', 'route', 'action', 'proxy'].includes(context.routeType)
+  const type = ['render', 'route', 'action', 'proxy'].includes(
+    context.routeType,
+  )
     ? context.routeType
     : 'other';
   console.error(

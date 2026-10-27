@@ -105,7 +105,6 @@ export async function revokeAgreementClearance(
   }
 }
 
-
 /**
  * Single owner operation: upload the signed PDF if necessary, then register it
  * against the exact project contract. Existing uploaded PDFs can be selected
@@ -135,32 +134,47 @@ export async function saveSignedAgreement(
     const hasFile = file instanceof File && file.size > 0;
     const selected = String(form.get('media_id') ?? '').trim();
     if (hasFile && selected)
-      throw new Error('Choose either a new signed PDF or an existing signed PDF.');
+      throw new Error(
+        'Choose either a new signed PDF or an existing signed PDF.',
+      );
     if (!hasFile && !selected)
-      throw new Error('Choose a signed PDF to upload, or select one already uploaded.');
+      throw new Error(
+        'Choose a signed PDF to upload, or select one already uploaded.',
+      );
 
     let mediaId: string;
     if (hasFile) {
-      if (!(file instanceof File) || file.type !== 'application/pdf'
-          || file.size > 8 * 1024 * 1024)
+      if (
+        !(file instanceof File) ||
+        file.type !== 'application/pdf' ||
+        file.size > 8 * 1024 * 1024
+      )
         throw new Error('Signed agreement must be a PDF up to 8 MB.');
-      const filename = file.name.replace(/[\\/\x00-\x1f\x7f]/g, '_').slice(0, 180);
+      const filename = file.name
+        .replace(/[\\/\x00-\x1f\x7f]/g, '_')
+        .slice(0, 180);
       if (!filename) throw new Error('The agreement needs a filename.');
       const bytes = Buffer.from(await file.arrayBuffer());
       if (bytes.length < 4 || bytes.subarray(0, 4).toString('ascii') !== '%PDF')
         throw new Error('The selected file is not a valid PDF.');
-      const { data, error } = await services.client.rpc('project_site_media_put', {
-        p_organization_id: org,
-        p_project_id: projectId,
-        p_category: 'agreement',
-        p_filename: filename,
-        p_mime: 'application/pdf',
-        p_base64: bytes.toString('base64'),
-        p_caption: note.slice(0, 500),
-      });
-      if (error) throw new Error(error.code === '42501'
-        ? 'Only an authorized project manager can upload this agreement.'
-        : error.message.slice(0, 220));
+      const { data, error } = await services.client.rpc(
+        'project_site_media_put',
+        {
+          p_organization_id: org,
+          p_project_id: projectId,
+          p_category: 'agreement',
+          p_filename: filename,
+          p_mime: 'application/pdf',
+          p_base64: bytes.toString('base64'),
+          p_caption: note.slice(0, 500),
+        },
+      );
+      if (error)
+        throw new Error(
+          error.code === '42501'
+            ? 'Only an authorized project manager can upload this agreement.'
+            : error.message.slice(0, 220),
+        );
       mediaId = id.parse(data);
       uploaded = true;
     } else {
@@ -173,24 +187,35 @@ export async function saveSignedAgreement(
       p_action: 'record_signed_pdf',
       p_input: { media_id: mediaId, note },
     });
-    if (error) throw new Error(error.code === '42501'
-      ? 'Signed agreement confirmation requires authorized project and finance access.'
-      : error.message.slice(0, 220));
+    if (error)
+      throw new Error(
+        error.code === '42501'
+          ? 'Signed agreement confirmation requires authorized project and finance access.'
+          : error.message.slice(0, 220),
+      );
 
     for (const path of [
       '/dashboard/projects/' + projectId,
       '/dashboard/projects/' + projectId + '/documents',
       '/dashboard/projects/' + projectId + '/site',
       '/dashboard/projects/' + projectId + '/timeline',
-    ]) revalidatePath(path);
-    return { saved: true, message: 'Signed agreement uploaded and recorded successfully.' };
+    ])
+      revalidatePath(path);
+    return {
+      saved: true,
+      message: 'Signed agreement uploaded and recorded successfully.',
+    };
   } catch (error) {
     if (uploaded) {
       revalidatePath('/dashboard/projects/' + projectId + '/documents');
       return {
-        saved: false, uploaded: true,
-        message: 'The PDF was uploaded, but signing was not recorded: ' +
-          (error instanceof Error ? error.message.slice(0, 180) : 'Please retry') +
+        saved: false,
+        uploaded: true,
+        message:
+          'The PDF was uploaded, but signing was not recorded: ' +
+          (error instanceof Error
+            ? error.message.slice(0, 180)
+            : 'Please retry') +
           '. Select the existing PDF to finish without uploading it again.',
       };
     }

@@ -29,7 +29,11 @@ export function workCompletionByProject(
     if (!result.has(task.project_id) || task.status === 'cancelled') continue;
     const weight = finiteNumber(task.weight);
     const recorded = finiteNumber(task.completion_percentage);
-    if (weight === null || weight <= 0 || (recorded === null && task.status !== 'done'))
+    if (
+      weight === null ||
+      weight <= 0 ||
+      (recorded === null && task.status !== 'done')
+    )
       continue;
     const percentage =
       task.status === 'done' ? 100 : Math.min(100, Math.max(0, recorded ?? 0));
@@ -39,7 +43,6 @@ export function workCompletionByProject(
     totals.set(task.project_id, previous);
   }
   for (const [id, total] of totals)
-    if (total.weight > 0)
-      result.set(id, Math.round(total.sum / total.weight));
+    if (total.weight > 0) result.set(id, Math.round(total.sum / total.weight));
   return result;
 }

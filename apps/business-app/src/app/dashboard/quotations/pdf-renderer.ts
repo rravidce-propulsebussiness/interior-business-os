@@ -1,5 +1,8 @@
 import { renderPdf } from '@business-os/shared/pdf';
-import { customerDocumentSchema, type CustomerDocument } from '@business-os/core/quotation-document';
+import {
+  customerDocumentSchema,
+  type CustomerDocument,
+} from '@business-os/core/quotation-document';
 
 /**
  * Two published concept photographs are decorative and externally hosted.
@@ -34,9 +37,11 @@ export async function renderQuotationPdf(
   }
   return renderPdf(safeQuotationPrintHtml(html), {
     brochure: true,
-    ...(document ? {
-      title: 'Quotation ' + document.number + ' R' + document.revision,
-      author: document.header.branding.name,
-    } : {}),
+    ...(document
+      ? {
+          title: 'Quotation ' + document.number + ' R' + document.revision,
+          author: document.header.branding.name,
+        }
+      : {}),
   });
 }

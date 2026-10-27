@@ -67,7 +67,7 @@ const stage = (
 export function projectTimelineFromQuote(
   industry: string,
   linesInput: readonly QuoteLine[],
-  requirements:StageRequirementsMap={},
+  requirements: StageRequirementsMap = {},
 ): ProjectQuotedTimeline | null {
   const lines = z.array(quoteLineSchema).max(250).parse(linesInput);
   if (industry === 'construction') {
@@ -80,11 +80,12 @@ export function projectTimelineFromQuote(
           template: result.template,
           zones: result.floors,
           stages: result.stages.map((s) => {
-            const saved=requirements[s.instanceCode];
+            const saved = requirements[s.instanceCode];
             return {
-              ...s,dependsOn:[...s.dependsOn],
-              activities:saved?.work??[...s.activities],
-              inspectionTopics:saved?.checks??[...s.inspectionTopics],
+              ...s,
+              dependsOn: [...s.dependsOn],
+              activities: saved?.work ?? [...s.activities],
+              inspectionTopics: saved?.checks ?? [...s.inspectionTopics],
             };
           }),
         }

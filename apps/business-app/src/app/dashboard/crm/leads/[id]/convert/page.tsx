@@ -6,9 +6,9 @@ import { idSchema } from '@business-os/shared';
 export default async function LegacyConvert({
   params,
 }: {
-  params: Promise<{id: string}>;
+  params: Promise<{ id: string }>;
 }) {
-  const {id} = await params;
+  const { id } = await params;
   idSchema.parse(id);
-  redirect('/dashboard/crm/leads/'+encodeURIComponent(id));
+  redirect('/dashboard/crm/leads/' + encodeURIComponent(id));
 }

@@ -1,81 +1,339 @@
 /* One SG Homes orange workspace style across dashboard, projects, finance and documents. */
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace, .website-dashboard, .pv2-page)) {
+.owner-layout:has(
+  :is(
+    .command-dashboard,
+    .proj-dashboard,
+    .project-detail-dashboard,
+    .fw-page,
+    .finance-document-workspace,
+    .website-dashboard,
+    .pv2-page
+  )
+) {
   --owner-blue: #fe5105;
   --owner-text: #111c34;
   --owner-muted: #66758b;
   --owner-line: #f1e8e2;
   background: #fffaf7;
 }
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace, .website-dashboard, .pv2-page)) .owner-workspace {
-  background: radial-gradient(circle at 80% 2%, #fff3eb 0%, transparent 550px), #fffaf7;
+.owner-layout:has(
+    :is(
+      .command-dashboard,
+      .proj-dashboard,
+      .project-detail-dashboard,
+      .fw-page,
+      .finance-document-workspace,
+      .website-dashboard,
+      .pv2-page
+    )
+  )
+  .owner-workspace {
+  background:
+    radial-gradient(circle at 80% 2%, #fff3eb 0%, transparent 550px), #fffaf7;
 }
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace, .website-dashboard, .pv2-page)) .owner-sidebar {
+.owner-layout:has(
+    :is(
+      .command-dashboard,
+      .proj-dashboard,
+      .project-detail-dashboard,
+      .fw-page,
+      .finance-document-workspace,
+      .website-dashboard,
+      .pv2-page
+    )
+  )
+  .owner-sidebar {
   background: #fff;
   border-right: 1px solid #f2e8e2;
   color: #17243e;
   padding: 18px 14px;
 }
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace, .website-dashboard, .pv2-page)) .owner-brand {
+.owner-layout:has(
+    :is(
+      .command-dashboard,
+      .proj-dashboard,
+      .project-detail-dashboard,
+      .fw-page,
+      .finance-document-workspace,
+      .website-dashboard,
+      .pv2-page
+    )
+  )
+  .owner-brand {
   color: #13203b !important;
   padding: 2px 8px 24px;
 }
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace, .website-dashboard, .pv2-page)) .owner-brand-icon {
+.owner-layout:has(
+    :is(
+      .command-dashboard,
+      .proj-dashboard,
+      .project-detail-dashboard,
+      .fw-page,
+      .finance-document-workspace,
+      .website-dashboard,
+      .pv2-page
+    )
+  )
+  .owner-brand-icon {
   background: linear-gradient(140deg, #ff791c, #ff4e02);
   color: #fff;
   box-shadow: 0 5px 15px #ff700c20;
 }
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace, .website-dashboard, .pv2-page)) .owner-brand strong {
+.owner-layout:has(
+    :is(
+      .command-dashboard,
+      .proj-dashboard,
+      .project-detail-dashboard,
+      .fw-page,
+      .finance-document-workspace,
+      .website-dashboard,
+      .pv2-page
+    )
+  )
+  .owner-brand
+  strong {
   font-size: 18px;
 }
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace, .website-dashboard, .pv2-page)) .owner-brand small {
+.owner-layout:has(
+    :is(
+      .command-dashboard,
+      .proj-dashboard,
+      .project-detail-dashboard,
+      .fw-page,
+      .finance-document-workspace,
+      .website-dashboard,
+      .pv2-page
+    )
+  )
+  .owner-brand
+  small {
   color: #64748b;
 }
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace, .website-dashboard, .pv2-page)) .owner-nav-item {
+.owner-layout:has(
+    :is(
+      .command-dashboard,
+      .proj-dashboard,
+      .project-detail-dashboard,
+      .fw-page,
+      .finance-document-workspace,
+      .website-dashboard,
+      .pv2-page
+    )
+  )
+  .owner-nav-item {
   color: #37455f !important;
   font-size: 13px;
   font-weight: 600;
 }
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace, .website-dashboard, .pv2-page)) .owner-nav-item:hover,
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace, .website-dashboard, .pv2-page)) .owner-nav-group-toggle:hover {
+.owner-layout:has(
+    :is(
+      .command-dashboard,
+      .proj-dashboard,
+      .project-detail-dashboard,
+      .fw-page,
+      .finance-document-workspace,
+      .website-dashboard,
+      .pv2-page
+    )
+  )
+  .owner-nav-item:hover,
+.owner-layout:has(
+    :is(
+      .command-dashboard,
+      .proj-dashboard,
+      .project-detail-dashboard,
+      .fw-page,
+      .finance-document-workspace,
+      .website-dashboard,
+      .pv2-page
+    )
+  )
+  .owner-nav-group-toggle:hover {
   background: #fff0e6;
   color: #fd520a !important;
 }
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace, .website-dashboard, .pv2-page)) .owner-nav-item.owner-nav-active {
+.owner-layout:has(
+    :is(
+      .command-dashboard,
+      .proj-dashboard,
+      .project-detail-dashboard,
+      .fw-page,
+      .finance-document-workspace,
+      .website-dashboard,
+      .pv2-page
+    )
+  )
+  .owner-nav-item.owner-nav-active {
   background: linear-gradient(120deg, #ff6a0b, #ff4600);
   box-shadow: 0 8px 18px #ff691b28;
   color: #fff !important;
 }
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace, .website-dashboard, .pv2-page)) .owner-subnav {
+.owner-layout:has(
+    :is(
+      .command-dashboard,
+      .proj-dashboard,
+      .project-detail-dashboard,
+      .fw-page,
+      .finance-document-workspace,
+      .website-dashboard,
+      .pv2-page
+    )
+  )
+  .owner-subnav {
   border-left-color: #ffe0ca;
 }
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace, .website-dashboard, .pv2-page)) .owner-subnav-link {
+.owner-layout:has(
+    :is(
+      .command-dashboard,
+      .proj-dashboard,
+      .project-detail-dashboard,
+      .fw-page,
+      .finance-document-workspace,
+      .website-dashboard,
+      .pv2-page
+    )
+  )
+  .owner-subnav-link {
   color: #68758a !important;
 }
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace, .website-dashboard, .pv2-page)) .owner-subnav-link:hover,
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace, .website-dashboard, .pv2-page)) .owner-subnav-active {
+.owner-layout:has(
+    :is(
+      .command-dashboard,
+      .proj-dashboard,
+      .project-detail-dashboard,
+      .fw-page,
+      .finance-document-workspace,
+      .website-dashboard,
+      .pv2-page
+    )
+  )
+  .owner-subnav-link:hover,
+.owner-layout:has(
+    :is(
+      .command-dashboard,
+      .proj-dashboard,
+      .project-detail-dashboard,
+      .fw-page,
+      .finance-document-workspace,
+      .website-dashboard,
+      .pv2-page
+    )
+  )
+  .owner-subnav-active {
   background: #fff3ea;
   color: #ed530b !important;
 }
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace, .website-dashboard, .pv2-page)) .owner-sidebar-bottom,
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace, .website-dashboard, .pv2-page)) .owner-plan-card {
+.owner-layout:has(
+    :is(
+      .command-dashboard,
+      .proj-dashboard,
+      .project-detail-dashboard,
+      .fw-page,
+      .finance-document-workspace,
+      .website-dashboard,
+      .pv2-page
+    )
+  )
+  .owner-sidebar-bottom,
+.owner-layout:has(
+    :is(
+      .command-dashboard,
+      .proj-dashboard,
+      .project-detail-dashboard,
+      .fw-page,
+      .finance-document-workspace,
+      .website-dashboard,
+      .pv2-page
+    )
+  )
+  .owner-plan-card {
   display: none;
 }
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace, .website-dashboard, .pv2-page)) .owner-topbar {
+.owner-layout:has(
+    :is(
+      .command-dashboard,
+      .proj-dashboard,
+      .project-detail-dashboard,
+      .fw-page,
+      .finance-document-workspace,
+      .website-dashboard,
+      .pv2-page
+    )
+  )
+  .owner-topbar {
   min-height: 70px;
   border-color: #f3eae5;
 }
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace, .website-dashboard, .pv2-page)) .owner-search {
+.owner-layout:has(
+    :is(
+      .command-dashboard,
+      .proj-dashboard,
+      .project-detail-dashboard,
+      .fw-page,
+      .finance-document-workspace,
+      .website-dashboard,
+      .pv2-page
+    )
+  )
+  .owner-search {
   background: #fcf8f7;
   border: 1px solid #f1e8e4;
 }
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace, .website-dashboard, .pv2-page)) .owner-profile-avatar {
+.owner-layout:has(
+    :is(
+      .command-dashboard,
+      .proj-dashboard,
+      .project-detail-dashboard,
+      .fw-page,
+      .finance-document-workspace,
+      .website-dashboard,
+      .pv2-page
+    )
+  )
+  .owner-profile-avatar {
   background: #47556c;
 }
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace, .website-dashboard, .pv2-page)) .owner-mobile-heading,
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace, .website-dashboard, .pv2-page)) .owner-mobile-heading button {
+.owner-layout:has(
+    :is(
+      .command-dashboard,
+      .proj-dashboard,
+      .project-detail-dashboard,
+      .fw-page,
+      .finance-document-workspace,
+      .website-dashboard,
+      .pv2-page
+    )
+  )
+  .owner-mobile-heading,
+.owner-layout:has(
+    :is(
+      .command-dashboard,
+      .proj-dashboard,
+      .project-detail-dashboard,
+      .fw-page,
+      .finance-document-workspace,
+      .website-dashboard,
+      .pv2-page
+    )
+  )
+  .owner-mobile-heading
+  button {
   color: #24344f;
 }
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace, .website-dashboard, .pv2-page)) .owner-no-company { color: #111c34; }
+.owner-layout:has(
+    :is(
+      .command-dashboard,
+      .proj-dashboard,
+      .project-detail-dashboard,
+      .fw-page,
+      .finance-document-workspace,
+      .website-dashboard,
+      .pv2-page
+    )
+  )
+  .owner-no-company {
+  color: #111c34;
+}
 
 .owner-layout .command-dashboard {
   padding: 24px 22px 96px;
@@ -86,9 +344,15 @@
 }
 .command-dashboard h1,
 .command-dashboard h2,
-.command-dashboard p { margin: 0; }
-.command-dashboard h2 { letter-spacing: -.025em; }
-.command-dashboard a { text-decoration: none; }
+.command-dashboard p {
+  margin: 0;
+}
+.command-dashboard h2 {
+  letter-spacing: -0.025em;
+}
+.command-dashboard a {
+  text-decoration: none;
+}
 .command-welcome {
   display: flex;
   align-items: center;
@@ -96,7 +360,12 @@
   gap: 18px;
   margin-bottom: 20px;
 }
-.command-welcome-text { display: flex; align-items: center; gap: 15px; min-width: 0; }
+.command-welcome-text {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  min-width: 0;
+}
 .command-sun {
   font-size: 30px;
   display: grid;
@@ -107,10 +376,14 @@
 .command-welcome h1 {
   font-size: clamp(22px, 2.2vw, 29px);
   font-weight: 850;
-  letter-spacing: -.04em;
+  letter-spacing: -0.04em;
   line-height: 1.1;
 }
-.command-welcome p { margin-top: 6px; color: #758096; font-size: 13px; }
+.command-welcome p {
+  margin-top: 6px;
+  color: #758096;
+  font-size: 13px;
+}
 .command-date {
   display: flex;
   align-items: center;
@@ -125,7 +398,7 @@
 }
 .command-metrics {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0,1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 14px;
   margin-bottom: 16px;
 }
@@ -142,7 +415,10 @@
   color: #111c34;
   box-shadow: 0 7px 22px #6f351b0a;
 }
-.owner-layout .command-metric:hover { border-color: #ffc9a8; transform: translateY(-1px); }
+.owner-layout .command-metric:hover {
+  border-color: #ffc9a8;
+  transform: translateY(-1px);
+}
 .command-metric-icon {
   width: 53px;
   height: 53px;
@@ -153,22 +429,42 @@
   background: #fff0e6;
   color: #ff5a06;
 }
-.command-tone-green .command-metric-icon { background: #e7faf0; color: #16a767; }
-.command-tone-blue .command-metric-icon { background: #edf6ff; color: #3181e8; }
-.command-tone-purple .command-metric-icon { background: #f4eeff; color: #8851ed; }
-.command-metric-body { display: flex; min-width: 0; flex-direction: column; }
-.command-metric-label { font-size: 12px; font-weight: 700; color: #2c3851; }
+.command-tone-green .command-metric-icon {
+  background: #e7faf0;
+  color: #16a767;
+}
+.command-tone-blue .command-metric-icon {
+  background: #edf6ff;
+  color: #3181e8;
+}
+.command-tone-purple .command-metric-icon {
+  background: #f4eeff;
+  color: #8851ed;
+}
+.command-metric-body {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+.command-metric-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #2c3851;
+}
 .command-metric strong {
   font-size: clamp(20px, 2vw, 26px);
   font-weight: 850;
-  letter-spacing: -.035em;
+  letter-spacing: -0.035em;
   margin: 9px 0 5px;
   white-space: nowrap;
 }
-.command-metric small { color: #78869a; font-size: 11px; }
+.command-metric small {
+  color: #78869a;
+  font-size: 11px;
+}
 .command-actions-panel {
   border: 1px solid #ffd9c2;
-  background: linear-gradient(110deg,#fff3eb,#fffaf6);
+  background: linear-gradient(110deg, #fff3eb, #fffaf6);
   padding: 15px;
   border-radius: 17px;
   margin-bottom: 16px;
@@ -180,7 +476,9 @@
   justify-content: space-between;
   min-width: 0;
 }
-.command-actions-heading { margin-bottom: 13px; }
+.command-actions-heading {
+  margin-bottom: 13px;
+}
 .command-actions-heading h2,
 .command-panel-heading h2 {
   display: flex;
@@ -193,13 +491,18 @@
 .command-heading-icon {
   display: grid;
   place-items: center;
-  width: 31px; height: 31px;
+  width: 31px;
+  height: 31px;
   border-radius: 10px;
-  background: linear-gradient(135deg,#ff7820,#ff4c03);
+  background: linear-gradient(135deg, #ff7820, #ff4c03);
   color: #fff;
   flex: 0 0 31px;
 }
-.command-actions-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 10px; }
+.command-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
 .owner-layout .command-action {
   color: #13213a;
   background: #fff;
@@ -211,19 +514,39 @@
   border-radius: 13px;
   border: 1px solid #f7e9e0;
 }
-.owner-layout .command-action:hover { border-color: #ffb17d; background: #fffdfa; }
+.owner-layout .command-action:hover {
+  border-color: #ffb17d;
+  background: #fffdfa;
+}
 .command-action-icon {
   flex: 0 0 49px;
-  width: 49px; height: 49px;
-  display: grid; place-items: center;
+  width: 49px;
+  height: 49px;
+  display: grid;
+  place-items: center;
   border-radius: 12px;
   background: linear-gradient(135deg, #ff7719, #ff4800);
   color: #fff;
   box-shadow: 0 5px 12px #ff63001c;
 }
-.command-action strong { font-size: 12px; display: block; font-weight: 800; margin-bottom: 5px; }
-.command-action small { font-size: 10px; line-height: 1.4; color: #738098; display: block; }
-.command-two-cols { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 15px; margin-bottom: 16px; }
+.command-action strong {
+  font-size: 12px;
+  display: block;
+  font-weight: 800;
+  margin-bottom: 5px;
+}
+.command-action small {
+  font-size: 10px;
+  line-height: 1.4;
+  color: #738098;
+  display: block;
+}
+.command-two-cols {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 15px;
+  margin-bottom: 16px;
+}
 .command-panel {
   min-width: 0;
   overflow: hidden;
@@ -232,7 +555,10 @@
   border-radius: 16px;
   box-shadow: 0 6px 20px #53311709;
 }
-.command-panel-heading { padding: 14px 15px 12px; border-bottom: 1px solid #f6eeea; }
+.command-panel-heading {
+  padding: 14px 15px 12px;
+  border-bottom: 1px solid #f6eeea;
+}
 .owner-layout .command-panel-heading > a {
   white-space: nowrap;
   color: #f85a08;
@@ -241,7 +567,9 @@
 }
 .command-attention-list,
 .command-project-list,
-.command-document-rows { padding: 3px 15px; }
+.command-document-rows {
+  padding: 3px 15px;
+}
 .command-attention-row,
 .command-project-row,
 .command-document-row {
@@ -255,25 +583,38 @@
 }
 .command-attention-row:last-child,
 .command-project-row:last-child,
-.command-document-row:last-child { border-bottom: 0; }
+.command-document-row:last-child {
+  border-bottom: 0;
+}
 .command-row-icon {
-  width: 40px; height: 40px;
+  width: 40px;
+  height: 40px;
   flex: 0 0 40px;
-  display: grid; place-items: center;
+  display: grid;
+  place-items: center;
   border-radius: 12px;
   background: #fff0e8;
   color: #ff580a;
 }
 .command-row-content {
-  display: block; min-width: 0; flex: 1 1 auto;
+  display: block;
+  min-width: 0;
+  flex: 1 1 auto;
 }
 .command-row-content strong {
-  display: block; font-size: 12px; font-weight: 750;
-  line-height: 1.35; overflow: hidden; text-overflow: ellipsis;
+  display: block;
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.35;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .command-row-content small {
-  display: block; color: #788399; font-size: 10px;
-  line-height: 1.45; margin-top: 4px;
+  display: block;
+  color: #788399;
+  font-size: 10px;
+  line-height: 1.45;
+  margin-top: 4px;
 }
 .command-status {
   white-space: nowrap;
@@ -288,106 +629,352 @@
   color: #b46110;
   background: #fff3df;
 }
-.command-status-urgent { color: #dc3030; background: #ffecee; }
-.command-status-neutral { color: #516a89; background: #edf3fb; }
-.command-status-success { color: #098854; background: #e1f9ed; }
-.command-arrow { margin-left: 2px; color: #6e7f98; font-size: 23px; }
-.command-project-symbol {
-  width: 54px; height: 54px; flex: 0 0 54px;
-  border-radius: 10px; color: #fd600f;
-  display: grid; place-items: center;
-  background: linear-gradient(145deg,#fff3e9,#ffdbbf);
+.command-status-urgent {
+  color: #dc3030;
+  background: #ffecee;
 }
-.command-project-content { flex: 1 1 auto; min-width: 0; display: grid; gap: 7px; }
-.command-project-top { display: flex; justify-content: space-between; gap: 5px; align-items: baseline; }
-.command-project-top strong { font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.command-status-neutral {
+  color: #516a89;
+  background: #edf3fb;
+}
+.command-status-success {
+  color: #098854;
+  background: #e1f9ed;
+}
+.command-arrow {
+  margin-left: 2px;
+  color: #6e7f98;
+  font-size: 23px;
+}
+.command-project-symbol {
+  width: 54px;
+  height: 54px;
+  flex: 0 0 54px;
+  border-radius: 10px;
+  color: #fd600f;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(145deg, #fff3e9, #ffdbbf);
+}
+.command-project-content {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: grid;
+  gap: 7px;
+}
+.command-project-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 5px;
+  align-items: baseline;
+}
+.command-project-top strong {
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .command-project-top small {
-  font-size: 10px; color: #a85d11;
-  padding: 4px 7px; background: #fff4e5; border-radius: 7px; white-space: nowrap;
+  font-size: 10px;
+  color: #a85d11;
+  padding: 4px 7px;
+  background: #fff4e5;
+  border-radius: 7px;
+  white-space: nowrap;
 }
 .command-progress {
-  height: 7px; overflow: hidden;
-  background: #edf0f4; border-radius: 99px;
+  height: 7px;
+  overflow: hidden;
+  background: #edf0f4;
+  border-radius: 99px;
   display: block;
 }
 .command-progress > span {
-  display: block; height: 100%;
-  background: linear-gradient(90deg,#ff9b57,#ff5c0a);
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #ff9b57, #ff5c0a);
   border-radius: inherit;
 }
-.command-stage-note { color: #77849a; font-size: 10px; }
-.command-empty { padding: 23px 17px !important; color: #75839a; font-size: 12px; }
+.command-stage-note {
+  color: #77849a;
+  font-size: 10px;
+}
+.command-empty {
+  padding: 23px 17px !important;
+  color: #75839a;
+  font-size: 12px;
+}
 .command-chart {
   height: 150px;
-  display: grid; grid-template-columns: repeat(7,minmax(0,1fr)); gap: 7px;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 7px;
   padding: 15px 18px 8px;
   border-bottom: 1px solid #f7f1ed;
-  background: repeating-linear-gradient(to top,#f5ede8 0px,#f5ede8 1px,transparent 1px,transparent 31px);
+  background: repeating-linear-gradient(
+    to top,
+    #f5ede8 0px,
+    #f5ede8 1px,
+    transparent 1px,
+    transparent 31px
+  );
 }
-.command-chart-column { min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: end; gap: 5px; color: #7d8998; font-size: 10px; }
-.command-chart-bar-wrap { height: 105px; width: 60%; display: flex; align-items: flex-end; }
-.command-chart-bar { width: 100%; background: linear-gradient(0deg,#ff5206,#ffb283); border-radius: 5px 5px 0 0; }
-.command-finance-totals { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); padding: 13px 12px; }
-.command-finance-totals div { min-width: 0; text-align: center; padding: 4px 6px; border-right: 1px solid #f4eeea; }
-.command-finance-totals div:last-child { border-right: 0; }
-.command-finance-totals strong { display: block; font-size: clamp(11px,1.15vw,16px); color: #151d32; overflow-wrap: anywhere; }
-.command-finance-totals span { display: block; font-size: 10px; color: #7c899e; margin-top: 5px; }
-.command-team-content { display: grid; grid-template-columns: 41% 1fr; gap: 14px; padding: 20px; }
+.command-chart-column {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: end;
+  gap: 5px;
+  color: #7d8998;
+  font-size: 10px;
+}
+.command-chart-bar-wrap {
+  height: 105px;
+  width: 60%;
+  display: flex;
+  align-items: flex-end;
+}
+.command-chart-bar {
+  width: 100%;
+  background: linear-gradient(0deg, #ff5206, #ffb283);
+  border-radius: 5px 5px 0 0;
+}
+.command-finance-totals {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  padding: 13px 12px;
+}
+.command-finance-totals div {
+  min-width: 0;
+  text-align: center;
+  padding: 4px 6px;
+  border-right: 1px solid #f4eeea;
+}
+.command-finance-totals div:last-child {
+  border-right: 0;
+}
+.command-finance-totals strong {
+  display: block;
+  font-size: clamp(11px, 1.15vw, 16px);
+  color: #151d32;
+  overflow-wrap: anywhere;
+}
+.command-finance-totals span {
+  display: block;
+  font-size: 10px;
+  color: #7c899e;
+  margin-top: 5px;
+}
+.command-team-content {
+  display: grid;
+  grid-template-columns: 41% 1fr;
+  gap: 14px;
+  padding: 20px;
+}
 .command-team-count {
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px;
-  border-radius: 18px; border: 10px solid #ffe4d2;
-  aspect-ratio: 1; width: min(100%,170px); margin: 0 auto; color: #f96a1c;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border-radius: 18px;
+  border: 10px solid #ffe4d2;
+  aspect-ratio: 1;
+  width: min(100%, 170px);
+  margin: 0 auto;
+  color: #f96a1c;
 }
-.command-team-count strong { color: #17243d; font-size: 34px; font-weight: 850; }
-.command-team-count span { color: #6c778b; font-size: 10px; }
-.command-team-details { display: flex; flex-direction: column; gap: 12px; justify-content: center; }
-.command-team-details > span { display: flex; gap: 8px; align-items: center; font-size: 12px; color: #53617a; }
-.command-team-details > span svg { color: #f96718; }
-.command-team-details > span strong { margin-left: auto; color: #12203b; }
-.owner-layout .command-team-details > a { color: #f96718; font-size: 11px; font-weight: 700; }
-.command-document-row { gap: 8px; }
-.command-document-amount { font-size: 11px; white-space: nowrap; }
-.command-mobile-nav { display: none; }
+.command-team-count strong {
+  color: #17243d;
+  font-size: 34px;
+  font-weight: 850;
+}
+.command-team-count span {
+  color: #6c778b;
+  font-size: 10px;
+}
+.command-team-details {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  justify-content: center;
+}
+.command-team-details > span {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 12px;
+  color: #53617a;
+}
+.command-team-details > span svg {
+  color: #f96718;
+}
+.command-team-details > span strong {
+  margin-left: auto;
+  color: #12203b;
+}
+.owner-layout .command-team-details > a {
+  color: #f96718;
+  font-size: 11px;
+  font-weight: 700;
+}
+.command-document-row {
+  gap: 8px;
+}
+.command-document-amount {
+  font-size: 11px;
+  white-space: nowrap;
+}
+.command-mobile-nav {
+  display: none;
+}
 
-@media(max-width: 1250px) {
-  .owner-layout .command-dashboard { padding: 20px 16px 90px; }
-  .command-metrics { grid-template-columns: repeat(2,minmax(0,1fr)); }
-  .command-actions-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+@media (max-width: 1250px) {
+  .owner-layout .command-dashboard {
+    padding: 20px 16px 90px;
+  }
+  .command-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .command-actions-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
-@media(max-width: 740px) {
-  .owner-layout .command-dashboard { padding: 17px 12px 105px; }
-  .owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace, .website-dashboard, .pv2-page)) .owner-topbar { min-height: 61px; padding: 8px 12px; }
-  .command-welcome { align-items: flex-start; gap: 7px; margin-bottom: 16px; }
-  .command-welcome-text { gap: 8px; }
-  .command-welcome h1 { font-size: 19px; }
-  .command-welcome p { font-size: 11px; }
-  .command-sun { width: 31px; font-size: 24px; }
-  .command-date { padding: 7px; font-size: 9px; border: none; background: none; }
-  .command-date svg { display: none; }
-  .command-metrics { gap: 9px; }
-  .owner-layout .command-metric { min-height: 111px; padding: 12px; gap: 8px; }
-  .command-metric-icon { width: 35px; height: 35px; flex-basis: 35px; border-radius: 9px; }
-  .command-metric-icon svg { width: 19px; height: 19px; }
-  .command-metric-label { font-size: 10px; }
-  .command-metric strong { font-size: clamp(17px, 4.9vw, 23px); margin: 8px 0 5px; }
-  .command-metric small { font-size: 9px; }
-  .command-actions-panel { padding: 10px; }
-  .command-actions-grid { gap: 8px; }
-  .owner-layout .command-action { min-height: 73px; padding: 9px; gap: 8px; }
-  .command-action-icon { width: 37px; height: 37px; flex-basis: 37px; border-radius: 9px; }
-  .command-action-icon svg { width: 19px; height: 19px; }
-  .command-action strong { font-size: 11px; }
-  .command-action small { font-size: 9px; }
-  .command-two-cols { grid-template-columns: 1fr; gap: 12px; margin-bottom: 12px; }
-  .command-panel-heading { padding: 12px; }
-  .command-panel-heading h2,.command-actions-heading h2 { font-size: 14px; }
-  .command-attention-list,.command-project-list,.command-document-rows { padding: 0 12px; }
-  .command-document-amount { font-size: 10px; }
-  .command-team-content { padding: 13px; }
+@media (max-width: 740px) {
+  .owner-layout .command-dashboard {
+    padding: 17px 12px 105px;
+  }
+  .owner-layout:has(
+      :is(
+        .command-dashboard,
+        .proj-dashboard,
+        .project-detail-dashboard,
+        .fw-page,
+        .finance-document-workspace,
+        .website-dashboard,
+        .pv2-page
+      )
+    )
+    .owner-topbar {
+    min-height: 61px;
+    padding: 8px 12px;
+  }
+  .command-welcome {
+    align-items: flex-start;
+    gap: 7px;
+    margin-bottom: 16px;
+  }
+  .command-welcome-text {
+    gap: 8px;
+  }
+  .command-welcome h1 {
+    font-size: 19px;
+  }
+  .command-welcome p {
+    font-size: 11px;
+  }
+  .command-sun {
+    width: 31px;
+    font-size: 24px;
+  }
+  .command-date {
+    padding: 7px;
+    font-size: 9px;
+    border: none;
+    background: none;
+  }
+  .command-date svg {
+    display: none;
+  }
+  .command-metrics {
+    gap: 9px;
+  }
+  .owner-layout .command-metric {
+    min-height: 111px;
+    padding: 12px;
+    gap: 8px;
+  }
+  .command-metric-icon {
+    width: 35px;
+    height: 35px;
+    flex-basis: 35px;
+    border-radius: 9px;
+  }
+  .command-metric-icon svg {
+    width: 19px;
+    height: 19px;
+  }
+  .command-metric-label {
+    font-size: 10px;
+  }
+  .command-metric strong {
+    font-size: clamp(17px, 4.9vw, 23px);
+    margin: 8px 0 5px;
+  }
+  .command-metric small {
+    font-size: 9px;
+  }
+  .command-actions-panel {
+    padding: 10px;
+  }
+  .command-actions-grid {
+    gap: 8px;
+  }
+  .owner-layout .command-action {
+    min-height: 73px;
+    padding: 9px;
+    gap: 8px;
+  }
+  .command-action-icon {
+    width: 37px;
+    height: 37px;
+    flex-basis: 37px;
+    border-radius: 9px;
+  }
+  .command-action-icon svg {
+    width: 19px;
+    height: 19px;
+  }
+  .command-action strong {
+    font-size: 11px;
+  }
+  .command-action small {
+    font-size: 9px;
+  }
+  .command-two-cols {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .command-panel-heading {
+    padding: 12px;
+  }
+  .command-panel-heading h2,
+  .command-actions-heading h2 {
+    font-size: 14px;
+  }
+  .command-attention-list,
+  .command-project-list,
+  .command-document-rows {
+    padding: 0 12px;
+  }
+  .command-document-amount {
+    font-size: 10px;
+  }
+  .command-team-content {
+    padding: 13px;
+  }
   .command-mobile-nav {
-    display: flex; position: fixed; bottom: 0; left: 0; right: 0; z-index: 20;
-    padding: 8px 4px calc(8px + env(safe-area-inset-bottom,0px));
-    background: #fff; border-top: 1px solid #f1e8e2;
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 20;
+    padding: 8px 4px calc(8px + env(safe-area-inset-bottom, 0px));
+    background: #fff;
+    border-top: 1px solid #f1e8e2;
     box-shadow: 0 -6px 22px #48362712;
     justify-content: space-around;
   }
@@ -395,38 +982,95 @@
     color: #607088;
     min-width: 50px;
     flex: 1 1 0;
-    display: flex; flex-direction: column; gap: 4px;
-    align-items: center; justify-content: center;
-    padding: 4px 2px; font-size: 9px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 2px;
+    font-size: 9px;
   }
-  .owner-layout .command-mobile-nav a[aria-current="page"] { color: #fd5505; font-weight: 800; }
+  .owner-layout .command-mobile-nav a[aria-current='page'] {
+    color: #fd5505;
+    font-weight: 800;
+  }
 }
-@media(max-width: 380px){
-  .command-welcome { flex-wrap: wrap; }
-  .command-metric { gap: 6px !important; }
-  .command-metric strong { font-size: 16px; }
-  .command-date { margin-left: auto; }
-  .command-finance-totals { grid-template-columns: repeat(2,minmax(0,1fr)); }
-  .command-finance-totals div:nth-child(2) { border-right: 0; }
+@media (max-width: 380px) {
+  .command-welcome {
+    flex-wrap: wrap;
+  }
+  .command-metric {
+    gap: 6px !important;
+  }
+  .command-metric strong {
+    font-size: 16px;
+  }
+  .command-date {
+    margin-left: auto;
+  }
+  .command-finance-totals {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .command-finance-totals div:nth-child(2) {
+    border-right: 0;
+  }
 }
 
-.owner-command-mobile-brand { display: none; }
-@media(max-width: 740px) {
-  .owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace, .website-dashboard, .pv2-page)) .owner-command-mobile-brand {
-    display: flex; align-items: center; gap: 9px;
-    min-width: 0; flex: 1; color: #18223b; font-size: 13px;
+.owner-command-mobile-brand {
+  display: none;
+}
+@media (max-width: 740px) {
+  .owner-layout:has(
+      :is(
+        .command-dashboard,
+        .proj-dashboard,
+        .project-detail-dashboard,
+        .fw-page,
+        .finance-document-workspace,
+        .website-dashboard,
+        .pv2-page
+      )
+    )
+    .owner-command-mobile-brand {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    min-width: 0;
+    flex: 1;
+    color: #18223b;
+    font-size: 13px;
   }
   .owner-command-mobile-brand strong {
-    display: block; min-width: 0; overflow: hidden;
-    text-overflow: ellipsis; white-space: nowrap;
+    display: block;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   .owner-command-mobile-mark {
-    flex: 0 0 34px; width: 34px; height: 34px;
-    display: grid; place-items: center;
+    flex: 0 0 34px;
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
     border-radius: 10px;
-    background: linear-gradient(135deg,#ff8024,#ff4d00);
+    background: linear-gradient(135deg, #ff8024, #ff4d00);
     color: #fff;
-    font-size: 16px; font-weight: 850;
+    font-size: 16px;
+    font-weight: 850;
   }
-  .owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace, .website-dashboard, .pv2-page)) .owner-search { display: none; }
+  .owner-layout:has(
+      :is(
+        .command-dashboard,
+        .proj-dashboard,
+        .project-detail-dashboard,
+        .fw-page,
+        .finance-document-workspace,
+        .website-dashboard,
+        .pv2-page
+      )
+    )
+    .owner-search {
+    display: none;
+  }
 }

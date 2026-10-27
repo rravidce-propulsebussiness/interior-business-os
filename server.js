@@ -32,7 +32,10 @@ console.log(
 );
 // Observability only: these hooks do not intercept signals or alter shutdown.
 process.on('uncaughtExceptionMonitor', (error, origin) => {
-  console.error(`[Business OS] Uncaught exception in pid ${process.pid} (${origin}):`, error);
+  console.error(
+    `[Business OS] Uncaught exception in pid ${process.pid} (${origin}):`,
+    error,
+  );
 });
 process.on('exit', (code) => {
   console.log(`[Business OS] Process ${process.pid} exited (code ${code}).`);
@@ -46,19 +49,27 @@ if (service === 'business-app' && existsSync(deployedBrowserPath)) {
   process.env.PLAYWRIGHT_BROWSERS_PATH = deployedBrowserPath;
   let executablePresent = false;
   try {
-    const requireFromApp = createRequire(resolve(root, 'apps', service, 'package.json'));
+    const requireFromApp = createRequire(
+      resolve(root, 'apps', service, 'package.json'),
+    );
     const { chromium } = requireFromApp('playwright');
     executablePresent = existsSync(chromium.executablePath());
   } catch {
     // No exceptions may prevent the CRM/other routes from starting.
   }
-  console.log(executablePresent
-    ? '[Business OS] Chromium executable present; launch and Linux libraries unverified.'
-    : '[Business OS] Browser directory exists, but Playwright executable was not found.');
-} else if (service === 'business-app' &&
+  console.log(
+    executablePresent
+      ? '[Business OS] Chromium executable present; launch and Linux libraries unverified.'
+      : '[Business OS] Browser directory exists, but Playwright executable was not found.',
+  );
+} else if (
+  service === 'business-app' &&
   process.env.PDF_RENDERER !== 'cloudflare-rest' &&
-  !(process.env.CF_BROWSER_ACCOUNT_ID && process.env.CF_BROWSER_API_TOKEN)) {
-  console.warn('[Business OS] Premium PDF renderer unavailable; build must install Chromium or configure Browser Rendering.');
+  !(process.env.CF_BROWSER_ACCOUNT_ID && process.env.CF_BROWSER_API_TOKEN)
+) {
+  console.warn(
+    '[Business OS] Premium PDF renderer unavailable; build must install Chromium or configure Browser Rendering.',
+  );
 }
 
 const appDir = resolve(root, 'apps', service);

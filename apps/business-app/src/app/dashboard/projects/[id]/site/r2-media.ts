@@ -15,7 +15,9 @@ function config(): R2Config | null {
   const access = process.env.BUSINESS_OS_R2_ACCESS_KEY_ID?.trim();
   const secret = process.env.BUSINESS_OS_R2_SECRET_ACCESS_KEY?.trim();
   if (!account || !access || !secret || !/^[0-9a-f]{32}$/.test(account)) {
-    throw new Error('R2 media is enabled but its private credentials are missing');
+    throw new Error(
+      'R2 media is enabled but its private credentials are missing',
+    );
   }
   return { account, access, secret };
 }
@@ -29,16 +31,24 @@ export function r2MediaHash(bytes: Buffer) {
   return createHash('sha256').update(bytes).digest('hex');
 }
 export function validateR2MediaBytes(bytes: Buffer, mime: string) {
-  if (bytes.length < 1 || bytes.length > MAX_BYTES) throw new Error('File too large');
-  const isPrefix = (hex: string) => bytes.subarray(0, hex.length / 2).equals(Buffer.from(hex, 'hex'));
-  const valid = mime === 'image/jpeg' ? isPrefix('ffd8') :
-    mime === 'image/png' ? isPrefix('89504e47') :
-    mime === 'image/webp' ? bytes.length >= 12 &&
-      bytes.toString('ascii', 0, 4) === 'RIFF' &&
-      bytes.toString('ascii', 8, 12) === 'WEBP' :
-    mime === 'video/mp4' ? bytes.length >= 8 &&
-      bytes.toString('ascii', 4, 8) === 'ftyp' :
-    mime === 'application/pdf' ? isPrefix('25504446') : false;
+  if (bytes.length < 1 || bytes.length > MAX_BYTES)
+    throw new Error('File too large');
+  const isPrefix = (hex: string) =>
+    bytes.subarray(0, hex.length / 2).equals(Buffer.from(hex, 'hex'));
+  const valid =
+    mime === 'image/jpeg'
+      ? isPrefix('ffd8')
+      : mime === 'image/png'
+        ? isPrefix('89504e47')
+        : mime === 'image/webp'
+          ? bytes.length >= 12 &&
+            bytes.toString('ascii', 0, 4) === 'RIFF' &&
+            bytes.toString('ascii', 8, 12) === 'WEBP'
+          : mime === 'video/mp4'
+            ? bytes.length >= 8 && bytes.toString('ascii', 4, 8) === 'ftyp'
+            : mime === 'application/pdf'
+              ? isPrefix('25504446')
+              : false;
   if (!valid) throw new Error('File content does not match the selected type');
 }
 function sha256(bytes: Buffer | string) {
@@ -55,23 +65,39 @@ async function request(
 ) {
   const values = config();
   if (!values) throw new Error('R2 media is not configured');
-  if (!/^(?:site|payment-proof)\/[a-f0-9-]{36}\/[a-f0-9-]{36}\/[a-f0-9-]{36}$/.test(key))
+  if (
+    !/^(?:site|payment-proof)\/[a-f0-9-]{36}\/[a-f0-9-]{36}\/[a-f0-9-]{36}$/.test(
+      key,
+    )
+  )
     throw new Error('Invalid R2 object key');
   if (bytes && bytes.length > MAX_BYTES) throw new Error('File too large');
   const host = values.account + '.r2.cloudflarestorage.com';
-  const uri = '/' + BUCKET + '/' + key.split('/').map(encodeURIComponent).join('/');
+  const uri =
+    '/' + BUCKET + '/' + key.split('/').map(encodeURIComponent).join('/');
   const now = new Date().toISOString();
   const timestamp = now.replace(/[:-]|\.\d{3}/g, '');
   const date = timestamp.slice(0, 8);
   const hash = sha256(bytes ?? Buffer.alloc(0));
   const scope = date + '/auto/s3/aws4_request';
   const canonicalHeaders =
-    'host:' + host + '\n' +
-    'x-amz-content-sha256:' + hash + '\n' +
-    'x-amz-date:' + timestamp + '\n';
+    'host:' +
+    host +
+    '\n' +
+    'x-amz-content-sha256:' +
+    hash +
+    '\n' +
+    'x-amz-date:' +
+    timestamp +
+    '\n';
   const signedHeaders = 'host;x-amz-content-sha256;x-amz-date';
   const canonical = [
-    method, uri, '', canonicalHeaders, signedHeaders, hash,
+    method,
+    uri,
+    '',
+    canonicalHeaders,
+    signedHeaders,
+    hash,
   ].join('\n');
   const stringToSign = [
     'AWS4-HMAC-SHA256',
@@ -84,18 +110,27 @@ async function request(
     'aws4_request',
   );
   const signature = createHmac('sha256', signingKey)
-    .update(stringToSign).digest('hex');
+    .update(stringToSign)
+    .digest('hex');
   const headers: Record<string, string> = {
     'x-amz-date': timestamp,
     'x-amz-content-sha256': hash,
     Authorization:
-      'AWS4-HMAC-SHA256 Credential=' + values.access + '/' + scope +
-      ', SignedHeaders=' + signedHeaders + ', Signature=' + signature,
+      'AWS4-HMAC-SHA256 Credential=' +
+      values.access +
+      '/' +
+      scope +
+      ', SignedHeaders=' +
+      signedHeaders +
+      ', Signature=' +
+      signature,
   };
   if (method === 'PUT' && mime) headers['Content-Type'] = mime;
   const init: RequestInit = {
-    method, headers,
-    cache: 'no-store', redirect: 'error',
+    method,
+    headers,
+    cache: 'no-store',
+    redirect: 'error',
     signal: AbortSignal.timeout(30000),
   };
   if (bytes) init.body = new Uint8Array(bytes);
@@ -107,7 +142,10 @@ export async function r2MediaPut(key: string, bytes: Buffer, mime: string) {
   if (!response.ok) throw new Error('R2 upload failed: ' + response.status);
   try {
     const check = await request('HEAD', key);
-    if (!check.ok || Number(check.headers.get('content-length')) !== bytes.length)
+    if (
+      !check.ok ||
+      Number(check.headers.get('content-length')) !== bytes.length
+    )
       throw new Error('R2 upload verification failed');
   } catch (error) {
     await r2MediaDelete(key).catch(() => undefined);

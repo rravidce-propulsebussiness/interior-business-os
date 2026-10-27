@@ -17,7 +17,10 @@ export async function providerStart(
   audience: 'business' | 'client' = 'business',
 ) {
   const origin = publicAuthOrigin(request.url);
-  const fallback = new URL(audience === 'client' ? '/client/login' : '/login', origin);
+  const fallback = new URL(
+    audience === 'client' ? '/client/login' : '/login',
+    origin,
+  );
   fallback.searchParams.set('provider_error', 'unavailable');
 
   if (!isSupabaseConfigured()) {

@@ -136,7 +136,6 @@ export async function saveConstructionPackage(
   }
 }
 
-
 /** Save an entire Custom Quote as ONE versioned, re-editable quotation line.
  * Authoritative prices and consumption are always re-read from company data.
  * No duplicated lines or extra material charges on subsequent saves. */
@@ -148,13 +147,19 @@ export async function saveCustomBrandQuote(
   try {
     const rid = idSchema.parse(revisionId);
     const values = selectionSchema.parse(input);
-    if (!Number.isInteger(version) || version < 1) throw new DomainError('VALIDATION_FAILED');
+    if (!Number.isInteger(version) || version < 1)
+      throw new DomainError('VALIDATION_FAILED');
     const { s, revision } = await editable(rid, true);
     if (revision.version !== version) throw new DomainError('CONFLICT');
     const price = await createConstructionRatesRepository(s.client).preview(
-      s.org, values.ids, values.areaSqft,
+      s.org,
+      values.ids,
+      values.areaSqft,
     );
-    if (Number(price.ratePerSqft) <= 0 || price.options.length !== values.ids.length)
+    if (
+      Number(price.ratePerSqft) <= 0 ||
+      price.options.length !== values.ids.length
+    )
       throw new DomainError('VALIDATION_FAILED');
     const description = encodeCustomBrandQuote({
       areaSqft: price.areaSqft,
@@ -176,7 +181,9 @@ export async function saveCustomBrandQuote(
       .select('id')
       .eq('organization_id', s.org)
       .eq('revision_id', rid)
-      .or('description.like.CUSTOM_BRAND_QUOTE_V1:%,description.like.SFT_ESTIMATE_V1:%,description.like.SFT_ESTIMATE_V2:%')
+      .or(
+        'description.like.CUSTOM_BRAND_QUOTE_V1:%,description.like.SFT_ESTIMATE_V1:%,description.like.SFT_ESTIMATE_V2:%',
+      )
       .limit(2);
     if (error || !existing || existing.length > 1)
       throw new DomainError('VALIDATION_FAILED');
@@ -190,11 +197,13 @@ export async function saveCustomBrandQuote(
       quantity: price.areaSqft,
       unit: 'built-up sq ft',
       rate: price.ratePerSqft,
-      reason: 'Tenant-authorized brand unit prices, SFT consumption and selections saved on this revision.',
+      reason:
+        'Tenant-authorized brand unit prices, SFT consumption and selections saved on this revision.',
       discount: { kind: 'none', value: '0' },
       estimated_cost_rate: null,
     });
-    const { data: updated } = await s.client.from('quotation_revisions')
+    const { data: updated } = await s.client
+      .from('quotation_revisions')
       .select('version')
       .eq('organization_id', s.org)
       .eq('id', rid)
@@ -204,7 +213,8 @@ export async function saveCustomBrandQuote(
       id,
       total: price.total,
       ...(updated?.version ? { version: updated.version } : {}),
-      message: 'Custom package quotation saved with customer-selected brands and locked price snapshot.',
+      message:
+        'Custom package quotation saved with customer-selected brands and locked price snapshot.',
     };
   } catch (error) {
     return { message: safeFailure(error).message };
@@ -372,7 +382,14 @@ export async function saveFloorwiseSftEstimate(
   revisionId: string,
   version: number,
   input: unknown,
-): Promise<{ message: string; id?: string; total?: string; version?: number; requestId?: string; code?: string }> {
+): Promise<{
+  message: string;
+  id?: string;
+  total?: string;
+  version?: number;
+  requestId?: string;
+  code?: string;
+}> {
   try {
     const rid = idSchema.parse(revisionId);
     const parsed = sftEstimateInputSchema.parse(input);
@@ -461,7 +478,10 @@ export async function saveFloorwiseSftEstimate(
       try {
         const user = await s.authorization.requireAuthenticatedUser();
         await snapshotConstructionPackagePdf(
-          s.org, rid, selectedPackage?.id ?? null, user.id,
+          s.org,
+          rid,
+          selectedPackage?.id ?? null,
+          user.id,
         );
       } catch {
         // The quotation line has already been saved. Never report a failed
@@ -469,7 +489,8 @@ export async function saveFloorwiseSftEstimate(
         // The owner must resolve the attachment before sharing it.
         attachmentWarning = true;
         console.error('construction.quotation.package_snapshot_failed', {
-          revisionId: rid, organizationId: s.org,
+          revisionId: rid,
+          organizationId: s.org,
         });
       }
     } else {
@@ -496,9 +517,13 @@ export async function saveFloorwiseSftEstimate(
           : 'Floor-wise estimate saved with the itemized area/rate schedule. Review your PDF before issuing.',
     };
   } catch (error) {
-    const failure=safeFailure(error);
-    const code=error instanceof DomainError ? error.code :
-      error instanceof z.ZodError ? 'VALIDATION_FAILED' : 'INTERNAL_ERROR';
-    return { message:failure.message, requestId:failure.requestId,code };
+    const failure = safeFailure(error);
+    const code =
+      error instanceof DomainError
+        ? error.code
+        : error instanceof z.ZodError
+          ? 'VALIDATION_FAILED'
+          : 'INTERNAL_ERROR';
+    return { message: failure.message, requestId: failure.requestId, code };
   }
 }

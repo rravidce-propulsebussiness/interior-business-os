@@ -52,7 +52,9 @@ export default async function GstDocumentDetail({
     );
   const billAttachment =
     doc.kind === 'purchase_bill' && doc.isOwner
-      ? await readSupplierBillAttachment(context.organizationId, id).catch(() => null)
+      ? await readSupplierBillAttachment(context.organizationId, id).catch(
+          () => null,
+        )
       : null;
   const snapshot = doc.snapshot;
   const issuer =
@@ -84,25 +86,36 @@ export default async function GstDocumentDetail({
             · {doc.number ?? 'Draft'}
           </h1>
           <p className="text-sm capitalize text-slate-500">
-            {doc.status==='issued'&&doc.kind==='sales_invoice'
-             ?'Issued · Payment requested (not proof of payment)':doc.status}
-           </p>
+            {doc.status === 'issued' && doc.kind === 'sales_invoice'
+              ? 'Issued · Payment requested (not proof of payment)'
+              : doc.status}
+          </p>
         </div>
         <div className="flex flex-wrap gap-2">
           {doc.kind === 'purchase_bill' && billAttachment && (
-            <a href={'/dashboard/billing/' + id + '/attachment'}
-              className="rounded-xl border border-orange-200 bg-orange-50 px-4 py-2.5 text-sm font-semibold text-orange-700">
+            <a
+              href={'/dashboard/billing/' + id + '/attachment'}
+              className="rounded-xl border border-orange-200 bg-orange-50 px-4 py-2.5 text-sm font-semibold text-orange-700"
+            >
               Download supplier bill
             </a>
           )}
           {doc.status !== 'draft' && <PrintDocumentButton />}
-          {doc.status==='issued'&&doc.kind==='sales_invoice'&&<>
-           <a href={'/dashboard/billing/'+id+'/pdf'}
-             className="rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold"
-             download>Download PDF</a>
-           <ShareInvoicePdf url={'/dashboard/billing/'+id+'/pdf'}
-             number={doc.number??'invoice'}/>
-          </>}
+          {doc.status === 'issued' && doc.kind === 'sales_invoice' && (
+            <>
+              <a
+                href={'/dashboard/billing/' + id + '/pdf'}
+                className="rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold"
+                download
+              >
+                Download PDF
+              </a>
+              <ShareInvoicePdf
+                url={'/dashboard/billing/' + id + '/pdf'}
+                number={doc.number ?? 'invoice'}
+              />
+            </>
+          )}
           {doc.status === 'draft' && canEdit && (
             <Link
               href={'/dashboard/billing/new?edit=' + id}
