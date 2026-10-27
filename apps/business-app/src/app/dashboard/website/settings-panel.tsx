@@ -1,6 +1,7 @@
 'use client';
 import { useState, useTransition } from 'react';
 import { WebsiteSourcePicker } from './source-picker';
+import { WebsiteMediaPicker } from './website-media-picker';
 import {
   type WebsiteDocument,
   defaultTheme,
@@ -18,6 +19,7 @@ export function WebsiteSettings({
   version: initialVersion,
   tab,
   canEdit,
+  canPreviewMedia = false,
   saveAction = saveWebsiteSection,
   templateMode = false,
 }: {
@@ -26,6 +28,7 @@ export function WebsiteSettings({
   version: number;
   tab: string;
   canEdit: boolean;
+  canPreviewMedia?: boolean;
   saveAction?: typeof saveWebsiteSection;
   templateMode?: boolean;
 }) {
@@ -125,8 +128,6 @@ export function WebsiteSettings({
                 'phone',
                 'email',
                 'address',
-                'logo',
-                'favicon',
               ] as const
             ).map((key) => (
               <label key={key} className="text-sm capitalize">
@@ -139,15 +140,27 @@ export function WebsiteSettings({
                       ...doc,
                       settings: {
                         ...doc.settings,
-                        [key]:
-                          ['logo', 'favicon'].includes(key) && !e.target.value
-                            ? undefined
-                            : e.target.value,
+                        [key]: e.target.value,
                       },
                     })
                   }
                 />
               </label>
+            ))}
+            {(['logo', 'favicon'] as const).map(key => (
+              <WebsiteMediaPicker
+                key={key}
+                id={id}
+                assets={doc.assets}
+                value={doc.settings[key]}
+                label={key === 'logo' ? 'Company logo' : 'Browser favicon'}
+                disabled={!canEdit || pending}
+                canPreview={canPreviewMedia}
+                onChange={assetId => setDoc(current => ({
+                  ...current,
+                  settings: { ...current.settings, [key]: assetId },
+                }))}
+              />
             ))}
             <label>
               <input
