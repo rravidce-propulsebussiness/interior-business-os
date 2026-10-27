@@ -139,6 +139,7 @@ export default async function WebsiteTab({
         domains={rows.data}
         base={config?.platform?.baseDomain ?? ''}
         canManage={s.allowed('website.domain.manage')}
+        isPublished={site.status === 'published'}
       />
     );
   } else if (tab === 'media') {
