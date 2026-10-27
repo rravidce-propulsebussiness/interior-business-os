@@ -21,10 +21,11 @@ export default async function SubscriptionBilling() {
   const websiteEnabled = ctx.entitlements.includes('website');
   const operational = ['crm','quotation','projects','billing','reports','purchasing']
     .some((moduleKey) => ctx.entitlements.includes(moduleKey));
-  const needsPurchase = key === 'website_unsubscribed';
+  const needsPurchase = key === 'website_unsubscribed' && !websiteEnabled;
   const websiteOnly = websiteEnabled && !operational;
   const isPropulse = key === 'propulse_managed';
-  const displayedPlan = isPropulse
+  const displayedPlan = key === 'website_unsubscribed' && websiteEnabled
+    ? 'Website Basic (active)' : isPropulse
     ? operational ? 'ProPulse Scale' : websiteEnabled ? 'ProPulse Growth' : 'ProPulse membership inactive'
     : plan?.name ?? 'Not assigned';
   const navigation: OwnerNavItem[] = [
