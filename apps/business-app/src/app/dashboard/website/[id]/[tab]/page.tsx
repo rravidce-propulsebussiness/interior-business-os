@@ -1,13 +1,14 @@
 import { WebsiteTeam } from '../../team-panel';
-import { FileDeveloperStudio } from '../../file-developer-studio';
+import { WebsiteEditor } from '../../studio';
 import { WebsiteDesignStudio } from '../../design-studio';
+import '../../website-studio.css';
 import '../../design-studio.css';
 import { OwnerShell } from '../../../owner-shell';
 import { ownerWorkspaceNavigation } from '../../../owner-workspace-navigation';
 import { canAccess } from '@business-os/auth';
 import '../../../owner-dashboard.css';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { websiteServices } from '../../service';
 import { WebsiteSettings, PublicationControls } from '../../settings-panel';
 import { DomainPanel } from '../../domain-panel';
@@ -19,6 +20,7 @@ const permissions: Record<string, string> = {
   forms: 'website.form.manage',
   seo: 'website.seo.manage',
   developer: 'website.custom_code.view',
+  layout: 'website.view',
   domains: 'website.domain.view',
   media: 'website.media.manage',
   versions: 'website.view',
@@ -26,14 +28,17 @@ const permissions: Record<string, string> = {
   metrics: 'website.view',
 };
 export default async function WebsiteTab({
-  params,
+  params, searchParams,
 }: {
   params: Promise<{ id: string; tab: string }>;
+  searchParams: Promise<{ page?: string }>;
 }) {
   const { id, tab } = await params;
   const permission = permissions[tab];
   if (!permission) notFound();
   const s = await websiteServices(permission, true);
+  // Existing deep links continue to open the one canonical Template Editor.
+  if (tab === 'developer') redirect(`/dashboard/website/${id}`);
   // These independent scoped reads run concurrently to reduce navigation
   // latency, particularly on small shared hosting instances.
   const [site, organization, user] = await Promise.all([
@@ -44,16 +49,19 @@ export default async function WebsiteTab({
   if (!organization) notFound();
   const email = user.email ?? '';
   let content;
-  if (tab === 'developer') {
-    content = <FileDeveloperStudio
+  if (tab === 'layout') {
+    const query = await searchParams;
+    content = <div className="site-studio-page"><WebsiteEditor
+      key={site.version}
       id={id}
       name={site.name}
       initial={site.document}
       version={site.version}
-      canEdit={s.allowed('website.custom_code.edit')}
-      canEditCss={s.allowed('website.custom_css.manage')}
+      status={site.status}
+      {...(query.page ? { initialPageId: query.page } : {})}
+      canEdit={s.allowed('website.page.edit')}
       canPublish={s.allowed('website.page.publish')}
-    />;
+    /></div>;
   } else if (tab === 'design') {
     content = <WebsiteDesignStudio
       id={id}
@@ -221,7 +229,7 @@ export default async function WebsiteTab({
       dashboardBrand
       searchPlaceholder="Search leads, projects, quotations..."
     >
-      {tab === 'developer' || tab === 'design' ? content : (
+      {tab === 'layout' || tab === 'design' ? content : (
         <main id="main-content" className="website-settings-workspace">
           <div className="website-settings-back"><Link href={`/dashboard/website/${id}`}>← Website Studio</Link></div>
           <header className="website-settings-title">
