@@ -34,7 +34,15 @@ export default async function WebsiteTab({
   const permission = permissions[tab];
   if (!permission) notFound();
   const s = await websiteServices(permission, true);
-  const site = await s.website.read(id);
+  // These independent scoped reads run concurrently to reduce navigation
+  // latency, particularly on small shared hosting instances.
+  const [site, organization, user] = await Promise.all([
+    s.website.read(id),
+    s.repository.organization(s.context.organizationId),
+    s.authorization.requireAuthenticatedUser(),
+  ]);
+  if (!organization) notFound();
+  const email = user.email ?? '';
   let content;
   if (tab === 'developer') {
     content = <FileDeveloperStudio
@@ -50,7 +58,12 @@ export default async function WebsiteTab({
     content = <WebsiteDesignStudio
       id={id}
       name={site.name}
-      initial={site.document}
+      initialTheme={site.document.theme}
+      pages={site.document.pages.map(page => ({
+        id: page.id,
+        title: page.title,
+        path: page.path,
+      }))}
       initialVersion={site.version}
       canEdit={s.allowed('website.theme.manage')}
     />;
@@ -192,12 +205,6 @@ export default async function WebsiteTab({
         )}
       />
     );
-  const [organization, user] = await Promise.all([
-    s.repository.organization(s.context.organizationId),
-    s.authorization.requireAuthenticatedUser(),
-  ]);
-  if (!organization) notFound();
-  const email = user.email ?? '';
   return (
     <OwnerShell
       companyName={organization.name}

@@ -71,6 +71,10 @@
 .wd-device-group button{border:0!important;background:transparent;border-radius:7px!important;color:#8a929c;font-size:11px;font-weight:750;padding:8px 11px;min-width:32px;box-shadow:none}
 .wd-device-group button:hover{color:#e56524}
 .wd-device-group button.active{background:#fff;color:#ea6226;box-shadow:0 2px 9px #372d1c16}
+.wd-preview-refresh{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:9px;padding:0 17px 12px}
+.wd-preview-refresh span{font-size:10px;color:#8893a0;line-height:1.5}
+.website-design .wd-preview-refresh button{width:auto;max-width:100%;background:#fff6ed;border:1px solid #f6d3b9;border-radius:8px;color:#d75c1f;padding:9px 11px;font-size:10px;font-weight:800;box-shadow:none}
+.website-design .wd-preview-refresh button:hover:not(:disabled){border-color:#e98f58;background:#fff1e3}
 .wd-page-picker{display:flex;align-items:center;gap:10px;color:#7b8795;font-size:11px;padding:0 17px 12px}
 .wd-page-picker select{min-width:0;width:auto;flex:1;background:#fff!important;border:1px solid #eae6e0!important;color:#414c5a!important;font-size:11px!important;border-radius:8px!important;padding:9px!important}
 .wd-preview-stage{min-height:430px;display:flex;align-items:flex-start;justify-content:center;overflow:auto;background:radial-gradient(circle at 30% 30%,#f4eee6,transparent 50%),#f5f2ef;padding:18px 13px 22px}
