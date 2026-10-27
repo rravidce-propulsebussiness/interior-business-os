@@ -11,6 +11,16 @@ import type { OwnerNavItem } from './owner-shell';
 export function ownerWorkspaceNavigation(context: TenantAccessContext | null): OwnerNavItem[] {
   const items: OwnerNavItem[] = [{ label: 'Dashboard', href: '/dashboard', icon: 'dashboard' }];
   if (!context) return items;
+  // Growth and direct Basic customers have a website-first workspace.
+  // Paid OS modules remain separately guarded by server permissions/RLS.
+  const websiteOnly = context.entitlements.includes('website') &&
+    !['projects','crm','quotation','billing','finance','operations','execution']
+      .some((key) => context.entitlements.includes(key));
+  if (websiteOnly) return [
+    { label: 'Website', href: '/dashboard/website', icon: 'globe' },
+    { label: 'Billing & Plans', href: '/dashboard/billing', icon: 'billing' },
+    { label: 'Settings', href: '/dashboard/settings', icon: 'settings' },
+  ];
   const has = (permission:string, moduleKey?:string) =>
     canAccess(context, {
       organizationId:context.organizationId,permission,

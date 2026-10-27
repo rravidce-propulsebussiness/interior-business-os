@@ -33,12 +33,12 @@ insert into auth.identities(user_id,provider,identity_data) values
 set local role authenticated;
 select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000091',true);
 select private.propulse_sync_denied(
-  $$select public.propulse_company_import('00000000-0000-4000-8000-000000000091','propulse:9101','{"name":"Fake","source_id":"9101","services":[],"locations":[]}')$$,
+  $$select public.propulse_company_import('00000000-0000-4000-8000-000000000091','propulse:9101','{"name":"Fake","source_id":"9101","services":[],"locations":[]}', '{"tier":"growth","expires_at":"2030-01-01T00:00:00Z"}')$$,
   'browser role cannot call service-only import');
 reset role;
 
 select private.propulse_sync_denied(
-  $$select public.propulse_company_import('00000000-0000-4000-8000-000000000092','propulse:9101','{"name":"Wrong Account","source_id":"9101","services":[],"locations":[]}')$$,
+  $$select public.propulse_company_import('00000000-0000-4000-8000-000000000092','propulse:9101','{"name":"Wrong Account","source_id":"9101","services":[],"locations":[]}', '{"tier":"growth","expires_at":"2030-01-01T00:00:00Z"}')$$,
   'mismatched ProPulse subject cannot grant another user ownership');
 
 select public.propulse_company_import(
@@ -46,7 +46,7 @@ select public.propulse_company_import(
  '{"source_id":"9101","name":"Verified Interiors","description":"Trusted company",
  "phone":"9123456789","industries":["interior"],
  "services":[{"industry":"Interior Design","service":"Modular Kitchens"}],
- "locations":[{"city":"Hyderabad","state":"Telangana"}]}'
+ "locations":[{"city":"Hyderabad","state":"Telangana"}]}', jsonb_build_object('tier','growth','expires_at',(now()+interval '30 days')::text)
 ) as first_result \gset
 
 select private.propulse_sync_assert(
@@ -65,21 +65,58 @@ select private.propulse_sync_assert(
       and m.status='active'
   ), 'ProPulse identity receives the Owner role');
 select private.propulse_sync_assert(
- (select count(*) > 0 from public.organization_entitlements
-  where organization_id=(:'first_result'::jsonb->>'organizationId')::uuid
-    and source='promotion' and valid_until>now()+interval '89 days'),
- 'self-service test entitlements are granted only to new owner company');
+ private.entitled((:'first_result'::jsonb->>'organizationId')::uuid,'website')
+ and not private.entitled((:'first_result'::jsonb->>'organizationId')::uuid,'projects')
+ and (select count(*)=1 from public.organization_entitlements e
+    join public.modules m on m.id=e.module_id
+    where e.organization_id=(:'first_result'::jsonb->>'organizationId')::uuid
+      and e.source='promotion' and e.configuration->>'source'='propulse'
+      and m.key='website' and e.valid_until>now()+interval '29 days'),
+ 'Growth membership grants only time-limited hosted website');
+select private.propulse_sync_assert(
+ coalesce((private.website_config((:'first_result'::jsonb->>'organizationId')::uuid)->>'template_only')::boolean,false)
+ and coalesce((private.website_config((:'first_result'::jsonb->>'organizationId')::uuid)->>'custom_domain')::boolean,false),
+ 'Growth allows own-domain connection but requires a published template');
 select private.propulse_sync_assert(
  (select count(*) = 1 from private.propulse_company_links
   where propulse_subject='propulse:9101'),
  'only one external-company link exists');
+
+-- Scale upgrade unlocks all active modules and returning to Growth removes
+-- only provider-owned temporary grants, never paid add-ons.
+select public.propulse_company_import(
+ '00000000-0000-4000-8000-000000000091','propulse:9101',
+ '{"source_id":"9101","name":"Verified Interiors","description":"Trusted company",
+ "phone":"9123456789","industries":["interior"],"services":[],"locations":[]}',
+ jsonb_build_object('tier','scale','expires_at',(now()+interval '30 days')::text)
+);
+select private.propulse_sync_assert(
+ private.entitled((:'first_result'::jsonb->>'organizationId')::uuid,'projects')
+ and (select tier from private.propulse_company_links
+      where propulse_subject='propulse:9101')='scale',
+ 'Scale unlocks project management');
+select private.propulse_sync_assert(
+ not coalesce((private.website_config((:'first_result'::jsonb->>'organizationId')::uuid)->>'template_only')::boolean,true)
+ and coalesce((private.website_config((:'first_result'::jsonb->>'organizationId')::uuid)->>'custom_domain')::boolean,false),
+ 'Scale enables full website creation and own-domain connection');
+select public.propulse_company_import(
+ '00000000-0000-4000-8000-000000000091','propulse:9101',
+ '{"source_id":"9101","name":"Verified Interiors","description":"Trusted company",
+ "phone":"9123456789","industries":["interior"],"services":[],"locations":[]}',
+ jsonb_build_object('tier','growth','expires_at',(now()+interval '30 days')::text)
+);
+select private.propulse_sync_assert(
+ not private.entitled((:'first_result'::jsonb->>'organizationId')::uuid,'projects'),
+ 'Scale promotion expires on downgrade to Growth');
+
+
 
 select public.propulse_company_import(
  '00000000-0000-4000-8000-000000000091','propulse:9101',
  '{"source_id":"9101","name":"Verified Interiors Updated","description":"New ProPulse description",
  "phone":"9123456789","industries":["construction","interior"],
  "services":[{"industry":"Construction","service":"Civil Works"}],
- "locations":[]}'
+ "locations":[]}', jsonb_build_object('tier','growth','expires_at',(now()+interval '30 days')::text)
 ) as second_result \gset
 select private.propulse_sync_assert(
   (:'second_result'::jsonb->>'organizationId')=(:'first_result'::jsonb->>'organizationId')
@@ -98,7 +135,7 @@ update public.organizations set name='Manually Renamed'
 select public.propulse_company_import(
  '00000000-0000-4000-8000-000000000091','propulse:9101',
  '{"source_id":"9101","name":"Source Renamed Again","description":"Latest",
- "phone":"","industries":[],"services":[],"locations":[]}'
+ "phone":"","industries":[],"services":[],"locations":[]}', jsonb_build_object('tier','growth','expires_at',(now()+interval '30 days')::text)
 );
 select private.propulse_sync_assert(
   (select name='Manually Renamed' from public.organizations
@@ -117,7 +154,7 @@ select public.propulse_company_import(
  '00000000-0000-4000-8000-000000000092','propulse:9102',
  '{"source_id":"9102","name":"Already Owned Construction",
  "description":"","phone":"","industries":["construction"],
- "services":[],"locations":[]}'
+ "services":[],"locations":[]}', jsonb_build_object('tier','growth','expires_at',(now()+interval '30 days')::text)
 ) as link_result \gset
 select private.propulse_sync_assert(
  (:'link_result'::jsonb->>'status')='linked_existing'
@@ -141,7 +178,7 @@ update private.company_onboarding_policy set approval_required=true where single
 select public.propulse_company_import(
  '00000000-0000-4000-8000-000000000093','propulse:9103',
  '{"source_id":"9103","name":"New Review Required",
- "description":"","phone":"","industries":[],"services":[],"locations":[]}'
+ "description":"","phone":"","industries":[],"services":[],"locations":[]}', jsonb_build_object('tier','growth','expires_at',(now()+interval '30 days')::text)
 ) as review_result \gset
 select private.propulse_sync_assert(
  (:'review_result'::jsonb->>'status')='review_required'

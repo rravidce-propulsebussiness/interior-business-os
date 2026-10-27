@@ -27,6 +27,7 @@ type Props = {
   pendingSetup: boolean;
   canManage: boolean;
   canCode: boolean;
+  templateOnly: boolean;
   canDesign: boolean;
   canEdit: boolean;
   canForms: boolean;
@@ -129,6 +130,7 @@ export function WebsiteHome({
   pendingSetup,
   canManage,
   canCode,
+  templateOnly,
   canDesign,
   canEdit,
   canForms,
@@ -282,7 +284,7 @@ export function WebsiteHome({
                 </p>
                 <p className="website-site-description">
                   Showcase your services and projects with a professional
-                  website and collect enquiries in your CRM.
+                  website hosted by Business OS. Connect your own domain.
                 </p>
 
                 <div className="website-metrics">
@@ -420,8 +422,8 @@ export function WebsiteHome({
           </span>
           <h2>Build your business website</h2>
           <p>
-            Choose a template or start with a blank canvas. Your website stays
-            private until you publish it.
+            Choose a published template and personalize it for your business.
+            Business OS hosts the website; you can connect your own domain.
           </p>
           {canManage && (
             <button
@@ -440,7 +442,7 @@ export function WebsiteHome({
           <div className="website-templates-heading">
             <div>
               <h2>Start with a template</h2>
-              <p>Create a new website using a ready template</p>
+              <p>Hosted by Business OS. Bring your own domain—registration is not included.</p>
             </div>
             {templates.length > 2 && (
               <button
@@ -474,12 +476,12 @@ export function WebsiteHome({
                 />
               );
             })}
-            <TemplateCard
+            {!templateOnly && <TemplateCard
               name="Blank Site"
               description="A clean start for your business"
               variant="blank"
               onClick={() => openCreation('')}
-            />
+            />}
           </div>
         </section>
       )}
@@ -491,6 +493,7 @@ export function WebsiteHome({
         initialTemplate={startingTemplate}
         templates={templates}
         canCode={canCode}
+        templateOnly={templateOnly}
       />
     </main>
   );

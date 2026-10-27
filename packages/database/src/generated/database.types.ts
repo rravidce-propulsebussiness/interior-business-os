@@ -12233,7 +12233,12 @@ export interface Database {
         Returns: Json;
       };
       propulse_company_import: {
-        Args: { p_user_id: string; p_subject: string; p_company: Json };
+        Args: {
+          p_user_id: string;
+          p_subject: string;
+          p_company: Json;
+          p_access: Json;
+        };
         Returns: Json;
       };
       propulse_company_profile: {
