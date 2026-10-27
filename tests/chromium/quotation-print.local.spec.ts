@@ -5,9 +5,9 @@ import { quotationDocumentFixture } from '../../packages/core/src/quotation-docu
 import { renderQuotationPdf } from '../../apps/business-app/src/app/dashboard/quotations/pdf-renderer';
 
 test('premium quotation is a complete multi-page A4 PDF with a cover and closing page', async ({ page }) => {
-  const document = quotationDocumentFixture();
-  document.header.branding.accent = '#f5650b';
-  const html = renderQuotationDocument(document);
+  const quotation = quotationDocumentFixture();
+  quotation.header.branding.accent = '#f5650b';
+  const html = renderQuotationDocument(quotation);
   // A deterministic browser test should not depend on Unsplash availability.
   // Tenant-uploaded photos remain data: URLs in real quotation snapshots.
   await page.route('https://images.unsplash.com/**', async (route) => {
@@ -20,7 +20,7 @@ test('premium quotation is a complete multi-page A4 PDF with a cover and closing
   await expect(page.locator('.pb-pricing')).toBeVisible();
   await expect(page.locator('.pb-specs-page')).toBeAttached();
   await expect(page.locator('.pb-payment-page')).toBeAttached();
-  await expect(page.locator('.pb-cover-number')).toContainText(document.number);
+  await expect(page.locator('.pb-cover-number')).toContainText(quotation.number);
   await expect(page.locator('.pb-estimate')).toBeVisible();
   await expect(page.locator('.pb-intro-card')).toHaveCount(2);
   await expect(page.locator('.pb-material-hero')).toBeVisible();
