@@ -12236,6 +12236,16 @@ export interface Database {
         Args: { p_user_id: string; p_subject: string; p_company: Json };
         Returns: Json;
       };
+      propulse_membership_sync: {
+        Args: {
+          p_user_id: string;
+          p_subject: string;
+          p_organization_id: string;
+          p_tier: string;
+          p_expires_at: string | null;
+        };
+        Returns: Json;
+      };
       propulse_company_profile: {
         Args: { p_organization_id: string };
         Returns: Json;
