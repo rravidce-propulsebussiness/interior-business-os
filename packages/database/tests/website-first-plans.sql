@@ -6,7 +6,7 @@ declare
   amount integer;
   config jsonb;
 begin
-  foreach tier in array array['website_basic','propulse_growth','propulse_scale'] loop
+  foreach tier in array array['propulse_growth','propulse_scale'] loop
     if not exists(select 1 from public.plans where key=tier and status='active') then
       raise exception 'Missing plan: %', tier;
     end if;
@@ -37,6 +37,31 @@ begin
       raise exception 'Website-only plan includes non-website module: %',tier;
     end if;
   end loop;
+  if exists (select 1 from public.plan_modules pm
+    join public.plans p on p.id=pm.plan_id
+    where p.key='website_basic') then
+    raise exception 'Website Basic assignment cannot bypass settled payment';
+  end if;
+  if not exists(select 1 from public.website_plan_limits l
+    join public.plans p on p.id=l.plan_id
+    where p.key='website_basic'
+      and l.configuration->>'custom_domain'='true'
+      and l.configuration->>'template_only'='true'
+      and l.configuration->>'forms'='true') then
+    raise exception 'Basic hosting and own-domain connection plan missing';
+  end if;
+  if has_function_privilege('anon',
+    'public.platform_website_basic_verify_payment(uuid,text,bigint,timestamptz)',
+    'EXECUTE') or not has_function_privilege('authenticated',
+    'public.platform_website_basic_verify_payment(uuid,text,bigint,timestamptz)',
+    'EXECUTE') then
+    raise exception 'Direct Basic payment RPC grants incorrect execution';
+  end if;
+  if not exists(select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace
+      where n.nspname='public' and p.proname='platform_website_basic_verify_payment'
+        and p.prosecdef) then
+    raise exception 'Manual payment verification must use privileged guarded RPC';
+  end if;
   if not exists(select 1 from public.plans p where p.key='website_unsubscribed'
     and not exists(select 1 from public.plan_modules pm where pm.plan_id=p.id))
     or not exists(select 1 from public.plans p where p.key='propulse_managed'
