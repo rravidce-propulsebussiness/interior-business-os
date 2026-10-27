@@ -328,13 +328,10 @@ $read$;
 -- The insecure legacy signature allowed a 90-day all-module trial and must
 -- never be callable after the upgrade. The new signed-provider-data version
 -- is the only import endpoint used by Business OS.
-revoke all on function public.propulse_company_import(uuid,text,jsonb)
-  from public,anon,authenticated;
+drop function public.propulse_company_import(uuid,text,jsonb);
 do $grant$
 begin
   if exists(select 1 from pg_roles where rolname='service_role') then
-    revoke execute on function public.propulse_company_import(uuid,text,jsonb)
-      from service_role;
     grant execute on function public.propulse_company_import(uuid,text,jsonb,jsonb)
       to service_role;
   end if;
