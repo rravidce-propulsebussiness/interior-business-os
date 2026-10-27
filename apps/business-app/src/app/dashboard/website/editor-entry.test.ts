@@ -10,6 +10,8 @@ describe('template-first business website editing', () => {
   const editor = source('./studio.tsx');
   const design = source('./design-studio.tsx');
   const advanced = source('./template-editor.tsx');
+  const media = source('./website-media-picker.tsx');
+  const settings = source('./settings-panel.tsx');
 
   it('opens the visual editor even for owners with source permissions', () => {
     expect(entry).toContain('<WebsiteEditor');
@@ -34,6 +36,24 @@ describe('template-first business website editing', () => {
     expect(tabs).toContain('encodeURIComponent(query.page)');
     expect(entry).toContain('initialPageId: page');
     expect(advanced).toContain('href={`/dashboard/website/${id}?page=');
+  });
+
+  it('chooses website images from existing draft assets rather than raw identifiers', () => {
+    expect(editor).toContain('<WebsiteMediaPicker');
+    expect(editor).toContain('assets={document.assets}');
+    expect(editor).not.toContain("'asset',\n                  'alt'");
+    expect(media).toContain('assets.slice(-24).reverse()');
+    expect(media).toContain('aria-pressed={asset.id === value}');
+    expect(media).toContain('onClick={() => onChange(asset.id)}');
+  });
+
+  it('allows logo and favicon choices without editing underlying database IDs', () => {
+    expect(settings).toContain("(['logo', 'favicon'] as const).map");
+    expect(settings).toContain('<WebsiteMediaPicker');
+    expect(settings).toContain('settings: { ...current.settings, [key]: assetId }');
+    expect(entry).toContain("canPreviewMedia={s.allowed('website.media.manage')}");
+    expect(tabs).toContain("canPreviewMedia={s.allowed('website.media.manage')}");
+    expect(media).toContain("Upload / manage images");
   });
 
   it('does not promote code editor as a standard design option', () => {

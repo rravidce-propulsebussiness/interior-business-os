@@ -50,6 +50,7 @@ export default async function WebsiteStudio({
           canEdit={s.allowed('website.page.edit')}
           canPublish={s.allowed('website.page.publish')}
           canViewSource={s.allowed('website.custom_code.view') && site.document.code.length > 0}
+          canPreviewMedia={s.allowed('website.media.manage')}
         />
       </div>
     </OwnerShell>
