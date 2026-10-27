@@ -61,13 +61,19 @@ select private.self_signup_assert(
    where organization_id = (:'created_a'::jsonb->>'organizationId')::uuid),
   'multiple industries share one tenant');
 select private.self_signup_assert(
-  public.has_entitlement((:'created_a'::jsonb->>'organizationId')::uuid,'projects'),
-  'testing grant enables projects outside the default Starter plan');
+  not public.has_entitlement((:'created_a'::jsonb->>'organizationId')::uuid,'projects')
+  and not public.has_entitlement((:'created_a'::jsonb->>'organizationId')::uuid,'website'),
+  'direct signup has no paid modules before verified plan activation');
 select private.self_signup_assert(
-  exists(select 1 from public.organization_entitlements
+  not exists(select 1 from public.organization_entitlements
     where organization_id = (:'created_a'::jsonb->>'organizationId')::uuid
-    and source='promotion' and enabled and valid_until > now()+interval '89 days'),
-  'testing entitlements expire automatically');
+    and source='promotion' and enabled),
+  'direct signup receives no broad testing promotion');
+select private.self_signup_assert(
+  exists(select 1 from public.organizations o join public.plans p on p.id=o.plan_id
+    where o.id=(:'created_a'::jsonb->>'organizationId')::uuid
+      and p.key='website_unsubscribed'),
+  'direct signup is awaiting website plan purchase');
 select private.self_signup_assert(
   not private.has_platform_permission('platform.organizations.manage'),
   'company creator does not gain platform admin privileges');
