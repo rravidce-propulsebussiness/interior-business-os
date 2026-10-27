@@ -24,6 +24,9 @@ export default async function SubscriptionBilling() {
   const needsPurchase = key === 'website_unsubscribed';
   const websiteOnly = websiteEnabled && !operational;
   const isPropulse = key === 'propulse_managed';
+  const displayedPlan = isPropulse
+    ? operational ? 'ProPulse Scale' : websiteEnabled ? 'ProPulse Growth' : 'ProPulse membership inactive'
+    : plan?.name ?? 'Not assigned';
   const navigation: OwnerNavItem[] = [
     { label: 'Dashboard', href: '/dashboard', icon: 'dashboard' },
     ...(websiteEnabled ? [{ label: 'Website', href: '/dashboard/website', icon: 'globe' as const }] : []),
@@ -38,7 +41,7 @@ export default async function SubscriptionBilling() {
       companyName={org.name}
       accountLabel={(user.email ?? 'Account').split('@')[0] ?? 'Account'}
       accountEmail={user.email ?? ''}
-      planLabel={plan?.name ?? 'Business plan'}
+      planLabel={displayedPlan}
       navigation={navigation}
       currentHref="/dashboard/billing"
       search=""
@@ -58,7 +61,7 @@ export default async function SubscriptionBilling() {
         </header>
         <section className="fw-panel fw-feature">
           <OwnerIcon name="billing" size={31}/>
-          <h2>Current plan: {plan?.name ?? 'Not assigned'}</h2>
+          <h2>Current plan: {displayedPlan}</h2>
           {needsPurchase ? (
             <>
               <p>Your business workspace is ready. Choose a paid Website Basic
