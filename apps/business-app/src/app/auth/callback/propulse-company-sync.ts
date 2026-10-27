@@ -126,7 +126,7 @@ export async function syncCompanyFromPropulse(
       p_subject: source.data.sub,
       p_organization_id: result.organizationId,
       p_tier: tier,
-      p_expires_at: expires_at ?? undefined,
+      ...(expires_at ? { p_expires_at: expires_at } : {}),
     });
     if (synced.error)
       throw new Error('ProPulse membership verification unavailable');
