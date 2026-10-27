@@ -23,6 +23,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Run canonical repository formatter
         run: pnpm format
+      - name: Stabilize the quotation studio CSS output
+        run: pnpm exec prettier --write apps/business-app/src/app/dashboard/quotations/studio.css
       - name: Verify format and generated DB types match
         run: |
           pnpm format:check
