@@ -37,6 +37,7 @@ jobs:
         env:
           TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:5432/business_os_test
           ALLOW_TEST_DATABASE_RESET: 'yes'
+      - run: pnpm typecheck && pnpm build
       - run: pnpm check
         env:
           TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:5432/business_os_test
