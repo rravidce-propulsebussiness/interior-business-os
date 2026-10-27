@@ -88,6 +88,12 @@ select private.propulse_sync_assert(
   and private.entitled((:'first_result'::jsonb->>'organizationId')::uuid,'website')
   and not private.entitled((:'first_result'::jsonb->>'organizationId')::uuid,'projects'),
   'Growth grants website hosting only');
+select private.propulse_sync_assert(
+  (private.website_config((:'first_result'::jsonb->>'organizationId')::uuid)->>'template_only')='true'
+  and (private.website_config((:'first_result'::jsonb->>'organizationId')::uuid)->>'custom_domain')='true'
+  and (private.website_config((:'first_result'::jsonb->>'organizationId')::uuid)->>'forms')='true'
+  and (private.website_config((:'first_result'::jsonb->>'organizationId')::uuid)->>'custom_code')='false',
+  'Growth effective config allows hosted templates, custom domain and enquiries without code');
 select public.propulse_membership_sync(
   '00000000-0000-4000-8000-000000000091','propulse:9101',
   (:'first_result'::jsonb->>'organizationId')::uuid,'scale',
@@ -96,6 +102,10 @@ select private.propulse_sync_assert(
   private.entitled((:'first_result'::jsonb->>'organizationId')::uuid,'projects')
   and private.entitled((:'first_result'::jsonb->>'organizationId')::uuid,'website'),
   'Scale unlocks complete Business OS modules');
+select private.propulse_sync_assert(
+  (private.website_config((:'first_result'::jsonb->>'organizationId')::uuid)->>'template_only')='false'
+  and (private.website_config((:'first_result'::jsonb->>'organizationId')::uuid)->>'custom_domain')='true',
+  'Scale effective config allows full website builder and custom domains');
 select public.propulse_membership_sync(
   '00000000-0000-4000-8000-000000000091','propulse:9101',
   (:'first_result'::jsonb->>'organizationId')::uuid,'none',null);
