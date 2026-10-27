@@ -122,6 +122,8 @@ create or replace function public.website_public(p_hostname text) returns jsonb 
  if p_hostname is null or length(p_hostname)>253 or p_hostname<>lower(p_hostname) or p_hostname ~ '[/@:\s\\]' then return null;end if;
  select * into w from public.websites where id=private.website_resolve(p_hostname);if w.id is null then return null;end if;
  select * into v from public.website_versions where id=w.published_version_id and website_id=w.id;
+ -- Preserve the latest public renderer's platform component denylist guard.
+ if not private.website_build_allowed(v.snapshot) then return null;end if;
  config=private.website_config(w.organization_id);
  if (coalesce(v.snapshot->'document'->>'css','')<>'' or jsonb_array_length(v.snapshot->'artifacts')>0) and not coalesce((config->>'custom_code')::boolean,false) or jsonb_array_length(v.snapshot->'artifacts')>0 and not coalesce((config->>'developer_mode')::boolean,false) then return null;end if;
  return jsonb_build_object('version',v.id,'publishedAt',v.created_at,'hostname',p_hostname,'build',v.snapshot,'formsEnabled',coalesce((config->>'forms')::boolean,false));
