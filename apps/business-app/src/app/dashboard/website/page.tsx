@@ -25,6 +25,15 @@ export default async function Websites() {
     s.authorization.requireAuthenticatedUser(),
   ]);
   if (!organization) throw new Error('Company workspace unavailable');
+  const config = await s.client.rpc('website_configuration', {
+    p_organization_id: s.context.organizationId,
+  });
+  if (config.error) throw new Error('Website plan unavailable');
+  const configValue = config.data && typeof config.data === 'object' &&
+      !Array.isArray(config.data) ? config.data : null;
+  const limits = configValue?.limits && typeof configValue.limits === 'object' &&
+      !Array.isArray(configValue.limits) ? configValue.limits : null;
+  const canBlank = limits?.template_only !== true;
   const pendingSetup = websiteSchemaPending(templates.error);
   if (templates.error && !pendingSetup)
     throw new Error('Website templates unavailable');
@@ -128,6 +137,7 @@ export default async function Websites() {
         pageViews={pageViews}
         domain={domain}
         templates={templates.data ?? []}
+        canBlank={canBlank}
         pendingSetup={pendingSetup}
         canManage={s.allowed('website.manage')}
         canCode={s.allowed('website.custom_code.edit')}
