@@ -33,9 +33,9 @@ insert into public.website_plan_limits(plan_id,configuration)
 select p.id,
   case
     when p.key='propulse_scale' then
-      '{"sites":3,"pages":50,"storage_bytes":52428800,"forms":true,"custom_domain":true,"custom_code":true,"developer_mode":true,"analytics":true,"integrations":true}'::jsonb
+      '{"sites":3,"pages":50,"storage_bytes":52428800,"forms":true,"custom_domain":true,"custom_code":true,"developer_mode":true,"analytics":true,"integrations":true,"template_only":false}'::jsonb
     else
-      '{"sites":1,"pages":10,"storage_bytes":10485760,"forms":false,"custom_domain":true,"custom_code":false,"developer_mode":false,"analytics":false,"integrations":false}'::jsonb
+      '{"sites":1,"pages":10,"storage_bytes":10485760,"forms":true,"custom_domain":true,"custom_code":false,"developer_mode":false,"analytics":false,"integrations":false,"template_only":true}'::jsonb
   end
 from public.plans p
 where p.key in ('website_basic','propulse_growth','propulse_scale')
