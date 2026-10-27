@@ -21,6 +21,7 @@ import {
   type CommandMetric,
   type CommandProject,
 } from './command-centre';
+import { NoCompanyWorkspace } from './no-company-workspace';
 import { leadsNavigation } from './leads-navigation';
 import { workCompletionByProject } from './projects/work-progress';
 import './owner-dashboard.css';
@@ -95,20 +96,7 @@ export default async function Dashboard({
 
   if (!context) {
     if (scope) notFound();
-    return (
-      <main id="main-content" className="owner-no-company">
-        <h1>No active company workspace</h1>
-        <p>
-          Create a business workspace to start using the tools, or accept an
-          invitation to join an existing company.
-        </p>
-        <a href="/dashboard/company/apply">Create your company →</a>
-        <a href="/auth/propulse">
-          Already registered on ProPulse? Import your company →
-        </a>
-        <a href="/dashboard/company/invitations">Join an invited company →</a>
-      </main>
-    );
+    return <NoCompanyWorkspace />;
   }
 
   const organization = await repository.organization(context.organizationId);

@@ -177,6 +177,33 @@ export async function inviteEmployeeByEmail(_state: FormState, form: FormData) {
   }
 }
 
+export async function createEmployeeInvitationCode(
+  _state: { message: string; code: string }, form: FormData,
+) {
+  void _state;
+  try {
+    const organizationId = String(form.get('organizationId') ?? '');
+    const repository = await authorizedWorkspace(organizationId, 'team.invite');
+    await authorizedWorkspace(organizationId, 'role.manage');
+    const branchId = String(form.get('branchId') ?? '').trim();
+    const result = await repository.createEmployeeInvitationCode(organizationId, {
+      email: String(form.get('email') ?? '').trim(),
+      roleIds: form.getAll('roleIds').filter((v): v is string => typeof v === 'string'),
+      ...(branchId ? { branchId } : {}),
+    });
+    if (!result || typeof result !== 'object' || Array.isArray(result) ||
+        typeof (result as { code?: unknown }).code !== 'string')
+      throw new DomainError('INTERNAL_ERROR');
+    refreshTeam();
+    return {
+      message: 'Share this one-time code privately with the invited email owner. It expires in 7 days.',
+      code: (result as { code: string }).code,
+    };
+  } catch (error) {
+    return { message: safeFailure(error).message, code: '' };
+  }
+}
+
 export async function resendEmployeeEmail(_state: FormState, form: FormData) {
   void _state;
   try {

@@ -11209,6 +11209,19 @@ export interface Database {
         Args: { p_invitation_id: string };
         Returns: string;
       };
+      employee_invitation_code_accept: {
+        Args: { p_code: string };
+        Returns: string;
+      };
+      employee_invitation_code_create: {
+        Args: {
+          p_organization_id: string;
+          p_email: string;
+          p_role_ids: string[];
+          p_branch_id?: string;
+        };
+        Returns: Json;
+      };
       employee_invitation_create: {
         Args: {
           p_organization_id: string;
