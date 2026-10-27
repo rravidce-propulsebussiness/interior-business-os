@@ -251,7 +251,9 @@ export default async function Dashboard({
       : [];
   const siteById = new Map(sites.map((site) => [site.id, site]));
   const plan = rawPlans?.find((item) => item.id === organization.plan_id);
-  const planLabel = plan?.key === 'propulse_managed'
+  const planLabel = plan?.key === 'website_unsubscribed' && canWebsite
+    ? 'Website Basic (active)'
+    : plan?.key === 'propulse_managed'
     ? context.entitlements.includes('projects') ? 'ProPulse Scale'
       : context.entitlements.includes('website') ? 'ProPulse Growth'
         : 'ProPulse membership inactive'
