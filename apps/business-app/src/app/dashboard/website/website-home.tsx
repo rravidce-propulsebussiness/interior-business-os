@@ -27,6 +27,7 @@ type Props = {
   pendingSetup: boolean;
   canManage: boolean;
   canCode: boolean;
+  canBlank: boolean;
   canDesign: boolean;
   canEdit: boolean;
   canForms: boolean;
@@ -129,6 +130,7 @@ export function WebsiteHome({
   pendingSetup,
   canManage,
   canCode,
+  canBlank,
   canDesign,
   canEdit,
   canForms,
@@ -474,12 +476,12 @@ export function WebsiteHome({
                 />
               );
             })}
-            <TemplateCard
+            {canBlank && <TemplateCard
               name="Blank Site"
               description="A clean start for your business"
               variant="blank"
               onClick={() => openCreation('')}
-            />
+            />}
           </div>
         </section>
       )}
@@ -491,6 +493,7 @@ export function WebsiteHome({
         initialTemplate={startingTemplate}
         templates={templates}
         canCode={canCode}
+        canBlank={canBlank}
       />
     </main>
   );
