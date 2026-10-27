@@ -143,6 +143,9 @@ export default async function Dashboard({
   const canInvite = has('team.invite') && has('role.manage');
   const canWebsite = has('website.view', 'website');
   const canSettings = has('organization.view');
+  // Avoid showing a mostly empty operational dashboard to website customers.
+  if (canWebsite && !canProjects && !canQuotes && !canBilling && !canLeads)
+    redirect('/dashboard/website');
   const canSites = context.entitlements.includes('projects');
   const query = (await searchParams).q?.trim().slice(0, 80) ?? '';
 
