@@ -9,6 +9,7 @@ import {
   enablePlatformSeller,
   updateCompanySeller,
   updateCompanyIndustry,
+  verifyWebsiteBasicBankPayment,
 } from '../control-actions';
 
 export const dynamic = 'force-dynamic';
@@ -144,6 +145,61 @@ export default async function OrganizationDetail({
           </p>
         )}
 
+        {canManage && canManageEntitlements &&
+          (plan?.key === 'website_unsubscribed' || plan?.key === 'website_basic') && (
+          <section className="mb-5 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <h2 className="text-xl font-semibold">
+              Direct Website Basic · Verify bank payment
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              This is for directly subscribed Business OS customers, not
+              ProPulse memberships. Verify settled credit in the actual
+              receiving bank account first. Recording a payment reference
+              activates one hosted template website with an optional
+              customer-owned custom domain. No domain is purchased or supplied.
+            </p>
+            <p className="mt-2 text-sm text-slate-600">
+              The subscription expires automatically. Renewal requires a new
+              independently verified bank reference. This form does not
+              collect money, validate an uploaded screenshot, or set a price.
+            </p>
+            <div className="mt-5">
+              <ActionForm
+                action={verifyWebsiteBasicBankPayment}
+                label="Record verified payment and activate hosting"
+              >
+                <input type="hidden" name="organizationId" value={id} />
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <label className="grid gap-2 text-sm">
+                    Verified bank reference
+                    <input name="paymentReference" type="text"
+                      minLength={8} maxLength={100} required
+                      placeholder="UTR / bank transaction ID"
+                      className={field} />
+                  </label>
+                  <label className="grid gap-2 text-sm">
+                    Settled amount ({organization.default_currency})
+                    <input name="amountRupees" type="text"
+                      inputMode="decimal" pattern="[0-9]+(\\.[0-9]{1,2})?"
+                      maxLength={13} required placeholder="999.00"
+                      className={field} />
+                  </label>
+                  <label className="grid gap-2 text-sm">
+                    Access valid until (UTC)
+                    <input name="validUntilDate" type="date" required
+                      className={field} />
+                  </label>
+                </div>
+                <label className="mt-4 flex items-start gap-3 text-sm">
+                  <input type="checkbox" name="confirmBankCredit" value="yes"
+                    required className="mt-1" />
+                  I personally confirmed this payment is settled in the
+                  receiving bank account and the reference is not reused.
+                </label>
+              </ActionForm>
+            </div>
+          </section>
+        )}
         <div className="grid gap-5 xl:grid-cols-2">
           <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <div className="flex flex-wrap items-center justify-between gap-3">
