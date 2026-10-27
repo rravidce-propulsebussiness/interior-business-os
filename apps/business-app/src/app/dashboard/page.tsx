@@ -251,7 +251,11 @@ export default async function Dashboard({
       : [];
   const siteById = new Map(sites.map((site) => [site.id, site]));
   const plan = rawPlans?.find((item) => item.id === organization.plan_id);
-  const planLabel = plan?.name || 'Business plan';
+  const planLabel = plan?.key === 'propulse_managed'
+    ? context.entitlements.includes('projects') ? 'ProPulse Scale'
+      : context.entitlements.includes('website') ? 'ProPulse Growth'
+        : 'ProPulse membership inactive'
+    : plan?.name || 'Business plan';
   const accountEmail = user.email ?? '';
   const accountLabel = emailDisplayName(accountEmail);
 
