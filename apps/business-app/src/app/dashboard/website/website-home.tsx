@@ -23,6 +23,7 @@ type Props = {
   enquiries: number | null;
   pageViews: number | null;
   domain: SiteDomain;
+  platformSubdomain: SiteDomain;
   templates: Template[];
   pendingSetup: boolean;
   canManage: boolean;
@@ -126,6 +127,7 @@ export function WebsiteHome({
   enquiries,
   pageViews,
   domain,
+  platformSubdomain,
   templates,
   pendingSetup,
   canManage,
@@ -218,8 +220,8 @@ export function WebsiteHome({
 
       {pendingSetup && (
         <p className="website-notice" role="status">
-          Shared templates are being set up. Existing websites and the blank
-          editor remain available.
+          Shared templates are being set up. Existing websites remain accessible.
+          {canBlank ? ' The blank editor is also available on your plan.' : ''}
         </p>
       )}
 
@@ -284,14 +286,23 @@ export function WebsiteHome({
                 </span>
                 <h3>{mainSite.name}</h3>
                 <p className="website-site-address">
-                  {domain ? domain.hostname : `Site: ${mainSite.slug}`}
+                  {platformSubdomain?.hostname ??
+                    domain?.hostname ??
+                    `Site: ${mainSite.slug}`}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {platformSubdomain
+                    ? platformSubdomain.ready
+                      ? 'Included Business OS subdomain · HTTPS ready'
+                      : 'Included Business OS subdomain · HTTPS setup pending'
+                    : 'Your included subdomain is pending platform hosting setup.'}
                 </p>
                 <p className="website-updated">
                   Last updated {formatDate(mainSite.updatedAt)}
                 </p>
                 <p className="website-site-description">
                   Showcase your services and projects with a professional
-                  website and collect enquiries in your CRM.
+                  website and receive website enquiries without a separate CRM subscription.
                 </p>
 
                 <div className="website-metrics">
@@ -429,7 +440,7 @@ export function WebsiteHome({
           </span>
           <h2>Build your business website</h2>
           <p>
-            Choose a template or start with a blank canvas. Your website stays
+            Choose a published template to begin. Your website stays
             private until you publish it.
           </p>
           {canManage && (
