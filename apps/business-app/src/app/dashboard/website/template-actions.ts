@@ -72,7 +72,7 @@ export async function saveTemplateFiles(id: string, version: number, input: Temp
       message: changes.length ? 'Template draft saved. Publish when ready.' : 'Everything is already saved.' };
   } catch (error) {
     return {
-      saved: false, version: writes ? nextVersion : undefined, partial: writes > 0,
+      saved: false, ...(writes ? { version: nextVersion } : {}), partial: writes > 0,
       message: (writes ? 'Some files saved. Reload this page before editing again. ' : '') +
         safeFailure(error).message,
     };

@@ -58,7 +58,7 @@ export default async function WebsiteTab({
       initial={site.document}
       version={site.version}
       status={site.status}
-      initialPageId={query.page}
+      {...(query.page ? { initialPageId: query.page } : {})}
       canEdit={s.allowed('website.page.edit')}
       canPublish={s.allowed('website.page.publish')}
     /></div>;
