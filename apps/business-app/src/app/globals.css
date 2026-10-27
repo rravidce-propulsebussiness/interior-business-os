@@ -132,6 +132,14 @@ label {
   font-weight: 650;
 }
 
+/* Keep the original contrast of legacy opt-in dark pages without leaking
+   their appearance into the modern company dashboard or public website studio. */
+body:has(:is(.premium-shell, .auth-shell, .dashboard-shell, .tenant-dashboard-v2)):not(:has(.owner-layout)) {
+  background: #07111f;
+  color: #f7fafc;
+  color-scheme: dark;
+}
+
 /* Intentional dark sections keep their own color tokens. They must not set
    the appearance of the company dashboard, forms or website settings. */
 :is(.premium-shell, .auth-shell, .dashboard-shell, .tenant-dashboard-v2) {
