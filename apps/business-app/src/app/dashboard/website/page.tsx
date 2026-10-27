@@ -46,6 +46,7 @@ export default async function Websites() {
   let enquiries: number | null = null;
   let pageViews: number | null = null;
   let domain: { hostname: string; ready: boolean } | null = null;
+  let platformSubdomain: { hostname: string; ready: boolean } | null = null;
 
   if (featured) {
     const [detail, metrics, domains] = await Promise.all([
@@ -57,7 +58,7 @@ export default async function Websites() {
       s.allowed('website.domain.view')
         ? s.client
             .from('website_domains')
-            .select('hostname,status,tls_status')
+            .select('hostname,kind,status,tls_status')
             .eq('organization_id', s.context.organizationId)
             .eq('website_id', featured.id)
             .neq('status', 'removed')
@@ -91,6 +92,12 @@ export default async function Websites() {
         .reduce((total, row) => total + row.hits, 0);
     }
     if (domains && !domains.error && domains.data?.length) {
+      const included = domains.data.find((entry) => entry.kind === 'subdomain');
+      if (included)
+        platformSubdomain = {
+          hostname: included.hostname,
+          ready: included.status === 'active' && included.tls_status === 'ready',
+        };
       const active = domains.data.find(
         (entry) => entry.status === 'active' && entry.tls_status === 'ready',
       );
@@ -136,6 +143,7 @@ export default async function Websites() {
         enquiries={enquiries}
         pageViews={pageViews}
         domain={domain}
+        platformSubdomain={platformSubdomain}
         templates={templates.data ?? []}
         canBlank={canBlank}
         pendingSetup={pendingSetup}
