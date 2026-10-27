@@ -143,6 +143,17 @@ create or replace function public.website_publish(p_organization_id uuid,p_websi
   if not coalesce((config->>'custom_code')::boolean,false) or jsonb_array_length(build->'artifacts')>0 and not coalesce((config->>'developer_mode')::boolean,false) then raise exception 'Custom code capability required' using errcode='42501';end if;
  end if;
  if jsonb_path_exists(build,'$.document.forms[*] ? (@.enabled == true)') and not coalesce((config->>'forms')::boolean,false) then raise exception 'Website forms require Forms capability' using errcode='42501';end if;
+ -- A template-only plan may edit its copied template but cannot publish an
+ -- arbitrary blank draft created through a direct RPC call.
+ if coalesce((config->>'template_only')::boolean,false)
+   and not exists (
+     select 1 from public.website_events e
+     where e.organization_id=p_organization_id and e.website_id=w.id
+       and e.action='website.template_applied'
+   ) then
+   raise exception 'A published template is required for this plan'
+      using errcode='42501';
+ end if;
  for a in select value from jsonb_array_elements(build->'document'->'assets') loop
   if not exists(select 1 from public.website_assets where organization_id=p_organization_id and website_id=w.id and id=(a->>'assetId')::uuid and status='ready') then raise exception 'Unavailable asset' using errcode='42501';end if;
  end loop;
