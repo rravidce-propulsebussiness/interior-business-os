@@ -476,7 +476,9 @@ export default async function OrganizationDetail({
                       >
                         <option value="">No plan</option>
                         {plans
-                          .filter((p) => p.status === 'active')
+                          .filter((p) => p.status === 'active' &&
+                            !['website_basic','propulse_growth','propulse_scale','propulse_managed']
+                              .includes(p.key))
                           .map((p) => (
                             <option key={p.id} value={p.id}>
                               {p.name}
