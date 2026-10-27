@@ -6,6 +6,7 @@ import {
   workspaceScope,
 } from '@business-os/auth/server';
 import { canAccess } from '@business-os/auth';
+import { resolveLoginDestination } from '@business-os/auth/login-destination';
 import { DomainError } from '@business-os/shared';
 import { createCrmRepository } from '@business-os/database/crm';
 import { createQuotationRepository } from '@business-os/database/quotations';
@@ -96,6 +97,7 @@ export default async function Dashboard({
 
   if (!context) {
     if (scope) notFound();
+    if ((await resolveLoginDestination(client, user.id)) === '/client') redirect('/client');
     return <NoCompanyWorkspace />;
   }
 
