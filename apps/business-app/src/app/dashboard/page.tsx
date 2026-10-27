@@ -5,6 +5,7 @@ import {
   workspaceScope,
 } from '@business-os/auth/server';
 import { canAccess } from '@business-os/auth';
+import { resolveLoginDestination } from '@business-os/auth/login-destination';
 import { DomainError } from '@business-os/shared';
 import { createCrmRepository } from '@business-os/database/crm';
 import { createQuotationRepository } from '@business-os/database/quotations';
@@ -20,6 +21,7 @@ import {
   type CommandMetric,
   type CommandProject,
 } from './command-centre';
+import { NoCompanyWorkspace } from './no-company-workspace';
 import { leadsNavigation } from './leads-navigation';
 import { workCompletionByProject } from './projects/work-progress';
 import './owner-dashboard.css';
@@ -94,20 +96,8 @@ export default async function Dashboard({
 
   if (!context) {
     if (scope) notFound();
-    return (
-      <main id="main-content" className="owner-no-company">
-        <h1>No active company workspace</h1>
-        <p>
-          Create a business workspace to start using the tools, or accept an
-          invitation to join an existing company.
-        </p>
-        <a href="/dashboard/company/apply">Create your company →</a>
-        <a href="/auth/propulse">
-          Already registered on ProPulse? Import your company →
-        </a>
-        <a href="/dashboard/company/invitations">Join an invited company →</a>
-      </main>
-    );
+    if ((await resolveLoginDestination(client, user.id)) === '/client') redirect('/client');
+    return <NoCompanyWorkspace />;
   }
 
   const organization = await repository.organization(context.organizationId);
@@ -144,14 +134,14 @@ export default async function Dashboard({
   const canSettings = has('organization.view');
   const canSites = context.entitlements.includes('projects');
 
-  // The hosted website is the primary destination for website-only plans.
-  // Full Business OS owners keep the cross-module command centre.
-  const operationalModules = ['crm','quotation','projects','billing','purchasing','reports']
+  // Website-only owners go straight to their hosted-site controls.
+  // Company dashboard and project-only clients retain existing routing.
+  const operationalModules = ['crm', 'quotation', 'projects', 'billing', 'purchasing', 'reports']
     .some((key) => context.entitlements.includes(key));
-  if (canWebsite && !operationalModules && !scope) redirect('/dashboard/website');
+  if (canWebsite && !operationalModules && !scope)
+    redirect('/dashboard/website');
   if (!canWebsite && !operationalModules && !scope)
     redirect('/dashboard/billing');
-
   const query = (await searchParams).q?.trim().slice(0, 80) ?? '';
 
   // Fetch only the active company's data, with its existing server/RLS guards.
@@ -250,13 +240,16 @@ export default async function Dashboard({
       : [];
   const siteById = new Map(sites.map((site) => [site.id, site]));
   const plan = rawPlans?.find((item) => item.id === organization.plan_id);
-  const planLabel = plan?.key === 'website_unsubscribed' && canWebsite
-    ? 'Website Basic (active)'
-    : plan?.key === 'propulse_managed'
-    ? context.entitlements.includes('projects') ? 'ProPulse Scale'
-      : context.entitlements.includes('website') ? 'ProPulse Growth'
-        : 'ProPulse membership inactive'
-    : plan?.name || 'Business plan';
+  const planLabel =
+    plan?.key === 'website_unsubscribed' && canWebsite
+      ? 'Website Basic (active)'
+      : plan?.key === 'propulse_managed'
+        ? context.entitlements.includes('projects')
+          ? 'ProPulse Scale'
+          : context.entitlements.includes('website')
+            ? 'ProPulse Growth'
+            : 'ProPulse membership inactive'
+        : plan?.name || 'Business plan';
   const accountEmail = user.email ?? '';
   const accountLabel = emailDisplayName(accountEmail);
 

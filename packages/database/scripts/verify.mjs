@@ -37,6 +37,7 @@ assertionFile('self-service-companies');
 assertionFile('propulse-company-sync');
 assertionFile('website-first-plans');
 assertionFile('employee-invitations');
+assertionFile('employee-invite-codes');
 // This file creates the documented demo organization required by later seeds.
 // Its fixture setup must run even when nested regression execution is omitted.
 console.log(psql(['-f', file('tests/development-seed.sql')]));

@@ -312,6 +312,20 @@ export function createRepository(client: SupabaseClient<Database>) {
         }),
       );
     },
+    async createEmployeeInvitationCode(orgId: string, input: unknown) {
+      const value = employeeEmailInvitationSchema.parse(input);
+      return unwrap(await client.rpc('employee_invitation_code_create', {
+        p_organization_id: idSchema.parse(orgId),
+        p_email: value.email,
+        p_role_ids: value.roleIds,
+        ...(value.branchId ? { p_branch_id: value.branchId } : {}),
+      }));
+    },
+    async acceptEmployeeInvitationCode(code: string) {
+      return unwrap(await client.rpc('employee_invitation_code_accept', {
+        p_code: code.trim(),
+      }));
+    },
     async employeeInvitations(orgId: string) {
       return unwrap(
         await client.rpc('employee_invitations_list', {

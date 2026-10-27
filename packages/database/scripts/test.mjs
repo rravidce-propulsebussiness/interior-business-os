@@ -4,6 +4,7 @@ console.log(psql(['-f', file('tests/company-applications.sql')]));
 console.log(psql(['-f', file('tests/self-service-companies.sql')]));
 console.log(psql(['-f', file('tests/propulse-company-sync.sql')]));
 console.log(psql(['-f', file('tests/employee-invitations.sql')]));
+console.log(psql(['-f', file('tests/employee-invite-codes.sql')]));
 console.log(psql(['-f', file('tests/catalog.sql')]));
 console.log(psql(['-f', file('tests/quotation-studio-defaults.sql')]));
 console.log(psql(['-f', file('tests/quotation-owner-access.sql')]));

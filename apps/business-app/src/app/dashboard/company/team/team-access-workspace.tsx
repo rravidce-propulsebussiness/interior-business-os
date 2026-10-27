@@ -4,7 +4,7 @@ import { useActionState, useEffect, useMemo, useRef, useState, type ReactNode } 
 import { OwnerIcon } from '../../owner-shell';
 import {
   changeMembershipRole, changeMembershipStatus, createCustomRole,
-  createRoleFromPreset, inviteEmployeeByEmail, resendEmployeeEmail, revokeEmployeeEmail,
+  createRoleFromPreset, inviteEmployeeByEmail, createEmployeeInvitationCode, resendEmployeeEmail, revokeEmployeeEmail,
 } from './actions';
 import { rolePresets } from './presets';
 import './team-access.css';
@@ -31,6 +31,39 @@ function ActionPanel({action,label,children,compact=false}:{
   {state.message&&<p role="status" className="team-form-result">{state.message}</p>}
  </form>;
 }
+function InviteFields({organizationId,branches,roles}: {organizationId:string;branches:Branch[];roles:Role[]}) {
+ return <>
+  <input type="hidden" name="organizationId" value={organizationId}/>
+  <Field label="Invited person's verified email">
+   <input type="email" name="email" required maxLength={254} autoComplete="email" placeholder="teammate@company.com"/>
+  </Field>
+  <Field label="Branch / Access scope"><select name="branchId" defaultValue="">
+   <option value="">Organization-wide</option>{branches.map(b=><option key={b.id} value={b.id}>{b.name}</option>)}
+  </select></Field>
+  <fieldset className="team-checkbox-group"><legend>Choose approved roles</legend>
+   {roles.filter(r=>!r.is_owner).map(r=><label key={r.id}>
+    <input type="checkbox" name="roleIds" value={r.id}/>{r.name}
+   </label>)}
+  </fieldset>
+ </>;
+}
+function CodeInvitePanel({organizationId,branches,roles}: {organizationId:string;branches:Branch[];roles:Role[]}) {
+ const [state,submit,pending]=useActionState(createEmployeeInvitationCode,{message:'',code:''});
+ const [copied,setCopied]=useState(false);
+ return <form className="team-action-form" action={submit}>
+  <InviteFields organizationId={organizationId} branches={branches} roles={roles}/>
+  <p className="team-help">One-time, 7-day invitation. The recipient must sign in using the verified email above. Codes never grant Owner access.</p>
+  <button type="submit" className="team-primary" disabled={pending}>{pending?'Generating…':'Generate invite code'}</button>
+  {state.message&&<p role="status" className="team-form-result">{state.message}</p>}
+  {state.code&&<div className="team-generated-code">
+   <label htmlFor="team-invitation-code">Share this code privately</label>
+   <input id="team-invitation-code" readOnly value={state.code} onFocus={e=>e.currentTarget.select()}/>
+   <button type="button" className="team-outline" onClick={()=>{
+    void navigator.clipboard.writeText(state.code).then(()=>setCopied(true)).catch(()=>setCopied(false));
+   }}>{copied?'Copied ✓':'Copy code'}</button>
+  </div>}
+ </form>;
+}
 const pretty=(status:string)=>status.replaceAll('_',' ').replace(/^./,c=>c.toUpperCase());
 const initial=(name:string)=>name.split(/\s+/).filter(Boolean).slice(0,2).map(s=>s[0]?.toUpperCase()).join('')||'?';
 const date=(value:string)=>{const day=new Date(value);return Number.isNaN(day.getTime())?'—':day.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});};
@@ -54,6 +87,7 @@ export function TeamAccessWorkspace({members,branches,roles,permissions,grants,a
  const [status,setStatus]=useState('all');
  const [roleFilter,setRoleFilter]=useState('all');
  const [inviteOpen,setInviteOpen]=useState(false);
+ const [inviteMode,setInviteMode]=useState<'code'|'email'>('code');
  const [roleEditor,setRoleEditor]=useState(false);
  const [editingRole,setEditingRole]=useState<Role|null>(null);
  const [presetOpen,setPresetOpen]=useState(false);
@@ -309,21 +343,19 @@ export function TeamAccessWorkspace({members,branches,roles,permissions,grants,a
   {inviteOpen&&<div className="team-modal-layer" onMouseDown={e=>{if(e.currentTarget===e.target)setInviteOpen(false);}}>
    <div className="team-modal" role="dialog" aria-modal="true" aria-labelledby="team-invite-title">
     <header><div><small>Company team</small><h2 id="team-invite-title">Invite team member</h2>
-     <p>Send an invitation to a verified email address.</p></div>
+     <p>Generate a one-time code or invite by verified email.</p></div>
      <button aria-label="Close invitation" type="button" onClick={()=>setInviteOpen(false)}>×</button>
     </header>
-    <ActionPanel action={inviteEmployeeByEmail} label="Send invitation">
-     <input type="hidden" name="organizationId" value={organizationId}/>
-     <Field label="Work email"><input type="email" name="email" required maxLength={254}
-      autoComplete="email" placeholder="teammate@company.com"/></Field>
-     <Field label="Branch / Access scope"><select name="branchId" defaultValue="">
-      <option value="">Organization-wide</option>{branches.map(b=><option key={b.id} value={b.id}>{b.name}</option>)}
-     </select></Field>
-     <fieldset className="team-checkbox-group"><legend>Choose roles</legend>
-      {roles.filter(r=>!r.is_owner).map(r=><label key={r.id}><input type="checkbox" name="roleIds" value={r.id}/>{r.name}</label>)}
-     </fieldset>
-     <p className="team-help">The invitation grants no access until the recipient signs in with the matching verified email.</p>
-    </ActionPanel>
+    <div className="team-invite-mode" role="group" aria-label="Invitation method">
+      <button type="button" className={inviteMode==='code'?'active':''} onClick={()=>setInviteMode('code')}>Invite code</button>
+      <button type="button" className={inviteMode==='email'?'active':''} onClick={()=>setInviteMode('email')}>Email invitation</button>
+    </div>
+    {inviteMode==='code'?
+      <CodeInvitePanel organizationId={organizationId} branches={branches} roles={roles}/>:
+      <ActionPanel action={inviteEmployeeByEmail} label="Send invitation">
+       <InviteFields organizationId={organizationId} branches={branches} roles={roles}/>
+       <p className="team-help">The invitation grants no access until the recipient signs in with the matching verified email.</p>
+      </ActionPanel>}
    </div>
   </div>}
   {roleEditor&&<div className="team-modal-layer" onMouseDown={e=>{if(e.currentTarget===e.target)setRoleEditor(false);}}>

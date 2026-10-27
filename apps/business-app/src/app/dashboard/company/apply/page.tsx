@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { WorkspaceOnboardingHeader } from '../onboarding-header';
 import { pageServices } from '@business-os/auth/server';
 import { CompanyRegistrationForm } from './company-registration-form';
 import { CompanyIdentityFields } from './company-identity-fields';
@@ -40,18 +41,15 @@ export default async function CompanyApplicationPage() {
   const applications = Array.isArray(history) ? history.filter(isSummary) : [];
 
   return (
+    <>
+      <WorkspaceOnboardingHeader />
     <main
       id="main-content"
       tabIndex={-1}
       className="company-registration-page min-h-screen bg-slate-50 px-5 py-10 text-slate-900 sm:px-8"
     >
       <div className="mx-auto max-w-4xl space-y-8">
-        <Link
-          href="/dashboard"
-          className="text-sm font-medium text-slate-600 hover:underline"
-        >
-          ← Business dashboard
-        </Link>
+
         <header className="rounded-3xl bg-slate-950 p-8 text-white sm:p-10">
           <p className="text-xs font-bold tracking-[0.2em] text-sky-300 uppercase">
             Company onboarding
@@ -183,5 +181,6 @@ export default async function CompanyApplicationPage() {
         </section>
       </div>
     </main>
+    </>
   );
 }
