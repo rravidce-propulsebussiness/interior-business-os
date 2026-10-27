@@ -242,6 +242,15 @@ export function FileDeveloperStudio({
         <div className="web-files-editor-body">
           <textarea ref={textarea} spellCheck={false} aria-label={`Edit ${chosen.path}`}
             value={chosen.content} onChange={e => update(e.target.value)}
+            onKeyDown={e => {
+              if (e.key === 'Tab' && !e.shiftKey) {
+                e.preventDefault();
+                const field = e.currentTarget;
+                const from = field.selectionStart, to = field.selectionEnd;
+                update(chosen.content.slice(0, from) + '  ' + chosen.content.slice(to));
+                requestAnimationFrame(() => field.setSelectionRange(from + 2, from + 2));
+              }
+            }}
             disabled={pending || !canChange} placeholder="Enter your source code…"
             className="web-files-codearea" />
         </div>
@@ -260,8 +269,10 @@ export function FileDeveloperStudio({
           <button className="web-files-secondary" type="button" onClick={() => {
             void navigator.clipboard?.writeText(codeSelected.id).then(() => setNotice('Component reference copied.')).catch(() => setNotice('Copy not available in this browser.'));
           }}>Copy reference</button>
-          <button className="web-files-secondary" type="button" disabled={!canEdit} onClick={() => {setFilename(codeSelected.name.split('/').at(-1)?.replace('.html','') ?? '');setModal('rename');}}>Rename component</button>
-          <button className="web-files-danger" type="button" disabled={!canEdit} onClick={() => setModal('delete')}>Delete unused component</button>
+          {!codeSelected.name.startsWith('pages/') && <>
+            <button className="web-files-secondary" type="button" disabled={!canEdit} onClick={() => {setFilename(codeSelected.name.split('/').at(-1)?.replace('.html','') ?? '');setModal('rename');}}>Rename component</button>
+            <button className="web-files-danger" type="button" disabled={!canEdit} onClick={() => setModal('delete')}>Delete unused component</button>
+          </>}
         </>}
         <div className="web-files-advice"><strong>How publishing works</strong>
           <p>Page files are connected to website routes. Each custom component runs in its own sandbox. Existing visual template pages remain unchanged.</p>

@@ -25,8 +25,8 @@ export function workspaceFiles(document: WebsiteDocument): SourceFile[] {
     const base = page ? 'pages' : 'components';
     const fields: { field: CodeField; path: string }[] = [
       { field: 'html', path: page ? 'pages/' + name + '.html' : 'components/' + name + '/index.html' },
-      { field: 'css', path: 'styles/' + name + '.css' },
-      { field: 'javascript', path: 'scripts/' + name + '.js' },
+      { field: 'css', path: 'styles/' + base + '/' + name + '.css' },
+      { field: 'javascript', path: 'scripts/' + base + '/' + name + '.js' },
     ];
     for (const entry of fields)
       files.push({ key: c.id + ':' + entry.field, content: c[entry.field],
@@ -78,7 +78,7 @@ export function newSourceComponent(
     ...next,
     pages: [...next.pages, {
       id: 'p' + id.slice(1, 17), path: route, title: name.replaceAll('-', ' '),
-      visibility: 'draft' as const,
+      visibility: 'public' as const,
       seo: { title: name.replaceAll('-', ' '), description: '', noindex: true },
       nodes: [node],
     }],

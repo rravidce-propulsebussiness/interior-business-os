@@ -10,7 +10,7 @@ describe('website developer virtual files', () => {
   it('represents existing website styles and custom components as separate files', () => {
     const site = newSourceComponent(emptyWebsite('Demo'), 'components', 'Hero', id);
     expect(workspaceFiles(site).map(f => f.path)).toEqual([
-      'styles/global.css','components/hero/index.html','styles/hero.css','scripts/hero.js',
+      'styles/global.css','components/hero/index.html','styles/components/hero.css','scripts/components/hero.js',
     ]);
     const file = workspaceFiles(site).find(f => f.key === id + ':javascript')!;
     const updated = changeSourceFile(site, file, 'document.querySelector("h1");');
