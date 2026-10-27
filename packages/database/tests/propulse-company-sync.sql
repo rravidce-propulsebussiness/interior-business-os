@@ -74,6 +74,10 @@ select private.propulse_sync_assert(
       and m.key='website' and e.valid_until>now()+interval '29 days'),
  'Growth membership grants only time-limited hosted website');
 select private.propulse_sync_assert(
+ coalesce((private.website_config((:'first_result'::jsonb->>'organizationId')::uuid)->>'template_only')::boolean,false)
+ and coalesce((private.website_config((:'first_result'::jsonb->>'organizationId')::uuid)->>'custom_domain')::boolean,false),
+ 'Growth allows own-domain connection but requires a published template');
+select private.propulse_sync_assert(
  (select count(*) = 1 from private.propulse_company_links
   where propulse_subject='propulse:9101'),
  'only one external-company link exists');
@@ -91,6 +95,10 @@ select private.propulse_sync_assert(
  and (select tier from private.propulse_company_links
       where propulse_subject='propulse:9101')='scale',
  'Scale unlocks project management');
+select private.propulse_sync_assert(
+ not coalesce((private.website_config((:'first_result'::jsonb->>'organizationId')::uuid)->>'template_only')::boolean,true)
+ and coalesce((private.website_config((:'first_result'::jsonb->>'organizationId')::uuid)->>'custom_domain')::boolean,false),
+ 'Scale enables full website creation and own-domain connection');
 select public.propulse_company_import(
  '00000000-0000-4000-8000-000000000091','propulse:9101',
  '{"source_id":"9101","name":"Verified Interiors","description":"Trusted company",
