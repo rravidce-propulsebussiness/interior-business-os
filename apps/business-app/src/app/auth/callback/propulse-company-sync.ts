@@ -29,6 +29,10 @@ const companySchema = z.object({
     .max(30),
 });
 const userInfoSchema = z.object({
+  business_os_access: z.object({
+    tier: z.enum(['none','growth','scale']),
+    expires_at: z.iso.datetime({ offset: true }).nullable(),
+  }),
   sub: z.string().regex(/^propulse:[1-9][0-9]{0,18}$/),
   email_verified: z.literal(true),
   company: companySchema.nullable(),
@@ -105,6 +109,7 @@ export async function syncCompanyFromPropulse(
       ...source.data.company,
       industries: industryKeys(source.data.company.services),
     },
+    p_access: source.data.business_os_access,
   });
   if (error) throw new Error('ProPulse company import unavailable');
   const result = importResultSchema.parse(data);
