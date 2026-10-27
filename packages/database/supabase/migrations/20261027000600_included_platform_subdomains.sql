@@ -70,9 +70,7 @@ declare
 begin
   select * into d from public.website_domains
     where organization_id=p_organization_id and id=p_domain_id;
-  perform private.website_require(
-    p_organization_id,'website.domain.manage',d.website_id
-  );
+  perform private.website_domain_require(p_organization_id,d.website_id);
   if d.id is null or d.version is distinct from p_version then
     raise exception 'Stale domain' using errcode='40001';
   end if;
