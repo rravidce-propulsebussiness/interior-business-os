@@ -76,8 +76,8 @@ begin
   -- The OAuth server obtains p_access only from a verified ProPulse UserInfo
   -- response. A caller cannot select its own tier or expiry.
   if p_access is null or jsonb_typeof(p_access) <> 'object'
-    or p_access->>'tier' not in ('growth','scale','none')
-    or jsonb_typeof(p_access->'expires_at') not in ('null','string') then
+    or not coalesce((p_access->>'tier') in ('growth','scale','none'),false)
+    or not coalesce(jsonb_typeof(p_access->'expires_at') in ('null','string'),false) then
     raise exception 'Valid ProPulse membership evidence required' using errcode='22023';
   end if;
   v_tier := p_access->>'tier';
@@ -253,7 +253,11 @@ begin
     set plan_id=v_propulse_plan
     where id=v_org and plan_id=(
       select d.plan_id from private.provisioning_defaults d where d.singleton=true
-    );
+    ) and (v_status='created' or exists(
+      select 1 from public.organization_entitlements e
+      where e.organization_id=v_org and e.source='promotion'
+        and e.configuration->>'source'='propulse'
+    ));
 
   -- Remove only this integration's grants; preserve purchased add-ons, other
   -- promotions and unrelated tenants. An expired Growth/Scale package cannot
