@@ -9,18 +9,20 @@ type Template = { id: string; name: string; description: string };
 export function WebsiteCreate({
   templates,
   canCode,
+  templateOnly,
   open,
   onClose,
   initialTemplate = '',
 }: {
   templates: Template[];
   canCode: boolean;
+  templateOnly: boolean;
   open: boolean;
   onClose: () => void;
   initialTemplate?: string;
 }) {
   const [message, setMessage] = useState('');
-  const [template, setTemplate] = useState(initialTemplate);
+  const [template, setTemplate] = useState(initialTemplate || (templateOnly ? templates[0]?.id ?? '' : ''));
   const [name, setName] = useState('');
   const [slug, setSlug] = useState('');
   const [slugChanged, setSlugChanged] = useState(false);
@@ -116,16 +118,17 @@ export function WebsiteCreate({
             value={template}
             onChange={(event) => setTemplate(event.target.value)}
           >
-            <option value="">Blank visual canvas</option>
+            {!templateOnly && <option value="">Blank visual canvas</option>}
             {templates.map((entry) => (
               <option key={entry.id} value={entry.id}>
                 {entry.name}
               </option>
             ))}
-            {canCode && (
+            {canCode && !templateOnly && (
               <option value="custom">Custom HTML, CSS and JavaScript</option>
             )}
           </select>
+          {templateOnly && <p className="website-form-hint">This plan includes published templates only. Upgrade for blank sites or developer tools.</p>}
           <label htmlFor="website-name">Website name</label>
           <input
             ref={nameRef}
@@ -172,7 +175,7 @@ export function WebsiteCreate({
             <button
               type="submit"
               className="website-primary"
-              disabled={pending}
+              disabled={pending || (templateOnly && (!templates.length || !template))}
             >
               {pending ? 'Creating…' : 'Create Website →'}
             </button>
