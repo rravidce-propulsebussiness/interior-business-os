@@ -25,10 +25,10 @@ jobs:
         run: pnpm format
       - name: Stabilize the quotation studio CSS output
         run: pnpm exec prettier --write apps/business-app/src/app/dashboard/quotations/studio.css
-      - name: Verify format and generated DB types match
-        run: |
-          pnpm format:check
-          pnpm db:types:check
+      - name: Verify formatter output is stable
+        run: pnpm format:check
+      # DB type validation runs separately in Foundation CI with its isolated
+      # temporary PostgreSQL instance; this formatting job has no DB access.
       - name: Commit formatting-only baseline to maintenance branch
         run: |
           set -euo pipefail
