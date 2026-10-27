@@ -31,8 +31,53 @@ export function DomainPanel({
     { type: 'TXT'; name: string; value: string }[]
   >([]);
   const [pending, start] = useTransition();
+  const includedSubdomain = domains.find(
+    (domain) => domain.kind === 'subdomain' && domain.status !== 'removed',
+  );
+  const subdomainLive =
+    includedSubdomain?.status === 'active' &&
+    includedSubdomain.tls_status === 'ready';
   return (
     <div className="space-y-5">
+      <section className="rounded-lg border p-5" aria-label="Included Business OS subdomain">
+        <h2 className="font-semibold">Your included Business OS subdomain</h2>
+        {includedSubdomain ? (
+          <>
+            <p className="mt-2 break-all font-mono text-sm">{includedSubdomain.hostname}</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {subdomainLive
+                ? 'Hosting and HTTPS are configured. Publish your website to make this address live.'
+                : 'This address is reserved for your website. Platform hosting or HTTPS activation is pending.'}
+              {' '}No separate domain purchase is required for your included subdomain.
+            </p>
+            {subdomainLive && (
+              <a
+                href={`https://${includedSubdomain.hostname}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 inline-flex rounded border px-3 py-2 text-sm"
+              >
+                Open website address
+              </a>
+            )}
+          </>
+        ) : (
+          <p className="mt-2 text-sm text-muted-foreground">
+            Your included subdomain is not configured yet. Business OS needs
+            a verified platform base domain and HTTPS setup before a public
+            address can be issued. No custom domain is required.
+          </p>
+        )}
+      </section>
+      <section className="rounded-lg border p-5">
+        <h2 className="font-semibold">Connect a domain you own (optional)</h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Custom-domain connection is included in Growth, Scale and paid
+          Website Basic hosting. Buy and renew the domain at any registrar
+          you choose; Business OS does not sell, register or own your domain.
+          Add the DNS records below, then verify ownership and HTTPS.
+        </p>
+      </section>
       {canManage && (
         <form
           className="flex gap-3"
@@ -69,9 +114,10 @@ export function DomainPanel({
       <p className="text-sm text-muted-foreground">
         Use a subdomain such as www.yourbusiness.com. A root domain without www
         requires an additional apex-domain routing setup at your DNS provider.
-        Your domain stays registered with your chosen registrar.
+        Your domain remains yours and registered with your chosen registrar.
+        Connecting it does not replace your included Business OS subdomain.
       </p>
-      {domains.map((d) => (
+      {domains.filter((d) => d.kind === 'custom').map((d) => (
         <section key={d.id} className="rounded border p-5">
           <div className="flex justify-between">
             <h2 className="font-semibold">{d.hostname}</h2>
