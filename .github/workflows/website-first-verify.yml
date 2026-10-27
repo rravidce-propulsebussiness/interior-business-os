@@ -1,0 +1,29 @@
+name: Website-first Typecheck and Build
+on:
+  push:
+    branches:
+      - feature/website-first-growth-scale-20261027
+  pull_request:
+    paths:
+      - 'apps/business-app/**'
+      - 'apps/websites/**'
+      - 'packages/database/**'
+      - 'packages/website-builder/**'
+      - '.github/workflows/website-first-verify.yml'
+permissions:
+  contents: read
+jobs:
+  types-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm lint
+      - run: pnpm build
