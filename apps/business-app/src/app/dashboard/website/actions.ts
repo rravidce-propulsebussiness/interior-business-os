@@ -53,6 +53,14 @@ export async function createWebsite(
       slug.length > 63
     )
       throw new Error('Enter a name and a safe subdomain slug');
+    const configuration = await s.client.rpc('website_configuration', {
+      p_organization_id: s.context.organizationId,
+    });
+    if (configuration.error) throw new Error('Website plan configuration unavailable');
+    const limits = (configuration.data as { limits?: { template_only?: boolean } } | null)?.limits;
+    if (limits?.template_only && !templateId) {
+      throw new Error('Choose a published template for this website plan.');
+    }
     let id: string;
     if (templateId) {
       const result = await s.client.rpc('website_from_template', {
