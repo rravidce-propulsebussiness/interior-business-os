@@ -144,6 +144,15 @@ export default async function Dashboard({
   const canWebsite = has('website.view', 'website');
   const canSettings = has('organization.view');
   const canSites = context.entitlements.includes('projects');
+
+  // The hosted website is the primary destination for website-only plans.
+  // Full Business OS owners keep the cross-module command centre.
+  const operationalModules = ['crm','quotation','projects','billing','purchasing','reports']
+    .some((key) => context.entitlements.includes(key));
+  if (canWebsite && !operationalModules && !scope) redirect('/dashboard/website');
+  if (!canWebsite && !operationalModules && !scope)
+    redirect('/dashboard/billing');
+
   const query = (await searchParams).q?.trim().slice(0, 80) ?? '';
 
   // Fetch only the active company's data, with its existing server/RLS guards.
