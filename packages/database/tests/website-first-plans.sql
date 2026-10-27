@@ -62,6 +62,27 @@ begin
         and p.prosecdef) then
     raise exception 'Manual payment verification must use privileged guarded RPC';
   end if;
+  -- Every entitled website is given a platform-owned hostname for free;
+  -- customers never need to register or connect a domain to start publishing.
+  if not exists (
+    select 1 from pg_trigger t
+      join pg_class c on c.oid=t.tgrelid
+      join pg_namespace n on n.oid=c.relnamespace
+    where n.nspname='public'
+      and c.relname='website_platform_settings'
+      and t.tgname='website_platform_included_subdomains'
+      and t.tgenabled='O'
+  ) then
+    raise exception 'Included platform subdomain backfill trigger unavailable';
+  end if;
+  if not exists (
+    select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace
+    where n.nspname='private'
+      and p.proname='website_ensure_included_subdomains'
+      and p.prosecdef
+  ) then
+    raise exception 'Platform-owned subdomains must be safely provisioned';
+  end if;
   if not exists(select 1 from public.plans p where p.key='website_unsubscribed'
     and not exists(select 1 from public.plan_modules pm where pm.plan_id=p.id))
     or not exists(select 1 from public.plans p where p.key='propulse_managed'
