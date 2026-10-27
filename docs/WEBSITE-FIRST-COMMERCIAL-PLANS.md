@@ -37,6 +37,15 @@ No price has been invented.
 - `20261027000400_website_first_onboarding.sql`: new direct registrations get
   no all-module trial. New ProPulse organizations receive no unrestricted
   promo and acquire only verified, expiring provider entitlements.
+- `20261027000500_direct_basic_verified_activation.sql`: direct Website
+  Basic never receives permanent access just from assigning the catalog plan.
+  An authorized platform administrator must independently confirm a settled
+  bank credit and record its unique transaction reference, amount and expiry.
+  The resulting time-limited website add-on provides Basic site hosting,
+  enquiry forms, and connection of the customer's own domain; renewal requires
+  fresh payment verification. Expiry retains stored pages/domains. This is a
+  **manual verification bridge**, not online checkout or automated bank
+  reconciliation. Admin UI is available on the organization details page.
 - Website create action and publish RPC enforce published template provenance
   for template-only subscriptions. Growth/Basic users cannot publish an
   arbitrary blank site by calling the lower-level create RPC.
@@ -55,9 +64,11 @@ No price has been invented.
    regression tests, and check existing businesses retained their assignments.
 4. Confirm platform `base_domain`, managed TLS, custom-domain routing, and
    Websites app deployment. DNS and HTTPS must be verified independently.
-5. Complete direct Website Basic subscription checkout and renewal/cancellation
-   lifecycle, including price selection and payment confirmation. Admin-only
-   activation is a temporary controlled path, not automated checkout.
+5. Complete automated direct Website Basic subscription checkout and
+   renewal/cancellation, including published prices and server-confirmed bank
+   credits. The current trusted admin-only manual payment activation allows
+   bounded access and renewal by newly verified reference, not self-service
+   payment or automated bank reconciliation.
 6. Verify existing ProPulse-linked organizations' grandfathered promotions and
    carry out a careful transition. Untouched existing direct companies should
    retain legitimate purchases.
