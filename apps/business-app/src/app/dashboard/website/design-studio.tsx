@@ -9,7 +9,6 @@ import './design-studio.css';
 
 type Theme = WebsiteDocument['theme'];
 type ColorKey = 'primary' | 'secondary' | 'accent' | 'background' | 'surface' | 'text' | 'muted' | 'border';
-type SettingKey = 'headingFont' | 'bodyFont' | 'shadow' | 'buttonStyle';
 type Device = 'desktop' | 'tablet' | 'mobile';
 const colors: { key: ColorKey; label: string; help: string }[] = [
   { key: 'primary', label: 'Primary brand', help: 'Primary buttons and accents' },
