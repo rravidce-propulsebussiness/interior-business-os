@@ -1,4 +1,5 @@
 import './no-company-workspace.css';
+import { WorkspaceOnboardingHeader } from './company/onboarding-header';
 
 function WorkflowPreview() {
   return <div className="bo-preview" aria-label="Preview of the connected business workspace">
@@ -56,12 +57,7 @@ function OptionIcon({kind}: {kind: 'create'|'import'|'join'}) {
  * retain their established authorization/redirect flows. */
 export function NoCompanyWorkspace() {
   return <main id="main-content" className="bo-wrap">
-    <header className="bo-topbar"><nav className="bo-nav" aria-label="Workspace setup">
-      <a className="bo-brand" href="/"><span className="bo-mark" aria-hidden="true">P</span>
-        <span className="bo-brand-name">ProPulse<span>BUSINESS OS</span></span></a>
-      <div className="bo-nav-end"><span className="bo-nav-hint"><i/>Workspace setup</span>
-        <a className="bo-home-link" href="/">Back to website ↗</a></div>
-    </nav></header>
+    <WorkspaceOnboardingHeader />
     <div className="bo-content">
       <section className="bo-hero" aria-labelledby="bo-headline">
         <div><div className="bo-eyebrow"><span aria-hidden="true">✦</span> WELCOME TO YOUR BUSINESS OS</div>

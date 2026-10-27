@@ -1,0 +1,139 @@
+/* Single light header for company creation, joining by code, and setup. */
+.workspace-onboarding-header {
+  position: sticky;
+  top: 0;
+  z-index: 80;
+  min-height: 76px;
+  background: rgba(255, 254, 252, .96);
+  border-bottom: 1px solid #eee3db;
+  backdrop-filter: blur(16px);
+  color: #352e2a;
+  color-scheme: light;
+}
+.workspace-onboarding-header,
+.workspace-onboarding-header * {
+  box-sizing: border-box;
+}
+.workspace-onboarding-header-inner {
+  max-width: 1168px;
+  min-height: 76px;
+  padding: 0 25px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+.workspace-onboarding-header .workspace-onboarding-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  color: #302b29;
+  text-decoration: none;
+}
+.workspace-onboarding-brand-mark {
+  height: 42px;
+  width: 42px;
+  flex: 0 0 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  color: #fff;
+  background: linear-gradient(145deg, #ff9a4e, #f55b20 73%);
+  box-shadow: 0 8px 18px #ef69372d;
+}
+.workspace-onboarding-brand-mark svg {
+  height: 24px;
+  width: 24px;
+}
+.workspace-onboarding-brand-text strong {
+  display: block;
+  font-size: 18px;
+  font-weight: 820;
+  letter-spacing: -.7px;
+  line-height: 1.05;
+}
+.workspace-onboarding-brand-text small {
+  display: block;
+  margin-top: 6px;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 1.4px;
+  color: #95857a;
+}
+.workspace-onboarding-nav {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.workspace-onboarding-logout-form {
+  display: flex;
+  margin: 0;
+}
+.workspace-onboarding-header .workspace-onboarding-home,
+.workspace-onboarding-header .workspace-onboarding-logout {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 9px 16px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 750;
+  line-height: 1;
+  border-radius: 11px !important;
+  text-decoration: none;
+  transition: transform .18s ease, background .18s ease, border-color .18s ease;
+  box-shadow: none !important;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.workspace-onboarding-header .workspace-onboarding-home {
+  color: #534239;
+  background: #fff;
+  border: 1px solid #eadfd7;
+}
+.workspace-onboarding-header .workspace-onboarding-logout {
+  color: #df5d25;
+  background: #fff0e8;
+  border: 1px solid #f8d2bd;
+}
+.workspace-onboarding-nav svg {
+  width: 17px;
+  height: 17px;
+  flex: none;
+}
+.workspace-onboarding-header .workspace-onboarding-home:hover {
+  color: #d95c26;
+  background: #fff7f1;
+  border-color: #f2b995;
+  transform: translateY(-1px);
+}
+.workspace-onboarding-header .workspace-onboarding-logout:hover {
+  color: #bd4519;
+  background: #ffe3d4;
+  border-color: #e9a881;
+  transform: translateY(-1px);
+}
+.workspace-onboarding-header :is(a, button):focus-visible {
+  outline: 3px solid #fb874f;
+  outline-offset: 3px;
+}
+@media (max-width: 560px) {
+  .workspace-onboarding-header,
+  .workspace-onboarding-header-inner { min-height: 68px; }
+  .workspace-onboarding-header-inner { padding: 0 16px; gap: 10px; }
+  .workspace-onboarding-brand-mark { height: 36px; width: 36px; flex-basis: 36px; border-radius: 10px; }
+  .workspace-onboarding-brand-text strong { font-size: 15px; }
+  .workspace-onboarding-brand-text small { font-size: 9px; letter-spacing: .8px; margin-top: 4px; }
+  .workspace-onboarding-nav { gap: 7px; }
+  .workspace-onboarding-header .workspace-onboarding-home,
+  .workspace-onboarding-header .workspace-onboarding-logout { padding: 10px; font-size: 12px; min-height: 39px; border-radius: 9px !important; }
+  .workspace-onboarding-nav svg { width: 15px; height: 15px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .workspace-onboarding-header .workspace-onboarding-home,
+  .workspace-onboarding-header .workspace-onboarding-logout { transition: none; }
+}

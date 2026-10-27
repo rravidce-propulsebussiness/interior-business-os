@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { WorkspaceOnboardingHeader } from '../onboarding-header';
 import { pageServices } from '@business-os/auth/server';
 import { ActionForm } from '@business-os/ui/action-form';
 import { acceptEmployeeEmailInvitation, acceptEmployeeInvitationByCode } from './actions';
@@ -35,18 +36,15 @@ export default async function MyEmployeeInvitations() {
   const result = await repository.myEmployeeInvitations();
   const invitations = Array.isArray(result) ? result.filter(isInvitation) : [];
   return (
+    <>
+      <WorkspaceOnboardingHeader />
     <main
       id="main-content"
       tabIndex={-1}
       className="invite-entry min-h-screen px-5 py-10 sm:px-8"
     >
       <div className="mx-auto max-w-3xl space-y-7">
-        <Link
-          href="/dashboard"
-          className="text-sm font-medium text-slate-600 hover:underline"
-        >
-          ← Business dashboard
-        </Link>
+
         <header className="invite-entry-hero rounded-3xl p-8">
           <p className="text-xs font-semibold uppercase tracking-widest">
             WORKSPACE ACCESS
@@ -140,5 +138,6 @@ export default async function MyEmployeeInvitations() {
         )}
       </div>
     </main>
+    </>
   );
 }
