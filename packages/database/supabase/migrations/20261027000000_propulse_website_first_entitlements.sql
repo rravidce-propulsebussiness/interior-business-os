@@ -300,6 +300,31 @@ begin
 end
 $import$;
 
+-- Only company owners with organization.view may read the currently linked
+-- provider tier. No provider access tokens or credentials are stored.
+create or replace function public.propulse_company_profile(p_organization_id uuid)
+returns jsonb language plpgsql stable security definer set search_path = ''
+as $read$
+begin
+  if not private.has_permission(p_organization_id,'organization.view') then
+    raise exception 'Forbidden' using errcode='42501';
+  end if;
+  return (
+    select jsonb_build_object(
+      'source','propulse',
+      'description',l.profile_snapshot->>'description',
+      'phone',l.profile_snapshot->>'phone',
+      'services',l.profile_snapshot->'services',
+      'locations',l.profile_snapshot->'locations',
+      'tier',l.tier,
+      'accessExpiresAt',l.access_valid_until,
+      'syncedAt',l.synced_at
+    ) from private.propulse_company_links l
+      where l.organization_id = p_organization_id
+  );
+end
+$read$;
+
 -- The insecure legacy signature allowed a 90-day all-module trial and must
 -- never be callable after the upgrade. The new signed-provider-data version
 -- is the only import endpoint used by Business OS.
