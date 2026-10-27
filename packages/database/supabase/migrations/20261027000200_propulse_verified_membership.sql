@@ -16,7 +16,7 @@ create or replace function public.propulse_membership_sync(
   p_subject text,
   p_organization_id uuid,
   p_tier text,
-  p_expires_at timestamptz
+  p_expires_at timestamptz default null
 )
 returns jsonb
 language plpgsql security definer set search_path = ''
