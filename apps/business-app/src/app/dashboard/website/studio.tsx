@@ -77,6 +77,7 @@ export function WebsiteEditor({
   // immediately repeat expensive authenticated server rendering.
   const previewCache = useRef(new Map<string, string>());
   const firstPreview = useRef(true);
+  const [publishState,setPublishState] = useState(status);
   const [previewLoading, setPreviewLoading] = useState(false);
   const openingPage = initial.pages.find(p => p.id === initialPageId) ??
     initial.pages.find(p => p.path === '/' && p.nodes.length) ??
@@ -565,7 +566,7 @@ export function WebsiteEditor({
           </div>
         </div>
         <div className="ss-heading-actions">
-          <span className="ss-wp-publish-state">{status === 'published' ? '● Published' : '● Draft'}</span>
+          <span className="ss-wp-publish-state">{publishState === 'published' ? '● Published' : '● Draft'}</span>
           <span className={hasUnsavedChanges ? 'ss-save-state dirty' : 'ss-save-state'}>
             {hasUnsavedChanges ? '● Unsaved changes' : '✓ All changes saved'}
           </span>
@@ -580,7 +581,7 @@ export function WebsiteEditor({
             onClick={() => start(async () => {
               const result = await publishAction(id, version, 'Published from website studio');
               setMessage(result.message);
-              if (result.id) setVersion((current) => current + 1);
+              if (result.id) {setVersion((current) => current + 1);setPublishState('published');}
             })}>
             ↗ &nbsp; {templateMode ? 'Publish template' : 'Publish website'}
           </button>}

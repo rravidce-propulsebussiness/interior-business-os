@@ -84,17 +84,26 @@ export function createWebsiteRepository(
       summary: string,
       restoreId?: string,
     ) {
-      return checked(
-        await client.rpc('website_publish', {
-          p_organization_id: org,
-          p_website_id: idSchema.parse(id),
-          p_version: version,
-          p_build_text: body,
-          p_signature: signature,
-          p_summary: summary,
-          ...(restoreId ? { p_restore_id: idSchema.parse(restoreId) } : {}),
-        }),
-      );
+      const response = await client.rpc('website_publish', {
+        p_organization_id: org,
+        p_website_id: idSchema.parse(id),
+        p_version: version,
+        p_build_text: body,
+        p_signature: signature,
+        p_summary: summary,
+        ...(restoreId ? { p_restore_id: idSchema.parse(restoreId) } : {}),
+      });
+      // These are deliberately stable, non-secret diagnostic identifiers.
+      // Do not expose the HMAC, signed payload or database key to clients.
+      if (response.error?.message === 'Invalid or expired build proof')
+        throw new Error('WEBSITE_BUILD_SIGNATURE_MISMATCH');
+      if (response.error?.message === 'Custom code capability required')
+        throw new Error('WEBSITE_CUSTOM_CODE_NOT_ENTITLED');
+      if (response.error?.message === 'Website forms require Forms capability and CRM')
+        throw new Error('WEBSITE_FORMS_NOT_ENTITLED');
+      if (response.error?.message === 'Stale publish')
+        throw new Error('WEBSITE_PUBLISH_VERSION_CONFLICT');
+      return checked(response);
     },
     async status(id: string, version: number, status: string) {
       const r = await client.rpc('website_status', {

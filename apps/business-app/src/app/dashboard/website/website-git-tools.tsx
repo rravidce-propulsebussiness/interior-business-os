@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, useTransition } from 'react';
 import { exportWebsitePageHtml } from './website-git-export';
-import { pullGithubStaticPages } from './github-pull';
+import { pullGithubStaticPages, inspectGithubSourceFiles, retrieveGithubSourceFile } from './github-pull';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import './website-entry.css';
@@ -28,6 +28,11 @@ export function WebsiteGitTools({ id, name, pages, version, canPull }: {
 }) {
   const router=useRouter();
   const [url, setUrl] = useState('');
+  const [sourceFiles,setSourceFiles] = useState<string[]>([]);
+  const [sourcePath,setSourcePath] = useState('');
+  const [sourceText,setSourceText] = useState('');
+  const [sourceMessage,setSourceMessage] = useState('');
+  const [sourceBusy,startSource] = useTransition();
   const [pulling, startPull] = useTransition();
   const [imported, setImported] = useState<string[]>([]);
   const [message, setMessage] = useState('');
@@ -56,6 +61,32 @@ export function WebsiteGitTools({ id, name, pages, version, canPull }: {
       setMessage(result.message);
       if(result.ok){setImported(result.pages);router.refresh();}
     });
+  };
+  const inspectSources = () => {
+    if(!links||sourceBusy)return;
+    startSource(async()=>{
+      const result=await inspectGithubSourceFiles(id,links.github);
+      setSourceMessage(result.message+(result.truncated?' GitHub truncated the large tree; enter another path manually.':''));
+      setSourceFiles(result.files);
+      if(result.files.length)setSourcePath(result.files[0]!);
+    });
+  };
+  const retrieveSource = () => {
+    if(!links||!sourcePath||sourceBusy)return;
+    startSource(async()=>{
+      const result=await retrieveGithubSourceFile(id,links.github,sourcePath);
+      setSourceMessage(result.message);
+      if(result.ok && typeof result.source==='string')setSourceText(result.source);
+    });
+  };
+  const downloadSource = () => {
+    if(!sourceText||!sourcePath)return;
+    const blob=new Blob([sourceText],{type:'text/plain;charset=utf-8'});
+    const url=URL.createObjectURL(blob);
+    const link=document.createElement('a');
+    link.href=url;link.download=sourcePath.split('/').at(-1)??'source.txt';
+    document.body.appendChild(link);link.click();link.remove();
+    requestAnimationFrame(()=>URL.revokeObjectURL(url));
   };
   const exportPage = () => startExport(async () => {
     try {
@@ -114,6 +145,28 @@ export function WebsiteGitTools({ id, name, pages, version, canPull }: {
         </div>
         {message && <p className="we-notice" role="status">{message}</p>}
         <p className="we-git-disclaimer">The repository shortcut is saved in this browser only; it is not a persistent GitHub OAuth connection or automatic synchronization.</p>
+        <div className="we-git-export">
+          <h3>Pull source code — multiple languages</h3>
+          <p>Browse and download source files from a public repository: HTML, CSS, JavaScript, TypeScript, React JSX/TSX, Vue, Svelte, Astro, PHP, Python, Java, Go, Rust, SQL, Markdown and more. This is source inspection, not executable hosting.</p>
+          <button type="button" className="we-outline" disabled={!links||sourceBusy}
+            onClick={inspectSources}>{sourceBusy?'Reading GitHub…':'Browse repository source files'}</button>
+          <label htmlFor="we-git-source-file">Source file path</label>
+          <input id="we-git-source-file" value={sourcePath} placeholder="apps/web/src/app/page.tsx"
+            onChange={event=>{setSourcePath(event.target.value);setSourceText('');}} spellCheck={false}
+            list="we-git-source-options"/>
+          <datalist id="we-git-source-options">{sourceFiles.map(path=>
+            <option key={path} value={path}/>)}</datalist>
+          <div className="we-git-buttons">
+            <button type="button" className="we-primary" disabled={!links||!sourcePath||sourceBusy}
+              onClick={retrieveSource}>{sourceBusy?'Pulling file…':'Pull selected source file'}</button>
+            <button type="button" className="we-outline" disabled={!sourceText}
+              onClick={downloadSource}>↓ Download source</button>
+          </div>
+          {sourceMessage&&<p className="we-notice" role="status">{sourceMessage}</p>}
+          {sourceText&&<textarea className="we-git-source-code" readOnly rows={16}
+            aria-label="Retrieved source code" value={sourceText}/>}
+          <p className="we-git-disclaimer">Source browsing is read-only. JavaScript, TypeScript, JSX/TSX, PHP and backend code cannot execute inside the isolated Website Template Builder. Deploy full applications separately through a Git-connected hosting workflow.</p>
+        </div>
         <div className="we-git-export">
           <h3>Export the current template as HTML</h3>
           <p>Download the rendered code of a website page. You can edit the HTML and CSS in VS Code, then commit it to your external Git repository.</p>

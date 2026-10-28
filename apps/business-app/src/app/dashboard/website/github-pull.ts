@@ -129,3 +129,76 @@ export async function pullGithubStaticPages(
       safeFailure(error).message};
   }
 }
+
+const sourceFilePattern = /\.(?:html|htm|css|scss|sass|less|js|jsx|ts|tsx|mjs|cjs|json|md|mdx|yaml|yml|vue|svelte|astro|php|py|go|rs|java|kt|swift|rb|sql|sh|xml|toml|txt)$/i;
+const excludedSource = /(?:^|\/)(?:\.env(?:\.|$)|\.git\/|\.next\/|node_modules\/|vendor\/|dist\/|build\/|\.npmrc$|id_rsa$|private[-_.]?key|secret[-_.]?key)/i;
+function safeSourcePath(path:string):boolean {
+  return path.length>0 && path.length<=280 &&
+    !path.startsWith('/') && !path.includes('..') && !path.includes('\\') &&
+    /^[A-Za-z0-9_./@-]+$/.test(path) &&
+    sourceFilePattern.test(path) && !excludedSource.test(path);
+}
+
+/** Discover source languages without treating them as runnable website code. */
+export async function inspectGithubSourceFiles(
+  websiteId:string, repositoryUrl:string,
+):Promise<{ok:boolean;message:string;files:string[];truncated:boolean}> {
+  try {
+    const parsed=parsePublicGithubRepo(repositoryUrl);
+    if(!parsed) throw new Error('Enter a valid public GitHub repository URL.');
+    const s=await websiteServices('website.custom_code.view');
+    await s.website.read(websiteId);
+    const base=`https://api.github.com/repos/${parsed.owner}/${parsed.repo}`;
+    const repo=JSON.parse(await githubText(base,70000)) as {
+      private?:boolean;default_branch?:string;
+    };
+    if(repo.private||!repo.default_branch||repo.default_branch.includes('..')||
+       !/^[A-Za-z0-9_./-]{1,160}$/.test(repo.default_branch))
+      throw new Error('Only public repositories are supported by this source browser.');
+    const tree=JSON.parse(await githubText(
+      `${base}/git/trees/${encodeURIComponent(repo.default_branch)}?recursive=1`,
+      2500000,
+    )) as {truncated?:boolean;tree?:{path:string;type:string;size?:number}[]};
+    const files=(tree.tree??[])
+      .filter(f=>f.type==='blob' && (f.size??0)<=100000 &&
+        safeSourcePath(f.path))
+      .map(f=>f.path).slice(0,200);
+    return {ok:true,files,truncated:Boolean(tree.truncated),
+      message:files.length
+        ? `Found ${files.length} source file(s) across supported languages. These are code files, not automatically runnable templates.`
+        : 'No supported source files found in this repository tree.'};
+  }catch(e){
+    return {ok:false,files:[],truncated:false,
+      message:e instanceof Error && /GitHub|public|size limit|rate limit|too large/i.test(e.message)
+        ? e.message : safeFailure(e).message};
+  }
+}
+
+/** Pull one explicit source file for read-only viewing/download.
+ * Never executes source, stores its content in the tenant website, or publishes it. */
+export async function retrieveGithubSourceFile(
+  websiteId:string,repositoryUrl:string,filename:string,
+):Promise<{ok:boolean;message:string;path?:string;source?:string}> {
+  try {
+    const parsed=parsePublicGithubRepo(repositoryUrl);
+    if(!parsed||!safeSourcePath(filename))
+      throw new Error('Enter a valid public repository and source filename.');
+    const s=await websiteServices('website.custom_code.view');
+    await s.website.read(websiteId);
+    const repo=JSON.parse(await githubText(
+      `https://api.github.com/repos/${parsed.owner}/${parsed.repo}`,70000,
+    )) as {private?:boolean;default_branch?:string};
+    if(repo.private||!repo.default_branch||repo.default_branch.includes('..')||
+       !/^[A-Za-z0-9_./-]{1,160}$/.test(repo.default_branch))
+      throw new Error('Public GitHub repository unavailable');
+    const branch=repo.default_branch.split('/').map(encodeURIComponent).join('/');
+    const path=filename.split('/').map(encodeURIComponent).join('/');
+    const source=await githubText(
+      `https://raw.githubusercontent.com/${parsed.owner}/${parsed.repo}/${branch}/${path}`,100000);
+    if(source.includes('\u0000'))throw new Error('Binary files cannot be displayed.');
+    return {ok:true,path:filename,source,message:`Pulled ${filename} for source review. This does not deploy code.`};
+  }catch(e){
+    return {ok:false,message:e instanceof Error && /GitHub|public|filename|Binary|size limit|rate limit|too large/i.test(e.message)
+      ? e.message : safeFailure(e).message};
+  }
+}
