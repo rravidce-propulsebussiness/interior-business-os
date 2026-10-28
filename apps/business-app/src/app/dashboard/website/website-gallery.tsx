@@ -10,6 +10,7 @@ export type GallerySite = {
 };
 export type GalleryTemplate = { id: string; name: string; description: string };
 const builtin: GalleryTemplate[] = [
+  { id: 'starter:showcase', name: 'Business Showcase · Multi-page', description: 'Complete home, about, services, projects, packages and contact pages with navigation and footer' },
   { id: 'starter:construction', name: 'Construction Company', description: 'Services, company introduction and project portfolio' },
   { id: 'starter:interior', name: 'Interior Design', description: 'Interior design showcase with elegant sections' },
   { id: 'starter:services', name: 'Professional Services', description: 'Simple and clean company services website' },
@@ -85,7 +86,7 @@ export function WebsiteGallery({ sites, templates, canManage, canCode }: {
           <div className="wg-template-details">
             <strong>{template.name}</strong>
             <p>{template.description || 'A customizable website for your business.'}</p>
-            {template.id === 'starter:construction' && <span className="wg-default-tag">Default template</span>}
+            {template.id === 'starter:showcase' && <span className="wg-default-tag">Default template</span>}
             {canManage ? <button className="wg-edit" type="button" onClick={() => openNew(template.id)}>
               Use this template
             </button> : <span className="wg-disabled-note">Contact your website manager to use this design.</span>}

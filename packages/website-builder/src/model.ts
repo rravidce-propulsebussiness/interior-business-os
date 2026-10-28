@@ -75,6 +75,7 @@ export const styleSchema = z
     color: color.optional(),
     background: color.optional(),
     fontSize: z.number().min(8).max(200).optional(),
+    fontFamily: z.enum(['serif', 'sans-serif', 'monospace']).optional(),
     padding: length.optional(),
     gap: length.optional(),
     margin: length.optional(),

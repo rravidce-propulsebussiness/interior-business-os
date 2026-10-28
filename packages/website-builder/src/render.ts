@@ -13,6 +13,7 @@ const styleNames: Record<string, string> = {
   color: 'color',
   background: 'background-color',
   fontSize: 'font-size',
+  fontFamily: 'font-family',
   padding: 'padding',
   gap: 'gap',
   margin: 'margin',
@@ -211,9 +212,12 @@ export function renderWebsite(
           : 'website-container';
     return `<${tag} ${id} class="${className}">${subtitle ? `<p class="website-eyebrow">${subtitle}</p>` : ''}${title ? `<h${node.type === 'hero' ? '1' : '2'}>${title}</h${node.type === 'hero' ? '1' : '2'}>` : ''}${text ? `<p>${text}</p>` : ''}${children}</${tag}>`;
   }
+  const headerLogo = doc.settings.logo && asset(doc.settings.logo)
+    ? `<img src="${e(asset(doc.settings.logo))}" alt="${e(doc.settings.name)}" style="height:44px;width:auto;max-width:180px;object-fit:contain">`
+    : e(doc.settings.name);
   const header = doc.header.length
     ? doc.header.map(render).join('')
-    : `<header class="website-section" style="padding-top:24px;padding-bottom:24px"><div class="website-nav"><a class="website-logo" href="/">${e(doc.settings.name)}</a>${nav(doc.navigation)}</div></header>`;
+    : `<header class="website-section" style="padding-top:24px;padding-bottom:24px"><div class="website-nav"><a class="website-logo" href="/">${headerLogo}</a>${nav(doc.navigation)}</div></header>`;
   // Empty drafts should never display the business name a second time in
   // a giant auto-generated footer. Only show a fallback when there is real
   // footer/contact content; explicitly authored footers are unchanged.
@@ -264,7 +268,15 @@ export function websiteHtml(
       document.addEventListener("click",function(event){
         const target=event.target;
         const node=target && target.closest && target.closest("[data-website-node]");
+        const anchor=target && target.closest && target.closest("a[href]");
         event.preventDefault();
+        if(anchor && !node){
+          const path=anchor.getAttribute("href")||"";
+          if(path.startsWith("/")&&!path.startsWith("//")){
+            parent.postMessage({type:"website.navigate",path:path},"*");
+          }
+          return;
+        }
         if(!node)return;
         const imageTarget=target.closest("img");
         if(imageTarget&&node.contains(imageTarget)){
