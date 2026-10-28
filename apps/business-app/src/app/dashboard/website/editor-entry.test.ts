@@ -13,6 +13,7 @@ describe('template-first business website editing', () => {
   const creation = source('./website-create.tsx');
   const media = source('./website-media-picker.tsx');
   const settings = source('./settings-panel.tsx');
+  const mediaRoute = source('./[id]/media/route.ts');
 
   it('opens the visual editor even for owners with source permissions', () => {
     expect(entry).toContain('<WebsiteEditor');
@@ -55,6 +56,25 @@ describe('template-first business website editing', () => {
     expect(entry).toContain("canPreviewMedia={s.allowed('website.media.manage')}");
     expect(tabs).toContain("canPreviewMedia={s.allowed('website.media.manage')}");
     expect(media).toContain("Upload / manage images");
+  });
+
+  it('uploads images within the editor using existing tenant-authorized media storage', () => {
+    expect(media).toContain("method: 'POST', body, credentials: 'same-origin'");
+    expect(media).toContain("['image/jpeg', 'image/png', 'image/webp', 'image/avif']");
+    expect(media).toContain('10 * 1024 * 1024');
+    expect(media).toContain('onUploaded({');
+    expect(mediaRoute).toContain("websiteServices('website.media.manage')");
+    expect(mediaRoute).toContain("request.headers.get('origin')");
+    expect(mediaRoute).toContain('width, height, alt:');
+  });
+
+  it('persists uploaded asset references before updating page or logo settings', () => {
+    expect(editor).toContain("(['assets', 'pages', 'header', 'footer'] as const)");
+    expect(editor).toContain('onUploaded={asset => {');
+    expect(editor).toContain('assets: [...document.assets, asset]');
+    expect(settings).toContain("saveAction(id, nextVersion, 'assets', doc.assets)");
+    expect(settings).toContain('onUploaded={asset => {');
+    expect(settings).toContain('assets: [...current.assets, asset]');
   });
 
   it('prioritizes editable published templates over blank or code sites', () => {

@@ -96,7 +96,7 @@ export function WebsiteEditor({
     page = document.pages.find((p) => p.id === pageId) ?? document.pages[0]!,
     activeNodes = area === 'pages' ? page.nodes : document[area],
     selected = selection ? locateNode(activeNodes, selection) : undefined;
-  const unsavedSections = (['pages', 'header', 'footer'] as const).filter(
+  const unsavedSections = (['assets', 'pages', 'header', 'footer'] as const).filter(
     (key) => JSON.stringify(document[key]) !== JSON.stringify(savedDocument[key]),
   );
   const hasUnsavedChanges = unsavedSections.length > 0;
@@ -565,6 +565,24 @@ export function WebsiteEditor({
                   disabled={!canEdit || pending}
                   canPreview={canPreviewMedia}
                   unsaved={hasUnsavedChanges}
+                  onUploaded={asset => {
+                    // Append the new image and replace the selected section in one
+                    // undoable draft change; Save draft persists assets before pages.
+                    const nextNodes = structuredClone(activeNodes);
+                    const target = selection ? locateNode(nextNodes, selection) : undefined;
+                    if (!target) return;
+                    target.props.asset = asset.id;
+                    if (!target.props.alt && asset.alt) target.props.alt = asset.alt;
+                    const nextDoc: WebsiteDocument = {
+                      ...document, assets: [...document.assets, asset],
+                    };
+                    if (area === 'pages') nextDoc.pages = document.pages.map(item =>
+                      item.id === page.id ? { ...item, nodes: nextNodes } : item);
+                    else if (area === 'header') nextDoc.header = nextNodes;
+                    else nextDoc.footer = nextNodes;
+                    edit(nextDoc);
+                    setMessage('Image uploaded. Save draft to keep this change.');
+                  }}
                   onChange={assetId => update(node => {
                     if (assetId) {
                       node.props.asset = assetId;
