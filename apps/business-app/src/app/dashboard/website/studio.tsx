@@ -3,6 +3,7 @@ import { useWebsitePreviewSrcDoc } from './website-preview-nonce';
 import { useEffect, useRef, useState, useTransition, type MouseEvent as ReactMouseEvent } from 'react';
 import Link from 'next/link';
 import { WebsiteMediaPicker } from './website-media-picker';
+import { convertPageToCodeDraft } from './convert-code-action';
 import { editableContentFields } from './website-content-fields';
 import {
   componentTypes,
@@ -83,6 +84,39 @@ export function WebsiteEditor({
     const receive = (event: MessageEvent) => {
       if (event.source !== frame.current?.contentWindow) return;
       const data = event.data;
+      if (data?.type === 'website.inline-text') {
+        if (!canEdit || typeof data.id !== 'string' ||
+            !/^[a-zA-Z][a-zA-Z0-9_-]{0,63}$/.test(data.id) ||
+            !['title','subtitle','text'].includes(data.field) ||
+            typeof data.value !== 'string' ||
+            data.value.length > (data.field === 'title' ? 300 :
+              data.field === 'subtitle' ? 1000 : 12000)) return;
+        setHistory(current => {
+          const next = structuredClone(current.present);
+          const walk = (items: WebsiteNode[]): WebsiteNode | undefined => {
+            for (const node of items) {
+              if (node.id === data.id) return node;
+              const child = walk(node.children);
+              if (child) return child;
+            }
+            return undefined;
+          };
+          let node = walk(next.header) ?? walk(next.footer);
+          if (!node) for (const page of next.pages) {
+            node = walk(page.nodes);
+            if (node) break;
+          }
+          if (!node) return current;
+          const allowed = editableContentFields(node).some(field => field.key === data.field) ||
+            ((node.type === 'heading' || node.type === 'button') && data.field === 'text');
+          if (!allowed || node.props[data.field as 'title'|'subtitle'|'text'] === data.value)
+            return current;
+          node.props[data.field as 'title'|'subtitle'|'text'] = data.value;
+          return editHistory(current, next);
+        });
+        setSelection(data.id);
+        return;
+      }
       if (data?.type === 'website.select' && typeof data.id === 'string') {
         setSelection(data.id);
         // On narrow screens the controls sit beneath the preview. Move there
@@ -103,7 +137,7 @@ export function WebsiteEditor({
     };
     window.addEventListener('message', receive);
     return () => window.removeEventListener('message', receive);
-  }, []);
+  }, [canEdit]);
   const [history, setHistory] = useState<History<WebsiteDocument>>({
       past: [],
       present: initial,
@@ -117,7 +151,7 @@ export function WebsiteEditor({
     [preview, setPreview] = useState(''),
     [pending, start] = useTransition(),
     [palette, setPalette] = useState(''),
-    [sideTab, setSideTab] = useState<'layers' | 'components'>('layers'),
+    [sideTab, setSideTab] = useState<'layers' | 'components' | 'files'>('layers'),
     [fullPreview, setFullPreview] = useState(false),
     [savedDocument, setSavedDocument] = useState(initial);
   const previewSrcDoc = useWebsitePreviewSrcDoc(preview);
@@ -300,6 +334,17 @@ export function WebsiteEditor({
     }
   }
   collect(activeNodes);
+  const convertToCode = () => {
+    if (!canViewSource || !canEdit || pending) return;
+    if (hasUnsavedChanges) {setMessage('Save your visual edits before converting a code copy.');return;}
+    if (!window.confirm('Create an editable HTML/CSS draft copy of this page? The original visual page stays unchanged. Dynamic forms and images cannot be converted automatically.')) return;
+    start(async () => {
+      const result = await convertPageToCodeDraft(id, version, page.id);
+      setMessage(result.message);
+      if (result.created && result.pageId)
+        window.location.assign(`/dashboard/website/${id}/developer?page=${encodeURIComponent(result.pageId)}`);
+    });
+  };
   const saveDraft = () =>
     start(async () => {
       let nextVersion = version;
@@ -421,7 +466,7 @@ export function WebsiteEditor({
           <Link href={`/dashboard/website/${id}/seo`} onClick={confirmLeavingEditor}>SEO</Link>
           <Link href={`/dashboard/website/${id}/media`} onClick={confirmLeavingEditor}>Images</Link>
           <Link href={`/dashboard/website/${id}/versions`} onClick={confirmLeavingEditor}>⌁ Versions</Link>
-          {canViewSource && <Link href={`/dashboard/website/${id}/developer`} onClick={confirmLeavingEditor}>Advanced source</Link>}
+          {canViewSource && <Link href={`/dashboard/website/${id}/developer`} onClick={confirmLeavingEditor}>Files & code</Link>}
         </div>
       </nav>}
       {message && <p className="ss-message" role="status">{message}</p>}
@@ -485,6 +530,9 @@ export function WebsiteEditor({
             <button type="button" role="tab" aria-selected={sideTab === 'components'}
               className={sideTab === 'components' ? 'active' : ''}
               onClick={() => setSideTab('components')}>Components</button>
+            {canViewSource && <button type="button" role="tab" aria-selected={sideTab === 'files'}
+              className={sideTab === 'files' ? 'active' : ''}
+              onClick={() => setSideTab('files')}>Files</button>}
           </div>
           {sideTab === 'layers' ? <div className="ss-left-content" role="tabpanel">
             <h2 className="ss-panel-label">{area === 'pages' ? 'CURRENT PAGE' : area === 'header' ? 'GLOBAL HEADER' : 'GLOBAL FOOTER'}</h2>
@@ -507,7 +555,7 @@ export function WebsiteEditor({
               setArea('footer'); setSelection(null); }}>
               <span>▣</span> Global footer <b>›</b>
             </button>
-          </div> : <div className="ss-left-content" role="tabpanel">
+          </div> : sideTab === 'components' ? <div className="ss-left-content" role="tabpanel">
             <h2 className="ss-panel-label">ADD COMPONENT</h2>
             <input aria-label="Find component" placeholder="Find a component…"
               className="ss-palette-search" value={palette}
@@ -533,9 +581,20 @@ export function WebsiteEditor({
                   nodes([...activeNodes, node]);setSelection(node.id);setSideTab('layers');
                 }}>{section.name}</button>)}
             </div>}
+          </div> : <div className="ss-left-content" role="tabpanel">
+            <h2 className="ss-panel-label">TEMPLATE FILES</h2>
+            <p className="ss-empty-layers">Work with your actual template HTML, CSS and JavaScript files. Visual sections remain editable on this screen.</p>
+            <Link className="ss-file-link" href={`/dashboard/website/${id}/developer`}
+              onClick={confirmLeavingEditor}>▣ Open file editor</Link>
+            <h2 className="ss-panel-label ss-shared-label">THIS PAGE</h2>
+            <button className="ss-file-convert" type="button" disabled={!canEdit || pending || hasUnsavedChanges}
+              onClick={convertToCode}>⌘ Convert to code copy</button>
+            <p className="ss-empty-layers">Creates a separate editable HTML/CSS draft page. The original template and published website stay safe. Media and forms need manual editing.</p>
+            <Link className="ss-file-link" href={`/dashboard/website/${id}/git`}
+              onClick={confirmLeavingEditor}>↗ GitHub & VS Code</Link>
           </div>}
           <div className="ss-left-tip"><strong>✦ &nbsp; Quick tip</strong>
-            <p>Click any section in the preview to edit it. Drag or add components from the library.</p>
+            <p>Click text on the website to type directly. Use Components to add sections or Files to edit HTML and CSS.</p>
           </div>
         </aside>
         <section className="ss-canvas" aria-label="Website canvas"
@@ -551,7 +610,7 @@ export function WebsiteEditor({
           }}>
           <div className="ss-canvas-head">
             <span className="ss-canvas-path">⌂ &nbsp; {page.path} &nbsp; · &nbsp; {page.visibility === 'public' ? 'Public on publish' : 'Private draft'}</span>
-            <span role="status">{previewLoading ? 'Updating preview…' : 'Click a section to edit'}</span>
+            <span role="status">{previewLoading ? 'Updating preview…' : 'Click text to type · Click a section for options'}</span>
           </div>
           <div className={`ss-browser ss-browser-${device}`}>
             <div className="ss-browser-bar" aria-hidden="true">

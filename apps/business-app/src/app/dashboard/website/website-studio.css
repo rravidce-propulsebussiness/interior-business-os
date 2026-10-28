@@ -172,3 +172,11 @@
  .ss-mobile-draftbar button{flex:0 0 auto;min-height:44px;padding:10px 20px;border:1px solid #d76531;border-radius:11px;background:#d76531;color:#fff;font-weight:800;font-size:14px;cursor:pointer}
  .ss-mobile-draftbar button:disabled{opacity:.7;cursor:wait}
 }
+
+/* Simplified WordPress-style visual editor with a Files tab. */
+.ss-left-tabs{gap:2px;padding-left:5px;padding-right:5px}
+.ss-left-tabs button{font-size:10px;min-width:0}
+.site-studio-page .ss-file-link,.site-studio-page .ss-file-convert{display:flex;align-items:center;justify-content:flex-start;width:100%;padding:11px 9px;border-radius:9px;border:1px solid #f0e1d5;background:#fff8f2;color:#ca5c23;font-size:11px;font-weight:800;margin:10px 0;text-align:left}
+.site-studio-page .ss-file-convert{background:#ffefe4;border-color:#ffcfaa}
+.site-studio-page .ss-file-link:hover,.site-studio-page .ss-file-convert:hover:not(:disabled){color:#9b411d;background:#ffe6d3}
+.ss-preview-frame [contenteditable]{cursor:text}

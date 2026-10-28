@@ -77,7 +77,7 @@ export function WebsiteCreate({
             <p>NEW WEBSITE</p>
             <h2 id="website-create-title">Create your website</h2>
             <span>
-              Start with a ready-to-edit template and add your business details.
+              Select a template and enter your business name. The website opens directly in the visual editor.
             </span>
           </div>
           <button
@@ -104,7 +104,7 @@ export function WebsiteCreate({
               if (result.id) {
                 onClose();
                 router.push(
-                  `/dashboard/website/${result.id}${template === 'custom' ? '/developer' : ''}`,
+                  `/dashboard/website/${result.id}${template === 'custom' ? '/developer' : '/layout'}`,
                 );
               }
             })

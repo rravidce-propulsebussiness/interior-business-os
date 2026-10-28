@@ -258,10 +258,52 @@ export function websiteHtml(
   // The server still renders and validates the final HTML for every draft.
   const previewScript = options.preview
     ? `<script data-website-preview-script>
+      // WordPress-style click-to-edit for plain text and headings.
+      // Sandboxed preview emits only plain strings; the parent validates
+      // type, field and length before touching the website document.
       document.addEventListener("click",function(event){
+        const target=event.target;
+        const node=target && target.closest && target.closest("[data-website-node]");
         event.preventDefault();
-        const node=event.target.closest("[data-website-node]");
-        if(node)parent.postMessage({type:"website.select",id:node.dataset.websiteNode},"*");
+        if(!node)return;
+        parent.postMessage({type:"website.select",id:node.dataset.websiteNode},"*");
+        const textTarget=target.closest("h1,h2,h3,h4,h5,h6,p,a.button");
+        if(!textTarget||!node.contains(textTarget)||textTarget.isContentEditable)return;
+        const type=node.matches("h1,h2,h3,h4,h5,h6")?"heading":
+          node.matches("p")?"text":
+          node.matches("a.button")?"button":node.tagName.toLowerCase();
+        let field=null;
+        if(type==="heading"&&textTarget===node)field="text";
+        else if(type==="text"&&textTarget===node)field="text";
+        else if(type==="button"&&textTarget===node)field="text";
+        else if(type==="section"||type==="div"||type==="footer"){
+          if(textTarget.matches(".website-eyebrow"))field="subtitle";
+          else if(textTarget.matches("h1,h2")&&textTarget.parentElement===node)field="title";
+          else if(textTarget.matches("p")&&textTarget.parentElement===node)field="text";
+        }
+        if(!field)return;
+        const before=textTarget.textContent||"";
+        textTarget.setAttribute("contenteditable","plaintext-only");
+        textTarget.setAttribute("spellcheck","true");
+        textTarget.style.outline="2px solid #fa762d";
+        textTarget.style.outlineOffset="3px";
+        textTarget.focus();
+        function onEditKey(e){
+          if(e.key==="Escape"){e.preventDefault();textTarget.textContent=before;textTarget.blur();}
+          if(e.key==="Enter"&&field!=="text"){e.preventDefault();textTarget.blur();}
+        }
+        textTarget.addEventListener("keydown",onEditKey);
+        textTarget.addEventListener("blur",function(){
+          textTarget.removeEventListener("keydown",onEditKey);
+          const after=(textTarget.textContent||"").slice(0,12000);
+          textTarget.removeAttribute("contenteditable");
+          textTarget.style.outline="";
+          textTarget.style.outlineOffset="";
+          if(after!==before)parent.postMessage({
+            type:"website.inline-text",id:node.dataset.websiteNode,
+            field:field,value:after
+          },"*");
+        },{once:true});
       });
       // The editor saves the scroll position before replacing srcDoc.
       // Only the trusted parent can restore this isolated preview.

@@ -52,7 +52,9 @@ export default async function WebsiteTab({
   const email = user.email ?? '';
   let content;
   if (tab === 'developer') {
+    const query = await searchParams;
     content = <TemplateEditor
+      {...(query.page ? { initialPageId: query.page } : {})}
       id={id}
       name={site.name}
       initial={templateSources(site.document)}
