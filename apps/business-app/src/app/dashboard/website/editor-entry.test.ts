@@ -93,6 +93,29 @@ describe('template-first business website editing', () => {
     expect(creation).toContain("template === 'custom' ? '/developer' : ''");
   });
 
+  it('uses cached recent previews and does not overwrite newer drafts', () => {
+    expect(editor).toContain('const previewCache = useRef(new Map<string, string>())');
+    expect(editor).toContain('JSON.stringify([history.present, page.path])');
+    expect(editor).toContain('const cached = previewCache.current.get(key)');
+    expect(editor).toContain('const delay = firstPreview.current ? 0 : 500');
+    expect(editor).toContain('if (!active) return; // A newer draft may already be visible.');
+    expect(editor).toContain('previewCache.current.size > 5');
+    expect(editor).toContain("previewLoading ? 'Updating preview…'");
+    expect(editor).not.toContain("setMessage('');");
+  });
+
+  it('prioritizes readable content fields and puts technical controls under Advanced', () => {
+    expect(editor).toContain("key === 'text' ? 'Body text'");
+    expect(editor).toContain("key === 'alt' ? 'Image description'");
+    expect(editor).toContain("rows={key === 'text' ? 5 : 3}");
+    expect(editor).toContain('<summary>Advanced settings and layout</summary>');
+    expect(editor.indexOf('Public data')).toBeGreaterThan(
+      editor.indexOf('<summary>Advanced settings and layout</summary>'),
+    );
+    expect(editor).toContain("(['form', 'embed', 'code'] as const)");
+    expect(editor).toContain('Open advanced source editor');
+  });
+
   it('does not promote code editor as a standard design option', () => {
     expect(editor).toContain('No coding needed.');
     expect(design).not.toContain('⌘ &nbsp; Code editor');
