@@ -800,34 +800,6 @@ export function WebsiteEditor({
                   This section has no text to edit. Select a different section or use the
                   settings below to change its appearance.
                 </p>}
-              {contentFields.map(field => (
-                <label key={field.key} className="ss-field-label">
-                  {field.label}
-                  {field.multiline ? (
-                    <textarea
-                      className={`${controls} mt-1`}
-                      rows={field.key === 'text' ? 5 : 3}
-                      maxLength={field.maxLength}
-                      placeholder={field.placeholder}
-                      value={selected.props[field.key] ?? ''}
-                      onChange={event => update(node => {
-                        if (event.target.value) node.props[field.key] = event.target.value;
-                        else delete node.props[field.key];
-                      })}
-                    />
-                  ) : (
-                    <input className={`${controls} mt-1`}
-                      maxLength={field.maxLength}
-                      placeholder={field.placeholder}
-                      value={selected.props[field.key] ?? ''}
-                      onChange={event => update(node => {
-                        if (event.target.value) node.props[field.key] = event.target.value;
-                        else delete node.props[field.key];
-                      })}
-                    />
-                  )}
-                </label>
-              ))}
               {(selected.type === 'image' || selected.type === 'hero' ||
                 selected.type === 'logo' || selected.props.asset !== undefined) && (
                 <WebsiteMediaPicker
@@ -876,6 +848,34 @@ export function WebsiteEditor({
                   })}
                 />
               )}
+              {contentFields.map(field => (
+                <label key={field.key} className="ss-field-label">
+                  {field.label}
+                  {field.multiline ? (
+                    <textarea
+                      className={`${controls} mt-1`}
+                      rows={field.key === 'text' ? 5 : 3}
+                      maxLength={field.maxLength}
+                      placeholder={field.placeholder}
+                      value={selected.props[field.key] ?? ''}
+                      onChange={event => update(node => {
+                        if (event.target.value) node.props[field.key] = event.target.value;
+                        else delete node.props[field.key];
+                      })}
+                    />
+                  ) : (
+                    <input className={`${controls} mt-1`}
+                      maxLength={field.maxLength}
+                      placeholder={field.placeholder}
+                      value={selected.props[field.key] ?? ''}
+                      onChange={event => update(node => {
+                        if (event.target.value) node.props[field.key] = event.target.value;
+                        else delete node.props[field.key];
+                      })}
+                    />
+                  )}
+                </label>
+              ))}
               <h3 className="ss-inspector-section-title ss-appearance-label">Appearance</h3>
               {(['background', 'color'] as const).map(key => (
                 <label key={key} className="ss-color-field">
