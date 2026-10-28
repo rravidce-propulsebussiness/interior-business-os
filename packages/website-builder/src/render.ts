@@ -237,5 +237,42 @@ export function websiteHtml(
 ): string | null {
   const r = renderWebsite(build, path, options);
   if (!r) return null;
-  return `<!doctype html><html lang="${e(build.document.settings.locale)}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${e(r.title)}</title><meta name="description" content="${e(r.description)}"><meta name="robots" content="${r.noindex ? 'noindex,nofollow' : 'index,follow'}"><style>${r.css}</style></head><body>${r.body}${options.preview ? `<script>document.addEventListener("click",function(event){event.preventDefault();const node=event.target.closest("[data-website-node]");if(node)parent.postMessage({type:"website.select",id:node.dataset.websiteNode},"*");});</script>` : ''}</body></html>`;
+  // This sandbox listener only changes textContent in existing preview nodes.
+  // The server still renders and validates the final HTML for every draft.
+  const previewScript = options.preview
+    ? `<script>
+      document.addEventListener("click",function(event){
+        event.preventDefault();
+        const node=event.target.closest("[data-website-node]");
+        if(node)parent.postMessage({type:"website.select",id:node.dataset.websiteNode},"*");
+      });
+      window.addEventListener("message",function(event){
+        if(event.source!==parent)return;
+        const data=event.data;
+        if(!data||data.type!=="website.preview-text"||
+          typeof data.id!=="string"||data.id.length>100)return;
+        const node=document.getElementById(data.id);
+        if(!node||node.dataset.websiteNode!==data.id)return;
+        function apply(element,value){
+          if(element&&typeof value==="string"&&value.length<=12000)
+            element.textContent=value;
+        }
+        function child(selector){
+          return Array.from(node.children).find(function(element){
+            return element.matches(selector);
+          });
+        }
+        if(data.nodeType==="heading"&&node.matches("h1,h2,h3,h4,h5,h6"))
+          apply(node,data.text||data.title||"");
+        else if(data.nodeType==="text"&&node.matches("p"))
+          apply(node,data.text||"");
+        else if(["hero","section","cta","card","contact","footer","container"].includes(data.nodeType)){
+          apply(child("h1,h2"),data.title||"");
+          apply(child("p.website-eyebrow"),data.subtitle||"");
+          apply(child("p:not(.website-eyebrow)"),data.text||"");
+        }
+      });
+    </script>`
+    : '';
+  return `<!doctype html><html lang="${e(build.document.settings.locale)}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${e(r.title)}</title><meta name="description" content="${e(r.description)}"><meta name="robots" content="${r.noindex ? 'noindex,nofollow' : 'index,follow'}"><style>${r.css}</style></head><body>${r.body}${previewScript}</body></html>`;
 }
