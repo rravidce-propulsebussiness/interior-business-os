@@ -3,7 +3,6 @@ import { canAccess } from '@business-os/auth';
 import { ownerWorkspaceNavigation } from '../owner-workspace-navigation';
 import { websiteServices } from './service';
 import { websiteSchemaPending } from '../../../website-schema';
-import { previewWebsite } from './actions';
 import { WebsiteHome, type WebsiteHomeSite } from './website-home';
 import '../owner-dashboard.css';
 import '../command-centre.css';
@@ -58,12 +57,8 @@ export default async function Websites() {
     ]);
     if (detail) {
       pages = detail.document.pages.length;
-      if (detail.document.pages.some((page) => page.nodes.length > 0)) {
-        previewHtml = await previewWebsite(
-          featured.id,
-          detail.document.pages[0]?.path ?? '/',
-        ).catch(() => null);
-      }
+      // Do not block the website dashboard on a second authenticated read
+      // and full site compilation. The detail view previews on demand.
     }
     if (!metrics.error && Array.isArray(metrics.data)) {
       const counts = metrics.data.filter(

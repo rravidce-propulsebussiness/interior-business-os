@@ -214,9 +214,26 @@ export function renderWebsite(
   const header = doc.header.length
     ? doc.header.map(render).join('')
     : `<header class="website-section" style="padding-top:24px;padding-bottom:24px"><div class="website-nav"><a class="website-logo" href="/">${e(doc.settings.name)}</a>${nav(doc.navigation)}</div></header>`;
+  // Empty drafts should never display the business name a second time in
+  // a giant auto-generated footer. Only show a fallback when there is real
+  // footer/contact content; explicitly authored footers are unchanged.
+  const hasFooterContact = Boolean(
+    doc.settings.address.trim() || doc.settings.phone.trim() ||
+    doc.settings.email.trim() || doc.footerNavigation.length,
+  );
   const footer = doc.footer.length
     ? doc.footer.map(render).join('')
-    : `<footer class="website-section"><h2>${e(doc.settings.name)}</h2>${nav(doc.footerNavigation)}<p>${e(doc.settings.address)}</p><p>${e(doc.settings.phone)} ${e(doc.settings.email)}</p></footer>`;
+    : !hasFooterContact
+      ? ''
+      : `<footer class="website-section" aria-label="Contact and footer" style="border-top:1px solid var(--border);padding-top:28px;padding-bottom:28px">
+           <div class="website-container">
+             ${doc.footerNavigation.length ? nav(doc.footerNavigation) : ''}
+             ${doc.settings.address.trim() ? `<p>${e(doc.settings.address)}</p>` : ''}
+             ${doc.settings.phone.trim() || doc.settings.email.trim()
+               ? `<p>${e([doc.settings.phone.trim(), doc.settings.email.trim()].filter(Boolean).join(' · '))}</p>`
+               : ''}
+           </div>
+         </footer>`;
   const body = `<a class="skip" href="#main-content">Skip to content</a>${header}<main id="main-content" tabindex="-1">${page.nodes.map(render).join('')}</main>${footer}`;
   return {
     body,

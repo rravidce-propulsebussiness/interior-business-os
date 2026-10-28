@@ -1,5 +1,7 @@
 import { WebsiteTeam } from '../../team-panel';
 import { TemplateEditor } from '../../template-editor';
+import { WebsiteEditor } from '../../studio';
+import { WebsiteGitTools } from '../../website-git-tools';
 import { templatePages, templateSources } from '../../template-workspace';
 import { WebsiteDesignStudio } from '../../design-studio';
 import '../../website-studio.css';
@@ -9,7 +11,7 @@ import { ownerWorkspaceNavigation } from '../../../owner-workspace-navigation';
 import { canAccess } from '@business-os/auth';
 import '../../../owner-dashboard.css';
 import Link from 'next/link';
-import { notFound, redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import { websiteServices } from '../../service';
 import { WebsiteSettings, PublicationControls } from '../../settings-panel';
 import { DomainPanel } from '../../domain-panel';
@@ -22,6 +24,7 @@ const permissions: Record<string, string> = {
   seo: 'website.seo.manage',
   developer: 'website.custom_code.view',
   layout: 'website.view',
+  git: 'website.custom_code.view',
   domains: 'website.domain.view',
   media: 'website.media.manage',
   versions: 'website.view',
@@ -38,11 +41,6 @@ export default async function WebsiteTab({
   const permission = permissions[tab];
   if (!permission) notFound();
   const s = await websiteServices(permission, true);
-  // The visual editor has one canonical URL. Preserve old layout deep links.
-  if (tab === 'layout') {
-    const query = await searchParams;
-    redirect(`/dashboard/website/${id}${query.page ? `?page=${encodeURIComponent(query.page)}` : ''}`);
-  }
   // These independent scoped reads run concurrently to reduce navigation
   // latency, particularly on small shared hosting instances.
   const [site, organization, user] = await Promise.all([
@@ -66,6 +64,19 @@ export default async function WebsiteTab({
         s.allowed('website.page.edit') && s.allowed('website.seo.manage')}
       canPublish={s.allowed('website.page.publish')}
     />;
+  } else if (tab === 'layout') {
+    const query = await searchParams;
+    content = <div className="site-studio-page"><WebsiteEditor
+      key={site.version} id={id} initial={site.document} version={site.version}
+      name={site.name} status={site.status}
+      {...(query.page ? { initialPageId: query.page } : {})}
+      canEdit={s.allowed('website.page.edit')}
+      canPublish={s.allowed('website.page.publish')}
+      canViewSource={s.allowed('website.custom_code.view') && site.document.code.length > 0}
+      canPreviewMedia={s.allowed('website.media.manage')}
+    /></div>;
+  } else if (tab === 'git') {
+    content = <WebsiteGitTools id={id} name={site.name}/>;
   } else if (tab === 'design') {
     content = <WebsiteDesignStudio
       id={id}
@@ -232,7 +243,7 @@ export default async function WebsiteTab({
       dashboardBrand
       searchPlaceholder="Search leads, projects, quotations..."
     >
-      {tab === 'developer' || tab === 'design' ? content : (
+      {tab === 'developer' || tab === 'design' || tab === 'layout' || tab === 'git' ? content : (
         <main id="main-content" className="website-settings-workspace">
           <div className="website-settings-back"><Link href={`/dashboard/website/${id}`}>← Website Studio</Link></div>
           <header className="website-settings-title">
