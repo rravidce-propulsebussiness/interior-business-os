@@ -38,7 +38,8 @@ export function WebsiteSettings({
     [pending, start] = useTransition(),
     [selected, setSelected] = useState(0),
     [savedAssets, setSavedAssets] = useState(initial.assets),
-    [savedSettings, setSavedSettings] = useState(initial.settings);
+    [savedSettings, setSavedSettings] = useState(initial.settings),
+    [savedPages, setSavedPages] = useState(initial.pages);
   const section =
     (
       { design: 'theme', seo: 'settings', developer: 'code' } as Record<
@@ -49,7 +50,7 @@ export function WebsiteSettings({
   const save = (key: string, value: unknown) =>
     start(async () => {
       let nextVersion = version;
-      if (key === 'settings' &&
+      if ((key === 'settings' || key === 'pages') &&
           JSON.stringify(doc.assets) !== JSON.stringify(savedAssets)) {
         // Attach uploaded assets before saving logo/favicon settings so the
         // saved document never refers to an unattached image.
@@ -65,6 +66,7 @@ export function WebsiteSettings({
       if (result.version) {
         setVersion(result.version);
         if (key === 'settings') setSavedSettings(doc.settings);
+        if (key === 'pages') setSavedPages(doc.pages);
       }
     });
   const content = (
@@ -219,7 +221,6 @@ export function WebsiteSettings({
                   'canonical',
                   'ogTitle',
                   'ogDescription',
-                  'image',
                 ] as const
               ).map((key) => (
                 <label key={key} className="text-xs">
@@ -239,6 +240,42 @@ export function WebsiteSettings({
                   />
                 </label>
               ))}
+              <div className="col-span-full">
+                <WebsiteMediaPicker
+                  id={id}
+                  assets={doc.assets}
+                  value={page.seo.image}
+                  label={`Social sharing image for ${page.title}`}
+                  disabled={!canEdit || pending}
+                  canPreview={canPreviewMedia}
+                  unsaved={JSON.stringify(doc.assets) !== JSON.stringify(savedAssets) ||
+                    JSON.stringify(doc.settings) !== JSON.stringify(savedSettings) ||
+                    JSON.stringify(doc.pages) !== JSON.stringify(savedPages)}
+                  onUploaded={asset => {
+                    setDoc(current => {
+                      const pages = structuredClone(current.pages);
+                      const target = pages.find(item => item.id === page.id);
+                      if (target) target.seo.image = asset.id;
+                      return {
+                        ...current,
+                        pages,
+                        assets: current.assets.some(item => item.id === asset.id)
+                          ? current.assets : [...current.assets, asset],
+                      };
+                    });
+                    setMessage('Social image uploaded. Save page SEO to keep it in your draft.');
+                  }}
+                  onChange={assetId => setDoc(current => {
+                    const pages = structuredClone(current.pages);
+                    const target = pages.find(item => item.id === page.id);
+                    if (target) {
+                      if (assetId) target.seo.image = assetId;
+                      else delete target.seo.image;
+                    }
+                    return { ...current, pages };
+                  })}
+                />
+              </div>
               <label className="text-sm">
                 <input
                   type="checkbox"

@@ -11,3 +11,6 @@ Image and hero sections use a thumbnail picker rather than an internal asset-key
 Save draft and Publish saved draft are separate actions. Preview does not submit forms. Concurrent changes fail with a reload message instead of overwriting another editor. Publishing validates all references, routes and custom source. Restore creates another immutable published version. Old media remains retained where needed by historical versions.
 
 The starter application saves draft sections in sequence. A failed capability/quota check can leave a partially populated draft and uploaded media; reload to review it. It never publishes partial results. Supply the industry-interior assets directory alongside the Business App deployment; it is read by the starter action.
+
+
+For social sharing, Site Settings → SEO provides an image gallery for each page (Open Graph image). Editors can select, remove, or upload a JPG/PNG/WebP/AVIF photo without typing an asset ID. The `Save page SEO` operation attaches any newly uploaded assets to the draft before saving page metadata; publishing remains separate.
