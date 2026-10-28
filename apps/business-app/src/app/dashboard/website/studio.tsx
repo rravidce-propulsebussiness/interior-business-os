@@ -69,10 +69,14 @@ export function WebsiteEditor({
   const previewCache = useRef(new Map<string, string>());
   const firstPreview = useRef(true);
   const [previewLoading, setPreviewLoading] = useState(false);
+  const openingPage = initial.pages.find(p => p.id === initialPageId) ??
+    initial.pages.find(p => p.path === '/' && p.nodes.length) ??
+    initial.pages.find(p => p.nodes.length) ??
+    initial.pages.find(p => p.path === '/') ??
+    initial.pages[0]!;
   const [selection, setSelection] = useState<string | null>(
-    initial.pages[0]?.nodes.find((node) => node.type === 'hero')?.id ??
-      initial.pages[0]?.nodes[0]?.id ??
-      null,
+    openingPage.nodes.find(node => node.type === 'hero')?.id ??
+      openingPage.nodes[0]?.id ?? null,
   );
   useEffect(() => {
     const receive = (event: MessageEvent) => {
@@ -105,7 +109,7 @@ export function WebsiteEditor({
       future: [],
     }),
     [version, setVersion] = useState(initialVersion),
-    [pageId, setPageId] = useState(initial.pages.find(p => p.id === initialPageId)?.id ?? initial.pages[0]!.id),
+    [pageId, setPageId] = useState(openingPage.id),
     [area, setArea] = useState<'pages' | 'header' | 'footer'>('pages'),
     [device, setDevice] = useState<'desktop' | 'tablet' | 'mobile'>('desktop'),
     [message, setMessage] = useState(''),

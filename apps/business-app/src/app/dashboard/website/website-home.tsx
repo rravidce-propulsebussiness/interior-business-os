@@ -146,10 +146,10 @@ export function WebsiteHome({
   const quickActions = mainSite
     ? [
         {
-          title: 'Edit Pages',
+          title: 'Edit website',
           desc: 'Update content, images and sections',
           icon: 'quotations' as const,
-          href: base,
+          href: `${base}/layout`,
           allowed: canEdit,
         },
         {
@@ -255,8 +255,8 @@ export function WebsiteHome({
                         <OwnerIcon name="globe" size={42} />
                       </div>
                       <strong>Your website takes shape here.</strong>
-                      <span>Open the studio to design your first page.</span>
-                      <Link href={base}>Start editing →</Link>
+                      <span>Open your website to preview it or choose a template.</span>
+                      <Link href={base}>Open website →</Link>
                     </div>
                   </div>
                 )}
@@ -332,11 +332,9 @@ export function WebsiteHome({
                 )}
 
                 <div className="website-main-actions">
-                  {canEdit && (
-                    <Link href={base} className="website-primary">
-                      <span aria-hidden="true">✎</span> Edit Website
-                    </Link>
-                  )}
+                  <Link href={base} className="website-primary">
+                    <span aria-hidden="true">◉</span> Open Website
+                  </Link>
                   {liveUrl ? (
                     <a
                       href={liveUrl}
@@ -351,7 +349,7 @@ export function WebsiteHome({
                       href={canDomains ? `${base}/domains` : base}
                       className="website-outline"
                     >
-                      {canDomains ? 'Set Up Live Site' : 'Open Website Studio'}
+                      {canDomains ? 'Set Up Live Site' : 'Website Settings'}
                     </Link>
                   )}
                 </div>
@@ -381,7 +379,7 @@ export function WebsiteHome({
                         {site.slug} · {site.status}
                       </small>
                     </span>
-                    <span className="website-other-arrow">Open studio →</span>
+                    <span className="website-other-arrow">View website →</span>
                   </Link>
                 ))}
               </div>
@@ -435,7 +433,7 @@ export function WebsiteHome({
         </section>
       )}
 
-      {canManage && (
+      {canManage && !mainSite && (
         <section className="website-templates-section">
           <div className="website-templates-heading">
             <div>

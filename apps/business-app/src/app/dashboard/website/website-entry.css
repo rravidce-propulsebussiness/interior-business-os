@@ -1,0 +1,110 @@
+/* Website entry — choose a template first, or see an existing site. */
+.owner-layout .we-entry{width:100%;max-width:1570px;margin:0 auto;padding:26px 22px 64px;color:#34363a;font-size:12px}
+.we-entry *,.we-entry *::before,.we-entry *::after{box-sizing:border-box}
+.we-entry :is(h1,h2,h3,p){margin:0}
+.we-entry a{text-decoration:none}
+.we-entry button{cursor:pointer}
+.we-entry button:disabled{cursor:not-allowed;opacity:.48}
+.we-entry :is(button,a):focus-visible{outline:3px solid #f3a374;outline-offset:2px}
+.we-head{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap;margin-bottom:23px}
+.we-identity{display:flex;align-items:center;gap:14px;min-width:0}
+.we-symbol{flex:0 0 53px;width:53px;height:53px;display:grid;place-items:center;color:#f36626;background:#fff0e6;border-radius:15px;font-size:25px}
+.we-eyebrow{display:block;color:#e26b30;font-size:10px;letter-spacing:.13em;font-weight:850}
+.we-head h1{font-size:clamp(23px,2.7vw,31px);letter-spacing:-.045em;font-weight:850;margin:3px 0}
+.we-head p{font-size:12px;line-height:1.5;color:#9096a1}
+.we-head-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.we-entry .we-outline{display:inline-flex;align-items:center;justify-content:center;padding:10px 14px;border:1px solid #eee5df;background:#fff;border-radius:9px;color:#707986;font-size:11px;font-weight:800}
+.we-entry .we-outline:hover{color:#e05e21;border-color:#efb08d}
+.we-status{padding:10px 12px;border-radius:40px;background:#fff4e7;color:#ba7b26;font-size:10px;font-weight:800}
+.we-status.live{background:#e9f7ee;color:#2f8253}
+.we-overview{display:grid;grid-template-columns:minmax(0,1.38fr) minmax(315px,.7fr);gap:17px}
+.we-site-card,.we-start-actions,.we-template-landing{background:#fff;border:1px solid #eee6e0;border-radius:15px;box-shadow:0 10px 29px #58321d0b;overflow:hidden}
+.we-site-top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px;border-bottom:1px solid #f1eae4}
+.we-site-top strong{display:block;font-size:15px;font-weight:850}
+.we-site-top span{display:block;font-size:11px;color:#a2aab5;margin-top:4px}
+.we-iframe-stage{background:#f5f0eb;display:grid;place-items:center;padding:14px;min-height:465px}
+.we-iframe-stage iframe{display:block;width:100%;height:540px;background:#fff;border:1px solid #e6dbd3;border-radius:10px;box-shadow:0 14px 30px #4d351f16}
+.we-preview-loading{text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:35px}
+.we-preview-loading>span{display:grid;place-items:center;width:63px;height:63px;border-radius:15px;background:#fff1e6;color:#e45e22;font-size:29px;animation:we-pulse 1.8s ease-in-out infinite}
+.we-preview-loading strong{font-size:14px}
+.we-preview-loading p{font-size:11px;color:#919ba8;line-height:1.65;max-width:300px}
+@keyframes we-pulse{50%{opacity:.6;transform:scale(.95)}}
+.we-start-actions{padding:20px 17px}
+.we-start-actions h2{font-size:17px;font-weight:850;letter-spacing:-.025em}
+.we-start-actions>p{color:#96a0ae;font-size:11px;line-height:1.65;margin:8px 0 18px}
+.we-action,.we-action-main{display:flex;align-items:center;gap:11px;padding:13px 11px;border:1px solid #f0eae3;border-radius:10px;background:#fff;color:#657080;margin:9px 0}
+.we-action-main{border-color:#ffd8bc;background:#fff6ef}
+.we-action:hover,.we-action-main:hover{border-color:#eca876;background:#fffaf6}
+.we-action>span:first-child,.we-action-main>span:first-child{width:32px;height:32px;flex:0 0 32px;border-radius:9px;display:grid;place-items:center;background:#fff1e8;color:#e86c30;font-size:14px;font-weight:800}
+.we-action-main>span:first-child{color:#fff;background:#f46624}
+.we-action>span:nth-child(2),.we-action-main>span:nth-child(2){flex:1;min-width:0}
+.we-action strong,.we-action-main strong{display:block;font-size:11px;color:#424951;font-weight:850}
+.we-action small,.we-action-main small{display:block;font-size:10px;color:#a3acb7;margin-top:4px;line-height:1.45}
+.we-action b,.we-action-main b{font-size:19px;color:#d6a27e}
+.we-safety-note{display:block;margin-top:16px;font-size:10px;color:#a8a1a0;line-height:1.6}
+.we-template-landing{padding:22px}
+.we-choose-intro{display:flex;justify-content:space-between;gap:15px;margin-bottom:20px}
+.we-step{color:#eb6d34;font-size:10px;font-weight:880;letter-spacing:.11em}
+.we-choose-intro h2{font-size:20px;font-weight:850;letter-spacing:-.025em;margin-top:5px}
+.we-choose-intro p{color:#909cab;font-size:11px;line-height:1.6;margin-top:7px}
+.we-template-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
+.we-template{background:#fff;border:1px solid #eae4df;border-radius:12px;text-align:left;overflow:hidden;color:#38434f;display:flex;flex-direction:column;align-items:stretch;padding:0}
+.we-template:hover:not(:disabled){border-color:#f4a97b;box-shadow:0 12px 27px #e56c241c;transform:translateY(-2px)}
+.we-template.selected{border:2px solid #f46a2a;box-shadow:0 9px 24px #e76b291a}
+.we-template-art{height:165px;background:#fbf2e9;display:flex;flex-direction:column;padding:11px 16px}
+.we-template-art.variant-1{background:#eaf1ec}
+.we-template-art.variant-2{background:#f4eae2}
+.we-template-art.variant-3{background:#f0edf4}
+.we-art-top{height:25px;background:#fff;display:flex;align-items:center;gap:5px;border-radius:6px 6px 0 0;padding:0 9px}
+.we-art-top i{display:block;width:6px;height:6px;border-radius:50%;background:#f8c6ad}
+.we-art-top i:nth-child(2){background:#ecd0a0}
+.we-art-top i:nth-child(3){background:#a7dfc1}
+.we-art-top span{margin:auto;display:block;width:25%;height:6px;border-radius:6px;background:#f2f0ed}
+.we-art-content{flex:1;display:flex;align-items:center;gap:15px;padding:13px 17px;background:#fff}
+.we-art-symbol{font-size:35px;color:#b85d37}
+.variant-1 .we-art-symbol{color:#6d9877}
+.variant-2 .we-art-symbol{color:#ab7d64}
+.variant-3 .we-art-symbol{color:#8a7c99}
+.we-art-lines{flex:1;display:flex;flex-direction:column;gap:8px}
+.we-art-lines i{width:100%;height:6px;border-radius:7px;background:#efe7df}
+.we-art-lines i:nth-child(2){width:80%}
+.we-art-lines i:nth-child(3){width:55%}
+.we-art-button{display:block;background:#f3884e;width:27px;height:13px;border-radius:3px}
+.we-art-bottom{display:flex;align-items:center;justify-content:space-around;gap:8px;height:20px;background:#fff;padding:3px}
+.we-art-bottom i{width:24%;height:6px;border-radius:6px;background:#eee8e2}
+.we-template-info{display:flex;flex-direction:column;gap:6px;padding:16px 14px 10px;flex:1}
+.we-template-info strong{font-size:13px;font-weight:850}
+.we-template-info small{color:#9ba3ae;font-size:11px;line-height:1.55}
+.we-template-select{display:block;padding:10px 14px 15px;color:#ed6325;font-weight:850;font-size:11px}
+.we-choose-foot{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;margin-top:18px;padding:20px 0 0;border-top:1px solid #eee8e3}
+.we-choose-foot strong{font-size:12px;font-weight:850}
+.we-choose-foot p{color:#98a1ae;font-size:11px;line-height:1.5;margin-top:6px}
+.we-entry .we-primary{background:linear-gradient(100deg,#ff7c35,#ef5d1b);border:1px solid #ec671f;border-radius:9px;color:#fff;font-size:11px;font-weight:850;padding:13px 18px;white-space:nowrap;box-shadow:0 7px 17px #e46b2920}
+.we-entry .we-primary:hover:not(:disabled){background:#df5a1c}
+.we-notice{margin-bottom:14px;border:1px solid #f3dab9;background:#fff5e9;border-radius:9px;padding:11px 14px;font-size:12px;color:#946126;line-height:1.6}
+@media(max-width:1120px){.we-overview{grid-template-columns:1fr}.we-template-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){.owner-layout .we-entry{padding:16px 10px 45px}.we-overview{gap:12px}.we-template-landing{padding:13px}.we-template-grid{grid-template-columns:1fr 1fr;gap:9px}.we-template-art{height:110px;padding:6px}.we-art-content{padding:7px;gap:8px}.we-art-symbol{font-size:22px}.we-art-lines{gap:5px}.we-template-info{padding:11px 9px}.we-template-info strong{font-size:11px}.we-template-info small{font-size:9px}.we-template-select{font-size:10px;padding:8px}.we-iframe-stage{min-height:300px;padding:8px}.we-iframe-stage iframe{height:400px}.we-head-actions{width:100%}.we-start-actions{padding:16px}}
+@media(prefers-reduced-motion:reduce){.we-entry *{transition:none!important;animation:none!important}}
+
+/* External GitHub/VS Code launchpad, not an automatic deployment connector. */
+.we-git-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(300px,.75fr);gap:17px}
+.we-git-card{background:#fff;border:1px solid #eee5de;border-radius:14px;padding:25px;box-shadow:0 9px 27px #4e31190a}
+.we-git-card h2{font-size:17px;font-weight:850;letter-spacing:-.025em}
+.we-git-card>p{color:#8894a3;font-size:12px;line-height:1.7;margin:12px 0}
+.we-git-card label{display:block;font-size:11px;color:#566174;font-weight:800;margin:20px 0 7px}
+.we-git-card input{display:block;width:100%;background:#fff!important;border:1px solid #e6ded8!important;border-radius:9px!important;padding:13px!important;color:#384153!important;font-size:12px!important;box-shadow:none!important}
+.we-git-buttons{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin:17px 0}
+.we-git-card .we-git-disclaimer{font-size:10px;color:#9ba3ac;background:#fff9f3;padding:11px 13px;border-radius:9px;border:1px solid #f7e5d6}
+.we-git-info>div{padding:15px 0;border-bottom:1px solid #f0e8e2}
+.we-git-info strong{font-size:12px;color:#555e6b}
+.we-git-info div p{margin:7px 0 0;font-size:11px;color:#8793a0;line-height:1.7}
+.we-git-info>.we-outline{margin-top:20px}
+@media(max-width:900px){.we-git-grid{grid-template-columns:1fr}}
+@media(max-width:600px){.we-git-card{padding:17px}}
+
+.we-git-export{margin-top:25px;border-top:1px solid #f0e7df;padding-top:19px}
+.we-git-export h3{font-size:14px;font-weight:830}
+.we-git-export>p{font-size:11px;line-height:1.65;color:#8b96a5;margin:9px 0}
+.we-git-export label{margin-top:14px}
+.we-git-export select{display:block;width:100%;background:white!important;color:#394352!important;border:1px solid #eee0d6!important;border-radius:9px!important;padding:11px!important;margin-bottom:14px}
+.we-git-export .we-outline{margin-bottom:13px}
