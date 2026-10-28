@@ -180,3 +180,8 @@
 .site-studio-page .ss-file-convert{background:#ffefe4;border-color:#ffcfaa}
 .site-studio-page .ss-file-link:hover,.site-studio-page .ss-file-convert:hover:not(:disabled){color:#9b411d;background:#ffe6d3}
 .ss-preview-frame [contenteditable]{cursor:text}
+
+.ss-files-tree{display:flex;flex-direction:column;gap:3px;margin:12px 0}
+.ss-files-tree h3{font-size:11px;font-weight:850;color:#656e7b;padding:11px 5px 5px;margin:0}
+.site-studio-page .ss-files-tree a,.site-studio-page .ss-files-tree button{display:block;width:100%;padding:9px 8px 9px 13px;border:0;border-radius:8px;background:transparent;color:#798391;font-size:10px;line-height:1.45;text-align:left;white-space:normal;overflow-wrap:anywhere;cursor:pointer}
+.site-studio-page .ss-files-tree a:hover,.site-studio-page .ss-files-tree button:hover{background:#fff1e7;color:#dc5a20}

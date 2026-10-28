@@ -583,9 +583,29 @@ export function WebsiteEditor({
             </div>}
           </div> : <div className="ss-left-content" role="tabpanel">
             <h2 className="ss-panel-label">TEMPLATE FILES</h2>
-            <p className="ss-empty-layers">Work with your actual template HTML, CSS and JavaScript files. Visual sections remain editable on this screen.</p>
-            <Link className="ss-file-link" href={`/dashboard/website/${id}/developer`}
-              onClick={confirmLeavingEditor}>▣ Open file editor</Link>
+            <p className="ss-empty-layers">Your website files are organized below. Choose a page or source file to edit.</p>
+            <div className="ss-files-tree">
+              <h3>▤ &nbsp; pages/</h3>
+              {document.pages.map(item => {
+                const codeNode = item.nodes.length === 1 && item.nodes[0]?.type === 'custom'
+                  ? document.code.find(code => code.id === item.nodes[0]?.props.code)
+                  : undefined;
+                return codeNode ? <Link key={item.id}
+                  href={`/dashboard/website/${id}/developer?page=${item.id}`}
+                  onClick={confirmLeavingEditor}>⌘ {item.title}.html</Link> :
+                  <button type="button" key={item.id} onClick={() => {
+                    setArea('pages');setPageId(item.id);setSelection(null);setSideTab('layers');
+                  }}>▣ {item.title} (visual)</button>;
+              })}
+              <h3>◈ &nbsp; components/</h3>
+              {document.code.filter(code => !code.name.startsWith('pages/')).map(code =>
+                <Link key={code.id}
+                  href={`/dashboard/website/${id}/developer?file=${code.id}`}
+                  onClick={confirmLeavingEditor}>◇ {code.name.split('/').at(-1)}</Link>)}
+              <h3>▤ &nbsp; styles/</h3>
+              <Link href={`/dashboard/website/${id}/developer?file=global`}
+                onClick={confirmLeavingEditor}>CSS global.css</Link>
+            </div>
             <h2 className="ss-panel-label ss-shared-label">THIS PAGE</h2>
             <button className="ss-file-convert" type="button" disabled={!canEdit || pending || hasUnsavedChanges}
               onClick={convertToCode}>⌘ Convert to code copy</button>
