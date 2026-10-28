@@ -101,3 +101,10 @@
 .we-git-info>.we-outline{margin-top:20px}
 @media(max-width:900px){.we-git-grid{grid-template-columns:1fr}}
 @media(max-width:600px){.we-git-card{padding:17px}}
+
+.we-git-export{margin-top:25px;border-top:1px solid #f0e7df;padding-top:19px}
+.we-git-export h3{font-size:14px;font-weight:830}
+.we-git-export>p{font-size:11px;line-height:1.65;color:#8b96a5;margin:9px 0}
+.we-git-export label{margin-top:14px}
+.we-git-export select{display:block;width:100%;background:white!important;color:#394352!important;border:1px solid #eee0d6!important;border-radius:9px!important;padding:11px!important;margin-bottom:14px}
+.we-git-export .we-outline{margin-bottom:13px}

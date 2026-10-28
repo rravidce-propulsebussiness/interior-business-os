@@ -76,7 +76,8 @@ export default async function WebsiteTab({
       canPreviewMedia={s.allowed('website.media.manage')}
     /></div>;
   } else if (tab === 'git') {
-    content = <WebsiteGitTools id={id} name={site.name}/>;
+    content = <WebsiteGitTools id={id} name={site.name}
+      pages={site.document.pages.map(page => ({ path: page.path, title: page.title }))}/>;
   } else if (tab === 'design') {
     content = <WebsiteDesignStudio
       id={id}
