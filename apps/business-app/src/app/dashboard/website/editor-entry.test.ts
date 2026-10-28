@@ -68,6 +68,17 @@ describe('template-first business website editing', () => {
     expect(creation).toContain("template === 'custom' ? '/developer' : ''");
   });
 
+  it('keeps current previews visible and deduplicates recent server renders', () => {
+    expect(editor).toContain('const previewCache = useRef(new Map<string, string>())');
+    expect(editor).toContain('JSON.stringify([history.present, page.path])');
+    expect(editor).toContain('const cached = previewCache.current.get(key)');
+    expect(editor).toContain('const delay = firstPreview.current ? 0 : 500');
+    expect(editor).toContain('if (!active) return; // A newer draft may already be visible.');
+    expect(editor).toContain('previewCache.current.size > 5');
+    expect(editor).toContain('previewLoading ? \'Updating preview…\'');
+    expect(editor).not.toContain("setMessage('');");
+  });
+
   it('does not promote code editor as a standard design option', () => {
     expect(editor).toContain('No coding needed.');
     expect(design).not.toContain('⌘ &nbsp; Code editor');
