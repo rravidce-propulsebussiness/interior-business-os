@@ -23,9 +23,11 @@ describe('multi-language GitHub source pulling',()=>{
   it('provides actionable publishing and upload error categories',()=>{
     const a=read('./actions.ts');
     const route=read('./[id]/uploads/media/route.ts');
+    const classifier=read('./media-upload-error.ts');
     expect(a).toContain('WEBSITE_BUILD_SIGNATURE_MISMATCH');
     expect(a).toContain('Website signing is not configured');
-    expect(route).toContain('WEBSITE_MEDIA_QUOTA');
-    expect(route).toContain('WEBSITE_BUILD_SIGNATURE_MISMATCH');
+    expect(route).toContain('classifyWebsiteMediaSaveFailure');
+    expect(classifier).toContain('WEBSITE_MEDIA_QUOTA');
+    expect(classifier).toContain('WEBSITE_BUILD_SIGNATURE_MISMATCH');
   });
 });
