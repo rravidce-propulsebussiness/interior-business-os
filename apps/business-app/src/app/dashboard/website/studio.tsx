@@ -59,6 +59,11 @@ export function WebsiteEditor({
   initialPageId?: string;
 }) {
   const frame = useRef<HTMLIFrameElement>(null);
+  // Cache recent draft previews so undo / redo and revisiting a page do not
+  // immediately repeat expensive authenticated server rendering.
+  const previewCache = useRef(new Map<string, string>());
+  const firstPreview = useRef(true);
+  const [previewLoading, setPreviewLoading] = useState(false);
   const [selection, setSelection] = useState<string | null>(
     initial.pages[0]?.nodes.find((node) => node.type === 'hero')?.id ??
       initial.pages[0]?.nodes[0]?.id ??
@@ -124,19 +129,37 @@ export function WebsiteEditor({
   };
   useEffect(() => {
     let active = true;
+    const key = JSON.stringify([history.present, page.path]);
+    const cached = previewCache.current.get(key);
+    if (cached !== undefined) {
+      setPreview(previous => previous === cached ? previous : cached);
+      setPreviewLoading(false);
+      return;
+    }
+    setPreviewLoading(true);
+    // First paint starts immediately; subsequent keystrokes are coalesced.
+    const delay = firstPreview.current ? 0 : 500;
+    firstPreview.current = false;
     const timer = setTimeout(() => {
       previewAction(id, history.present, page.path)
         .then((html) => {
-          if (active) {
-            setPreview(html ?? '');
-            setMessage('');
+          if (!active) return; // A newer draft may already be visible.
+          const next = html ?? '';
+          previewCache.current.set(key, next);
+          // Keep cache small for large customer websites.
+          if (previewCache.current.size > 5) {
+            const oldest = previewCache.current.keys().next().value;
+            if (oldest !== undefined) previewCache.current.delete(oldest);
           }
+          setPreview(previous => previous === next ? previous : next);
+          setPreviewLoading(false);
         })
-        .catch((e) => {
-          if (active)
-            setMessage(e instanceof Error ? e.message : 'Preview unavailable');
+        .catch((error) => {
+          if (!active) return;
+          setPreviewLoading(false);
+          setMessage(error instanceof Error ? error.message : 'Preview unavailable');
         });
-    }, 600);
+    }, delay);
     return () => {
       active = false;
       clearTimeout(timer);
@@ -418,7 +441,7 @@ export function WebsiteEditor({
           }}>
           <div className="ss-canvas-head">
             <span className="ss-canvas-path">⌂ &nbsp; {page.path} &nbsp; · &nbsp; {page.visibility === 'public' ? 'Public on publish' : 'Private draft'}</span>
-            <span>Click a section to edit</span>
+            <span role="status">{previewLoading ? 'Updating preview…' : 'Click a section to edit'}</span>
           </div>
           <div className={`ss-browser ss-browser-${device}`}>
             <div className="ss-browser-bar" aria-hidden="true">
@@ -534,25 +557,32 @@ export function WebsiteEditor({
                   'subtitle',
                   'href',
                   'alt',
-                  'form',
-                  'code',
-                  'embed',
                 ] as const
               ).filter((key) => ['title', 'text', 'subtitle', 'href'].includes(key) ||
                 selected.props[key] !== undefined).map((key) => (
                 <label key={key} className="ss-field-label">
                   {key === 'title' ? 'Heading' : key === 'subtitle' ? 'Description' :
-                    key === 'href' ? 'Button link' : key}
-                  <input
-                    className={`${controls} mt-1`}
-                    value={selected.props[key] ?? ''}
-                    onChange={(e) =>
-                      update((n) => {
-                        if (e.target.value) n.props[key] = e.target.value;
-                        else delete n.props[key];
-                      })
-                    }
-                  />
+                    key === 'text' ? 'Body text' : key === 'href' ? 'Button link' :
+                    key === 'alt' ? 'Image description' : key}
+                  {key === 'text' || key === 'subtitle' ? (
+                    <textarea
+                      className={`${controls} mt-1`}
+                      rows={key === 'text' ? 5 : 3}
+                      value={selected.props[key] ?? ''}
+                      onChange={event => update(node => {
+                        if (event.target.value) node.props[key] = event.target.value;
+                        else delete node.props[key];
+                      })}
+                    />
+                  ) : (
+                    <input className={`${controls} mt-1`}
+                      value={selected.props[key] ?? ''}
+                      onChange={event => update(node => {
+                        if (event.target.value) node.props[key] = event.target.value;
+                        else delete node.props[key];
+                      })}
+                    />
+                  )}
                 </label>
               ))}
               {(selected.type === 'image' || selected.type === 'hero' ||
@@ -566,8 +596,7 @@ export function WebsiteEditor({
                   canPreview={canPreviewMedia}
                   unsaved={hasUnsavedChanges}
                   onUploaded={asset => {
-                    // Always merge into the freshest draft: an upload may finish
-                    // after the user has edited other fields or switched panels.
+                    // Merge into the latest draft: uploads can finish after edits.
                     const targetId = selection;
                     const targetArea = area;
                     const targetPageId = page.id;
@@ -604,7 +633,33 @@ export function WebsiteEditor({
                   })}
                 />
               )}
-              <label className="block text-xs">
+              <h3 className="ss-inspector-section-title ss-appearance-label">Appearance</h3>
+              {(['background', 'color'] as const).map(key => (
+                <label key={key} className="ss-color-field">
+                  {key === 'background' ? 'Background' : 'Text color'}
+                  <input type="color" value={(device === 'desktop' ? selected.style : selected[device])[key] ?? '#ffffff'}
+                    onChange={event => update(node => {
+                      (device === 'desktop' ? node.style : node[device])[key] = event.target.value;
+                    })} />
+                </label>
+              ))}
+              <div className="ss-two-col-fields">
+                {(['padding', 'radius'] as const).map(key => (
+                  <label key={key} className="ss-field-label">
+                    {key === 'radius' ? 'Border radius' : 'Padding'}
+                    <input type="number" min="0" max="2000" className={controls}
+                      value={(device === 'desktop' ? selected.style : selected[device])[key] ?? ''}
+                      onChange={event => update(node => {
+                        const style = device === 'desktop' ? node.style : node[device];
+                        if (event.target.value === '') delete style[key];
+                        else style[key] = Number(event.target.value);
+                      })} />
+                  </label>
+                ))}
+              </div>
+              <details className="ss-inspector-advanced">
+                <summary>Advanced settings and layout</summary>
+                <label className="block text-xs">
                 Public data
                 <select
                   className={controls}
@@ -634,32 +689,21 @@ export function WebsiteEditor({
                   ))}
                 </select>
               </label>
-              <h3 className="ss-inspector-section-title ss-appearance-label">Appearance</h3>
-              {(['background', 'color'] as const).map(key => (
-                <label key={key} className="ss-color-field">
-                  {key === 'background' ? 'Background' : 'Text color'}
-                  <input type="color" value={(device === 'desktop' ? selected.style : selected[device])[key] ?? '#ffffff'}
-                    onChange={event => update(node => {
-                      (device === 'desktop' ? node.style : node[device])[key] = event.target.value;
-                    })} />
-                </label>
-              ))}
-              <div className="ss-two-col-fields">
-                {(['padding', 'radius'] as const).map(key => (
-                  <label key={key} className="ss-field-label">
-                    {key === 'radius' ? 'Border radius' : 'Padding'}
-                    <input type="number" min="0" max="2000" className={controls}
-                      value={(device === 'desktop' ? selected.style : selected[device])[key] ?? ''}
+
+                {(['form', 'embed', 'code'] as const)
+                  .filter(key => selected.props[key] !== undefined)
+                  .map(key => <label key={key} className="ss-field-label">
+                    {key === 'code' ? 'Custom component reference' :
+                      key === 'form' ? 'Form reference' : 'Embedded content URL'}
+                    <input className={controls} value={selected.props[key] ?? ''}
                       onChange={event => update(node => {
-                        const style = device === 'desktop' ? node.style : node[device];
-                        if (event.target.value === '') delete style[key];
-                        else style[key] = Number(event.target.value);
+                        if (event.target.value) node.props[key] = event.target.value;
+                        else delete node.props[key];
                       })} />
-                  </label>
-                ))}
-              </div>
-              <details className="ss-inspector-advanced">
-                <summary>Advanced layout options</summary>
+                  </label>)}
+                {selected.props.code && canViewSource &&
+                  <Link href={`/dashboard/website/${id}/developer`}>Open advanced source editor</Link>}
+
                 {(['fontSize','gap','margin','columns','maxWidth','minHeight'] as const).map(key => (
                   <label key={key} className="ss-field-label">
                     {key}
