@@ -674,10 +674,24 @@ export function WebsiteEditor({
                   onChange={event=>edit({...document,pages:document.pages.map(item=>
                     item.id===page.id?{...item,title:event.target.value}:item)})}/>
               </label>
-              <p className="ss-wp-hint">Page URL: <strong>{page.path}</strong>. Choose Header to link pages together.</p>
+              <label className="ss-wp-input">Page address
+                <input disabled={!canEdit} maxLength={180}
+                  value={page.path}
+                  onChange={event=>edit({...document,pages:document.pages.map(item=>
+                    item.id===page.id?{...item,path:event.target.value}:item)})}/>
+              </label>
+              <label className="ss-wp-input">Page visibility
+                <select disabled={!canEdit} value={page.visibility}
+                  onChange={event=>edit({...document,pages:document.pages.map(item=>
+                    item.id===page.id?{...item,visibility:event.target.value as 'public'|'draft'}:item)})}>
+                  <option value="draft">Private draft — not included on publication</option>
+                  <option value="public">Public — include when I publish</option>
+                </select>
+              </label>
+              <p className="ss-wp-hint">Select Public, save your draft and then use Publish Website. Update Header & menu to link your pages.</p>
               {canCreatePage && <button type="button" className="ss-wp-main-action"
                 onClick={addWebsitePage}>+ Add website page</button>}
-              <p className="ss-wp-hint">To change a page name or URL, select the page and open its settings from the canvas.</p>
+              <p className="ss-wp-hint">Your edits are saved as a draft and do not affect the published website until you choose Publish.</p>
             </>}
             {sitePanel === 'header' && <>
               <p className="ss-wp-hint">Your header appears on all template pages. Its menu links point to your website pages.</p>

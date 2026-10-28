@@ -343,3 +343,7 @@
  .ss-simple-layout.ss-focused .ss-board{min-height:440px;flex:1}
  .ss-simple-layout.ss-focused .ss-preview-frame{min-height:350px}
 }
+
+.ss-wp-manager .ss-wp-input select{display:block;width:100%;min-width:0;border:1px solid #e9dfd7!important;
+  border-radius:8px!important;padding:10px!important;background:#fff!important;color:#333b44!important;
+  font-size:11px!important}
