@@ -71,10 +71,15 @@ describe('template-first business website editing', () => {
   it('persists uploaded asset references before updating page or logo settings', () => {
     expect(editor).toContain("(['assets', 'pages', 'header', 'footer'] as const)");
     expect(editor).toContain('onUploaded={asset => {');
-    expect(editor).toContain('assets: [...document.assets, asset]');
+    expect(editor).toContain('setHistory(history => {');
+    expect(editor).toContain('const current = history.present;');
+    expect(editor).toContain('assets: current.assets.some(item => item.id === asset.id)');
+    expect(editor).toContain('return editHistory(history, draft);');
     expect(settings).toContain("saveAction(id, nextVersion, 'assets', doc.assets)");
     expect(settings).toContain('onUploaded={asset => {');
     expect(settings).toContain('assets: [...current.assets, asset]');
+    expect(settings).toContain('[savedSettings, setSavedSettings]');
+    expect(settings).toContain('unsaved={JSON.stringify(doc.assets)');
   });
 
   it('prioritizes editable published templates over blank or code sites', () => {
