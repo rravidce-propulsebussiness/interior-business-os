@@ -137,9 +137,12 @@ describe('template-first business website editing', () => {
   });
 
   it('prioritizes readable content fields and puts technical controls under Advanced', () => {
-    expect(editor).toContain("key === 'text' ? 'Body text'");
-    expect(editor).toContain("key === 'alt' ? 'Image description'");
-    expect(editor).toContain("rows={key === 'text' ? 5 : 3}");
+    expect(editor).toContain('editableContentFields(selected)');
+    expect(editor).toContain('{contentFields.map(field => (');
+    expect(editor).toContain('field.label');
+    expect(editor).toContain("rows={field.key === 'text' ? 5 : 3}");
+    expect(editor).toContain('maxLength={field.maxLength}');
+    expect(editor).toContain("type: 'website.preview-text'");
     expect(editor).toContain('<summary>Advanced settings and layout</summary>');
     expect(editor.indexOf('Public data')).toBeGreaterThan(
       editor.indexOf('<summary>Advanced settings and layout</summary>'),
