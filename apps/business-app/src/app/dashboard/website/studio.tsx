@@ -557,25 +557,32 @@ export function WebsiteEditor({
                   'subtitle',
                   'href',
                   'alt',
-                  'form',
-                  'code',
-                  'embed',
                 ] as const
               ).filter((key) => ['title', 'text', 'subtitle', 'href'].includes(key) ||
                 selected.props[key] !== undefined).map((key) => (
                 <label key={key} className="ss-field-label">
                   {key === 'title' ? 'Heading' : key === 'subtitle' ? 'Description' :
-                    key === 'href' ? 'Button link' : key}
-                  <input
-                    className={`${controls} mt-1`}
-                    value={selected.props[key] ?? ''}
-                    onChange={(e) =>
-                      update((n) => {
-                        if (e.target.value) n.props[key] = e.target.value;
-                        else delete n.props[key];
-                      })
-                    }
-                  />
+                    key === 'text' ? 'Body text' : key === 'href' ? 'Button link' :
+                    key === 'alt' ? 'Image description' : key}
+                  {key === 'text' || key === 'subtitle' ? (
+                    <textarea
+                      className={`${controls} mt-1`}
+                      rows={key === 'text' ? 5 : 3}
+                      value={selected.props[key] ?? ''}
+                      onChange={event => update(node => {
+                        if (event.target.value) node.props[key] = event.target.value;
+                        else delete node.props[key];
+                      })}
+                    />
+                  ) : (
+                    <input className={`${controls} mt-1`}
+                      value={selected.props[key] ?? ''}
+                      onChange={event => update(node => {
+                        if (event.target.value) node.props[key] = event.target.value;
+                        else delete node.props[key];
+                      })}
+                    />
+                  )}
                 </label>
               ))}
               {(selected.type === 'image' || selected.type === 'hero' ||
@@ -615,7 +622,33 @@ export function WebsiteEditor({
                   })}
                 />
               )}
-              <label className="block text-xs">
+              <h3 className="ss-inspector-section-title ss-appearance-label">Appearance</h3>
+              {(['background', 'color'] as const).map(key => (
+                <label key={key} className="ss-color-field">
+                  {key === 'background' ? 'Background' : 'Text color'}
+                  <input type="color" value={(device === 'desktop' ? selected.style : selected[device])[key] ?? '#ffffff'}
+                    onChange={event => update(node => {
+                      (device === 'desktop' ? node.style : node[device])[key] = event.target.value;
+                    })} />
+                </label>
+              ))}
+              <div className="ss-two-col-fields">
+                {(['padding', 'radius'] as const).map(key => (
+                  <label key={key} className="ss-field-label">
+                    {key === 'radius' ? 'Border radius' : 'Padding'}
+                    <input type="number" min="0" max="2000" className={controls}
+                      value={(device === 'desktop' ? selected.style : selected[device])[key] ?? ''}
+                      onChange={event => update(node => {
+                        const style = device === 'desktop' ? node.style : node[device];
+                        if (event.target.value === '') delete style[key];
+                        else style[key] = Number(event.target.value);
+                      })} />
+                  </label>
+                ))}
+              </div>
+              <details className="ss-inspector-advanced">
+                <summary>Advanced settings and layout</summary>
+                <label className="block text-xs">
                 Public data
                 <select
                   className={controls}
@@ -645,32 +678,21 @@ export function WebsiteEditor({
                   ))}
                 </select>
               </label>
-              <h3 className="ss-inspector-section-title ss-appearance-label">Appearance</h3>
-              {(['background', 'color'] as const).map(key => (
-                <label key={key} className="ss-color-field">
-                  {key === 'background' ? 'Background' : 'Text color'}
-                  <input type="color" value={(device === 'desktop' ? selected.style : selected[device])[key] ?? '#ffffff'}
-                    onChange={event => update(node => {
-                      (device === 'desktop' ? node.style : node[device])[key] = event.target.value;
-                    })} />
-                </label>
-              ))}
-              <div className="ss-two-col-fields">
-                {(['padding', 'radius'] as const).map(key => (
-                  <label key={key} className="ss-field-label">
-                    {key === 'radius' ? 'Border radius' : 'Padding'}
-                    <input type="number" min="0" max="2000" className={controls}
-                      value={(device === 'desktop' ? selected.style : selected[device])[key] ?? ''}
+
+                {(['form', 'embed', 'code'] as const)
+                  .filter(key => selected.props[key] !== undefined)
+                  .map(key => <label key={key} className="ss-field-label">
+                    {key === 'code' ? 'Custom component reference' :
+                      key === 'form' ? 'Form reference' : 'Embedded content URL'}
+                    <input className={controls} value={selected.props[key] ?? ''}
                       onChange={event => update(node => {
-                        const style = device === 'desktop' ? node.style : node[device];
-                        if (event.target.value === '') delete style[key];
-                        else style[key] = Number(event.target.value);
+                        if (event.target.value) node.props[key] = event.target.value;
+                        else delete node.props[key];
                       })} />
-                  </label>
-                ))}
-              </div>
-              <details className="ss-inspector-advanced">
-                <summary>Advanced layout options</summary>
+                  </label>)}
+                {selected.props.code && canViewSource &&
+                  <Link href={`/dashboard/website/${id}/developer`}>Open advanced source editor</Link>}
+
                 {(['fontSize','gap','margin','columns','maxWidth','minHeight'] as const).map(key => (
                   <label key={key} className="ss-field-label">
                     {key}
