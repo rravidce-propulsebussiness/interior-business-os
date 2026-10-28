@@ -36,7 +36,8 @@ export function WebsiteSettings({
     [version, setVersion] = useState(initialVersion),
     [message, setMessage] = useState(''),
     [pending, start] = useTransition(),
-    [selected, setSelected] = useState(0);
+    [selected, setSelected] = useState(0),
+    [savedAssets, setSavedAssets] = useState(initial.assets);
   const section =
     (
       { design: 'theme', seo: 'settings', developer: 'code' } as Record<
@@ -46,9 +47,21 @@ export function WebsiteSettings({
     )[tab] ?? tab;
   const save = (key: string, value: unknown) =>
     start(async () => {
-      const r = await saveAction(id, version, key, value);
-      setMessage(r.message);
-      if (r.version) setVersion(r.version);
+      let nextVersion = version;
+      if (key === 'settings' &&
+          JSON.stringify(doc.assets) !== JSON.stringify(savedAssets)) {
+        // Attach uploaded assets before saving logo/favicon settings so the
+        // saved document never refers to an unattached image.
+        const attachment = await saveAction(id, nextVersion, 'assets', doc.assets);
+        setMessage(attachment.message);
+        if (!attachment.version) return;
+        nextVersion = attachment.version;
+        setVersion(nextVersion);
+        setSavedAssets(doc.assets);
+      }
+      const result = await saveAction(id, nextVersion, key, value);
+      setMessage(result.message);
+      if (result.version) setVersion(result.version);
     });
   const content = (
     <>
@@ -156,6 +169,14 @@ export function WebsiteSettings({
                 label={key === 'logo' ? 'Company logo' : 'Browser favicon'}
                 disabled={!canEdit || pending}
                 canPreview={canPreviewMedia}
+                onUploaded={asset => {
+                  setDoc(current => ({
+                    ...current,
+                    assets: [...current.assets, asset],
+                    settings: { ...current.settings, [key]: asset.id },
+                  }));
+                  setMessage('Image uploaded. Save SEO to keep your logo or favicon.');
+                }}
                 onChange={assetId => setDoc(current => ({
                   ...current,
                   settings: { ...current.settings, [key]: assetId },
