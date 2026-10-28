@@ -93,16 +93,32 @@ export function createWebsiteRepository(
         p_summary: summary,
         ...(restoreId ? { p_restore_id: idSchema.parse(restoreId) } : {}),
       });
-      // These are deliberately stable, non-secret diagnostic identifiers.
-      // Do not expose the HMAC, signed payload or database key to clients.
-      if (response.error?.message === 'Invalid or expired build proof')
-        throw new Error('WEBSITE_BUILD_SIGNATURE_MISMATCH');
-      if (response.error?.message === 'Custom code capability required')
-        throw new Error('WEBSITE_CUSTOM_CODE_NOT_ENTITLED');
-      if (response.error?.message === 'Website forms require Forms capability and CRM')
-        throw new Error('WEBSITE_FORMS_NOT_ENTITLED');
-      if (response.error?.message === 'Stale publish')
-        throw new Error('WEBSITE_PUBLISH_VERSION_CONFLICT');
+      // Preserve only stable error categories, never proof contents or raw
+      // database diagnostics. checked() would otherwise turn every database
+      // publishing rejection into an indistinguishable VALIDATION_FAILED.
+      if (response.error) {
+        const reason = (response.error.message ?? '').trim();
+        const mapping: Record<string,string> = {
+          'Invalid or expired build proof': 'WEBSITE_BUILD_SIGNATURE_MISMATCH',
+          'Build proof required': 'WEBSITE_BUILD_SIGNATURE_MISMATCH',
+          'Build ownership mismatch': 'WEBSITE_BUILD_OWNERSHIP_MISMATCH',
+          'Custom code capability required': 'WEBSITE_CUSTOM_CODE_NOT_ENTITLED',
+          'Website forms require Forms capability and CRM': 'WEBSITE_FORMS_NOT_ENTITLED',
+          'Stale publish': 'WEBSITE_PUBLISH_VERSION_CONFLICT',
+          'Invalid build': 'WEBSITE_BUILD_INVALID',
+          'Unavailable asset': 'WEBSITE_PUBLISH_MISSING_ASSET',
+          'Page limit reached': 'WEBSITE_PUBLISH_PAGE_LIMIT',
+          'Unavailable website': 'WEBSITE_PUBLISH_UNAVAILABLE',
+        };
+        const category = mapping[reason] ??
+          (response.error.code === '42501'
+            ? 'WEBSITE_PUBLISH_PERMISSION_DENIED'
+            : 'WEBSITE_PUBLISH_DATABASE_REJECTED');
+        console.error('website.publish.rpc.failed', {
+          category, sqlState: response.error.code ?? 'unknown',
+        });
+        throw new Error(category);
+      }
       return checked(response);
     },
     async status(id: string, version: number, status: string) {

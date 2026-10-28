@@ -20,7 +20,7 @@ async function githubText(url: string, max: number): Promise<string> {
   if (!result.ok) {
     if (result.status===403 || result.status===429)
       throw new Error('GitHub rate limit reached. Try again later.');
-    if (result.status===404) throw new Error('Public GitHub repository or file not found.');
+    if (result.status===404) throw new Error('Public GitHub repository/file not found. This repository might be private; URL-only import cannot access private code. Use GitHub or VS Code until an authorized GitHub connection is configured.');
     throw new Error('GitHub could not return this public repository.');
   }
   if (Number(result.headers.get('content-length') || 0)>max)
@@ -127,9 +127,29 @@ export async function pullGithubStaticPages(
         (skipped.length?`Skipped ${skipped.length} unsupported/duplicate files. `:'')+
         'Images, scripts, framework code and publishing were not imported. Open Code / Files to edit, then publish separately.'};
   } catch(error) {
+    const reason=error instanceof Error ? error.message : '';
+    // Expose only errors authored by this importer; external API/database
+    // text still goes through the generic safe failure wrapper.
+    const known = [
+      'Enter https://github.com/owner/repository',
+      'Your role needs page creation permission',
+      'This website changed.',
+      'Only public repositories',
+      'Public GitHub repository/file not found.',
+      'GitHub rate limit reached.',
+      'GitHub could not return',
+      'GitHub file exceeds',
+      'Repository is too large',
+      'No supported static HTML',
+      'More than 12 HTML',
+      'No importable pages.',
+      'Website code/page limit',
+    ];
+    const message=known.some(prefix=>reason.startsWith(prefix))
+      ? reason : safeFailure(error).message;
     return {ok:false,pages:[],message:
       (writes?'Some source files saved but pages were not attached. Reload before retrying. ':'')+
-      safeFailure(error).message};
+      message};
   }
 }
 
@@ -145,7 +165,7 @@ function safeSourcePath(path:string):boolean {
 /** Discover source languages without treating them as runnable website code. */
 export async function inspectGithubSourceFiles(
   websiteId:string, repositoryUrl:string,
-):Promise<{ok:boolean;message:string;files:string[];truncated:boolean}> {
+):Promise<{ok:boolean;message:string;files:string[];truncated:boolean;defaultBranch?:string}> {
   try {
     const parsed=parsePublicGithubRepo(repositoryUrl);
     if(!parsed) throw new Error('Enter a valid public GitHub repository URL.');
@@ -166,7 +186,7 @@ export async function inspectGithubSourceFiles(
       .filter(f=>f.type==='blob' && (f.size??0)<=100000 &&
         safeSourcePath(f.path))
       .map(f=>f.path).slice(0,200);
-    return {ok:true,files,truncated:Boolean(tree.truncated),
+    return {ok:true,files,truncated:Boolean(tree.truncated),defaultBranch:repo.default_branch,
       message:files.length
         ? `Found ${files.length} source file(s) across supported languages. These are code files, not automatically runnable templates.`
         : 'No supported source files found in this repository tree.'};

@@ -178,6 +178,7 @@ export async function publishWebsite(
   version: number,
   summary: string,
   restoreId?: string,
+  useBasicTheme = false,
 ) {
   try {
     const s = await websiteServices('website.page.publish');
@@ -190,8 +191,13 @@ export async function publishWebsite(
     // The DB will reject custom CSS/code when a tenant doesn't have the
     // relevant capability. Report that before attempting a signed publish.
     if (selected.document.css.trim() &&
-        (!limits?.custom_code || !s.allowed('website.custom_code.publish')))
-      return {message:'This plan cannot publish custom CSS. Remove custom CSS in Code / Files or enable the Custom Code plan feature, then retry. No website changes were published.'};
+        (!limits?.custom_code || !s.allowed('website.custom_code.publish'))) {
+      if (!useBasicTheme)
+        return {
+          canPublishWithoutCss: true,
+          message: 'This template contains advanced CSS that your website plan cannot publish. You can publish with the standard theme (custom CSS will be omitted from the public version, but kept in your draft), or enable the Website Custom Code plan feature.',
+        };
+    }
     if (selected.document.code.length &&
         (!limits?.custom_code || !limits?.developer_mode ||
           !s.allowed('website.custom_code.publish')))
@@ -200,7 +206,12 @@ export async function publishWebsite(
       return {message:'Website forms are not enabled for your plan. Disable the form or enable Forms before publishing.'};
     if (selected.document.code.length && !s.allowed('website.custom_code.view'))
       throw new Error('Custom code view permission required');
-    const build = compileWebsite(selected.document);
+    // The basic-theme option is explicit and changes only the signed public
+    // build; the customer's draft and saved CSS are never overwritten.
+    const omitCss = useBasicTheme &&
+      (!limits?.custom_code || !s.allowed('website.custom_code.publish'));
+    const build = compileWebsite(omitCss
+      ? {...selected.document, css: ''} : selected.document);
     const proof = signWebsite({
       purpose: 'website.publish',
       organizationId: s.context.organizationId,
@@ -222,15 +233,24 @@ export async function publishWebsite(
       id: publication,
       message: restoreId
         ? 'Restored as a new published version'
-        : 'Website published',
+        : omitCss
+          ? 'Website published with the standard theme. Advanced CSS was omitted from this public version; your draft CSS is unchanged.'
+          : 'Website published',
     };
   } catch (e) {
     if (e instanceof Error) {
       const problems: Record<string,string> = {
-        WEBSITE_BUILD_SIGNATURE_MISMATCH: 'Publishing is blocked by a website signing-key mismatch. The administrator must check Hostinger WEBSITE_BUILD_SIGNING_KEY and WEBSITE_BUILD_KEY_ID against the active Supabase website signing key. No pages were published.',
-        WEBSITE_CUSTOM_CODE_NOT_ENTITLED: 'Publishing custom CSS/JavaScript needs the Website Custom Code feature. Remove custom CSS/code or enable that feature.',
-        WEBSITE_FORMS_NOT_ENTITLED: 'Publishing website forms requires the Forms capability and CRM entitlement.',
+        WEBSITE_BUILD_SIGNATURE_MISMATCH: 'Website publishing and media uploads require matching signing keys on Hostinger and Supabase. Check WEBSITE_BUILD_SIGNING_KEY and WEBSITE_BUILD_KEY_ID against the active database key. No changes were published.',
+        WEBSITE_BUILD_OWNERSHIP_MISMATCH: 'The signed website build does not match this website/version. Refresh the editor, review your changes and try again.',
+        WEBSITE_CUSTOM_CODE_NOT_ENTITLED: 'This website has custom CSS or code that your current plan cannot publish. Enable the Website Custom Code and Developer Mode benefits, or remove custom CSS/code from the draft before publishing.',
+        WEBSITE_FORMS_NOT_ENTITLED: 'Publishing website forms requires both the Forms capability and CRM entitlement. Disable forms or enable the feature.',
         WEBSITE_PUBLISH_VERSION_CONFLICT: 'The website changed since opening this editor. Refresh, review your changes and publish again.',
+        WEBSITE_BUILD_INVALID: 'This website build contains invalid page data or exceeds your plan limits. Review page visibility and available template sections before publishing.',
+        WEBSITE_PUBLISH_MISSING_ASSET: 'A referenced image is not available in the website media library. Replace the image in the editor, save the draft and retry publishing.',
+        WEBSITE_PUBLISH_PAGE_LIMIT: 'Your website contains more public pages than the current plan allows. Reduce public pages or upgrade the website plan.',
+        WEBSITE_PUBLISH_UNAVAILABLE: 'This website is unavailable or currently suspended/archived. Contact the workspace administrator.',
+        WEBSITE_PUBLISH_PERMISSION_DENIED: 'Publishing was denied by the website database permission rules. Ask the business owner to verify your Website Publish permission and website membership.',
+        WEBSITE_PUBLISH_DATABASE_REJECTED: 'Website publishing was rejected by the database. Check website plan limits, active signing key, and database migration status. Share the reference ID with your administrator.',
       };
       const diagnostic = problems[e.message];
       if (diagnostic) return {message:diagnostic};

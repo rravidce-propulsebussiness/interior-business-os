@@ -126,3 +126,7 @@
   padding:11px!important;font-size:11px!important}
 .we-git-export :is(button,input):focus-visible{outline:2px solid #f28143;outline-offset:2px}
 .we-git-export button:disabled{opacity:.5;cursor:not-allowed}
+
+.we-git-export .we-source-zip{display:inline-flex;margin:14px 0;
+  padding:11px 13px;border:1px solid #ecd5c7;color:#c05b27;
+  border-radius:9px;background:#fff8f0;font-size:11px;font-weight:800}

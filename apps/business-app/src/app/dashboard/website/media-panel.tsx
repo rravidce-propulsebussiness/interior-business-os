@@ -36,8 +36,13 @@ export function MediaPanel({
               method: 'POST',
               body: form,
             });
-            const data = await r.json();
-            setMessage(String(data.message));
+            const data = await r.json() as {message?:unknown;code?:unknown;requestId?:unknown};
+            const details = [
+              typeof data.code === 'string' ? `Code: ${data.code}` : '',
+              typeof data.requestId === 'string' ? `Reference: ${data.requestId}` : '',
+            ].filter(Boolean).join(' · ');
+            setMessage((typeof data.message === 'string' ? data.message : 'Upload failed')+
+              (!r.ok && details ? ` (${details})` : ''));
             if (r.ok) router.refresh();
           })
         }

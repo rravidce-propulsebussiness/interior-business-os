@@ -84,23 +84,31 @@ export async function POST(
     if (r.error) {
       // Database-side upload validation uses the same signing proof as publish.
       // Return a useful actionable category without exposing proof material.
-      const reason = r.error.message;
-      if (reason === 'Invalid or expired build proof')
+      const reason = r.error.message ?? '';
+      if (reason.includes('Invalid or expired build proof') ||
+          reason.includes('Invalid media proof') ||
+          reason.includes('Media content mismatch'))
         return Response.json({
           code:'WEBSITE_BUILD_SIGNATURE_MISMATCH',
           message:'Image upload is blocked by an app/database signing-key mismatch. An administrator must align the Hostinger website signing key with Supabase. No image was saved.',
         },{status:503,headers:{'Cache-Control':'no-store'}});
-      if (reason === 'Media storage limit reached')
+      if (reason.includes('Media storage limit reached'))
         return Response.json({
           code:'WEBSITE_MEDIA_QUOTA',
           message:'Your website storage allowance is full. Remove unused media or increase the storage limit.',
         },{status:413,headers:{'Cache-Control':'no-store'}});
+      const category = reason.includes('permission') ||
+        reason.includes('Unavailable') || r.error.code === '42501'
+        ? 'WEBSITE_MEDIA_PERMISSION'
+        : 'WEBSITE_MEDIA_REJECTED';
       console.error('website.media.save.failed', {
-        code: r.error.code ?? 'unknown', category: 'database_rejected',
+        category, sqlState: r.error.code ?? 'unknown',
       });
       return Response.json({
-        code:'WEBSITE_MEDIA_REJECTED',
-        message:'The media service rejected this upload. Check website media permissions, storage limits, and server signing configuration.',
+        code:category,
+        message:category === 'WEBSITE_MEDIA_PERMISSION'
+          ? 'Media storage denied this upload. Check your company website media permission and website membership.'
+          : 'The website media database rejected this upload. Confirm the site has storage allowance, the website schema migrations are applied and the signing keys are configured.',
       },{status:400,headers:{'Cache-Control':'no-store'}});
     }
     return Response.json(
@@ -113,15 +121,19 @@ export async function POST(
     const known = [
       'Choose a file up to 10 MB', 'Invalid PDF',
       'Unsupported video container', 'Website signing is not configured',
+      'Use a JPEG, PNG, WebP or AVIF image', 'Image exceeds the 40 MP decode limit',
+      'Choose an image up to 10 MB',
     ];
-    const message = known.includes(validation) ? validation :
-      'Upload could not be processed. Use a JPEG, PNG, WebP or AVIF image under 10 MB. If this persists, contact the administrator with the reference ID.';
+    const unsupported = /unsupported|unrecognized|invalid image|not a valid image|too large|pixel|decoder|sharp/i.test(validation);
+    const message = known.includes(validation) ? validation : unsupported
+      ? 'The image processor cannot read this file or its dimensions. Try a JPEG, PNG or WebP image under 10 MB.'
+      : 'Upload processing failed. Confirm the website signing key, database media permissions, and image processing support; contact the administrator with this reference ID.';
     console.error('website.media.upload.failed', {
       requestId: failure.requestId,
       category: validation === 'Website signing is not configured'
         ? 'website_signing_not_configured' : 'image_processing_or_upload',
     });
-    return Response.json({message, requestId:failure.requestId}, {
+    return Response.json({code:validation === 'Website signing is not configured' ? 'WEBSITE_SIGNING_NOT_CONFIGURED' : unsupported ? 'WEBSITE_IMAGE_UNSUPPORTED' : 'WEBSITE_UPLOAD_PROCESSING', message, requestId:failure.requestId}, {
       status: validation === 'Website signing is not configured' ? 503 : 400,
       headers: { 'Cache-Control': 'no-store' },
     });
