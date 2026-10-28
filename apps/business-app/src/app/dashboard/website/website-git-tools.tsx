@@ -133,7 +133,7 @@ export function WebsiteGitTools({ id, name, pages, version, canPull }: {
         </div>
         <div className="we-git-export">
           <h3>Pull & inspect GitHub source — all supported languages</h3>
-          <p>Browse and download source files from a public repository: HTML, CSS, JavaScript, TypeScript, React JSX/TSX, Vue, Svelte, Astro, PHP, Python, Java, Go, Rust, SQL, Markdown and more. This works with mixed-language repositories, including your Business OS Next.js project. Source inspection does not run or deploy the project.</p>
+          <p>Browse and download source files from a public repository: HTML, CSS, JavaScript, TypeScript, React JSX/TSX, Vue, Svelte, Astro, PHP, Python, Java, Go, Rust, SQL, Markdown and more. This works with mixed-language repositories, including your Business OS Next.js project. Source browsing is read-only. It does not run or deploy the project.</p>
           <button type="button" className="we-outline" disabled={!links||sourceBusy}
             onClick={inspectSources}>{sourceBusy?'Reading GitHub…' : 'Browse / Pull repository source files'}</button>
           <label htmlFor="we-git-source-file">Source file path</label>
