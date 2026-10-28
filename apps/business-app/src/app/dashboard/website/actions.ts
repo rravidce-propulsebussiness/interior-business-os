@@ -185,6 +185,19 @@ export async function publishWebsite(
     if (current.version !== version)
       throw new Error('Draft changed. Reload before publishing.');
     const selected = restoreId ? await s.website.read(id, restoreId) : current;
+    const limits = selected.limits as {custom_code?: boolean;developer_mode?: boolean;
+      forms?: boolean;pages?: number} | undefined;
+    // The DB will reject custom CSS/code when a tenant doesn't have the
+    // relevant capability. Report that before attempting a signed publish.
+    if (selected.document.css.trim() &&
+        (!limits?.custom_code || !s.allowed('website.custom_code.publish')))
+      return {message:'This plan cannot publish custom CSS. Remove custom CSS in Code / Files or enable the Custom Code plan feature, then retry. No website changes were published.'};
+    if (selected.document.code.length &&
+        (!limits?.custom_code || !limits?.developer_mode ||
+          !s.allowed('website.custom_code.publish')))
+      return {message:'This plan cannot publish custom HTML/JavaScript. Remove custom components or enable Developer Mode, then retry. No website changes were published.'};
+    if (selected.document.forms.some(form=>form.enabled) && limits?.forms===false)
+      return {message:'Website forms are not enabled for your plan. Disable the form or enable Forms before publishing.'};
     if (selected.document.code.length && !s.allowed('website.custom_code.view'))
       throw new Error('Custom code view permission required');
     const build = compileWebsite(selected.document);
@@ -212,6 +225,17 @@ export async function publishWebsite(
         : 'Website published',
     };
   } catch (e) {
+    if (e instanceof Error) {
+      const problems: Record<string,string> = {
+        WEBSITE_BUILD_SIGNATURE_MISMATCH: 'Publishing is blocked by a website signing-key mismatch. The administrator must check Hostinger WEBSITE_BUILD_SIGNING_KEY and WEBSITE_BUILD_KEY_ID against the active Supabase website signing key. No pages were published.',
+        WEBSITE_CUSTOM_CODE_NOT_ENTITLED: 'Publishing custom CSS/JavaScript needs the Website Custom Code feature. Remove custom CSS/code or enable that feature.',
+        WEBSITE_FORMS_NOT_ENTITLED: 'Publishing website forms requires the Forms capability and CRM entitlement.',
+        WEBSITE_PUBLISH_VERSION_CONFLICT: 'The website changed since opening this editor. Refresh, review your changes and publish again.',
+      };
+      if (problems[e.message]) return {message:problems[e.message]};
+      if (e.message === 'Website signing is not configured')
+        return {message:'Website publishing is not configured on the server. Set WEBSITE_BUILD_SIGNING_KEY (at least 32 bytes) and WEBSITE_BUILD_KEY_ID in Hostinger to match the active Supabase signing key.'};
+    }
     return { message: message(e) };
   }
 }

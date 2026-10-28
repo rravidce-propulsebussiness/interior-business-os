@@ -81,15 +81,48 @@ export async function POST(
       p_signature: proof.signature,
       p_data: data.toString('base64'),
     });
-    if (r.error) throw new Error('Upload denied or storage limit reached');
+    if (r.error) {
+      // Database-side upload validation uses the same signing proof as publish.
+      // Return a useful actionable category without exposing proof material.
+      const reason = r.error.message;
+      if (reason === 'Invalid or expired build proof')
+        return Response.json({
+          code:'WEBSITE_BUILD_SIGNATURE_MISMATCH',
+          message:'Image upload is blocked by an app/database signing-key mismatch. An administrator must align the Hostinger website signing key with Supabase. No image was saved.',
+        },{status:503,headers:{'Cache-Control':'no-store'}});
+      if (reason === 'Media storage limit reached')
+        return Response.json({
+          code:'WEBSITE_MEDIA_QUOTA',
+          message:'Your website storage allowance is full. Remove unused media or increase the storage limit.',
+        },{status:413,headers:{'Cache-Control':'no-store'}});
+      console.error('website.media.save.failed', {
+        code: r.error.code ?? 'unknown', category: 'database_rejected',
+      });
+      return Response.json({
+        code:'WEBSITE_MEDIA_REJECTED',
+        message:'The media service rejected this upload. Check website media permissions, storage limits, and server signing configuration.',
+      },{status:400,headers:{'Cache-Control':'no-store'}});
+    }
     return Response.json(
       { id: r.data, width, height, alt: String(form.get('alt') ?? '').slice(0, 500), message: 'Media uploaded' },
       { headers: { 'Cache-Control': 'no-store' } },
     );
   } catch (e) {
     const failure = safeFailure(e);
-    return Response.json(failure, {
-      status: 400,
+    const validation = e instanceof Error ? e.message : '';
+    const known = [
+      'Choose a file up to 10 MB', 'Invalid PDF',
+      'Unsupported video container', 'Website signing is not configured',
+    ];
+    const message = known.includes(validation) ? validation :
+      'Upload could not be processed. Use a JPEG, PNG, WebP or AVIF image under 10 MB. If this persists, contact the administrator with the reference ID.';
+    console.error('website.media.upload.failed', {
+      requestId: failure.requestId,
+      category: validation === 'Website signing is not configured'
+        ? 'website_signing_not_configured' : 'image_processing_or_upload',
+    });
+    return Response.json({message, requestId:failure.requestId}, {
+      status: validation === 'Website signing is not configured' ? 503 : 400,
       headers: { 'Cache-Control': 'no-store' },
     });
   }

@@ -116,3 +116,13 @@
 .we-git-imported{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:15px;padding:12px;background:#fff;border-radius:9px}
 .we-git-imported strong{flex-basis:100%;font-size:11px}
 .we-git-imported span{padding:7px 9px;font-size:10px;border-radius:6px;background:#f4f6f4;color:#53645b}
+
+.we-git-source-code{display:block;width:100%;min-height:240px;resize:vertical;
+  font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:11px;
+  line-height:1.55;color:#383c41;background:#fbfaf9;border:1px solid #e9dfd7;
+  border-radius:9px;padding:14px;margin-top:14px;white-space:pre;overflow:auto}
+.we-git-export input{display:block;width:100%;background:#fff!important;color:#354054!important;
+  border:1px solid #e6ded8!important;border-radius:9px!important;
+  padding:11px!important;font-size:11px!important}
+.we-git-export :is(button,input):focus-visible{outline:2px solid #f28143;outline-offset:2px}
+.we-git-export button:disabled{opacity:.5;cursor:not-allowed}
