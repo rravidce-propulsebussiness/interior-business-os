@@ -916,7 +916,8 @@ export function WebsiteEditor({
         </div>
       </div>
       <div className="ss-studio-foot">🔒 &nbsp; Draft preview only. Website changes are published only when you choose Publish.</div>
-      {canEdit && (hasUnsavedChanges || pending) && (
+      {canEdit && (hasUnsavedChanges || pending) && <>
+        <div className="ss-mobile-draft-spacer" aria-hidden="true" />
         <div className="ss-mobile-draftbar" role="region" aria-label="Unsaved website changes">
           <span className="ss-mobile-draftbar-state">
             {pending ? 'Saving website…' : 'Unsaved website changes'}
@@ -926,7 +927,7 @@ export function WebsiteEditor({
             {pending ? 'Saving…' : 'Save draft'}
           </button>
         </div>
-      )}
+      </>}
       {fullPreview && <div className="ss-preview-overlay" role="presentation" onMouseDown={(event) => {
         if (event.currentTarget === event.target) setFullPreview(false);
       }}>
