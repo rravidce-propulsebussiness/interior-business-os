@@ -2,7 +2,9 @@
 import { useWebsitePreviewSrcDoc } from './website-preview-nonce';
 import { useEffect, useRef, useState, useTransition, type MouseEvent as ReactMouseEvent } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { WebsiteMediaPicker } from './website-media-picker';
+import { linkedDraftPagesForPublication } from './website-publication-links';
 import { convertPageToCodeDraft } from './convert-code-action';
 import { editableContentFields } from './website-content-fields';
 import {
@@ -26,6 +28,7 @@ import {
 import {
   saveWebsiteSection,
   publishWebsite,
+  publishWebsiteWithLinkedPages,
   renderDraftPreview,
 } from './actions';
 const uid = () => `n${crypto.randomUUID().replaceAll('-', '')}`;
@@ -67,6 +70,7 @@ export function WebsiteEditor({
   templateMode?: boolean;
   initialPageId?: string;
 }) {
+  const router = useRouter();
   const frame = useRef<HTMLIFrameElement>(null);
   const inspectorRef = useRef<HTMLElement>(null);
   const latestDocRef = useRef(initial);
@@ -246,6 +250,7 @@ export function WebsiteEditor({
     (key) => JSON.stringify(document[key]) !== JSON.stringify(savedDocument[key]),
   );
   const hasUnsavedChanges = unsavedSections.length > 0;
+  const linkedDraftPages = linkedDraftPagesForPublication(document);
   const edit = (next: WebsiteDocument) =>
     setHistory((h) => editHistory(h, next));
   const nodes = (next: WebsiteNode[]) =>
@@ -584,7 +589,14 @@ export function WebsiteEditor({
           </button>}
           {canPublish && <button type="button" className="ss-btn ss-publish-action"
             disabled={pending || hasUnsavedChanges}
-            onClick={() => start(async () => {
+            onClick={() => {
+              if (linkedDraftPages.length) {
+                setMessage('Publishing is blocked because menu links open draft pages: ' +
+                  linkedDraftPages.join(', ') +
+                  '. Review these pages, then choose “Publish linked pages + website” below.');
+                return;
+              }
+              start(async () => {
               try {
                 const result = await publishAction(id, version, 'Published from website studio');
                 setMessage(result.message);
@@ -594,7 +606,8 @@ export function WebsiteEditor({
               } catch {
                 setMessage('The publish request could not reach the website service. Check the Hostinger deployment and server logs, then reload the latest draft and retry. No publication was confirmed.');
               }
-            })}>
+              });
+            }}>
             ↗ &nbsp; {templateMode ? 'Publish template' : 'Publish website'}
           </button>}
         </div>
@@ -615,6 +628,35 @@ export function WebsiteEditor({
         </div>
       </nav>}
       {message && <p className="ss-message" role="status">{message}</p>}
+      {canPublish && canEdit && linkedDraftPages.length > 0 && !hasUnsavedChanges && !templateMode &&
+        <div className="ss-basic-publish" role="region" aria-label="Pages requiring publication">
+          <p><strong>Publishing is blocked by linked draft pages:</strong>{' '}
+            {linkedDraftPages.join(', ')}. These pages appear in the public
+            menu or website content but are not published yet. Review them before publishing.</p>
+          <button type="button" className="ss-btn ss-publish-action" disabled={pending}
+            onClick={() => {
+              if (!window.confirm('Make these linked pages public and publish the website? ' +
+                linkedDraftPages.join(', ') +
+                '. All other draft pages will remain private.')) return;
+              start(async () => {
+                try {
+                  const result = await publishWebsiteWithLinkedPages(id, version,
+                    'Published linked website pages from visual editor');
+                  setMessage(result.message);
+                  if (result.id) {
+                    setPublishState('published');
+                    if (result.version !== undefined) setVersion(result.version);
+                    router.refresh();
+                  } else if (result.version !== undefined) {
+                    setVersion(result.version);
+                    router.refresh();
+                  }
+                } catch {
+                  setMessage('Website publication was interrupted. No publication was confirmed. Reload the editor to check the latest draft.');
+                }
+              });
+            }}>Publish linked pages + website</button>
+        </div>}
       {canPublish && canPublishWithBasicTheme && !hasUnsavedChanges && <div className="ss-basic-publish">
         <p>The advanced CSS is not allowed by this plan. This option keeps it in your draft and publishes with the standard theme instead.</p>
         <button type="button" className="ss-btn ss-publish-action" disabled={pending}
