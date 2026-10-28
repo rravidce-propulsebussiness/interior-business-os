@@ -96,6 +96,25 @@ export function renderWebsite(
   }
   function render(node: WebsiteNode): string {
     css += `#${node.id}{${styles(node.style)}}@media(max-width:900px){#${node.id}{${styles(node.tablet)}}}@media(max-width:600px){#${node.id}{${styles(node.mobile)}}}`;
+    // Hero/section headings and paragraphs are rendered as child elements.
+    // Override their own global typography rules when a user formats the
+    // selected section in the visual editor.
+    const directText = (style: NodeStyle) => [
+      style.fontFamily ? `font-family:${style.fontFamily}` : '',
+      style.fontSize ? `font-size:${style.fontSize}px` : '',
+      style.align ? `text-align:${style.align}` : '',
+    ].filter(Boolean).join(';');
+    const addTextRules = (style: NodeStyle) => {
+      const declarations = directText(style);
+      return declarations
+        ? `#${node.id}>h1,#${node.id}>h2,#${node.id}>p{${declarations}}`
+        : '';
+    };
+    if (['hero','section','cta','contact','card','footer','container'].includes(node.type)) {
+      css += addTextRules(node.style) +
+        `@media(max-width:900px){${addTextRules(node.tablet)}}` +
+        `@media(max-width:600px){${addTextRules(node.mobile)}}`;
+    }
     const p = node.props,
       children = node.children.map(render).join(''),
       id = `id="${node.id}" data-website-node="${node.id}"`,

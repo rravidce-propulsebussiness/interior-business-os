@@ -33,5 +33,9 @@ describe('Business Showcase multi-page template', () => {
     copy.pages[0]!.nodes[0]!.style.fontFamily = 'serif';
     copy.pages[0]!.nodes[0]!.style.fontSize = 44;
     expect(validateDocument(copy).pages[0]!.nodes[0]!.style.fontSize).toBe(44);
+    const rendered = websiteHtml(compileWebsite(copy), '/')!;
+    expect(rendered).toContain('font-family:serif');
+    expect(rendered).toContain('#showcaseHero>h1');
+    expect(rendered).toContain('font-size:44px');
   });
 });
