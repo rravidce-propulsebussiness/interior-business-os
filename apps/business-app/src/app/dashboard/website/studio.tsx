@@ -182,8 +182,8 @@ export function WebsiteEditor({
     const onEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') setFocused(false);
     };
-    document.addEventListener('keydown', onEscape);
-    return () => document.removeEventListener('keydown', onEscape);
+    window.document.addEventListener('keydown', onEscape);
+    return () => window.document.removeEventListener('keydown', onEscape);
   }, [focused]);
   const previewSrcDoc = useWebsitePreviewSrcDoc(preview);
   const document = history.present,
