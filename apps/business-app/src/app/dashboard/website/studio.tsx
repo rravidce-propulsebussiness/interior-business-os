@@ -78,6 +78,7 @@ export function WebsiteEditor({
   const previewCache = useRef(new Map<string, string>());
   const firstPreview = useRef(true);
   const [publishState,setPublishState] = useState(status);
+  const [canPublishWithBasicTheme,setCanPublishWithBasicTheme] = useState(false);
   const [previewLoading, setPreviewLoading] = useState(false);
   const openingPage = initial.pages.find(p => p.id === initialPageId) ??
     initial.pages.find(p => p.path === '/' && p.nodes.length) ??
@@ -581,6 +582,8 @@ export function WebsiteEditor({
             onClick={() => start(async () => {
               const result = await publishAction(id, version, 'Published from website studio');
               setMessage(result.message);
+              setCanPublishWithBasicTheme('canPublishWithoutCss' in result &&
+                result.canPublishWithoutCss === true);
               if (result.id) {setVersion((current) => current + 1);setPublishState('published');}
             })}>
             ↗ &nbsp; {templateMode ? 'Publish template' : 'Publish website'}
@@ -603,6 +606,19 @@ export function WebsiteEditor({
         </div>
       </nav>}
       {message && <p className="ss-message" role="status">{message}</p>}
+      {canPublish && canPublishWithBasicTheme && !hasUnsavedChanges && <div className="ss-basic-publish">
+        <p>The advanced CSS is not allowed by this plan. This option keeps it in your draft and publishes with the standard theme instead.</p>
+        <button type="button" className="ss-btn ss-publish-action" disabled={pending}
+          onClick={() => {
+            if(!window.confirm('Publish with the standard theme? Your custom CSS will NOT appear on the public website, but your draft and custom CSS remain saved.'))return;
+            start(async()=>{
+              const result=await publishAction(id,version,
+                'Published with standard theme from website studio',undefined,true);
+              setMessage(result.message);
+              if(result.id){setVersion(v=>v+1);setPublishState('published');setCanPublishWithBasicTheme(false);}
+            });
+          }}>Publish with standard theme</button>
+      </div>}
       <div className="ss-board">
         <div className="ss-toolbar ss-wp-toolbar">
           <div className="ss-toolbar-group">

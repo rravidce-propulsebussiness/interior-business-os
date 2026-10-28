@@ -145,7 +145,7 @@ function safeSourcePath(path:string):boolean {
 /** Discover source languages without treating them as runnable website code. */
 export async function inspectGithubSourceFiles(
   websiteId:string, repositoryUrl:string,
-):Promise<{ok:boolean;message:string;files:string[];truncated:boolean}> {
+):Promise<{ok:boolean;message:string;files:string[];truncated:boolean;defaultBranch?:string}> {
   try {
     const parsed=parsePublicGithubRepo(repositoryUrl);
     if(!parsed) throw new Error('Enter a valid public GitHub repository URL.');
@@ -166,7 +166,7 @@ export async function inspectGithubSourceFiles(
       .filter(f=>f.type==='blob' && (f.size??0)<=100000 &&
         safeSourcePath(f.path))
       .map(f=>f.path).slice(0,200);
-    return {ok:true,files,truncated:Boolean(tree.truncated),
+    return {ok:true,files,truncated:Boolean(tree.truncated),defaultBranch:repo.default_branch,
       message:files.length
         ? `Found ${files.length} source file(s) across supported languages. These are code files, not automatically runnable templates.`
         : 'No supported source files found in this repository tree.'};

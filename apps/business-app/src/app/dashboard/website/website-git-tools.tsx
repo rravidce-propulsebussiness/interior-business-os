@@ -31,6 +31,7 @@ export function WebsiteGitTools({ id, name, pages, version, canPull }: {
   const [sourceFiles,setSourceFiles] = useState<string[]>([]);
   const [sourcePath,setSourcePath] = useState('');
   const [sourceText,setSourceText] = useState('');
+  const [defaultBranch,setDefaultBranch] = useState('');
   const [sourceMessage,setSourceMessage] = useState('');
   const [sourceBusy,startSource] = useTransition();
   const [pulling, startPull] = useTransition();
@@ -68,6 +69,7 @@ export function WebsiteGitTools({ id, name, pages, version, canPull }: {
       const result=await inspectGithubSourceFiles(id,links.github);
       setSourceMessage(result.message+(result.truncated?' GitHub truncated the large tree; enter another path manually.':''));
       setSourceFiles(result.files);
+      setDefaultBranch(result.ok && result.defaultBranch ? result.defaultBranch : '');
       if(result.files.length)setSourcePath(result.files[0]!);
     });
   };
@@ -129,27 +131,11 @@ export function WebsiteGitTools({ id, name, pages, version, canPull }: {
           {links && <a className="we-outline" href={links.vscode} target="_blank" rel="noopener noreferrer">
             Open VS Code ↗</a>}
         </div>
-        <div className="we-git-pull-panel">
-          <h3>Pull code into your website</h3>
-          <p>Import supported <strong>public static HTML/CSS</strong> pages into new draft website files, without replacing any existing pages.</p>
-          <button className="we-primary" type="button" onClick={pull}
-            disabled={!links || !canPull || pulling}>
-            {pulling ? 'Pulling supported files…' : '↓ Pull GitHub HTML/CSS files'}
-          </button>
-          {!canPull && <p>Static HTML/CSS import is unavailable for this website's current plan or your editing permissions. Developer Mode and Custom Code must be enabled to import files. You can still use <strong>Browse source files — multiple languages</strong> below.</p>}
-          <p className="we-git-disclaimer">React, Next.js, PHP, scripts, external assets and private repositories cannot be pulled into the visual website runtime. Use a separate Git deployment for full application code. Imported pages are drafts at /git-home, /git-about, etc., and will not change your current home page.</p>
-          {imported.length>0 && <div className="we-git-imported"><strong>Imported draft pages</strong>
-            {imported.map(path=><span key={path}>{path}</span>)}
-            <Link className="we-outline" href={`/dashboard/website/${id}/developer`}>Edit imported files</Link>
-          </div>}
-        </div>
-        {message && <p className="we-notice" role="status">{message}</p>}
-        <p className="we-git-disclaimer">The repository shortcut is saved in this browser only; it is not a persistent GitHub OAuth connection or automatic synchronization.</p>
         <div className="we-git-export">
-          <h3>Pull source code — multiple languages</h3>
-          <p>Browse and download source files from a public repository: HTML, CSS, JavaScript, TypeScript, React JSX/TSX, Vue, Svelte, Astro, PHP, Python, Java, Go, Rust, SQL, Markdown and more. This is source inspection, not executable hosting.</p>
+          <h3>Pull & inspect GitHub source — all supported languages</h3>
+          <p>Browse and download source files from a public repository: HTML, CSS, JavaScript, TypeScript, React JSX/TSX, Vue, Svelte, Astro, PHP, Python, Java, Go, Rust, SQL, Markdown and more. This works with mixed-language repositories, including your Business OS Next.js project. Source inspection does not run or deploy the project.</p>
           <button type="button" className="we-outline" disabled={!links||sourceBusy}
-            onClick={inspectSources}>{sourceBusy?'Reading GitHub…':'Browse repository source files'}</button>
+            onClick={inspectSources}>{sourceBusy?'Reading GitHub…' : 'Browse / Pull repository source files'}</button>
           <label htmlFor="we-git-source-file">Source file path</label>
           <input id="we-git-source-file" value={sourcePath} placeholder="apps/web/src/app/page.tsx"
             onChange={event=>{setSourcePath(event.target.value);setSourceText('');}} spellCheck={false}
@@ -162,11 +148,32 @@ export function WebsiteGitTools({ id, name, pages, version, canPull }: {
             <button type="button" className="we-outline" disabled={!sourceText}
               onClick={downloadSource}>↓ Download source</button>
           </div>
+          {defaultBranch && links && <a className="we-outline we-source-zip"
+            href={`${links.github}/archive/refs/heads/${defaultBranch.split('/').map(encodeURIComponent).join('/')}.zip`}
+            rel="noopener noreferrer" target="_blank">
+            ↓ Download complete repository ZIP (all languages)
+          </a>}
           {sourceMessage&&<p className="we-notice" role="status">{sourceMessage}</p>}
           {sourceText&&<textarea className="we-git-source-code" readOnly rows={16}
             aria-label="Retrieved source code" value={sourceText}/>}
-          <p className="we-git-disclaimer">Source browsing is read-only. JavaScript, TypeScript, JSX/TSX, PHP and backend code cannot execute inside the isolated Website Template Builder. Deploy full applications separately through a Git-connected hosting workflow.</p>
+          <p className="we-git-disclaimer">The full repository ZIP contains supported and unsupported source languages. Files can be opened in VS Code. This does not install, run, publish, or synchronize a React/Next.js/PHP backend into the template editor.</p>
         </div>
+        <div className="we-git-pull-panel">
+          <h3>Optional: import static HTML pages into your visual website</h3>
+          <p>Import supported <strong>public static HTML/CSS</strong> pages into new draft website files, without replacing any existing pages.</p>
+          <button className="we-primary" type="button" onClick={pull}
+            disabled={!links || !canPull || pulling}>
+            {pulling ? 'Pulling supported files…' : '↓ Import compatible static HTML/CSS'}
+          </button>
+          {!canPull && <p>Static HTML/CSS import is unavailable for this website's current plan or your editing permissions. Developer Mode and Custom Code must be enabled to import files. You can still use <strong>Browse source files — multiple languages</strong> below.</p>}
+          <p className="we-git-disclaimer">React, Next.js, PHP, scripts, external assets and private repositories cannot be pulled into the visual website runtime. Use a separate Git deployment for full application code. Imported pages are drafts at /git-home, /git-about, etc., and will not change your current home page.</p>
+          {imported.length>0 && <div className="we-git-imported"><strong>Imported draft pages</strong>
+            {imported.map(path=><span key={path}>{path}</span>)}
+            <Link className="we-outline" href={`/dashboard/website/${id}/developer`}>Edit imported files</Link>
+          </div>}
+        </div>
+        {message && <p className="we-notice" role="status">{message}</p>}
+        <p className="we-git-disclaimer">The repository shortcut is saved in this browser only; it is not a persistent GitHub OAuth connection or automatic synchronization.</p>
         <div className="we-git-export">
           <h3>Export the current template as HTML</h3>
           <p>Download the rendered code of a website page. You can edit the HTML and CSS in VS Code, then commit it to your external Git repository.</p>

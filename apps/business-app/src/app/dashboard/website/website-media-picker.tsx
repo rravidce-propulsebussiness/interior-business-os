@@ -57,9 +57,16 @@ export function WebsiteMediaPicker({
       const response = await fetch(`/dashboard/website/${id}/uploads/media`, {
         method: 'POST', body, credentials: 'same-origin',
       });
-      const result: { id?: unknown; width?: unknown; height?: unknown; alt?: unknown; message?: unknown } =
+      const result: { id?: unknown; width?: unknown; height?: unknown; alt?: unknown; message?: unknown;code?:unknown;requestId?:unknown } =
         await response.json();
-      if (!response.ok) throw new Error(typeof result.message === 'string' ? result.message : 'Upload failed');
+      if (!response.ok) {
+        const details = [
+          typeof result.code === 'string' ? `Code: ${result.code}` : '',
+          typeof result.requestId === 'string' ? `Reference: ${result.requestId}` : '',
+        ].filter(Boolean).join(' · ');
+        throw new Error((typeof result.message === 'string' ? result.message : 'Upload failed') +
+          (details ? ` (${details})` : ''));
+      }
       if (typeof result.id !== 'string' ||
         !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(result.id))
         throw new Error('Upload response was invalid. Refresh the media library.');
