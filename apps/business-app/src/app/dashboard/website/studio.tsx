@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useRef, useState, useTransition, type MouseEvent } from 'react';
+import { useEffect, useRef, useState, useTransition, type MouseEvent as ReactMouseEvent } from 'react';
 import Link from 'next/link';
 import { WebsiteMediaPicker } from './website-media-picker';
 import { editableContentFields } from './website-content-fields';
@@ -329,7 +329,7 @@ export function WebsiteEditor({
   // Next.js links too. Links inside the studio have their own explicit prompt.
   useEffect(() => {
     if (!hasUnsavedChanges && !pending) return;
-    const protectSidebar = (event: globalThis.MouseEvent) => {
+    const protectSidebar = (event: MouseEvent) => {
       if (event.defaultPrevented || event.button !== 0 ||
           event.ctrlKey || event.metaKey || event.altKey || event.shiftKey)
         return;
@@ -368,7 +368,7 @@ export function WebsiteEditor({
     window.addEventListener('keydown', saveShortcut);
     return () => window.removeEventListener('keydown', saveShortcut);
   });
-  const confirmLeavingEditor = (event: MouseEvent<HTMLAnchorElement>) => {
+  const confirmLeavingEditor = (event: ReactMouseEvent<HTMLAnchorElement>) => {
     if ((hasUnsavedChanges || pending) &&
         !window.confirm('You have unsaved website changes. Leave without saving?'))
       event.preventDefault();
