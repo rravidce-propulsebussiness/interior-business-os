@@ -88,7 +88,7 @@ export function WebsiteEditor({
   const [showSections, setShowSections] = useState(false);
   const [showInspector, setShowInspector] = useState(false);
   const [sitePanel, setSitePanel] = useState<'pages'|'header'|'footer'|null>(null);
-  const [focused, setFocused] = useState(false);
+  const [focused, setFocused] = useState(!templateMode);
   useEffect(() => {
     const receive = (event: MessageEvent) => {
       if (event.source !== frame.current?.contentWindow) return;
