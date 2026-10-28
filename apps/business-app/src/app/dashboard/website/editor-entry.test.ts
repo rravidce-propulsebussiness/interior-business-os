@@ -55,7 +55,7 @@ describe('template-first business website editing', () => {
     expect(settings).toContain('settings: { ...current.settings, [key]: assetId }');
     expect(entry).toContain("canPreviewMedia={s.allowed('website.media.manage')}");
     expect(tabs).toContain("canPreviewMedia={s.allowed('website.media.manage')}");
-    expect(media).toContain("Upload / manage images");
+    expect(media).toContain("Manage images");
   });
 
   it('uploads images within the editor using existing tenant-authorized media storage', () => {
