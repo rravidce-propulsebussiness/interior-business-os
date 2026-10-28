@@ -99,6 +99,18 @@ describe('template-first business website editing', () => {
     expect(editor).not.toContain("setMessage('');");
   });
 
+  it('prioritizes readable content fields and puts technical controls under Advanced', () => {
+    expect(editor).toContain("key === 'text' ? 'Body text'");
+    expect(editor).toContain("key === 'alt' ? 'Image description'");
+    expect(editor).toContain("rows={key === 'text' ? 5 : 3}");
+    expect(editor).toContain('<summary>Advanced settings and layout</summary>');
+    expect(editor.indexOf('Public data')).toBeGreaterThan(
+      editor.indexOf('<summary>Advanced settings and layout</summary>'),
+    );
+    expect(editor).toContain("(['form', 'embed', 'code'] as const)");
+    expect(editor).toContain('Open advanced source editor');
+  });
+
   it('does not promote code editor as a standard design option', () => {
     expect(editor).toContain('No coding needed.');
     expect(design).not.toContain('⌘ &nbsp; Code editor');
