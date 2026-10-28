@@ -46,6 +46,9 @@ export async function pullGithubStaticPages(
         !s.allowed('website.seo.manage'))
       throw new Error('Your role needs page creation permission to import a website');
     const site=await s.website.read(websiteId);
+    const limits=site.limits as {custom_code?:boolean;developer_mode?:boolean} | undefined;
+    if(!limits?.custom_code || !limits?.developer_mode)
+      return {ok:false,pages:[],message:'This website plan does not enable Developer Mode or custom code. You can still browse source files in multiple languages below; importing them into website drafts requires an enabled Developer Mode plan.'};
     if (site.version!==expectedVersion)
       throw new Error('This website changed. Refresh before importing GitHub files.');
     const base=`https://api.github.com/repos/${parsed.owner}/${parsed.repo}`;
