@@ -240,6 +240,17 @@ export async function publishWebsite(
     };
   } catch (e) {
     if (e instanceof Error) {
+      // Public content validation errors should be actionable rather than
+      // reduced to a generic request-reference message.
+      const brokenLink = /^Broken internal link: (\/[a-z0-9\-\/?#]*)$/i.exec(e.message);
+      if (brokenLink)
+        return { message: `Publishing is blocked because the link ${brokenLink[1]} points to an unpublished or missing page. Make that page public, or remove the menu/button link, save the draft and retry.` };
+      if (e.message === 'SEO title required')
+        return { message: 'A public page is missing its SEO title. Add the title in the Pages/SEO editor, save and publish again.' };
+      if (e.message === 'Image and alt text required')
+        return { message: 'A public image block is missing its image or alternative text. Update that block before publishing.' };
+      if (e.message === 'Missing enabled form')
+        return { message: 'A public page references a disabled or missing form. Enable the form or remove that block before publishing.' };
       const problems: Record<string,string> = {
         WEBSITE_BUILD_SIGNATURE_MISMATCH: 'Website publishing and media uploads require matching signing keys on Hostinger and Supabase. Check WEBSITE_BUILD_SIGNING_KEY and WEBSITE_BUILD_KEY_ID against the active database key. No changes were published.',
         WEBSITE_BUILD_OWNERSHIP_MISMATCH: 'The signed website build does not match this website/version. Refresh the editor, review your changes and try again.',
