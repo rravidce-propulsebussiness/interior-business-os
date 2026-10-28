@@ -596,21 +596,32 @@ export function WebsiteEditor({
                   canPreview={canPreviewMedia}
                   unsaved={hasUnsavedChanges}
                   onUploaded={asset => {
-                    // Append the new image and replace the selected section in one
-                    // undoable draft change; Save draft persists assets before pages.
-                    const nextNodes = structuredClone(activeNodes);
-                    const target = selection ? locateNode(nextNodes, selection) : undefined;
-                    if (!target) return;
-                    target.props.asset = asset.id;
-                    if (!target.props.alt && asset.alt) target.props.alt = asset.alt;
-                    const nextDoc: WebsiteDocument = {
-                      ...document, assets: [...document.assets, asset],
-                    };
-                    if (area === 'pages') nextDoc.pages = document.pages.map(item =>
-                      item.id === page.id ? { ...item, nodes: nextNodes } : item);
-                    else if (area === 'header') nextDoc.header = nextNodes;
-                    else nextDoc.footer = nextNodes;
-                    edit(nextDoc);
+                    // Merge into the latest draft: uploads can finish after edits.
+                    const targetId = selection;
+                    const targetArea = area;
+                    const targetPageId = page.id;
+                    setHistory(history => {
+                      const current = history.present;
+                      const currentNodes = targetArea === 'pages'
+                        ? current.pages.find(item => item.id === targetPageId)?.nodes
+                        : current[targetArea];
+                      if (!currentNodes || !targetId) return history;
+                      const nextNodes = structuredClone(currentNodes);
+                      const target = locateNode(nextNodes, targetId);
+                      if (!target) return history;
+                      target.props.asset = asset.id;
+                      if (!target.props.alt && asset.alt) target.props.alt = asset.alt;
+                      const draft: WebsiteDocument = {
+                        ...current,
+                        assets: current.assets.some(item => item.id === asset.id)
+                          ? current.assets : [...current.assets, asset],
+                      };
+                      if (targetArea === 'pages') draft.pages = current.pages.map(item =>
+                        item.id === targetPageId ? { ...item, nodes: nextNodes } : item);
+                      else if (targetArea === 'header') draft.header = nextNodes;
+                      else draft.footer = nextNodes;
+                      return editHistory(history, draft);
+                    });
                     setMessage('Image uploaded. Save draft to keep this change.');
                   }}
                   onChange={assetId => update(node => {

@@ -37,7 +37,8 @@ export function WebsiteSettings({
     [message, setMessage] = useState(''),
     [pending, start] = useTransition(),
     [selected, setSelected] = useState(0),
-    [savedAssets, setSavedAssets] = useState(initial.assets);
+    [savedAssets, setSavedAssets] = useState(initial.assets),
+    [savedSettings, setSavedSettings] = useState(initial.settings);
   const section =
     (
       { design: 'theme', seo: 'settings', developer: 'code' } as Record<
@@ -61,7 +62,10 @@ export function WebsiteSettings({
       }
       const result = await saveAction(id, nextVersion, key, value);
       setMessage(result.message);
-      if (result.version) setVersion(result.version);
+      if (result.version) {
+        setVersion(result.version);
+        if (key === 'settings') setSavedSettings(doc.settings);
+      }
     });
   const content = (
     <>
@@ -169,6 +173,8 @@ export function WebsiteSettings({
                 label={key === 'logo' ? 'Company logo' : 'Browser favicon'}
                 disabled={!canEdit || pending}
                 canPreview={canPreviewMedia}
+                unsaved={JSON.stringify(doc.assets) !== JSON.stringify(savedAssets) ||
+                  JSON.stringify(doc.settings) !== JSON.stringify(savedSettings)}
                 onUploaded={asset => {
                   setDoc(current => ({
                     ...current,
