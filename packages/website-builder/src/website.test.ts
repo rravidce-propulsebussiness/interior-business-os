@@ -99,6 +99,22 @@ describe('structured website publishing', () => {
     d.pages[0]!.nodes = [createNode('lead_form', 'form')];
     expect(() => compileWebsite(d)).toThrow('Missing enabled form');
   });
+  it('restores preview scroll position only within the isolated editor iframe', () => {
+    const d = emptyWebsite();
+    d.pages[0]!.nodes = [createNode('text', 'scrollNode')];
+    const build = compileWebsite(d);
+    const preview = websiteHtml(build, '/', { preview: true })!;
+    const published = websiteHtml(build, '/')!;
+    expect(preview).toContain('website.preview-scroll');
+    expect(preview).toContain('website.preview-restore-scroll');
+    expect(preview).toContain('website.preview-restored');
+    expect(preview).toContain('event.source!==parent');
+    expect(preview).toContain('Number.isFinite(x)&&Number.isFinite(y)');
+    expect(preview).toContain('window.scrollTo(Math.min(x,100000),Math.min(y,100000))');
+    expect(published).not.toContain('website.preview-scroll');
+    expect(published).not.toContain('website.preview-restored');
+  });
+
   it('patches preview text immediately without exposing executable HTML injection', () => {
     const d = emptyWebsite('Construction company');
     const hero = createNode('hero', 'hero1');

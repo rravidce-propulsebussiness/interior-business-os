@@ -59,6 +59,9 @@ export function WebsiteEditor({
   initialPageId?: string;
 }) {
   const frame = useRef<HTMLIFrameElement>(null);
+  const previewScroll = useRef({ x: 0, y: 0 });
+  const restoringPreviewScroll = useRef(false);
+  const lastPreviewHtml = useRef('');
   // Cache recent draft previews so undo / redo and revisiting a page do not
   // immediately repeat expensive authenticated server rendering.
   const previewCache = useRef(new Map<string, string>());
@@ -70,16 +73,21 @@ export function WebsiteEditor({
       null,
   );
   useEffect(() => {
-    const select = (event: MessageEvent) => {
-      if (
-        event.source === frame.current?.contentWindow &&
-        event.data?.type === 'website.select' &&
-        typeof event.data.id === 'string'
-      )
-        setSelection(event.data.id);
+    const receive = (event: MessageEvent) => {
+      if (event.source !== frame.current?.contentWindow) return;
+      const data = event.data;
+      if (data?.type === 'website.select' && typeof data.id === 'string')
+        setSelection(data.id);
+      if (data?.type === 'website.preview-restored')
+        restoringPreviewScroll.current = false;
+      if (data?.type === 'website.preview-scroll' && !restoringPreviewScroll.current) {
+        const x = Number(data.x), y = Number(data.y);
+        if (Number.isFinite(x) && Number.isFinite(y) && x >= 0 && y >= 0)
+          previewScroll.current = { x, y };
+      }
     };
-    window.addEventListener('message', select);
-    return () => window.removeEventListener('message', select);
+    window.addEventListener('message', receive);
+    return () => window.removeEventListener('message', receive);
   }, []);
   const [history, setHistory] = useState<History<WebsiteDocument>>({
       past: [],
@@ -143,11 +151,19 @@ export function WebsiteEditor({
     }
   };
   useEffect(() => {
+    previewScroll.current = { x: 0, y: 0 };
+    restoringPreviewScroll.current = true;
+  }, [page.path]);
+  useEffect(() => {
     let active = true;
     const key = JSON.stringify([history.present, page.path]);
     const cached = previewCache.current.get(key);
     if (cached !== undefined) {
-      setPreview(previous => previous === cached ? previous : cached);
+      if (lastPreviewHtml.current !== cached) {
+        restoringPreviewScroll.current = true;
+        lastPreviewHtml.current = cached;
+        setPreview(cached);
+      }
       setPreviewLoading(false);
       return;
     }
@@ -166,7 +182,11 @@ export function WebsiteEditor({
             const oldest = previewCache.current.keys().next().value;
             if (oldest !== undefined) previewCache.current.delete(oldest);
           }
-          setPreview(previous => previous === next ? previous : next);
+          if (lastPreviewHtml.current !== next) {
+            restoringPreviewScroll.current = true;
+            lastPreviewHtml.current = next;
+            setPreview(next);
+          }
           setPreviewLoading(false);
         })
         .catch((error) => {
@@ -466,6 +486,9 @@ export function WebsiteEditor({
             </div>
             <iframe
               ref={frame}
+              onLoad={() => frame.current?.contentWindow?.postMessage({
+                type: 'website.preview-restore-scroll', ...previewScroll.current,
+              }, '*')}
               title="Website preview"
               sandbox="allow-scripts"
               referrerPolicy="no-referrer"
