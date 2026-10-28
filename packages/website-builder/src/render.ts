@@ -257,7 +257,7 @@ export function websiteHtml(
   // This sandbox listener only changes textContent in existing preview nodes.
   // The server still renders and validates the final HTML for every draft.
   const previewScript = options.preview
-    ? `<script>
+    ? `<script data-website-preview-script>
       document.addEventListener("click",function(event){
         event.preventDefault();
         const node=event.target.closest("[data-website-node]");

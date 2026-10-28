@@ -1,4 +1,5 @@
 'use client';
+import { useWebsitePreviewSrcDoc } from './website-preview-nonce';
 
 import { useEffect, useState, useTransition } from 'react';
 import Link from 'next/link';
@@ -34,6 +35,7 @@ export function WebsiteEntry({
 }: Props) {
   const router = useRouter();
   const [html, setHtml] = useState<string | null>(null);
+  const previewSrcDoc = useWebsitePreviewSrcDoc(html ?? '');
   const [previewError, setPreviewError] = useState('');
   const [message, setMessage] = useState('');
   const [chosen, setChosen] = useState<string | null>(null);
@@ -94,7 +96,7 @@ export function WebsiteEntry({
           </div>
           <div className="we-iframe-stage">
             {html ? <iframe title={name + ' website preview'} sandbox="allow-scripts"
-              referrerPolicy="no-referrer" srcDoc={html}/> :
+              referrerPolicy="no-referrer" srcDoc={previewSrcDoc}/> :
               <div className="we-preview-loading">
                 <span aria-hidden="true">◈</span>
                 <strong>{previewError ? 'Website preview unavailable' : 'Preparing your website view…'}</strong>

@@ -32,7 +32,7 @@ export function MediaPanel({
         className="flex flex-wrap items-end gap-3 rounded border p-4"
         action={(form) =>
           start(async () => {
-            const r = await fetch(`/dashboard/website/${id}/media`, {
+            const r = await fetch(`/dashboard/website/${id}/uploads/media`, {
               method: 'POST',
               body: form,
             });

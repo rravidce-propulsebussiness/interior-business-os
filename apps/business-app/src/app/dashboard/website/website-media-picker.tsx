@@ -8,7 +8,7 @@ import './website-media-picker.css';
 type Asset = WebsiteDocument['assets'][number];
 
 /**
- * Uploads use the existing same-origin, tenant-authorized /media endpoint.
+ * Uploads use a dedicated same-origin tenant-authorized POST-only endpoint,\n * separate from the /media page and its GET asset routes.
  * Selection and document attachment stay local until the owner saves the draft.
  */
 export function WebsiteMediaPicker({
@@ -54,7 +54,7 @@ export function WebsiteMediaPicker({
       body.append('file', file);
       const alt = file.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ').slice(0, 500);
       body.append('alt', alt);
-      const response = await fetch(`/dashboard/website/${id}/media`, {
+      const response = await fetch(`/dashboard/website/${id}/uploads/media`, {
         method: 'POST', body, credentials: 'same-origin',
       });
       const result: { id?: unknown; width?: unknown; height?: unknown; alt?: unknown; message?: unknown } =

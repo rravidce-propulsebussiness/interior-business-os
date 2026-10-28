@@ -1,4 +1,5 @@
 'use client';
+import { useWebsitePreviewSrcDoc } from './website-preview-nonce';
 import { useEffect, useRef, useState, useTransition, type MouseEvent as ReactMouseEvent } from 'react';
 import Link from 'next/link';
 import { WebsiteMediaPicker } from './website-media-picker';
@@ -119,6 +120,7 @@ export function WebsiteEditor({
     [sideTab, setSideTab] = useState<'layers' | 'components'>('layers'),
     [fullPreview, setFullPreview] = useState(false),
     [savedDocument, setSavedDocument] = useState(initial);
+  const previewSrcDoc = useWebsitePreviewSrcDoc(preview);
   const document = history.present,
     page = document.pages.find((p) => p.id === pageId) ?? document.pages[0]!,
     activeNodes = area === 'pages' ? page.nodes : document[area],
@@ -565,7 +567,7 @@ export function WebsiteEditor({
               title="Website preview"
               sandbox="allow-scripts"
               referrerPolicy="no-referrer"
-              srcDoc={preview ||
+              srcDoc={previewSrcDoc ||
                 '<!doctype html><html><body style="font:16px sans-serif;padding:24px">Building preview…</body></html>'}
               className="ss-preview-frame"
             />
@@ -971,7 +973,7 @@ export function WebsiteEditor({
             <button type="button" onClick={() => setFullPreview(false)}>Close ×</button>
           </div>
           <iframe title="Full website preview" sandbox="allow-scripts"
-            referrerPolicy="no-referrer" srcDoc={preview} />
+            referrerPolicy="no-referrer" srcDoc={previewSrcDoc} />
         </div>
       </div>}
     </div>

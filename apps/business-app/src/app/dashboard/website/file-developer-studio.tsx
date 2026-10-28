@@ -1,4 +1,5 @@
 'use client';
+import { useWebsitePreviewSrcDoc } from './website-preview-nonce';
 
 import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import Link from 'next/link';
@@ -156,6 +157,7 @@ export function FileDeveloperStudio({
       if (result.id) setVersion(v => v + 1);
     });
   }
+  const previewSrcDoc = useWebsitePreviewSrcDoc(preview);
   useEffect(() => {
     function shortcut(event: KeyboardEvent) {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's') {
@@ -289,7 +291,7 @@ export function FileDeveloperStudio({
     {showPreview && <div className="web-files-modal-backdrop" role="presentation" onMouseDown={e => {if(e.target===e.currentTarget)setShowPreview(false);}}>
       <div className="web-files-preview-modal" role="dialog" aria-modal="true" aria-label="Draft website preview">
         <header><div><strong>Draft preview</strong><span>{previewPath} · Forms disabled</span></div><button type="button" onClick={() => setShowPreview(false)}>Close ×</button></header>
-        <iframe title="Sandboxed draft website" srcDoc={preview} sandbox="allow-scripts" referrerPolicy="no-referrer"/>
+        <iframe title="Sandboxed draft website" srcDoc={previewSrcDoc} sandbox="allow-scripts" referrerPolicy="no-referrer"/>
       </div>
     </div>}
     {modal && <div className="web-files-modal-backdrop" role="presentation" onMouseDown={e => {if(e.target===e.currentTarget)setModal(null);}}>

@@ -1,4 +1,5 @@
 'use client';
+import { useWebsitePreviewSrcDoc } from './website-preview-nonce';
 
 import { useCallback, useState } from 'react';
 import Link from 'next/link';
@@ -136,6 +137,7 @@ export function WebsiteHome({
   canDomains,
 }: Props) {
   const [createOpen, setCreateOpen] = useState(false);
+  const previewSrcDoc = useWebsitePreviewSrcDoc(previewHtml ?? '');
   const closeCreation = useCallback(() => setCreateOpen(false), []);
   const [startingTemplate, setStartingTemplate] = useState('');
   const [showAllTemplates, setShowAllTemplates] = useState(false);
@@ -238,7 +240,7 @@ export function WebsiteHome({
                       title={`Draft preview of ${mainSite.name}`}
                       sandbox="allow-scripts"
                       referrerPolicy="no-referrer"
-                      srcDoc={previewHtml}
+                      srcDoc={previewSrcDoc}
                       scrolling="no"
                     />
                   </div>
