@@ -258,6 +258,7 @@ export function websiteHtml(
           const x=Number(data.x), y=Number(data.y);
           if(Number.isFinite(x)&&Number.isFinite(y)&&x>=0&&y>=0)
             window.scrollTo(Math.min(x,100000),Math.min(y,100000));
+          parent.postMessage({type:"website.preview-restored"},"*");
           return;
         }
         if(!data||data.type!=="website.preview-text"||
