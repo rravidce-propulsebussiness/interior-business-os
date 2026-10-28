@@ -325,6 +325,36 @@ export function WebsiteEditor({
     window.addEventListener('beforeunload', warn);
     return () => window.removeEventListener('beforeunload', warn);
   }, [hasUnsavedChanges, pending]);
+  // The company sidebar sits outside Website Studio; protect its same-origin
+  // Next.js links too. Links inside the studio have their own explicit prompt.
+  useEffect(() => {
+    if (!hasUnsavedChanges && !pending) return;
+    const protectSidebar = (event: globalThis.MouseEvent) => {
+      if (event.defaultPrevented || event.button !== 0 ||
+          event.ctrlKey || event.metaKey || event.altKey || event.shiftKey)
+        return;
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      const anchor = target.closest('a[href]');
+      if (!anchor || anchor.closest('.ss-studio-editor') ||
+          anchor.hasAttribute('download') ||
+          (anchor.getAttribute('target') && anchor.getAttribute('target') !== '_self'))
+        return;
+      try {
+        const next = new URL(anchor.getAttribute('href') || '', window.location.href);
+        const current = new URL(window.location.href);
+        if (next.origin !== current.origin ||
+            (next.pathname === current.pathname && next.search === current.search))
+          return;
+        if (!window.confirm('You have unsaved website changes. Leave without saving?')) {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+        }
+      } catch { /* Invalid links are handled by the browser. */ }
+    };
+    document.addEventListener('click', protectSidebar, true);
+    return () => document.removeEventListener('click', protectSidebar, true);
+  }, [hasUnsavedChanges, pending]);
   // Save without scrolling back to the top of a long page.
   useEffect(() => {
     const saveShortcut = (event: KeyboardEvent) => {
