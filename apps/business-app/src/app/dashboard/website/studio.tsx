@@ -123,8 +123,23 @@ export function WebsiteEditor({
     const next = structuredClone(activeNodes);
     const node = locateNode(next, selection);
     if (node) {
+      const previous = { ...node.props };
       change(node);
       nodes(next);
+      // The iframe applies text-only edits immediately, safely through
+      // textContent. The debounced server preview remains authoritative.
+      if (['title', 'text', 'subtitle'].some(key =>
+        previous[key as 'title' | 'text' | 'subtitle'] !==
+          node.props[key as 'title' | 'text' | 'subtitle'])) {
+        frame.current?.contentWindow?.postMessage({
+          type: 'website.preview-text',
+          id: node.id,
+          nodeType: node.type,
+          title: node.props.title ?? '',
+          text: node.props.text ?? '',
+          subtitle: node.props.subtitle ?? '',
+        }, '*');
+      }
     }
   };
   useEffect(() => {
