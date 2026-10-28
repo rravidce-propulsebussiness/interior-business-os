@@ -20,7 +20,7 @@ async function githubText(url: string, max: number): Promise<string> {
   if (!result.ok) {
     if (result.status===403 || result.status===429)
       throw new Error('GitHub rate limit reached. Try again later.');
-    if (result.status===404) throw new Error('Public GitHub repository or file not found.');
+    if (result.status===404) throw new Error('Public GitHub repository/file not found. This repository might be private; URL-only import cannot access private code. Use GitHub or VS Code until an authorized GitHub connection is configured.');
     throw new Error('GitHub could not return this public repository.');
   }
   if (Number(result.headers.get('content-length') || 0)>max)
@@ -127,9 +127,29 @@ export async function pullGithubStaticPages(
         (skipped.length?`Skipped ${skipped.length} unsupported/duplicate files. `:'')+
         'Images, scripts, framework code and publishing were not imported. Open Code / Files to edit, then publish separately.'};
   } catch(error) {
+    const reason=error instanceof Error ? error.message : '';
+    // Expose only errors authored by this importer; external API/database
+    // text still goes through the generic safe failure wrapper.
+    const known = [
+      'Enter https://github.com/owner/repository',
+      'Your role needs page creation permission',
+      'This website changed.',
+      'Only public repositories',
+      'Public GitHub repository/file not found.',
+      'GitHub rate limit reached.',
+      'GitHub could not return',
+      'GitHub file exceeds',
+      'Repository is too large',
+      'No supported static HTML',
+      'More than 12 HTML',
+      'No importable pages.',
+      'Website code/page limit',
+    ];
+    const message=known.some(prefix=>reason.startsWith(prefix))
+      ? reason : safeFailure(error).message;
     return {ok:false,pages:[],message:
       (writes?'Some source files saved but pages were not attached. Reload before retrying. ':'')+
-      safeFailure(error).message};
+      message};
   }
 }
 
