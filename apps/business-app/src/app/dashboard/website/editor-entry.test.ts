@@ -154,7 +154,7 @@ describe('template-first business website editing', () => {
   it('protects unsaved website drafts from accidental navigation or reload', () => {
     expect(editor).toContain("window.addEventListener('beforeunload', warn)");
     expect(editor).toContain("event.returnValue = ''");
-    expect(editor).toContain("document.addEventListener('click', protectSidebar, true)");
+    expect(editor).toContain("window.document.addEventListener('click', protectSidebar, true)");
     expect(editor).toContain("anchor.closest('.ss-studio-editor')");
     expect(editor).toContain("event.stopImmediatePropagation()");
     expect(editor).toContain('onClick={confirmLeavingEditor}');
