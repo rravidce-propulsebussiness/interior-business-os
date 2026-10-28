@@ -162,3 +162,13 @@
 .ss-section-layout{margin-top:18px}
 .ss-inspector{scroll-margin-top:90px}
 @media(max-width:750px){.ss-inspector-content .ss-field-label{font-size:13px}.ss-inspector-content input:not([type='color']),.ss-inspector-content select,.ss-inspector-content textarea{font-size:16px!important}}
+
+/* Keep Save Draft within thumb reach on phones, without covering the inspector. */
+.ss-mobile-draftbar,.ss-mobile-draft-spacer{display:none}
+@media(max-width:750px){
+ .ss-mobile-draft-spacer{display:block;height:94px}
+ .ss-mobile-draftbar{position:fixed;bottom:0;left:0;right:0;z-index:45;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px max(16px,env(safe-area-inset-left)) calc(12px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-right));background:#fffaf6;border-top:1px solid #f1d2b9;box-shadow:0 -8px 28px #44220e1b}
+ .ss-mobile-draftbar-state{flex:1;min-width:0;font-size:13px;line-height:1.35;font-weight:750;color:#925328}
+ .ss-mobile-draftbar button{flex:0 0 auto;min-height:44px;padding:10px 20px;border:1px solid #d76531;border-radius:11px;background:#d76531;color:#fff;font-weight:800;font-size:14px;cursor:pointer}
+ .ss-mobile-draftbar button:disabled{opacity:.7;cursor:wait}
+}

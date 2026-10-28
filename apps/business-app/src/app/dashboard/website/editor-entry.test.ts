@@ -151,6 +151,27 @@ describe('template-first business website editing', () => {
     expect(editor).toContain('Open advanced source editor');
   });
 
+  it('protects unsaved website drafts from accidental navigation or reload', () => {
+    expect(editor).toContain("window.addEventListener('beforeunload', warn)");
+    expect(editor).toContain("event.returnValue = ''");
+    expect(editor).toContain("window.document.addEventListener('click', protectSidebar, true)");
+    expect(editor).toContain("anchor.closest('.ss-studio-editor')");
+    expect(editor).toContain("event.stopImmediatePropagation()");
+    expect(editor).toContain('onClick={confirmLeavingEditor}');
+    expect(editor).toContain("You have unsaved website changes. Leave without saving?");
+  });
+
+  it('offers keyboard Save Draft and a fixed mobile control without auto-publishing', () => {
+    expect(editor).toContain("event.key.toLowerCase() === 's'");
+    expect(editor).toContain("event.ctrlKey || event.metaKey");
+    expect(editor).toContain("if (canEdit && hasUnsavedChanges && !pending && !event.repeat) saveDraft()");
+    expect(editor).toContain('ss-mobile-draftbar');
+    expect(editor).toContain('ss-mobile-draft-spacer');
+    expect(editor).toContain('onClick={saveDraft}');
+    expect(editor).toContain('disabled={pending || !hasUnsavedChanges}');
+    expect(editor).toContain("saveAction(id, nextVersion, section, document[section])");
+  });
+
   it('does not promote code editor as a standard design option', () => {
     expect(editor).toContain('No coding needed.');
     expect(design).not.toContain('⌘ &nbsp; Code editor');
