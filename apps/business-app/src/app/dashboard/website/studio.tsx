@@ -534,6 +534,7 @@ export function WebsiteEditor({
           </div>
         </div>
         <div className="ss-heading-actions">
+          <span className="ss-wp-publish-state">{status === 'published' ? '● Published' : '● Draft'}</span>
           <span className={hasUnsavedChanges ? 'ss-save-state dirty' : 'ss-save-state'}>
             {hasUnsavedChanges ? '● Unsaved changes' : '✓ All changes saved'}
           </span>
