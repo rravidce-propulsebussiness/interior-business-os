@@ -232,7 +232,8 @@ export async function publishWebsite(
         WEBSITE_FORMS_NOT_ENTITLED: 'Publishing website forms requires the Forms capability and CRM entitlement.',
         WEBSITE_PUBLISH_VERSION_CONFLICT: 'The website changed since opening this editor. Refresh, review your changes and publish again.',
       };
-      if (problems[e.message]) return {message:problems[e.message]};
+      const diagnostic = problems[e.message];
+      if (diagnostic) return {message:diagnostic};
       if (e.message === 'Website signing is not configured')
         return {message:'Website publishing is not configured on the server. Set WEBSITE_BUILD_SIGNING_KEY (at least 32 bytes) and WEBSITE_BUILD_KEY_ID in Hostinger to match the active Supabase signing key.'};
     }
