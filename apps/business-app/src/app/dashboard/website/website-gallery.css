@@ -63,3 +63,8 @@
 @media(max-width:1100px){.wg-template-grid,.wg-owned-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:700px){.owner-layout .wg-gallery{padding:19px 11px 42px}.wg-catalog{padding:14px}.wg-template-grid,.wg-owned-grid{grid-template-columns:1fr}.wg-template-preview{height:180px}.wg-template-hero strong{font-size:20px}}
 @media(prefers-reduced-motion:reduce){.wg-gallery *{transition:none!important}}
+
+.wg-gallery .wg-notice{background:#fff2e9;border:1px solid #facfab;border-radius:10px;
+  color:#985b39;font-size:12px;line-height:1.6;padding:13px 16px;margin-bottom:17px}
+.wg-card-actions button.wg-secondary{cursor:pointer}
+.wg-card-actions button.wg-secondary:disabled{opacity:.45;cursor:not-allowed}

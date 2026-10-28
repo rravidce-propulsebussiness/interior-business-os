@@ -83,6 +83,9 @@ export default async function WebsiteTab({
     /></div>;
   } else if (tab === 'git') {
     content = <WebsiteGitTools id={id} name={site.name}
+      version={site.version}
+      canPull={s.allowed('website.custom_code.edit') && s.allowed('website.page.create') &&
+        s.allowed('website.page.edit') && s.allowed('website.seo.manage')}
       pages={site.document.pages.map(page => ({ path: page.path, title: page.title }))}/>;
   } else if (tab === 'design') {
     content = <WebsiteDesignStudio

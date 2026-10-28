@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState, useTransition } from 'react';
 import { exportWebsitePageHtml } from './website-git-export';
+import { pullGithubStaticPages } from './github-pull';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import './website-entry.css';
 
@@ -20,10 +22,14 @@ function normalizeRepository(input: string): { github: string; vscode: string } 
   } catch { return null; }
 }
 
-export function WebsiteGitTools({ id, name, pages }: {
+export function WebsiteGitTools({ id, name, pages, version, canPull }: {
   id: string; name: string; pages: {path:string; title:string}[];
+  version:number; canPull:boolean;
 }) {
+  const router=useRouter();
   const [url, setUrl] = useState('');
+  const [pulling, startPull] = useTransition();
+  const [imported, setImported] = useState<string[]>([]);
   const [message, setMessage] = useState('');
   const [pagePath, setPagePath] = useState(pages.find(p => p.path === '/')?.path ?? pages[0]?.path ?? '/');
   const [exporting, startExport] = useTransition();
@@ -41,6 +47,15 @@ export function WebsiteGitTools({ id, name, pages }: {
       setUrl(links.github);
       setMessage('Repository shortcut saved in this browser. Automatic syncing is not enabled.');
     } catch { setMessage('This browser could not save the shortcut. You can still open the links below.'); }
+  };
+  const pull = () => {
+    if(!links || !canPull || pulling)return;
+    if(!window.confirm('Pull supported static HTML/CSS pages from this public GitHub repository into new private drafts? Existing pages and published website will not be replaced.'))return;
+    startPull(async()=>{
+      const result=await pullGithubStaticPages(id,version,links.github);
+      setMessage(result.message);
+      if(result.ok){setImported(result.pages);router.refresh();}
+    });
   };
   const exportPage = () => startExport(async () => {
     try {
@@ -77,14 +92,28 @@ export function WebsiteGitTools({ id, name, pages }: {
         <input id="we-git-url" type="url" value={url} onChange={e => {setUrl(e.target.value);setMessage('');}}
           placeholder="https://github.com/your-business/website" spellCheck={false}/>
         <div className="we-git-buttons">
-          <button type="button" className="we-primary" onClick={save}>Save repository shortcut</button>
+          <button type="button" className="we-primary" onClick={save}>Save repository URL</button>
           {links && <a className="we-outline" href={links.github} target="_blank" rel="noopener noreferrer">
             Open GitHub ↗</a>}
           {links && <a className="we-outline" href={links.vscode} target="_blank" rel="noopener noreferrer">
             Open VS Code ↗</a>}
         </div>
+        <div className="we-git-pull-panel">
+          <h3>Pull code into your website</h3>
+          <p>Import supported <strong>public static HTML/CSS</strong> pages into new draft website files, without replacing any existing pages.</p>
+          <button className="we-primary" type="button" onClick={pull}
+            disabled={!links || !canPull || pulling}>
+            {pulling ? 'Pulling supported files…' : '↓ Pull GitHub HTML/CSS files'}
+          </button>
+          {!canPull && <p>Website code editing and page creation permissions are required.</p>}
+          <p className="we-git-disclaimer">React, Next.js, PHP, scripts, external assets and private repositories cannot be pulled into the visual website runtime. Use a separate Git deployment for full application code. Imported pages are drafts at /git-home, /git-about, etc., and will not change your current home page.</p>
+          {imported.length>0 && <div className="we-git-imported"><strong>Imported draft pages</strong>
+            {imported.map(path=><span key={path}>{path}</span>)}
+            <Link className="we-outline" href={`/dashboard/website/${id}/developer`}>Edit imported files</Link>
+          </div>}
+        </div>
         {message && <p className="we-notice" role="status">{message}</p>}
-        <p className="we-git-disclaimer">This shortcut is saved only in your current browser. It does not install a GitHub integration or store access tokens.</p>
+        <p className="we-git-disclaimer">The repository shortcut is saved in this browser only; it is not a persistent GitHub OAuth connection or automatic synchronization.</p>
         <div className="we-git-export">
           <h3>Export the current template as HTML</h3>
           <p>Download the rendered code of a website page. You can edit the HTML and CSS in VS Code, then commit it to your external Git repository.</p>
@@ -101,7 +130,7 @@ export function WebsiteGitTools({ id, name, pages }: {
         <h2>How full-code customization works</h2>
         <p>There are two different website workflows:</p>
         <div><strong>Normal website editing</strong><p>Use Website Studio to edit texts, projects, images, sections and styles. No coding required.</p></div>
-        <div><strong>Developer website</strong><p>Use GitHub + desktop VS Code (or VS Code for Web) to build a separate React/Next.js or other framework website.</p></div>
+        <div><strong>Developer website</strong><p>Import a compatible public static page as a draft file. Edit full React/Next.js code in GitHub or VS Code using separate hosting.</p></div>
         <div><strong>Publishing</strong><p>A full GitHub project requires its own hosting and deployment setup. It is <b>not automatically imported, synced or published</b> by the template builder.</p></div>
         <Link className="we-outline" href={`/dashboard/website/${id}/developer`}>Edit supported HTML/CSS/JS in Business OS</Link>
       </aside>

@@ -1,12 +1,15 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
+import { addReadyMadeWebsitePages } from './ready-pages-action';
 import Link from 'next/link';
 import { WebsiteCreate } from './website-create';
 import './website-gallery.css';
 
 export type GallerySite = {
-  id: string; name: string; slug: string; published: boolean; status: string;
+  id: string; name: string; slug: string; version: number;
+  published: boolean; status: string;
 };
 export type GalleryTemplate = { id: string; name: string; description: string };
 const builtin: GalleryTemplate[] = [
@@ -20,6 +23,9 @@ export function WebsiteGallery({ sites, templates, canManage, canCode }: {
   sites: GallerySite[]; templates: GalleryTemplate[];
   canManage: boolean; canCode: boolean;
 }) {
+  const router=useRouter();
+  const [busy,start] = useTransition();
+  const [notice,setNotice] = useState('');
   const [create, setCreate] = useState(false);
   const [chosen, setChosen] = useState('');
   const [search, setSearch] = useState('');
@@ -30,6 +36,18 @@ export function WebsiteGallery({ sites, templates, canManage, canCode }: {
   const shown = catalog.filter(t => (t.name + ' ' + t.description)
     .toLowerCase().includes(search.trim().toLowerCase()));
   const openNew = (id = '') => {setChosen(id);setCreate(true);};
+  const addPages = (site:GallerySite) => {
+    if(busy || !canManage)return;
+    if(!window.confirm('Add the missing Services, Packages, About, Projects and Contact template pages to this website? Existing pages, photos and published content will not be replaced.'))return;
+    start(async()=>{
+      const result=await addReadyMadeWebsitePages(site.id,site.version);
+      setNotice(result.message);
+      if(result.ok){
+        router.refresh();
+        router.push(`/dashboard/website/${site.id}/layout`);
+      }
+    });
+  };
 
   return <main id="main-content" className="wg-gallery">
     <header className="wg-header">
@@ -41,6 +59,7 @@ export function WebsiteGallery({ sites, templates, canManage, canCode }: {
         + Create website
       </button>}
     </header>
+    {notice && <div className="wg-notice" role="status">{notice}</div>}
     {sites.length > 0 && <section className="wg-owned">
       <div className="wg-section-heading"><div><span className="wg-eyebrow">YOUR DEFAULT WEBSITE</span>
         <h2>Your website</h2><p>Your saved content stays intact when you edit it.</p></div></div>
@@ -61,6 +80,10 @@ export function WebsiteGallery({ sites, templates, canManage, canCode }: {
             <Link className="wg-edit" href={`/dashboard/website/${site.id}/layout`}>✎ Edit website</Link>
             {canCode && <Link className="wg-secondary" href={`/dashboard/website/${site.id}/developer`}>Files</Link>}
             <Link className="wg-secondary" href={`/dashboard/website/${site.id}/design`}>Design</Link>
+            {canManage && <button type="button" className="wg-secondary"
+              disabled={busy} onClick={()=>addPages(site)}>
+              {busy?'Adding pages…':'+ Ready-made pages'}
+            </button>}
           </div>
         </article>)}
       </div>
