@@ -16,6 +16,8 @@ type Props = {
   id: string; name: string; initial: TemplateSources; pages: TemplatePage[];
   version: number; canEdit: boolean; canEditCss: boolean; canPublish: boolean;
   canCreatePage: boolean;
+  initialPageId?: string;
+  initialFileId?: string;
 };
 
 const makeId = () => 'n' + crypto.randomUUID().replaceAll('-', '');
@@ -26,7 +28,7 @@ const titleName = (value: string) => value.replace(/-/g, ' ')
 
 export function TemplateEditor({
   id, name, initial, pages: initialPages, version: startVersion,
-  canEdit, canEditCss, canPublish, canCreatePage,
+  canEdit, canEditCss, canPublish, canCreatePage, initialPageId, initialFileId,
 }: Props) {
   const [sources, setSources] = useState(initial);
   const [savedSources, setSavedSources] = useState(initial);
@@ -34,8 +36,11 @@ export function TemplateEditor({
   const [newPageIds, setNewPageIds] = useState<string[]>([]);
   const [version, setVersion] = useState(startVersion);
   const [selected, setSelected] = useState<Selection>(
-    initialPages.length ? { kind: 'page', id: initialPages[0]!.id } :
-    { kind: 'global', id: 'global' },
+    initialFileId === 'global' ? {kind:'global',id:'global'} :
+    initialFileId && initial.code.some(c => c.id === initialFileId)
+      ? {kind:'component',id:initialFileId} :
+      { kind: 'page', id: initialPages.find(p => p.id === initialPageId)?.id ??
+        initialPages.find(p => p.codeId)?.id ?? initialPages[0]?.id ?? '' },
   );
   const [field, setField] = useState<FileField>('html');
   const [search, setSearch] = useState('');

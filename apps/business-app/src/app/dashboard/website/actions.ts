@@ -13,6 +13,7 @@ import {
 } from '@business-os/website-builder/compiler';
 import { websiteHtml } from '@business-os/website-builder/render';
 import { websiteServices, signWebsite } from './service';
+import { applyWebsiteTemplate } from './entry-actions';
 import { websiteJson } from '@business-os/database/website';
 import { safeFailure, idSchema } from '@business-os/shared';
 import { interiorWebsite } from '@business-os/industry-interior/website';
@@ -54,7 +55,21 @@ export async function createWebsite(
     )
       throw new Error('Enter a name and a safe subdomain slug');
     let id: string;
-    if (templateId) {
+    if (templateId.startsWith('starter:')) {
+      if (!['starter:construction','starter:interior','starter:services'].includes(templateId))
+        throw new Error('Unknown starter template');
+      id = await s.website.create(name, slug, emptyWebsite(name));
+      const fresh = await s.website.read(id);
+      const applied = await applyWebsiteTemplate(id, fresh.version, templateId);
+      if (!applied.saved) {
+        revalidatePath('/dashboard/website');
+        return {
+          id,
+          message: 'Website created, but template setup needs attention: ' +
+            applied.message + ' Open this site to retry safely.',
+        };
+      }
+    } else if (templateId) {
       const result = await s.client.rpc('website_from_template', {
         p_organization_id: s.context.organizationId,
         p_template_id: idSchema.parse(templateId),

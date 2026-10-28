@@ -35,7 +35,7 @@ export default async function WebsiteTab({
   params, searchParams,
 }: {
   params: Promise<{ id: string; tab: string }>;
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; file?: string }>;
 }) {
   const { id, tab } = await params;
   const permission = permissions[tab];
@@ -52,7 +52,10 @@ export default async function WebsiteTab({
   const email = user.email ?? '';
   let content;
   if (tab === 'developer') {
+    const query = await searchParams;
     content = <TemplateEditor
+      {...(query.page ? { initialPageId: query.page } : {})}
+      {...(query.file ? { initialFileId: query.file } : {})}
       id={id}
       name={site.name}
       initial={templateSources(site.document)}
