@@ -108,3 +108,11 @@
 .we-git-export label{margin-top:14px}
 .we-git-export select{display:block;width:100%;background:white!important;color:#394352!important;border:1px solid #eee0d6!important;border-radius:9px!important;padding:11px!important;margin-bottom:14px}
 .we-git-export .we-outline{margin-bottom:13px}
+
+.we-git-pull-panel{margin:18px 0;padding:19px;border:1px solid #f3d2b8;border-radius:12px;background:#fffaf5}
+.we-git-pull-panel h3{font-size:14px;font-weight:850;color:#484140}
+.we-git-pull-panel p{font-size:11px;color:#79818d;line-height:1.7;margin:8px 0 14px}
+.we-git-pull-panel button:disabled{opacity:.5;cursor:not-allowed}
+.we-git-imported{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:15px;padding:12px;background:#fff;border-radius:9px}
+.we-git-imported strong{flex-basis:100%;font-size:11px}
+.we-git-imported span{padding:7px 9px;font-size:10px;border-radius:6px;background:#f4f6f4;color:#53645b}

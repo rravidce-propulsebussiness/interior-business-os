@@ -48,6 +48,7 @@ export default async function Websites() {
         id: site.id,
         name: site.name,
         slug: site.slug,
+        version: site.version,
         status: site.status,
         published: Boolean(site.published_version_id) && site.status === 'published',
       }))}
