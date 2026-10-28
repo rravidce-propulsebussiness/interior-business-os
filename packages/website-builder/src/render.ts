@@ -246,9 +246,20 @@ export function websiteHtml(
         const node=event.target.closest("[data-website-node]");
         if(node)parent.postMessage({type:"website.select",id:node.dataset.websiteNode},"*");
       });
+      // The editor saves the scroll position before replacing srcDoc.
+      // Only the trusted parent can restore this isolated preview.
+      window.addEventListener("scroll",function(){
+        parent.postMessage({type:"website.preview-scroll",x:scrollX,y:scrollY},"*");
+      },{passive:true});
       window.addEventListener("message",function(event){
         if(event.source!==parent)return;
         const data=event.data;
+        if(data&&data.type==="website.preview-restore-scroll"){
+          const x=Number(data.x), y=Number(data.y);
+          if(Number.isFinite(x)&&Number.isFinite(y)&&x>=0&&y>=0)
+            window.scrollTo(Math.min(x,100000),Math.min(y,100000));
+          return;
+        }
         if(!data||data.type!=="website.preview-text"||
           typeof data.id!=="string"||data.id.length>100)return;
         const node=document.getElementById(data.id);
