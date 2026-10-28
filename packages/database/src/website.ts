@@ -42,8 +42,10 @@ export function createWebsiteRepository(
       );
       if (!raw || typeof raw !== 'object' || Array.isArray(raw))
         throw new DomainError('VALIDATION_FAILED');
+      const publishedVersionValue = (raw as Record<string, unknown>).publishedVersionId;
       return {
         ...raw,
+        publishedVersionId: typeof publishedVersionValue === 'string' ? publishedVersionValue : null,
         id: String(raw.id),
         name: String(raw.name),
         slug: String(raw.slug),
