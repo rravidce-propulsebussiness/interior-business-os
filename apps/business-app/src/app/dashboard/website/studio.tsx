@@ -63,6 +63,7 @@ export function WebsiteEditor({
 }) {
   const frame = useRef<HTMLIFrameElement>(null);
   const inspectorRef = useRef<HTMLElement>(null);
+  const latestDocRef = useRef(initial);
   const previewScroll = useRef({ x: 0, y: 0 });
   const restoringPreviewScroll = useRef(false);
   const lastPreviewHtml = useRef('');
@@ -76,14 +77,38 @@ export function WebsiteEditor({
     initial.pages.find(p => p.nodes.length) ??
     initial.pages.find(p => p.path === '/') ??
     initial.pages[0]!;
-  const [selection, setSelection] = useState<string | null>(
-    openingPage.nodes.find(node => node.type === 'hero')?.id ??
-      openingPage.nodes[0]?.id ?? null,
-  );
+  // A full-width canvas is the default. Side panels open only on request.
+  const [selection, setSelection] = useState<string | null>(null);
+  const [showSections, setShowSections] = useState(false);
+  const [showInspector, setShowInspector] = useState(false);
+  const [focused, setFocused] = useState(false);
   useEffect(() => {
     const receive = (event: MessageEvent) => {
       if (event.source !== frame.current?.contentWindow) return;
       const data = event.data;
+      const selectTarget = (nodeId: string) => {
+        const doc = latestDocRef.current;
+        if (locateNode(doc.header, nodeId)) setArea('header');
+        else if (locateNode(doc.footer, nodeId)) setArea('footer');
+        else {
+          const found = doc.pages.find(page => locateNode(page.nodes, nodeId));
+          if (!found) return false;
+          setPageId(found.id);
+          setArea('pages');
+        }
+        setSelection(nodeId);
+        return true;
+      };
+      if (data?.type === 'website.replace-image' &&
+        typeof data.id === 'string' &&
+        /^[a-zA-Z][a-zA-Z0-9_-]{0,63}$/.test(data.id)) {
+        if (!canEdit) return;
+        if (selectTarget(data.id)) {
+          setShowSections(false);
+          setShowInspector(true);
+        }
+        return;
+      }
       if (data?.type === 'website.inline-text') {
         if (!canEdit || typeof data.id !== 'string' ||
             !/^[a-zA-Z][a-zA-Z0-9_-]{0,63}$/.test(data.id) ||
@@ -114,18 +139,15 @@ export function WebsiteEditor({
           node.props[data.field as 'title'|'subtitle'|'text'] = data.value;
           return editHistory(current, next);
         });
-        setSelection(data.id);
+        selectTarget(data.id);
         return;
       }
-      if (data?.type === 'website.select' && typeof data.id === 'string') {
-        setSelection(data.id);
-        // On narrow screens the controls sit beneath the preview. Move there
-        // only when the owner deliberately taps an element in the preview.
-        if (window.innerWidth <= 750)
-          requestAnimationFrame(() => inspectorRef.current?.scrollIntoView({
-            block: 'start',
-            behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
-          }));
+      if (data?.type === 'website.select' && typeof data.id === 'string' &&
+          /^[a-zA-Z][a-zA-Z0-9_-]{0,63}$/.test(data.id)) {
+        if (!selectTarget(data.id)) return;
+        if (data.inline === true) return; // Text remains editable in place.
+        setShowSections(false);
+        setShowInspector(true);
       }
       if (data?.type === 'website.preview-restored')
         restoringPreviewScroll.current = false;
@@ -154,6 +176,15 @@ export function WebsiteEditor({
     [sideTab, setSideTab] = useState<'layers' | 'components' | 'files'>('layers'),
     [fullPreview, setFullPreview] = useState(false),
     [savedDocument, setSavedDocument] = useState(initial);
+  useEffect(() => { latestDocRef.current = history.present; }, [history.present]);
+  useEffect(() => {
+    if (!focused) return;
+    const onEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setFocused(false);
+    };
+    window.document.addEventListener('keydown', onEscape);
+    return () => window.document.removeEventListener('keydown', onEscape);
+  }, [focused]);
   const previewSrcDoc = useWebsitePreviewSrcDoc(preview);
   const document = history.present,
     page = document.pages.find((p) => p.id === pageId) ?? document.pages[0]!,
@@ -425,7 +456,7 @@ export function WebsiteEditor({
       event.preventDefault();
   };
   return (
-    <div className="ss-studio-editor">
+    <div className={`ss-studio-editor ss-simple-layout${focused ? ' ss-focused' : ''}`}>
       <header className="ss-heading">
         <div className="ss-heading-title">
           <span className="ss-heading-icon" aria-hidden="true">▣</span>
@@ -456,23 +487,33 @@ export function WebsiteEditor({
           </button>}
         </div>
       </header>
-      {!templateMode && <nav className="ss-modebar" aria-label="Website editing modes">
+      {!templateMode && <nav className="ss-modebar ss-simple-nav" aria-label="Website editing modes">
         <div className="ss-modebar-left">
-          <span className="ss-mode-active">▣ &nbsp; Visual editor</span>
+          <Link href="/dashboard/website" onClick={confirmLeavingEditor}>← Templates</Link>
+          <span className="ss-mode-active">◉ &nbsp; Visual Editor</span>
+          {canViewSource && <Link href={`/dashboard/website/${id}/developer`}
+            onClick={confirmLeavingEditor}>⌘ &nbsp; Code / Files</Link>}
+          {canViewSource && <Link href={`/dashboard/website/${id}/git`}
+            onClick={confirmLeavingEditor}>GitHub / VS Code</Link>}
         </div>
         <div className="ss-modebar-right">
-          <span className="ss-mode-hint">Website settings</span>
-          <Link href={`/dashboard/website/${id}/design`} onClick={confirmLeavingEditor}>⚙ Design</Link>
-          <Link href={`/dashboard/website/${id}/seo`} onClick={confirmLeavingEditor}>SEO</Link>
+          <Link href={`/dashboard/website/${id}/design`} onClick={confirmLeavingEditor}>Design</Link>
           <Link href={`/dashboard/website/${id}/media`} onClick={confirmLeavingEditor}>Images</Link>
-          <Link href={`/dashboard/website/${id}/versions`} onClick={confirmLeavingEditor}>⌁ Versions</Link>
-          {canViewSource && <Link href={`/dashboard/website/${id}/developer`} onClick={confirmLeavingEditor}>Files & code</Link>}
+          <Link href={`/dashboard/website/${id}/seo`} onClick={confirmLeavingEditor}>SEO</Link>
         </div>
       </nav>}
       {message && <p className="ss-message" role="status">{message}</p>}
       <div className="ss-board">
         <div className="ss-toolbar">
           <div className="ss-toolbar-group">
+            <button type="button" className="ss-simple-tool" aria-expanded={showSections}
+              onClick={() => {setShowSections(open => !open);setShowInspector(false);}}>
+              ☰ &nbsp; Pages / Sections
+            </button>
+            <button type="button" className="ss-simple-tool" aria-expanded={showInspector}
+              onClick={() => {setShowInspector(open => !open);setShowSections(false);}}>
+              ✎ &nbsp; {selection ? 'Edit selection' : 'Page settings'}
+            </button>
             <span className="ss-toolbar-label">EDITING</span>
             <select aria-label="Page" className="ss-page-select" value={page.id}
               onChange={(event) => { setPageId(event.target.value); setSelection(null); }}>
@@ -507,7 +548,10 @@ export function WebsiteEditor({
             </select>
           </div>
           <div className="ss-toolbar-group">
-            <span className="ss-toolbar-label">PREVIEW</span>
+            <button type="button" className="ss-simple-tool" onClick={() => setFocused(open => !open)}>
+              {focused ? '✕ Exit full screen' : '⛶ Full screen'}
+            </button>
+            <span className="ss-toolbar-label">VIEW</span>
             <div className="ss-device-controls" role="group" aria-label="Preview device">
               {(['desktop', 'tablet', 'mobile'] as const).map((size) =>
                 <button type="button" key={size} aria-label={size + ' preview'}
@@ -522,7 +566,10 @@ export function WebsiteEditor({
         </div>
         <div className="ss-workspace">
 
-        <aside className="ss-left-panel">
+        {showSections && <aside className="ss-left-panel">
+          <div className="ss-panel-close-bar"><strong>Website sections</strong>
+            <button type="button" aria-label="Close sections" onClick={() => setShowSections(false)}>✕</button>
+          </div>
           <div className="ss-left-tabs" role="tablist" aria-label="Editor sidebar">
             <button type="button" role="tab" aria-selected={sideTab === 'layers'}
               className={sideTab === 'layers' ? 'active' : ''}
@@ -616,7 +663,7 @@ export function WebsiteEditor({
           <div className="ss-left-tip"><strong>✦ &nbsp; Quick tip</strong>
             <p>Click text on the website to type directly. Use Components to add sections or Files to edit HTML and CSS.</p>
           </div>
-        </aside>
+        </aside>}
         <section className="ss-canvas" aria-label="Website canvas"
           onDragOver={(event) => event.preventDefault()}
           onDrop={(event) => {
@@ -656,8 +703,13 @@ export function WebsiteEditor({
             Select an element to edit its properties
           </div>
         </section>
-        <aside ref={inspectorRef} className="ss-inspector">
-          <div className="ss-inspector-top"><h2>{selected ? 'Edit section' : 'Page settings'}</h2><span>{selected ? '✣ Selected' : 'Website page'}</span></div>
+        {showInspector && <aside ref={inspectorRef} className="ss-inspector">
+          <div className="ss-inspector-top">
+            <h2>{selected ? selected.type === 'image' || selected.props.asset
+              ? 'Replace image' : 'Edit section' : 'Page settings'}</h2>
+            <button type="button" className="ss-panel-close" aria-label="Close properties"
+              onClick={() => setShowInspector(false)}>✕</button>
+          </div>
           {selected && <div className="ss-selected-card">
             <span className="ss-selected-icon" aria-hidden="true">▣</span>
             <div><strong>{selected.type.replaceAll('_', ' ').replace(/\b\w/g, (letter) => letter.toUpperCase()) + ' Section'}</strong>
@@ -748,34 +800,6 @@ export function WebsiteEditor({
                   This section has no text to edit. Select a different section or use the
                   settings below to change its appearance.
                 </p>}
-              {contentFields.map(field => (
-                <label key={field.key} className="ss-field-label">
-                  {field.label}
-                  {field.multiline ? (
-                    <textarea
-                      className={`${controls} mt-1`}
-                      rows={field.key === 'text' ? 5 : 3}
-                      maxLength={field.maxLength}
-                      placeholder={field.placeholder}
-                      value={selected.props[field.key] ?? ''}
-                      onChange={event => update(node => {
-                        if (event.target.value) node.props[field.key] = event.target.value;
-                        else delete node.props[field.key];
-                      })}
-                    />
-                  ) : (
-                    <input className={`${controls} mt-1`}
-                      maxLength={field.maxLength}
-                      placeholder={field.placeholder}
-                      value={selected.props[field.key] ?? ''}
-                      onChange={event => update(node => {
-                        if (event.target.value) node.props[field.key] = event.target.value;
-                        else delete node.props[field.key];
-                      })}
-                    />
-                  )}
-                </label>
-              ))}
               {(selected.type === 'image' || selected.type === 'hero' ||
                 selected.type === 'logo' || selected.props.asset !== undefined) && (
                 <WebsiteMediaPicker
@@ -824,6 +848,34 @@ export function WebsiteEditor({
                   })}
                 />
               )}
+              {contentFields.map(field => (
+                <label key={field.key} className="ss-field-label">
+                  {field.label}
+                  {field.multiline ? (
+                    <textarea
+                      className={`${controls} mt-1`}
+                      rows={field.key === 'text' ? 5 : 3}
+                      maxLength={field.maxLength}
+                      placeholder={field.placeholder}
+                      value={selected.props[field.key] ?? ''}
+                      onChange={event => update(node => {
+                        if (event.target.value) node.props[field.key] = event.target.value;
+                        else delete node.props[field.key];
+                      })}
+                    />
+                  ) : (
+                    <input className={`${controls} mt-1`}
+                      maxLength={field.maxLength}
+                      placeholder={field.placeholder}
+                      value={selected.props[field.key] ?? ''}
+                      onChange={event => update(node => {
+                        if (event.target.value) node.props[field.key] = event.target.value;
+                        else delete node.props[field.key];
+                      })}
+                    />
+                  )}
+                </label>
+              ))}
               <h3 className="ss-inspector-section-title ss-appearance-label">Appearance</h3>
               {(['background', 'color'] as const).map(key => (
                 <label key={key} className="ss-color-field">
@@ -1027,7 +1079,7 @@ export function WebsiteEditor({
             </label>
           )}
           </div>
-        </aside>
+        </aside>}
         </div>
       </div>
       <div className="ss-studio-foot">🔒 &nbsp; Draft preview only. Website changes are published only when you choose Publish.</div>

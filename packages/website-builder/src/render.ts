@@ -266,9 +266,15 @@ export function websiteHtml(
         const node=target && target.closest && target.closest("[data-website-node]");
         event.preventDefault();
         if(!node)return;
-        parent.postMessage({type:"website.select",id:node.dataset.websiteNode},"*");
+        const imageTarget=target.closest("img");
+        if(imageTarget&&node.contains(imageTarget)){
+          parent.postMessage({type:"website.replace-image",id:node.dataset.websiteNode},"*");
+          return;
+        }
         const textTarget=target.closest("h1,h2,h3,h4,h5,h6,p,a.button");
-        if(!textTarget||!node.contains(textTarget)||textTarget.isContentEditable)return;
+        const inline=Boolean(textTarget&&node.contains(textTarget));
+        parent.postMessage({type:"website.select",id:node.dataset.websiteNode,inline:inline},"*");
+        if(!inline||textTarget.isContentEditable)return;
         const type=node.matches("h1,h2,h3,h4,h5,h6")?"heading":
           node.matches("p")?"text":
           node.matches("a.button")?"button":node.tagName.toLowerCase();

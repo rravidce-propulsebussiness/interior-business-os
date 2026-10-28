@@ -2,13 +2,14 @@ import { createHash } from 'node:crypto';
 import { safeFailure } from '@business-os/shared';
 import { prepareMarketingImage } from '@business-os/shared/media';
 import { websiteServices, signWebsite } from '../../../service';
+import { isAllowedWebsiteUploadOrigin } from '../../../upload-origin';
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id } = await params;
-    if (request.headers.get('origin') !== new URL(request.url).origin)
+    if (!isAllowedWebsiteUploadOrigin(request))
       return Response.json({ message: 'Unavailable upload' }, { status: 403 });
     const s = await websiteServices('website.media.manage');
     await s.website.read(id);
