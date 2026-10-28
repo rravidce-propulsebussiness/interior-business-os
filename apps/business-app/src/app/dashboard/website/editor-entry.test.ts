@@ -114,6 +114,17 @@ describe('template-first business website editing', () => {
     expect(editor).toContain('if (!active) return; // A newer draft may already be visible.');
   });
 
+  it('keeps the preview at the same scroll position while the server refreshes', () => {
+    expect(editor).toContain("type: 'website.preview-restore-scroll'");
+    expect(editor).toContain("data?.type === 'website.preview-scroll'");
+    expect(editor).toContain("data?.type === 'website.preview-restored'");
+    expect(editor).toContain("restoringPreviewScroll.current = true");
+    expect(editor).toContain("restoringPreviewScroll.current = false");
+    expect(editor).toContain('onLoad={() => frame.current?.contentWindow?.postMessage({');
+    expect(editor).toContain('previewScroll.current = { x: 0, y: 0 };');
+    expect(editor).toContain('lastPreviewHtml.current !== next');
+  });
+
   it('uses cached recent previews and does not overwrite newer drafts', () => {
     expect(editor).toContain('const previewCache = useRef(new Map<string, string>())');
     expect(editor).toContain('JSON.stringify([history.present, page.path])');
