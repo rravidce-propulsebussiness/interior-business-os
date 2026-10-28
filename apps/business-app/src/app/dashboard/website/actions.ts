@@ -13,6 +13,7 @@ import {
 } from '@business-os/website-builder/compiler';
 import { websiteHtml } from '@business-os/website-builder/render';
 import { websiteServices, signWebsite } from './service';
+import { linkedDraftPagesForPublication } from './website-publication-links';
 import { applyWebsiteTemplate } from './entry-actions';
 import { websiteJson } from '@business-os/database/website';
 import { safeFailure, idSchema } from '@business-os/shared';
@@ -261,6 +262,54 @@ export async function publishWebsite(
     return { message: message(e) };
   }
 }
+/**
+ * Explicitly publish draft pages linked from public menus/sections and then
+ * publish the website. Only called after the editor asks the owner to confirm.
+ * Existing unrelated draft pages remain private.
+ */
+export async function publishWebsiteWithLinkedPages(
+  id: string,
+  version: number,
+  summary: string,
+): Promise<{ id?: string; version?: number; message: string }> {
+  let savedVersion: number | undefined;
+  try {
+    const s = await websiteServices('website.page.publish');
+    if (!s.allowed('website.page.edit'))
+      return { message: 'You need Website Page Edit permission to publish linked draft pages.' };
+    const current = await s.website.read(id);
+    if (current.version !== version)
+      return { message: 'This website changed. Reload the latest draft and retry publishing.' };
+    const linked = linkedDraftPagesForPublication(current.document);
+    if (!linked.length) {
+      const result = await publishWebsite(id, version, summary);
+      return { ...result, ...(result.id ? {version: version + 1} : {}) };
+    }
+    if (current.document.pages.some(page =>
+      linked.includes(page.path) && !page.seo.title.trim()))
+      return { message: 'A linked page has no SEO title. Add an SEO title before publishing.' };
+    const selected = new Set(linked);
+    const pages = current.document.pages.map(page =>
+      selected.has(page.path) ? { ...page, visibility: 'public' as const } : page);
+    // Normal version-checked save enforces tenant permissions and preserves audit.
+    savedVersion = await s.website.save(id, version, 'pages', pages);
+    const result = await publishWebsite(id, savedVersion, summary);
+    revalidatePath(`/dashboard/website/${id}/layout`);
+    return {
+      ...result,
+      version: result.id ? savedVersion + 1 : savedVersion,
+      message: result.id
+        ? `Published website including ${linked.length} linked page(s): ${linked.join(', ')}.`
+        : `Linked pages were saved as public drafts but publication failed: ${result.message} Reload the editor before retrying.`,
+    };
+  } catch (error) {
+    return { ...(savedVersion !== undefined ? { version: savedVersion } : {}),
+      message: (savedVersion !== undefined
+        ? 'Linked pages were saved, but publishing did not finish. Reload the editor before retrying. '
+        : '') + message(error) };
+  }
+}
+
 export async function changeWebsiteStatus(
   id: string,
   version: number,
