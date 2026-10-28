@@ -136,7 +136,7 @@ export function WebsiteGitTools({ id, name, pages, version, canPull }: {
             disabled={!links || !canPull || pulling}>
             {pulling ? 'Pulling supported files…' : '↓ Pull GitHub HTML/CSS files'}
           </button>
-          {!canPull && <p>Website code editing and page creation permissions are required.</p>}
+          {!canPull && <p>Static HTML/CSS import is unavailable for this website's current plan or your editing permissions. Developer Mode and Custom Code must be enabled to import files. You can still use <strong>Browse source files — multiple languages</strong> below.</p>}
           <p className="we-git-disclaimer">React, Next.js, PHP, scripts, external assets and private repositories cannot be pulled into the visual website runtime. Use a separate Git deployment for full application code. Imported pages are drafts at /git-home, /git-about, etc., and will not change your current home page.</p>
           {imported.length>0 && <div className="we-git-imported"><strong>Imported draft pages</strong>
             {imported.map(path=><span key={path}>{path}</span>)}
