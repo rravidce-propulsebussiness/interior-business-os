@@ -85,6 +85,7 @@ export function WebsiteEditor({
     initial.pages[0]!;
   // A full-width canvas is the default. Side panels open only on request.
   const [selection, setSelection] = useState<string | null>(null);
+  const [selectedContentId, setSelectedContentId] = useState<string | null>(null);
   const [showSections, setShowSections] = useState(false);
   const [showInspector, setShowInspector] = useState(false);
   const [sitePanel, setSitePanel] = useState<'pages'|'header'|'footer'|null>(null);
@@ -104,8 +105,37 @@ export function WebsiteEditor({
           setArea('pages');
         }
         setSelection(nodeId);
+        setSelectedContentId(null);
         return true;
       };
+      if (data?.type === 'website.select-content' ||
+          data?.type === 'website.replace-content-image') {
+        if (!canEdit || typeof data.contentId !== 'string' ||
+            !/^[a-zA-Z][a-zA-Z0-9_-]{0,63}$/.test(data.contentId) ||
+            !latestDocRef.current.content.some(c => c.id === data.contentId)) return;
+        setSelectedContentId(data.contentId);
+        setSelection(null);
+        setShowSections(false);setSitePanel(null);setShowInspector(true);
+        return;
+      }
+      if (data?.type === 'website.inline-content-text') {
+        if (!canEdit || typeof data.contentId !== 'string' ||
+            !/^[a-zA-Z][a-zA-Z0-9_-]{0,63}$/.test(data.contentId) ||
+            !['title','text'].includes(data.field) ||
+            typeof data.value !== 'string' || !data.value.trim() ||
+            data.value.length > (data.field === 'title' ? 300 : 12000)) return;
+        setHistory(current=>{
+          const existing=current.present.content.find(c=>c.id===data.contentId);
+          if(!existing || existing[data.field as 'title'|'text']===data.value) return current;
+          const next=structuredClone(current.present);
+          const item=next.content.find(c=>c.id===data.contentId);
+          if(!item) return current;
+          item[data.field as 'title'|'text']=data.value;
+          return editHistory(current,next);
+        });
+        setSelectedContentId(data.contentId);
+        return;
+      }
       if (data?.type === 'website.navigate' && typeof data.path === 'string') {
         const path = data.path.split('#')[0]?.split('?')[0];
         const target = latestDocRef.current.pages.find(p => p.path === path);
@@ -209,7 +239,8 @@ export function WebsiteEditor({
     activeNodes = area === 'pages' ? page.nodes : document[area],
     selected = selection ? locateNode(activeNodes, selection) : undefined;
   const contentFields = selected ? editableContentFields(selected) : [];
-  const unsavedSections = (['assets', 'pages', 'header', 'footer', 'navigation', 'footerNavigation', 'settings'] as const).filter(
+  const selectedContent = selectedContentId ? document.content.find(c=>c.id===selectedContentId) : undefined;
+  const unsavedSections = (['assets', 'content', 'pages', 'header', 'footer', 'navigation', 'footerNavigation', 'settings'] as const).filter(
     (key) => JSON.stringify(document[key]) !== JSON.stringify(savedDocument[key]),
   );
   const hasUnsavedChanges = unsavedSections.length > 0;
@@ -850,8 +881,9 @@ export function WebsiteEditor({
         </section>
         {showInspector && <aside ref={inspectorRef} className="ss-inspector">
           <div className="ss-inspector-top">
-            <h2>{selected ? selected.type === 'image' || selected.props.asset
-              ? 'Replace image' : 'Edit section' : 'Page settings'}</h2>
+            <h2>{selectedContent ? 'Edit photo & content' :
+              selected ? selected.type === 'image' || selected.props.asset
+              ? 'Replace image' : 'Edit selected text' : 'Page settings'}</h2>
             <button type="button" className="ss-panel-close" aria-label="Close properties"
               onClick={() => setShowInspector(false)}>✕</button>
           </div>
@@ -863,7 +895,46 @@ export function WebsiteEditor({
           </div>}
           <div className="ss-inspector-content">
 
-          {!selected ? (
+          {selectedContent ? <fieldset disabled={!canEdit} className="space-y-4">
+            <h3 className="ss-inspector-section-title">{selectedContent.kind === 'projects' ? 'Project card' : 'Service card'}</h3>
+            <p className="ss-content-help">Click the title or description in the website to type directly, or edit them below.</p>
+            <label className="ss-field-label">Title
+              <input className={controls} maxLength={300} value={selectedContent.title}
+                onChange={e=>edit({...document,content:document.content.map(item=>
+                  item.id===selectedContent.id?{...item,title:e.target.value}:item)})}/>
+            </label>
+            <label className="ss-field-label">Description
+              <textarea className={controls} rows={4} maxLength={12000}
+                value={selectedContent.text}
+                onChange={e=>edit({...document,content:document.content.map(item=>
+                  item.id===selectedContent.id?{...item,text:e.target.value}:item)})}/>
+            </label>
+            <WebsiteMediaPicker id={id} assets={document.assets}
+              value={selectedContent.image} label="Card photo"
+              disabled={!canEdit||pending} canPreview={canPreviewMedia}
+              unsaved={hasUnsavedChanges}
+              onChange={assetId=>{
+                const next=structuredClone(document);
+                const item=next.content.find(c=>c.id===selectedContent.id);
+                if(item){
+                  if(assetId)item.image=assetId;
+                  else delete item.image;
+                  edit(next);
+                }
+              }}
+              onUploaded={asset=>{
+                setHistory(h=>{
+                  const current=h.present;
+                  if(!current.content.some(c=>c.id===selectedContent.id))return h;
+                  const next=structuredClone(current);
+                  if(!next.assets.some(a=>a.id===asset.id))next.assets.push(asset);
+                  const item=next.content.find(c=>c.id===selectedContent.id);
+                  if(item)item.image=asset.id;
+                  return editHistory(h,next);
+                });
+                setMessage('Photo added to your draft. Save to keep it.');
+              }}/>
+          </fieldset> : !selected ? (
             <>
               <label className="block text-xs">
                 Page title

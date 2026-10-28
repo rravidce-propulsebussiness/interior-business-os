@@ -28,6 +28,17 @@ describe('Business Showcase multi-page template', () => {
     }
   });
 
+  it('lets the editor edit project and service card content, including photos', () => {
+    const html = websiteHtml(compileWebsite(doc), '/', { preview:true })!;
+    expect(html).toContain('data-website-content-id="showcaseServiceConstruction"');
+    expect(html).toContain('data-website-content-field="title"');
+    expect(html).toContain('data-website-add-photo');
+    expect(html).toContain('website.replace-content-image');
+    expect(html).toContain('website.inline-content-text');
+    const publicHtml = websiteHtml(compileWebsite(doc), '/')!;
+    expect(publicHtml).not.toContain('data-website-add-photo');
+  });
+
   it('supports per-text font selections in the schema', () => {
     const copy = structuredClone(doc);
     copy.pages[0]!.nodes[0]!.style.fontFamily = 'serif';

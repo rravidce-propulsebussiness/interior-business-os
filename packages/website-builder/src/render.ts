@@ -212,7 +212,7 @@ export function renderWebsite(
           c.published &&
           (!p.collection || c.id === p.collection),
       );
-      return `<div ${id}>${title ? `<h2>${title}</h2>` : ''}<div class="${node.type === 'faq' ? '' : 'website-grid'}">${items.map((item) => (node.type === 'faq' ? `<details><summary>${e(item.title)}</summary><p>${e(item.text)}</p></details>` : `<article class="website-card">${item.image ? `<img src="${e(asset(item.image))}" alt="${e(item.title)}" loading="lazy">` : ''}<h3>${e(item.title)}</h3><p>${e(item.text)}</p>${item.href ? `<a href="${e(item.href)}">Explore →</a>` : ''}</article>`)).join('')}</div></div>`;
+      return `<div ${id}>${title ? `<h2>${title}</h2>` : ''}<div class="${node.type === 'faq' ? '' : 'website-grid'}">${items.map((item) => (node.type === 'faq' ? `<details><summary>${e(item.title)}</summary><p>${e(item.text)}</p></details>` : `<article class="website-card" data-website-content-id="${e(item.id)}">${item.image ? `<img data-website-content-image src="${e(asset(item.image))}" alt="${e(item.title)}" loading="lazy">` : options.preview ? '<button type="button" data-website-add-photo style="background:#fff4e9;color:#b45a23;border:1px dashed #e9a476;padding:12px">+ Add photo</button>' : ''}<h3 data-website-content-field="title">${e(item.title)}</h3><p data-website-content-field="text">${e(item.text)}</p>${item.href ? `<a href="${e(item.href)}">Explore →</a>` : ''}</article>`)).join('')}</div></div>`;
     }
     const tag =
       node.type === 'section' || node.type === 'hero' || node.type === 'cta'
@@ -289,6 +289,42 @@ export function websiteHtml(
         const node=target && target.closest && target.closest("[data-website-node]");
         const anchor=target && target.closest && target.closest("a[href]");
         event.preventDefault();
+        const contentCard=target && target.closest && target.closest("[data-website-content-id]");
+        if(contentCard){
+          const contentId=contentCard.getAttribute("data-website-content-id");
+          const image=target.closest("[data-website-content-image],[data-website-add-photo]");
+          if(image){
+            parent.postMessage({type:"website.replace-content-image",contentId:contentId},"*");
+            return;
+          }
+          const editable=target.closest("[data-website-content-field]");
+          if(editable && contentCard.contains(editable) && !editable.isContentEditable){
+            const field=editable.getAttribute("data-website-content-field");
+            if(field!=="title"&&field!=="text")return;
+            parent.postMessage({type:"website.select-content",contentId:contentId},"*");
+            const before=editable.textContent||"";
+            editable.setAttribute("contenteditable","plaintext-only");
+            editable.setAttribute("spellcheck","true");
+            editable.style.outline="2px solid #fa762d";
+            editable.focus();
+            function contentKey(e){
+              if(e.key==="Escape"){e.preventDefault();editable.textContent=before;editable.blur();}
+              if(e.key==="Enter"&&field==="title"){e.preventDefault();editable.blur();}
+            }
+            editable.addEventListener("keydown",contentKey);
+            editable.addEventListener("blur",function(){
+              editable.removeEventListener("keydown",contentKey);
+              editable.removeAttribute("contenteditable");
+              editable.style.outline="";
+              const after=(editable.textContent||"").slice(0,field==="title"?300:12000);
+              if(after!==before)parent.postMessage({
+                type:"website.inline-content-text",contentId:contentId,
+                field:field,value:after
+              },"*");
+            },{once:true});
+            return;
+          }
+        }
         if(anchor && !node){
           const path=anchor.getAttribute("href")||"";
           if(path.startsWith("/")&&!path.startsWith("//")){
