@@ -352,8 +352,8 @@ export function WebsiteEditor({
         }
       } catch { /* Invalid links are handled by the browser. */ }
     };
-    document.addEventListener('click', protectSidebar, true);
-    return () => document.removeEventListener('click', protectSidebar, true);
+    window.document.addEventListener('click', protectSidebar, true);
+    return () => window.document.removeEventListener('click', protectSidebar, true);
   }, [hasUnsavedChanges, pending]);
   // Save without scrolling back to the top of a long page.
   useEffect(() => {
