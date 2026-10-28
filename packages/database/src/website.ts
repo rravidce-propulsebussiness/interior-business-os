@@ -110,10 +110,12 @@ export function createWebsiteRepository(
           'Page limit reached': 'WEBSITE_PUBLISH_PAGE_LIMIT',
           'Unavailable website': 'WEBSITE_PUBLISH_UNAVAILABLE',
         };
-        const category = mapping[reason] ??
-          (response.error.code === '42501'
-            ? 'WEBSITE_PUBLISH_PERMISSION_DENIED'
-            : 'WEBSITE_PUBLISH_DATABASE_REJECTED');
+        const category = response.error.code === 'PGRST202'
+          ? 'WEBSITE_PUBLISH_RPC_MISSING'
+          : mapping[reason] ??
+            (response.error.code === '42501'
+              ? 'WEBSITE_PUBLISH_PERMISSION_DENIED'
+              : 'WEBSITE_PUBLISH_DATABASE_REJECTED');
         console.error('website.publish.rpc.failed', {
           category, sqlState: response.error.code ?? 'unknown',
         });

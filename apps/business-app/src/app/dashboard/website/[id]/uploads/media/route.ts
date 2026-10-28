@@ -3,6 +3,7 @@ import { safeFailure } from '@business-os/shared';
 import { prepareMarketingImage } from '@business-os/shared/media';
 import { websiteServices, signWebsite } from '../../../service';
 import { isAllowedWebsiteUploadOrigin } from '../../../upload-origin';
+import { classifyWebsiteMediaSaveFailure } from '../../../media-upload-error';
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
@@ -82,34 +83,16 @@ export async function POST(
       p_data: data.toString('base64'),
     });
     if (r.error) {
-      // Database-side upload validation uses the same signing proof as publish.
-      // Return a useful actionable category without exposing proof material.
-      const reason = r.error.message ?? '';
-      if (reason.includes('Invalid or expired build proof') ||
-          reason.includes('Invalid media proof') ||
-          reason.includes('Media content mismatch'))
-        return Response.json({
-          code:'WEBSITE_BUILD_SIGNATURE_MISMATCH',
-          message:'Image upload is blocked by an app/database signing-key mismatch. An administrator must align the Hostinger website signing key with Supabase. No image was saved.',
-        },{status:503,headers:{'Cache-Control':'no-store'}});
-      if (reason.includes('Media storage limit reached'))
-        return Response.json({
-          code:'WEBSITE_MEDIA_QUOTA',
-          message:'Your website storage allowance is full. Remove unused media or increase the storage limit.',
-        },{status:413,headers:{'Cache-Control':'no-store'}});
-      const category = reason.includes('permission') ||
-        reason.includes('Unavailable') || r.error.code === '42501'
-        ? 'WEBSITE_MEDIA_PERMISSION'
-        : 'WEBSITE_MEDIA_REJECTED';
+      const failure = classifyWebsiteMediaSaveFailure(r.error.message ?? '', r.error.code ?? '');
+      const trace = safeFailure(new Error(failure.code));
       console.error('website.media.save.failed', {
-        category, sqlState: r.error.code ?? 'unknown',
+        category: failure.code, sqlState: r.error.code ?? 'unknown',
+        requestId: trace.requestId,
       });
       return Response.json({
-        code:category,
-        message:category === 'WEBSITE_MEDIA_PERMISSION'
-          ? 'Media storage denied this upload. Check your company website media permission and website membership.'
-          : 'The website media database rejected this upload. Confirm the site has storage allowance, the website schema migrations are applied and the signing keys are configured.',
-      },{status:400,headers:{'Cache-Control':'no-store'}});
+        code: failure.code, message: failure.message,
+        requestId: trace.requestId,
+      }, { status: failure.status, headers: { 'Cache-Control': 'no-store' } });
     }
     return Response.json(
       { id: r.data, width, height, alt: String(form.get('alt') ?? '').slice(0, 500), message: 'Media uploaded' },

@@ -7,6 +7,7 @@ import { sanitizeHtml, validateCss } from '@business-os/website-builder/compiler
 import { validateDocument, type WebsiteDocument } from '@business-os/website-builder';
 import { safeFailure } from '@business-os/shared';
 import { parsePublicGithubRepo } from './github-pull-url';
+import { importedPageSlug, importableHtmlPath, importableStylesheetPath } from './github-static-import-paths';
 
 async function githubText(url: string, max: number): Promise<string> {
   // Only two fixed GitHub-owned hosts are used; never fetch user URL directly.
@@ -65,13 +66,13 @@ export async function pullGithubStaticPages(
     if (treeResponse.truncated) throw new Error('Repository is too large to inspect safely.');
     const files=(treeResponse.tree ?? []).filter(file=>
       file.type==='blob' && (file.size??0)<=50000 &&
-      /^(?:(?:pages\/)?[a-z0-9-]+\.html)$/i.test(file.path));
-    if (!files.length) throw new Error('No supported static HTML pages found. React, Next.js and PHP projects cannot be imported by this editor.');
+      importableHtmlPath(file.path));
+    if (!files.length) throw new Error('No supported static HTML pages found. Export or build your framework website to static HTML first (for example out/, dist/ or build/), then commit those files. PHP/Python server code cannot run in the visual builder.');
     if (files.length>12)
       throw new Error('More than 12 HTML pages found. Use a smaller static site repository.');
     const styling=treeResponse.tree?.find(file =>
       file.type==='blob' && (file.size??0)<=30000 &&
-      /^(?:style|styles|main)\.css$/i.test(file.path));
+      importableStylesheetPath(file.path));
     const root=`https://raw.githubusercontent.com/${parsed.owner}/${parsed.repo}/${metadata.default_branch.split('/').map(encodeURIComponent).join('/')}`;
     let css='';
     if (styling) {
@@ -85,7 +86,7 @@ export async function pullGithubStaticPages(
     const skipped:string[]=[];
     for(const file of files.sort((a,b)=>a.path.localeCompare(b.path))) {
       const basename=file.path.split('/').at(-1)!.slice(0,-5);
-      const slug='git-'+(basename==='index'?'home':basename);
+      const slug=importedPageSlug(file.path);
       const path='/'+slug;
       if(usedPaths.has(path)) {skipped.push(file.path+' (already imported)');continue;}
       try {
@@ -123,9 +124,9 @@ export async function pullGithubStaticPages(
     revalidatePath(`/dashboard/website/${websiteId}/developer`);
     revalidatePath(`/dashboard/website/${websiteId}/layout`);
     return {ok:true,pages:additions.map(p=>p.path),
-      message:`Pulled ${additions.length} static HTML page(s) into private drafts under /git-*. `+
+      message:`Imported ${additions.length} static HTML page(s) into private drafts under /git-*. `+
         (skipped.length?`Skipped ${skipped.length} unsupported/duplicate files. `:'')+
-        'Images, scripts, framework code and publishing were not imported. Open Code / Files to edit, then publish separately.'};
+        'Images, scripts, backend code and publishing were not imported. Open Code / Files to review the resulting pages, then publish separately.'};
   } catch(error) {
     const reason=error instanceof Error ? error.message : '';
     // Expose only errors authored by this importer; external API/database

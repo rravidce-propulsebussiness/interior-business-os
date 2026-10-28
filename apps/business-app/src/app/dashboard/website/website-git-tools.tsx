@@ -133,7 +133,7 @@ export function WebsiteGitTools({ id, name, pages, version, canPull }: {
         </div>
         <div className="we-git-export">
           <h3>Pull & inspect GitHub source — all supported languages</h3>
-          <p>Browse and download source files from a public repository: HTML, CSS, JavaScript, TypeScript, React JSX/TSX, Vue, Svelte, Astro, PHP, Python, Java, Go, Rust, SQL, Markdown and more. This works with mixed-language repositories, including your Business OS Next.js project. Source inspection does not run or deploy the project.</p>
+          <p>Browse and download source files from a public repository: HTML, CSS, JavaScript, TypeScript, React JSX/TSX, Vue, Svelte, Astro, PHP, Python, Java, Go, Rust, SQL, Markdown and more. This works with mixed-language repositories, including your Business OS Next.js project. Source browsing is read-only. It does not run or deploy the project.</p>
           <button type="button" className="we-outline" disabled={!links||sourceBusy}
             onClick={inspectSources}>{sourceBusy?'Reading GitHub…' : 'Browse / Pull repository source files'}</button>
           <label htmlFor="we-git-source-file">Source file path</label>
@@ -159,14 +159,14 @@ export function WebsiteGitTools({ id, name, pages, version, canPull }: {
           <p className="we-git-disclaimer">The full repository ZIP contains supported and unsupported source languages. Files can be opened in VS Code. This does not install, run, publish, or synchronize a React/Next.js/PHP backend into the template editor.</p>
         </div>
         <div className="we-git-pull-panel">
-          <h3>Optional: import static HTML pages into your visual website</h3>
-          <p>Import supported <strong>public static HTML/CSS</strong> pages into new draft website files, without replacing any existing pages.</p>
+          <h3>Import static HTML or prebuilt framework exports</h3>
+          <p>Import supported <strong>static HTML/CSS</strong> from the repository root or common build folders (<code>out/</code>, <code>dist/</code>, <code>build/</code>). For React, Vite, Astro or Next.js, build and commit an HTML export first. Existing website pages remain untouched.</p>
           <button className="we-primary" type="button" onClick={pull}
             disabled={!links || !canPull || pulling}>
-            {pulling ? 'Pulling supported files…' : '↓ Import compatible static HTML/CSS'}
+            {pulling ? 'Importing static pages…' : '↓ Import static HTML / exported pages'}
           </button>
           {!canPull && <p>Static HTML/CSS import is unavailable for this website's current plan or your editing permissions. Developer Mode and Custom Code must be enabled to import files. You can still use <strong>Browse source files — multiple languages</strong> below.</p>}
-          <p className="we-git-disclaimer">React, Next.js, PHP, scripts, external assets and private repositories cannot be pulled into the visual website runtime. Use a separate Git deployment for full application code. Imported pages are drafts at /git-home, /git-about, etc., and will not change your current home page.</p>
+          <p className="we-git-disclaimer">Framework source, PHP/Python backends, scripts, external assets and private repositories cannot run in the visual builder. Static HTML exports may be imported after sanitization. Full applications need separate Git deployment and hosting. Imported drafts at /git-home, /git-about, etc. will not replace your current live home page.</p>
           {imported.length>0 && <div className="we-git-imported"><strong>Imported draft pages</strong>
             {imported.map(path=><span key={path}>{path}</span>)}
             <Link className="we-outline" href={`/dashboard/website/${id}/developer`}>Edit imported files</Link>

@@ -13,6 +13,7 @@ import {
 } from '@business-os/website-builder/compiler';
 import { websiteHtml } from '@business-os/website-builder/render';
 import { websiteServices, signWebsite } from './service';
+import { linkedDraftPagesForPublication } from './website-publication-links';
 import { applyWebsiteTemplate } from './entry-actions';
 import { websiteJson } from '@business-os/database/website';
 import { safeFailure, idSchema } from '@business-os/shared';
@@ -239,6 +240,17 @@ export async function publishWebsite(
     };
   } catch (e) {
     if (e instanceof Error) {
+      // Public content validation errors should be actionable rather than
+      // reduced to a generic request-reference message.
+      const brokenLink = /^Broken internal link: (\/[a-z0-9\-\/?#]*)$/i.exec(e.message);
+      if (brokenLink)
+        return { message: `Publishing is blocked because the link ${brokenLink[1]} points to an unpublished or missing page. Make that page public, or remove the menu/button link, save the draft and retry.` };
+      if (e.message === 'SEO title required')
+        return { message: 'A public page is missing its SEO title. Add the title in the Pages/SEO editor, save and publish again.' };
+      if (e.message === 'Image and alt text required')
+        return { message: 'A public image block is missing its image or alternative text. Update that block before publishing.' };
+      if (e.message === 'Missing enabled form')
+        return { message: 'A public page references a disabled or missing form. Enable the form or remove that block before publishing.' };
       const problems: Record<string,string> = {
         WEBSITE_BUILD_SIGNATURE_MISMATCH: 'Website publishing and media uploads require matching signing keys on Hostinger and Supabase. Check WEBSITE_BUILD_SIGNING_KEY and WEBSITE_BUILD_KEY_ID against the active database key. No changes were published.',
         WEBSITE_BUILD_OWNERSHIP_MISMATCH: 'The signed website build does not match this website/version. Refresh the editor, review your changes and try again.',
@@ -251,6 +263,7 @@ export async function publishWebsite(
         WEBSITE_PUBLISH_UNAVAILABLE: 'This website is unavailable or currently suspended/archived. Contact the workspace administrator.',
         WEBSITE_PUBLISH_PERMISSION_DENIED: 'Publishing was denied by the website database permission rules. Ask the business owner to verify your Website Publish permission and website membership.',
         WEBSITE_PUBLISH_DATABASE_REJECTED: 'Website publishing was rejected by the database. Check website plan limits, active signing key, and database migration status. Share the reference ID with your administrator.',
+        WEBSITE_PUBLISH_RPC_MISSING: 'Publishing cannot run because the website_publish function is missing from the configured Supabase project or its API schema cache. Apply the website database migrations to the correct Business OS database, then reload the API schema. No changes were published.',
       };
       const diagnostic = problems[e.message];
       if (diagnostic) return {message:diagnostic};
@@ -260,6 +273,54 @@ export async function publishWebsite(
     return { message: message(e) };
   }
 }
+/**
+ * Explicitly publish draft pages linked from public menus/sections and then
+ * publish the website. Only called after the editor asks the owner to confirm.
+ * Existing unrelated draft pages remain private.
+ */
+export async function publishWebsiteWithLinkedPages(
+  id: string,
+  version: number,
+  summary: string,
+): Promise<{ id?: string; version?: number; message: string }> {
+  let savedVersion: number | undefined;
+  try {
+    const s = await websiteServices('website.page.publish');
+    if (!s.allowed('website.page.edit'))
+      return { message: 'You need Website Page Edit permission to publish linked draft pages.' };
+    const current = await s.website.read(id);
+    if (current.version !== version)
+      return { message: 'This website changed. Reload the latest draft and retry publishing.' };
+    const linked = linkedDraftPagesForPublication(current.document);
+    if (!linked.length) {
+      const result = await publishWebsite(id, version, summary);
+      return { ...result, ...(result.id ? {version: version + 1} : {}) };
+    }
+    if (current.document.pages.some(page =>
+      linked.includes(page.path) && !page.seo.title.trim()))
+      return { message: 'A linked page has no SEO title. Add an SEO title before publishing.' };
+    const selected = new Set(linked);
+    const pages = current.document.pages.map(page =>
+      selected.has(page.path) ? { ...page, visibility: 'public' as const } : page);
+    // Normal version-checked save enforces tenant permissions and preserves audit.
+    savedVersion = await s.website.save(id, version, 'pages', pages);
+    const result = await publishWebsite(id, savedVersion, summary);
+    revalidatePath(`/dashboard/website/${id}/layout`);
+    return {
+      ...result,
+      version: result.id ? savedVersion + 1 : savedVersion,
+      message: result.id
+        ? `Published website including ${linked.length} linked page(s): ${linked.join(', ')}.`
+        : `Linked pages were saved as public drafts but publication failed: ${result.message} Reload the editor before retrying.`,
+    };
+  } catch (error) {
+    return { ...(savedVersion !== undefined ? { version: savedVersion } : {}),
+      message: (savedVersion !== undefined
+        ? 'Linked pages were saved, but publishing did not finish. Reload the editor before retrying. '
+        : '') + message(error) };
+  }
+}
+
 export async function changeWebsiteStatus(
   id: string,
   version: number,
