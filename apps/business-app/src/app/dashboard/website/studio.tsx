@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState, useTransition } from 'react';
 import Link from 'next/link';
 import { WebsiteMediaPicker } from './website-media-picker';
+import { editableContentFields } from './website-content-fields';
 import {
   componentTypes,
   createNode,
@@ -59,6 +60,7 @@ export function WebsiteEditor({
   initialPageId?: string;
 }) {
   const frame = useRef<HTMLIFrameElement>(null);
+  const inspectorRef = useRef<HTMLElement>(null);
   const previewScroll = useRef({ x: 0, y: 0 });
   const restoringPreviewScroll = useRef(false);
   const lastPreviewHtml = useRef('');
@@ -76,8 +78,16 @@ export function WebsiteEditor({
     const receive = (event: MessageEvent) => {
       if (event.source !== frame.current?.contentWindow) return;
       const data = event.data;
-      if (data?.type === 'website.select' && typeof data.id === 'string')
+      if (data?.type === 'website.select' && typeof data.id === 'string') {
         setSelection(data.id);
+        // On narrow screens the controls sit beneath the preview. Move there
+        // only when the owner deliberately taps an element in the preview.
+        if (window.innerWidth <= 750)
+          requestAnimationFrame(() => inspectorRef.current?.scrollIntoView({
+            block: 'start',
+            behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+          }));
+      }
       if (data?.type === 'website.preview-restored')
         restoringPreviewScroll.current = false;
       if (data?.type === 'website.preview-scroll' && !restoringPreviewScroll.current) {
@@ -109,6 +119,7 @@ export function WebsiteEditor({
     page = document.pages.find((p) => p.id === pageId) ?? document.pages[0]!,
     activeNodes = area === 'pages' ? page.nodes : document[area],
     selected = selection ? locateNode(activeNodes, selection) : undefined;
+  const contentFields = selected ? editableContentFields(selected) : [];
   const unsavedSections = (['assets', 'pages', 'header', 'footer'] as const).filter(
     (key) => JSON.stringify(document[key]) !== JSON.stringify(savedDocument[key]),
   );
@@ -502,12 +513,12 @@ export function WebsiteEditor({
             Select an element to edit its properties
           </div>
         </section>
-        <aside className="ss-inspector">
-          <div className="ss-inspector-top"><h2>Inspector</h2><span>{selected ? '✣ Selected' : 'Page settings'}</span></div>
+        <aside ref={inspectorRef} className="ss-inspector">
+          <div className="ss-inspector-top"><h2>{selected ? 'Edit section' : 'Page settings'}</h2><span>{selected ? '✣ Selected' : 'Website page'}</span></div>
           {selected && <div className="ss-selected-card">
             <span className="ss-selected-icon" aria-hidden="true">▣</span>
             <div><strong>{selected.type.replaceAll('_', ' ').replace(/\b\w/g, (letter) => letter.toUpperCase()) + ' Section'}</strong>
-              <small>Customize content and appearance</small>
+              <small>Change text, images and styling</small>
             </div>
           </div>}
           <div className="ss-inspector-content">
@@ -587,37 +598,36 @@ export function WebsiteEditor({
             </>
           ) : (
             <fieldset disabled={!canEdit} className="space-y-4">
-              <h3 className="ss-inspector-section-title">Content</h3>
-              {(
-                [
-                  'title',
-                  'text',
-                  'subtitle',
-                  'href',
-                  'alt',
-                ] as const
-              ).filter((key) => ['title', 'text', 'subtitle', 'href'].includes(key) ||
-                selected.props[key] !== undefined).map((key) => (
-                <label key={key} className="ss-field-label">
-                  {key === 'title' ? 'Heading' : key === 'subtitle' ? 'Description' :
-                    key === 'text' ? 'Body text' : key === 'href' ? 'Button link' :
-                    key === 'alt' ? 'Image description' : key}
-                  {key === 'text' || key === 'subtitle' ? (
+              <h3 className="ss-inspector-section-title">Edit content</h3>
+              <p className="ss-content-help">Update this section here. Changes appear in the preview and stay in your draft until saved.</p>
+              {contentFields.length === 0 && selected.type !== 'image' &&
+                selected.type !== 'logo' && <p className="ss-content-help">
+                  This section has no text to edit. Select a different section or use the
+                  settings below to change its appearance.
+                </p>}
+              {contentFields.map(field => (
+                <label key={field.key} className="ss-field-label">
+                  {field.label}
+                  {field.multiline ? (
                     <textarea
                       className={`${controls} mt-1`}
-                      rows={key === 'text' ? 5 : 3}
-                      value={selected.props[key] ?? ''}
+                      rows={field.key === 'text' ? 5 : 3}
+                      maxLength={field.maxLength}
+                      placeholder={field.placeholder}
+                      value={selected.props[field.key] ?? ''}
                       onChange={event => update(node => {
-                        if (event.target.value) node.props[key] = event.target.value;
-                        else delete node.props[key];
+                        if (event.target.value) node.props[field.key] = event.target.value;
+                        else delete node.props[field.key];
                       })}
                     />
                   ) : (
                     <input className={`${controls} mt-1`}
-                      value={selected.props[key] ?? ''}
+                      maxLength={field.maxLength}
+                      placeholder={field.placeholder}
+                      value={selected.props[field.key] ?? ''}
                       onChange={event => update(node => {
-                        if (event.target.value) node.props[key] = event.target.value;
-                        else delete node.props[key];
+                        if (event.target.value) node.props[field.key] = event.target.value;
+                        else delete node.props[field.key];
                       })}
                     />
                   )}
@@ -771,8 +781,10 @@ export function WebsiteEditor({
                   </select>
                 </label>
               </details>
-              <h3 className="ss-inspector-section-title ss-appearance-label">Responsive</h3>
-              <div className="ss-inspector-responsive">
+              <details className="ss-inspector-advanced ss-section-layout">
+                <summary>Responsive and section placement</summary>
+                <h3 className="ss-inspector-section-title ss-appearance-label">Responsive</h3>
+                <div className="ss-inspector-responsive">
                 {(['desktop','tablet','mobile'] as const).map(size => (
                   <button type="button" key={size} className={device === size ? 'active' : ''}
                     onClick={() => setDevice(size)}>{size}</button>
@@ -841,9 +853,10 @@ export function WebsiteEditor({
                     });
                   }}
                 >
-                  Save section
+                  Save reusable section
                 </button>
               </div>
+              </details>
             </fieldset>
           )}
           {document.sections.length > 0 && (

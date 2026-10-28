@@ -138,3 +138,27 @@
 @media(max-width:750px){.owner-layout .site-studio-page{padding:18px 11px 38px}.ss-heading{align-items:flex-start}.ss-heading-icon{width:43px;height:43px}.ss-heading h1{font-size:24px}.ss-heading-actions{width:100%;justify-content:flex-end}.ss-modebar{padding:6px}.ss-modebar-right{width:100%;justify-content:flex-end}.ss-mode-active,.ss-mode-link{padding:10px 12px;font-size:10px}.ss-workspace{display:flex;flex-direction:column}.ss-left-panel,.ss-inspector{width:100%;border-right:0;border-left:0}.ss-left-content{padding:13px 12px}.ss-left-tip{margin:8px 11px 12px}.ss-toolbar{gap:13px;padding:12px}.ss-toolbar-group{width:100%;justify-content:flex-start}.ss-toolbar-group:last-child{justify-content:flex-end}.ss-canvas{padding:15px 10px}.ss-preview-frame{height:530px}.ss-browser-mobile .ss-preview-frame{height:700px}.ss-inspector{border-top:1px solid #eee9e5}.ss-inspector-content{padding:14px}.ss-browser{max-width:100%}}
 @media(max-width:420px){.ss-heading-actions{gap:6px}.site-studio-page .ss-btn{padding:10px;font-size:10px}.ss-toolbar-label{font-size:9px}.ss-page-select{min-width:114px}.ss-area-select{max-width:135px}.ss-canvas-head{font-size:9px}.ss-browser-address{max-width:60%}.ss-canvas-foot{font-size:9px}}
 @media(prefers-reduced-motion:reduce){.site-studio-page *{transition:none!important;animation:none!important}}
+
+
+/* A readable, predictable content editor for business owners.
+   Advanced options remain available but do not compete with basic editing. */
+.ss-inspector-content .ss-field-label{display:block;margin:14px 0;font-size:13px;line-height:1.45;color:#43566a;font-weight:700}
+.ss-inspector-content input:not([type='color']),.ss-inspector-content select,.ss-inspector-content textarea{
+  min-height:44px;font-size:14px!important;line-height:1.5!important;color:#243747!important
+}
+.ss-inspector-content textarea{min-height:100px;resize:vertical}
+.ss-inspector-content input::placeholder,.ss-inspector-content textarea::placeholder{color:#8190a0}
+.ss-inspector-section-title{font-size:14px!important;line-height:1.5;color:#23374c;margin-top:16px!important}
+.ss-inspector-top h2{font-size:15px}
+.ss-inspector-top span{font-size:12px}
+.ss-selected-card strong{font-size:14px}
+.ss-selected-card small{font-size:12px;color:#697889}
+.ss-color-field,.ss-two-col-fields .ss-field-label,.ss-inspector-advanced .ss-field-label{font-size:12px}
+.ss-inspector-advanced summary{font-size:13px;font-weight:750;color:#405b74;line-height:1.5;padding:4px 0}
+.ss-inspector-advanced[open]{padding-bottom:12px}
+.ss-inspector-advanced .ss-inspector-section-title{margin-top:16px!important}
+.ss-inspector-responsive button,.ss-responsive-tip{font-size:12px}
+.ss-content-help{margin:0 0 14px;font-size:12px;line-height:1.6;color:#64748b}
+.ss-section-layout{margin-top:18px}
+.ss-inspector{scroll-margin-top:90px}
+@media(max-width:750px){.ss-inspector-content .ss-field-label{font-size:13px}.ss-inspector-content input:not([type='color']),.ss-inspector-content select,.ss-inspector-content textarea{font-size:16px!important}}
