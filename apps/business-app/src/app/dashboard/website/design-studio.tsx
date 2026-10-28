@@ -1,4 +1,5 @@
 'use client';
+import { useWebsitePreviewSrcDoc } from './website-preview-nonce';
 
 import { useRef, useState, useTransition } from 'react';
 import Link from 'next/link';
@@ -77,6 +78,7 @@ export function WebsiteDesignStudio({
   const [previewPending, startPreview] = useTransition();
   const requestRef = useRef(0);
   const changed = JSON.stringify(saved) !== JSON.stringify(theme);
+  const previewSrcDoc = useWebsitePreviewSrcDoc(preview);
   const foreground = isLight(theme.primary) ? '#302D2A' : '#FFFFFF';
 
   // Full preview is opt-in. Instant style sample never waits for the server.
@@ -306,7 +308,7 @@ export function WebsiteDesignStudio({
               <div className="wd-browser-top"><span>● ● ●</span><small>{name} · {pagePath}</small><span>↗</span></div>
               {previewMode === 'site' && preview && !previewError ? (
                 <iframe title="Website theme preview" sandbox="allow-scripts"
-                  referrerPolicy="no-referrer" srcDoc={preview} />
+                  referrerPolicy="no-referrer" srcDoc={previewSrcDoc} />
               ) : <div className="wd-sample" style={{
                 color:theme.text,background:theme.background,fontFamily:fontFamilies[theme.bodyFont],
               }}>

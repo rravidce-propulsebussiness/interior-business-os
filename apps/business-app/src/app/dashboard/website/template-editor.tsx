@@ -1,4 +1,5 @@
 'use client';
+import { useWebsitePreviewSrcDoc } from './website-preview-nonce';
 
 import { useEffect, useMemo, useState, useTransition } from 'react';
 import Link from 'next/link';
@@ -47,6 +48,7 @@ export function TemplateEditor({
   const [blocked, setBlocked] = useState(false);
   const [pending, start] = useTransition();
 
+  const previewSrcDoc = useWebsitePreviewSrcDoc(previewHtml);
   const currentPage = selected.kind === 'page' ? pages.find(p => p.id === selected.id) : undefined;
   const currentCodeId = selected.kind === 'component' ? selected.id : currentPage?.codeId;
   const currentCode = sources.code.find(c => c.id === currentCodeId);
@@ -320,7 +322,7 @@ export function TemplateEditor({
       <div className="te-dialog te-preview-dialog" role="dialog" aria-modal="true" aria-label="Template preview">
         <header><div><strong>Website draft preview</strong><small>{previewPath}</small></div>
           <button type="button" onClick={() => setPreviewOpen(false)}>Close ×</button></header>
-        <iframe title="Sandboxed website preview" srcDoc={previewHtml} sandbox="allow-scripts" referrerPolicy="no-referrer"/>
+        <iframe title="Sandboxed website preview" srcDoc={previewSrcDoc} sandbox="allow-scripts" referrerPolicy="no-referrer"/>
       </div>
     </div>}
     {form && <div className="te-overlay" role="presentation" onMouseDown={event => {

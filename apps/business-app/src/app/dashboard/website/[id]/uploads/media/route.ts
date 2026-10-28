@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { safeFailure } from '@business-os/shared';
 import { prepareMarketingImage } from '@business-os/shared/media';
-import { websiteServices, signWebsite } from '../../service';
+import { websiteServices, signWebsite } from '../../../service';
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
