@@ -106,6 +106,14 @@ describe('template-first business website editing', () => {
     expect(creation).toContain("template === 'custom' ? '/developer' : ''");
   });
 
+  it('updates text immediately in the sandbox while keeping server preview authoritative', () => {
+    expect(editor).toContain("type: 'website.preview-text'");
+    expect(editor).toContain('frame.current?.contentWindow?.postMessage({');
+    expect(editor).toContain("['title', 'text', 'subtitle'].some");
+    expect(editor).toContain('previewAction(id, history.present, page.path)');
+    expect(editor).toContain('if (!active) return; // A newer draft may already be visible.');
+  });
+
   it('uses cached recent previews and does not overwrite newer drafts', () => {
     expect(editor).toContain('const previewCache = useRef(new Map<string, string>())');
     expect(editor).toContain('JSON.stringify([history.present, page.path])');
