@@ -82,6 +82,19 @@ describe('template-first business website editing', () => {
     expect(settings).toContain('unsaved={JSON.stringify(doc.assets)');
   });
 
+  it('edits social-sharing images visually and saves new assets before SEO pages', () => {
+    expect(settings).toContain('label={`Social sharing image for ${page.title}`}');
+    expect(settings).toContain('value={page.seo.image}');
+    expect(settings).toContain('onUploaded={asset => {');
+    expect(settings).toContain('target.seo.image = asset.id');
+    expect(settings).toContain("if (assetId) target.seo.image = assetId");
+    expect(settings).toContain('else delete target.seo.image');
+    expect(settings).toContain("if ((key === 'settings' || key === 'pages') &&");
+    expect(settings).toContain("saveAction(id, nextVersion, 'assets', doc.assets)");
+    expect(settings).toContain("if (key === 'pages') setSavedPages(doc.pages)");
+    expect(settings).not.toContain("'ogDescription',\n                  'image',");
+  });
+
   it('prioritizes editable published templates over blank or code sites', () => {
     expect(creation).toContain("initialTemplate || templates[0]?.id || ''");
     expect(creation).toContain('<option value="">Start with a blank website</option>');
