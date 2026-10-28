@@ -99,6 +99,28 @@ describe('structured website publishing', () => {
     d.pages[0]!.nodes = [createNode('lead_form', 'form')];
     expect(() => compileWebsite(d)).toThrow('Missing enabled form');
   });
+  it('patches preview text immediately without exposing executable HTML injection', () => {
+    const d = emptyWebsite('Construction company');
+    const hero = createNode('hero', 'hero1');
+    hero.props.title = 'Old title';
+    const paragraph = createNode('text', 'copy1');
+    paragraph.props.text = 'Original paragraph';
+    d.pages[0]!.nodes = [hero, paragraph];
+    const build = compileWebsite(d);
+    const preview = websiteHtml(build, '/', { preview: true })!;
+    const published = websiteHtml(build, '/')!;
+    expect(preview).toContain('website.preview-text');
+    expect(preview).toContain('event.source!==parent');
+    expect(preview).toContain('node.dataset.websiteNode!==data.id');
+    expect(preview).toContain('element.textContent=value');
+    expect(preview).toContain('data.nodeType==="heading"');
+    expect(preview).toContain('data.nodeType==="text"');
+    expect(preview).toContain('apply(child("h1,h2"),data.title||"")');
+    expect(preview).not.toContain('element.innerHTML=');
+    expect(published).not.toContain('website.preview-text');
+    expect(published).not.toContain('<script>');
+  });
+
   it('escapes content and JSON-like markup in rendered HTML', () => {
     const d = emptyWebsite('<script>bad</script>');
     const n = createNode('text', 'copy');
