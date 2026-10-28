@@ -82,7 +82,7 @@ export async function POST(
     });
     if (r.error) throw new Error('Upload denied or storage limit reached');
     return Response.json(
-      { id: r.data, message: 'Media uploaded' },
+      { id: r.data, width, height, alt: String(form.get('alt') ?? '').slice(0, 500), message: 'Media uploaded' },
       { headers: { 'Cache-Control': 'no-store' } },
     );
   } catch (e) {
