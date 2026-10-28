@@ -1,3 +1,4 @@
+import { businessShowcaseTemplate } from './showcase';
 import {
   createNode,
   emptyWebsite,
@@ -24,8 +25,9 @@ export function validateTemplate(input: unknown): WebsiteDocument {
 
 export function starterTemplate(
   name: string,
-  kind: 'blank' | 'construction' | 'services' | 'custom' = 'blank',
+  kind: 'blank' | 'construction' | 'services' | 'custom' | 'showcase' = 'blank',
 ): WebsiteDocument {
+  if (kind === 'showcase') return validateTemplate(businessShowcaseTemplate(name));
   const doc = emptyWebsite(name);
   if (kind === 'blank') return doc;
   doc.theme.primary = '#88352B';

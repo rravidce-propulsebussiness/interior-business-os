@@ -7,10 +7,11 @@ import { validateCss, validateJavaScript, sanitizeHtml } from '@business-os/webs
 import { websiteServices } from './service';
 import { safeFailure, idSchema } from '@business-os/shared';
 
-const builtins = new Set(['starter:construction','starter:services','starter:interior']);
+const builtins = new Set(['starter:showcase','starter:construction','starter:services','starter:interior']);
 
 function builtin(name: string, selected: string) {
-  const kind = selected === 'starter:construction' ? 'construction' : 'services';
+  const kind = selected === 'starter:showcase' ? 'showcase' :
+    selected === 'starter:construction' ? 'construction' : 'services';
   const doc = starterTemplate(name, kind);
   if (selected === 'starter:interior') {
     doc.pages[0]!.nodes[0]!.props.title = 'Beautiful interiors, thoughtfully made.';

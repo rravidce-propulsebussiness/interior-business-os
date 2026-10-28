@@ -40,6 +40,9 @@ export function WebsiteEditor({
   canPublish,
   canViewSource = false,
   canPreviewMedia = false,
+  canEditNavigation = false,
+  canEditSettings = false,
+  canCreatePage = false,
   saveAction = saveWebsiteSection,
   previewAction = renderDraftPreview,
   publishAction = publishWebsite,
@@ -55,6 +58,9 @@ export function WebsiteEditor({
   canPublish: boolean;
   canViewSource?: boolean;
   canPreviewMedia?: boolean;
+  canEditNavigation?: boolean;
+  canEditSettings?: boolean;
+  canCreatePage?: boolean;
   saveAction?: typeof saveWebsiteSection;
   previewAction?: typeof renderDraftPreview;
   publishAction?: typeof publishWebsite;
@@ -79,9 +85,11 @@ export function WebsiteEditor({
     initial.pages[0]!;
   // A full-width canvas is the default. Side panels open only on request.
   const [selection, setSelection] = useState<string | null>(null);
+  const [selectedContentId, setSelectedContentId] = useState<string | null>(null);
   const [showSections, setShowSections] = useState(false);
   const [showInspector, setShowInspector] = useState(false);
-  const [focused, setFocused] = useState(false);
+  const [sitePanel, setSitePanel] = useState<'pages'|'header'|'footer'|null>(null);
+  const [focused, setFocused] = useState(!templateMode);
   useEffect(() => {
     const receive = (event: MessageEvent) => {
       if (event.source !== frame.current?.contentWindow) return;
@@ -97,8 +105,43 @@ export function WebsiteEditor({
           setArea('pages');
         }
         setSelection(nodeId);
+        setSelectedContentId(null);
         return true;
       };
+      if (data?.type === 'website.select-content' ||
+          data?.type === 'website.replace-content-image') {
+        if (!canEdit || typeof data.contentId !== 'string' ||
+            !/^[a-zA-Z][a-zA-Z0-9_-]{0,63}$/.test(data.contentId) ||
+            !latestDocRef.current.content.some(c => c.id === data.contentId)) return;
+        setSelectedContentId(data.contentId);
+        setSelection(null);
+        setShowSections(false);setSitePanel(null);setShowInspector(true);
+        return;
+      }
+      if (data?.type === 'website.inline-content-text') {
+        if (!canEdit || typeof data.contentId !== 'string' ||
+            !/^[a-zA-Z][a-zA-Z0-9_-]{0,63}$/.test(data.contentId) ||
+            !['title','text'].includes(data.field) ||
+            typeof data.value !== 'string' || !data.value.trim() ||
+            data.value.length > (data.field === 'title' ? 300 : 12000)) return;
+        setHistory(current=>{
+          const existing=current.present.content.find(c=>c.id===data.contentId);
+          if(!existing || existing[data.field as 'title'|'text']===data.value) return current;
+          const next=structuredClone(current.present);
+          const item=next.content.find(c=>c.id===data.contentId);
+          if(!item) return current;
+          item[data.field as 'title'|'text']=data.value;
+          return editHistory(current,next);
+        });
+        setSelectedContentId(data.contentId);
+        return;
+      }
+      if (data?.type === 'website.navigate' && typeof data.path === 'string') {
+        const path = data.path.split('#')[0]?.split('?')[0];
+        const target = latestDocRef.current.pages.find(p => p.path === path);
+        if (target) {setPageId(target.id);setArea('pages');setSelection(null);setShowInspector(false);}
+        return;
+      }
       if (data?.type === 'website.replace-image' &&
         typeof data.id === 'string' &&
         /^[a-zA-Z][a-zA-Z0-9_-]{0,63}$/.test(data.id)) {
@@ -145,7 +188,12 @@ export function WebsiteEditor({
       if (data?.type === 'website.select' && typeof data.id === 'string' &&
           /^[a-zA-Z][a-zA-Z0-9_-]{0,63}$/.test(data.id)) {
         if (!selectTarget(data.id)) return;
-        if (data.inline === true) return; // Text remains editable in place.
+        if (data.inline === true) {
+          setSitePanel(null);
+          setShowSections(false);
+          setShowInspector(true);
+          return; // Text stays editable in place while style controls are visible.
+        }
         setShowSections(false);
         setShowInspector(true);
       }
@@ -191,7 +239,8 @@ export function WebsiteEditor({
     activeNodes = area === 'pages' ? page.nodes : document[area],
     selected = selection ? locateNode(activeNodes, selection) : undefined;
   const contentFields = selected ? editableContentFields(selected) : [];
-  const unsavedSections = (['assets', 'pages', 'header', 'footer'] as const).filter(
+  const selectedContent = selectedContentId ? document.content.find(c=>c.id===selectedContentId) : undefined;
+  const unsavedSections = (['assets', 'content', 'pages', 'header', 'footer', 'navigation', 'footerNavigation', 'settings'] as const).filter(
     (key) => JSON.stringify(document[key]) !== JSON.stringify(savedDocument[key]),
   );
   const hasUnsavedChanges = unsavedSections.length > 0;
@@ -208,6 +257,55 @@ export function WebsiteEditor({
             ),
           },
     );
+  const modifySettings = (key: 'name'|'phone'|'email'|'address', value: string) => {
+    if (!canEditSettings) return;
+    edit({ ...document, settings: { ...document.settings, [key]: value } });
+  };
+  const modifyLinks = (group: 'navigation'|'footerNavigation',
+    index: number, change: Partial<WebsiteDocument['navigation'][number]>) => {
+    if (!canEditNavigation) return;
+    edit({ ...document, [group]: document[group].map((link,i) =>
+      i === index ? { ...link, ...change } : link) });
+  };
+  const appendLink = (group: 'navigation'|'footerNavigation') => {
+    if (!canEditNavigation || document[group].length >= 40) return;
+    const first = document.pages.find(p => !document[group].some(l => l.href === p.path));
+    const href = first?.path ?? '/';
+    edit({ ...document, [group]: [...document[group],
+      { label: first?.title ?? 'Home', href, children: [] }] });
+  };
+  const removeLink = (group: 'navigation'|'footerNavigation', index: number) => {
+    if (!canEditNavigation) return;
+    edit({ ...document, [group]: document[group].filter((_,i) => i !== index) });
+  };
+  const addWebsitePage = () => {
+    if (!canEdit || !canCreatePage) return;
+    const name = window.prompt('New website page name (example: Gallery or Our Team)');
+    if (!name) return;
+    const title = name.trim().slice(0,160);
+    const slug = title.toLowerCase().replace(/[^a-z0-9-]+/g,'-')
+      .replace(/^-+|-+$/g,'').slice(0,60);
+    if (!slug) {setMessage('Enter a page name using English letters or numbers.');return;}
+    const path = '/' + slug;
+    if (document.pages.some(p => p.path === path)) {
+      setMessage('A page already uses this address.');return;
+    }
+    const pageId = uid();
+    const nextPage = {
+      id:pageId, title, path, visibility:'public' as const,
+      seo:{title, description:'',noindex:true}, nodes:[],
+    };
+    edit({ ...document,
+      pages:[...document.pages,nextPage],
+      ...(canEditNavigation ? {
+        navigation:[...document.navigation,
+          {label:title,href:path,children:[]}].slice(0,40),
+      } : {}),
+    });
+    setPageId(pageId);setArea('pages');setSelection(null);setShowInspector(false);
+    setSitePanel(null);setShowSections(true);setSideTab('components');
+    setMessage('New page created. Add a block or choose an existing page. Save the draft when ready.');
+  };
   const update = (change: (node: WebsiteNode) => void) => {
     if (!selection) return;
     const next = structuredClone(activeNodes);
@@ -467,6 +565,7 @@ export function WebsiteEditor({
           </div>
         </div>
         <div className="ss-heading-actions">
+          <span className="ss-wp-publish-state">{status === 'published' ? '● Published' : '● Draft'}</span>
           <span className={hasUnsavedChanges ? 'ss-save-state dirty' : 'ss-save-state'}>
             {hasUnsavedChanges ? '● Unsaved changes' : '✓ All changes saved'}
           </span>
@@ -504,68 +603,145 @@ export function WebsiteEditor({
       </nav>}
       {message && <p className="ss-message" role="status">{message}</p>}
       <div className="ss-board">
-        <div className="ss-toolbar">
+        <div className="ss-toolbar ss-wp-toolbar">
           <div className="ss-toolbar-group">
-            <button type="button" className="ss-simple-tool" aria-expanded={showSections}
-              onClick={() => {setShowSections(open => !open);setShowInspector(false);}}>
-              ☰ &nbsp; Pages / Sections
+            <button type="button" className="ss-simple-tool"
+              onClick={() => {setSitePanel('pages');setShowSections(false);setShowInspector(false);}}>
+              ▤ Pages
             </button>
-            <button type="button" className="ss-simple-tool" aria-expanded={showInspector}
-              onClick={() => {setShowInspector(open => !open);setShowSections(false);}}>
-              ✎ &nbsp; {selection ? 'Edit selection' : 'Page settings'}
-            </button>
-            <span className="ss-toolbar-label">EDITING</span>
-            <select aria-label="Page" className="ss-page-select" value={page.id}
-              onChange={(event) => { setPageId(event.target.value); setSelection(null); }}>
-              {document.pages.map((item) => <option key={item.id} value={item.id}>
+            <select aria-label="Choose website page" className="ss-page-select ss-wp-page-select"
+              value={page.id} onChange={event => {
+                setPageId(event.target.value);setArea('pages');setSelection(null);
+              }}>
+              {document.pages.map(item => <option key={item.id} value={item.id}>
                 {item.path === '/' ? '⌂ ' : ''}{item.title}
               </option>)}
             </select>
-            {canEdit && <button type="button" className="ss-btn ss-small-action" onClick={() => {
-              const n = uid();
-              edit({ ...document, pages: [...document.pages, {
-                id: n, path: `/page-${document.pages.length + 1}`,
-                title: 'New page', visibility: 'draft',
-                seo: { title: 'New page', description: '', noindex: false },
-                nodes: [],
-              }] });
-              setPageId(n);
-              setArea('pages');
-              setSelection(null);
-            }}>+ Page</button>}
-            <span className="ss-toolbar-separator" />
+            <button type="button" className="ss-simple-tool"
+              onClick={() => {setSitePanel('header');setShowSections(false);setShowInspector(false);}}>
+              Header & menu
+            </button>
+            <button type="button" className="ss-simple-tool"
+              onClick={() => {setSitePanel('footer');setShowSections(false);setShowInspector(false);}}>
+              Footer
+            </button>
+            {canEdit && <button type="button" className="ss-simple-tool ss-wp-add"
+              onClick={() => {setSitePanel(null);setShowInspector(false);setShowSections(true);setSideTab('components');}}>
+              + Add block
+            </button>}
+          </div>
+          <div className="ss-toolbar-group">
+            <Link className="ss-simple-tool" href={`/dashboard/website/${id}/design`}
+              onClick={confirmLeavingEditor}>Theme & fonts</Link>
             <div className="ss-history-controls">
               <button type="button" aria-label="Undo" title="Undo" disabled={!history.past.length}
                 onClick={() => setHistory(undoHistory)}>↶</button>
               <button type="button" aria-label="Redo" title="Redo" disabled={!history.future.length}
                 onClick={() => setHistory(redoHistory)}>↷</button>
             </div>
-            <select aria-label="Editing area" className="ss-area-select" value={area}
-              onChange={(event) => { setArea(event.target.value as typeof area); setSelection(null); }}>
-              <option value="pages">Page content</option>
-              <option value="header">Global header</option>
-              <option value="footer">Global footer</option>
-            </select>
-          </div>
-          <div className="ss-toolbar-group">
-            <button type="button" className="ss-simple-tool" onClick={() => setFocused(open => !open)}>
-              {focused ? '✕ Exit full screen' : '⛶ Full screen'}
-            </button>
-            <span className="ss-toolbar-label">VIEW</span>
             <div className="ss-device-controls" role="group" aria-label="Preview device">
-              {(['desktop', 'tablet', 'mobile'] as const).map((size) =>
-                <button type="button" key={size} aria-label={size + ' preview'}
-                  title={size} aria-pressed={device === size}
-                  className={device === size ? 'active' : ''}
+              {(['desktop','tablet','mobile'] as const).map(size =>
+                <button type="button" key={size} aria-label={size+' preview'}
+                  aria-pressed={device===size} className={device===size?'active':''}
                   onClick={() => setDevice(size)}>
-                  {size === 'desktop' ? '▣' : size === 'tablet' ? '▥' : '▯'}
+                  {size==='desktop'?'▣':size==='tablet'?'▥':'▯'}
                 </button>)}
             </div>
-            <span className="ss-draft-badge">● {status === 'published' ? 'Published / draft' : 'Draft'}</span>
+            <button type="button" className="ss-simple-tool" onClick={() => setFocused(open=>!open)}>
+              {focused?'Exit full screen':'⛶ Full screen'}
+            </button>
           </div>
         </div>
         <div className="ss-workspace">
 
+        {sitePanel && <aside className="ss-wp-manager" aria-label="Website settings">
+          <div className="ss-panel-close-bar">
+            <strong>{sitePanel === 'pages' ? 'Website pages' :
+              sitePanel === 'header' ? 'Header & page links' : 'Footer & contact details'}</strong>
+            <button type="button" aria-label="Close website settings" onClick={() => setSitePanel(null)}>✕</button>
+          </div>
+          <div className="ss-wp-manager-body">
+            {sitePanel === 'pages' && <>
+              <p className="ss-wp-hint">Choose a page to view it as a website. New pages can be added to the header menu automatically.</p>
+              {document.pages.map(item => <button type="button" key={item.id}
+                className={item.id===page.id?'ss-wp-page active':'ss-wp-page'}
+                onClick={() => {setPageId(item.id);setArea('pages');setSelection(null);setSitePanel(null);}}>
+                <span><strong>{item.title}</strong><small>{item.path}</small></span>
+                <span>{item.visibility==='public'?'Public':'Draft'} ›</span>
+              </button>)}
+              <label className="ss-wp-input">Selected page name
+                <input disabled={!canEdit} maxLength={160} value={page.title}
+                  onChange={event=>edit({...document,pages:document.pages.map(item=>
+                    item.id===page.id?{...item,title:event.target.value}:item)})}/>
+              </label>
+              <p className="ss-wp-hint">Page URL: <strong>{page.path}</strong>. Choose Header to link pages together.</p>
+              {canCreatePage && <button type="button" className="ss-wp-main-action"
+                onClick={addWebsitePage}>+ Add website page</button>}
+              <p className="ss-wp-hint">To change a page name or URL, select the page and open its settings from the canvas.</p>
+            </>}
+            {sitePanel === 'header' && <>
+              <p className="ss-wp-hint">Your header appears on all template pages. Its menu links point to your website pages.</p>
+              <label className="ss-wp-input">Business name
+                <input disabled={!canEditSettings} maxLength={160}
+                  value={document.settings.name}
+                  onChange={e=>modifySettings('name',e.target.value)}/>
+              </label>
+              <h3>Logo</h3>
+              <WebsiteMediaPicker id={id} assets={document.assets} value={document.settings.logo}
+                label="Header logo" disabled={!canEditSettings||pending}
+                canPreview={canPreviewMedia} unsaved={hasUnsavedChanges}
+                onChange={assetId=>{
+                  const next=structuredClone(document);
+                  if(assetId) next.settings.logo=assetId;
+                  else delete next.settings.logo;
+                  edit(next);
+                }}
+                onUploaded={asset=>edit({...document,assets:[...document.assets,asset],
+                  settings:{...document.settings,logo:asset.id}})}/>
+              <h3>Header links</h3>
+              {document.navigation.map((link,index) => <div className="ss-wp-link-edit" key={index}>
+                <input aria-label={`Header link ${index+1} label`} maxLength={100}
+                  disabled={!canEditNavigation} value={link.label}
+                  onChange={e=>modifyLinks('navigation',index,{label:e.target.value})}/>
+                <select aria-label={`Header link ${index+1} destination`}
+                  disabled={!canEditNavigation} value={link.href}
+                  onChange={e=>modifyLinks('navigation',index,{href:e.target.value})}>
+                  {!document.pages.some(p=>p.path===link.href) && <option value={link.href}>{link.href}</option>}
+                  {document.pages.map(p=><option key={p.id} value={p.path}>{p.title} ({p.path})</option>)}
+                </select>
+                {canEditNavigation && <button type="button" title="Remove link" aria-label={`Remove ${link.label}`}
+                  onClick={()=>removeLink('navigation',index)}>×</button>}
+              </div>)}
+              {canEditNavigation && <button type="button" className="ss-wp-main-action"
+                onClick={()=>appendLink('navigation')}>+ Add menu link</button>}
+            </>}
+            {sitePanel === 'footer' && <>
+              <p className="ss-wp-hint">Footer links and contact details appear at the bottom of your website.</p>
+              {(['phone','email','address'] as const).map(key=><label className="ss-wp-input" key={key}>
+                {key==='phone'?'Phone':key==='email'?'Email':'Business address'}
+                <input disabled={!canEditSettings} value={document.settings[key]}
+                  maxLength={key==='address'?500:key==='phone'?50:254}
+                  onChange={e=>modifySettings(key,e.target.value)}/>
+              </label>)}
+              <h3>Footer page links</h3>
+              {document.footerNavigation.map((link,index) => <div className="ss-wp-link-edit" key={index}>
+                <input aria-label={`Footer link ${index+1} label`} maxLength={100}
+                  disabled={!canEditNavigation} value={link.label}
+                  onChange={e=>modifyLinks('footerNavigation',index,{label:e.target.value})}/>
+                <select aria-label={`Footer link ${index+1} destination`}
+                  disabled={!canEditNavigation} value={link.href}
+                  onChange={e=>modifyLinks('footerNavigation',index,{href:e.target.value})}>
+                  {!document.pages.some(p=>p.path===link.href) && <option value={link.href}>{link.href}</option>}
+                  {document.pages.map(p=><option key={p.id} value={p.path}>{p.title} ({p.path})</option>)}
+                </select>
+                {canEditNavigation && <button type="button" title="Remove link" aria-label={`Remove ${link.label}`}
+                  onClick={()=>removeLink('footerNavigation',index)}>×</button>}
+              </div>)}
+              {canEditNavigation && <button type="button" className="ss-wp-main-action"
+                onClick={()=>appendLink('footerNavigation')}>+ Add footer link</button>}
+            </>}
+          </div>
+        </aside>}
         {showSections && <aside className="ss-left-panel">
           <div className="ss-panel-close-bar"><strong>Website sections</strong>
             <button type="button" aria-label="Close sections" onClick={() => setShowSections(false)}>✕</button>
@@ -705,8 +881,9 @@ export function WebsiteEditor({
         </section>
         {showInspector && <aside ref={inspectorRef} className="ss-inspector">
           <div className="ss-inspector-top">
-            <h2>{selected ? selected.type === 'image' || selected.props.asset
-              ? 'Replace image' : 'Edit section' : 'Page settings'}</h2>
+            <h2>{selectedContent ? 'Edit photo & content' :
+              selected ? selected.type === 'image' || selected.props.asset
+              ? 'Replace image' : 'Edit selected text' : 'Page settings'}</h2>
             <button type="button" className="ss-panel-close" aria-label="Close properties"
               onClick={() => setShowInspector(false)}>✕</button>
           </div>
@@ -718,7 +895,46 @@ export function WebsiteEditor({
           </div>}
           <div className="ss-inspector-content">
 
-          {!selected ? (
+          {selectedContent ? <fieldset disabled={!canEdit} className="space-y-4">
+            <h3 className="ss-inspector-section-title">{selectedContent.kind === 'projects' ? 'Project card' : 'Service card'}</h3>
+            <p className="ss-content-help">Click the title or description in the website to type directly, or edit them below.</p>
+            <label className="ss-field-label">Title
+              <input className={controls} maxLength={300} value={selectedContent.title}
+                onChange={e=>edit({...document,content:document.content.map(item=>
+                  item.id===selectedContent.id?{...item,title:e.target.value}:item)})}/>
+            </label>
+            <label className="ss-field-label">Description
+              <textarea className={controls} rows={4} maxLength={12000}
+                value={selectedContent.text}
+                onChange={e=>edit({...document,content:document.content.map(item=>
+                  item.id===selectedContent.id?{...item,text:e.target.value}:item)})}/>
+            </label>
+            <WebsiteMediaPicker id={id} assets={document.assets}
+              value={selectedContent.image} label="Card photo"
+              disabled={!canEdit||pending} canPreview={canPreviewMedia}
+              unsaved={hasUnsavedChanges}
+              onChange={assetId=>{
+                const next=structuredClone(document);
+                const item=next.content.find(c=>c.id===selectedContent.id);
+                if(item){
+                  if(assetId)item.image=assetId;
+                  else delete item.image;
+                  edit(next);
+                }
+              }}
+              onUploaded={asset=>{
+                setHistory(h=>{
+                  const current=h.present;
+                  if(!current.content.some(c=>c.id===selectedContent.id))return h;
+                  const next=structuredClone(current);
+                  if(!next.assets.some(a=>a.id===asset.id))next.assets.push(asset);
+                  const item=next.content.find(c=>c.id===selectedContent.id);
+                  if(item)item.image=asset.id;
+                  return editHistory(h,next);
+                });
+                setMessage('Photo added to your draft. Save to keep it.');
+              }}/>
+          </fieldset> : !selected ? (
             <>
               <label className="block text-xs">
                 Page title
@@ -876,6 +1092,48 @@ export function WebsiteEditor({
                   )}
                 </label>
               ))}
+              <h3 className="ss-inspector-section-title">Text formatting</h3>
+              <div className="ss-wp-type-controls">
+                <label>Font family
+                  <select disabled={!canEdit} className={controls}
+                    value={(device === 'desktop' ? selected.style : selected[device]).fontFamily ?? ''}
+                    onChange={event=>update(node=>{
+                      const style=device==='desktop'?node.style:node[device];
+                      if(event.target.value) style.fontFamily=event.target.value as 'serif'|'sans-serif'|'monospace';
+                      else delete style.fontFamily;
+                    })}>
+                    <option value="">Use website theme</option>
+                    <option value="sans-serif">Modern sans serif</option>
+                    <option value="serif">Classic serif</option>
+                    <option value="monospace">Monospace</option>
+                  </select>
+                </label>
+                <label>Font size (px)
+                  <input disabled={!canEdit} type="number" min={8} max={200}
+                    className={controls} placeholder="Theme default"
+                    value={(device === 'desktop' ? selected.style : selected[device]).fontSize ?? ''}
+                    onChange={event=>update(node=>{
+                      const style=device==='desktop'?node.style:node[device];
+                      const size=Number(event.target.value);
+                      if(!event.target.value) delete style.fontSize;
+                      else if(Number.isFinite(size)) style.fontSize=Math.min(200,Math.max(8,size));
+                    })}/>
+                </label>
+                <label>Text alignment
+                  <select disabled={!canEdit} className={controls}
+                    value={(device==='desktop'?selected.style:selected[device]).align??''}
+                    onChange={event=>update(node=>{
+                      const style=device==='desktop'?node.style:node[device];
+                      if(event.target.value) style.align=event.target.value as 'left'|'center'|'right';
+                      else delete style.align;
+                    })}>
+                    <option value="">Default</option>
+                    <option value="left">Left</option>
+                    <option value="center">Center</option>
+                    <option value="right">Right</option>
+                  </select>
+                </label>
+              </div>
               <h3 className="ss-inspector-section-title ss-appearance-label">Appearance</h3>
               {(['background', 'color'] as const).map(key => (
                 <label key={key} className="ss-color-field">

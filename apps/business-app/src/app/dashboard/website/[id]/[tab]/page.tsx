@@ -75,8 +75,11 @@ export default async function WebsiteTab({
       {...(query.page ? { initialPageId: query.page } : {})}
       canEdit={s.allowed('website.page.edit')}
       canPublish={s.allowed('website.page.publish')}
-      canViewSource={s.allowed('website.custom_code.view') && site.document.code.length > 0}
+      canViewSource={s.allowed('website.custom_code.view')}
       canPreviewMedia={s.allowed('website.media.manage')}
+      canCreatePage={s.allowed('website.page.create')}
+      canEditNavigation={s.allowed('website.navigation.manage')}
+      canEditSettings={s.allowed('website.seo.manage')}
     /></div>;
   } else if (tab === 'git') {
     content = <WebsiteGitTools id={id} name={site.name}
