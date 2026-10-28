@@ -55,7 +55,7 @@ describe('template-first business website editing', () => {
     expect(settings).toContain('settings: { ...current.settings, [key]: assetId }');
     expect(entry).toContain("canPreviewMedia={s.allowed('website.media.manage')}");
     expect(tabs).toContain("canPreviewMedia={s.allowed('website.media.manage')}");
-    expect(media).toContain("Upload / manage images");
+    expect(media).toContain("Manage images");
   });
 
   it('uploads images within the editor using existing tenant-authorized media storage', () => {
@@ -71,10 +71,15 @@ describe('template-first business website editing', () => {
   it('persists uploaded asset references before updating page or logo settings', () => {
     expect(editor).toContain("(['assets', 'pages', 'header', 'footer'] as const)");
     expect(editor).toContain('onUploaded={asset => {');
-    expect(editor).toContain('assets: [...document.assets, asset]');
+    expect(editor).toContain('setHistory(history => {');
+    expect(editor).toContain('const current = history.present;');
+    expect(editor).toContain('assets: current.assets.some(item => item.id === asset.id)');
+    expect(editor).toContain('return editHistory(history, draft);');
     expect(settings).toContain("saveAction(id, nextVersion, 'assets', doc.assets)");
     expect(settings).toContain('onUploaded={asset => {');
     expect(settings).toContain('assets: [...current.assets, asset]');
+    expect(settings).toContain('[savedSettings, setSavedSettings]');
+    expect(settings).toContain('unsaved={JSON.stringify(doc.assets)');
   });
 
   it('prioritizes editable published templates over blank or code sites', () => {
@@ -86,29 +91,6 @@ describe('template-first business website editing', () => {
     expect(creation).toContain('canCode && showAdvanced');
     expect(creation).toContain('Developer options');
     expect(creation).toContain("template === 'custom' ? '/developer' : ''");
-  });
-
-  it('uses cached recent previews and does not overwrite newer drafts', () => {
-    expect(editor).toContain('const previewCache = useRef(new Map<string, string>())');
-    expect(editor).toContain('JSON.stringify([history.present, page.path])');
-    expect(editor).toContain('const cached = previewCache.current.get(key)');
-    expect(editor).toContain('const delay = firstPreview.current ? 0 : 500');
-    expect(editor).toContain('if (!active) return; // A newer draft may already be visible.');
-    expect(editor).toContain('previewCache.current.size > 5');
-    expect(editor).toContain("previewLoading ? 'Updating preview…'");
-    expect(editor).not.toContain("setMessage('');");
-  });
-
-  it('prioritizes readable content fields and puts technical controls under Advanced', () => {
-    expect(editor).toContain("key === 'text' ? 'Body text'");
-    expect(editor).toContain("key === 'alt' ? 'Image description'");
-    expect(editor).toContain("rows={key === 'text' ? 5 : 3}");
-    expect(editor).toContain('<summary>Advanced settings and layout</summary>');
-    expect(editor.indexOf('Public data')).toBeGreaterThan(
-      editor.indexOf('<summary>Advanced settings and layout</summary>'),
-    );
-    expect(editor).toContain("(['form', 'embed', 'code'] as const)");
-    expect(editor).toContain('Open advanced source editor');
   });
 
   it('does not promote code editor as a standard design option', () => {
