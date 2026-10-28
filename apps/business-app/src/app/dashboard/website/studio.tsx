@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useRef, useState, useTransition } from 'react';
+import { useEffect, useRef, useState, useTransition, type MouseEvent } from 'react';
 import Link from 'next/link';
 import { WebsiteMediaPicker } from './website-media-picker';
 import { editableContentFields } from './website-content-fields';
@@ -315,6 +315,34 @@ export function WebsiteEditor({
         ? 'Draft saved. Published website remains unchanged.'
         : 'All changes are already saved.');
     });
+  // Avoid losing locally edited website drafts on tab close, reload or navigation.
+  useEffect(() => {
+    if (!hasUnsavedChanges && !pending) return;
+    const warn = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = '';
+    };
+    window.addEventListener('beforeunload', warn);
+    return () => window.removeEventListener('beforeunload', warn);
+  }, [hasUnsavedChanges, pending]);
+  // Save without scrolling back to the top of a long page.
+  useEffect(() => {
+    const saveShortcut = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) &&
+          !event.altKey && !event.shiftKey &&
+          event.key.toLowerCase() === 's') {
+        event.preventDefault();
+        if (canEdit && hasUnsavedChanges && !pending && !event.repeat) saveDraft();
+      }
+    };
+    window.addEventListener('keydown', saveShortcut);
+    return () => window.removeEventListener('keydown', saveShortcut);
+  });
+  const confirmLeavingEditor = (event: MouseEvent<HTMLAnchorElement>) => {
+    if ((hasUnsavedChanges || pending) &&
+        !window.confirm('You have unsaved website changes. Leave without saving?'))
+      event.preventDefault();
+  };
   return (
     <div className="ss-studio-editor">
       <header className="ss-heading">
@@ -353,11 +381,11 @@ export function WebsiteEditor({
         </div>
         <div className="ss-modebar-right">
           <span className="ss-mode-hint">Website settings</span>
-          <Link href={`/dashboard/website/${id}/design`}>⚙ Design</Link>
-          <Link href={`/dashboard/website/${id}/seo`}>SEO</Link>
-          <Link href={`/dashboard/website/${id}/media`}>Images</Link>
-          <Link href={`/dashboard/website/${id}/versions`}>⌁ Versions</Link>
-          {canViewSource && <Link href={`/dashboard/website/${id}/developer`}>Advanced source</Link>}
+          <Link href={`/dashboard/website/${id}/design`} onClick={confirmLeavingEditor}>⚙ Design</Link>
+          <Link href={`/dashboard/website/${id}/seo`} onClick={confirmLeavingEditor}>SEO</Link>
+          <Link href={`/dashboard/website/${id}/media`} onClick={confirmLeavingEditor}>Images</Link>
+          <Link href={`/dashboard/website/${id}/versions`} onClick={confirmLeavingEditor}>⌁ Versions</Link>
+          {canViewSource && <Link href={`/dashboard/website/${id}/developer`} onClick={confirmLeavingEditor}>Advanced source</Link>}
         </div>
       </nav>}
       {message && <p className="ss-message" role="status">{message}</p>}
@@ -750,7 +778,7 @@ export function WebsiteEditor({
                       })} />
                   </label>)}
                 {selected.props.code && canViewSource &&
-                  <Link href={`/dashboard/website/${id}/developer`}>Open advanced source editor</Link>}
+                  <Link href={`/dashboard/website/${id}/developer`} onClick={confirmLeavingEditor}>Open advanced source editor</Link>}
 
                 {(['fontSize','gap','margin','columns','maxWidth','minHeight'] as const).map(key => (
                   <label key={key} className="ss-field-label">
@@ -888,6 +916,17 @@ export function WebsiteEditor({
         </div>
       </div>
       <div className="ss-studio-foot">🔒 &nbsp; Draft preview only. Website changes are published only when you choose Publish.</div>
+      {canEdit && (hasUnsavedChanges || pending) && (
+        <div className="ss-mobile-draftbar" role="region" aria-label="Unsaved website changes">
+          <span className="ss-mobile-draftbar-state">
+            {pending ? 'Saving website…' : 'Unsaved website changes'}
+          </span>
+          <button type="button" disabled={pending || !hasUnsavedChanges}
+            onClick={saveDraft}>
+            {pending ? 'Saving…' : 'Save draft'}
+          </button>
+        </div>
+      )}
       {fullPreview && <div className="ss-preview-overlay" role="presentation" onMouseDown={(event) => {
         if (event.currentTarget === event.target) setFullPreview(false);
       }}>
