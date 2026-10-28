@@ -27,49 +27,32 @@ export function starterTemplate(
   name: string,
   kind: 'blank' | 'construction' | 'services' | 'custom' | 'showcase' = 'blank',
 ): WebsiteDocument {
-  if (kind === 'showcase') return validateTemplate(businessShowcaseTemplate(name));
-  const doc = emptyWebsite(name);
-  if (kind === 'blank') return doc;
-  doc.theme.primary = '#88352B';
-  doc.theme.accent = '#BD5C3F';
-  doc.theme.headingFont = 'sans-serif';
-  doc.theme.radius = 16;
+  if (kind === 'blank') return emptyWebsite(name);
   if (kind === 'custom') {
-    doc.code = [
-      {
-        id: 'customHome',
-        name: 'Custom home page',
-        html: '<main><h1>Your company</h1><p>Build your website with your own HTML and CSS.</p></main>',
-        css: 'main { padding: 48px; font-family: sans-serif; }',
-        javascript: '',
-      },
-    ];
-    const node = createNode('custom', 'customPage');
-    node.props = { code: 'customHome' };
-    doc.pages[0]!.nodes = [node];
+    const doc=emptyWebsite(name);
+    doc.code=[{
+      id:'customHome',name:'Custom home page',
+      html:'<main><h1>Your company</h1><p>Build your website with your own HTML and CSS.</p></main>',
+      css:'main { padding: 48px; font-family: sans-serif; }',
+      javascript:'',
+    }];
+    const node=createNode('custom','customPage');
+    node.props={code:'customHome'};
+    doc.pages[0]!.nodes=[node];
     return validateTemplate(doc);
   }
-  const hero = createNode('hero', 'hero');
-  hero.props = {
-    title:
-      kind === 'construction'
-        ? 'Built around your vision.'
-        : 'Expert service. Personal attention.',
-    subtitle: 'Tell customers what makes your business different.',
-  };
-  hero.style = {
-    padding: 64,
-    minHeight: 380,
-    background: '#242923',
-    color: '#FFFFFF',
-  };
-  const heading = createNode('heading', 'servicesHeading');
-  heading.props = { text: 'What we do', level: 2 };
-  heading.style = { padding: 24 };
-  const text = createNode('text', 'servicesText');
-  text.props.text =
-    'Replace this example with your services, experience and approach.';
-  text.style = { padding: 24 };
-  doc.pages[0]!.nodes = [hero, heading, text];
+  // Every visual starter is a finished six-page website with editable
+  // services, packages, project cards, header menu and footer.
+  const doc=businessShowcaseTemplate(name);
+  if (kind === 'construction') {
+    doc.pages[0]!.nodes[0]!.props.title='Building better spaces, together.';
+    doc.pages[0]!.nodes[0]!.props.subtitle='CONSTRUCTION · PLANNING · EXECUTION';
+  }
+  if (kind === 'services') {
+    doc.pages[0]!.nodes[0]!.props.title='Expert service. Personal attention.';
+    doc.pages[0]!.nodes[0]!.props.subtitle='TRUSTED BUSINESS SERVICES';
+    doc.theme.primary='#8A624E';
+    doc.theme.accent='#BE845D';
+  }
   return validateTemplate(doc);
 }

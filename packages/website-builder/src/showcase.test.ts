@@ -7,6 +7,17 @@ import { websiteHtml } from './render';
 describe('Business Showcase multi-page template', () => {
   const doc = starterTemplate('Example Construction', 'showcase');
 
+  it.each(['construction','services','showcase'] as const)(
+    '%s starter includes all six business pages rather than a blank one-page site',
+    kind => {
+      const site=starterTemplate('Test Company',kind);
+      expect(site.pages.map(page=>page.path)).toEqual([
+        '/','/about','/services','/projects','/packages','/contact',
+      ]);
+      expect(site.pages.every(page=>page.nodes.length>0)).toBe(true);
+    },
+  );
+
   it('creates complete editable pages with linked navigation and footer', () => {
     expect(doc.pages.map(page => page.path)).toEqual([
       '/', '/about', '/services', '/projects', '/packages', '/contact',

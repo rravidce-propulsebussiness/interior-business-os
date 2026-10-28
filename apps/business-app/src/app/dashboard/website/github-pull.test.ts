@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parsePublicGithubRepo } from './github-pull';
+import { parsePublicGithubRepo } from './github-pull-url';
 
 describe('GitHub public static website import URL guard', () => {
   it('accepts only a repository root on GitHub', () => {
