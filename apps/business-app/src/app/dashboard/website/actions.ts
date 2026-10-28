@@ -251,6 +251,7 @@ export async function publishWebsite(
         WEBSITE_PUBLISH_UNAVAILABLE: 'This website is unavailable or currently suspended/archived. Contact the workspace administrator.',
         WEBSITE_PUBLISH_PERMISSION_DENIED: 'Publishing was denied by the website database permission rules. Ask the business owner to verify your Website Publish permission and website membership.',
         WEBSITE_PUBLISH_DATABASE_REJECTED: 'Website publishing was rejected by the database. Check website plan limits, active signing key, and database migration status. Share the reference ID with your administrator.',
+        WEBSITE_PUBLISH_RPC_MISSING: 'Publishing cannot run because the website_publish function is missing from the configured Supabase project or its API schema cache. Apply the website database migrations to the correct Business OS database, then reload the API schema. No changes were published.',
       };
       const diagnostic = problems[e.message];
       if (diagnostic) return {message:diagnostic};
