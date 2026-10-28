@@ -60,6 +60,7 @@ export function WebsiteEditor({
   initialPageId?: string;
 }) {
   const frame = useRef<HTMLIFrameElement>(null);
+  const inspectorRef = useRef<HTMLElement>(null);
   const previewScroll = useRef({ x: 0, y: 0 });
   const restoringPreviewScroll = useRef(false);
   const lastPreviewHtml = useRef('');
@@ -77,8 +78,16 @@ export function WebsiteEditor({
     const receive = (event: MessageEvent) => {
       if (event.source !== frame.current?.contentWindow) return;
       const data = event.data;
-      if (data?.type === 'website.select' && typeof data.id === 'string')
+      if (data?.type === 'website.select' && typeof data.id === 'string') {
         setSelection(data.id);
+        // On narrow screens the controls sit beneath the preview. Move there
+        // only when the owner deliberately taps an element in the preview.
+        if (window.innerWidth <= 750)
+          requestAnimationFrame(() => inspectorRef.current?.scrollIntoView({
+            block: 'start',
+            behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+          }));
+      }
       if (data?.type === 'website.preview-restored')
         restoringPreviewScroll.current = false;
       if (data?.type === 'website.preview-scroll' && !restoringPreviewScroll.current) {
@@ -504,7 +513,7 @@ export function WebsiteEditor({
             Select an element to edit its properties
           </div>
         </section>
-        <aside className="ss-inspector">
+        <aside ref={inspectorRef} className="ss-inspector">
           <div className="ss-inspector-top"><h2>{selected ? 'Edit section' : 'Page settings'}</h2><span>{selected ? '✣ Selected' : 'Website page'}</span></div>
           {selected && <div className="ss-selected-card">
             <span className="ss-selected-icon" aria-hidden="true">▣</span>
