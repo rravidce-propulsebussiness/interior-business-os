@@ -479,23 +479,28 @@ export function WebsiteEditor({
   const saveDraft = () =>
     start(async () => {
       let nextVersion = version;
-      for (const section of unsavedSections) {
-        const result = await saveAction(id, nextVersion, section, document[section]);
-        if (!result.version) {
-          setMessage(result.message || 'Draft save failed. Reload before retrying.');
-          if (nextVersion !== version) {
-            setVersion(nextVersion);
-            setMessage('Part of the draft saved. Reload to avoid conflicting changes.');
+      try {
+        for (const section of unsavedSections) {
+          const result = await saveAction(id, nextVersion, section, document[section]);
+          if (!result.version) {
+            setMessage(result.message || 'Draft save failed. Reload before retrying.');
+            if (nextVersion !== version) {
+              setVersion(nextVersion);
+              setMessage('Part of the draft saved. Reload to avoid conflicting changes.');
+            }
+            return;
           }
-          return;
+          nextVersion = result.version;
         }
-        nextVersion = result.version;
+        setVersion(nextVersion);
+        setSavedDocument(document);
+        setMessage(unsavedSections.length
+          ? 'Draft saved. Published website remains unchanged.'
+          : 'All changes are already saved.');
+      } catch {
+        if (nextVersion !== version) setVersion(nextVersion);
+        setMessage('The website save request was interrupted. Your edits remain in this browser; check your connection and deployment, then reload the latest draft before retrying.');
       }
-      setVersion(nextVersion);
-      setSavedDocument(document);
-      setMessage(unsavedSections.length
-        ? 'Draft saved. Published website remains unchanged.'
-        : 'All changes are already saved.');
     });
   // Avoid losing locally edited website drafts on tab close, reload or navigation.
   useEffect(() => {
@@ -580,11 +585,15 @@ export function WebsiteEditor({
           {canPublish && <button type="button" className="ss-btn ss-publish-action"
             disabled={pending || hasUnsavedChanges}
             onClick={() => start(async () => {
-              const result = await publishAction(id, version, 'Published from website studio');
-              setMessage(result.message);
-              setCanPublishWithBasicTheme('canPublishWithoutCss' in result &&
-                result.canPublishWithoutCss === true);
-              if (result.id) {setVersion((current) => current + 1);setPublishState('published');}
+              try {
+                const result = await publishAction(id, version, 'Published from website studio');
+                setMessage(result.message);
+                setCanPublishWithBasicTheme('canPublishWithoutCss' in result &&
+                  result.canPublishWithoutCss === true);
+                if (result.id) {setVersion((current) => current + 1);setPublishState('published');}
+              } catch {
+                setMessage('The publish request could not reach the website service. Check the Hostinger deployment and server logs, then reload the latest draft and retry. No publication was confirmed.');
+              }
             })}>
             ↗ &nbsp; {templateMode ? 'Publish template' : 'Publish website'}
           </button>}
