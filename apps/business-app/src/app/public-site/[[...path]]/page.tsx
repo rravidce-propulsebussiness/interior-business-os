@@ -25,5 +25,9 @@ export default async function PublicSitePage({
   const site = await currentWebsite();
   if (!site || !site.build.document.pages.some((page) => page.path === path))
     notFound();
-  return <PublishedWebsite site={site} path={path} />;
+  return (
+    <div className="public-website-root">
+      <PublishedWebsite site={site} path={path} />
+    </div>
+  );
 }
