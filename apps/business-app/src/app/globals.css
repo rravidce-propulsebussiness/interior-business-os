@@ -47,12 +47,12 @@ body {
 
 /* Removed the global dark-grid overlay; authored page backgrounds are local. */
 
-::selection {
+:where(body:not(:has(.public-website-root))) ::selection {
   background: #ffe0c7;
   color: #342e30;
 }
 
-a {
+:where(body:not(:has(.public-website-root))) a {
   color: inherit;
   text-decoration-color: rgba(254, 81, 5, 0.35);
   text-underline-offset: 0.22em;
@@ -62,18 +62,18 @@ a {
     transform 160ms ease;
 }
 
-a:hover {
+:where(body:not(:has(.public-website-root))) a:hover {
   color: #ee5f1b;
 }
 
-button,
-input,
-select,
-textarea {
+:where(body:not(:has(.public-website-root))) button,
+:where(body:not(:has(.public-website-root))) input,
+:where(body:not(:has(.public-website-root))) select,
+:where(body:not(:has(.public-website-root))) textarea {
   font: inherit;
 }
 
-button {
+:where(body:not(:has(.public-website-root))) button {
   border: 1px solid #eee4dd;
   border-radius: 0.8rem !important;
   box-shadow: none;
@@ -83,23 +83,23 @@ button {
     filter 160ms ease;
 }
 
-button:hover:not(:disabled) {
+:where(body:not(:has(.public-website-root))) button:hover:not(:disabled) {
   transform: translateY(-1px);
   filter: brightness(1.04);
   box-shadow: 0 6px 18px rgba(71, 49, 36, 0.1);
 }
 
-button:active:not(:disabled) {
+:where(body:not(:has(.public-website-root))) button:active:not(:disabled) {
   transform: translateY(0);
 }
 
-button:disabled {
+:where(body:not(:has(.public-website-root))) button:disabled {
   opacity: 0.52;
 }
 
-input,
-select,
-textarea {
+:where(body:not(:has(.public-website-root))) input,
+:where(body:not(:has(.public-website-root))) select,
+:where(body:not(:has(.public-website-root))) textarea {
   width: 100%;
   border: 1px solid #e8e1db !important;
   border-radius: 0.8rem !important;
@@ -113,20 +113,20 @@ textarea {
     background 160ms ease;
 }
 
-input::placeholder,
-textarea::placeholder {
+:where(body:not(:has(.public-website-root))) input::placeholder,
+:where(body:not(:has(.public-website-root))) textarea::placeholder {
   color: #9299a6;
 }
 
-input:focus,
-select:focus,
-textarea:focus {
+:where(body:not(:has(.public-website-root))) input:focus,
+:where(body:not(:has(.public-website-root))) select:focus,
+:where(body:not(:has(.public-website-root))) textarea:focus {
   border-color: #f6a46e !important;
   background: #ffffff;
   box-shadow: 0 0 0 4px var(--ring);
 }
 
-label {
+:where(body:not(:has(.public-website-root))) label {
   color: inherit;
   font-size: 0.92rem;
   font-weight: 650;
