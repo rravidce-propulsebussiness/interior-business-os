@@ -1,4 +1,5 @@
 import { refreshSessionWithRewrite } from '@business-os/database/proxy';
+import { isManagedWebsiteHost } from './public-website-hosts';
 import { publicAuthOrigin } from '@business-os/auth/origin';
 import { NextResponse, type NextRequest } from 'next/server';
 import {
@@ -46,6 +47,43 @@ export async function proxy(request: NextRequest) {
   // A visitor must not be allowed to supply internal tenant-scope headers.
   request.headers.delete(WORKSPACE_SLUG_HEADER);
   request.headers.delete(WORKSPACE_HOST_HEADER);
+  // Published company websites share this Next.js process but must never
+  // enter workspace authentication or the platform route tree. Opt-in only
+  // after wildcard DNS and HTTPS are configured and checked.
+  const publicWebsiteRouting =
+    process.env.BUSINESS_OS_PUBLIC_WEBSITE_ROUTING_ENABLED === 'true';
+  const baseDomain =
+    process.env.BUSINESS_OS_PUBLIC_WEBSITE_BASE_DOMAIN ?? 'sghomesinterior.in';
+  const host = request.headers.get('host') ?? request.nextUrl.hostname;
+  if (request.nextUrl.pathname === '/public-site' ||
+      request.nextUrl.pathname.startsWith('/public-site/')) {
+    return new NextResponse('Not found', {
+      status: 404,
+      headers: { 'Cache-Control': 'private, no-store' },
+    });
+  }
+  if (publicWebsiteRouting && isManagedWebsiteHost(host, baseDomain)) {
+    // Keep the original Host header intact: website_public/website_asset_public
+    // require an exact registered hostname. No workspace cookies or headers
+    // are injected into public site responses.
+    const target = request.nextUrl.clone();
+    target.pathname =
+      '/public-site' +
+      (request.nextUrl.pathname === '/' ? '' : request.nextUrl.pathname);
+    const response = NextResponse.rewrite(target, {
+      request: { headers: request.headers },
+    });
+    response.headers.set('Cache-Control', 'private, no-store');
+    response.headers.set(
+      'Content-Security-Policy',
+      "default-src 'self'; script-src 'self' 'unsafe-inline'; " +
+      "style-src 'self' 'unsafe-inline'; img-src 'self'; media-src 'self'; " +
+      "connect-src 'self'; frame-src 'self' https://www.youtube-nocookie.com " +
+      "https://www.google.com https://www.openstreetmap.org; object-src 'none'; " +
+      "base-uri 'none'; form-action 'self'; frame-ancestors 'none'",
+    );
+    return response;
+  }
   const enabled = process.env.BUSINESS_OS_TENANT_ROUTES_ENABLED === 'true';
   const routing = workspaceIngress({
     host: request.nextUrl.hostname,
