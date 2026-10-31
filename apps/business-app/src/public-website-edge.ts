@@ -9,7 +9,7 @@ export const EDGE_SIGNATURE_HEADER = 'x-business-os-edge-signature';
 /** An upstream proxy may identify a public website only with a valid HMAC. */
 export function verifiedEdgeHostname(input: {
   headers: Pick<Headers, 'get'>;
-  secret?: string;
+  secret?: string | undefined;
   baseDomain: string;
   method: string;
   pathAndSearch: string;
