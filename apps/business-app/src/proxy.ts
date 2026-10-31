@@ -1,5 +1,12 @@
 import { refreshSessionWithRewrite } from '@business-os/database/proxy';
 import { isManagedWebsiteHost } from './public-website-hosts';
+import {
+  EDGE_HOST_HEADER,
+  EDGE_SIGNATURE_HEADER,
+  EDGE_TIME_HEADER,
+  PUBLIC_SITE_HOST_HEADER,
+  verifiedEdgeHostname,
+} from './public-website-edge';
 import { publicAuthOrigin } from '@business-os/auth/origin';
 import { NextResponse, type NextRequest } from 'next/server';
 import {
@@ -54,7 +61,24 @@ export async function proxy(request: NextRequest) {
     process.env.BUSINESS_OS_PUBLIC_WEBSITE_ROUTING_ENABLED === 'true';
   const baseDomain =
     process.env.BUSINESS_OS_PUBLIC_WEBSITE_BASE_DOMAIN ?? 'sghomesinterior.in';
-  const host = request.headers.get('host') ?? request.nextUrl.hostname;
+  // Preserve the visitor's company hostname only if signed by our edge.
+  // Hostinger otherwise sees the apex hostname when Cloudflare forwards.
+  const verifiedHost = publicWebsiteRouting
+    ? verifiedEdgeHostname({
+        headers: request.headers,
+        secret: process.env.BUSINESS_OS_PUBLIC_EDGE_SECRET,
+        baseDomain,
+        method: request.method,
+        pathAndSearch: request.nextUrl.pathname + request.nextUrl.search,
+      })
+    : null;
+  // Never permit untrusted clients to choose a tenant through forwarding headers.
+  request.headers.delete(PUBLIC_SITE_HOST_HEADER);
+  request.headers.delete(EDGE_HOST_HEADER);
+  request.headers.delete(EDGE_SIGNATURE_HEADER);
+  request.headers.delete(EDGE_TIME_HEADER);
+  if (verifiedHost) request.headers.set(PUBLIC_SITE_HOST_HEADER, verifiedHost);
+  const host = verifiedHost ?? request.headers.get('host') ?? request.nextUrl.hostname;
   if (request.nextUrl.pathname === '/public-site' ||
       request.nextUrl.pathname.startsWith('/public-site/')) {
     return new NextResponse('Not found', {
@@ -63,6 +87,10 @@ export async function proxy(request: NextRequest) {
     });
   }
   if (publicWebsiteRouting && isManagedWebsiteHost(host, baseDomain)) {
+    // The health probe verifies that this hostname reaches the same Node app.
+    if (request.nextUrl.pathname === '/api/health') {
+      return NextResponse.next({ request: { headers: request.headers } });
+    }
     // Keep the original Host header intact: website_public/website_asset_public
     // require an exact registered hostname. No workspace cookies or headers
     // are injected into public site responses.
