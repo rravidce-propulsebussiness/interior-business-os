@@ -14,8 +14,18 @@ export function normalizeHostname(host: string | null) {
   const value = host.toLowerCase().replace(/:\d{1,5}$/, '');
   return /^[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$/.test(value) ? value : null;
 }
+export function publicWebsiteHostname(headers: Pick<Headers, 'get'>) {
+  // The Business OS proxy strips this header from client requests and only
+  // reinstates it after verifying the Cloudflare gateway HMAC. The standalone
+  // websites app continues using its Host header.
+  const forwarded =
+    process.env.BUSINESS_OS_PUBLIC_WEBSITE_ROUTING_ENABLED === 'true'
+      ? headers.get('x-business-os-public-host')
+      : null;
+  return normalizeHostname(forwarded ?? headers.get('host'));
+}
 export const currentWebsite = cache(async () => {
-  const host = normalizeHostname((await headers()).get('host'));
+  const host = publicWebsiteHostname(await headers());
   if (!host || !isSupabaseConfigured()) return null;
   const r = await createPublicDatabase().rpc('website_public', {
     p_hostname: host,
