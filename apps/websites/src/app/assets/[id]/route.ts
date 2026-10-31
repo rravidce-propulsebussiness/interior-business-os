@@ -2,13 +2,13 @@ import {
   createPublicDatabase,
   isSupabaseConfigured,
 } from '@business-os/database/server';
-import { normalizeHostname } from '../../../website';
+import { publicWebsiteHostname } from '../../../website';
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
-  const host = normalizeHostname(request.headers.get('host'));
+  const host = publicWebsiteHostname(request.headers);
   if (!host || !isSupabaseConfigured() || !/^[0-9a-f-]{36}$/.test(id))
     return new Response('Not found', { status: 404 });
   const r = await createPublicDatabase().rpc('website_asset_public', {
