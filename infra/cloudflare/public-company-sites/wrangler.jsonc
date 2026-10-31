@@ -1,0 +1,12 @@
+{
+  "name": "business-os-public-company-sites",
+  "main": "worker.mjs",
+  "compatibility_date": "2026-10-31",
+  "workers_dev": false,
+  "routes": [
+    {
+      "pattern": "neelima-constructions.sghomesinterior.in/*",
+      "zone_name": "sghomesinterior.in"
+    }
+  ]
+}
