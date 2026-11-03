@@ -1,71 +1,125 @@
-# Same Hostinger Node.js app for Business OS and company public sites
+# Business OS public websites and customer-owned domains
 
-The existing app at https://sghomesinterior.in remains the only Hostinger
-Node.js service. Hostinger's default subdomain folder does not forward to it.
+The existing `apps/business-app` Hostinger Node.js deployment serves:
+- the Business OS platform at `sghomesinterior.in`;
+- managed company subdomains such as `company.sghomesinterior.in`;
+- customer-owned apex and subdomain hostnames such as `company.com` and `www.company.com`.
 
-## Trust boundaries
+All website requests are forwarded through a signed Cloudflare Worker to the existing Business OS origin. The application uses the signed original hostname only after HMAC verification. The public `website_public(text)` database function then requires an exact registered hostname, active domain state, TLS-ready state, a published website/version and website entitlement.
 
-The Cloudflare Worker sends a request to the *existing apex hostname*,
-retaining the visitor's company hostname in timestamped HMAC-SHA256 headers.
-The Next.js proxy validates the exact hostname, request method, path, query
-and the timestamp before setting an internal public hostname header.
+## 1. Cloudflare for SaaS prerequisite
 
-Untrusted headers are always stripped in the app proxy. The published
-website RPC independently requires an active domain, TLS-ready status,
-a published version and valid entitlement.
+Customer-owned domains require Cloudflare for SaaS on the provider zone and an allocated custom-hostname quota. The Cloudflare API currently returns a no-quota / feature-not-enabled response until this is provisioned. Do not advertise customer-owned domains as live until the fallback-origin and custom-hostname APIs are available.
 
-## Prepare
+Enable Cloudflare for SaaS for the `sghomesinterior.in` zone and obtain hostname quota. Cloudflare API token permissions must allow reading/writing custom hostnames and the fallback origin.
 
-1. Confirm sghomesinterior.in, /login, /api/health work after Cloudflare
-   nameserver activation. Keep apex, www and email DNS entries intact.
-2. Publish the GitHub change through the *existing* Hostinger deployment.
-3. Generate a new, random 32-byte secret locally or in a secure password
-   manager. Do not publish it in Git, logs, chat, or a public variable.
-4. Save the identical value into:
-   - Existing Hostinger Node app private environment variable
-     BUSINESS_OS_PUBLIC_EDGE_SECRET
-   - Cloudflare Worker encrypted secret BUSINESS_OS_PUBLIC_EDGE_SECRET
-5. In Hostinger also set:
-   BUSINESS_OS_PUBLIC_WEBSITE_ROUTING_ENABLED=true
-   BUSINESS_OS_PUBLIC_WEBSITE_BASE_DOMAIN=sghomesinterior.in
-   Keep BUSINESS_OS_SERVICE=business-app. Restart the existing Node app.
-6. Create a **Proxied** Cloudflare A record named
-   neelima-constructions, pointing to 192.0.2.0 (reserved, never reached
-   because the Worker handles that route). If an exact record already
-   exists, update its settings instead of adding duplicates.
-7. Deploy infra/cloudflare/public-company-sites/worker.mjs with a route
-   neelima-constructions.sghomesinterior.in/*.
-8. Confirm the exact test URL
-   https://neelima-constructions.sghomesinterior.in/api/health
-   returns the same liveness response as the apex. Also test a static
-   Next.js asset path and HTTPS certificate.
-9. Confirm the website_domains managed subdomain record exists for the
-   published Neelima site. If missing, insert it safely as pending.
-   Only after verified HTTPS and hostname forwarding work should an
-   authorized operator mark it active, tls_status=ready and verified_at.
-10. Check the published home page, nested pages, media, enquiries,
-    sitemap, robots and 404s for unknown/unpublished websites.
+## 2. Configure the fallback origin and CNAME target
 
-## Promote to all companies
+Use a Worker as the fallback origin. In the `sghomesinterior.in` DNS zone configure:
 
-After successfully testing Neelima:
+| Type | Name | Target / content | Proxy |
+|---|---|---|---|
+| AAAA | `proxy-fallback` | `100::` (originless Worker fallback) | DNS only |
+| CNAME | `customers` | `proxy-fallback.sghomesinterior.in` | Proxied |
 
-1. Add a Proxied wildcard DNS record named * pointing to 192.0.2.0.
-2. Replace the Worker route with *.sghomesinterior.in/*.
-3. Exclude service hosts (especially www) with a more-specific
-   pass-through/no-Worker route if they are proxied.
-4. Confirm existing apex, www and mail service behavior still works.
-5. Register and activate each company hostname only after its HTTPS
-   and published website are verified.
+Set the Cloudflare for SaaS fallback origin to:
+`proxy-fallback.sghomesinterior.in`
 
-## Safety & rollback
+Customer DNS records must point to the CNAME target:
+`customers.sghomesinterior.in`
 
-- Do not redirect apex to a company or move Business OS to a second app.
-- Never expose the shared HMAC secret via NEXT_PUBLIC_ variables.
-- Never enable managed_subdomain_tls in Supabase solely because DNS
-  resolves. Enable it only after wildcard HTTPS and routing are verified.
-- Rollback: remove the Cloudflare Worker route (and optionally the
-  company DNS entry), turn off
-  BUSINESS_OS_PUBLIC_WEBSITE_ROUTING_ENABLED and restart Hostinger.
-- If a company shows the Hostinger page/404 rather than the Business OS
-  health JSON, Cloudflare is not forwarding it to the existing app.
+The fallback origin is a Worker origin, not a Hostinger IP. The CNAME target is the customer-facing DNS target. Do not point customer domains directly to the Hostinger IP.
+
+## 3. Worker routes and service-host exclusions
+
+Deploy `infra/cloudflare/public-company-sites/worker.mjs` with route:
+`*/*`
+
+The broad route is needed because Cloudflare for SaaS custom hostnames enter the provider zone while retaining the customer's original Host header. More-specific no-Worker routes must be preserved for provider-owned hosts so the catch-all does not intercept the platform or mail services:
+
+- `sghomesinterior.in/*`
+- `www.sghomesinterior.in/*`
+- `admin.sghomesinterior.in/*`
+- `api.sghomesinterior.in/*`
+- `auth.sghomesinterior.in/*`
+- `dashboard.sghomesinterior.in/*`
+- `login.sghomesinterior.in/*`
+- `register.sghomesinterior.in/*`
+- `sites.sghomesinterior.in/*`
+- `mail.sghomesinterior.in/*`
+- `webmail.sghomesinterior.in/*`
+- `ftp.sghomesinterior.in/*`
+- `autoconfig.sghomesinterior.in/*`
+- `autodiscover.sghomesinterior.in/*`
+
+Set these exclusion routes to **Worker: None**. Keep the existing first-level company-subdomain route if desired; the catch-all route also covers managed subdomains.
+
+Never remove or replace the apex/www bypasses when deploying the Worker. Do not use the catch-all route without these more-specific exclusions.
+
+## 4. Hostinger Business App environment
+
+Keep the existing application and set these server-only variables in the existing Hostinger Node.js app:
+
+```env
+BUSINESS_OS_SERVICE=business-app
+BUSINESS_OS_PUBLIC_WEBSITE_ROUTING_ENABLED=true
+BUSINESS_OS_PUBLIC_WEBSITE_BASE_DOMAIN=sghomesinterior.in
+BUSINESS_OS_PUBLIC_EDGE_SECRET=<same random secret as the Worker>
+CLOUDFLARE_SAAS_ZONE_ID=<provider zone id>
+CLOUDFLARE_SAAS_API_TOKEN=<private token>
+CLOUDFLARE_SAAS_FALLBACK_ORIGIN=proxy-fallback.sghomesinterior.in
+CLOUDFLARE_SAAS_CNAME_TARGET=customers.sghomesinterior.in
+```
+
+The Worker secret `BUSINESS_OS_PUBLIC_EDGE_SECRET` and Hostinger secret must match exactly and remain private. Restart/redeploy the existing Node app after changing environment variables.
+
+## 5. Customer onboarding: www and root domain
+
+Each customer hostname is registered separately in Website Studio → Domains. A customer may add both:
+- `www.customer.com`
+- `customer.com`
+
+Business OS shows a per-hostname ownership TXT challenge. The customer also adds any Cloudflare hostname/SSL TXT validation records returned by Cloudflare.
+
+### www / other subdomain
+
+At the customer's DNS provider:
+- CNAME host: `www`
+- Target: `customers.sghomesinterior.in`
+- Use DNS-only unless the customer's Cloudflare zone has the required SaaS O2O configuration.
+
+### Root / apex
+
+At the customer's DNS provider, point the root host `@` to `customers.sghomesinterior.in` using one of:
+- ALIAS;
+- ANAME;
+- provider-supported CNAME flattening.
+
+A standard DNS CNAME is not allowed at the zone apex by many providers. An A-only apex setup is not supported by the default CNAME-target configuration; Cloudflare Apex Proxying or another explicitly configured apex-proxy service is required. Never give customers a guessed A-record IP.
+
+### Activation checks
+
+Cloudflare custom hostname readiness requires both:
+- custom hostname `status = active`;
+- certificate `ssl.status = active`.
+
+Business OS also requires its own TXT challenge to match. Only then may the domain verification RPC mark the record active and TLS ready. The database remains the final authorization gate.
+
+## 6. Website plan entitlement
+
+Custom domains remain a plan capability. Enable `custom_domain=true` only on the website plans/add-ons that should include the feature. The owner UI hides the add-domain form when their plan does not include it; the database RPC independently enforces the entitlement.
+
+Managed `*.sghomesinterior.in` company subdomains are separate and do not require the customer-owned-domain entitlement.
+
+## 7. Verification and rollback
+
+Test:
+1. `https://sghomesinterior.in/api/health`
+2. an active managed company subdomain homepage and nested page;
+3. a registered `www.customer.com` hostname;
+4. a registered apex `customer.com` hostname using flattening/ALIAS/ANAME;
+5. assets, enquiries, robots.txt and sitemap.xml;
+6. an unknown hostname and an unpublished website both return 404;
+7. apex, www, login, dashboard, admin and mail hosts still behave normally.
+
+Rollback customer-owned routing by removing the Cloudflare for SaaS custom hostname and the customer CNAME record, then restore the previous Worker route set. Do not disable managed company subdomains or change the Business OS apex DNS while rolling back customer domains.
