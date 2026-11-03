@@ -134,9 +134,17 @@ export async function ensureCloudflareFallbackOrigin() {
   if (!cloudflareSaasCnameTarget())
     throw new Error('Set CLOUDFLARE_SAAS_CNAME_TARGET in the platform environment');
 
-  const existing = await cloudflareRequest<FallbackOrigin>('/fallback_origin');
+  let existing: FallbackOrigin | null = null;
+  try {
+    existing = await cloudflareRequest<FallbackOrigin>('/fallback_origin');
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : '';
+    // A zone with SaaS enabled but no fallback origin yet can return 404.
+    // Quota/permission errors are deliberately not swallowed.
+    if (!/404|not found|no fallback origin/i.test(reason)) throw error;
+  }
   if (
-    existing.origin === configuredOrigin &&
+    existing?.origin === configuredOrigin &&
     existing.status === 'active'
   ) return existing;
 
