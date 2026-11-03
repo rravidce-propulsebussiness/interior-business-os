@@ -10202,6 +10202,56 @@ export interface Database {
         };
         Relationships: [];
       };
+      website_project_sources: {
+        Row: {
+          website_id: string;
+          organization_id: string;
+          source_kind: string;
+          template_key: string | null;
+          repository_url: string | null;
+          branch_name: string;
+          framework: string;
+          deployment_url: string | null;
+          version: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          website_id: string;
+          organization_id: string;
+          source_kind: string;
+          template_key?: string | null;
+          repository_url?: string | null;
+          branch_name?: string;
+          framework?: string;
+          deployment_url?: string | null;
+          version?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          website_id?: string;
+          organization_id?: string;
+          source_kind?: string;
+          template_key?: string | null;
+          repository_url?: string | null;
+          branch_name?: string;
+          framework?: string;
+          deployment_url?: string | null;
+          version?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'project_source_site_fk';
+            columns: ['organization_id', 'website_id'];
+            isOneToOne: false;
+            referencedRelation: 'websites';
+            referencedColumns: ['organization_id', 'id'];
+          },
+        ];
+      };
       website_templates: {
         Row: {
           id: string;
@@ -12539,6 +12589,36 @@ export interface Database {
       website_prepare_crm: {
         Args: { p_organization_id: string; p_website_id: string };
         Returns: undefined;
+      };
+      website_project_configure: {
+        Args: {
+          p_organization_id: string;
+          p_website_id: string;
+          p_version: number;
+          p_repository_url: string;
+          p_branch_name: string;
+          p_framework: string;
+          p_deployment_url?: string;
+        };
+        Returns: number;
+      };
+      website_project_create: {
+        Args: {
+          p_organization_id: string;
+          p_name: string;
+          p_slug: string;
+          p_document: Json;
+          p_source_kind: string;
+          p_template_key?: string;
+          p_repository_url?: string;
+          p_branch_name?: string;
+          p_framework?: string;
+        };
+        Returns: string;
+      };
+      website_project_list: {
+        Args: { p_organization_id: string };
+        Returns: Json;
       };
       website_public: { Args: { p_hostname: string }; Returns: Json };
       website_publish: {
