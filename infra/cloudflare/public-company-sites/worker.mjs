@@ -1,26 +1,51 @@
-// Route company websites to the existing Hostinger Node.js deployment.
-// Activate only after the matching secret and Business OS feature flag exist.
+// Signed gateway for managed company subdomains and Cloudflare for SaaS
+// custom hostnames (apex + www). All public-site ownership is rechecked by
+// website_public in the Business OS database after the request reaches origin.
 const BASE = 'sghomesinterior.in';
-const RESERVED = new Set(['www', 'admin', 'api', 'auth', 'sites', 'mail',
-  'webmail', 'ftp', 'autoconfig', 'autodiscover', 'login', 'dashboard']);
+const RESERVED = new Set([
+  'www', 'sites', 'admin', 'api', 'auth', 'dashboard', 'login', 'register',
+  'mail', 'webmail', 'ftp', 'autodiscover', 'autoconfig', 'customers',
+  'proxy-fallback',
+]);
 const encoder = new TextEncoder();
 
-function companyHost(hostname) {
-  if (!hostname.endsWith('.' + BASE)) return false;
-  const label = hostname.slice(0, -(BASE.length + 1));
-  return label.length <= 63 && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(label)
-    && !RESERVED.has(label);
+function validDnsHostname(hostname) {
+  if (!hostname || hostname.length > 253 || hostname.includes('..')) return false;
+  const labels = hostname.split('.');
+  if (labels.length < 2) return false;
+  if (!labels.every(label =>
+    label.length <= 63 &&
+    /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(label),
+  )) return false;
+  const tld = labels[labels.length - 1];
+  return /^[a-z]{2,63}$/.test(tld) || /^xn--[a-z0-9-]{2,59}$/.test(tld);
+}
+
+function routableHostname(hostname) {
+  if (!validDnsHostname(hostname)) return false;
+  if (hostname === BASE) return false;
+  if (hostname.endsWith('.' + BASE)) {
+    const label = hostname.slice(0, -(BASE.length + 1));
+    return !label.includes('.') && !RESERVED.has(label) &&
+      /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(label);
+  }
+  // Custom apex domains and customer subdomains are accepted here only as
+  // transport candidates. The database authorizes the exact hostname later.
+  return true;
 }
 
 export default {
   async fetch(request, env) {
     const input = new URL(request.url);
     const originalHost = input.hostname.toLowerCase();
-    if (!companyHost(originalHost)) return new Response('Not found', { status: 404 });
+    if (!routableHostname(originalHost))
+      return new Response('Not found', { status: 404 });
+
     const secret = env.BUSINESS_OS_PUBLIC_EDGE_SECRET;
     if (!secret || secret.length < 40) {
       return new Response('Public website gateway not configured', { status: 503 });
     }
+
     const timestamp = String(Math.floor(Date.now() / 1000));
     const payload = [timestamp, originalHost, request.method.toUpperCase(),
       input.pathname + input.search].join('\n');
@@ -29,18 +54,19 @@ export default {
       false, ['sign'],
     );
     const bytes = await crypto.subtle.sign('HMAC', key, encoder.encode(payload));
-    const signature = [...new Uint8Array(bytes)].map(b => b.toString(16).padStart(2, '0')).join('');
+    const signature = [...new Uint8Array(bytes)]
+      .map(b => b.toString(16).padStart(2, '0')).join('');
 
-    // Hostinger sees the apex, which is already associated with the Node app.
-    // The signed headers preserve the original public hostname for DB lookup.
+    // Hostinger sees the apex; signed headers preserve the original company
+    // or custom hostname for exact lookup by the shared public-site renderer.
     const upstream = new URL(input);
     upstream.hostname = BASE;
     const forwarded = new Request(upstream, request);
-    for (const key of [
+    for (const header of [
       'cookie', 'authorization', 'x-forwarded-host',
       'x-business-os-public-host', 'x-business-os-edge-host',
       'x-business-os-edge-time', 'x-business-os-edge-signature',
-    ]) forwarded.headers.delete(key);
+    ]) forwarded.headers.delete(header);
     forwarded.headers.set('x-business-os-edge-host', originalHost);
     forwarded.headers.set('x-business-os-edge-time', timestamp);
     forwarded.headers.set('x-business-os-edge-signature', signature);
