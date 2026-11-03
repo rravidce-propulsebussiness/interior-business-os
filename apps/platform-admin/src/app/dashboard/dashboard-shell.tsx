@@ -105,7 +105,6 @@ const primary: { title: string; icon: IconName; href: string }[] = [
     icon: 'projects',
     href: '/dashboard/control/projects',
   },
-  { title: 'Website Builder', icon: 'website', href: '/dashboard/website' },
   { title: 'Domain Management', icon: 'domain', href: '/dashboard/domains' },
   {
     title: 'Settings & Customization',
