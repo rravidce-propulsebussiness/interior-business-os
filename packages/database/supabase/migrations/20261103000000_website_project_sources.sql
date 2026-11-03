@@ -65,6 +65,7 @@ create function private.website_project_validate(
 ) returns void language plpgsql immutable set search_path='' as $$
 begin
   if kind is null or kind not in ('template','repository')
+     or stack is null
      or stack not in ('static','react','vite','nextjs','vue','astro','php','python','node','other')
      or branch is null or length(branch) not between 1 and 100
      or branch !~ '^[A-Za-z0-9][A-Za-z0-9._/-]*$'
@@ -74,16 +75,19 @@ begin
   end if;
   if kind='template' then
     if template is null or template not in
-      ('construction','interiors','real-estate','corporate')
-      then
+      ('construction','interiors','real-estate','corporate') then
       raise exception 'Invalid template choice' using errcode='22023';
     end if;
   elsif kind='repository' and (template is not null or repo is null) then
     raise exception 'Repository URL required' using errcode='22023';
   end if;
   if repo is not null and (
-    length(repo)>350 or
-    repo !~ '^https://(github[.]com|gitlab[.]com|bitbucket[.]org)/[A-Za-z0-9_.-]+(/[A-Za-z0-9_.-]+)+([.]git)?
+    length(repo)>350
+    or repo !~ '^https://(github[.]com|gitlab[.]com|bitbucket[.]org)/[A-Za-z0-9_.-]+(/[A-Za-z0-9_.-]+)+([.]git)?$'
+    or position('..' in repo)>0
+  ) then
+    raise exception 'Use a credential-free HTTPS repository URL' using errcode='22023';
+  end if;
   if deployed is not null and (
     length(deployed)>500
     or deployed !~ '^https://[A-Za-z0-9][A-Za-z0-9.-]+([:]443)?(/[-A-Za-z0-9._~/]*)?$'
