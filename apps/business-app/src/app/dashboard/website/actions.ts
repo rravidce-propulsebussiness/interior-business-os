@@ -57,7 +57,8 @@ export async function createWebsite(
       throw new Error('Enter a name and a safe subdomain slug');
     let id: string;
     if (templateId.startsWith('starter:')) {
-      if (!['starter:showcase','starter:construction','starter:interior','starter:services'].includes(templateId))
+      if (!['starter:showcase','starter:construction','starter:interior','starter:services',
+        'starter:premium-construction','starter:premium-interiors','starter:premium-villas'].includes(templateId))
         throw new Error('Unknown starter template');
       id = await s.website.create(name, slug, emptyWebsite(name));
       const fresh = await s.website.read(id);
