@@ -1,11 +1,7 @@
 import { WebsiteTeam } from '../../team-panel';
-import { TemplateEditor } from '../../template-editor';
 import { FixedTemplateEditor } from '../../fixed-template-editor';
 import { WebsiteGitTools } from '../../website-git-tools';
-import { templatePages, templateSources } from '../../template-workspace';
-import { WebsiteDesignStudio } from '../../design-studio';
 import '../../website-studio.css';
-import '../../design-studio.css';
 import { OwnerShell } from '../../../owner-shell';
 import { ownerWorkspaceNavigation } from '../../../owner-workspace-navigation';
 import { canAccess } from '@business-os/auth';
@@ -81,19 +77,6 @@ export default async function WebsiteTab({
         s.allowed('website.custom_code.edit') && s.allowed('website.page.create') &&
         s.allowed('website.page.edit') && s.allowed('website.seo.manage')}
       pages={site.document.pages.map(page => ({ path: page.path, title: page.title }))}/>;
-  } else if (tab === 'design') {
-    content = <WebsiteDesignStudio
-      id={id}
-      name={site.name}
-      initialTheme={site.document.theme}
-      pages={site.document.pages.map(page => ({
-        id: page.id,
-        title: page.title,
-        path: page.path,
-      }))}
-      initialVersion={site.version}
-      canEdit={s.allowed('website.theme.manage')}
-    />;
   } else if (tab === 'metrics') {
     const result = await s.client.rpc('website_metrics_read', {
       p_organization_id: s.context.organizationId,
