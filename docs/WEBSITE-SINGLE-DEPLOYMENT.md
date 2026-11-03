@@ -62,3 +62,6 @@ If hostname routing cannot be enabled by the existing Hostinger plan,
 use an HTTPS reverse proxy capable of forwarding the company Host to the
 app's existing origin, or choose a compatible hosting plan. Do **not**
 create a second app just to make the source code render company pages.
+
+For customer-owned apex and `www` domains, use the separate Cloudflare for SaaS
+configuration and DNS requirements in `docs/WEBSITE-CLOUDFLARE-EDGE.md`.
