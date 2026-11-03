@@ -1,5 +1,5 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
-import { isManagedWebsiteHost } from './public-website-hosts';
+import { isPublicWebsiteHost } from './public-website-hosts';
 
 export const PUBLIC_SITE_HOST_HEADER = 'x-business-os-public-host';
 export const EDGE_HOST_HEADER = 'x-business-os-edge-host';
@@ -18,7 +18,7 @@ export function verifiedEdgeHostname(input: {
   const { headers, secret, baseDomain, method, pathAndSearch } = input;
   if (!secret || secret.length < 40) return null;
   const host = headers.get(EDGE_HOST_HEADER)?.toLowerCase() ?? '';
-  if (!isManagedWebsiteHost(host, baseDomain)) return null;
+  if (!isPublicWebsiteHost(host, baseDomain)) return null;
   const timestamp = headers.get(EDGE_TIME_HEADER) ?? '';
   const signature = headers.get(EDGE_SIGNATURE_HEADER) ?? '';
   if (!/^\d{10}$/.test(timestamp) || !/^[0-9a-f]{64}$/.test(signature)) return null;
@@ -28,5 +28,6 @@ export function verifiedEdgeHostname(input: {
   const expected = createHmac('sha256', secret).update(payload).digest();
   const supplied = Buffer.from(signature, 'hex');
   return supplied.length === expected.length && timingSafeEqual(supplied, expected)
-    ? host : null;
+    ? host
+    : null;
 }
