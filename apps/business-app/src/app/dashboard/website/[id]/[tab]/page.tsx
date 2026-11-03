@@ -15,6 +15,10 @@ import { notFound } from 'next/navigation';
 import { websiteServices } from '../../service';
 import { WebsiteSettings, PublicationControls } from '../../settings-panel';
 import { DomainPanel } from '../../domain-panel';
+import {
+  cloudflareSaasConfigured,
+  cloudflareSaasCnameTarget,
+} from '../../cloudflare-domains';
 import { MediaPanel } from '../../media-panel';
 const permissions: Record<string, string> = {
   design: 'website.theme.manage',
@@ -148,10 +152,6 @@ export default async function WebsiteTab({
       </section>
     );
   } else if (tab === 'domains') {
-    const r = await s.client.rpc('website_configuration', {
-      p_organization_id: s.context.organizationId,
-    });
-    const config = r.data as { platform?: { baseDomain?: string } } | null;
     const rows = await s.client
       .from('website_domains')
       .select('id,hostname,kind,status,challenge,tls_status,version')
@@ -160,11 +160,14 @@ export default async function WebsiteTab({
       .order('created_at', { ascending: false })
       .limit(25);
     if (rows.error) throw new Error('Domains unavailable');
+    const limits = site.limits as { custom_domain?: boolean } | undefined;
     content = (
       <DomainPanel
         site={id}
         domains={rows.data}
-        base={config?.platform?.baseDomain ?? ''}
+        cnameTarget={cloudflareSaasCnameTarget()}
+        customDomainEnabled={limits?.custom_domain === true}
+        saasReady={cloudflareSaasConfigured()}
         canManage={s.allowed('website.domain.manage')}
       />
     );
