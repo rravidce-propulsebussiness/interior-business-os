@@ -164,22 +164,18 @@ function StudioIcon({
 
 function Thumbnail({
   template,
-  compact = false,
+  brand,
 }: {
   template: Template;
-  compact?: boolean;
+  brand: string;
 }) {
   return (
     <div
-      className={
-        'ps-thumbnail ps-thumbnail-' +
-        template.style +
-        (compact ? ' ps-thumbnail-compact' : '')
-      }
+      className={'ps-thumbnail ps-thumbnail-' + template.style}
     >
       <div className="ps-thumbnail-top">
         <span className="ps-thumbnail-logo">
-          ⌂ {compact ? 'SITE' : 'STUDIO'}
+          ⌂ {brand}
         </span>
         <span>Home　 About　 Services　 Contact</span>
       </div>
@@ -662,7 +658,7 @@ export function WebsitePremium({
           {visibleTemplates.map((template) => (
             <article className="ps-template-card" key={template.id}>
               <div className="ps-template-art">
-                <Thumbnail template={template} />
+                <Thumbnail template={template} brand={companyName} />
                 <span
                   className={'ps-template-badge ps-badge-' + template.style}
                 >
@@ -747,7 +743,7 @@ export function WebsitePremium({
             </button>
             <span className="ps-kicker">PREMIUM TEMPLATE PREVIEW</span>
             <h2 id="ps-preview-title">{preview.name}</h2>
-            <Thumbnail template={preview} />
+            <Thumbnail template={preview} brand={companyName} />
             <p>{preview.description}</p>
             <div className="ps-modal-actions">
               <button
