@@ -1,23 +1,128 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { validateTemplate, starterTemplate, type WebsiteDocument } from '@business-os/website-builder';
+import {
+  validateTemplate,
+  starterTemplate,
+  type WebsiteDocument,
+} from '@business-os/website-builder';
 import { isUnconfiguredWebsite } from './entry-state';
-import { validateCss, validateJavaScript, sanitizeHtml } from '@business-os/website-builder/compiler';
+import {
+  validateCss,
+  validateJavaScript,
+  sanitizeHtml,
+} from '@business-os/website-builder/compiler';
 import { websiteServices } from './service';
 import { safeFailure, idSchema } from '@business-os/shared';
 
-const builtins = new Set(['starter:showcase','starter:construction','starter:services','starter:interior']);
+const builtins = new Set([
+  'starter:showcase',
+  'starter:construction',
+  'starter:services',
+  'starter:interior',
+  'starter:premium-construction',
+  'starter:premium-interiors',
+  'starter:premium-villas',
+]);
 
 function builtin(name: string, selected: string) {
-  const kind = selected === 'starter:showcase' ? 'showcase' :
-    selected === 'starter:construction' ? 'construction' : 'services';
+  const kind =
+    selected === 'starter:showcase' ||
+    selected === 'starter:premium-construction'
+      ? 'showcase'
+      : selected === 'starter:construction' ||
+          selected === 'starter:premium-villas'
+        ? 'construction'
+        : 'services';
   const doc = starterTemplate(name, kind);
   if (selected === 'starter:interior') {
-    doc.pages[0]!.nodes[0]!.props.title = 'Beautiful interiors, thoughtfully made.';
+    doc.pages[0]!.nodes[0]!.props.title =
+      'Beautiful interiors, thoughtfully made.';
     doc.pages[0]!.nodes[0]!.props.subtitle = 'Your interior design studio';
     doc.theme.primary = '#A35A3C';
     doc.theme.accent = '#CB8E63';
+  }
+  // New premium starters are separate, versioned selections; older starters
+  // and existing published websites are not overwritten or changed.
+  const premium = {
+    'starter:premium-construction': {
+      title: 'Turnkey Construction & Interior Solutions',
+      subtitle: 'BUILD · DESIGN · DELIVER',
+      text: 'Beautifully planned homes, transparent execution and inspiring spaces.',
+      primary: '#F46B20',
+      accent: '#F5A454',
+      surface: '#FFFFFF',
+      background: '#FFF8F2',
+      dark: '#202E30',
+    },
+    'starter:premium-interiors': {
+      title: 'Elegant Interior Spaces',
+      subtitle: 'DESIGN · EXECUTE · TRANSFORM',
+      text: 'Thoughtful interior design for the way you live and work.',
+      primary: '#BC6B38',
+      accent: '#D5A06F',
+      surface: '#FFFFFF',
+      background: '#FBF7F0',
+      dark: '#42372F',
+    },
+    'starter:premium-villas': {
+      title: 'Luxury Villas & Farmhouses',
+      subtitle: 'DESIGN · BUILD · LIVE',
+      text: 'Architecture and construction with a distinct sense of place.',
+      primary: '#D36A39',
+      accent: '#C8A26E',
+      surface: '#FFFFFF',
+      background: '#F8F7F3',
+      dark: '#192C34',
+    },
+  }[
+    selected as
+      | 'starter:premium-construction'
+      | 'starter:premium-interiors'
+      | 'starter:premium-villas'
+  ];
+  if (premium) {
+    const hero = doc.pages.find((page) => page.path === '/')?.nodes[0];
+    if (hero) {
+      hero.props.title = premium.title;
+      hero.props.subtitle = premium.subtitle;
+      hero.props.text = premium.text;
+      hero.style = {
+        ...hero.style,
+        background: premium.dark,
+        color: '#FFFFFF',
+        minHeight: 490,
+      };
+      const button = hero.children.find((child) => child.type === 'button');
+      if (button)
+        button.style = {
+          ...button.style,
+          background: premium.primary,
+          color: '#FFFFFF',
+        };
+    }
+    doc.theme = {
+      ...doc.theme,
+      primary: premium.primary,
+      accent: premium.accent,
+      secondary: '#FBEAE0',
+      background: premium.background,
+      surface: premium.surface,
+      headingFont: 'serif',
+      bodyFont: 'sans-serif',
+    };
+    doc.settings.description = premium.text;
+    doc.css += `
+      #showcaseHero{background:linear-gradient(125deg,${premium.dark} 15%,#3d4e4c 100%)!important;
+        position:relative;overflow:hidden}
+      #showcaseHero::after{content:'';position:absolute;right:-12%;bottom:-52%;
+        width:44%;height:120%;border:1px solid #ffffff22;border-radius:50%;pointer-events:none}
+      #showcaseHero>h1{max-width:820px;font-family:serif;font-weight:600;letter-spacing:-.05em}
+      #showcaseHero>p{max-width:650px;color:#f4e9df}
+      .website-card{border-radius:16px}
+      .website-nav{gap:26px}
+      @media(max-width:600px){#showcaseHero{padding:60px 22px!important}}
+    `;
   }
   return validateTemplate(doc);
 }
@@ -40,71 +145,124 @@ export async function applyWebsiteTemplate(
     if (site.version !== version)
       throw new Error('Website changed. Reload before choosing a template.');
     if (!isUnconfiguredWebsite(site.document, Boolean(site.publishedVersionId)))
-      throw new Error('This website already contains saved content. Your existing pages will not be replaced.');
+      throw new Error(
+        'This website already contains saved content. Your existing pages will not be replaced.',
+      );
 
     let template: WebsiteDocument;
     if (builtins.has(templateChoice)) {
       template = builtin(site.name, templateChoice);
     } else {
       const idValue = idSchema.parse(templateChoice);
-      const row = await s.client.from('website_templates')
-        .select('document,status').eq('id', idValue).eq('status', 'published').single();
-      if (row.error || !row.data) throw new Error('Template unavailable. Choose another.');
+      const row = await s.client
+        .from('website_templates')
+        .select('document,status')
+        .eq('id', idValue)
+        .eq('status', 'published')
+        .single();
+      if (row.error || !row.data)
+        throw new Error('Template unavailable. Choose another.');
       template = validateTemplate(row.data.document);
     }
 
     // Preserve tenant-owned company details, keeping the template portable.
-    template.settings = { ...template.settings,
-      name: site.name, phone: site.document.settings.phone,
-      email: site.document.settings.email, address: site.document.settings.address,
+    template.settings = {
+      ...template.settings,
+      name: site.name,
+      phone: site.document.settings.phone,
+      email: site.document.settings.email,
+      address: site.document.settings.address,
       timezone: site.document.settings.timezone,
     };
     // Existing hosted preview/publish policies apply to all imported source.
     validateCss(template.css);
     for (const item of template.code) {
-      sanitizeHtml(item.html); validateCss(item.css);
+      sanitizeHtml(item.html);
+      validateCss(item.css);
       validateJavaScript(item.javascript);
     }
-    const sections = ([
-      'theme','css','forms','content','code','navigation','footerNavigation',
-      'header','footer','pages','sections','settings',
-    ] as const).filter(section =>
-      JSON.stringify(template[section]) !== JSON.stringify(site.document[section]));
+    const sections = (
+      [
+        'theme',
+        'css',
+        'forms',
+        'content',
+        'code',
+        'navigation',
+        'footerNavigation',
+        'header',
+        'footer',
+        'pages',
+        'sections',
+        'settings',
+      ] as const
+    ).filter(
+      (section) =>
+        JSON.stringify(template[section]) !==
+        JSON.stringify(site.document[section]),
+    );
 
     const permission = {
-      theme: 'website.theme.manage', css: 'website.custom_css.manage',
-      forms: 'website.form.manage', content: 'website.page.edit',
-      code: 'website.custom_code.edit', navigation: 'website.navigation.manage',
+      theme: 'website.theme.manage',
+      css: 'website.custom_css.manage',
+      forms: 'website.form.manage',
+      content: 'website.page.edit',
+      code: 'website.custom_code.edit',
+      navigation: 'website.navigation.manage',
       footerNavigation: 'website.navigation.manage',
-      header: 'website.page.edit', footer: 'website.page.edit',
-      pages: 'website.page.edit', sections: 'website.page.edit',
+      header: 'website.page.edit',
+      footer: 'website.page.edit',
+      pages: 'website.page.edit',
+      sections: 'website.page.edit',
       settings: 'website.seo.manage',
     } as const;
     for (const section of sections) {
       if (!s.allowed(permission[section]))
-        throw new Error('Your plan or role cannot use this template. Missing ' + section + ' permission.');
+        throw new Error(
+          'Your plan or role cannot use this template. Missing ' +
+            section +
+            ' permission.',
+        );
     }
     if (sections.includes('pages')) {
       if (!s.allowed('website.page.create') || !s.allowed('website.seo.manage'))
         throw new Error('Page creation and SEO permissions are required.');
-      if (site.document.pages.some(oldPage =>
-        !template.pages.some(nextPage => nextPage.id === oldPage.id)) &&
-        !s.allowed('website.page.delete'))
-        throw new Error('Removing blank placeholders requires page deletion permission.');
+      if (
+        site.document.pages.some(
+          (oldPage) =>
+            !template.pages.some((nextPage) => nextPage.id === oldPage.id),
+        ) &&
+        !s.allowed('website.page.delete')
+      )
+        throw new Error(
+          'Removing blank placeholders requires page deletion permission.',
+        );
     }
 
     let nextVersion = version;
     for (const section of sections) {
-      nextVersion = await s.website.save(id, nextVersion, section, template[section]);
+      nextVersion = await s.website.save(
+        id,
+        nextVersion,
+        section,
+        template[section],
+      );
       completed++;
     }
     revalidatePath(`/dashboard/website/${id}`);
     revalidatePath('/dashboard/website');
-    return { saved: true, message: 'Template applied to your draft. Edit your content and publish when ready.' };
+    return {
+      saved: true,
+      message:
+        'Template applied to your draft. Edit your content and publish when ready.',
+    };
   } catch (error) {
-    return { saved: false,
-      message: (completed ? 'Template setup partially saved. Reload to inspect the draft before continuing. ' : '') +
-        safeFailure(error).message,
+    return {
+      saved: false,
+      message:
+        (completed
+          ? 'Template setup partially saved. Reload to inspect the draft before continuing. '
+          : '') + safeFailure(error).message,
     };
   }
 }

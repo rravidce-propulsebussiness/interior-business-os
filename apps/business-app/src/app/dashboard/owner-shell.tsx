@@ -6,6 +6,7 @@ import { signOut } from '@business-os/auth/actions';
 import { useCompanyNavigation } from './company-navigation-provider';
 import './owner-dashboard.css';
 import './command-centre.css';
+import './owner-shell-global.css';
 
 const iconPaths = {
   dashboard: 'M3 10.5 12 3l9 7.5M5 9v12h14V9M9 21v-8h6v8',
@@ -175,6 +176,86 @@ export function OwnerShell({
           type="button"
         />
       )}
+      <header className="owner-topbar">
+        <a
+          className="owner-global-brand"
+          href="/dashboard"
+          aria-label={companyName + ' Business OS home'}
+        >
+          <span className="owner-global-brand-mark">
+            <OwnerIcon name="dashboard" size={27} />
+          </span>
+          <span>
+            <strong>{companyName}</strong>
+            <small>Business OS</small>
+          </span>
+        </a>
+        <button
+          ref={toggleRef}
+          className="owner-menu-button"
+          type="button"
+          aria-label="Open navigation"
+          aria-controls="owner-sidebar-navigation"
+          aria-expanded={menuOpen}
+          onClick={() => setMenuOpen(true)}
+        >
+          <OwnerIcon name="menu" size={22} />
+        </button>
+        {dashboardBrand && (
+          <a className="owner-command-mobile-brand" href="/dashboard">
+            <span className="owner-command-mobile-mark">
+              {companyName.trim().charAt(0).toUpperCase()}
+            </span>
+            <strong>{companyName}</strong>
+          </a>
+        )}
+        <form
+          className="owner-search"
+          action={searchAction}
+          method="GET"
+          role="search"
+        >
+          <OwnerIcon name="search" size={19} />
+          <input
+            type="search"
+            name="q"
+            defaultValue={search}
+            maxLength={80}
+            placeholder={searchPlaceholder}
+            aria-label="Search within this company"
+          />
+        </form>
+        <div className="owner-account-actions">
+          {notificationsEnabled && (
+            <a
+              href="/dashboard/notifications"
+              className="owner-topbar-icon"
+              aria-label="Notifications"
+            >
+              <OwnerIcon name="bell" size={21} />
+            </a>
+          )}
+          <details className="owner-profile">
+            <summary aria-label="Account menu">
+              <span className="owner-profile-avatar">{initials}</span>
+              <span className="owner-profile-label">
+                <strong>{accountLabel}</strong>
+                <small>Company workspace</small>
+              </span>
+              <span className="owner-profile-chevron">⌄</span>
+            </summary>
+            <div className="owner-profile-menu">
+              <strong>{companyName}</strong>
+              <small>{accountEmail}</small>
+              <form action={signOut}>
+                <button type="submit">
+                  <OwnerIcon name="logout" size={17} /> Sign out
+                </button>
+              </form>
+            </div>
+          </details>
+        </div>
+      </header>
       <aside
         ref={sidebarRef}
         id="owner-sidebar-navigation"
@@ -300,6 +381,22 @@ export function OwnerShell({
             );
           })}
         </nav>
+        {displayedNavigation.some(
+          (item) => item.href === '/dashboard/website',
+        ) && (
+          <a
+            className="owner-studio-promo"
+            href="/dashboard/website"
+            onClick={() => setMenuOpen(false)}
+          >
+            <span className="owner-studio-promo-crown">
+              <OwnerIcon name="crown" size={20} />
+            </span>
+            <strong>Website Studio</strong>
+            <small>Create stunning websites for your business</small>
+            <span className="owner-studio-promo-photo" aria-hidden="true" />
+          </a>
+        )}
         <div className="owner-sidebar-bottom">
           <div className="owner-plan-card">
             <OwnerIcon name="crown" size={21} />
@@ -314,70 +411,17 @@ export function OwnerShell({
         </div>
       </aside>
       <div className="owner-workspace">
-        <header className="owner-topbar">
-          <button
-            ref={toggleRef}
-            className="owner-menu-button"
-            type="button"
-            aria-label="Open navigation"
-            aria-controls="owner-sidebar-navigation"
-            aria-expanded={menuOpen}
-            onClick={() => setMenuOpen(true)}
-          >
-            <OwnerIcon name="menu" size={22} />
-          </button>
-          {dashboardBrand && <a className="owner-command-mobile-brand" href="/dashboard">
-            <span className="owner-command-mobile-mark">{companyName.trim().charAt(0).toUpperCase()}</span>
-            <strong>{companyName}</strong>
-          </a>}
-          <form
-            className="owner-search"
-            action={searchAction}
-            method="GET"
-            role="search"
-          >
-            <OwnerIcon name="search" size={19} />
-            <input
-              type="search"
-              name="q"
-              defaultValue={search}
-              maxLength={80}
-              placeholder={searchPlaceholder}
-              aria-label="Search within this company"
-            />
-          </form>
-          <div className="owner-account-actions">
-            {notificationsEnabled && (
-              <a
-                href="/dashboard/notifications"
-                className="owner-topbar-icon"
-                aria-label="Notifications"
-              >
-                <OwnerIcon name="bell" size={21} />
-              </a>
-            )}
-            <details className="owner-profile">
-              <summary aria-label="Account menu">
-                <span className="owner-profile-avatar">{initials}</span>
-                <span className="owner-profile-label">
-                  <strong>{accountLabel}</strong>
-                  <small>Company workspace</small>
-                </span>
-                <span className="owner-profile-chevron">⌄</span>
-              </summary>
-              <div className="owner-profile-menu">
-                <strong>{companyName}</strong>
-                <small>{accountEmail}</small>
-                <form action={signOut}>
-                  <button type="submit">
-                    <OwnerIcon name="logout" size={17} /> Sign out
-                  </button>
-                </form>
-              </div>
-            </details>
-          </div>
-        </header>
         {children}
+        <footer className="owner-global-footer" aria-label="Workspace footer">
+          <span>© {new Date().getFullYear()} ProPulse Business OS</span>
+          <span className="owner-global-footer-dot" aria-hidden="true">
+            ·
+          </span>
+          <span>Secure business workspace</span>
+          <a href="/dashboard" className="owner-global-footer-home">
+            Dashboard
+          </a>
+        </footer>
       </div>
     </div>
   );
