@@ -1,4 +1,5 @@
 'use server';
+import { Resolver } from 'node:dns/promises';
 import { signWebsite } from './service';
 import { domainServices } from './domain-service';
 import { revalidatePath } from 'next/cache';
@@ -122,7 +123,7 @@ export async function checkWebsiteDomain(
 
     // The Business OS ownership proof is separate from Cloudflare's own
     // hostname/DCV validation. Both must be satisfied before activation.
-    const resolver = new (await import('node:dns/promises')).Resolver({
+    const resolver = new Resolver({
       timeout: 3000,
       tries: 1,
     });
