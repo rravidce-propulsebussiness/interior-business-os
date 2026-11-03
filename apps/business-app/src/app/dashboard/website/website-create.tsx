@@ -122,7 +122,7 @@ export function WebsiteCreate({
 </select>
           <p className="website-form-hint">
             {templates.length
-              ? 'You can change the template's text, photos and logos. Layout, colors and sections remain fixed.'
+              ? 'You can replace the template text, photos and logos. Layout, colors and sections remain fixed.'
               : 'Choose an available starter template.'}
           </p>
           <label htmlFor="website-name">Website name</label>
