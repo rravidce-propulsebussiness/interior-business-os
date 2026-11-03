@@ -6,15 +6,16 @@ import type { WebsiteDocument, WebsiteNode } from '@business-os/website-builder'
 import { WebsiteMediaPicker } from './website-media-picker';
 import { editableContentFields } from './website-content-fields';
 import { useWebsitePreviewSrcDoc } from './website-preview-nonce';
-import { renderDraftPreview, saveWebsiteSection, publishWebsite, publishWebsiteWithLinkedPages } from './actions';
+import { renderDraftPreview, publishWebsite, publishWebsiteWithLinkedPages } from './actions';
+import { saveFixedTemplateSection } from './fixed-template-actions';
+import { fixedTemplateSections } from './fixed-template-guard';
 import { linkedDraftPagesForPublication } from './website-publication-links';
 import './fixed-template-editor.css';
 
 type Area = 'header' | 'footer' | 'pages';
 type Picked = { kind: 'node' | 'content'; id: string };
 type Asset = WebsiteDocument['assets'][number];
-const editable = ['assets', 'content', 'pages', 'header', 'footer'] as const;
-type EditableSection = (typeof editable)[number];
+const editable = fixedTemplateSections;
 
 function findNode(nodes: WebsiteNode[], id: string): WebsiteNode | undefined {
   for (const node of nodes) {
@@ -178,7 +179,7 @@ export function FixedTemplateEditor({
       let currentVersion = version;
       for (const section of editable) {
         if (JSON.stringify(snapshot[section]) === JSON.stringify(saved[section])) continue;
-        const result = await saveWebsiteSection(id, currentVersion, section, snapshot[section]);
+        const result = await saveFixedTemplateSection(id, currentVersion, section, snapshot[section]);
         if (result.version === undefined) {
           setVersion(currentVersion);
           setStatus('Save incomplete: ' + result.message + ' Reload the latest draft before editing again.');
@@ -199,7 +200,7 @@ export function FixedTemplateEditor({
         ? await publishWebsiteWithLinkedPages(id, version, 'Published fixed-template content')
         : await publishWebsite(id, version, 'Published fixed-template content');
       setStatus(result.message);
-      if (result.id) setVersion(result.version ?? version + 1);
+      if (result.id) setVersion('version' in result && typeof result.version === 'number' ? result.version : version + 1);
     });
   };
   useEffect(() => {
