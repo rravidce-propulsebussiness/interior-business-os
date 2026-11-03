@@ -18,6 +18,8 @@ export type WebsiteProjectRow = {
   branchName: string;
   framework: string;
   deploymentUrl: string;
+  backendRepositoryUrl: string;
+  backendDeploymentUrl: string;
   version: number;
 };
 export type WebsiteDomainRow = {
@@ -109,6 +111,8 @@ export function WebsiteFoundation({
   const [editBranch, setEditBranch] = useState('main');
   const [editFramework, setEditFramework] = useState<Stack>('other');
   const [editDeployment, setEditDeployment] = useState('');
+  const [editBackendRepo, setEditBackendRepo] = useState('');
+  const [editBackendDeployment, setEditBackendDeployment] = useState('');
 
   const projectMap = useMemo(() => new Map(projects.map(p => [p.websiteId,p])), [projects]);
   const chosenSite = sites.find(s => s.id === selectedId) ?? sites[0];
@@ -143,6 +147,8 @@ export function WebsiteFoundation({
     setEditBranch(selected.branchName || 'main');
     setEditFramework((stackChoices.find(s => s.value === selected.framework)?.value || 'other'));
     setEditDeployment(selected.deploymentUrl || '');
+    setEditBackendRepo(selected.backendRepositoryUrl || '');
+    setEditBackendDeployment(selected.backendDeploymentUrl || '');
     setSourceEdit(true);
   }
   function create(event: FormEvent<HTMLFormElement>) {
@@ -170,6 +176,7 @@ export function WebsiteFoundation({
       const result = await saveWebsiteProject(chosenSite.id, selected.version, {
         repositoryUrl:editRepo, branchName:editBranch,
         framework:editFramework, deploymentUrl:editDeployment,
+        backendRepositoryUrl:editBackendRepo, backendDeploymentUrl:editBackendDeployment,
       });
       setNotice(result.message);
       if (result.version) {
@@ -341,18 +348,28 @@ export function WebsiteFoundation({
                     <a className="wf3-outline" href={vscodeLink(selected.repositoryUrl)!} target="_blank" rel="noreferrer">VS Code</a>}
                 </div>
               </>}
-              {selected?.deploymentUrl && <a className="wf3-repo-url" href={selected.deploymentUrl} target="_blank" rel="noreferrer">View external deployment</a>}
+              {selected?.deploymentUrl && <a className="wf3-repo-url" href={selected.deploymentUrl} target="_blank" rel="noreferrer">View frontend deployment</a>}
+              {selected?.backendRepositoryUrl && <>
+                <div className="wf3-side-field"><small>Backend repository</small><strong>Independent company backend</strong></div>
+                <a className="wf3-repo-url" href={selected.backendRepositoryUrl} target="_blank" rel="noreferrer">{selected.backendRepositoryUrl}</a>
+                {vscodeLink(selected.backendRepositoryUrl) && <a className="wf3-outline" href={vscodeLink(selected.backendRepositoryUrl)!} target="_blank" rel="noreferrer">Edit backend in VS Code</a>}
+              </>}
+              {selected?.backendDeploymentUrl && <a className="wf3-repo-url" href={selected.backendDeploymentUrl} target="_blank" rel="noreferrer">View backend deployment</a>}
               {selected && canManage && !sourceEdit && <button className="wf3-outline" onClick={startEdit}>
                 {selected.repositoryUrl ? 'Update source & deployment' : 'Connect independent Git repository'}
               </button>}
               {sourceEdit && selected && <form className="wf3-edit-form" onSubmit={saveProject}>
-                <label>Repository URL<input required type="url" value={editRepo} onChange={e=>setEditRepo(e.target.value)} placeholder="https://github.com/org/project" /></label>
+                <label>Frontend repository URL<input required type="url" value={editRepo} onChange={e=>setEditRepo(e.target.value)} placeholder="https://github.com/org/frontend" /></label>
                 <label>Branch<input required value={editBranch} onChange={e=>setEditBranch(e.target.value)} /></label>
                 <label>Framework<select value={editFramework} onChange={e=>setEditFramework(e.target.value as Stack)}>
                   {stackChoices.map(option=><option key={option.value} value={option.value}>{option.name}</option>)}
                 </select></label>
-                <label>External deployment URL (optional)<input type="url" value={editDeployment}
+                <label>Frontend deployment URL (optional)<input type="url" value={editDeployment}
                   onChange={e=>setEditDeployment(e.target.value)} placeholder="https://company.hosting-provider.com"/></label>
+                <label>Backend repository URL (optional)<input type="url" value={editBackendRepo}
+                  onChange={e=>setEditBackendRepo(e.target.value)} placeholder="https://github.com/org/backend"/></label>
+                <label>Backend deployment URL (optional)<input type="url" value={editBackendDeployment}
+                  onChange={e=>setEditBackendDeployment(e.target.value)} placeholder="https://api.company.com"/></label>
                 <button className="wf3-primary" disabled={saving}>Save repository connection</button>
                 <button type="button" className="wf3-outline" onClick={()=>setSourceEdit(false)}>Cancel</button>
               </form>}
@@ -360,7 +377,7 @@ export function WebsiteFoundation({
                 <button className="wf3-primary wf3-deploy" disabled={saving || chosenSite.published} onClick={publishTemplate}>
                   {chosenSite.published ? '✓ Template published' : saving ? 'Publishing…' : 'Publish Template'}
                 </button>}
-              {selected?.repositoryUrl && <p className="wf3-legal">Full-code sites deploy on isolated external hosting. Connecting a repository or deployment URL does not run a build or activate domain routing.</p>}
+              {selected?.repositoryUrl && <p className="wf3-legal">Frontend and backend can use different languages, repositories and hosting environments. These links do not run builds, connect APIs automatically or activate domain routing.</p>}
             </div>
             <div className="wf3-side-section wf3-ssl">
               <strong>◇ SSL &amp; Security</strong>
