@@ -86,7 +86,7 @@ export async function proxy(request: NextRequest) {
       headers: { 'Cache-Control': 'private, no-store' },
     });
   }
-  if (publicWebsiteRouting && isManagedWebsiteHost(host, baseDomain)) {
+  if (publicWebsiteRouting && (verifiedHost !== null || isManagedWebsiteHost(host, baseDomain))) {
     // The health probe verifies that this hostname reaches the same Node app.
     if (request.nextUrl.pathname === '/api/health') {
       return NextResponse.next({ request: { headers: request.headers } });
