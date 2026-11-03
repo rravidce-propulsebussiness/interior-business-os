@@ -36,7 +36,9 @@ describe('authenticated company website edge routing', () => {
     h.set(EDGE_HOST_HEADER, 'other-company.sghomesinterior.in');
     expect(verify(h)).toBeNull();
     expect(verify(signed('admin.sghomesinterior.in'))).toBeNull();
-    expect(verify(signed('foo.example.com'))).toBeNull();
+    expect(verify(signed('customer.com'))).toBe('customer.com');
+    expect(verify(signed('www.customer.com'))).toBe('www.customer.com');
+    expect(verify(signed('not a hostname'))).toBeNull();
     expect(verify(signed('a.b.sghomesinterior.in'))).toBeNull();
   });
   it('binds the signature to method, path and query', () => {
