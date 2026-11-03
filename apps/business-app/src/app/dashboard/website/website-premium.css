@@ -220,6 +220,10 @@
   transform: translateY(-3px);
   box-shadow: 0 20px 35px #bd311c38;
 }
+.ps-studio .ps-create-banner:disabled {
+  opacity: 1;
+  filter: saturate(0.9);
+}
 .ps-create-plus {
   display: grid;
   place-items: center;
