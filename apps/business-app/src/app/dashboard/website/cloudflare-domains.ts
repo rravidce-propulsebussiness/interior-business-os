@@ -1,11 +1,11 @@
 import 'server-only';
 
 /**
- * Optional Cloudflare for SaaS provisioning adapter.
+ * Cloudflare for SaaS adapter.
  *
- * The platform operator must first configure an active Cloudflare zone,
- * an HTTPS fallback origin and a proxied CNAME target. Tenant users never
- * receive the Cloudflare token or choose an API destination.
+ * The platform operator configures a fallback origin and a proxied CNAME target
+ * once. Customer apex and www hostnames are then registered independently.
+ * API credentials are server-only and are never returned to the browser.
  */
 type ValidationRecord = {
   txt_name?: string;
@@ -24,6 +24,7 @@ export type CloudflareHostname = {
   status: string;
   ssl?: {
     status?: string;
+    method?: string;
     validation_records?: ValidationRecord[];
   };
   ownership_verification?: {
@@ -31,6 +32,11 @@ export type CloudflareHostname = {
     name?: string;
     value?: string;
   };
+};
+
+type FallbackOrigin = {
+  origin?: string;
+  status?: string;
 };
 
 function credentials() {
@@ -44,6 +50,20 @@ function credentials() {
   return { zone, token };
 }
 
+function normalizedConfiguredHostname(value: string | undefined) {
+  const host = value?.trim().toLowerCase().replace(/\.$/, '') ?? '';
+  if (
+    !host ||
+    host.length > 253 ||
+    !host.includes('.') ||
+    !host.split('.').every(label =>
+      label.length <= 63 &&
+      /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(label),
+    )
+  ) return '';
+  return host;
+}
+
 export function cloudflareSaasEnabled() {
   return Boolean(
     process.env.CLOUDFLARE_SAAS_ZONE_ID?.trim() &&
@@ -51,9 +71,27 @@ export function cloudflareSaasEnabled() {
   );
 }
 
+export function cloudflareSaasFallbackOrigin() {
+  return normalizedConfiguredHostname(
+    process.env.CLOUDFLARE_SAAS_FALLBACK_ORIGIN,
+  );
+}
+
+export function cloudflareSaasCnameTarget() {
+  return normalizedConfiguredHostname(
+    process.env.CLOUDFLARE_SAAS_CNAME_TARGET,
+  );
+}
+
+export function cloudflareSaasConfigured() {
+  return cloudflareSaasEnabled() &&
+    Boolean(cloudflareSaasFallbackOrigin()) &&
+    Boolean(cloudflareSaasCnameTarget());
+}
+
 async function cloudflareRequest<T>(
   path: string,
-  method: 'GET' | 'POST' = 'GET',
+  method: 'GET' | 'POST' | 'PUT' = 'GET',
   body?: unknown,
 ): Promise<T> {
   const config = credentials();
@@ -74,15 +112,44 @@ async function cloudflareRequest<T>(
       ...(body ? { body: JSON.stringify(body) } : {}),
     },
   );
-  if (!response.ok)
-    throw new Error('Cloudflare custom hostname API unavailable');
-  const data = (await response.json()) as {
+  const data = (await response.json().catch(() => null)) as {
     success?: boolean;
     result?: T;
-  };
-  if (data.success !== true || data.result == null)
-    throw new Error('Cloudflare rejected custom hostname request');
+    errors?: { message?: string }[];
+  } | null;
+  if (!response.ok || data?.success !== true || data.result == null) {
+    const reason = data?.errors?.map(item => item.message).filter(Boolean).join('; ');
+    throw new Error(
+      reason || 'Cloudflare for SaaS API unavailable (HTTP ' + response.status + ')',
+    );
+  }
   return data.result;
+}
+
+/** Ensure the one-time Cloudflare for SaaS fallback origin is active. */
+export async function ensureCloudflareFallbackOrigin() {
+  const configuredOrigin = cloudflareSaasFallbackOrigin();
+  if (!configuredOrigin)
+    throw new Error('Set CLOUDFLARE_SAAS_FALLBACK_ORIGIN in the platform environment');
+  if (!cloudflareSaasCnameTarget())
+    throw new Error('Set CLOUDFLARE_SAAS_CNAME_TARGET in the platform environment');
+
+  const existing = await cloudflareRequest<FallbackOrigin>('/fallback_origin');
+  if (
+    existing.origin === configuredOrigin &&
+    existing.status === 'active'
+  ) return existing;
+
+  const updated = await cloudflareRequest<FallbackOrigin>(
+    '/fallback_origin',
+    'PUT',
+    { origin: configuredOrigin },
+  );
+  if (
+    updated.origin !== configuredOrigin ||
+    updated.status !== 'active'
+  ) throw new Error('Cloudflare fallback origin is not active yet');
+  return updated;
 }
 
 async function findHostname(hostname: string) {
@@ -91,28 +158,41 @@ async function findHostname(hostname: string) {
   );
   if (!Array.isArray(rows))
     throw new Error('Invalid Cloudflare hostname response');
-  return rows.find((row) => row.hostname === hostname) ?? null;
+  return rows.find(row => row.hostname === hostname) ?? null;
 }
 
-/** Idempotent across check retries; the database claim is created first. */
+/** Idempotent across retries; each customer hostname is provisioned once. */
 export async function ensureCloudflareHostname(hostname: string) {
+  await ensureCloudflareFallbackOrigin();
   const existing = await findHostname(hostname);
   if (existing) return existing;
   try {
-    return await cloudflareRequest<CloudflareHostname>('', 'POST', {
-      hostname,
-      ssl: { method: 'http', type: 'dv' },
-    });
+    const created = await cloudflareRequest<CloudflareHostname>(
+      '',
+      'POST',
+      {
+        hostname,
+        ssl: {
+          method: 'txt',
+          type: 'dv',
+          settings: { min_tls_version: '1.2', http2: 'on' },
+        },
+      },
+    );
+    // Cloudflare may omit DCV tokens from the create response. Re-read the
+    // hostname so the UI can display any TXT validation records immediately.
+    const refreshed = await findHostname(hostname);
+    return refreshed ?? created;
   } catch {
-    // Recover safely if two requests provisioned the same claimed hostname.
+    // Recover safely if a previous attempt created the same hostname.
     const after = await findHostname(hostname);
     if (after) return after;
-    throw new Error('Cloudflare hostname provisioning unavailable');
+    throw new Error('Cloudflare could not provision this custom hostname');
   }
 }
 
 export async function getCloudflareHostname(hostname: string) {
-  await ensureCloudflareHostname(hostname);
+  await ensureCloudflareFallbackOrigin();
   return (await findHostname(hostname)) ?? ensureCloudflareHostname(hostname);
 }
 
@@ -143,7 +223,7 @@ export function cloudflareDnsInstructions(
   return records.filter(
     (entry, index, all) =>
       all.findIndex(
-        (candidate) =>
+        candidate =>
           candidate.name === entry.name && candidate.value === entry.value,
       ) === index,
   );
