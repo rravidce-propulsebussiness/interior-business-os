@@ -7,6 +7,7 @@ import { websiteServices } from '../../service';
 import { DomainPanel } from '../../domain-panel';
 import { cloudflareSaasConfigured, cloudflareSaasCnameTarget } from '../../cloudflare-domains';
 import '../../../owner-dashboard.css';
+import '../../website-domains-v2.css';
 
 /**
  * Website Studio v2 deliberately has no in-dashboard editor.
