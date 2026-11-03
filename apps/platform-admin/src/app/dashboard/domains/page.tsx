@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { pageServices } from '@business-os/auth/server';
 import { DomainError } from '@business-os/shared';
 import { OsIcon } from '../dashboard-shell';
+import { WebsitePlatformControls } from '../website/controls';
 
 export default async function DomainManagement() {
   const services = await pageServices();
@@ -18,51 +19,32 @@ export default async function DomainManagement() {
     throw error;
   }
 
-  const [settings, websites] = await Promise.all([
+  const [settings, plans, limits] = await Promise.all([
+    services.client.from('website_platform_settings').select('*').single(),
+    services.repository.plans(),
     services.client
-      .from('website_platform_settings')
-      .select('base_domain,managed_subdomain_tls')
-      .single(),
-    services.client.rpc('website_platform_list', {}),
+      .from('website_plan_limits')
+      .select('plan_id,configuration'),
   ]);
-  if (settings.error || websites.error)
+  if (settings.error || limits.error)
     throw new Error('Domain controls unavailable');
-  const sites = Array.isArray(websites.data)
-    ? websites.data.flatMap((item) =>
-        item &&
-        typeof item === 'object' &&
-        !Array.isArray(item) &&
-        typeof item.id === 'string' &&
-        typeof item.name === 'string' &&
-        typeof item.organization === 'string' &&
-        typeof item.status === 'string'
-          ? [
-              {
-                id: item.id,
-                name: item.name,
-                organization: item.organization,
-                status: item.status,
-              },
-            ]
-          : [],
-      )
-    : [];
 
   return (
     <main id="main-content" tabIndex={-1}>
       <p className="text-xs font-bold uppercase tracking-[.14em] text-blue-600">
-        Website infrastructure
+        Platform infrastructure
       </p>
       <div className="mt-2 flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="os-secondary-heading">Domain Management</h1>
           <p className="os-secondary-subtitle">
-            Connect websites to domains purchased from any registrar, without
-            transferring registration.
+            Configure shared domain infrastructure and plan capabilities.
+            Company website content is managed by authorized company members
+            and assigned Website Developers in the Business App.
           </p>
         </div>
-        <Link className="os-action" href="/dashboard/website">
-          Platform website configuration →
+        <Link className="os-action secondary" href="/dashboard/plans">
+          Manage membership plans →
         </Link>
       </div>
 
@@ -81,16 +63,6 @@ export default async function DomainManagement() {
             </p>
           </div>
         </dl>
-        <dl className="os-stat">
-          <div className="os-stat-icon os-icon-green">
-            <OsIcon name="website" />
-          </div>
-          <div>
-            <dt>Known websites</dt>
-            <dd>{sites.length.toLocaleString('en-IN')}</dd>
-            <p className="os-stat-note">Platform website registry</p>
-          </div>
-        </dl>
         <dl className="os-stat" style={{ gridColumn: 'span 2' }}>
           <div className="os-stat-icon os-icon-purple">
             <OsIcon name="check" size={24} />
@@ -103,113 +75,94 @@ export default async function DomainManagement() {
                 : 'Not configured'}
             </dd>
             <p className="os-stat-note">
-              Live certificate provisioning requires hosting setup and
-              verification
+              Hosting must separately provision and verify live certificates
             </p>
           </div>
         </dl>
       </div>
 
-      <section className="os-resource-panel">
+      <section className="os-resource-panel mt-6">
+        <h2 className="mb-4 text-xl font-semibold">
+          Platform domain and plan configuration
+        </h2>
+        <p className="os-secondary-subtitle mb-5">
+          These controls apply to infrastructure, allowed website features and
+          subscription limits. They do not edit any company website.
+        </p>
+        <WebsitePlatformControls
+          baseDomain={settings.data.base_domain ?? ''}
+          managedTls={settings.data.managed_subdomain_tls}
+          plans={plans.map((plan) => {
+            const raw = limits.data.find(
+              (item) => item.plan_id === plan.id,
+            )?.configuration;
+            const configuration: Record<string, number | boolean> = {};
+            if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
+              for (const [key, value] of Object.entries(raw)) {
+                if (typeof value === 'number' || typeof value === 'boolean')
+                  configuration[key] = value;
+              }
+            }
+            return { ...plan, configuration };
+          })}
+          allowedEmbeds={
+            Array.isArray(settings.data.allowed_embeds)
+              ? settings.data.allowed_embeds.filter(
+                  (host): host is string => typeof host === 'string',
+                )
+              : []
+          }
+          disabledComponents={
+            Array.isArray(settings.data.disabled_components)
+              ? settings.data.disabled_components.filter(
+                  (component): component is string =>
+                    typeof component === 'string',
+                )
+              : []
+          }
+        />
+      </section>
+
+      <section className="os-resource-panel mt-6">
         <div className="os-panel-heading">
-          <h2>Connect a customer’s existing domain</h2>
-          <Link href="/dashboard/website">Configure domain settings ↗</Link>
+          <h2>How companies connect their domains</h2>
         </div>
         <p className="os-secondary-subtitle">
-          The existing tenant Website → Domains workflow creates a unique domain
-          claim and a one-time DNS ownership challenge. The Super Admin controls
-          the platform base hostname, entitlements and website suspensions;
-          modifying a tenant’s domain currently requires the tenant’s own
-          authorized website session.
+          Company Owners and assigned Website Developers with the required
+          permissions manage their own website and domain claims. Super Admin
+          does not modify tenant website content.
         </p>
         <div className="os-domain-steps">
           <div className="os-domain-step">
             <div className="os-stat-icon os-icon-blue">
               <OsIcon name="website" size={22} />
             </div>
-            <strong>1. Add the website domain</strong>
-            In the business workspace, open Website Studio → Domains and add{' '}
-            <code>www.customer.com</code>. This creates a unique claim and TXT
-            challenge. Enable the customer’s custom-domain entitlement when
-            required.
+            <strong>1. Add the custom domain</strong>
+            In the Business App, open Website Studio → Domains and register
+            the customer's hostname.
           </div>
           <div className="os-domain-step">
             <div className="os-stat-icon os-icon-purple">
               <OsIcon name="domain" size={22} />
             </div>
-            <strong>2. Update external DNS</strong>
-            At the existing registrar, create{' '}
-            <code>_business-os.www.customer.com</code> as a TXT record with the
-            generated verification value. Point the hostname’s CNAME to{' '}
-            <code>
-              {settings.data.base_domain || 'your configured platform hostname'}
-            </code>
-            .
+            <strong>2. Configure external DNS</strong>
+            Add the supplied ownership TXT record and point the hostname's
+            CNAME to the platform destination.
           </div>
           <div className="os-domain-step">
             <div className="os-stat-icon os-icon-green">
               <OsIcon name="check" size={22} />
             </div>
-            <strong>3. Provision TLS and verify</strong>
-            With Cloudflare for SaaS configured on the Business App, HTTPS
-            certificates are requested automatically. Otherwise, configure a
-            certificate at the host. Use Verify DNS and HTTPS before activation.
+            <strong>3. Verify HTTPS and publish</strong>
+            Hosting or the optional Cloudflare adapter provisions TLS;
+            the Business App verifies DNS and HTTPS before activation.
           </div>
         </div>
         <p className="os-warning mt-5">
-          Domain connection and domain registration transfer are different
-          operations. The Business App can automatically request
-          Cloudflare-managed certificates when its SaaS integration is
-          configured. Otherwise Business OS verifies existing DNS and HTTPS; it
-          does not purchase or transfer domain registrations. Do not mark a
-          domain live until both DNS and HTTPS verification succeed.
+          Domain connection is not domain registration or transfer.
+          A configured TLS checkbox does not prove live HTTPS is working.
+          Customer websites must pass DNS and certificate verification.
         </p>
-        <div className="mt-5 flex flex-wrap gap-3">
-          <Link className="os-action" href="/dashboard/website">
-            Configure domain/TLS platform →
-          </Link>
-          <Link className="os-action secondary" href="/dashboard/organizations">
-            Select customer tenant →
-          </Link>
-        </div>
-      </section>
-
-      <section className="os-resource-panel">
-        <div className="os-panel-heading">
-          <h2>Website registry</h2>
-          <Link href="/dashboard/website">Manage sites ↗</Link>
-        </div>
-        <div className="os-table-wrap">
-          <table className="os-table">
-            <thead>
-              <tr>
-                <th>Website</th>
-                <th>Organization</th>
-                <th>Status</th>
-                <th>Platform action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sites.map((site) => (
-                <tr key={site.id}>
-                  <td style={{ fontWeight: 700 }}>{site.name}</td>
-                  <td>{site.organization}</td>
-                  <td>
-                    <span className={`os-pill ${site.status}`}>
-                      {site.status}
-                    </span>
-                  </td>
-                  <td>
-                    <Link href="/dashboard/website">Manage website ↗</Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {sites.length === 0 && (
-            <p className="os-empty">No websites registered yet.</p>
-          )}
-        </div>
       </section>
     </main>
   );
