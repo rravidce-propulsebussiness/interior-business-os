@@ -3,6 +3,10 @@ import { z } from 'zod';
 import { pageServices } from '@business-os/auth/server';
 import { WebsitePlatformControls } from '../website/controls';
 import { DomainPanel } from '../../dashboard/website/domain-panel';
+import {
+  cloudflareSaasConfigured,
+  cloudflareSaasCnameTarget,
+} from '../../dashboard/website/cloudflare-domains';
 import { websiteSchemaPending } from '../../../website-schema';
 import { validWorkspaceSlug } from '../../../workspace-paths';
 
@@ -189,7 +193,9 @@ export default async function DomainManagement({
                   site={site.id}
                   organizationId={company.id}
                   domains={site.domains}
-                  base={settings.data.base_domain ?? ''}
+                  cnameTarget={cloudflareSaasCnameTarget()}
+                  customDomainEnabled={true}
+                  saasReady={cloudflareSaasConfigured()}
                   canManage={
                     ['active', 'trial'].includes(company.status) &&
                     !['suspended', 'archived'].includes(site.status)

@@ -16,3 +16,9 @@ const templateSql = readFileSync(
   'utf8',
 ).replace('/*DOCUMENT*/', quote(document));
 console.log(psql([], templateSql));
+
+const websiteV2 = readFileSync(
+  file('tests/website-v2.sql'),
+  'utf8',
+).replace('/*DOCUMENT*/', quote(document));
+console.log(psql([], websiteV2));

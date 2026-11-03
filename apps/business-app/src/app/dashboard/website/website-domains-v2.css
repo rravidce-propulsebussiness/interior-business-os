@@ -1,0 +1,10 @@
+/* Dedicated domain screen: v2 keeps domain management without legacy editor styles. */
+.website-settings-workspace{max-width:1100px;margin:0 auto;padding:30px 24px 80px;color:#26364d}
+.website-settings-back a{display:inline-flex;margin-bottom:22px;font-size:13px;font-weight:800;color:#d65918;text-decoration:none}
+.website-settings-title{padding:26px 28px 20px;background:linear-gradient(105deg,#fff,#fff2e7);border:1px solid #f3e5db;border-radius:14px;margin-bottom:20px}
+.website-settings-title p{font-size:12px;color:#7a8596;margin:0 0 9px;line-height:1.65}
+.website-settings-title h1{font-size:clamp(23px,3vw,33px);font-weight:850;letter-spacing:-.035em;margin:0 0 9px;color:#19263e}
+.website-settings-content{border:1px solid #eaebef;border-radius:14px;background:#fff;padding:25px}
+@media(max-width:640px){.website-settings-workspace{padding:15px 12px 40px}.website-settings-title{padding:19px}.website-settings-content{padding:15px}}
+.website-domain-warning{padding:14px 17px;border:1px solid #f4c79d;background:#fff8ed;color:#8c4b12;border-radius:12px;margin-bottom:16px;font-size:12px;line-height:1.7}
+.website-domain-warning strong{font-weight:850}

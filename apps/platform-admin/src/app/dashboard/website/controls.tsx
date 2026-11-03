@@ -116,6 +116,7 @@ export function WebsitePlatformControls({
         }
       >
         <h2 className="font-semibold">Website plan capabilities</h2>
+        <p className="text-sm text-muted-foreground">One website per business by default. Raise the Sites limit only for approved plans or Super Admin exceptions. Domains and subdomains do not count as separate websites.</p>
         <select
           aria-label="Plan"
           name="plan"
@@ -139,7 +140,7 @@ export function WebsitePlatformControls({
               required
               className="mt-1 block w-full rounded border p-2"
               key={selectedPlan + k}
-              defaultValue={Number(selectedConfig[k] ?? [3, 50, 52428800][i])}
+              defaultValue={Number(selectedConfig[k] ?? [1, 50, 52428800][i])}
             />
           </label>
         ))}
