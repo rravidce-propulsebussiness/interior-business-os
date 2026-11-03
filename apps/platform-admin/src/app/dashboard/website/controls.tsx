@@ -185,7 +185,7 @@ export function WebsitePlatformControls({
                 step="1"
                 required
                 disabled={!selectedPlan}
-                defaultValue={Number(selectedConfig[key] ?? [3, 50, 52428800][index])}
+                defaultValue={Number(selectedConfig[key] ?? [1, 50, 52428800][index])}
               />
             </label>
           ))}
