@@ -10215,6 +10215,8 @@ export interface Database {
           version: number;
           created_at: string;
           updated_at: string;
+          backend_repository_url: string | null;
+          backend_deployment_url: string | null;
         };
         Insert: {
           website_id: string;
@@ -10228,6 +10230,8 @@ export interface Database {
           version?: number;
           created_at?: string;
           updated_at?: string;
+          backend_repository_url?: string | null;
+          backend_deployment_url?: string | null;
         };
         Update: {
           website_id?: string;
@@ -10241,6 +10245,8 @@ export interface Database {
           version?: number;
           created_at?: string;
           updated_at?: string;
+          backend_repository_url?: string | null;
+          backend_deployment_url?: string | null;
         };
         Relationships: [
           {
@@ -12599,6 +12605,20 @@ export interface Database {
           p_branch_name: string;
           p_framework: string;
           p_deployment_url?: string;
+        };
+        Returns: number;
+      };
+      website_project_configure_stack: {
+        Args: {
+          p_organization_id: string;
+          p_website_id: string;
+          p_version: number;
+          p_repository_url: string;
+          p_branch_name: string;
+          p_framework: string;
+          p_deployment_url?: string;
+          p_backend_repository_url?: string;
+          p_backend_deployment_url?: string;
         };
         Returns: number;
       };
