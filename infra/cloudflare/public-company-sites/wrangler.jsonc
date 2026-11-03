@@ -3,14 +3,12 @@
   "main": "worker.mjs",
   "compatibility_date": "2026-10-31",
   "workers_dev": false,
-  // Route every first-level company subdomain through the signed gateway.
-  // Cloudflare DNS must have a proxied wildcard record; keep the apex untouched.
-  // IMPORTANT: In the Cloudflare zone, preserve a more-specific route with
-  // pattern www.sghomesinterior.in/* and NO Worker to protect the main www site.
-  // DNS-only service records (mail, ftp, autoconfig, autodiscover) are separate.
+  // Cloudflare for SaaS sends customer hostnames through the provider zone.
+  // More-specific no-Worker routes for the provider apex/www and service hosts
+  // must be preserved in Cloudflare; see docs/WEBSITE-CLOUDFLARE-EDGE.md.
   "routes": [
     {
-      "pattern": "*.sghomesinterior.in/*",
+      "pattern": "*/*",
       "zone_name": "sghomesinterior.in"
     }
   ]
