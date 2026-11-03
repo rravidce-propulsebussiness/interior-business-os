@@ -6,6 +6,7 @@ import { websiteJson } from '@business-os/database/website';
 import { websiteServices } from './service';
 import { applyWebsiteTemplate } from './entry-actions';
 import { publishWebsite } from './actions';
+import { isUnconfiguredWebsite } from './entry-state';
 
 type WebsiteFramework =
   | 'static' | 'react' | 'vite' | 'nextjs' | 'vue'
@@ -183,6 +184,9 @@ export async function publishTemplateProject(
   try {
     const s = await websiteServices('website.page.publish');
     const site = await s.website.read(websiteId);
+    if (isUnconfiguredWebsite(site.document, Boolean(site.publishedVersionId))) {
+      return { ok: false, message: 'The selected template has not been installed yet. Complete template setup before publishing.' };
+    }
     const client = s.client as unknown as ProjectRpcClient;
     const records = await client.rpc<unknown>('website_project_list', {
       p_organization_id: s.context.organizationId,
