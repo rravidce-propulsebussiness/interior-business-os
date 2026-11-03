@@ -28,6 +28,8 @@ function normalizeProject(value: unknown): WebsiteProjectRow | null {
     branchName: str(record.branchName) || 'main',
     framework: str(record.framework) || 'other',
     deploymentUrl: str(record.deploymentUrl),
+    backendRepositoryUrl: str(record.backendRepositoryUrl),
+    backendDeploymentUrl: str(record.backendDeploymentUrl),
     version: typeof record.version === 'number' ? record.version : 1,
   };
 }
