@@ -6,6 +6,7 @@ import { signOut } from '@business-os/auth/actions';
 import { useCompanyNavigation } from './company-navigation-provider';
 import './owner-dashboard.css';
 import './command-centre.css';
+import './owner-shell-global.css';
 
 const iconPaths = {
   dashboard: 'M3 10.5 12 3l9 7.5M5 9v12h14V9M9 21v-8h6v8',
