@@ -36,7 +36,7 @@ type Template = {
 
 const templates: Template[] = [
   {
-    id: 'starter:showcase', name: 'Modern Construction Pro',
+    id: 'starter:premium-construction', name: 'Modern Construction Pro',
     tagline: 'Perfect for construction & turnkey projects',
     category: 'Construction', badge: 'Popular', style: 'construction',
     headline: 'Turnkey Construction & Interior Solutions',
@@ -44,7 +44,7 @@ const templates: Template[] = [
     description: 'A complete multi-page business showcase with projects, services, packages and enquiry sections.',
   },
   {
-    id: 'starter:interior', name: 'Premium Interiors',
+    id: 'starter:premium-interiors', name: 'Premium Interiors',
     tagline: 'Modern & elegant interiors showcase',
     category: 'Interiors', badge: 'New', style: 'interior',
     headline: 'Elegant Interior Spaces',
@@ -52,7 +52,7 @@ const templates: Template[] = [
     description: 'A warm, content-first interior design starter. Replace text and photos without shifting the layout.',
   },
   {
-    id: 'starter:construction', name: 'Luxury Villa Showcase',
+    id: 'starter:premium-villas', name: 'Luxury Villa Showcase',
     tagline: 'High-end villa & farmhouse projects',
     category: 'Real Estate', badge: 'Premium', style: 'villa',
     headline: 'Luxury Villas & Farmhouses',
@@ -130,7 +130,7 @@ export function WebsitePremium({
     (site.name + ' ' + site.slug).toLowerCase().includes(search.toLowerCase()) &&
     (statusFilter === 'all' || (statusFilter === 'live' ? site.published : !site.published))), [sites, search, statusFilter]);
   const visibleTemplates = category === 'All Templates' ? templates :
-    category === 'Architecture' ? templates.filter(t => t.id === 'starter:construction') :
+    category === 'Architecture' ? templates.filter(t => t.id === 'starter:premium-villas') :
     templates.filter(t => t.category === category);
   const closeCreate = useCallback(() => {
     if (!saving) setCreating(false);
