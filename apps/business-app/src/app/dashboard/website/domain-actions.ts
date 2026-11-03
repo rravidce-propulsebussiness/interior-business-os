@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 import {
   cloudflareDnsInstructions,
   cloudflareSaasConfigured,
+  ensureCloudflareFallbackOrigin,
   ensureCloudflareHostname,
   getCloudflareHostname,
   type DomainDnsInstruction,
@@ -43,6 +44,10 @@ export async function addWebsiteDomain(
     // Ensure the shared SaaS fallback is ready before creating a customer
     // domain claim. This avoids leaving a pending DB row when Cloudflare has
     // not allocated the required SSL for SaaS feature/quota.
+    // Verify the platform-level SaaS fallback before creating a tenant
+    // claim; a missing Cloudflare SaaS quota must not leave orphan domains.
+    await ensureCloudflareFallbackOrigin();
+
     const r = await s.client.rpc('website_domain_add', {
       p_organization_id: s.context.organizationId,
       p_website_id: site,
