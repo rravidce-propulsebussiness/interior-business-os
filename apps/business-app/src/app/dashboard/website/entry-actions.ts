@@ -7,17 +7,75 @@ import { validateCss, validateJavaScript, sanitizeHtml } from '@business-os/webs
 import { websiteServices } from './service';
 import { safeFailure, idSchema } from '@business-os/shared';
 
-const builtins = new Set(['starter:showcase','starter:construction','starter:services','starter:interior']);
+const builtins = new Set([
+  'starter:showcase', 'starter:construction', 'starter:services', 'starter:interior',
+  'starter:premium-construction', 'starter:premium-interiors', 'starter:premium-villas',
+]);
 
 function builtin(name: string, selected: string) {
-  const kind = selected === 'starter:showcase' ? 'showcase' :
-    selected === 'starter:construction' ? 'construction' : 'services';
+  const kind = selected === 'starter:showcase' ||
+    selected === 'starter:premium-construction' ? 'showcase' :
+    selected === 'starter:construction' ||
+    selected === 'starter:premium-villas' ? 'construction' : 'services';
   const doc = starterTemplate(name, kind);
   if (selected === 'starter:interior') {
     doc.pages[0]!.nodes[0]!.props.title = 'Beautiful interiors, thoughtfully made.';
     doc.pages[0]!.nodes[0]!.props.subtitle = 'Your interior design studio';
     doc.theme.primary = '#A35A3C';
     doc.theme.accent = '#CB8E63';
+  }
+  // New premium starters are separate, versioned selections; older starters
+  // and existing published websites are not overwritten or changed.
+  const premium = {
+    'starter:premium-construction': {
+      title: 'Turnkey Construction & Interior Solutions',
+      subtitle: 'BUILD · DESIGN · DELIVER',
+      text: 'Beautifully planned homes, transparent execution and inspiring spaces.',
+      primary: '#F46B20', accent: '#F5A454', surface: '#FFFFFF',
+      background: '#FFF8F2', dark: '#202E30',
+    },
+    'starter:premium-interiors': {
+      title: 'Elegant Interior Spaces',
+      subtitle: 'DESIGN · EXECUTE · TRANSFORM',
+      text: 'Thoughtful interior design for the way you live and work.',
+      primary: '#BC6B38', accent: '#D5A06F', surface: '#FFFFFF',
+      background: '#FBF7F0', dark: '#42372F',
+    },
+    'starter:premium-villas': {
+      title: 'Luxury Villas & Farmhouses',
+      subtitle: 'DESIGN · BUILD · LIVE',
+      text: 'Architecture and construction with a distinct sense of place.',
+      primary: '#D36A39', accent: '#C8A26E', surface: '#FFFFFF',
+      background: '#F8F7F3', dark: '#192C34',
+    },
+  }[selected as 'starter:premium-construction' | 'starter:premium-interiors' | 'starter:premium-villas'];
+  if (premium) {
+    const hero = doc.pages.find(page => page.path === '/')?.nodes[0];
+    if (hero) {
+      hero.props.title = premium.title;
+      hero.props.subtitle = premium.subtitle;
+      hero.props.text = premium.text;
+      hero.style = { ...hero.style, background: premium.dark, color: '#FFFFFF', minHeight: 490 };
+      const button = hero.children.find(child => child.type === 'button');
+      if (button) button.style = { ...button.style, background: premium.primary, color: '#FFFFFF' };
+    }
+    doc.theme = {
+      ...doc.theme, primary: premium.primary, accent: premium.accent,
+      secondary: '#FBEAE0', background: premium.background,
+      surface: premium.surface, headingFont: 'serif', bodyFont: 'sans-serif',
+    };
+    doc.settings.description = premium.text;
+    doc.css += `
+      #showcaseHero{background:linear-gradient(125deg,${premium.dark} 15%,#3d4e4c 100%)!important;
+        position:relative;overflow:hidden}
+      #showcaseHero::after{content:'';position:absolute;right:-12%;bottom:-52%;
+        width:44%;height:120%;border:1px solid #ffffff22;border-radius:50%;pointer-events:none}
+      #showcaseHero>h1{max-width:820px;font-family:serif;font-weight:600;letter-spacing:-.05em}
+      #showcaseHero>p{max-width:650px;color:#f4e9df}
+      .website-card{border-radius:16px}
+      .website-nav{gap:26px}
+      @media(max-width:600px){#showcaseHero{padding:60px 22px!important}}
+    `;
   }
   return validateTemplate(doc);
 }
