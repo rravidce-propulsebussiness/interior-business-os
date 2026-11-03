@@ -43,3 +43,8 @@
 @media(max-width:1130px){ .ft-layout { grid-template-columns:1fr; } .ft-inspector { position:static; } .ft-fields { max-height:none; } }
 @media(max-width:700px){ .ft-editor { padding:16px 12px 90px; } .ft-actions { width:100%; } .ft-actions a,.ft-actions button { flex:1 1 140px; } .ft-locked { margin-left:0; } .ft-stage { padding:9px; } .ft-browser iframe { height:580px; } }
 @media(prefers-reduced-motion:reduce){ .ft-editor * { transition:none !important; transform:none !important; animation:none !important; } }
+
+.ft-quick-list{margin-top:22px;text-align:left;display:grid;gap:7px}
+.ft-quick-list h3{margin:0 0 3px;font-size:12px;font-weight:800;color:#342e30}
+.ft-quick-list button{width:100%;padding:9px 11px;text-align:left;border:1px solid #f1e8e2;border-radius:8px;color:#525b6d;background:#fff;font-size:11px;cursor:pointer;overflow-wrap:anywhere}
+.ft-quick-list button:hover,.ft-quick-list button:focus-visible{background:#fff0e6;border-color:#fbb481;color:#e9570c}
