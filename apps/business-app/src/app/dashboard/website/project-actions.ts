@@ -139,20 +139,26 @@ export async function saveWebsiteProject(
     branchName: string;
     framework: WebsiteFramework;
     deploymentUrl: string;
+    backendRepositoryUrl: string;
+    backendDeploymentUrl: string;
   },
 ): Promise<{ version?: number; message: string }> {
   const repository = data.repositoryUrl.trim();
   const branch = data.branchName.trim();
   const deployment = data.deploymentUrl.trim();
+  const backendRepository = data.backendRepositoryUrl.trim();
+  const backendDeployment = data.backendDeploymentUrl.trim();
   if (!validRepository(repository) || !validBranch(branch) ||
       !frameworks.has(data.framework) ||
-      (deployment !== '' && !validDeployment(deployment)))
+      (deployment !== '' && !validDeployment(deployment)) ||
+      (backendRepository !== '' && !validRepository(backendRepository)) ||
+      (backendDeployment !== '' && (!backendRepository || !validDeployment(backendDeployment))))
     return { message: 'Check the HTTPS repository, branch, framework and optional public HTTPS deployment URL.' };
   try {
     const s = await websiteServices('website.manage');
     await s.website.read(websiteId); // tenant and website-scope authorization
     const client = s.client as unknown as ProjectRpcClient;
-    const result = await client.rpc<number>('website_project_configure', {
+    const result = await client.rpc<number>('website_project_configure_stack', {
       p_organization_id: s.context.organizationId,
       p_website_id: websiteId,
       p_version: version,
@@ -160,13 +166,15 @@ export async function saveWebsiteProject(
       p_branch_name: branch,
       p_framework: data.framework,
       p_deployment_url: deployment || null,
+      p_backend_repository_url: backendRepository || null,
+      p_backend_deployment_url: backendDeployment || null,
     });
     if (result.error || result.data === null)
       return { message: 'Could not save settings. Reload to check permissions or changes by another developer.' };
     revalidatePath('/dashboard/website');
     return {
       version: result.data,
-      message: 'Repository settings saved. Your code and backend remain independently deployed; this does not trigger a build.',
+      message: 'Frontend and backend repository connections saved. Each codebase remains independently deployed; no build was triggered.',
     };
   } catch {
     return { message: 'Could not save website source settings.' };
