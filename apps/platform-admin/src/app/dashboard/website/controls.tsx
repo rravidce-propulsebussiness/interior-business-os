@@ -5,7 +5,6 @@ export function WebsitePlatformControls({
   baseDomain,
   managedTls,
   plans,
-  sites,
   allowedEmbeds,
   disabledComponents,
 }: {
@@ -18,7 +17,6 @@ export function WebsitePlatformControls({
   }[];
   allowedEmbeds: string[];
   disabledComponents: string[];
-  sites: { id: string; name: string; organization: string; status: string }[];
 }) {
   const [message, setMessage] = useState(''),
     [pending, start] = useTransition(),
@@ -170,51 +168,6 @@ export function WebsitePlatformControls({
           Save plan capabilities
         </button>
       </form>
-      <section>
-        <h2 className="mb-4 font-semibold">Website delivery status</h2>
-        {sites.map((site) => (
-          <form
-            key={site.id}
-            className="mb-3 flex flex-wrap items-center gap-3 rounded border p-4"
-            action={(f) =>
-              start(async () =>
-                setMessage(
-                  (
-                    await savePlatformWebsite(
-                      site.status === 'suspended' ? 'resume' : 'suspend',
-                      { websiteId: site.id, reason: String(f.get('reason')) },
-                    )
-                  ).message,
-                ),
-              )
-            }
-          >
-            <div className="min-w-48 flex-1">
-              <h3>{site.name}</h3>
-              <p className="text-sm text-muted-foreground">
-                {site.organization} · {site.status}
-              </p>
-            </div>
-            <input
-              name="reason"
-              required
-              minLength={3}
-              maxLength={500}
-              placeholder="Reason"
-              aria-label={`Reason for ${site.name}`}
-              className="rounded border p-2"
-            />
-            <button
-              disabled={pending}
-              className="rounded border px-3 py-2 text-sm"
-            >
-              {site.status === 'suspended'
-                ? 'Release to unpublished'
-                : 'Suspend website'}
-            </button>
-          </form>
-        ))}
-      </section>
       <p role="status">{message}</p>
     </div>
   );
