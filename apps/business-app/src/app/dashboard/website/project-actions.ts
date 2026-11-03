@@ -4,6 +4,8 @@ import { revalidatePath } from 'next/cache';
 import { emptyWebsite } from '@business-os/website-builder';
 import { websiteJson } from '@business-os/database/website';
 import { websiteServices } from './service';
+import { applyWebsiteTemplate } from './entry-actions';
+import { publishWebsite } from './actions';
 
 type WebsiteFramework =
   | 'static' | 'react' | 'vite' | 'nextjs' | 'vue'
@@ -107,11 +109,22 @@ export async function createWebsiteProject(input: WebsiteProjectRequest): Promis
         return { message: 'This business has reached its website limit. Request an additional site from Super Admin or upgrade the website package.' };
       return { message: 'Website creation failed. Verify your website entitlement, repository URL and subdomain availability.' };
     }
+    let notice = 'Repository project created. Connect a deployment URL after publishing through your hosting provider.';
+    if (input.sourceKind === 'template' && template) {
+      const starters: Record<string, string> = {
+        construction: 'starter:construction',
+        interiors: 'starter:interior',
+        'real-estate': 'starter:showcase',
+        corporate: 'starter:services',
+      };
+      const fresh = await s.website.read(result.data);
+      const applied = await applyWebsiteTemplate(result.data, fresh.version, starters[template]!);
+      notice = applied.saved
+        ? 'Template installed as a private draft. Publish it from Website Studio when ready.'
+        : 'Website created, but template setup requires review: ' + applied.message;
+    }
     revalidatePath('/dashboard/website');
-    return {
-      id: result.data,
-      message: 'Website project created. Source settings were saved. Publishing and deployment are separate.',
-    };
+    return { id: result.data, message: notice };
   } catch {
     return { message: 'Website creation is unavailable. Check website permissions and database migration status.' };
   }
@@ -156,5 +169,39 @@ export async function saveWebsiteProject(
     };
   } catch {
     return { message: 'Could not save website source settings.' };
+  }
+}
+
+/**
+ * Publishing only applies to installed, managed starter templates.
+ * Repository projects run on independent external hosting, never within
+ * the Business OS server process.
+ */
+export async function publishTemplateProject(
+  websiteId: string,
+): Promise<{ message: string; ok: boolean }> {
+  try {
+    const s = await websiteServices('website.page.publish');
+    const site = await s.website.read(websiteId);
+    const client = s.client as unknown as ProjectRpcClient;
+    const records = await client.rpc<unknown>('website_project_list', {
+      p_organization_id: s.context.organizationId,
+    });
+    if (records.error || !Array.isArray(records.data)) {
+      return { ok: false, message: 'Website project unavailable.' };
+    }
+    const project = records.data.find((row: unknown) => (
+      row !== null && typeof row === 'object' &&
+      (row as {websiteId?: string}).websiteId === websiteId
+    )) as { sourceKind?: string; repositoryUrl?: string | null } | undefined;
+    if (!project || project.sourceKind !== 'template' || project.repositoryUrl) {
+      return { ok: false, message: 'Repository projects must be deployed independently by their hosting provider.' };
+    }
+    const result = await publishWebsite(websiteId, site.version, 'Published managed website template');
+    if (!result.id) return { ok: false, message: result.message };
+    revalidatePath('/dashboard/website');
+    return { ok: true, message: 'Template published. It will be accessible once your managed subdomain or custom domain is active with HTTPS.' };
+  } catch {
+    return { ok: false, message: 'Unable to publish the template. Check website permissions, draft and publishing configuration.' };
   }
 }
