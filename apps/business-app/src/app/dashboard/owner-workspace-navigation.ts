@@ -19,6 +19,9 @@ export function ownerWorkspaceNavigation(context: TenantAccessContext | null): O
   if (has('lead.view','crm')) items.push({
     label:'Leads',href:'/dashboard/crm/leads',icon:'leads',
   });
+  if (has('website.view','website')) items.push({
+    label:'Website Studio',href:'/dashboard/website',icon:'globe',
+  });
   if (has('quotation.view','quotation')) items.push({
     label:'Quotations',href:'/dashboard/quotations',icon:'quotations',
     children:[
@@ -53,9 +56,6 @@ export function ownerWorkspaceNavigation(context: TenantAccessContext | null): O
   });
   if (has('team.view') || has('role.view')) items.push({
     label:'Team',href:'/dashboard/company/team',icon:'team',
-  });
-  if (has('website.view','website')) items.push({
-    label:'Website',href:'/dashboard/website',icon:'globe',
   });
   if (has('organization.view')) items.push({
     label:'Settings',href:'/dashboard/settings',icon:'settings',
