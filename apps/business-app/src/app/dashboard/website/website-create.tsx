@@ -8,20 +8,18 @@ type Template = { id: string; name: string; description: string };
 
 export function WebsiteCreate({
   templates,
-  canCode,
   open,
   onClose,
   initialTemplate = '',
 }: {
   templates: Template[];
-  canCode: boolean;
+  canCode?: boolean;
   open: boolean;
   onClose: () => void;
   initialTemplate?: string;
 }) {
   const [message, setMessage] = useState('');
   const [template, setTemplate] = useState(initialTemplate || templates[0]?.id || '');
-  const [showAdvanced, setShowAdvanced] = useState(initialTemplate === 'custom');
   const [name, setName] = useState('');
   const [slug, setSlug] = useState('');
   const [slugChanged, setSlugChanged] = useState(false);
@@ -77,7 +75,7 @@ export function WebsiteCreate({
             <p>NEW WEBSITE</p>
             <h2 id="website-create-title">Create your website</h2>
             <span>
-              Select a template and enter your business name. The website opens directly in the visual editor.
+              Choose a fixed template and enter your business name. You can replace text and photos without changing the design.
             </span>
           </div>
           <button
@@ -93,19 +91,20 @@ export function WebsiteCreate({
           className="website-create-form"
           action={(form) =>
             start(async () => {
+              const chosenTemplate = String(form.get('template') ?? '');
+              if (!chosenTemplate || chosenTemplate === 'custom') {
+                setMessage('Choose one of the available fixed templates.');
+                return;
+              }
               const result = await createWebsite(
                 String(form.get('name') ?? '').trim(),
                 String(form.get('slug') ?? '').trim(),
-                String(form.get('template') ?? '') === 'custom'
-                  ? ''
-                  : String(form.get('template') ?? ''),
+                chosenTemplate,
               );
               setMessage(result.message);
               if (result.id) {
                 onClose();
-                router.push(
-                  `/dashboard/website/${result.id}${template === 'custom' ? '/developer' : '/layout'}`,
-                );
+                router.push(`/dashboard/website/${result.id}/layout`);
               }
             })
           }
@@ -120,28 +119,12 @@ export function WebsiteCreate({
             {templates.map(entry => (
               <option key={entry.id} value={entry.id}>{entry.name}</option>
             ))}
-            <option value="">Start with a blank website</option>
-            {canCode && showAdvanced && (
-              <option value="custom">Advanced: custom HTML/CSS/JavaScript</option>
-            )}
-          </select>
+</select>
           <p className="website-form-hint">
             {templates.length
-              ? 'Template content, images and design are editable after creation.'
-              : 'Published templates are not available yet. You can create a blank website.'}
+              ? 'You can change the template's text, photos and logos. Layout, colors and sections remain fixed.'
+              : 'Choose an available starter template.'}
           </p>
-          {canCode && <div className="website-create-advanced">
-            <button type="button" aria-expanded={showAdvanced}
-              onClick={() => {
-                if (showAdvanced && template === 'custom')
-                  setTemplate(templates[0]?.id || '');
-                setShowAdvanced(!showAdvanced);
-              }}>
-              {showAdvanced ? 'Hide developer options' : 'Developer options'}
-            </button>
-            {showAdvanced && <p>Custom code is optional and intended for developers.
-              Regular websites use the visual editor, without HTML or CSS.</p>}
-          </div>}
           <label htmlFor="website-name">Website name</label>
           <input
             ref={nameRef}
@@ -188,7 +171,7 @@ export function WebsiteCreate({
             <button
               type="submit"
               className="website-primary"
-              disabled={pending}
+              disabled={pending || !template}
             >
               {pending ? 'Creating…' : 'Create Website →'}
             </button>
