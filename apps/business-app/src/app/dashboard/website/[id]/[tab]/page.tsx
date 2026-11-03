@@ -1,6 +1,6 @@
 import { WebsiteTeam } from '../../team-panel';
 import { TemplateEditor } from '../../template-editor';
-import { WebsiteEditor } from '../../studio';
+import { FixedTemplateEditor } from '../../fixed-template-editor';
 import { WebsiteGitTools } from '../../website-git-tools';
 import { templatePages, templateSources } from '../../template-workspace';
 import { WebsiteDesignStudio } from '../../design-studio';
@@ -11,7 +11,7 @@ import { ownerWorkspaceNavigation } from '../../../owner-workspace-navigation';
 import { canAccess } from '@business-os/auth';
 import '../../../owner-dashboard.css';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { websiteServices } from '../../service';
 import { WebsiteSettings, PublicationControls } from '../../settings-panel';
 import { DomainPanel } from '../../domain-panel';
@@ -42,6 +42,10 @@ export default async function WebsiteTab({
   searchParams: Promise<{ page?: string; file?: string }>;
 }) {
   const { id, tab } = await params;
+  // Legacy layout/design/source links never reopen the drag-and-drop builder.
+  if (tab === 'developer') redirect(`/dashboard/website/${id}/git`);
+  if (tab === 'design' || tab === 'navigation' || tab === 'content')
+    redirect(`/dashboard/website/${id}/layout`);
   const permission = permissions[tab];
   if (!permission) notFound();
   const s = await websiteServices(permission, true);
@@ -55,36 +59,20 @@ export default async function WebsiteTab({
   if (!organization) notFound();
   const email = user.email ?? '';
   let content;
-  if (tab === 'developer') {
+  if (tab === 'layout') {
     const query = await searchParams;
-    content = <TemplateEditor
-      {...(query.page ? { initialPageId: query.page } : {})}
-      {...(query.file ? { initialFileId: query.file } : {})}
+    content = <FixedTemplateEditor
+      key={site.version}
       id={id}
       name={site.name}
-      initial={templateSources(site.document)}
-      pages={templatePages(site.document)}
+      initial={site.document}
       version={site.version}
-      canEdit={s.allowed('website.custom_code.edit')}
-      canEditCss={s.allowed('website.custom_css.manage')}
-      canCreatePage={s.allowed('website.page.create') &&
-        s.allowed('website.page.edit') && s.allowed('website.seo.manage')}
-      canPublish={s.allowed('website.page.publish')}
-    />;
-  } else if (tab === 'layout') {
-    const query = await searchParams;
-    content = <div className="site-studio-page"><WebsiteEditor
-      key={site.version} id={id} initial={site.document} version={site.version}
-      name={site.name} status={site.status}
       {...(query.page ? { initialPageId: query.page } : {})}
       canEdit={s.allowed('website.page.edit')}
       canPublish={s.allowed('website.page.publish')}
-      canViewSource={s.allowed('website.custom_code.view')}
-      canPreviewMedia={s.allowed('website.media.manage')}
-      canCreatePage={s.allowed('website.page.create')}
-      canEditNavigation={s.allowed('website.navigation.manage')}
-      canEditSettings={s.allowed('website.seo.manage')}
-    /></div>;
+      canUpload={s.allowed('website.media.manage')}
+      canUseGithub={s.allowed('website.custom_code.view')}
+    />;
   } else if (tab === 'git') {
     content = <WebsiteGitTools id={id} name={site.name}
       version={site.version}
@@ -258,7 +246,7 @@ export default async function WebsiteTab({
       dashboardBrand
       searchPlaceholder="Search leads, projects, quotations..."
     >
-      {tab === 'developer' || tab === 'design' || tab === 'layout' || tab === 'git' ? content : (
+      {tab === 'layout' || tab === 'git' ? content : (
         <main id="main-content" className="website-settings-workspace">
           <div className="website-settings-back"><Link href={`/dashboard/website/${id}`}>← Website Studio</Link></div>
           <header className="website-settings-title">
