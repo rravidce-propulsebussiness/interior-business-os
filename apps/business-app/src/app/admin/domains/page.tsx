@@ -15,6 +15,12 @@ export default async function DomainManagement() {
     await services.authorization.requirePlatformPermission(
       'platform.catalog.view',
     );
+    await services.authorization.requirePlatformPermission(
+      'platform.organizations.view',
+    );
+    await services.authorization.requirePlatformPermission(
+      'platform.organizations.manage',
+    );
   } catch (error) {
     if (error instanceof DomainError && error.code === 'FORBIDDEN') notFound();
     throw error;
