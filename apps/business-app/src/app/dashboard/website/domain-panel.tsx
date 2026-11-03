@@ -118,19 +118,14 @@ export function DomainPanel({
 
               <div className="rounded bg-muted/40 p-3 text-sm">
                 <p className="font-semibold">2. Point the hostname to Business OS</p>
-                {domain.hostname.startsWith('www.') ? (
-                  <p className="mt-1">
-                    Create a CNAME record with host <code>www</code> and target{' '}
-                    <code>{cnameTarget || 'CNAME target not configured'}</code>.
-                  </p>
-                ) : (
-                  <p className="mt-1">
-                    For a root/apex hostname, create an ALIAS/ANAME record or use
-                    your DNS provider's CNAME flattening on host <code>@</code>,
-                    targeting <code>{cnameTarget || 'CNAME target not configured'}</code>.
-                    A-only DNS providers require a separate apex-proxying service.
-                  </p>
-                )}
+                <p className="mt-1">
+                  For a subdomain such as <code>www</code>, create a CNAME
+                  record for that subdomain. For a root/apex hostname, use an
+                  ALIAS/ANAME record or your DNS provider's CNAME flattening on
+                  host <code>@</code>. In both cases the target is{' '}
+                  <code>{cnameTarget || 'CNAME target not configured'}</code>.
+                  A-only DNS providers require a separate apex-proxying service.
+                </p>
                 <p className="mt-2 text-muted-foreground">
                   For a subdomain such as www, use a CNAME. If your DNS provider
                   is Cloudflare, leave the customer record DNS-only (grey cloud)
