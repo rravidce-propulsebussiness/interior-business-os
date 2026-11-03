@@ -1,8 +1,6 @@
 'use client';
 
-import { useCallback, useState, useTransition } from 'react';
-import { useRouter } from 'next/navigation';
-import { addReadyMadeWebsitePages } from './ready-pages-action';
+import { useCallback, useState } from 'react';
 import Link from 'next/link';
 import { WebsiteCreate } from './website-create';
 import './website-gallery.css';
@@ -23,9 +21,6 @@ export function WebsiteGallery({ sites, templates, canManage, canCode }: {
   sites: GallerySite[]; templates: GalleryTemplate[];
   canManage: boolean; canCode: boolean;
 }) {
-  const router=useRouter();
-  const [busy,start] = useTransition();
-  const [notice,setNotice] = useState('');
   const [create, setCreate] = useState(false);
   const [chosen, setChosen] = useState('');
   const [search, setSearch] = useState('');
@@ -36,33 +31,24 @@ export function WebsiteGallery({ sites, templates, canManage, canCode }: {
   const shown = catalog.filter(t => (t.name + ' ' + t.description)
     .toLowerCase().includes(search.trim().toLowerCase()));
   const openNew = (id = '') => {setChosen(id);setCreate(true);};
-  const addPages = (site:GallerySite) => {
-    if(busy || !canManage)return;
-    if(!window.confirm('Add the missing Services, Packages, About, Projects and Contact template pages to this website? Existing pages, photos and published content will not be replaced.'))return;
-    start(async()=>{
-      const result=await addReadyMadeWebsitePages(site.id,site.version);
-      setNotice(result.message);
-      if(result.ok){
-        router.refresh();
-        router.push(`/dashboard/website/${site.id}/layout`);
-      }
-    });
-  };
 
   return <main id="main-content" className="wg-gallery">
     <header className="wg-header">
       <div><span className="wg-eyebrow">PROPULSE BUSINESS OS / WEBSITES</span>
         <h1>Website templates</h1>
-        <p>Choose a design, click Edit, and customize your website visually. No code required.</p>
+        <p>Pick a fixed template and change only its text and images. Developers can use GitHub / VS Code.</p>
       </div>
       {canManage && <button type="button" className="wg-create" onClick={() => openNew()}>
         + Create website
       </button>}
     </header>
-    {notice && <div className="wg-notice" role="status">{notice}</div>}
     {sites.length > 0 && <section className="wg-owned">
       <div className="wg-section-heading"><div><span className="wg-eyebrow">YOUR DEFAULT WEBSITE</span>
         <h2>Your website</h2><p>Your saved content stays intact when you edit it.</p></div></div>
+      <div className="wg-methods" role="group" aria-label="Website editing options">
+        <div><strong>1. Fixed template</strong><span>Click to edit words, pictures and logos. Design and layout stay locked.</span></div>
+        <div><strong>2. GitHub / VS Code</strong><span>Develop a custom website in your external code repository.</span></div>
+      </div>
       <div className="wg-owned-grid">
         {sites.map((site, index) => <article className="wg-owned-card" key={site.id}>
           <div className="wg-site-art" aria-hidden="true">
@@ -77,20 +63,15 @@ export function WebsiteGallery({ sites, templates, canManage, canCode }: {
             {index === 0 && <span className="wg-default-tag">Default</span>}
           </div>
           <div className="wg-card-actions">
-            <Link className="wg-edit" href={`/dashboard/website/${site.id}/layout`}>✎ Edit website</Link>
-            {canCode && <Link className="wg-secondary" href={`/dashboard/website/${site.id}/developer`}>Files</Link>}
-            <Link className="wg-secondary" href={`/dashboard/website/${site.id}/design`}>Design</Link>
-            {canManage && <button type="button" className="wg-secondary"
-              disabled={busy} onClick={()=>addPages(site)}>
-              {busy?'Adding pages…':'+ Ready-made pages'}
-            </button>}
+            <Link className="wg-edit" href={`/dashboard/website/${site.id}/layout`}>✎ Edit text &amp; images</Link>
+            {canCode && <Link className="wg-secondary" href={`/dashboard/website/${site.id}/git`}>GitHub / VS Code</Link>}
           </div>
         </article>)}
       </div>
     </section>}
     <section className="wg-catalog">
       <div className="wg-section-heading"><div><span className="wg-eyebrow">READY TO CUSTOMIZE</span>
-        <h2>All templates</h2><p>Choose a starting design and change its words, images and sections.</p></div>
+        <h2>All templates</h2><p>Choose a fixed design. Replace its words, photos and logos without changing the layout.</p></div>
         <input type="search" aria-label="Search website templates" value={search}
           onChange={event => setSearch(event.target.value)} placeholder="Find a template…" />
       </div>
@@ -123,7 +104,6 @@ export function WebsiteGallery({ sites, templates, canManage, canCode }: {
       open={create}
       onClose={close}
       templates={catalog}
-      canCode={canCode}
       initialTemplate={chosen || catalog[0]?.id || ''}
     />}
   </main>;
