@@ -4,6 +4,7 @@ import { pageServices } from '@business-os/auth/server';
 import { DomainError } from '@business-os/shared';
 import { OsIcon } from '../dashboard-shell';
 import { WebsitePlatformControls } from '../website/controls';
+import './domain-management.css';
 
 export default async function DomainManagement() {
   const services = await pageServices();
@@ -22,73 +23,84 @@ export default async function DomainManagement() {
   const [settings, plans, limits] = await Promise.all([
     services.client.from('website_platform_settings').select('*').single(),
     services.repository.plans(),
-    services.client
-      .from('website_plan_limits')
-      .select('plan_id,configuration'),
+    services.client.from('website_plan_limits').select('plan_id,configuration'),
   ]);
   if (settings.error || limits.error)
     throw new Error('Domain controls unavailable');
 
   return (
-    <main id="main-content" tabIndex={-1}>
-      <p className="text-xs font-bold uppercase tracking-[.14em] text-blue-600">
-        Platform infrastructure
-      </p>
-      <div className="mt-2 flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="os-secondary-heading">Domain Management</h1>
-          <p className="os-secondary-subtitle">
-            Configure shared domain infrastructure and plan capabilities.
-            Company website content is managed by authorized company members
-            and assigned Website Developers in the Business App.
-          </p>
+    <main className="os-domain-page" id="main-content" tabIndex={-1}>
+      <div className="os-domain-heading">
+        <div className="os-domain-heading-copy">
+          <span className="os-domain-heading-icon">
+            <OsIcon name="domain" size={28} />
+          </span>
+          <div>
+            <p className="os-domain-eyebrow">PLATFORM INFRASTRUCTURE</p>
+            <h1>Domain Management</h1>
+            <p className="os-domain-description">
+              Configure platform domains, HTTPS readiness and plan-level website
+              capabilities. Company Owners and assigned Website Developers
+              manage their own websites in the Business App.
+            </p>
+          </div>
         </div>
-        <Link className="os-action secondary" href="/dashboard/plans">
-          Manage membership plans →
+        <Link className="os-action os-domain-top-action" href="/dashboard/plans">
+          <OsIcon name="crown" size={18} />
+          Membership plans
+          <OsIcon name="arrow" size={17} />
         </Link>
       </div>
 
-      <div className="os-stats-grid os-domain-summary mt-6">
-        <dl className="os-stat" style={{ gridColumn: 'span 2' }}>
-          <div className="os-stat-icon os-icon-blue">
-            <OsIcon name="domain" size={24} />
-          </div>
+      <section className="os-domain-highlights" aria-label="Domain configuration summary">
+        <div className="os-domain-highlight">
+          <span className="os-domain-highlight-icon">
+            <OsIcon name="domain" size={25} />
+          </span>
           <div>
-            <dt>Managed base hostname</dt>
-            <dd className="text-base!" style={{ overflowWrap: 'anywhere' }}>
+            <p>Managed base hostname</p>
+            <strong className="os-domain-hostname">
               {settings.data.base_domain || 'Not configured'}
-            </dd>
-            <p className="os-stat-note">
-              CNAME destination for verified external domains
-            </p>
+            </strong>
+            <small>Destination for managed subdomains and custom-domain DNS</small>
           </div>
-        </dl>
-        <dl className="os-stat" style={{ gridColumn: 'span 2' }}>
-          <div className="os-stat-icon os-icon-purple">
-            <OsIcon name="check" size={24} />
-          </div>
+        </div>
+        <div className="os-domain-highlight">
+          <span className="os-domain-highlight-icon os-domain-highlight-icon-green">
+            <OsIcon name="check" size={25} />
+          </span>
           <div>
-            <dt>Wildcard TLS configuration</dt>
-            <dd className="text-base!">
+            <p>Wildcard HTTPS configuration</p>
+            <strong>
               {settings.data.managed_subdomain_tls
                 ? 'Marked configured'
                 : 'Not configured'}
-            </dd>
-            <p className="os-stat-note">
-              Hosting must separately provision and verify live certificates
-            </p>
+            </strong>
+            <small>Live certificate and routing checks are still required</small>
           </div>
-        </dl>
-      </div>
+        </div>
+        <div className="os-domain-highlight">
+          <span className="os-domain-highlight-icon">
+            <OsIcon name="crown" size={25} />
+          </span>
+          <div>
+            <p>Custom domain capability</p>
+            <strong>Controlled by plan</strong>
+            <small>Configure eligibility and limits per membership plan</small>
+          </div>
+        </div>
+      </section>
 
-      <section className="os-resource-panel mt-6">
-        <h2 className="mb-4 text-xl font-semibold">
-          Platform domain and plan configuration
-        </h2>
-        <p className="os-secondary-subtitle mb-5">
-          These controls apply to infrastructure, allowed website features and
-          subscription limits. They do not edit any company website.
-        </p>
+      <section className="os-domain-panel os-domain-config" aria-labelledby="os-domain-config-title">
+        <div className="os-domain-section-heading">
+          <span className="os-domain-section-icon">
+            <OsIcon name="settings" size={20} />
+          </span>
+          <div>
+            <h2 id="os-domain-config-title">Platform domain and plan configuration</h2>
+            <p>Shared infrastructure settings only — company website content stays private.</p>
+          </div>
+        </div>
         <WebsitePlatformControls
           baseDomain={settings.data.base_domain ?? ''}
           managedTls={settings.data.managed_subdomain_tls}
@@ -123,45 +135,61 @@ export default async function DomainManagement() {
         />
       </section>
 
-      <section className="os-resource-panel mt-6">
-        <div className="os-panel-heading">
-          <h2>How companies connect their domains</h2>
-        </div>
-        <p className="os-secondary-subtitle">
-          Company Owners and assigned Website Developers with the required
-          permissions manage their own website and domain claims. Super Admin
-          does not modify tenant website content.
-        </p>
-        <div className="os-domain-steps">
-          <div className="os-domain-step">
-            <div className="os-stat-icon os-icon-blue">
-              <OsIcon name="website" size={22} />
-            </div>
-            <strong>1. Add the custom domain</strong>
-            In the Business App, open Website Studio → Domains and register
-            the customer's hostname.
-          </div>
-          <div className="os-domain-step">
-            <div className="os-stat-icon os-icon-purple">
-              <OsIcon name="domain" size={22} />
-            </div>
-            <strong>2. Configure external DNS</strong>
-            Add the supplied ownership TXT record and point the hostname's
-            CNAME to the platform destination.
-          </div>
-          <div className="os-domain-step">
-            <div className="os-stat-icon os-icon-green">
-              <OsIcon name="check" size={22} />
-            </div>
-            <strong>3. Verify HTTPS and publish</strong>
-            Hosting or the optional Cloudflare adapter provisions TLS;
-            the Business App verifies DNS and HTTPS before activation.
+      <section className="os-domain-panel os-domain-guide" aria-labelledby="os-domain-guide-title">
+        <div className="os-domain-section-heading">
+          <span className="os-domain-section-icon">
+            <OsIcon name="domain" size={20} />
+          </span>
+          <div>
+            <h2 id="os-domain-guide-title">How companies connect their domains</h2>
+            <p>Companies use the Business App to manage their own website domain.</p>
           </div>
         </div>
-        <p className="os-warning mt-5">
-          Domain connection is not domain registration or transfer.
-          A configured TLS checkbox does not prove live HTTPS is working.
-          Customer websites must pass DNS and certificate verification.
+        <ol className="os-domain-steps">
+          <li className="os-domain-step">
+            <span className="os-domain-step-number">1</span>
+            <span className="os-domain-step-icon">
+              <OsIcon name="website" size={25} />
+            </span>
+            <div>
+              <h3>Add a custom domain</h3>
+              <p>
+                The authorized company user registers a hostname under
+                Website Studio → Domains.
+              </p>
+            </div>
+          </li>
+          <li className="os-domain-step">
+            <span className="os-domain-step-number">2</span>
+            <span className="os-domain-step-icon">
+              <OsIcon name="domain" size={25} />
+            </span>
+            <div>
+              <h3>Configure external DNS</h3>
+              <p>
+                Add the ownership TXT record and point the hostname to
+                the platform's configured destination.
+              </p>
+            </div>
+          </li>
+          <li className="os-domain-step">
+            <span className="os-domain-step-number">3</span>
+            <span className="os-domain-step-icon os-domain-step-icon-green">
+              <OsIcon name="check" size={25} />
+            </span>
+            <div>
+              <h3>Verify HTTPS and publish</h3>
+              <p>
+                Hosting or the optional Cloudflare adapter provisions TLS;
+                DNS and HTTPS must pass before activation.
+              </p>
+            </div>
+          </li>
+        </ol>
+        <p className="os-domain-caution">
+          <OsIcon name="check" size={18} />
+          Connecting a domain does not buy or transfer its registration.
+          A configured TLS flag alone does not prove that HTTPS is live.
         </p>
       </section>
     </main>
