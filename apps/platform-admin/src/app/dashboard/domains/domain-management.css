@@ -1,2 +1,37 @@
 /* Owner-themed Domain Management UI. */
 .os-domain-page { color: #342e30; max-width: 1640px; margin: 0 auto; }
+
+.os-domain-page *, .os-domain-page *::before,.os-domain-page *::after{box-sizing:border-box}
+.os-domain-heading{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;margin:4px 0 20px}
+.os-domain-heading-copy{display:flex;align-items:center;gap:17px;min-width:0;flex:1 1 550px}
+.os-domain-heading-icon{display:grid;place-items:center;flex:0 0 61px;width:61px;height:61px;border-radius:15px;background:#fff0e5;color:#fe5105}
+.os-domain-eyebrow{margin:0 0 6px;color:#fe5105;font-size:10px;font-weight:800;letter-spacing:.13em}
+.os-domain-heading h1{margin:0;color:#342e30;font-size:clamp(24px,2.5vw,31px);font-weight:850;letter-spacing:-.9px;line-height:1.2}
+.os-domain-description{max-width:785px;margin:7px 0 0;color:#65738c;font-size:12px;line-height:1.7}
+.os-domain-top-action{display:inline-flex;align-items:center;white-space:nowrap}
+.os-domain-highlights{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin-bottom:17px}
+.os-domain-highlight{display:flex;align-items:flex-start;gap:14px;min-width:0;min-height:116px;padding:18px 16px;border:1px solid #f1e8e2;border-radius:13px;background:#fff;box-shadow:0 6px 22px #192b4e09;transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
+.os-domain-highlight:hover{transform:translateY(-2px);border-color:#ffd7bf;box-shadow:0 14px 30px #a55c2817}
+.os-domain-highlight-icon{display:grid;place-items:center;width:52px;height:52px;flex:0 0 52px;border-radius:12px;color:#fe5105;background:#fff0e5}
+.os-domain-highlight-icon-green{background:#e2fbec;color:#08a860}
+.os-domain-highlight p{margin:1px 0 8px;color:#61708b;font-size:12px}
+.os-domain-highlight strong{display:block;color:#342e30;font-size:clamp(16px,1.35vw,21px);letter-spacing:-.35px;line-height:1.2;font-weight:800;overflow-wrap:anywhere}
+.os-domain-highlight small{display:block;margin-top:9px;color:#79859a;font-size:10px;line-height:1.5}
+.os-domain-highlight .os-domain-hostname{color:#ee5009}
+.os-domain-panel{margin-top:16px;padding:21px;border:1px solid #f1e8e2;border-radius:15px;background:#fff;box-shadow:0 6px 22px #192b4e09}
+.os-domain-section-heading{display:flex;align-items:center;gap:11px;margin-bottom:20px}
+.os-domain-section-icon{display:grid;place-items:center;width:40px;height:40px;flex:0 0 40px;border-radius:11px;background:#fff0e6;color:#fa5a0d}
+.os-domain-section-heading h2{margin:0;color:#342e30;font-size:18px;font-weight:800;letter-spacing:-.3px}
+.os-domain-section-heading p{margin:6px 0 0;color:#75839a;font-size:11px;line-height:1.5}
+.os-domain-settings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.os-domain-form{min-width:0;display:flex;flex-direction:column;gap:16px;padding:19px;border:1px solid #f1e8e2;border-radius:13px;background:linear-gradient(155deg,#fff,#fffdfb)}
+.os-domain-form-heading{display:flex;align-items:center;gap:11px;padding-bottom:15px;border-bottom:1px solid #f3eae5}
+.os-domain-form-icon{display:grid;place-items:center;width:43px;height:43px;flex:0 0 43px;border-radius:11px;color:#fe5105;background:#fff0e5}
+.os-domain-form-heading h3{margin:0;color:#342e30;font-size:15px;font-weight:800}
+.os-domain-form-heading p{margin:5px 0 0;color:#718096;font-size:11px;line-height:1.5}
+.os-domain-field{min-width:0;display:flex;flex-direction:column;gap:7px}
+.os-domain-field>span{color:#424150;font-size:12px;font-weight:750}
+.os-domain-page .os-domain-field input,.os-domain-page .os-domain-field select{width:100%;min-width:0;height:43px;padding:0 12px;border:1px solid #e9dfd9;border-radius:9px;background:#fff;color:#342e30;box-shadow:none;font-size:12px}
+.os-domain-page .os-domain-field input:focus-visible,.os-domain-page .os-domain-field select:focus-visible{outline:2px solid #ffad79;outline-offset:1px;border-color:#ff9b61}
+.os-domain-page .os-domain-field input:disabled,.os-domain-page .os-domain-field select:disabled{opacity:.6;cursor:not-allowed}
+.os-domain-field small{color:#8290a3;font-size:10px;line-height:1.4}
