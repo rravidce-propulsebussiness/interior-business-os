@@ -33,6 +33,26 @@ function findLocation(document: WebsiteDocument, id: string): { area: Area; page
   }
   return null;
 }
+function editableTargets(document: WebsiteDocument, pageId: string) {
+  const targets: { id: string; label: string; kind: Picked['kind'] }[] = [];
+  const walk = (nodes: WebsiteNode[], group: string) => {
+    nodes.forEach(node => {
+      if (editableContentFields(node).length || node.type === 'image' ||
+          node.type === 'logo' || node.props.asset !== undefined)
+        targets.push({ id: node.id, kind: 'node',
+          label: group + ' · ' + (node.props.title || node.props.text || node.type).slice(0, 50) });
+      walk(node.children, group);
+    });
+  };
+  walk(document.header, 'Header');
+  const page = document.pages.find(p => p.id === pageId);
+  if (page) walk(page.nodes, page.title);
+  walk(document.footer, 'Footer');
+  for (const item of document.content)
+    targets.push({ id: item.id, kind: 'content', label: 'Card · ' + item.title.slice(0, 50) });
+  return targets.slice(0, 100);
+}
+
 function fromLocation(document: WebsiteDocument, target: Picked | null) {
   if (!target || target.kind !== 'node') return undefined;
   const location = findLocation(document, target.id);
@@ -76,6 +96,7 @@ export function FixedTemplateEditor({
   const dirty = editable.filter(section => JSON.stringify(document[section]) !== JSON.stringify(saved[section]));
   const srcDoc = useWebsitePreviewSrcDoc(preview);
   const linkedDrafts = linkedDraftPagesForPublication(document);
+  const targets = editableTargets(document, pageId);
 
   useEffect(() => { currentDocument.current = document; }, [document]);
   useEffect(() => {
@@ -289,6 +310,16 @@ export function FixedTemplateEditor({
             <h2>Click text or an image</h2>
             <p>Choose a heading to rewrite it, a picture to replace it, or a card to update its title and photo.</p>
             <p>Header, footer, sections, colors and layouts stay exactly as designed.</p>
+            <div className="ft-quick-list">
+              <h3>Or select an item here</h3>
+              {targets.map(target => (
+                <button type="button" key={target.kind + target.id}
+                  onClick={() => target.kind === 'node' ? chooseNode(target.id)
+                    : setPicked({ kind: 'content', id: target.id })}>
+                  {target.label}
+                </button>
+              ))}
+            </div>
           </div>}
           <div className="ft-inspector-footer">
             <strong>{dirty.length ? '● Unsaved content changes' : '✓ Draft up to date'}</strong>
