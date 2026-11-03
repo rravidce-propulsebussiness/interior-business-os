@@ -208,3 +208,93 @@ export function FixedTemplateEditor({
     window.addEventListener('beforeunload', onBeforeUnload);
     return () => window.removeEventListener('beforeunload', onBeforeUnload);
   }, [dirty.length]);
+
+  return (
+    <main id="main-content" className="ft-editor">
+      <header className="ft-heading">
+        <div>
+          <p className="ft-eyebrow">WEBSITE / TEMPLATE CONTENT</p>
+          <h1>Edit your website content</h1>
+          <p>Click any editable heading, paragraph, photo or logo. Your template layout, spacing and design stay fixed.</p>
+        </div>
+        <div className="ft-actions">
+          <Link href="/dashboard/website" className="ft-outline">← Templates</Link>
+          {canUseGithub && <Link href={`/dashboard/website/${id}/git`} className="ft-outline">GitHub / VS Code</Link>}
+          <button type="button" disabled={!canEdit || pending || !dirty.length} onClick={save}>
+            {pending ? 'Saving…' : 'Save draft'}
+          </button>
+          {canPublish && <button type="button" className="ft-publish" disabled={pending || !!dirty.length}
+            onClick={publish}>Publish website</button>}
+        </div>
+      </header>
+      {status && <p className="ft-notice" role="status">{status}</p>}
+      <div className="ft-layout">
+        <section className="ft-stage" aria-label="Fixed website template preview">
+          <div className="ft-toolbar">
+            <label htmlFor="ft-page-choice">Page</label>
+            <select id="ft-page-choice" value={pageId} onChange={event => { setPageId(event.target.value); setPicked(null); }}>
+              {document.pages.map(item => <option key={item.id} value={item.id}>{item.title}</option>)}
+            </select>
+            <span className="ft-locked">Locked template layout</span>
+          </div>
+          <div className="ft-browser">
+            <div className="ft-browser-bar"><span>● ● ●</span><strong>{name} / {page?.path ?? '/'}</strong></div>
+            <iframe ref={frame} title="Click-to-edit website preview" sandbox="allow-scripts"
+              referrerPolicy="no-referrer" srcDoc={srcDoc ||
+                '<!doctype html><html><body style="font:16px sans-serif;padding:30px">Loading your website preview…</body></html>'} />
+          </div>
+          {previewError && <p className="ft-notice" role="status">{previewError}</p>}
+          <p className="ft-help">Click an item in the preview to edit it. You cannot move, resize, add or delete sections.</p>
+        </section>
+        <aside className="ft-inspector" aria-label="Selected website content">
+          <div className="ft-inspector-heading">
+            <strong>{node ? 'Edit selected item' : item ? 'Edit selected card' : 'Choose content to edit'}</strong>
+            <small>Changes affect text and images only.</small>
+          </div>
+          {node ? <div className="ft-fields">
+            <span className="ft-item-type">{node.type.replaceAll('_', ' ')} · Fixed position</span>
+            {fields.map(field => <label key={field.key} className="ft-field">
+              <span>{field.label}</span>
+              {field.multiline
+                ? <textarea rows={4} maxLength={field.maxLength} disabled={!canEdit || pending}
+                    value={String(node.props[field.key] ?? '')}
+                    onChange={event => updateNode(node.id, field.key, event.target.value)} />
+                : <input type="text" maxLength={field.maxLength} disabled={!canEdit || pending}
+                    value={String(node.props[field.key] ?? '')}
+                    onChange={event => updateNode(node.id, field.key, event.target.value)} />}
+            </label>)}
+            {(node.type === 'image' || node.type === 'hero' || node.type === 'logo' ||
+              node.props.asset !== undefined) && <WebsiteMediaPicker
+                id={id} assets={document.assets} value={node.props.asset}
+                label={node.type === 'logo' ? 'Logo' : 'Image'} canPreview={canUpload}
+                disabled={!canEdit || pending} unsaved={!!dirty.length}
+                onChange={assetId => setNodeImage(node.id, assetId)}
+                onUploaded={asset => setNodeImage(node.id, asset.id, asset)} />}
+            {!fields.length && !(node.type === 'image' || node.type === 'hero' || node.type === 'logo' ||
+              node.props.asset !== undefined) &&
+              <p className="ft-help">This is part of the locked design. Select a text or image instead.</p>}
+          </div> : item ? <div className="ft-fields">
+            <label className="ft-field"><span>Title</span><input maxLength={300} value={item.title}
+              disabled={!canEdit || pending} onChange={event => updateContent(item.id, 'title', event.target.value)}/></label>
+            <label className="ft-field"><span>Description</span><textarea rows={5} maxLength={12000}
+              value={item.text} disabled={!canEdit || pending}
+              onChange={event => updateContent(item.id, 'text', event.target.value)}/></label>
+            <WebsiteMediaPicker id={id} assets={document.assets} value={item.image}
+              label="Card image" canPreview={canUpload} disabled={!canEdit || pending}
+              unsaved={!!dirty.length} onChange={assetId => setContentImage(item.id, assetId)}
+              onUploaded={asset => setContentImage(item.id, asset.id, asset)}/>
+          </div> : <div className="ft-instructions">
+            <span aria-hidden="true">✎</span>
+            <h2>Click text or an image</h2>
+            <p>Choose a heading to rewrite it, a picture to replace it, or a card to update its title and photo.</p>
+            <p>Header, footer, sections, colors and layouts stay exactly as designed.</p>
+          </div>}
+          <div className="ft-inspector-footer">
+            <strong>{dirty.length ? '● Unsaved content changes' : '✓ Draft up to date'}</strong>
+            <p>Save your draft first, then publish when you are ready.</p>
+          </div>
+        </aside>
+      </div>
+    </main>
+  );
+}
