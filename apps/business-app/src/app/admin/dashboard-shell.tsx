@@ -112,7 +112,6 @@ const primary: { title: string; icon: IconName; href: string }[] = [
     icon: 'projects',
     href: '/admin/control/projects',
   },
-  { title: 'Website Builder', icon: 'website', href: '/admin/website' },
   { title: 'Domain Management', icon: 'domain', href: '/admin/domains' },
   {
     title: 'Settings & Customization',

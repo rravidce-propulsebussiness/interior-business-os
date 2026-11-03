@@ -62,14 +62,6 @@ const cards = [
     action: 'View project controls',
   },
   {
-    label: 'Website Builder',
-    detail: 'Website limits, publishing capabilities and site controls.',
-    icon: 'website',
-    hue: 'green',
-    link: '/dashboard/website',
-    action: 'Manage websites',
-  },
-  {
     label: 'Domain Management',
     detail: 'Connect external domains with DNS and HTTPS verification.',
     icon: 'domain',
@@ -159,7 +151,7 @@ export default async function PlatformDashboard() {
         <div>
           <h1>Super Admin Dashboard</h1>
           <p className="os-subhead">
-            Control your marketplace, tenants, plans, websites and platform
+            Control your marketplace, tenants, plans and platform
             settings.
           </p>
         </div>
@@ -293,12 +285,6 @@ export default async function PlatformDashboard() {
                 note: 'Plan, status and module overrides',
                 href: '/dashboard/organizations',
                 icon: 'users',
-              },
-              {
-                title: 'Set website capabilities',
-                note: 'Domain entitlements and page limits',
-                href: '/dashboard/website',
-                icon: 'website',
               },
               {
                 title: 'Connect a custom domain',

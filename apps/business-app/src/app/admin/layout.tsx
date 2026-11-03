@@ -4,6 +4,7 @@ import { pageServices } from '@business-os/auth/server';
 import { DomainError } from '@business-os/shared';
 import { DashboardShell } from './dashboard-shell';
 import './dashboard.css';
+import './owner-theme.css';
 
 export const dynamic = 'force-dynamic';
 

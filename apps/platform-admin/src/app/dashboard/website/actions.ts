@@ -13,7 +13,7 @@ export async function savePlatformWebsite(operation: string, input: unknown) {
       p_input: websiteJson(input),
     });
     if (r.error) throw r.error;
-    revalidatePath('/dashboard/website');
+    revalidatePath('/dashboard/domains');
     return { message: 'Platform website configuration updated.' };
   } catch {
     return {

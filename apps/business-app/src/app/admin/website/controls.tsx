@@ -1,229 +1,222 @@
 'use client';
+
 import { useState, useTransition } from 'react';
 import { savePlatformWebsite } from './actions';
+import { OsIcon } from '../dashboard-shell';
+
+type PlanConfig = Record<string, number | boolean>;
+type WebsitePlan = {
+  id: string;
+  name: string;
+  configuration?: PlanConfig;
+};
+
+const features = [
+  ['forms', 'Website forms'],
+  ['custom_domain', 'Custom domains'],
+  ['custom_code', 'Custom frontend code'],
+  ['developer_mode', 'Developer mode'],
+  ['analytics', 'Website analytics'],
+  ['integrations', 'Integrations'],
+] as const;
+
+const limits = [
+  ['sites', 'Websites per company'],
+  ['pages', 'Pages per website'],
+  ['storage_bytes', 'Storage allowance (bytes)'],
+] as const;
+
 export function WebsitePlatformControls({
   baseDomain,
   managedTls,
   plans,
-  sites,
   allowedEmbeds,
   disabledComponents,
-  mode = 'website',
 }: {
-  mode?: 'website' | 'domains';
   baseDomain: string;
   managedTls: boolean;
-  plans: {
-    id: string;
-    name: string;
-    configuration?: Record<string, number | boolean>;
-  }[];
+  plans: WebsitePlan[];
   allowedEmbeds: string[];
   disabledComponents: string[];
-  sites: { id: string; name: string; organization: string; status: string }[];
 }) {
-  const [message, setMessage] = useState(''),
-    [pending, start] = useTransition(),
-    [selectedPlan, setSelectedPlan] = useState(plans[0]?.id ?? '');
-  const selectedConfig =
-    plans.find((p) => p.id === selectedPlan)?.configuration ?? {};
+  const [message, setMessage] = useState('');
+  const [pending, start] = useTransition();
+  const [selectedPlan, setSelectedPlan] = useState(plans[0]?.id ?? '');
+  const selectedConfig = plans.find((plan) => plan.id === selectedPlan)?.configuration ?? {};
+
   return (
-    <div className="space-y-8">
-      {mode === 'domains' && (
-        <form
-          className="grid max-w-xl gap-4 rounded border p-5"
-          action={(f) =>
-            start(async () =>
-              setMessage(
-                (
-                  await savePlatformWebsite('settings', {
-                    baseDomain: String(f.get('baseDomain')),
-                    managedTls: f.get('tls') === 'on',
-                    allowedEmbeds: String(f.get('embeds'))
-                      .split(',')
-                      .map((x) => x.trim())
-                      .filter(Boolean),
-                    disabledComponents: String(f.get('components'))
-                      .split(',')
-                      .map((x) => x.trim())
-                      .filter(Boolean),
-                  })
-                ).message,
-              ),
-            )
-          }
-        >
-          <h2 className="font-semibold">Platform subdomains</h2>
-          <label>
-            Base hostname
-            <input
-              className="mt-1 block w-full rounded border p-2"
-              name="baseDomain"
-              required
-              defaultValue={baseDomain}
-              placeholder="sites.example.com"
-            />
-          </label>
-          <label className="text-sm">
-            <input type="checkbox" name="tls" defaultChecked={managedTls} />{' '}
-            Wildcard routing and HTTPS have been configured
-          </label>
-          <label className="text-sm">
-            Allowed embed hostnames (comma separated)
-            <input
-              name="embeds"
-              className="mt-1 w-full rounded border p-2"
-              defaultValue={allowedEmbeds.join(', ')}
-            />
-          </label>
-          <label className="text-sm">
-            Disabled component types (comma separated)
-            <input
-              name="components"
-              className="mt-1 w-full rounded border p-2"
-              defaultValue={disabledComponents.join(', ')}
-            />
-          </label>
-          <button
-            disabled={pending}
-            className="rounded bg-primary px-4 py-2 text-primary-foreground"
-          >
-            Save platform domain
+    <div className="os-domain-settings">
+      <form
+        className="os-domain-form"
+        aria-label="Domain infrastructure settings"
+        action={(form) =>
+          start(async () => {
+            setMessage('');
+            const result = await savePlatformWebsite('settings', {
+              baseDomain: String(form.get('baseDomain')),
+              managedTls: form.get('tls') === 'on',
+              allowedEmbeds: String(form.get('embeds'))
+                .split(',')
+                .map((host) => host.trim())
+                .filter(Boolean),
+              disabledComponents: String(form.get('components'))
+                .split(',')
+                .map((component) => component.trim())
+                .filter(Boolean),
+            });
+            setMessage(result.message);
+          })
+        }
+      >
+        <div className="os-domain-form-heading">
+          <span className="os-domain-form-icon">
+            <OsIcon name="domain" size={21} />
+          </span>
+          <div>
+            <h3>Domain infrastructure settings</h3>
+            <p>Configure shared hostname, DNS target and allowed components.</p>
+          </div>
+        </div>
+
+        <label className="os-domain-field">
+          <span>Base hostname</span>
+          <input
+            name="baseDomain"
+            required
+            defaultValue={baseDomain}
+            placeholder="sites.example.com"
+            autoComplete="off"
+          />
+          <small>Changing this does not rename existing company domains.</small>
+        </label>
+
+        <label className="os-domain-toggle-row">
+          <span className="os-domain-toggle-copy">
+            <strong>Wildcard routing and HTTPS configured</strong>
+            <small>Enable only after the hosting provider has configured both.</small>
+          </span>
+          <input className="os-domain-switch" type="checkbox" name="tls" defaultChecked={managedTls} />
+        </label>
+
+        <label className="os-domain-field">
+          <span>Allowed embed hostnames</span>
+          <input
+            name="embeds"
+            defaultValue={allowedEmbeds.join(', ')}
+            placeholder="youtube.com, maps.google.com"
+            autoComplete="off"
+          />
+          <small>Separate allowed hostnames with commas.</small>
+        </label>
+
+        <label className="os-domain-field">
+          <span>Disabled component types</span>
+          <input
+            name="components"
+            defaultValue={disabledComponents.join(', ')}
+            placeholder="video, iframe"
+            autoComplete="off"
+          />
+          <small>Separate component names with commas.</small>
+        </label>
+
+        <div className="os-domain-form-footer">
+          <button className="os-domain-save" disabled={pending} type="submit">
+            <OsIcon name="check" size={18} />
+            {pending ? 'Saving…' : 'Save infrastructure'}
           </button>
-        </form>
-      )}
-      {mode === 'website' && (
-        <form
-          className="grid max-w-xl gap-4 rounded border p-5"
-          action={(f) =>
-            start(async () => {
-              const config: Record<string, number | boolean> = {};
-              for (const key of ['sites', 'pages', 'storage_bytes'])
-                config[key] = Number(f.get(key));
-              for (const key of [
-                'forms',
-                'custom_domain',
-                'custom_code',
-                'developer_mode',
-                'analytics',
-                'integrations',
-              ])
-                config[key] = f.get(key) === 'on';
-              setMessage(
-                (
-                  await savePlatformWebsite('plan', {
-                    planId: String(f.get('plan')),
-                    configuration: config,
-                  })
-                ).message,
-              );
-            })
-          }
-        >
-          <h2 className="font-semibold">Website plan capabilities</h2>
+        </div>
+      </form>
+
+      <form
+        className="os-domain-form"
+        aria-label="Website plan capabilities"
+        action={(form) =>
+          start(async () => {
+            if (!selectedPlan) return;
+            setMessage('');
+            const config: PlanConfig = {};
+            for (const [key] of limits)
+              config[key] = Number(form.get(key));
+            for (const [key] of features)
+              config[key] = form.get(key) === 'on';
+            const result = await savePlatformWebsite('plan', {
+              planId: selectedPlan,
+              configuration: config,
+            });
+            setMessage(result.message);
+          })
+        }
+      >
+        <div className="os-domain-form-heading">
+          <span className="os-domain-form-icon">
+            <OsIcon name="crown" size={21} />
+          </span>
+          <div>
+            <h3>Website plan capabilities</h3>
+            <p>Set infrastructure quotas and feature eligibility per plan.</p>
+          </div>
+        </div>
+
+        <label className="os-domain-field">
+          <span>Membership plan</span>
           <select
-            aria-label="Plan"
             name="plan"
-            className="rounded border p-2"
             value={selectedPlan}
-            onChange={(e) => setSelectedPlan(e.target.value)}
+            onChange={(event) => setSelectedPlan(event.target.value)}
+            disabled={pending || plans.length === 0}
           >
-            {plans.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name}
-              </option>
+            {plans.length === 0 && <option value="">No plans available</option>}
+            {plans.map((plan) => (
+              <option key={plan.id} value={plan.id}>{plan.name}</option>
             ))}
           </select>
-          {['sites', 'pages', 'storage_bytes'].map((k, i) => (
-            <label key={k} className="text-sm">
-              {k}
+        </label>
+
+        <div className="os-domain-limits">
+          {limits.map(([key, label], index) => (
+            <label className="os-domain-field" key={key}>
+              <span>{label}</span>
               <input
-                name={k}
+                key={selectedPlan + key}
+                name={key}
                 type="number"
                 min="1"
+                step="1"
                 required
-                className="mt-1 block w-full rounded border p-2"
-                key={selectedPlan + k}
-                defaultValue={Number(selectedConfig[k] ?? [3, 50, 52428800][i])}
+                disabled={!selectedPlan}
+                defaultValue={Number(selectedConfig[key] ?? [1, 50, 52428800][index])}
               />
             </label>
           ))}
-          <div className="grid grid-cols-2 gap-3">
-            {[
-              'forms',
-              'custom_domain',
-              'custom_code',
-              'developer_mode',
-              'analytics',
-              'integrations',
-            ].map((k) => (
-              <label key={k} className="text-sm">
-                <input
-                  key={selectedPlan + k}
-                  type="checkbox"
-                  name={k}
-                  defaultChecked={Boolean(selectedConfig[k] ?? k === 'forms')}
-                />{' '}
-                {k.replaceAll('_', ' ')}
-              </label>
-            ))}
-          </div>
-          <button
-            disabled={pending}
-            className="rounded bg-primary px-4 py-2 text-primary-foreground"
-          >
-            Save plan capabilities
-          </button>
-        </form>
-      )}
-      {mode === 'website' && (
-        <section>
-          <h2 className="mb-4 font-semibold">Website delivery status</h2>
-          {sites.map((site) => (
-            <form
-              key={site.id}
-              className="mb-3 flex flex-wrap items-center gap-3 rounded border p-4"
-              action={(f) =>
-                start(async () =>
-                  setMessage(
-                    (
-                      await savePlatformWebsite(
-                        site.status === 'suspended' ? 'resume' : 'suspend',
-                        { websiteId: site.id, reason: String(f.get('reason')) },
-                      )
-                    ).message,
-                  ),
-                )
-              }
-            >
-              <div className="min-w-48 flex-1">
-                <h3>{site.name}</h3>
-                <p className="text-sm text-muted-foreground">
-                  {site.organization} · {site.status}
-                </p>
-              </div>
+        </div>
+        <p className="os-domain-storage-hint">
+          Storage quotas use bytes; 50 MiB equals 52,428,800 bytes.
+        </p>
+
+        <div className="os-domain-feature-grid" role="group" aria-label="Plan website features">
+          {features.map(([key, label]) => (
+            <label className="os-domain-feature" key={key}>
+              <span>{label}</span>
               <input
-                name="reason"
-                required
-                minLength={3}
-                maxLength={500}
-                placeholder="Reason"
-                aria-label={`Reason for ${site.name}`}
-                className="rounded border p-2"
+                key={selectedPlan + key}
+                className="os-domain-switch"
+                name={key}
+                type="checkbox"
+                disabled={!selectedPlan}
+                defaultChecked={Boolean(selectedConfig[key] ?? key === 'forms')}
               />
-              <button
-                disabled={pending}
-                className="rounded border px-3 py-2 text-sm"
-              >
-                {site.status === 'suspended'
-                  ? 'Release to unpublished'
-                  : 'Suspend website'}
-              </button>
-            </form>
+            </label>
           ))}
-        </section>
-      )}
-      <p role="status">{message}</p>
+        </div>
+        <div className="os-domain-form-footer">
+          <button className="os-domain-save" disabled={pending || !selectedPlan} type="submit">
+            <OsIcon name="check" size={18} />
+            {pending ? 'Saving…' : 'Save plan capabilities'}
+          </button>
+        </div>
+      </form>
+      <p className="os-domain-save-message" role="status" aria-live="polite">{message}</p>
     </div>
   );
 }
