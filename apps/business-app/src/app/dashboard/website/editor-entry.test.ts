@@ -1,180 +1,72 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 
-const source = (relative: string) =>
-  readFileSync(new URL(relative, import.meta.url), 'utf8');
+const source = (relative: string) => readFileSync(new URL(relative, import.meta.url), 'utf8');
 
-describe('template-first business website editing', () => {
-  const entry = source('./[id]/page.tsx');
-  const tabs = source('./[id]/[tab]/page.tsx');
-  const editor = source('./studio.tsx');
-  const design = source('./design-studio.tsx');
-  const advanced = source('./template-editor.tsx');
+describe('two-mode company website workflow', () => {
+  const gallery = source('./website-gallery.tsx');
   const creation = source('./website-create.tsx');
+  const tabs = source('./[id]/[tab]/page.tsx');
+  const fixed = source('./fixed-template-editor.tsx');
+  const server = source('./fixed-template-actions.ts');
+  const github = source('./website-git-tools.tsx');
   const media = source('./website-media-picker.tsx');
-  const settings = source('./settings-panel.tsx');
-  const mediaRoute = source('./[id]/media/route.ts');
 
-  it('opens the visual editor even for owners with source permissions', () => {
-    expect(entry).toContain('<WebsiteEditor');
-    expect(entry).not.toContain('<TemplateEditor');
-    expect(entry).not.toContain('canViewSource ?');
-    expect(entry).toContain("canEdit={s.allowed('website.page.edit')}");
-    expect(entry).toContain("canViewSource={s.allowed('website.custom_code.view') && site.document.code.length > 0}");
+  it('offers only fixed content editing and GitHub / VS Code to company users', () => {
+    expect(gallery).toContain('Edit text &amp; images');
+    expect(gallery).toContain('GitHub / VS Code');
+    expect(gallery).not.toContain('>Design</Link>');
+    expect(gallery).not.toContain('>Files</Link>');
+    expect(gallery).not.toContain('Ready-made pages');
+    expect(gallery).not.toContain('/developer`');
   });
 
-  it('keeps the developer editor permission-gated and separate', () => {
-    expect(tabs).toContain("developer: 'website.custom_code.view'");
-    expect(tabs).toContain("if (tab === 'developer') {");
-    expect(tabs).toContain('<TemplateEditor');
-    expect(tabs).toContain("canEdit={s.allowed('website.custom_code.edit')}");
-    expect(tabs).not.toContain("if (tab === 'developer') redirect(");
-    expect(editor).toContain('canViewSource && <Link');
-    expect(advanced).toContain('Advanced source editor');
+  it('requires a template for new websites and opens the content editor', () => {
+    expect(creation).toContain('Choose one of the available fixed templates.');
+    expect(creation).not.toContain('Start with a blank website');
+    expect(creation).not.toContain('Developer options');
+    expect(creation).not.toContain('Advanced: custom HTML');
+    expect(creation).toContain('/layout`');
   });
 
-  it('preserves old visual deep links while consolidating editing URLs', () => {
-    expect(tabs).toContain("if (tab === 'layout')");
-    expect(tabs).toContain('encodeURIComponent(query.page)');
-    expect(entry).toContain('initialPageId: page');
-    expect(advanced).toContain('href={`/dashboard/website/${id}?page=');
+  it('routes layout to the fixed content-only editor and hides old editor modes', () => {
+    expect(tabs).toContain('<FixedTemplateEditor');
+    expect(tabs).not.toContain('<WebsiteEditor');
+    expect(tabs).not.toContain('<TemplateEditor');
+    expect(tabs).toContain("if (tab === 'developer') redirect(");
+    expect(tabs).toContain("if (tab === 'design' || tab === 'navigation' || tab === 'content')");
+    expect(tabs).toContain("canEdit={s.allowed('website.page.edit')}");
+    expect(tabs).toContain("canUpload={s.allowed('website.media.manage')}");
   });
 
-  it('chooses website images from existing draft assets rather than raw identifiers', () => {
-    expect(editor).toContain('<WebsiteMediaPicker');
-    expect(editor).toContain('assets={document.assets}');
-    expect(editor).not.toContain("'asset',\n                  'alt'");
-    expect(media).toContain('assets.slice(-24).reverse()');
-    expect(media).toContain('aria-pressed={asset.id === value}');
-    expect(media).toContain('onClick={() => onChange(asset.id)}');
+  it('offers click-to-edit text, headings, cards, photos and logos without structural commands', () => {
+    expect(fixed).toContain("data.type === 'website.select'");
+    expect(fixed).toContain("data.type === 'website.inline-text'");
+    expect(fixed).toContain("data.type === 'website.select-content'");
+    expect(fixed).toContain('<WebsiteMediaPicker');
+    expect(fixed).toContain('onUploaded={asset => setNodeImage');
+    expect(fixed).not.toContain('moveNode(');
+    expect(fixed).not.toContain('insertNode(');
+    expect(fixed).not.toContain('duplicateNode(');
   });
 
-  it('allows logo and favicon choices without editing underlying database IDs', () => {
-    expect(settings).toContain("(['logo', 'favicon'] as const).map");
-    expect(settings).toContain('<WebsiteMediaPicker');
-    expect(settings).toContain('settings: { ...current.settings, [key]: assetId }');
-    expect(entry).toContain("canPreviewMedia={s.allowed('website.media.manage')}");
-    expect(tabs).toContain("canPreviewMedia={s.allowed('website.media.manage')}");
-    expect(media).toContain("Manage images");
+  it('protects saves using the existing role permissions and a template shape guard', () => {
+    expect(server).toContain("websiteServices(section === 'assets' ? 'website.media.manage' : 'website.page.edit')");
+    expect(server).toContain('preservesFixedTemplate(');
+    expect(fixed).toContain('saveFixedTemplateSection(');
+    expect(fixed).toContain('publishWebsite(');
   });
 
-  it('uploads images within the editor using existing tenant-authorized media storage', () => {
-    expect(media).toContain("method: 'POST', body, credentials: 'same-origin'");
+  it('keeps the established media upload checks in the content panel', () => {
     expect(media).toContain("['image/jpeg', 'image/png', 'image/webp', 'image/avif']");
     expect(media).toContain('10 * 1024 * 1024');
-    expect(media).toContain('onUploaded({');
-    expect(mediaRoute).toContain("websiteServices('website.media.manage')");
-    expect(mediaRoute).toContain("request.headers.get('origin')");
-    expect(mediaRoute).toContain('width, height, alt:');
+    expect(media).toContain("method: 'POST', body, credentials: 'same-origin'");
   });
 
-  it('persists uploaded asset references before updating page or logo settings', () => {
-    expect(editor).toContain("(['assets', 'pages', 'header', 'footer'] as const)");
-    expect(editor).toContain('onUploaded={asset => {');
-    expect(editor).toContain('setHistory(history => {');
-    expect(editor).toContain('const current = history.present;');
-    expect(editor).toContain('assets: current.assets.some(item => item.id === asset.id)');
-    expect(editor).toContain('return editHistory(history, draft);');
-    expect(settings).toContain("saveAction(id, nextVersion, 'assets', doc.assets)");
-    expect(settings).toContain('onUploaded={asset => {');
-    expect(settings).toContain('assets: [...current.assets, asset]');
-    expect(settings).toContain('[savedSettings, setSavedSettings]');
-    expect(settings).toContain('unsaved={JSON.stringify(doc.assets)');
-  });
-
-  it('edits social-sharing images visually and saves new assets before SEO pages', () => {
-    expect(settings).toContain('label={`Social sharing image for ${page.title}`}');
-    expect(settings).toContain('value={page.seo.image}');
-    expect(settings).toContain('onUploaded={asset => {');
-    expect(settings).toContain('target.seo.image = asset.id');
-    expect(settings).toContain("if (assetId) target.seo.image = assetId");
-    expect(settings).toContain('else delete target.seo.image');
-    expect(settings).toContain("if ((key === 'settings' || key === 'pages') &&");
-    expect(settings).toContain("saveAction(id, nextVersion, 'assets', doc.assets)");
-    expect(settings).toContain("if (key === 'pages') setSavedPages(doc.pages)");
-    expect(settings).not.toContain("'ogDescription',\n                  'image',");
-  });
-
-  it('prioritizes editable published templates over blank or code sites', () => {
-    expect(creation).toContain("initialTemplate || templates[0]?.id || ''");
-    expect(creation).toContain('<option value="">Start with a blank website</option>');
-    expect(creation.indexOf('{templates.map(entry => (')).toBeLessThan(
-      creation.indexOf('<option value="">Start with a blank website</option>'),
-    );
-    expect(creation).toContain('canCode && showAdvanced');
-    expect(creation).toContain('Developer options');
-    expect(creation).toContain("template === 'custom' ? '/developer' : ''");
-  });
-
-  it('updates text immediately in the sandbox while keeping server preview authoritative', () => {
-    expect(editor).toContain("type: 'website.preview-text'");
-    expect(editor).toContain('frame.current?.contentWindow?.postMessage({');
-    expect(editor).toContain("['title', 'text', 'subtitle'].some");
-    expect(editor).toContain('previewAction(id, history.present, page.path)');
-    expect(editor).toContain('if (!active) return; // A newer draft may already be visible.');
-  });
-
-  it('keeps the preview at the same scroll position while the server refreshes', () => {
-    expect(editor).toContain("type: 'website.preview-restore-scroll'");
-    expect(editor).toContain("data?.type === 'website.preview-scroll'");
-    expect(editor).toContain("data?.type === 'website.preview-restored'");
-    expect(editor).toContain("restoringPreviewScroll.current = true");
-    expect(editor).toContain("restoringPreviewScroll.current = false");
-    expect(editor).toContain('onLoad={() => frame.current?.contentWindow?.postMessage({');
-    expect(editor).toContain('previewScroll.current = { x: 0, y: 0 };');
-    expect(editor).toContain('lastPreviewHtml.current !== next');
-  });
-
-  it('uses cached recent previews and does not overwrite newer drafts', () => {
-    expect(editor).toContain('const previewCache = useRef(new Map<string, string>())');
-    expect(editor).toContain('JSON.stringify([history.present, page.path])');
-    expect(editor).toContain('const cached = previewCache.current.get(key)');
-    expect(editor).toContain('const delay = firstPreview.current ? 0 : 500');
-    expect(editor).toContain('if (!active) return; // A newer draft may already be visible.');
-    expect(editor).toContain('previewCache.current.size > 5');
-    expect(editor).toContain("previewLoading ? 'Updating preview…'");
-    expect(editor).not.toContain("setMessage('');");
-  });
-
-  it('prioritizes readable content fields and puts technical controls under Advanced', () => {
-    expect(editor).toContain('editableContentFields(selected)');
-    expect(editor).toContain('{contentFields.map(field => (');
-    expect(editor).toContain('field.label');
-    expect(editor).toContain("rows={field.key === 'text' ? 5 : 3}");
-    expect(editor).toContain('maxLength={field.maxLength}');
-    expect(editor).toContain("type: 'website.preview-text'");
-    expect(editor).toContain('<summary>Advanced settings and layout</summary>');
-    expect(editor.indexOf('Public data')).toBeGreaterThan(
-      editor.indexOf('<summary>Advanced settings and layout</summary>'),
-    );
-    expect(editor).toContain("(['form', 'embed', 'code'] as const)");
-    expect(editor).toContain('Open advanced source editor');
-  });
-
-  it('protects unsaved website drafts from accidental navigation or reload', () => {
-    expect(editor).toContain("window.addEventListener('beforeunload', warn)");
-    expect(editor).toContain("event.returnValue = ''");
-    expect(editor).toContain("window.document.addEventListener('click', protectSidebar, true)");
-    expect(editor).toContain("anchor.closest('.ss-studio-editor')");
-    expect(editor).toContain("event.stopImmediatePropagation()");
-    expect(editor).toContain('onClick={confirmLeavingEditor}');
-    expect(editor).toContain("You have unsaved website changes. Leave without saving?");
-  });
-
-  it('offers keyboard Save Draft and a fixed mobile control without auto-publishing', () => {
-    expect(editor).toContain("event.key.toLowerCase() === 's'");
-    expect(editor).toContain("event.ctrlKey || event.metaKey");
-    expect(editor).toContain("if (canEdit && hasUnsavedChanges && !pending && !event.repeat) saveDraft()");
-    expect(editor).toContain('ss-mobile-draftbar');
-    expect(editor).toContain('ss-mobile-draft-spacer');
-    expect(editor).toContain('onClick={saveDraft}');
-    expect(editor).toContain('disabled={pending || !hasUnsavedChanges}');
-    expect(editor).toContain("saveAction(id, nextVersion, section, document[section])");
-  });
-
-  it('does not promote code editor as a standard design option', () => {
-    expect(editor).toContain('No coding needed.');
-    expect(design).not.toContain('⌘ &nbsp; Code editor');
-    expect(advanced).toContain('Visual editor');
+  it('uses external GitHub / VS Code rather than an internal source editor', () => {
+    expect(github).toContain('vscode.dev/github/');
+    expect(github).not.toContain('Edit supported HTML/CSS/JS in Business OS');
+    expect(github).toContain('Automatic syncing is not enabled');
+    expect(github).toContain('separate hosting');
   });
 });

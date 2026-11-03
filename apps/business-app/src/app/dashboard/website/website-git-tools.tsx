@@ -156,7 +156,7 @@ export function WebsiteGitTools({ id, name, pages, version, canPull }: {
           {sourceMessage&&<p className="we-notice" role="status">{sourceMessage}</p>}
           {sourceText&&<textarea className="we-git-source-code" readOnly rows={16}
             aria-label="Retrieved source code" value={sourceText}/>}
-          <p className="we-git-disclaimer">The full repository ZIP contains supported and unsupported source languages. Files can be opened in VS Code. This does not install, run, publish, or synchronize a React/Next.js/PHP backend into the template editor.</p>
+          <p className="we-git-disclaimer">The full repository ZIP contains supported and unsupported source languages. Files can be opened in VS Code. This does not install, run, publish, or synchronize a React/Next.js/PHP backend into the fixed-template editor.</p>
         </div>
         <div className="we-git-pull-panel">
           <h3>Import static HTML or prebuilt framework exports</h3>
@@ -166,10 +166,10 @@ export function WebsiteGitTools({ id, name, pages, version, canPull }: {
             {pulling ? 'Importing static pages…' : '↓ Import static HTML / exported pages'}
           </button>
           {!canPull && <p>Static HTML/CSS import is unavailable for this website's current plan or your editing permissions. Developer Mode and Custom Code must be enabled to import files. You can still use <strong>Browse source files — multiple languages</strong> below.</p>}
-          <p className="we-git-disclaimer">Framework source, PHP/Python backends, scripts, external assets and private repositories cannot run in the visual builder. Static HTML exports may be imported after sanitization. Full applications need separate Git deployment and hosting. Imported drafts at /git-home, /git-about, etc. will not replace your current live home page.</p>
+          <p className="we-git-disclaimer">Framework source, PHP/Python backends, scripts, external assets and private repositories cannot run in the fixed-template editor. Static HTML exports may be imported after sanitization. Full applications need separate Git deployment and hosting. Imported drafts at /git-home, /git-about, etc. will not replace your current live home page.</p>
           {imported.length>0 && <div className="we-git-imported"><strong>Imported draft pages</strong>
             {imported.map(path=><span key={path}>{path}</span>)}
-            <Link className="we-outline" href={`/dashboard/website/${id}/developer`}>Edit imported files</Link>
+            <p>Imported pages are private drafts. Continue source development in GitHub / VS Code.</p>
           </div>}
         </div>
         {message && <p className="we-notice" role="status">{message}</p>}
@@ -189,10 +189,10 @@ export function WebsiteGitTools({ id, name, pages, version, canPull }: {
       <aside className="we-git-card we-git-info">
         <h2>How full-code customization works</h2>
         <p>There are two different website workflows:</p>
-        <div><strong>Normal website editing</strong><p>Use Website Studio to edit texts, projects, images, sections and styles. No coding required.</p></div>
-        <div><strong>Developer website</strong><p>Import a compatible public static page as a draft file. Edit full React/Next.js code in GitHub or VS Code using separate hosting.</p></div>
+        <div><strong>Normal website editing</strong><p>Use a fixed website template and replace its texts, photos and logos. Layout stays locked.</p></div>
+        <div><strong>Developer website</strong><p>Edit full React/Next.js or other framework code in GitHub or VS Code with separate hosting. Compatible static exports can be imported as private drafts.</p></div>
         <div><strong>Publishing</strong><p>A full GitHub project requires its own hosting and deployment setup. It is <b>not automatically imported, synced or published</b> by the template builder.</p></div>
-        <Link className="we-outline" href={`/dashboard/website/${id}/developer`}>Edit supported HTML/CSS/JS in Business OS</Link>
+
       </aside>
     </section>
   </main>;

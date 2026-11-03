@@ -68,3 +68,10 @@
   color:#985b39;font-size:12px;line-height:1.6;padding:13px 16px;margin-bottom:17px}
 .wg-card-actions button.wg-secondary{cursor:pointer}
 .wg-card-actions button.wg-secondary:disabled{opacity:.45;cursor:not-allowed}
+
+/* The only owner website modes: fixed content and external Git development. */
+.wg-methods{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;margin:0 0 18px}
+.wg-methods>div{display:flex;flex-direction:column;gap:6px;min-height:77px;padding:15px 17px;border:1px solid #f2e6dd;border-radius:12px;background:#fffaf7}
+.wg-methods strong{font-size:13px;color:#ef5811;font-weight:820}
+.wg-methods span{font-size:11px;color:#77849a;line-height:1.5}
+@media(max-width:700px){.wg-methods{grid-template-columns:1fr}}
