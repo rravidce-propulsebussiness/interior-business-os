@@ -1,20 +1,26 @@
 'use client';
 import { useState, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   addWebsiteDomain,
   checkWebsiteDomain,
   removeWebsiteDomain,
 } from './domain-actions';
+
+type DnsRecord = { type: 'TXT'; name: string; value: string };
+
 export function DomainPanel({
   site,
-  base,
+  cnameTarget,
   domains,
   canManage,
+  customDomainEnabled,
+  saasReady,
   organizationId,
 }: {
   organizationId?: string;
   site: string;
-  base: string;
+  cnameTarget: string;
   domains: {
     id: string;
     hostname: string;
@@ -25,111 +31,151 @@ export function DomainPanel({
     version: number;
   }[];
   canManage: boolean;
+  customDomainEnabled: boolean;
+  saasReady: boolean;
 }) {
+  const router = useRouter();
   const [message, setMessage] = useState('');
-  const [records, setRecords] = useState<
-    { type: 'TXT'; name: string; value: string }[]
-  >([]);
+  const [records, setRecords] = useState<DnsRecord[]>([]);
   const [pending, start] = useTransition();
+
   return (
     <div className="space-y-5">
-      {canManage && (
+      {canManage && customDomainEnabled && saasReady && (
         <form
-          className="flex gap-3"
-          action={(f) =>
-            start(async () =>
-              setMessage(
-                (
-                  await addWebsiteDomain(
-                    site,
-                    String(f.get('hostname')),
-                    organizationId,
-                  )
-                ).message,
-              ),
-            )
+          className="flex flex-wrap gap-3"
+          action={(form) =>
+            start(async () => {
+              const result = await addWebsiteDomain(
+                site,
+                String(form.get('hostname') ?? ''),
+                organizationId,
+              );
+              setMessage(result.message);
+              setRecords(result.records);
+              router.refresh();
+            })
           }
         >
           <input
             aria-label="Custom hostname"
             name="hostname"
-            placeholder="www.yourbusiness.com"
+            placeholder="www.yourbusiness.com or yourbusiness.com"
             required
             maxLength={253}
-            className="w-full rounded border p-3"
+            className="min-w-0 flex-1 rounded border p-3"
           />
           <button
             disabled={pending}
             className="shrink-0 rounded bg-primary px-4 py-2 text-primary-foreground"
           >
-            Add domain
+            Add custom domain
           </button>
         </form>
       )}
+
+      {!customDomainEnabled && (
+        <p role="status" className="rounded border p-4 text-sm">
+          Custom domains are not included in your current website plan. Ask your
+          Business OS administrator to enable the Custom Domain plan feature.
+        </p>
+      )}
+      {customDomainEnabled && !saasReady && (
+        <p role="status" className="rounded border p-4 text-sm">
+          The platform custom-domain gateway is not configured yet. The
+          administrator must enable Cloudflare for SaaS and configure its
+          fallback origin before custom domains can be connected.
+        </p>
+      )}
+
       <p className="text-sm text-muted-foreground">
-        Use a subdomain such as www.yourbusiness.com. A root domain without www
-        requires an additional apex-domain routing setup at your DNS provider.
-        Your domain stays registered with your chosen registrar.
+        Connect either your root domain (yourbusiness.com) or a subdomain
+        (www.yourbusiness.com). You can add both to the same website; each
+        hostname is verified separately. Your domain remains registered with
+        your existing domain provider.
       </p>
-      {domains.map((d) => (
-        <section key={d.id} className="rounded border p-5">
-          <div className="flex justify-between">
-            <h2 className="font-semibold">{d.hostname}</h2>
-            <span className="text-sm capitalize">{d.status}</span>
+
+      {domains.map((domain) => (
+        <section key={domain.id} className="space-y-3 rounded border p-5">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="break-all font-semibold">{domain.hostname}</h2>
+            <span className="text-sm capitalize">
+              {domain.status} · HTTPS {domain.tls_status}
+            </span>
           </div>
-          <p className="mt-2 text-sm">HTTPS: {d.tls_status}</p>
-          {d.kind === 'custom' && d.status !== 'removed' && (
+
+          {domain.kind === 'custom' && domain.status !== 'removed' && (
             <>
-              <dl className="mt-4 space-y-3 break-all text-sm">
-                <div>
-                  <dt className="font-semibold">
-                    TXT · _business-os.{d.hostname}
-                  </dt>
-                  <dd className="mt-1 font-mono">
-                    business-os-verification={d.challenge}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="font-semibold">CNAME · {d.hostname}</dt>
-                  <dd>{base || 'Platform hostname has not been configured'}</dd>
-                </div>
-              </dl>
+              <div className="rounded bg-muted/40 p-3 text-sm">
+                <p className="font-semibold">1. Verify domain ownership</p>
+                <p className="mt-1 break-all font-mono">
+                  TXT · _business-os.{domain.hostname}
+                </p>
+                <p className="mt-1 break-all font-mono">
+                  business-os-verification={domain.challenge}
+                </p>
+              </div>
+
+              <div className="rounded bg-muted/40 p-3 text-sm">
+                <p className="font-semibold">2. Point the hostname to Business OS</p>
+                {domain.hostname.startsWith('www.') ? (
+                  <p className="mt-1">
+                    Create a CNAME record with host <code>www</code> and target{' '}
+                    <code>{cnameTarget || 'CNAME target not configured'}</code>.
+                  </p>
+                ) : (
+                  <p className="mt-1">
+                    For a root/apex hostname, create an ALIAS/ANAME record or use
+                    your DNS provider's CNAME flattening on host <code>@</code>,
+                    targeting <code>{cnameTarget || 'CNAME target not configured'}</code>.
+                    A-only DNS providers require a separate apex-proxying service.
+                  </p>
+                )}
+                <p className="mt-2 text-muted-foreground">
+                  For a subdomain such as www, use a CNAME. If your DNS provider
+                  is Cloudflare, leave the customer record DNS-only (grey cloud)
+                  unless your Cloudflare for SaaS setup explicitly supports
+                  proxying/O2O.
+                </p>
+              </div>
+
               {canManage && (
-                <div className="mt-5 flex gap-4">
+                <div className="flex flex-wrap gap-3">
                   <button
-                    disabled={pending}
+                    disabled={pending || !customDomainEnabled || !saasReady}
                     onClick={() =>
                       start(async () => {
                         const result = await checkWebsiteDomain(
                           site,
-                          d.id,
+                          domain.id,
                           organizationId,
                         );
                         setMessage(result.message);
                         setRecords(result.records);
+                        router.refresh();
                       })
                     }
                     className="rounded border px-3 py-2 text-sm"
                   >
-                    Verify DNS and HTTPS
+                    {domain.status === 'active' && domain.tls_status === 'ready'
+                      ? 'Recheck domain'
+                      : 'Verify DNS and HTTPS'}
                   </button>
                   <button
                     disabled={pending}
                     onClick={() =>
-                      start(async () =>
-                        setMessage(
-                          (
-                            await removeWebsiteDomain(
-                              site,
-                              d.id,
-                              d.version,
-                              organizationId,
-                            )
-                          ).message,
-                        ),
-                      )
+                      start(async () => {
+                        const result = await removeWebsiteDomain(
+                          site,
+                          domain.id,
+                          domain.version,
+                          organizationId,
+                        );
+                        setMessage(result.message);
+                        router.refresh();
+                      })
                     }
-                    className="text-sm"
+                    className="text-sm underline"
                   >
                     Remove domain
                   </button>
@@ -139,31 +185,28 @@ export function DomainPanel({
           )}
         </section>
       ))}
+
       {records.length > 0 && (
         <section className="rounded border p-4">
           <h2 className="mb-2 font-semibold">
             Additional Cloudflare validation records
           </h2>
           <p className="mb-3 text-sm text-muted-foreground">
-            If HTTPS is pending, add the records below in your DNS provider.
-            These tokens come from Cloudflare and are separate from the Business
-            OS TXT record.
+            Add these TXT records at your domain provider if Cloudflare requests
+            them. They are separate from the Business OS ownership TXT record.
           </p>
           <dl className="space-y-2 break-all text-sm">
             {records.map((record) => (
               <div key={record.name + record.value}>
-                <dt className="font-semibold">
-                  {record.type} · {record.name}
-                </dt>
+                <dt className="font-semibold">{record.type} · {record.name}</dt>
                 <dd className="font-mono">{record.value}</dd>
               </div>
             ))}
           </dl>
         </section>
       )}
-      <p role="status" className="text-sm">
-        {message}
-      </p>
+
+      <p role="status" className="text-sm">{message}</p>
     </div>
   );
 }
