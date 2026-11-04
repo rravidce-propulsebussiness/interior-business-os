@@ -154,3 +154,30 @@
 @media(max-width:850px) { .execution-workspace .erp-stats { grid-template-columns:repeat(2,minmax(0,1fr)); } .execution-workspace .erp-page { padding-inline: 15px; } }
 @media(max-width:520px) { .execution-workspace .erp-stats { grid-template-columns:1fr; } .execution-workspace .erp-panel { padding:13px; } .execution-workspace .erp-filterbar { flex-direction:column; align-items:stretch; } .execution-workspace .erp-filterbar label { flex-basis:auto; } }
 @media(prefers-reduced-motion:reduce) { .execution-workspace :where(a,button,table tr) { animation:none!important;transition:none!important;transform:none!important; } }
+
+.execution-workspace .erp-detail-meta { display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-bottom:17px; padding:12px 15px; border:1px solid #eadedb; border-radius:12px; background:#fff; font-size:11px; color:#6c7180; }
+.execution-workspace .erp-detail-meta strong { color:#3d3442; font-weight:850; }
+.execution-workspace .erp-section-row td { padding:12px; background:#f8efec; font-weight:850; color:#783a31; }
+.execution-workspace .erp-section-row a { color:#783a31; }
+.execution-workspace .erp-boq-indented { padding-left:27px!important; max-width:430px; overflow-wrap:anywhere; }
+.execution-workspace .erp-line-expand { position:relative; }
+.execution-workspace .erp-line-expand summary { cursor:pointer; color:#934837; font-size:10px; font-weight:800; white-space:nowrap; }
+.execution-workspace .erp-line-expand[open] { min-width:245px; }
+.execution-workspace .erp-line-expand .erp-breakdown { min-width:245px; }
+.execution-workspace .erp-audit-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+.execution-workspace .erp-audit-grid > div { background:#faf8fa; border-radius:10px; padding:12px; min-width:0; }
+.execution-workspace .erp-audit-grid dt { color:#778195; font-size:10px; margin-bottom:5px; }
+.execution-workspace .erp-audit-grid dd { font-size:12px; font-weight:750; color:#383947; overflow-wrap:anywhere; }
+.execution-workspace .erp-compare-cards { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; margin-bottom:12px; }
+.execution-workspace .erp-compare-cards > div { display:grid; gap:5px; padding:13px; border-radius:10px; background:#faf4f2; }
+.execution-workspace .erp-compare-cards small { color:#8c8290; font-size:10px; }
+.execution-workspace .erp-compare-cards strong { color:#553341; font-size:12px; }
+.execution-workspace .erp-compare-cards span { font-size:15px; font-weight:850; overflow-wrap:anywhere; }
+.execution-workspace .erp-impact { display:flex; align-items:center; justify-content:space-between; gap:9px; flex-wrap:wrap; padding:13px; margin-bottom:14px; border-radius:10px; background:linear-gradient(120deg,#fae7e1,#fff4f0); color:#853a31; }
+.execution-workspace .erp-impact span { font-size:11px; font-weight:800; }
+.execution-workspace .erp-impact strong { font-size:16px; }
+.execution-workspace .erp-action-forms > form { border:1px solid #f0e9e8; border-radius:11px; padding:13px; background:#fffdfd; }
+.execution-workspace .erp-action-forms input { border-color:#e7dade; border-radius:9px; }
+.execution-workspace .erp-action-forms button { padding:9px 15px; border-radius:9px; }
+.execution-workspace .erp-stack > .erp-panel .erp-cell-secondary { line-height:1.6; margin:12px 0 0; }
+@media(max-width:760px){.execution-workspace .erp-audit-grid { grid-template-columns:1fr; }.execution-workspace .erp-line-expand[open] { min-width:170px; } }
