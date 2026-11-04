@@ -13,7 +13,7 @@ export const erpIdSchema = z.uuid();
 export const erpDecimalSchema = z
   .string()
   .regex(
-    /^(0|[1-9]\\d{0,11})(\\.\\d{1,6})?$/,
+    /^(0|[1-9]\d{0,11})(\.\d{1,6})?$/,
     'Expected a non-negative decimal string',
   );
 
