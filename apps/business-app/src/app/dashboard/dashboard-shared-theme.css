@@ -4,7 +4,7 @@
  * Every page served from /dashboard gets this stylesheet, but ONLY direct
  * legacy main elements are visually restyled. Pages already using OwnerShell
  * keep their full branded shell. There are no global bare-element rules,
- * !important overrides, wildcard-domain selectors or application logic.
+ * forced cascade overrides, wildcard-domain selectors or application logic.
  */
 .dashboard-visual-root {
   display: contents;
