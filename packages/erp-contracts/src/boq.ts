@@ -31,6 +31,7 @@ export const erpRequestContextSchema = z
     subjectUserId: erpIdSchema,
     organizationId: erpIdSchema,
     projectId: erpIdSchema,
+    partitionId: erpIdSchema,
     permissions: z.array(z.string().min(1).max(100)).max(100),
     requestId: z.uuid(),
     issuedAt: z.number().int().positive(),
@@ -63,6 +64,23 @@ export const erpProjectMappingSchema = z
   .strict();
 
 export type ErpProjectMapping = z.infer<typeof erpProjectMappingSchema>;
+
+/**
+ * Consistency guard for a mapping already loaded by a trusted server-side
+ * resolver. This is not an authorization check and must not replace membership,
+ * entitlement, project-grant, signature or database partition enforcement.
+ */
+export function erpMappingMatchesRequestContext(
+  mapping: ErpProjectMapping,
+  context: ErpRequestContext,
+): boolean {
+  return (
+    mapping.status === 'active' &&
+    mapping.organizationId === context.organizationId &&
+    mapping.businessProjectId === context.projectId &&
+    mapping.partitionId === context.partitionId
+  );
+}
 
 export const erpBoqCreateSchema = z
   .object({
