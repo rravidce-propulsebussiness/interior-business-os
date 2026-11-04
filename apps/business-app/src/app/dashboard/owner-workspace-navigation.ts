@@ -180,12 +180,18 @@ export function ownerWorkspaceNavigation(
       href: '/dashboard/reports',
       icon: 'reports',
     });
-  if (has('automation.view'))
+  if (has('automation.view')) {
+    items.push({
+      label: 'WhatsApp',
+      href: '/dashboard/whatsapp',
+      icon: 'message',
+    });
     items.push({
       label: 'Automations',
       href: '/dashboard/automations',
       icon: 'settings',
     });
+  }
   if (has('team.manage'))
     items.push({
       label: 'Employees',
