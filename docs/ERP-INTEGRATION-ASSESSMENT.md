@@ -1,8 +1,8 @@
 # OpenConstructionERP Integration Assessment
 
-Status: source import completed; architecture assessment in progress.
+Status: source import complete; capability and tenancy review recorded. No ERP runtime is exposed to Business OS users yet.
 
-## Verified import
+## Verified source import
 
 - Upstream: `datadrivenconstruction/OpenConstructionERP`
 - Pinned upstream commit: `2d27b866937ea3bd66d3878707b357a3099ba7fa`
@@ -10,71 +10,105 @@ Status: source import completed; architecture assessment in progress.
 - Imported files: 15,554
 - Destination branch: `integration/full-erp-merge`
 - Import commit: `f4c5cd083d849de0a2ee56400cc6f61c8b711945`
-- Import workflow: completed successfully; clone, source copy, and commit/push steps all passed.
+- Import workflow: successful (run #3)
 - Root and backend copies of `LICENSE` and `NOTICE` are retained.
 
-This is a preserved source import. It is not yet a production integration, and no ERP database migrations have been applied to Business OS.
+This is a preserved source import, not a production integration.
 
-## Runtime boundary
+## Runtime and database findings
 
-Business OS is a pnpm TypeScript monorepo with Next.js apps and shared packages, backed by Supabase/PostgreSQL.
+Business OS is a pnpm TypeScript monorepo with Next.js applications, shared packages and Supabase/PostgreSQL.
 
-The imported ERP has its own Python 3.12+ backend project and React/Vite frontend project. Its backend includes Alembic migration configuration and independent runtime/database assumptions. The backend README describes a bundled embedded PostgreSQL first-run experience, while the checked-in Alembic configuration contains a SQLite URL; this discrepancy must be resolved by tracing the actual runtime settings before any deployment or migration work.
+OpenConstructionERP has a separate Python 3.12+ backend and React/Vite frontend. Its backend `app/database.py` explicitly enforces PostgreSQL and describes embedded PostgreSQL as the default, with external PostgreSQL supported through `DATABASE_URL`. The backend README also documents the embedded PostgreSQL setup. The checked-in `alembic.ini` has a SQLite URL, but this is not sufficient evidence that SQLite is supported by the live backend; treat it as a stale/default migration configuration until the Alembic environment and runtime URL override are traced. Do not use SQLite as the integration target.
 
-Do not combine the two dependency graphs or start the ERP's standalone frontend as the Business OS user interface. Keep the source isolated while the integration boundary is designed.
+The backend `main.py` mounts many module routers under its API and establishes request-time RLS context. Its startup path can run PostgreSQL schema-healing/migration logic. It must not be pointed at the existing Business OS Supabase database.
 
-## Recommended target architecture
+## Critical tenant and identity incompatibility
 
-1. **Business OS remains the product shell.** Keep Next.js apps, navigation, design system, Supabase identity, organizations, permissions and existing domain packages as the canonical user-facing platform.
-2. **ERP capability service is initially isolated.** Run the Python backend as a separately versioned internal service with its own controlled database/schema. Do not expose it publicly or trust its standalone login as Business OS authentication.
-3. **Add a typed integration gateway.** Next.js server routes call a server-only adapter. The adapter forwards verified Business OS user and organization context, validates inputs/outputs, applies authorization and records audit events. Never accept organization IDs or role claims from an untrusted browser payload.
-4. **Rebuild the ERP experience in the Business OS UI.** Reuse business workflows and algorithms through service APIs where suitable; progressively implement native Next.js screens using the existing UI package. Do not transplant the Vite app wholesale into the production shell.
-5. **Keep domain ownership explicit.** Business OS remains authoritative for customers, projects, contracts, quotations, billing, vendors, inventory and organization membership wherever those already exist. ERP modules should add specialist construction-estimating capabilities without creating shadow customer/project/quotation records.
-6. **Use an anti-corruption mapping layer.** Map Business OS IDs to ERP IDs through explicit organization-scoped mapping records. Include idempotency, audit history, retry handling and data provenance.
-7. **Reuse the existing quotation engine.** Business OS already has a canonical TypeScript/Zod/Decimal quotation engine. Do not create a second source of truth for customer-facing quotation totals. Evaluate ERP BOQ/takeoff outputs as validated inputs to that engine, with parity tests and clear rounding/unit rules.
-8. **Review migrations before adoption.** Inventory every ERP model, tenant boundary, user assumption, migration and destructive operation. Never run the complete ERP Alembic history against the Business OS Supabase database. Prefer additive, reviewed integration tables and isolated service storage.
-9. **Keep imports and modifications on this branch.** Do not alter production `main` or deployment configuration until build, security, migration, tenancy and workflow tests pass.
+The source file `backend/app/core/tenant_scope.py` explicitly documents that the current ERP has no separate Tenant/Organization entity. Its current tenant fallback is the JWT subject/user ID. `backend/app/dependencies.py` resolves that tenant from the caller token. Its BOQ access checks use project ownership and project membership; assemblies scope through owner IDs; drawing takeoff checks project access.
 
-## Capability integration order
+Business OS uses organization membership and organization-scoped authorization. Therefore:
 
-### Wave 1 — Estimating foundation
-- BOQ item structures, units and conversion rules
-- Safe formula evaluation and validation
-- Resource norms and assemblies
-- Quantity takeoff from drawings/PDF/DWG/BIM
-- Estimate rollups, cost matching and rate build-ups
+- Never pass a Business OS organization ID as if it were an ERP user ID.
+- Never use a shared ERP administrator, demo account or global owner to represent all Business OS organizations.
+- Never trust browser-supplied ERP user IDs, tenant IDs, project IDs or role claims.
+- Do not expose any ERP endpoint until the identity mapping and per-organization authorization model has been implemented and tested.
+- A service credential alone is not a tenant boundary. Every request must be bound to a verified Business OS organization and a narrowly scoped ERP principal or an equivalent server-enforced organization partition.
 
-### Wave 2 — Cost and project controls
-- Cost plans and elemental breakdowns
-- Cashflow forecasting and cost control
-- Progress measurement and earned-value reporting
-- Schedule and risk/contingency calculations
+Required design decision: implement an explicit organization-to-ERP-principal mapping and enforce organization isolation in the ERP service/data layer, or refactor the ERP tenant model to support organization IDs directly. A mapping-only approach is acceptable only if all project, BOQ, assembly, drawing, file, search, background-job, audit and storage access paths are proven to honor the same organization boundary. A single user-owned ERP tenant cannot safely represent multiple Business OS organizations.
 
-### Wave 3 — Specialist optimization
-- Cutting/waste optimization
-- Resource planning and rate/index datasets
-- Advanced BIM/5D/6D workflows and related integrations
+## Capability inventory: first estimating wave
 
-Each capability must have an API contract, organization isolation, authorization policy, data mapping, test fixtures and UI acceptance criteria before being exposed to users.
+### BOQ
+Source area: `backend/app/modules/boq/`
+- Router and service/repository/model/schema layers exist.
+- Supports BOQ/project access checks, sections and positions, quantity links, branches, revisions/export/import and resource norms.
+- Quantities are accepted as numeric values; monetary values use Decimal and are serialized as decimal strings in key schemas.
+- Position unit validation normalizes units.
+- BOQ endpoints depend on ERP project ownership/membership checks. They are not organization-aware by default.
 
-## Required gates before enabling a capability
+### Parametric assemblies
+Source area: `backend/app/modules/assemblies/`
+- Formula engine, parametric assemblies, components and templates.
+- Assembly scope uses owner IDs and project access.
+- Decimal-safe monetary handling is present in important rollups.
+- Must not be treated as organization-isolated until the tenant boundary is corrected.
 
-- Trace runtime configuration, secrets, storage, database, background jobs and external network calls.
-- Identify user, organization, project and permission assumptions in the relevant module.
-- Confirm licence and third-party asset obligations for that module.
-- Define source-of-truth ownership and stable ID mapping.
-- Add API schema and unit/integration tests, including cross-organization access-denial tests.
-- Validate calculation parity, units, rounding and India-specific defaults against reviewed examples.
-- Add feature flag and rollback path; deploy disabled by default.
+### Drawing takeoff
+Source area: `backend/app/modules/dwg_takeoff/`
+- Drawing upload, drawing metadata, annotations, entity groups, scale and quantity links.
+- Project access checks exist around read/write paths.
+- Upload and download paths depend on server storage roots and file handling; these require separate storage isolation, malware/file validation, size limits and signed-access review before enabling.
+- Takeoff output should be reviewed before it updates a BOQ; measurements must not silently overwrite approved quantities.
+
+### Cost matching and estimate rollup
+Source areas: `backend/app/modules/cost_match/` and `backend/app/modules/estimate_rollup/`
+- Separate matching and estimate composition/rollup capabilities exist.
+- Their currency, market/rate provenance, unit conversion and permissions need a focused review before exposing to India projects.
+
+## Recommended product boundary
+
+1. Business OS remains the product shell and canonical identity/organization system.
+2. Business OS remains authoritative for customers, projects, quotations, contracts, billing, vendors, inventory and membership wherever those domains already exist.
+3. ERP specialist estimating services run separately with their own isolated PostgreSQL database initially.
+4. A server-only Business OS adapter authenticates the user, resolves active organization membership and permission, maps the Business OS project to an ERP project, and forwards only server-verified context.
+5. ERP response data is validated by a typed contract before being returned to the UI.
+6. BOQ/takeoff quantities may feed the existing Business OS quotation engine as reviewed inputs. Do not create a second customer-facing quotation total engine.
+7. Rebuild estimating screens in the Business OS Next.js design system; do not expose the imported standalone Vite app as the new product UI.
+
+## First API contract (proposed, not implemented)
+
+- `POST /internal/v1/organizations/{organizationId}/projects/{projectId}/boqs`: create a draft BOQ only after server-side org membership, project mapping and permission checks.
+- `GET /internal/v1/organizations/{organizationId}/projects/{projectId}/boqs`: list BOQs within the mapped organization/project.
+- `GET /internal/v1/organizations/{organizationId}/boqs/{boqId}`: fetch BOQ with explicit org/project ownership check.
+- `POST /internal/v1/organizations/{organizationId}/boqs/{boqId}/positions`: add a validated position; use decimal strings for rates/money and normalized units.
+- `POST /internal/v1/organizations/{organizationId}/boqs/{boqId}/takeoff-imports`: stage takeoff quantities for review; never silently apply to approved/issued BOQ positions.
+- `POST /internal/v1/organizations/{organizationId}/boqs/{boqId}/takeoff-imports/{importId}/apply`: explicit authorized apply action with idempotency key, before/after audit record and version check.
+
+The organization ID in these paths is a routing scope, not authorization. The gateway and ERP service must independently verify the signed server context and resource ownership. Do not expose these proposed paths until implemented.
+
+## Required security and correctness gates
+
+- Organization isolation tests: organization A cannot read, mutate, enumerate, search, export or download organization B data.
+- Cross-project access tests for BOQs, assemblies, drawings, annotations, files and background jobs.
+- Explicit ERP principal mapping; no shared admin identity.
+- Signed service-to-service authentication, audience/issuer checks, short expiry and replay protection.
+- Idempotency and audit history for create/update/import/apply operations.
+- File storage path isolation, content-type validation, upload limits, malware scanning and signed download URLs.
+- Decimal string handling, unit conversion, quantity bounds, rounding rules and India-specific rate provenance.
+- BOQ version checks and approval workflow before quantities affect customer quotations.
+- Separate database and migration rehearsal; no ERP schema healing against Business OS Supabase.
+- Feature flag, observability, rate limits and rollback plan.
 
 ## Licence and attribution
 
-The imported source identifies itself as AGPL-3.0-or-later and includes a commercial-licence contact in its NOTICE. Preserve the original licence, notices, authorship and third-party attributions. Before distributing a combined derivative or making modified covered functionality available over a network, obtain legal review of AGPL source-availability, notice and corresponding-source obligations, or negotiate a suitable commercial licence. Do not represent the source as unrestricted proprietary code.
+OpenConstructionERP declares AGPL-3.0-or-later. Preserve the original licence, notices, authorship and third-party attributions. Before distributing a combined derivative or making modified covered functionality available over a network, obtain legal review of AGPL source-availability, notice and corresponding-source obligations, or negotiate a suitable commercial licence. Open source does not mean unrestricted proprietary reuse.
 
 ## Current exclusions
 
-- No merge of ERP authentication into Business OS auth.
-- No direct ERP database migration into Supabase.
-- No overwrite of existing Next.js apps, packages, quotation engine, CRM, procurement or execution modules.
+- No ERP auth merged into Business OS auth.
+- No direct ERP migration into Business OS Supabase.
 - No public exposure of the imported standalone frontend/backend.
+- No shared admin or demo identity used for organization tenancy.
+- No ERP quantity silently overwrites approved Business OS estimates or quotations.
 - No production deployment or merge to `main`.
