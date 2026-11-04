@@ -46,6 +46,24 @@ export const erpRequestContextSchema = z
     path: ['expiresAt'],
   });
 
+/**
+ * Server-resolved mapping between an authorized Business OS project and its
+ * isolated ERP project. This is an internal response/command contract only:
+ * parsing it never proves membership or authorizes a lookup.
+ */
+export const erpProjectMappingSchema = z
+  .object({
+    organizationId: erpIdSchema,
+    businessProjectId: erpIdSchema,
+    erpProjectId: erpIdSchema,
+    partitionId: erpIdSchema,
+    status: z.enum(['active', 'suspended', 'revoked']),
+    mappingVersion: z.number().int().positive(),
+  })
+  .strict();
+
+export type ErpProjectMapping = z.infer<typeof erpProjectMappingSchema>;
+
 export const erpBoqCreateSchema = z
   .object({
     projectId: erpIdSchema,
