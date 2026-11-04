@@ -370,3 +370,37 @@ Tests cover missing/invalid mapping fields, unknown client-supplied mapping fiel
 ### CI status for the current contract work
 
 The latest workflow for commit `3b363c630d14e03f431cd0814347c36e3781f77b` ran the dedicated ERP contract tests, acceptance suite, dependency security check, database checks and application/workspace builds successfully. The verify job failed at the existing repository-wide `pnpm check` step. The live diagnostic job also failed its Hostinger public-renderer/health check while the local Chromium job passed. These failures are separate from the ERP contract test result and remain open; do not treat the branch as release-ready.
+
+## BOQ repository/service authorization trace (2026-11-04)
+
+A direct trace of the pinned BOQ repository, service and router confirms that project checks in the upstream router are ERP-user checks, while the repository layer accepts bare identifiers. This is an explicit adapter boundary blocker, not a finding that the upstream application is necessarily insecure in its own single-tenant/user model.
+
+### Bare-ID repository methods observed
+
+In `vendor/openconstructionerp/backend/app/modules/boq/repository.py`:
+
+- `BOQRepository.get_by_id` uses `session.get(BOQ, boq_id)`; `get_header`, `update_fields` and `delete` predicate only on BOQ ID.
+- BOQ lists filter by project ID, but have no organization partition predicate.
+- Position `get_by_id`, `list_by_ids`, `list_children`, BOQ lists and mutation methods are keyed by position/BOQ IDs only.
+- Markup and quantity-link get/update/delete methods similarly accept bare row IDs or BOQ/position IDs.
+- Activity and exchange-report methods scope by BOQ/project IDs, not an organization partition.
+- Aggregate totals, resource-code lookups and bulk methods accept ID arrays/project IDs without a tenant partition argument.
+
+The service layer composes these methods and often resolves a BOQ/position parent before acting. That parent traversal is useful for ordinary project authorization, but it does not establish a Business OS organization grant and cannot be treated as a tenant boundary.
+
+### Router authorization observed
+
+The BOQ router defines helpers such as `project_access`, `_readable_projects_for_boq` and `_verify_project_owner_for_boq`. These inspect the upstream ERP Project owner, ERP team membership and ERP admin role. BOQ create/list and several project activity/resource routes invoke those helpers. Bulk listing first filters the requested project IDs through the same ERP-user model.
+
+Other handlers fetch child rows (for example a position by ID) and then rely on their parent/project context. For a Business OS adapter, every such entry point must be guarded by the verified Business OS organization + project mapping before the child lookup, and the database/repository must independently enforce the resolved partition. A child identifier must never be accepted as proof of access.
+
+### Required adapter rule
+
+Do not proxy these existing router endpoints directly. The future gateway must:
+1. Resolve the active Business OS organization using the existing request-scoped auth context; do not accept organization or partition as trusted browser input.
+2. Authorize the Business OS project grant and resolve exactly one active server-side mapping.
+3. Construct the signed short-lived ERP context with the mapping's partition ID and the mapped ERP project ID.
+4. Require ERP repositories/services to constrain every read/write to that partition; enforce parent-child consistency with composite constraints.
+5. Re-authorize current membership/mapping for async results, exports and downloads.
+
+No upstream BOQ repository method is currently partition-safe by itself. The pinned vendor tree remains unchanged; a separate integration fork/patch set and two-organization database tests are required before any route can be exposed.
