@@ -310,3 +310,51 @@ Do not expose file-manager aggregation, raw document/photo/BIM/DWG downloads, bu
 ## CI status note (2026-11-04)
 
 The latest Foundation checks run for commit `ebd630dea7e76c4129c21185acf4592c57b7517f` completed with failure at `pnpm check`. The targeted tests, acceptance tests, dependency security step, database verification/type/seed checks, application build, and workspace typecheck/build all completed successfully. Later audit, Playwright installation and recovery-test steps were skipped because the formatting check failed. Earlier runs show the same repository-wide Prettier failure (hundreds of files); do not treat the pipeline as green or mass-format the imported upstream snapshot to conceal existing formatting debt. The formatting gate remains a release blocker until the repository's baseline is addressed deliberately.
+
+## ERP database partition design and migration gates (2026-11-04)
+
+### Finding: project ownership alone is insufficient
+
+The inspected SQLAlchemy models confirm that the upstream schema is not organization-partitioned:
+
+- Project has an owner_id FK to the ERP user table, but no organization/partition column.
+- BOQ has a project_id FK, but no organization/partition column. Positions and markups inherit through BOQ; BOQ activity rows can refer to a project and/or BOQ.
+- DwgDrawing has a project_id; versions and entity groups inherit through drawing. Annotations carry both project and drawing IDs, so consistency between those two parent paths must be enforced.
+- Assembly has optional project_id and owner_id; assemblies can also be templates. Components inherit through assembly. The current globally unique assembly code and global template catalogue need an explicit global-vs-tenant classification before partitioning.
+- Generic jobs do not yet have reliable per-row owner/project authorization. They are admin-gated as an interim IDOR mitigation, and cannot be considered tenant-isolated.
+
+### Proposed partition key and relational constraints
+
+Use an immutable ERP organization_partition_id (UUID) on every tenant-owned root row, with a server-controlled mapping to the Business OS organization UUID. Do not store or trust a browser-provided partition key. The server-side adapter resolves the partition only from the verified active Business OS organization and its authorized project mapping.
+
+For project-owned tables, add a composite unique key on (organization_partition_id, id) to the parent and composite foreign keys on child tables, e.g. BOQ (organization_partition_id, project_id) -> Project (organization_partition_id, id); Position (organization_partition_id, boq_id) -> BOQ; DrawingVersion/EntityGroup (organization_partition_id, drawing_id) -> Drawing; Annotation must reference both its drawing and project within the same partition. Use equivalent composite constraints for Assembly -> Project and Component -> Assembly. Keep ordinary primary keys for compatibility where safe, but all tenant-facing lookup/update/delete predicates must include the partition.
+
+The partition key must propagate into activity/audit rows, import/export records, background jobs, websocket/progress state, search indexes, caches and storage object keys. Global reference catalogues and built-in templates must be explicitly classified as shared read-only data or copied into tenant-owned versioned snapshots; a nullable partition value must never silently mean unrestricted access.
+
+### Migration sequence (design only; no migration applied)
+
+1. Inventory every SQLAlchemy model, migration, raw SQL query, repository, worker, event handler and storage backend. Classify each table as tenant-owned, shared read-only catalogue, platform-only or ephemeral.
+2. Create a dedicated ERP database migration branch and disposable PostgreSQL test database. Never run upstream Alembic against the Business OS Supabase database.
+3. Add nullable partition columns to tenant-owned roots and children, plus composite unique constraints/FKs. Add indexes beginning with the partition key for hot lookup paths.
+4. Backfill only from verified project ownership and reviewed Business OS mapping records. Quarantine ambiguous rows; never guess from an admin user, email, default tenant, or creator ID.
+5. Update all repositories/services to require a non-null partition context. Make partition-scoped get, list, count, search, update, delete, relationship traversal and bulk operations mandatory. Remove None/admin unrestricted behavior from tenant-facing paths.
+6. Propagate partition context to jobs, exports, files, caches, search and event payloads. Re-authorize current membership and mapping when retrieving asynchronous results or downloading files.
+7. Validate there are no null tenant partitions, cross-partition parent-child references, duplicate ownership mappings or unscoped tenant queries. Only then enforce NOT NULL and enable database RLS/forced RLS or an equivalent independently tested database boundary.
+8. Rehearse upgrade, rollback and backup restore with representative data. Run two-organization negative tests and concurrency tests before enabling the server adapter.
+
+### Minimum two-organization acceptance matrix
+
+| Surface | Org A request against Org B identifier | Required result |
+|---|---|---|
+| Project / project register | Read, list, count, search | Deny or omit without leaking existence/count |
+| BOQ / position / markup | Read, mutate, delete, compare, duplicate | Deny; child inherits parent partition |
+| Drawing / version / annotation / entity group | Read, annotate, convert, download | Deny; all parent references same partition |
+| Assembly / component / template | Read, clone, reassign, edit | Deny; shared templates read-only only |
+| File / attachment / bundle | Guess ID/path, export, import, replace | Deny; no raw path or cross-org archive |
+| Job / progress / result | Poll, cancel, download after transfer | Deny; re-check current authorization |
+| Bulk / pagination / similarity | Include mixed-org IDs | Only authorized rows; no count or timing oracle |
+| Admin / platform operations | ERP global-admin token in tenant route | Deny; separate audited support path only |
+
+Repeat the matrix for a user who belongs to both organizations after switching the active Business OS organization. Also test project transfer/unmapping during an in-flight job, concurrent update/delete, malformed nested IDs, idempotent retries and revoked membership.
+
+No database migration or runtime adapter is approved by this design document. The source snapshot remains pinned and unmodified; implementation patches belong in a separate integration layer or dedicated ERP fork so upstream provenance remains reviewable.
