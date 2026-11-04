@@ -24,18 +24,24 @@ describe('ERP boundary contracts', () => {
     expect(parsed.success).toBe(true);
   });
 
-  it('rejects an expired or inverted server context', () => {
+  it('rejects expired, inverted, or excessively long server contexts', () => {
+    const context = {
+      issuer: 'https://business-os.internal',
+      audience: 'openconstructionerp-internal',
+      subjectUserId: id,
+      organizationId: id,
+      projectId: id,
+      permissions: [],
+      requestId: id,
+      issuedAt: 200,
+      expiresAt: 100,
+    };
+
+    expect(erpRequestContextSchema.safeParse(context).success).toBe(false);
     expect(
       erpRequestContextSchema.safeParse({
-        issuer: 'https://business-os.internal',
-        audience: 'openconstructionerp-internal',
-        subjectUserId: id,
-        organizationId: id,
-        projectId: id,
-        permissions: [],
-        requestId: id,
-        issuedAt: 200,
-        expiresAt: 100,
+        ...context,
+        expiresAt: 501,
       }).success,
     ).toBe(false);
   });
