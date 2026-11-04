@@ -12,7 +12,10 @@ export const erpIdSchema = z.uuid();
 
 export const erpDecimalSchema = z
   .string()
-  .regex(/^(0|[1-9]\d{0,11})(\.\d{1,6})?$/, 'Expected a non-negative decimal string');
+  .regex(
+    /^(0|[1-9]\\d{0,11})(\\.\\d{1,6})?$/,
+    'Expected a non-negative decimal string',
+  );
 
 export const erpUnitSchema = z
   .string()
@@ -36,6 +39,10 @@ export const erpRequestContextSchema = z
   .strict()
   .refine((value) => value.expiresAt > value.issuedAt, {
     message: 'Context expiry must be after issue time',
+    path: ['expiresAt'],
+  })
+  .refine((value) => value.expiresAt - value.issuedAt <= 300, {
+    message: 'Context lifetime must not exceed 300 seconds',
     path: ['expiresAt'],
   });
 
