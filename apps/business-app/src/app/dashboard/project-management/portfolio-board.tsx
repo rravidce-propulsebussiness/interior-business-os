@@ -172,7 +172,11 @@ export function PortfolioBoard({
                 )}
                 {canTasks && (
                   <Link
-                    href={(canExecution ? '/dashboard/project-management/tasks' : '/dashboard/operations/project_tasks') + queryString}
+                    href={
+                      (canExecution
+                        ? '/dashboard/project-management/tasks'
+                        : '/dashboard/operations/project_tasks') + queryString
+                    }
                   >
                     Tasks
                   </Link>

@@ -42,9 +42,15 @@ describe('project management navigation and trusted portfolio boundaries', () =>
   });
 
   it('falls back to the existing task register without execution permission', () => {
-    const projects = ownerWorkspaceNavigation(company(['project.view', 'task.view']));
-    expect(projects.find((item) => item.label === 'Project Management')?.children)
-      .toContainEqual({ label: 'Task Register', href: '/dashboard/operations/project_tasks' });
+    const projects = ownerWorkspaceNavigation(
+      company(['project.view', 'task.view']),
+    );
+    expect(
+      projects.find((item) => item.label === 'Project Management')?.children,
+    ).toContainEqual({
+      label: 'Task Register',
+      href: '/dashboard/operations/project_tasks',
+    });
   });
 
   it('never offers the owner portfolio to a role without project.view', () => {

@@ -101,7 +101,9 @@ export default async function ProjectManagementPage() {
       ? [
           {
             label: canExecution ? 'Task Board' : 'Task Register',
-            href: canExecution ? '/dashboard/project-management/tasks' : '/dashboard/operations/project_tasks',
+            href: canExecution
+              ? '/dashboard/project-management/tasks'
+              : '/dashboard/operations/project_tasks',
             icon: 'calendar' as const,
           },
         ]
@@ -249,7 +251,11 @@ export default async function ProjectManagementPage() {
               {canTasks && (
                 <Link
                   className="pm-text-link"
-                  href={canExecution ? '/dashboard/project-management/tasks' : '/dashboard/operations/project_tasks'}
+                  href={
+                    canExecution
+                      ? '/dashboard/project-management/tasks'
+                      : '/dashboard/operations/project_tasks'
+                  }
                 >
                   {canExecution ? 'Task Board' : 'Task register'} →
                 </Link>
