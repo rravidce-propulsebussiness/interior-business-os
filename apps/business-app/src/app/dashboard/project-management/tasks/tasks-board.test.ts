@@ -1,13 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
-const read = (name: string) => readFileSync(new URL(name, import.meta.url), 'utf8');
+const read = (name: string) =>
+  readFileSync(new URL(name, import.meta.url), 'utf8');
 const page = read('./page.tsx');
 const nav = read('../../owner-workspace-navigation.ts');
 const operation = read('../../operations/service.ts');
 describe('permission-safe project task board', () => {
   it('reuses canonical Operations task RPCs with tenant permission checks', () => {
     expect(page).toContain("operationsServices('task.view', true)");
-    expect(page).toContain("s.operations.search('project_tasks', { project_id: project }, page)");
+    expect(page).toContain(
+      "s.operations.search('project_tasks', { project_id: project }, page)",
+    );
     expect(page).toContain("s.operations.options('projects'");
     expect(page).toContain('z.uuid().safeParse');
     expect(operation).toContain('authorization.requirePermission');
