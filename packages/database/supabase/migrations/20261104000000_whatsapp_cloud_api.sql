@@ -1,5 +1,13 @@
 begin;
 
+do $
+begin
+  if not exists (select 1 from pg_catalog.pg_roles where rolname = 'service_role') then
+    create role service_role nologin bypassrls;
+  end if;
+end;
+$;
+
 create table public.whatsapp_business_connections (
   id uuid primary key default gen_random_uuid(),
   organization_id uuid not null references public.organizations(id) on delete cascade,
@@ -26,6 +34,7 @@ grant select (id, organization_id, waba_id, business_name, phone_number_id, disp
   on public.whatsapp_business_connections to authenticated;
 create policy whatsapp_connections_read on public.whatsapp_business_connections
   for select to authenticated using (private.has_permission(organization_id, 'automation.view'));
+grant select on public.whatsapp_business_connections to service_role;
 
 create function public.whatsapp_connection_save(
   p_organization_id uuid,
