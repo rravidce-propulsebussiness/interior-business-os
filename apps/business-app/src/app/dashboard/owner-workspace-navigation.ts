@@ -76,10 +76,15 @@ export function ownerWorkspaceNavigation(
         { label: 'Projects', href: '/dashboard/projects' },
         ...(has('task.view', 'projects')
           ? [
-              {
-                label: 'Task Register',
-                href: '/dashboard/operations/project_tasks',
-              },
+              has('execution.view', 'projects')
+                ? {
+                    label: 'Task Board',
+                    href: '/dashboard/project-management/tasks',
+                  }
+                : {
+                    label: 'Task Register',
+                    href: '/dashboard/operations/project_tasks',
+                  },
             ]
           : []),
         ...(has('milestone.view', 'projects')
