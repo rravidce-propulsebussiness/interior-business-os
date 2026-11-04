@@ -140,3 +140,31 @@ The takeoff repository confirms that project checks alone are not a sufficient o
 6. Until those changes land, the safe integration surface remains typed contracts and documentation only; no takeoff proxy or UI feature flag should be enabled.
 
 These findings are a code-level review of the takeoff models/repository, not a claim that every route is exploitable. Router/service authorization still needs endpoint-by-endpoint tracing and adversarial tests before any exposure.
+
+
+## Additional takeoff route and authorization review (2026-11-04)
+
+The endpoint review reinforces that upstream authentication/RBAC is user/role based, not organization based:
+
+- `RequirePermission` requires a valid ERP access token and checks the token's permission list/live role registry. The `admin` role bypasses every module permission. This establishes authentication and feature permission, but not Business OS organization membership.
+- `verify_project_access` checks ERP project existence, ERP admin status, owner ID and ERP team membership. An ERP admin can reach any ERP project. That bypass cannot be used as a substitute for an organization boundary.
+- The `/cad-extract/` endpoint requires `takeoff.read` but has no project parameter or persistent project association. It performs conversion and returns grouped results directly. It must remain disabled in any multi-organization proxy until an explicit organization/project context and resource policy are added.
+- The interactive `/cad-columns/` flow creates a CAD session and records the ERP user ID; follow-up grouping endpoints call `_verify_cad_session_access`. Project-bound sessions reuse ERP project access; standalone sessions require exact uploader identity. This is a useful user-level IDOR defense, but it does not support shared organization membership or organization transfer.
+- `_get_session_from_db` retrieves a CAD session by session ID and expiry first; the route-level ownership helper is what gates subsequent use. The in-memory fast path has the same requirement. Every consumer must preserve that guard.
+- Converter install/uninstall and converter progress operate on shared server-level binaries/progress keyed by converter ID, not tenant-owned business data. These are host-administration capabilities, not organization features; they should not be exposed to ordinary Business OS members. In particular, a shared progress feed should not be treated as per-user status or authorization.
+- `/cad-extract/` and `/cad-columns/` have permission dependencies, so they are not anonymous endpoints; however, permission alone is not the same as a verified project/organization grant.
+
+### Integration disposition from this review
+
+No takeoff routes are approved for proxying yet. First candidates after remediation should be limited to explicitly project-bound BOQ/document/measurement operations. Keep converter management, host diagnostics, unscoped CAD conversion, and global install progress outside the Business OS tenant-facing API.
+
+Required automated test matrix must include:
+- ordinary member versus organization admin versus ERP global admin;
+- two Business OS organizations mapped to distinct ERP project partitions;
+- direct-ID reads and mutations with guessed IDs;
+- standalone CAD session owner versus another member of the same organization;
+- project-bound session access by an authorized teammate in the same organization;
+- attempts to use another organization's project ID even when the caller has the same ERP role;
+- unscoped conversion endpoints and host-level converter controls blocked from the tenant-facing gateway.
+
+The upstream checks provide a useful starting point for user-level access control, but they do not establish organization-level isolation. This distinction is now explicit in the integration gate.
