@@ -25,7 +25,13 @@ export function PortfolioBoard({
     const term = query.trim().toLowerCase();
     const selection = projects.filter((project) => {
       const category = projectCategory(project.status);
-      const matches = [project.name, project.code, project.client, project.address, project.industry]
+      const matches = [
+        project.name,
+        project.code,
+        project.client,
+        project.address,
+        project.industry,
+      ]
         .join(' ')
         .toLowerCase()
         .includes(term);
@@ -39,7 +45,8 @@ export function PortfolioBoard({
     });
     return selection.sort((left, right) => {
       if (sort === 'name') return left.name.localeCompare(right.name);
-      if (sort === 'progress') return (right.progress ?? -1) - (left.progress ?? -1);
+      if (sort === 'progress')
+        return (right.progress ?? -1) - (left.progress ?? -1);
       return right.createdAt.localeCompare(left.createdAt);
     });
   }, [projects, attention, filter, query, sort]);
@@ -49,7 +56,9 @@ export function PortfolioBoard({
     { key: 'ongoing', label: 'Ongoing' },
     { key: 'completed', label: 'Completed' },
     { key: 'on_hold', label: 'On hold' },
-    ...(attention ? [{ key: 'attention' as const, label: 'Needs attention' }] : []),
+    ...(attention
+      ? [{ key: 'attention' as const, label: 'Needs attention' }]
+      : []),
   ];
 
   return (
@@ -76,7 +85,10 @@ export function PortfolioBoard({
         </label>
         <label className="pm-sort">
           <span>Sort by</span>
-          <select value={sort} onChange={(event) => setSort(event.target.value)}>
+          <select
+            value={sort}
+            onChange={(event) => setSort(event.target.value)}
+          >
             <option value="newest">Newest first</option>
             <option value="name">Project name</option>
             <option value="progress">Physical progress</option>
@@ -88,7 +100,9 @@ export function PortfolioBoard({
           <button
             type="button"
             key={item.key}
-            className={filter === item.key ? 'pm-filter is-active' : 'pm-filter'}
+            className={
+              filter === item.key ? 'pm-filter is-active' : 'pm-filter'
+            }
             aria-pressed={filter === item.key}
             onClick={() => setFilter(item.key)}
           >
@@ -126,7 +140,11 @@ export function PortfolioBoard({
               </p>
               <div className="pm-progress-heading">
                 <span>Measured task progress</span>
-                <strong>{project.progress === null ? 'Not tracked' : project.progress + '%'}</strong>
+                <strong>
+                  {project.progress === null
+                    ? 'Not tracked'
+                    : project.progress + '%'}
+                </strong>
               </div>
               <div
                 className="pm-progress-track"
@@ -135,7 +153,11 @@ export function PortfolioBoard({
                 aria-valuemin={0}
                 aria-valuemax={100}
                 aria-valuenow={project.progress ?? undefined}
-                aria-valuetext={project.progress === null ? 'Not tracked' : project.progress + '%'}
+                aria-valuetext={
+                  project.progress === null
+                    ? 'Not tracked'
+                    : project.progress + '%'
+                }
               >
                 <span style={{ width: (project.progress ?? 0) + '%' }} />
               </div>
@@ -144,10 +166,14 @@ export function PortfolioBoard({
                   Project workspace
                 </Link>
                 {canExecution && (
-                  <Link href={'/dashboard/operations' + queryString}>Site execution</Link>
+                  <Link href={'/dashboard/operations' + queryString}>
+                    Site execution
+                  </Link>
                 )}
                 {canTasks && (
-                  <Link href={'/dashboard/operations/project_tasks' + queryString}>
+                  <Link
+                    href={'/dashboard/operations/project_tasks' + queryString}
+                  >
                     Tasks
                   </Link>
                 )}
@@ -157,7 +183,11 @@ export function PortfolioBoard({
         })}
         {!matching.length && (
           <div className="pm-empty">
-            <strong>{projects.length ? 'No matching projects' : 'No projects recorded yet'}</strong>
+            <strong>
+              {projects.length
+                ? 'No matching projects'
+                : 'No projects recorded yet'}
+            </strong>
             <p>
               {projects.length
                 ? 'Adjust the search or status filter.'

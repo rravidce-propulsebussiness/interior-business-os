@@ -57,7 +57,12 @@ export function ownerWorkspaceNavigation(
         { label: 'My Quotes', href: '/dashboard/quotations' },
         { label: 'Packages', href: '/dashboard/quotations/packages' },
         ...(has('catalog.view', 'catalog') && has('pricing.view', 'pricing')
-          ? [{ label: 'Construction Pricing', href: '/dashboard/pricing/construction' }]
+          ? [
+              {
+                label: 'Construction Pricing',
+                href: '/dashboard/pricing/construction',
+              },
+            ]
           : []),
       ],
     });
@@ -70,10 +75,20 @@ export function ownerWorkspaceNavigation(
         { label: 'Portfolio Overview', href: '/dashboard/project-management' },
         { label: 'Projects', href: '/dashboard/projects' },
         ...(has('task.view', 'projects')
-          ? [{ label: 'Task Register', href: '/dashboard/operations/project_tasks' }]
+          ? [
+              {
+                label: 'Task Register',
+                href: '/dashboard/operations/project_tasks',
+              },
+            ]
           : []),
         ...(has('milestone.view', 'projects')
-          ? [{ label: 'Milestones', href: '/dashboard/operations/project_milestones' }]
+          ? [
+              {
+                label: 'Milestones',
+                href: '/dashboard/operations/project_milestones',
+              },
+            ]
           : []),
       ],
     });

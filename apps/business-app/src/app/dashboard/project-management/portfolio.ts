@@ -28,8 +28,12 @@ export function portfolioSnapshot(
   today: string,
 ) {
   const total = projects.length;
-  const completed = projects.filter((item) => projectCategory(item.status) === 'completed').length;
-  const onHold = projects.filter((item) => projectCategory(item.status) === 'on_hold').length;
+  const completed = projects.filter(
+    (item) => projectCategory(item.status) === 'completed',
+  ).length;
+  const onHold = projects.filter(
+    (item) => projectCategory(item.status) === 'on_hold',
+  ).length;
   const tracked = projects.filter((item) => item.progress !== null);
   const averageProgress = tracked.length
     ? Math.round(
@@ -58,7 +62,9 @@ export function portfolioSnapshot(
         .sort((a, b) => {
           const priority = { blocked: 0, overdue: 1, due_soon: 2 };
           const left = priority[a.kind] - priority[b.kind];
-          return left || (a.planned_end ?? '').localeCompare(b.planned_end ?? '');
+          return (
+            left || (a.planned_end ?? '').localeCompare(b.planned_end ?? '')
+          );
         })
     : null;
   const byProject: Record<string, number> = {};
@@ -75,6 +81,7 @@ export function portfolioSnapshot(
     byProject,
     blocked: alerts?.filter((alert) => alert.kind === 'blocked').length ?? null,
     overdue: alerts?.filter((alert) => alert.kind === 'overdue').length ?? null,
-    dueSoon: alerts?.filter((alert) => alert.kind === 'due_soon').length ?? null,
+    dueSoon:
+      alerts?.filter((alert) => alert.kind === 'due_soon').length ?? null,
   };
 }

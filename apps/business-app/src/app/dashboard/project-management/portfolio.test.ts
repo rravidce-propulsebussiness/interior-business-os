@@ -1,8 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import type { ProjectEntry } from '../projects/project-v2-types';
-import { portfolioSnapshot, projectCategory, type PortfolioTask } from './portfolio';
+import {
+  portfolioSnapshot,
+  projectCategory,
+  type PortfolioTask,
+} from './portfolio';
 
-function project(id: string, status: string, progress: number | null): ProjectEntry {
+function project(
+  id: string,
+  status: string,
+  progress: number | null,
+): ProjectEntry {
   return {
     id,
     name: 'Project ' + id,
@@ -24,7 +32,14 @@ function task(
   planned_end: string | null,
   project_id = 'p1',
 ): PortfolioTask {
-  return { id, status, planned_end, project_id, title: 'Task ' + id, priority: 'normal' };
+  return {
+    id,
+    status,
+    planned_end,
+    project_id,
+    title: 'Task ' + id,
+    priority: 'normal',
+  };
 }
 
 describe('construction project portfolio, based on canonical records', () => {
@@ -34,7 +49,11 @@ describe('construction project portfolio, based on canonical records', () => {
     expect(projectCategory('on_hold')).toBe('on_hold');
     expect(projectCategory('active')).toBe('ongoing');
     const summary = portfolioSnapshot(
-      [project('p1', 'active', 55), project('p2', 'completed', null), project('p3', 'on_hold', 25)],
+      [
+        project('p1', 'active', 55),
+        project('p2', 'completed', null),
+        project('p3', 'on_hold', 25),
+      ],
       null,
       '2026-11-04',
     );
@@ -81,7 +100,11 @@ describe('construction project portfolio, based on canonical records', () => {
   });
 
   it('keeps unknown progress and permissions unknown, not zero', () => {
-    const result = portfolioSnapshot([project('p1', 'active', null)], null, '2026-11-04');
+    const result = portfolioSnapshot(
+      [project('p1', 'active', null)],
+      null,
+      '2026-11-04',
+    );
     expect(result.averageProgress).toBeNull();
     expect(result.alerts).toBeNull();
     expect(result.byProject).toEqual({});

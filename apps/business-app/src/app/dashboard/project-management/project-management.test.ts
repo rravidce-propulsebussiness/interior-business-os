@@ -8,7 +8,10 @@ type Context = NonNullable<Parameters<typeof ownerWorkspaceNavigation>[0]>;
 const read = (path: string) =>
   readFileSync(new URL(path, import.meta.url), 'utf8');
 
-function company(permissions: string[], entitlements: string[] = ['projects']): Context {
+function company(
+  permissions: string[],
+  entitlements: string[] = ['projects'],
+): Context {
   return {
     userId: 'test-member',
     organizationId: 'test-company',
@@ -23,7 +26,9 @@ function company(permissions: string[], entitlements: string[] = ['projects']): 
 
 describe('project management navigation and trusted portfolio boundaries', () => {
   it('opens one portfolio and canonical projects under an authorized group', () => {
-    const items = ownerWorkspaceNavigation(company(['project.view', 'task.view']));
+    const items = ownerWorkspaceNavigation(
+      company(['project.view', 'task.view']),
+    );
     expect(items.find((item) => item.label === 'Project Management')).toEqual({
       label: 'Project Management',
       href: '/dashboard/project-management',
@@ -51,26 +56,32 @@ describe('project management navigation and trusted portfolio boundaries', () =>
 
   it('shows only destinations for actual source permissions', () => {
     const navigation = ownerWorkspaceNavigation(
-      company([
-        'project.view',
-        'quotation.view',
-        'catalog.view',
-        'pricing.view',
-        'brochure.view',
-        'automation.view',
-        'notification.view',
-      ], ['projects', 'quotation', 'catalog', 'pricing', 'brochure']),
+      company(
+        [
+          'project.view',
+          'quotation.view',
+          'catalog.view',
+          'pricing.view',
+          'brochure.view',
+          'automation.view',
+          'notification.view',
+        ],
+        ['projects', 'quotation', 'catalog', 'pricing', 'brochure'],
+      ),
     );
-    const projectNav = navigation.find((item) => item.label === 'Project Management');
+    const projectNav = navigation.find(
+      (item) => item.label === 'Project Management',
+    );
     expect(projectNav?.children).toHaveLength(2);
     expect(navigation.some((item) => item.label === 'Brochures')).toBe(true);
     expect(navigation.some((item) => item.label === 'Automations')).toBe(true);
     expect(navigation.some((item) => item.label === 'My Work')).toBe(true);
-    expect(navigation.find((item) => item.label === 'Quotations')?.children)
-      .toContainEqual({
-        label: 'Construction Pricing',
-        href: '/dashboard/pricing/construction',
-      });
+    expect(
+      navigation.find((item) => item.label === 'Quotations')?.children,
+    ).toContainEqual({
+      label: 'Construction Pricing',
+      href: '/dashboard/pricing/construction',
+    });
   });
 
   it('uses projectIndex, project-scoped query and permission gates', () => {

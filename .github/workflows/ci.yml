@@ -68,12 +68,6 @@ jobs:
           apps/business-app/src/erp-routing-regression.test.ts
           apps/business-app/src/app/dashboard/project-management/portfolio.test.ts
           apps/business-app/src/app/dashboard/project-management/project-management.test.ts
-      - name: Temporary export Prettier output for project management files
-        run: |
-          pnpm exec prettier --write apps/business-app/src/app/dashboard/owner-workspace-navigation.ts apps/business-app/src/app/dashboard/project-management/page.tsx apps/business-app/src/app/dashboard/project-management/portfolio.ts apps/business-app/src/app/dashboard/project-management/portfolio-board.tsx apps/business-app/src/app/dashboard/project-management/portfolio.test.ts apps/business-app/src/app/dashboard/project-management/project-management.test.ts apps/business-app/src/app/dashboard/project-management/project-management.css docs/CONSTRUCTION-ERP-PROJECT-MANAGEMENT-BACKLOG.md
-          for path in apps/business-app/src/app/dashboard/owner-workspace-navigation.ts apps/business-app/src/app/dashboard/project-management/page.tsx apps/business-app/src/app/dashboard/project-management/portfolio.ts apps/business-app/src/app/dashboard/project-management/portfolio-board.tsx apps/business-app/src/app/dashboard/project-management/portfolio.test.ts apps/business-app/src/app/dashboard/project-management/project-management.test.ts apps/business-app/src/app/dashboard/project-management/project-management.css docs/CONSTRUCTION-ERP-PROJECT-MANAGEMENT-BACKLOG.md; do
-            printf 'PMFMT:%s:%s\n' "$path" "$(base64 -w0 "$path")"
-          done
       - name: Check formatting of the ERP integration
         run: >-
           pnpm exec prettier --check

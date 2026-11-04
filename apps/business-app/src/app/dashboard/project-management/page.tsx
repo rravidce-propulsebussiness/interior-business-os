@@ -39,8 +39,9 @@ export default async function ProjectManagementPage() {
   }).format(new Date());
 
   let tasks: PortfolioTask[] | null = null;
-  let coverage: 'ready' | 'restricted' | 'unavailable' | 'limited' =
-    canTasks ? 'unavailable' : 'restricted';
+  let coverage: 'ready' | 'restricted' | 'unavailable' | 'limited' = canTasks
+    ? 'unavailable'
+    : 'restricted';
   // ProjectIndex itself is capped. Never advertise partial counts as totals.
   if (canTasks && list.length < 250) {
     if (!list.length) {
@@ -62,7 +63,11 @@ export default async function ProjectManagementPage() {
             .limit(401),
         ),
       );
-      if (responses.every((response) => !response.error && (response.data?.length ?? 0) < 401)) {
+      if (
+        responses.every(
+          (response) => !response.error && (response.data?.length ?? 0) < 401,
+        )
+      ) {
         const rows = responses.flatMap((response) => response.data ?? []);
         if (rows.length <= 2000) {
           tasks = rows;
@@ -84,22 +89,58 @@ export default async function ProjectManagementPage() {
   const accountEmail = user.email ?? '';
   const actions = [
     ...(canExecution
-      ? [{ label: 'Site operations', href: '/dashboard/operations', icon: 'projects' as const }]
+      ? [
+          {
+            label: 'Site operations',
+            href: '/dashboard/operations',
+            icon: 'projects' as const,
+          },
+        ]
       : []),
     ...(canTasks
-      ? [{ label: 'Task register', href: '/dashboard/operations/project_tasks', icon: 'calendar' as const }]
+      ? [
+          {
+            label: 'Task register',
+            href: '/dashboard/operations/project_tasks',
+            icon: 'calendar' as const,
+          },
+        ]
       : []),
     ...(canMilestones
-      ? [{ label: 'Milestones', href: '/dashboard/operations/project_milestones', icon: 'calendar' as const }]
+      ? [
+          {
+            label: 'Milestones',
+            href: '/dashboard/operations/project_milestones',
+            icon: 'calendar' as const,
+          },
+        ]
       : []),
     ...(canEstimates
-      ? [{ label: 'Estimates', href: '/dashboard/execution', icon: 'quotations' as const }]
+      ? [
+          {
+            label: 'Estimates',
+            href: '/dashboard/execution',
+            icon: 'quotations' as const,
+          },
+        ]
       : []),
     ...(canQuality
-      ? [{ label: 'Inspections', href: '/dashboard/operations/project_inspections', icon: 'check' as const }]
+      ? [
+          {
+            label: 'Inspections',
+            href: '/dashboard/operations/project_inspections',
+            icon: 'check' as const,
+          },
+        ]
       : []),
     ...(canFinance
-      ? [{ label: 'Finance', href: '/dashboard/finance', icon: 'billing' as const }]
+      ? [
+          {
+            label: 'Finance',
+            href: '/dashboard/finance',
+            icon: 'billing' as const,
+          },
+        ]
       : []),
   ];
 
@@ -126,7 +167,10 @@ export default async function ProjectManagementPage() {
           <div>
             <span className="pm-hero-kicker">CONSTRUCTION & DELIVERY</span>
             <h1>Project Management</h1>
-            <p>One workspace for real project progress, schedules, site work and delivery.</p>
+            <p>
+              One workspace for real project progress, schedules, site work and
+              delivery.
+            </p>
           </div>
           <div className="pm-hero-buttons">
             <Link href="/dashboard/projects" className="pm-hero-secondary">
@@ -142,17 +186,38 @@ export default async function ProjectManagementPage() {
 
         <section className="pm-metrics" aria-label="Project portfolio summary">
           {[
-            { label: 'Accessible projects', value: overview.total, detail: 'Current portfolio', tone: 'neutral' },
-            { label: 'Ongoing', value: overview.ongoing, detail: 'Active delivery work', tone: 'blue' },
-            { label: 'Completed', value: overview.completed, detail: 'Completed or handed over', tone: 'green' },
+            {
+              label: 'Accessible projects',
+              value: overview.total,
+              detail: 'Current portfolio',
+              tone: 'neutral',
+            },
+            {
+              label: 'Ongoing',
+              value: overview.ongoing,
+              detail: 'Active delivery work',
+              tone: 'blue',
+            },
+            {
+              label: 'Completed',
+              value: overview.completed,
+              detail: 'Completed or handed over',
+              tone: 'green',
+            },
             {
               label: 'Physical progress',
-              value: overview.averageProgress === null ? '—' : overview.averageProgress + '%',
+              value:
+                overview.averageProgress === null
+                  ? '—'
+                  : overview.averageProgress + '%',
               detail: overview.tracked + ' projects with tracked tasks',
               tone: 'amber',
             },
           ].map((metric) => (
-            <article className={'pm-metric is-' + metric.tone} key={metric.label}>
+            <article
+              className={'pm-metric is-' + metric.tone}
+              key={metric.label}
+            >
               <span>{metric.label}</span>
               <strong>{metric.value}</strong>
               <small>{metric.detail}</small>
@@ -161,21 +226,31 @@ export default async function ProjectManagementPage() {
         </section>
         {list.length >= 250 && (
           <p role="status" className="pm-note">
-            This view lists the latest 250 accessible projects. Portfolio totals are limited
-            to those records; use the project directory for your workflow.
+            This view lists the latest 250 accessible projects. Portfolio totals
+            are limited to those records; use the project directory for your
+            workflow.
           </p>
         )}
 
-        <section className="pm-work-layout" aria-label="Project work and navigation">
+        <section
+          className="pm-work-layout"
+          aria-label="Project work and navigation"
+        >
           <div className="pm-panel pm-attention">
             <div className="pm-panel-heading">
               <div>
                 <span className="pm-eyebrow">SITE DELIVERY SIGNALS</span>
                 <h2>Needs attention</h2>
-                <p>Based on actual authorized Operations tasks, not guessed milestones.</p>
+                <p>
+                  Based on actual authorized Operations tasks, not guessed
+                  milestones.
+                </p>
               </div>
               {canTasks && (
-                <Link className="pm-text-link" href="/dashboard/operations/project_tasks">
+                <Link
+                  className="pm-text-link"
+                  href="/dashboard/operations/project_tasks"
+                >
                   Task register →
                 </Link>
               )}
@@ -183,23 +258,41 @@ export default async function ProjectManagementPage() {
             {coverage === 'ready' && overview.alerts ? (
               <>
                 <div className="pm-alert-stats">
-                  <div><strong>{overview.blocked}</strong><span>Blocked</span></div>
-                  <div><strong>{overview.overdue}</strong><span>Overdue</span></div>
-                  <div><strong>{overview.dueSoon}</strong><span>Due in 7 days</span></div>
+                  <div>
+                    <strong>{overview.blocked}</strong>
+                    <span>Blocked</span>
+                  </div>
+                  <div>
+                    <strong>{overview.overdue}</strong>
+                    <span>Overdue</span>
+                  </div>
+                  <div>
+                    <strong>{overview.dueSoon}</strong>
+                    <span>Due in 7 days</span>
+                  </div>
                 </div>
                 {overview.alerts.length ? (
                   <ul className="pm-task-list">
                     {overview.alerts.slice(0, 6).map((task) => {
-                      const project = list.find((item) => item.id === task.project_id);
+                      const project = list.find(
+                        (item) => item.id === task.project_id,
+                      );
                       return (
                         <li key={task.id}>
-                          <Link href={'/dashboard/operations/project_tasks/' + task.id}>
+                          <Link
+                            href={
+                              '/dashboard/operations/project_tasks/' + task.id
+                            }
+                          >
                             <span className={'pm-alert-dot is-' + task.kind} />
                             <span>
                               <strong>{task.title}</strong>
                               <small>
-                                {project?.name ?? 'Project'} · {task.kind.replaceAll('_', ' ')}
-                                {task.planned_end ? ' · ' + task.planned_end : ''}
+                                {project?.name ?? 'Project'} ·{' '}
+                                {task.kind.replaceAll('_', ' ')}
+                                {task.planned_end
+                                  ? ' · ' + task.planned_end
+                                  : ''}
                               </small>
                             </span>
                             <OwnerIcon name="arrow" size={15} />
@@ -209,7 +302,9 @@ export default async function ProjectManagementPage() {
                     })}
                   </ul>
                 ) : (
-                  <p className="pm-empty-inline">No blocked or upcoming tasks in the tracked work.</p>
+                  <p className="pm-empty-inline">
+                    No blocked or upcoming tasks in the tracked work.
+                  </p>
                 )}
               </>
             ) : (
@@ -227,19 +322,26 @@ export default async function ProjectManagementPage() {
               <div>
                 <span className="pm-eyebrow">YOUR WORKSPACE</span>
                 <h2>Management tools</h2>
-                <p>Existing authorized modules, linked to the same company records.</p>
+                <p>
+                  Existing authorized modules, linked to the same company
+                  records.
+                </p>
               </div>
             </div>
             <div className="pm-shortcut-grid">
               {actions.map((action) => (
                 <Link href={action.href} key={action.href}>
-                  <span><OwnerIcon name={action.icon} size={18} /></span>
+                  <span>
+                    <OwnerIcon name={action.icon} size={18} />
+                  </span>
                   <strong>{action.label}</strong>
                   <OwnerIcon name="arrow" size={15} />
                 </Link>
               ))}
               {!actions.length && (
-                <p className="pm-empty-inline">Project-level tools depend on your role permissions.</p>
+                <p className="pm-empty-inline">
+                  Project-level tools depend on your role permissions.
+                </p>
               )}
             </div>
           </div>
