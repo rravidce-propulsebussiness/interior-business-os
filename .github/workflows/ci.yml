@@ -63,6 +63,7 @@ jobs:
         run: >-
           pnpm exec vitest run
           apps/business-app/src/app/dashboard/owner-navigation.test.ts
+          apps/business-app/src/app/dashboard/dashboard-shared-theme.test.ts
           apps/business-app/src/app/dashboard/owner-erp-navigation.behavior.test.ts
           apps/business-app/src/workspace-paths.test.ts
           apps/business-app/src/erp-routing-regression.test.ts
@@ -74,6 +75,9 @@ jobs:
         run: >-
           pnpm exec prettier --check
           apps/business-app/src/app/dashboard/owner-navigation.test.ts
+          apps/business-app/src/app/dashboard/dashboard-shared-theme.test.ts
+          apps/business-app/src/app/dashboard/layout.tsx
+          apps/business-app/src/app/dashboard/dashboard-shared-theme.css
           apps/business-app/src/app/dashboard/owner-erp-navigation.behavior.test.ts
           apps/business-app/src/erp-routing-regression.test.ts
           apps/business-app/src/app/dashboard/owner-workspace-navigation.ts

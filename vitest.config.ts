@@ -33,6 +33,7 @@ export default defineConfig({
       'apps/business-app/src/workspace-paths.test.ts',
       'apps/business-app/src/erp-routing-regression.test.ts',
       'apps/business-app/src/app/dashboard/owner-navigation.test.ts',
+      'apps/business-app/src/app/dashboard/dashboard-shared-theme.test.ts',
       'apps/business-app/src/app/dashboard/owner-erp-navigation.behavior.test.ts',
       'apps/business-app/src/app/dashboard/project-management/portfolio.test.ts',
       'apps/business-app/src/app/dashboard/project-management/project-management.test.ts',
