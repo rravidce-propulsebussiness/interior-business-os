@@ -7,6 +7,11 @@ on:
         description: "Type IMPORT to confirm the full source import"
         required: true
         type: string
+  push:
+    branches:
+      - integration/full-erp-merge
+    paths:
+      - .github/IMPORT_OPENCONSTRUCTIONERP
 
 permissions:
   contents: write
@@ -17,7 +22,7 @@ concurrency:
 
 jobs:
   import:
-    if: ${{ github.ref == 'refs/heads/integration/full-erp-merge' && inputs.confirm_import == 'IMPORT' }}
+    if: ${{ github.ref == 'refs/heads/integration/full-erp-merge' && ((github.event_name == 'workflow_dispatch' && inputs.confirm_import == 'IMPORT') || (github.event_name == 'push' && github.event.head_commit.message == 'ci: start OpenConstructionERP source import')) }}
     runs-on: ubuntu-latest
     steps:
       - name: Check out integration branch
@@ -26,13 +31,13 @@ jobs:
           ref: integration/full-erp-merge
           fetch-depth: 0
 
-      - name: Check source repository
+      - name: Clone the inspected upstream snapshot
         run: |
-          git ls-remote https://github.com/datadrivenconstruction/OpenConstructionERP.git refs/heads/main
-
-      - name: Clone upstream source
-        run: |
-          git clone --depth 1 --branch main https://github.com/datadrivenconstruction/OpenConstructionERP.git /tmp/OpenConstructionERP
+          git init /tmp/OpenConstructionERP
+          git -C /tmp/OpenConstructionERP remote add origin https://github.com/datadrivenconstruction/OpenConstructionERP.git
+          git -C /tmp/OpenConstructionERP fetch --depth 1 origin 2d27b866937ea3bd66d3878707b357a3099ba7fa
+          git -C /tmp/OpenConstructionERP checkout --detach FETCH_HEAD
+          test "$(git -C /tmp/OpenConstructionERP rev-parse HEAD)" = "2d27b866937ea3bd66d3878707b357a3099ba7fa"
 
       - name: Import complete source tree
         run: |
@@ -45,8 +50,9 @@ jobs:
 
       - name: Commit and push to integration branch
         run: |
+          rm -f .github/IMPORT_OPENCONSTRUCTIONERP
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add vendor/openconstructionerp
+          git add vendor/openconstructionerp .github/IMPORT_OPENCONSTRUCTIONERP
           git commit -m "chore: import OpenConstructionERP source under vendor"
           git push origin HEAD:integration/full-erp-merge
