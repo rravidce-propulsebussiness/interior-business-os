@@ -81,16 +81,17 @@ describe('ERP uses the existing owner workspace and access policy', () => {
     ]);
   });
 
-  it('hides ERP when project entitlement or active membership is missing', () => {
+  it('requires the project entitlement and active membership', () => {
     expect(erp(company(['execution.view'], ['purchasing']))).toBeUndefined();
-    expect(erp(company(['execution.view'], ['projects'], 'inactive'))).toBeUndefined();
+    const inactive = company(['execution.view'], ['projects'], 'inactive');
+    expect(erp(inactive)).toBeUndefined();
   });
 
   it('never grants access merely because a module entitlement exists', () => {
     expect(erp(company([], ['projects', 'purchasing']))).toBeUndefined();
   });
 
-  it('links a single-permission operator only to their allowed section', () => {
+  it('shows only the operator-authorized section', () => {
     expect(erp(company(['inspection.view']))?.children).toEqual([
       {
         label: 'Quality Inspections',
