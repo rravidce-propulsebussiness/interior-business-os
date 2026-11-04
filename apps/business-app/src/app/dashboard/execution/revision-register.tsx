@@ -52,6 +52,16 @@ export async function RevisionRegister({
   const projectNames = new Map(
     (projects?.data ?? []).map((project) => [project.id, project.name]),
   );
+  // Selector is limited to the first 100 RLS-visible projects. The search
+  // field remains available if the user cannot enumerate projects.
+  const projectOptions = s.allowed('project.view')
+    ? await s.client
+        .from('projects')
+        .select('id,name')
+        .eq('organization_id', s.org)
+        .order('name', { ascending: true })
+        .limit(100)
+    : null;
   const currentPage = data.rows.length;
   const approved = data.rows.filter((row) => row.status === 'approved').length;
   const draft = data.rows.filter((row) => row.status === 'draft').length;
@@ -177,12 +187,27 @@ export async function RevisionRegister({
             </select>
           </label>
           <label>
-            <span>Project ID</span>
-            <input
-              name="project"
-              defaultValue={filter.project || ''}
-              placeholder="Optional project UUID"
-            />
+            <span>Project</span>
+            {projectOptions && !projectOptions.error ? (
+              <select name="project" defaultValue={filter.project || ''}>
+                <option value="">All accessible projects</option>
+                {filter.project &&
+                  !projectOptions.data?.some((item) => item.id === filter.project) && (
+                    <option value={filter.project}>Currently selected project</option>
+                  )}
+                {(projectOptions.data ?? []).map((item) => (
+                  <option value={item.id} key={item.id}>
+                    {item.name}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <input
+                name="project"
+                defaultValue={filter.project || ''}
+                placeholder="Optional project UUID"
+              />
+            )}
           </label>
           <button type="submit" className="erp-button erp-button-primary">
             Apply filters
