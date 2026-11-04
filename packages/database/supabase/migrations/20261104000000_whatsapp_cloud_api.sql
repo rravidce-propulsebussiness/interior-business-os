@@ -1,13 +1,5 @@
 begin;
 
-do $$
-begin
-  if not exists (select 1 from pg_catalog.pg_roles where rolname = 'service_role') then
-    create role service_role nologin bypassrls;
-  end if;
-end;
-$$;
-
 create table public.whatsapp_business_connections (
   id uuid primary key default gen_random_uuid(),
   organization_id uuid not null references public.organizations(id) on delete cascade,
