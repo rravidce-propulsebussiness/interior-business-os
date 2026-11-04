@@ -3,7 +3,8 @@ import { LegalPage } from '../legal-page';
 
 export const metadata: Metadata = {
   title: 'Privacy Policy | ProPulse Business OS',
-  description: 'How ProPulse Business OS handles account, workspace, project and connected messaging data.',
+  description:
+    'How ProPulse Business OS handles account, workspace, project and connected messaging data.',
   robots: { index: true, follow: true },
   alternates: { canonical: 'https://sghomesinterior.in/privacy-policy' },
 };
