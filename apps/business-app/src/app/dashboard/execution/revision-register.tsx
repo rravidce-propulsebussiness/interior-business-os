@@ -192,8 +192,12 @@ export async function RevisionRegister({
               <select name="project" defaultValue={filter.project || ''}>
                 <option value="">All accessible projects</option>
                 {filter.project &&
-                  !projectOptions.data?.some((item) => item.id === filter.project) && (
-                    <option value={filter.project}>Currently selected project</option>
+                  !projectOptions.data?.some(
+                    (item) => item.id === filter.project,
+                  ) && (
+                    <option value={filter.project}>
+                      Currently selected project
+                    </option>
                   )}
                 {(projectOptions.data ?? []).map((item) => (
                   <option value={item.id} key={item.id}>

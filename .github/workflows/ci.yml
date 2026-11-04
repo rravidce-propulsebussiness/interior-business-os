@@ -70,10 +70,6 @@ jobs:
           apps/business-app/src/app/dashboard/project-management/project-management.test.ts
           apps/business-app/src/app/dashboard/execution/revision-cost.test.ts
           apps/business-app/src/app/dashboard/execution/revision-ui.test.ts
-      - name: Temporary capture formatted project picker
-        run: |
-          pnpm exec prettier --write apps/business-app/src/app/dashboard/execution/revision-register.tsx
-          printf 'BOQPICKERFMT:%s\n' "$(base64 -w0 apps/business-app/src/app/dashboard/execution/revision-register.tsx)"
       - name: Check formatting of the ERP integration
         run: >-
           pnpm exec prettier --check
