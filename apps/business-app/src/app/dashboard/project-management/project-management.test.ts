@@ -36,7 +36,7 @@ describe('project management navigation and trusted portfolio boundaries', () =>
       children: [
         { label: 'Portfolio Overview', href: '/dashboard/project-management' },
         { label: 'Projects', href: '/dashboard/projects' },
-        { label: 'Task Register', href: '/dashboard/operations/project_tasks' },
+        { label: 'Task Board', href: '/dashboard/project-management/tasks' },
       ],
     });
   });

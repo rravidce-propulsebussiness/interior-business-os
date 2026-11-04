@@ -101,7 +101,7 @@ export default async function ProjectManagementPage() {
       ? [
           {
             label: 'Task register',
-            href: '/dashboard/operations/project_tasks',
+            href: '/dashboard/project-management/tasks',
             icon: 'calendar' as const,
           },
         ]
@@ -249,7 +249,7 @@ export default async function ProjectManagementPage() {
               {canTasks && (
                 <Link
                   className="pm-text-link"
-                  href="/dashboard/operations/project_tasks"
+                  href="/dashboard/project-management/tasks"
                 >
                   Task register →
                 </Link>
@@ -281,7 +281,7 @@ export default async function ProjectManagementPage() {
                         <li key={task.id}>
                           <Link
                             href={
-                              '/dashboard/operations/project_tasks/' + task.id
+                              '/dashboard/project-management/tasks/' + task.id
                             }
                           >
                             <span className={'pm-alert-dot is-' + task.kind} />

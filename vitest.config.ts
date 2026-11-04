@@ -36,6 +36,7 @@ export default defineConfig({
       'apps/business-app/src/app/dashboard/owner-erp-navigation.behavior.test.ts',
       'apps/business-app/src/app/dashboard/project-management/portfolio.test.ts',
       'apps/business-app/src/app/dashboard/project-management/project-management.test.ts',
+      'apps/business-app/src/app/dashboard/project-management/tasks/tasks-board.test.ts',
     ],
     clearMocks: true,
     restoreMocks: true,

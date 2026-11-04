@@ -77,8 +77,8 @@ export function ownerWorkspaceNavigation(
         ...(has('task.view', 'projects')
           ? [
               {
-                label: 'Task Register',
-                href: '/dashboard/operations/project_tasks',
+                label: 'Task Board',
+                href: '/dashboard/project-management/tasks',
               },
             ]
           : []),
