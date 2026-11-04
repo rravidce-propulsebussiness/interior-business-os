@@ -1030,6 +1030,9 @@ export default async function Home() {
             <a href="#how-it-works">How It Works</a>
             <a href="/login">Sign in</a>
             <a href="mailto:info@propulsetechnologies.online">Contact us</a>
+            <a href="/privacy-policy">Privacy Policy</a>
+            <a href="/terms-of-service">Terms of Service</a>
+            <a href="/data-deletion">Data Deletion</a>
           </div>
         </div>
         <div className="pp-container pp-footer-bottom">
