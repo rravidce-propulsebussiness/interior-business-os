@@ -358,3 +358,15 @@ The partition key must propagate into activity/audit rows, import/export records
 Repeat the matrix for a user who belongs to both organizations after switching the active Business OS organization. Also test project transfer/unmapping during an in-flight job, concurrent update/delete, malformed nested IDs, idempotent retries and revoked membership.
 
 No database migration or runtime adapter is approved by this design document. The source snapshot remains pinned and unmodified; implementation patches belong in a separate integration layer or dedicated ERP fork so upstream provenance remains reviewable.
+
+## Typed boundary contract progress (2026-11-04)
+
+The separate `@business-os/erp-contracts` package now contains strict Zod contracts for short-lived internal request context, project mapping, BOQ creation/positions and takeoff imports. The internal request context carries the immutable `partitionId` alongside the verified organization and Business OS project identifiers. Context lifetime is limited to 300 seconds.
+
+The mapping consistency helper accepts only an active mapping whose organization, Business OS project and partition exactly match the already-constructed server request context. It deliberately does not compare a client-provided ERP project identifier or authorize a request; the ERP project identifier must come from the trusted mapping lookup. Parsing or matching these values is not proof of membership, entitlement or project grant.
+
+Tests cover missing/invalid mapping fields, unknown client-supplied mapping fields, cross-organization/project/partition mapping reuse, inactive mappings, decimal-string inputs and takeoff idempotency/version preconditions. These are contract-level tests, not yet repository/database isolation tests.
+
+### CI status for the current contract work
+
+The latest workflow for commit `3b363c630d14e03f431cd0814347c36e3781f77b` ran the dedicated ERP contract tests, acceptance suite, dependency security check, database checks and application/workspace builds successfully. The verify job failed at the existing repository-wide `pnpm check` step. The live diagnostic job also failed its Hostinger public-renderer/health check while the local Chromium job passed. These failures are separate from the ERP contract test result and remain open; do not treat the branch as release-ready.
