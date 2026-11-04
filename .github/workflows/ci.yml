@@ -70,12 +70,6 @@ jobs:
           apps/business-app/src/app/dashboard/project-management/project-management.test.ts
           apps/business-app/src/app/dashboard/execution/revision-cost.test.ts
           apps/business-app/src/app/dashboard/execution/revision-ui.test.ts
-      - name: Temporary capture BOQ canonical formatting
-        run: |
-          pnpm exec prettier --write apps/business-app/src/app/dashboard/execution/revision-cost.test.ts apps/business-app/src/app/dashboard/execution/revision-ui.test.ts apps/business-app/src/app/dashboard/execution/layout.tsx apps/business-app/src/app/dashboard/execution/revision-register.tsx apps/business-app/src/app/dashboard/execution/revision-workspace.tsx apps/business-app/src/app/dashboard/execution/revision-cost.ts apps/business-app/src/app/dashboard/execution/execution-premium.css apps/business-app/src/app/dashboard/owner-shell-global.css
-          for path in apps/business-app/src/app/dashboard/execution/revision-cost.test.ts apps/business-app/src/app/dashboard/execution/revision-ui.test.ts apps/business-app/src/app/dashboard/execution/layout.tsx apps/business-app/src/app/dashboard/execution/revision-register.tsx apps/business-app/src/app/dashboard/execution/revision-workspace.tsx apps/business-app/src/app/dashboard/execution/revision-cost.ts apps/business-app/src/app/dashboard/execution/execution-premium.css apps/business-app/src/app/dashboard/owner-shell-global.css; do
-            printf 'BOQFMT:%s:%s\n' "$path" "$(base64 -w0 "$path")"
-          done
       - name: Check formatting of the ERP integration
         run: >-
           pnpm exec prettier --check

@@ -10,7 +10,11 @@ import './execution-premium.css';
  * Each child route still performs its existing permission checks; this
  * layout only supplies the unified, branded company navigation.
  */
-export default async function ExecutionLayout({ children }: { children: ReactNode }) {
+export default async function ExecutionLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
   const context = await activeOrganization();
   if (!context) return <>{children}</>;
   const s = await pageServices();
@@ -36,12 +40,17 @@ export default async function ExecutionLayout({ children }: { children: ReactNod
       )}
     >
       <div className="execution-workspace">
-        <nav aria-label="Construction workspace navigation" className="erp-crumbs">
+        <nav
+          aria-label="Construction workspace navigation"
+          className="erp-crumbs"
+        >
           <Link href="/dashboard">Business OS</Link>
           <span aria-hidden="true">/</span>
           <Link href="/dashboard/execution">Construction ERP</Link>
           <span aria-hidden="true">/</span>
-          <Link href="/dashboard/execution/execution_estimate_revisions">BOQ &amp; Estimating</Link>
+          <Link href="/dashboard/execution/execution_estimate_revisions">
+            BOQ &amp; Estimating
+          </Link>
         </nav>
         {children}
       </div>
