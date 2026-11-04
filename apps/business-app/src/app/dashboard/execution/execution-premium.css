@@ -181,3 +181,49 @@
 .execution-workspace .erp-action-forms button { padding:9px 15px; border-radius:9px; }
 .execution-workspace .erp-stack > .erp-panel .erp-cell-secondary { line-height:1.6; margin:12px 0 0; }
 @media(max-width:760px){.execution-workspace .erp-audit-grid { grid-template-columns:1fr; }.execution-workspace .erp-line-expand[open] { min-width:170px; } }
+
+/* Generic execution screens use the same design tokens and density as the BOQ. */
+.execution-workspace > main:not(.erp-page) > h1 {
+  padding: 14px 0 4px;
+}
+.execution-workspace > main:not(.erp-page) > p,
+.execution-workspace > main:not(.erp-page) > section > p {
+  color: #6f7b8e; line-height: 1.65;
+}
+.execution-workspace > main:not(.erp-page) > nav,
+.execution-workspace > main:not(.erp-page) > ul {
+  border: 1px solid #ebe4e6;
+  border-radius: 13px; padding: 15px;
+  background: #fff; box-shadow: var(--erp-shadow);
+}
+.execution-workspace > main:not(.erp-page) > form {
+  background: #fff; border: 1px solid #ede5e5;
+  border-radius: 13px; padding: 15px;
+}
+.execution-workspace > main:not(.erp-page) :where(input,textarea,select) {
+  border-radius: 9px; border: 1px solid #ddd9de; padding: 9px 11px;
+  background: #fff; color: #293249; max-width: 100%;
+}
+.execution-workspace > main:not(.erp-page) button:not(:disabled) { cursor: pointer; }
+.execution-workspace > main:not(.erp-page) button[type="submit"] {
+  background: linear-gradient(120deg,#88352b,#bd5c3f);
+  color: #fff; border-color: #b15b44; padding: 9px 15px;
+}
+.execution-workspace > main:not(.erp-page) > section,
+.execution-workspace > main:not(.erp-page) > dl {
+  background:#fff; border:1px solid #ede6e6; border-radius:13px;
+  padding:15px; box-shadow:var(--erp-shadow);
+}
+.execution-workspace > main:not(.erp-page) th {
+  background: #f8f5f6; font-size: 11px; font-weight: 800; color: #45495d;
+}
+.execution-workspace > main:not(.erp-page) th,
+.execution-workspace > main:not(.erp-page) td {
+  padding: 10px; border-color: #eee7e9;
+}
+.execution-workspace > main:not(.erp-page) tbody tr:hover {
+  background: #fff7f4;
+}
+.execution-workspace > main:not(.erp-page) :where(a.underline) {
+  color: #8e4031; text-decoration-color: #ddaf9b;
+}

@@ -9,6 +9,7 @@ import { executionServices } from '../../service';
 import { ExecutionForm } from '../../form';
 import { configurationEntities, configurationPermission } from '../../forms';
 import { ScopeBuilder } from '../../builder';
+import { RevisionWorkspace } from '../../revision-workspace';
 import { label, records, RecordTable, text, titles } from '../../presentation';
 export default async function ExecutionDetail({
   params,
@@ -25,6 +26,11 @@ export default async function ExecutionDetail({
     row = await s.execution.detail(entity, id),
     q = await searchParams,
     page = Math.max(1, Number(q.page) || 1);
+  // Modern BOQ detail reuses exactly the same authorized revision record and
+  // existing server-side estimate actions. Other execution entities retain
+  // their established record pages and behavior.
+  if (entity === 'execution_estimate_revisions')
+    return <RevisionWorkspace s={s} row={row} />;
   const childMap: Partial<Record<ExecutionEntity, [ExecutionEntity, string]>> =
     {
       material_categories: ['materials', 'category_id'],
