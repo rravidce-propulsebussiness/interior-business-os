@@ -54,7 +54,10 @@
 
 .dashboard-visual-root > main :where(a) {
   text-underline-offset: 3px;
-  transition: color .2s ease, opacity .2s ease, transform .2s ease;
+  transition:
+    color 0.2s ease,
+    opacity 0.2s ease,
+    transform 0.2s ease;
 }
 
 .dashboard-visual-root > main :where(a:hover) {
@@ -65,33 +68,50 @@
   border-color: var(--dash-line);
 }
 
-.dashboard-visual-root > main :where(input:not([type="checkbox"]):not([type="radio"]), select, textarea) {
+.dashboard-visual-root
+  > main
+  :where(input:not([type='checkbox']):not([type='radio']), select, textarea) {
   border-radius: 10px;
   border-color: #ddd9df;
   background: #fff;
   color: #31394e;
   min-width: 0;
   max-width: 100%;
-  transition: border-color .18s ease, box-shadow .18s ease;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
 }
 
-.dashboard-visual-root > main :where(input:focus-visible, select:focus-visible, textarea:focus-visible, a:focus-visible, button:focus-visible) {
+.dashboard-visual-root
+  > main
+  :where(
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible,
+    a:focus-visible,
+    button:focus-visible
+  ) {
   outline: 2px solid var(--dash-terracotta);
   outline-offset: 2px;
 }
 
-.dashboard-visual-root > main :where(button, a[role="button"]) {
+.dashboard-visual-root > main :where(button, a[role='button']) {
   border-radius: 10px;
-  transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    filter 0.2s ease;
 }
 
 .dashboard-visual-root > main :where(button:disabled) {
-  opacity: .55;
+  opacity: 0.55;
   cursor: not-allowed;
 }
 
-.dashboard-visual-root > main :where(button:hover:not(:disabled), a[role="button"]:hover) {
-  box-shadow: 0 7px 19px rgba(105, 53, 43, .12);
+.dashboard-visual-root
+  > main
+  :where(button:hover:not(:disabled), a[role='button']:hover) {
+  box-shadow: 0 7px 19px rgba(105, 53, 43, 0.12);
 }
 
 .dashboard-visual-root > main :where(table) {
@@ -113,7 +133,7 @@
 }
 
 .dashboard-visual-root > main :where(tbody tr) {
-  transition: background-color .16s ease;
+  transition: background-color 0.16s ease;
 }
 
 .dashboard-visual-root > main :where(tbody tr:hover) {
@@ -128,22 +148,30 @@
   cursor: pointer;
 }
 
-.dashboard-visual-root > main :where(article, section, .rounded-2xl, .rounded-3xl) {
+.dashboard-visual-root
+  > main
+  :where(article, section, .rounded-2xl, .rounded-3xl) {
   border-color: var(--dash-line);
 }
 
 .dashboard-visual-root > main :where(.shadow-sm, .shadow, .shadow-lg) {
-  box-shadow: 0 8px 26px rgba(58, 31, 35, .065);
+  box-shadow: 0 8px 26px rgba(58, 31, 35, 0.065);
 }
 
 /* The section animation is subtle, focus-independent and user controlled. */
 @media (prefers-reduced-motion: no-preference) {
   @keyframes propulse-workspace-enter {
-    from { opacity: .88; transform: translateY(5px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0.88;
+      transform: translateY(5px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
   .dashboard-visual-root > main {
-    animation: propulse-workspace-enter .28s ease-out both;
+    animation: propulse-workspace-enter 0.28s ease-out both;
   }
   .dashboard-visual-root > main :where(article):hover {
     border-color: #e0c5bc;
