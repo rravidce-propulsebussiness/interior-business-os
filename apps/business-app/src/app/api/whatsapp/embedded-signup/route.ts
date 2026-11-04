@@ -54,9 +54,7 @@ async function graph<T>(
     },
   );
   const data = (await response.json().catch(() => null)) as
-    | T
-    | { error?: unknown }
-    | null;
+    T | { error?: unknown } | null;
   if (!response.ok || !data) throw new Error('META_API_FAILED');
   return data as T;
 }

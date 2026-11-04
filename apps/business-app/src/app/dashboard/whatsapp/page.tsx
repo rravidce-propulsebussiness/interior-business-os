@@ -16,8 +16,8 @@ export default async function WhatsAppPage() {
 
   const configured = Boolean(
     process.env.META_APP_ID &&
-      process.env.META_EMBEDDED_SIGNUP_CONFIG_ID &&
-      process.env.META_GRAPH_API_VERSION,
+    process.env.META_EMBEDDED_SIGNUP_CONFIG_ID &&
+    process.env.META_GRAPH_API_VERSION,
   );
   const connections = error ? [] : (data ?? []);
 
