@@ -29,7 +29,11 @@ describe('one authorized company navigation on every dashboard page', () => {
       'Dashboard',
       'Leads',
       'Quotations',
+      'Project Management',
       'Projects',
+      'Automations',
+      'Brochures',
+      'My Work',
       'ERP Operations',
       'Marketplace',
       'Purchases',
@@ -71,6 +75,15 @@ describe('one authorized company navigation on every dashboard page', () => {
       expect(canonical).toContain(`href: '${href}'`);
     }
     expect(canonical).toContain('if (erpChildren.length)');
+    expect(canonical).toContain("has('project.view', 'projects')");
+    expect(canonical).toContain("has('task.view', 'projects')");
+    expect(canonical).toContain("has('milestone.view', 'projects')");
+    expect(canonical).toContain("has('brochure.view', 'brochure')");
+    expect(canonical).toContain("has('automation.view')");
+    expect(canonical).toContain("has('notification.view')");
+    expect(canonical).toContain("has('catalog.view', 'catalog')");
+    expect(canonical).toContain("has('pricing.view', 'pricing')");
+    expect(canonical).toContain("href: '/dashboard/project-management'");
     expect(operations).toContain('currentHref="/dashboard/operations"');
     expect(canonical).not.toContain('window.location');
   });
