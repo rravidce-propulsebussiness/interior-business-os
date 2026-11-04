@@ -22,7 +22,7 @@ concurrency:
 
 jobs:
   import:
-    if: ${{ github.ref == 'refs/heads/integration/full-erp-merge' && ((github.event_name == 'workflow_dispatch' && inputs.confirm_import == 'IMPORT') || (github.event_name == 'push' && github.event.head_commit.message == 'ci: start OpenConstructionERP source import')) }}
+    if: ${{ github.ref == 'refs/heads/integration/full-erp-merge' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.confirm_import == 'IMPORT')) }}
     runs-on: ubuntu-latest
     steps:
       - name: Check out integration branch
