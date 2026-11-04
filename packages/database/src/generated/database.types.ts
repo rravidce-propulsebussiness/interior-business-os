@@ -10647,9 +10647,107 @@ export interface Database {
           },
         ];
       };
+      whatsapp_business_connections: {
+        Row: {
+          id: string;
+          organization_id: string;
+          waba_id: string;
+          business_name: string;
+          phone_number_id: string;
+          display_phone_number: string | null;
+          verified_name: string | null;
+          status: string;
+          token_ciphertext: string;
+          token_iv: string;
+          token_tag: string;
+          last_connected_at: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          waba_id: string;
+          business_name?: string;
+          phone_number_id: string;
+          display_phone_number?: string | null;
+          verified_name?: string | null;
+          status?: string;
+          token_ciphertext: string;
+          token_iv: string;
+          token_tag: string;
+          last_connected_at?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          waba_id?: string;
+          business_name?: string;
+          phone_number_id?: string;
+          display_phone_number?: string | null;
+          verified_name?: string | null;
+          status?: string;
+          token_ciphertext?: string;
+          token_iv?: string;
+          token_tag?: string;
+          last_connected_at?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      whatsapp_webhook_events: {
+        Row: {
+          id: string;
+          organization_id: string;
+          waba_id: string;
+          idempotency_key: string;
+          payload: Json;
+          received_at: string;
+          expires_at: string;
+          processed_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          waba_id: string;
+          idempotency_key: string;
+          payload: Json;
+          received_at?: string;
+          expires_at?: string;
+          processed_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          waba_id?: string;
+          idempotency_key?: string;
+          payload?: Json;
+          received_at?: string;
+          expires_at?: string;
+          processed_at?: string | null;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {
+      whatsapp_connection_save: {
+        Args: {
+          p_organization_id: string;
+          p_waba_id: string;
+          p_business_name: string;
+          p_phone_number_id: string;
+          p_display_phone_number: string;
+          p_verified_name: string;
+          p_token_ciphertext: string;
+          p_token_iv: string;
+          p_token_tag: string;
+        };
+        Returns: string;
+      };
       accept_membership: {
         Args: { p_membership_id: string };
         Returns: undefined;

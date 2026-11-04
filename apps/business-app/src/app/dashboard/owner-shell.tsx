@@ -37,6 +37,7 @@ const iconPaths = {
     'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20ZM2 12h20M12 2c-5 6-5 14 0 20M12 2c5 6 5 14 0 20',
   check: 'm4 12 5 5L20 6',
   calendar: 'M3 5h18v16H3zM7 2v6M17 2v6M3 10h18',
+  message: 'M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 21l2.1-5.4A8.5 8.5 0 1 1 21 11.5Z',
 } as const;
 
 export type OwnerIconName = keyof typeof iconPaths;
