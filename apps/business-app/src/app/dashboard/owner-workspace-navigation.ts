@@ -58,6 +58,53 @@ export function ownerWorkspaceNavigation(
       href: '/dashboard/site-projects',
       icon: 'projects',
     });
+  // ERP is a view over the existing tenant-scoped execution services, not
+  // a separate app or hostname. Match each destination's server permission
+  // and extra module entitlements before showing a navigation link.
+  const erpChildren: NonNullable<OwnerNavItem['children']> = [];
+  if (has('execution.view', 'projects'))
+    erpChildren.push({
+      label: 'Site Operations',
+      href: '/dashboard/operations',
+    });
+  if (has('estimate.view', 'projects'))
+    erpChildren.push({
+      label: 'Estimates & Materials',
+      href: '/dashboard/execution',
+    });
+  if (
+    has('purchase_order.view', 'projects') &&
+    context.entitlements.includes('purchasing')
+  )
+    erpChildren.push({
+      label: 'Procurement',
+      href: '/dashboard/execution/purchase_orders',
+    });
+  if (
+    has('inventory.view', 'projects') &&
+    context.entitlements.includes('purchasing')
+  )
+    erpChildren.push({
+      label: 'Inventory & Stock',
+      href: '/dashboard/operations/stock',
+    });
+  if (has('inspection.view', 'projects'))
+    erpChildren.push({
+      label: 'Quality Inspections',
+      href: '/dashboard/operations/project_inspections',
+    });
+  if (has('handover.view', 'projects'))
+    erpChildren.push({
+      label: 'Handover',
+      href: '/dashboard/operations/handover_records',
+    });
+  if (erpChildren.length)
+    items.push({
+      label: 'ERP Operations',
+      href: erpChildren[0]!.href,
+      icon: 'projects',
+      children: erpChildren,
+    });
   if (has('purchase.view')) {
     items.push({
       label: 'Marketplace',
