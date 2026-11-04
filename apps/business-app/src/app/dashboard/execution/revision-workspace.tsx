@@ -205,7 +205,7 @@ export async function RevisionWorkspace({
         )
       : null;
   const delta =
-    summary.total !== null && prior?.total !== null
+    summary.total !== null && typeof prior?.total === 'number'
       ? summary.total - prior.total
       : null;
   const scopesById = new Map(scopes.map((scope) => [scope.id, scope]));

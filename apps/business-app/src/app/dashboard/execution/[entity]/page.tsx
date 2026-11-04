@@ -90,15 +90,6 @@ export default async function ExecutionList({
             Record cost revision
           </Link>
         )}
-      {entity === 'execution_estimate_revisions' &&
-        s.allowed('estimate.create') && (
-          <Link
-            className="underline"
-            href={`/dashboard/execution${q.project ? `?project=${q.project}` : ''}`}
-          >
-            Create estimate from accepted contract
-          </Link>
-        )}
       {entity === 'materials' && (
         <nav className="my-4 flex flex-wrap gap-4">
           {(
