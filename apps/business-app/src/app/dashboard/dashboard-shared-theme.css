@@ -1,0 +1,165 @@
+/*
+ * ProPulse Business OS shared legacy content styles.
+ *
+ * Every page served from /dashboard gets this stylesheet, but ONLY direct
+ * legacy main elements are visually restyled. Pages already using OwnerShell
+ * keep their full branded shell. There are no global bare-element rules,
+ * !important overrides, wildcard-domain selectors or application logic.
+ */
+.dashboard-visual-root {
+  display: contents;
+}
+
+.dashboard-visual-root > main {
+  --dash-burgundy: #88352b;
+  --dash-terracotta: #bd5c3f;
+  --dash-text: #2c354b;
+  --dash-muted: #6c798d;
+  --dash-line: #ebe4e5;
+  --dash-panel: #fff;
+  --dash-surface: #faf8f8;
+  color: var(--dash-text);
+  background:
+    radial-gradient(ellipse at 84% 0%, #fff0e9 0, transparent 440px),
+    var(--dash-surface);
+  min-height: calc(100dvh - 68px);
+  max-width: 100%;
+  padding: clamp(18px, 2vw, 32px);
+  font-family: inherit;
+}
+
+.dashboard-visual-root > main *,
+.dashboard-visual-root > main *::before,
+.dashboard-visual-root > main *::after {
+  box-sizing: border-box;
+}
+
+.dashboard-visual-root > main :where(h1) {
+  color: #55252a;
+  font-size: clamp(25px, 2.5vw, 35px);
+  letter-spacing: -0.035em;
+  line-height: 1.18;
+  font-weight: 850;
+}
+
+.dashboard-visual-root > main :where(h2) {
+  color: #3a3647;
+  letter-spacing: -0.025em;
+  font-weight: 800;
+}
+
+.dashboard-visual-root > main :where(p, small) {
+  line-height: 1.6;
+}
+
+.dashboard-visual-root > main :where(a) {
+  text-underline-offset: 3px;
+  transition: color .2s ease, opacity .2s ease, transform .2s ease;
+}
+
+.dashboard-visual-root > main :where(a:hover) {
+  color: var(--dash-terracotta);
+}
+
+.dashboard-visual-root > main :where(form) {
+  border-color: var(--dash-line);
+}
+
+.dashboard-visual-root > main :where(input:not([type="checkbox"]):not([type="radio"]), select, textarea) {
+  border-radius: 10px;
+  border-color: #ddd9df;
+  background: #fff;
+  color: #31394e;
+  min-width: 0;
+  max-width: 100%;
+  transition: border-color .18s ease, box-shadow .18s ease;
+}
+
+.dashboard-visual-root > main :where(input:focus-visible, select:focus-visible, textarea:focus-visible, a:focus-visible, button:focus-visible) {
+  outline: 2px solid var(--dash-terracotta);
+  outline-offset: 2px;
+}
+
+.dashboard-visual-root > main :where(button, a[role="button"]) {
+  border-radius: 10px;
+  transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
+}
+
+.dashboard-visual-root > main :where(button:disabled) {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+.dashboard-visual-root > main :where(button:hover:not(:disabled), a[role="button"]:hover) {
+  box-shadow: 0 7px 19px rgba(105, 53, 43, .12);
+}
+
+.dashboard-visual-root > main :where(table) {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 12px;
+}
+
+.dashboard-visual-root > main :where(th) {
+  font-weight: 800;
+  color: #535d6e;
+  background: #f9f6f7;
+  border-color: var(--dash-line);
+}
+
+.dashboard-visual-root > main :where(td) {
+  border-color: #efeaec;
+  color: #465067;
+}
+
+.dashboard-visual-root > main :where(tbody tr) {
+  transition: background-color .16s ease;
+}
+
+.dashboard-visual-root > main :where(tbody tr:hover) {
+  background: #fff8f4;
+}
+
+.dashboard-visual-root > main :where(details) {
+  border-color: var(--dash-line);
+}
+
+.dashboard-visual-root > main :where(summary) {
+  cursor: pointer;
+}
+
+.dashboard-visual-root > main :where(article, section, .rounded-2xl, .rounded-3xl) {
+  border-color: var(--dash-line);
+}
+
+.dashboard-visual-root > main :where(.shadow-sm, .shadow, .shadow-lg) {
+  box-shadow: 0 8px 26px rgba(58, 31, 35, .065);
+}
+
+/* The section animation is subtle, focus-independent and user controlled. */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes propulse-workspace-enter {
+    from { opacity: .88; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .dashboard-visual-root > main {
+    animation: propulse-workspace-enter .28s ease-out both;
+  }
+  .dashboard-visual-root > main :where(article):hover {
+    border-color: #e0c5bc;
+  }
+}
+@media (max-width: 760px) {
+  .dashboard-visual-root > main {
+    padding: 16px;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-visual-root > main :where(*, *::before, *::after) {
+    animation: none;
+    transition: none;
+    scroll-behavior: auto;
+  }
+}
