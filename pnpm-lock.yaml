@@ -277,6 +277,12 @@ importers:
         specifier: workspace:*
         version: link:../website-builder
 
+  packages/erp-contracts:
+    dependencies:
+      zod:
+        specifier: 4.6.5
+        version: 4.6.5
+
   packages/quotation-engine:
     dependencies:
       zod:
