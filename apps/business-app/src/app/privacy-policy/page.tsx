@@ -4,7 +4,7 @@ import { LegalPage } from '../legal-page';
 export const metadata: Metadata = {
   title: 'Privacy Policy | ProPulse Business OS',
   description:
-    'How ProPulse Business OS handles account, workspace, project and connected messaging data.',
+    'Privacy details for ProPulse Business OS and messaging integrations.',
   robots: { index: true, follow: true },
   alternates: { canonical: 'https://sghomesinterior.in/privacy-policy' },
 };
@@ -15,8 +15,7 @@ export default function PrivacyPolicyPage() {
   return (
     <LegalPage title="Privacy Policy" updated={updated}>
       <p>
-        ProPulse Business OS is a business workspace for construction and interior
-        teams. This policy explains how Star Glow Home Infra Construction and
+        ProPulse Business OS supports construction and interior business teams. This policy explains how Star Glow Home Infra Construction and
         Interior Private Limited, operating the ProPulse service, handles
         information when you visit the service or use a business workspace.
       </p>
@@ -41,7 +40,9 @@ export default function PrivacyPolicyPage() {
       <h2>How we use information</h2>
       <ul>
         <li>To provide and maintain the workspace and its enabled features.</li>
-        <li>To route business records to authorized users in the same workspace.</li>
+        <li>
+          To route business records to authorized users in the same workspace.
+        </li>
         <li>To operate requested integrations and automation.</li>
         <li>To secure the service, troubleshoot faults and prevent misuse.</li>
         <li>To respond to support, privacy and legal requests.</li>
@@ -51,7 +52,7 @@ export default function PrivacyPolicyPage() {
       <p>
         We do not sell personal information. Information is made available to
         authorized members of the relevant workspace and to service providers
-        needed to host, secure and operate the service. When you enable a Meta or
+        needed to host, secure and operate the service. When you enable Meta or
         WhatsApp integration, information is exchanged with Meta and WhatsApp as
         needed for that integration and is also subject to their terms and
         privacy notices. We may disclose information when required by law or
