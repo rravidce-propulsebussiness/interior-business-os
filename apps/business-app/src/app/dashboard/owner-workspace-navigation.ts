@@ -21,6 +21,12 @@ export function ownerWorkspaceNavigation(
       permission,
       ...(moduleKey ? { moduleKey } : {}),
     });
+  if (has('notification.view'))
+    items.push({
+      label: 'My Work',
+      href: '/dashboard/work',
+      icon: 'calendar',
+    });
   if (has('lead.view', 'crm'))
     items.push({
       label: 'Leads',
@@ -33,6 +39,12 @@ export function ownerWorkspaceNavigation(
       href: '/dashboard/website',
       icon: 'globe',
     });
+  if (has('brochure.view', 'brochure'))
+    items.push({
+      label: 'Brochures',
+      href: '/dashboard/brochures',
+      icon: 'quotations',
+    });
   if (has('quotation.view', 'quotation'))
     items.push({
       label: 'Quotations',
@@ -44,13 +56,26 @@ export function ownerWorkspaceNavigation(
           : []),
         { label: 'My Quotes', href: '/dashboard/quotations' },
         { label: 'Packages', href: '/dashboard/quotations/packages' },
+        ...(has('catalog.view', 'catalog') && has('pricing.view', 'pricing')
+          ? [{ label: 'Construction Pricing', href: '/dashboard/pricing/construction' }]
+          : []),
       ],
     });
   if (has('project.view', 'projects'))
     items.push({
-      label: 'Projects',
-      href: '/dashboard/projects',
+      label: 'Project Management',
+      href: '/dashboard/project-management',
       icon: 'projects',
+      children: [
+        { label: 'Portfolio Overview', href: '/dashboard/project-management' },
+        { label: 'Projects', href: '/dashboard/projects' },
+        ...(has('task.view', 'projects')
+          ? [{ label: 'Task Register', href: '/dashboard/operations/project_tasks' }]
+          : []),
+        ...(has('milestone.view', 'projects')
+          ? [{ label: 'Milestones', href: '/dashboard/operations/project_milestones' }]
+          : []),
+      ],
     });
   else if (context.entitlements.includes('projects'))
     items.push({
@@ -139,6 +164,12 @@ export function ownerWorkspaceNavigation(
       label: 'Reports',
       href: '/dashboard/reports',
       icon: 'reports',
+    });
+  if (has('automation.view'))
+    items.push({
+      label: 'Automations',
+      href: '/dashboard/automations',
+      icon: 'settings',
     });
   if (has('team.manage'))
     items.push({
