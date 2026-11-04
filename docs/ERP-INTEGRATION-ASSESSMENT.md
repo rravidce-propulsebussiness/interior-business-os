@@ -215,3 +215,20 @@ If the upstream ERP cannot be safely changed to enforce a partition key on every
 Business OS remains authoritative for identity, membership, organization/project ownership, customer/commercial records and final quotation totals. The ERP may own specialist BOQ/takeoff working records only after tenant isolation is proven. An ERP BOQ or takeoff result is an input proposal; it must be reviewed, version-checked and explicitly imported into the existing Business OS quotation/execution workflow. It cannot directly mutate a signed quotation, contract, approved execution estimate or invoice.
 
 This review confirms that the Business OS identity foundation is suitable to anchor the integration, but it does not make the upstream ERP tenant-safe. The ERP-side partitioning and adversarial test gates remain blocking.
+
+
+## Additional estimating repository isolation review (2026-11-04)
+
+A direct repository pass across BOQ, assemblies and DWG takeoff confirms that current ownership checks are generally performed above the repository layer and are not consistently embedded in repository queries:
+
+- BOQ `get_by_id(boq_id)` uses `session.get` by primary key. BOQ list operations use project IDs, so the calling service must prove the project belongs to the authorized organization before calling them. The BOQ repository does not accept an organization/partition context.
+- Assembly `get_by_id`, `get_by_id_with_components`, `get_by_code`, `update_fields` and `delete` are identifier-based. `list_all` has an optional `owner_id` filter; its own docstring explicitly treats `owner_id=None` as an admin/unscoped listing. That optional sentinel is unsafe as a tenant gateway default. Components are fetched by assembly ID and must inherit a verified parent scope.
+- DWG drawing repository reads by drawing ID and lists by project ID. Drawing versions, annotations and entity groups must be traced through their parent drawing/project authorization; a UUID lookup alone does not prove tenant access.
+- Cost-match repositories include run/project filters and result/run relationships, but those are ERP project IDs, not Business OS organization keys. The run's project must be checked before any result listing, decision, export or status retrieval.
+- The ERP tenant-scope helper explicitly maps tenant to JWT `sub` in current installs. It deliberately returns `None` for admin/unscoped access in some company-wide repository patterns. That is incompatible with a tenant-facing multi-organization adapter unless the global bypass is removed or strictly isolated to a separate host-admin surface.
+
+### Repository hardening requirements
+
+For every tenant-owned repository, make organization/partition context mandatory rather than optional. Use query predicates that include the partition key for primary-key reads, updates, deletes, counts, search and relationship traversal. Avoid APIs where `None` means unrestricted access in any tenant-facing call path. Add composite constraints so child rows cannot point across partitions. Keep platform-wide catalogues on a separate explicit read-only path with clear provenance.
+
+This review is limited to the repository files inspected and does not certify the full route/service call graph. Before implementation, trace all callers and all secondary access paths (exports, downloads, background tasks, websocket/progress endpoints, caches and bulk operations) and add two-organization negative tests.
