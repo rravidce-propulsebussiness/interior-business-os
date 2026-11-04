@@ -9,6 +9,7 @@ const provider = file('./company-navigation-provider.tsx');
 const shell = file('./owner-shell.tsx');
 const studio = file('./quotations/studio-frame.tsx');
 const finance = file('./finance/page.tsx');
+const operations = file('./operations/page.tsx');
 
 describe('one authorized company navigation on every dashboard page', () => {
   it('uses the shared permission-filtered menu from dashboard layout', () => {
@@ -42,10 +43,10 @@ describe('one authorized company navigation on every dashboard page', () => {
       expect(canonical).toContain(`label: '${name}'`);
     }
     expect(canonical).toMatch(
-      /label: 'Billing & Plans',\\s*href: '\/dashboard\/billing'/,
+      /label: 'Billing & Plans',\s*href: '\/dashboard\/billing'/,
     );
     expect(canonical).toMatch(
-      /label: 'Finance',\\s*href: '\/dashboard\/finance'/,
+      /label: 'Finance',\s*href: '\/dashboard\/finance'/,
     );
     expect(canonical).not.toContain("href: '/dashboard/company/settings'");
     expect(canonical).not.toContain("label: 'Clients'");
@@ -70,6 +71,7 @@ describe('one authorized company navigation on every dashboard page', () => {
       expect(canonical).toContain(`href: '${href}'`);
     }
     expect(canonical).toContain('if (erpChildren.length)');
+    expect(operations).toContain('currentHref="/dashboard/operations"');
     expect(canonical).not.toContain('window.location');
   });
 
