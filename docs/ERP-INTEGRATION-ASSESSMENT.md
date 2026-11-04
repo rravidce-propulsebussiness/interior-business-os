@@ -76,6 +76,10 @@ Source areas: `backend/app/modules/cost_match/` and `backend/app/modules/estimat
 6. BOQ/takeoff quantities may feed the existing Business OS quotation engine as reviewed inputs. Do not create a second customer-facing quotation total engine.
 7. Rebuild estimating screens in the Business OS Next.js design system; do not expose the imported standalone Vite app as the new product UI.
 
+## Typed contract package (created; not yet runtime-connected)
+
+A new workspace package `@business-os/erp-contracts` now defines strict Zod boundary schemas for organization-bound server context, BOQ creation, BOQ positions, BOQ responses and staged takeoff imports. It requires decimal strings for quantities/rates, uses INR as the default BOQ currency, and includes idempotency and BOQ-version preconditions for takeoff imports. Contract tests cover context expiry, defaults, decimal-string enforcement and takeoff preconditions. These schemas validate payload shape only; they do not authenticate requests or establish tenant isolation. Runtime adapters remain disabled until the ERP organization boundary is implemented and verified.
+
 ## First API contract (proposed, not implemented)
 
 - `POST /internal/v1/organizations/{organizationId}/projects/{projectId}/boqs`: create a draft BOQ only after server-side org membership, project mapping and permission checks.
