@@ -301,7 +301,7 @@ export default async function OperationsPage({
       navigation={nav}
       search={query}
       notificationsEnabled={has('notification.view')}
-      currentHref="/dashboard/projects"
+      currentHref="/dashboard/operations"
     >
       <main id="main-content" tabIndex={-1} className="ops-dashboard">
         <nav aria-label="Breadcrumb" className="ops-breadcrumb">
