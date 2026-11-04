@@ -9,8 +9,8 @@ import { workspaceIngress } from './workspace-paths';
 const base = 'sghomesinterior.in';
 const centralHosts = [base];
 
-describe('ERP navigation does not change company or public website ingress', () => {
-  it('keeps workspace-scoped ERP URLs on the existing central hostname', () => {
+describe('ERP keeps website ingress unchanged', () => {
+  it('keeps scoped ERP URLs on the central hostname', () => {
     const result = workspaceIngress({
       host: base,
       pathname: '/company-a/dashboard/operations',
@@ -25,7 +25,7 @@ describe('ERP navigation does not change company or public website ingress', () 
     });
   });
 
-  it('continues to resolve customer-owned dashboard hostnames exactly', () => {
+  it('keeps exact custom-domain tenant scope', () => {
     const result = workspaceIngress({
       host: 'customer-website.com',
       pathname: '/dashboard/execution',
@@ -41,10 +41,11 @@ describe('ERP navigation does not change company or public website ingress', () 
     });
   });
 
-  it('preserves managed wildcard and reserved service hostname boundaries', () => {
-    expect(isManagedWebsiteHost('company-a.sghomesinterior.in', base)).toBe(true);
-    expect(isManagedWebsiteHost('admin.sghomesinterior.in', base)).toBe(false);
-    expect(isManagedWebsiteHost('a.b.sghomesinterior.in', base)).toBe(false);
+  it('preserves wildcard and reserved hosts', () => {
+    const managed = (host: string) => isManagedWebsiteHost(host, base);
+    expect(managed('company-a.sghomesinterior.in')).toBe(true);
+    expect(managed('admin.sghomesinterior.in')).toBe(false);
+    expect(managed('a.b.sghomesinterior.in')).toBe(false);
     expect(isPublicWebsiteHost(base, base)).toBe(false);
     expect(isPublicWebsiteHost('customer-website.com', base)).toBe(true);
   });
