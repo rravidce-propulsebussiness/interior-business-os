@@ -10373,6 +10373,106 @@ export interface Database {
           },
         ];
       };
+      whatsapp_business_connections: {
+        Row: {
+          id: string;
+          organization_id: string;
+          waba_id: string;
+          business_name: string;
+          phone_number_id: string;
+          display_phone_number: string | null;
+          verified_name: string | null;
+          status: string;
+          token_ciphertext: string;
+          token_iv: string;
+          token_tag: string;
+          last_connected_at: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          waba_id: string;
+          business_name?: string;
+          phone_number_id: string;
+          display_phone_number?: string | null;
+          verified_name?: string | null;
+          status?: string;
+          token_ciphertext: string;
+          token_iv: string;
+          token_tag: string;
+          last_connected_at?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          waba_id?: string;
+          business_name?: string;
+          phone_number_id?: string;
+          display_phone_number?: string | null;
+          verified_name?: string | null;
+          status?: string;
+          token_ciphertext?: string;
+          token_iv?: string;
+          token_tag?: string;
+          last_connected_at?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'whatsapp_business_connections_organization_id_fkey';
+            columns: ['organization_id'];
+            isOneToOne: false;
+            referencedRelation: 'organizations';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      whatsapp_webhook_events: {
+        Row: {
+          id: string;
+          organization_id: string;
+          waba_id: string;
+          idempotency_key: string;
+          payload: Json;
+          received_at: string;
+          expires_at: string;
+          processed_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          waba_id: string;
+          idempotency_key: string;
+          payload: Json;
+          received_at?: string;
+          expires_at?: string;
+          processed_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          waba_id?: string;
+          idempotency_key?: string;
+          payload?: Json;
+          received_at?: string;
+          expires_at?: string;
+          processed_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'whatsapp_webhook_events_organization_id_fkey';
+            columns: ['organization_id'];
+            isOneToOne: false;
+            referencedRelation: 'organizations';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       work_measurement_costs: {
         Row: {
           id: string;
@@ -10647,123 +10747,9 @@ export interface Database {
           },
         ];
       };
-      whatsapp_business_connections: {
-        Row: {
-          id: string;
-          organization_id: string;
-          waba_id: string;
-          business_name: string;
-          phone_number_id: string;
-          display_phone_number: string | null;
-          verified_name: string | null;
-          status: string;
-          token_ciphertext: string;
-          token_iv: string;
-          token_tag: string;
-          last_connected_at: string;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          organization_id: string;
-          waba_id: string;
-          business_name?: string;
-          phone_number_id: string;
-          display_phone_number?: string | null;
-          verified_name?: string | null;
-          status?: string;
-          token_ciphertext: string;
-          token_iv: string;
-          token_tag: string;
-          last_connected_at?: string;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          organization_id?: string;
-          waba_id?: string;
-          business_name?: string;
-          phone_number_id?: string;
-          display_phone_number?: string | null;
-          verified_name?: string | null;
-          status?: string;
-          token_ciphertext?: string;
-          token_iv?: string;
-          token_tag?: string;
-          last_connected_at?: string;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'whatsapp_business_connections_organization_id_fkey';
-            columns: ['organization_id'];
-            isOneToOne: false;
-            referencedRelation: 'organizations';
-            referencedColumns: ['id'];
-          },
-        ];
-      };
-      whatsapp_webhook_events: {
-        Row: {
-          id: string;
-          organization_id: string;
-          waba_id: string;
-          idempotency_key: string;
-          payload: Json;
-          received_at: string;
-          expires_at: string;
-          processed_at: string | null;
-        };
-        Insert: {
-          id?: string;
-          organization_id: string;
-          waba_id: string;
-          idempotency_key: string;
-          payload: Json;
-          received_at?: string;
-          expires_at?: string;
-          processed_at?: string | null;
-        };
-        Update: {
-          id?: string;
-          organization_id?: string;
-          waba_id?: string;
-          idempotency_key?: string;
-          payload?: Json;
-          received_at?: string;
-          expires_at?: string;
-          processed_at?: string | null;
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'whatsapp_webhook_events_organization_id_fkey';
-            columns: ['organization_id'];
-            isOneToOne: false;
-            referencedRelation: 'organizations';
-            referencedColumns: ['id'];
-          },
-        ];
-      };
     };
     Views: Record<string, never>;
     Functions: {
-      whatsapp_connection_save: {
-        Args: {
-          p_organization_id: string;
-          p_waba_id: string;
-          p_business_name: string;
-          p_phone_number_id: string;
-          p_display_phone_number: string;
-          p_verified_name: string;
-          p_token_ciphertext: string;
-          p_token_iv: string;
-          p_token_tag: string;
-        };
-        Returns: string;
-      };
       accept_membership: {
         Args: { p_membership_id: string };
         Returns: undefined;
@@ -12742,6 +12728,20 @@ export interface Database {
           p_signature?: string;
         };
         Returns: number;
+      };
+      whatsapp_connection_save: {
+        Args: {
+          p_organization_id: string;
+          p_waba_id: string;
+          p_business_name: string;
+          p_phone_number_id: string;
+          p_display_phone_number: string;
+          p_verified_name: string;
+          p_token_ciphertext: string;
+          p_token_iv: string;
+          p_token_tag: string;
+        };
+        Returns: string;
       };
       work_queue: {
         Args: { p_organization_id: string; p_group?: string; p_page?: number };
