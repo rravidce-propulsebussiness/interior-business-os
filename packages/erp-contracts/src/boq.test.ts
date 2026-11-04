@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   erpBoqCreateSchema,
+  erpMappingMatchesRequestContext,
   erpBoqPositionCreateSchema,
   erpRequestContextSchema,
   erpTakeoffImportSchema,
@@ -16,6 +17,7 @@ describe('ERP boundary contracts', () => {
       subjectUserId: id,
       organizationId: id,
       projectId: id,
+      partitionId: id,
       permissions: ['boq.read'],
       requestId: id,
       issuedAt: 100,
@@ -119,6 +121,55 @@ describe('ERP boundary contracts', () => {
         status: 'active',
         clientSupplied: true,
       }).success,
+    ).toBe(false);
+  });
+
+
+  it('rejects cross-organization, cross-project, cross-partition and inactive mappings', () => {
+    const mapping = {
+      organizationId: id,
+      businessProjectId: id,
+      erpProjectId: '00000000-0000-4000-8000-000000000002',
+      partitionId: id,
+      status: 'active' as const,
+      mappingVersion: 1,
+    };
+    const context = {
+      issuer: 'https://business-os.internal',
+      audience: 'openconstructionerp-internal' as const,
+      subjectUserId: id,
+      organizationId: id,
+      projectId: id,
+      partitionId: id,
+      permissions: ['boq.read'],
+      requestId: id,
+      issuedAt: 100,
+      expiresAt: 200,
+    };
+    expect(erpMappingMatchesRequestContext(mapping, context)).toBe(true);
+    expect(
+      erpMappingMatchesRequestContext(mapping, {
+        ...context,
+        organizationId: '00000000-0000-4000-8000-000000000003',
+      }),
+    ).toBe(false);
+    expect(
+      erpMappingMatchesRequestContext(mapping, {
+        ...context,
+        projectId: '00000000-0000-4000-8000-000000000004',
+      }),
+    ).toBe(false);
+    expect(
+      erpMappingMatchesRequestContext(mapping, {
+        ...context,
+        partitionId: '00000000-0000-4000-8000-000000000005',
+      }),
+    ).toBe(false);
+    expect(
+      erpMappingMatchesRequestContext(
+        { ...mapping, status: 'suspended' },
+        context,
+      ),
     ).toBe(false);
   });
 
