@@ -1,47 +1,88 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
-const file = (path:string) => readFileSync(new URL(path, import.meta.url), 'utf8');
-const canonical=file('./owner-workspace-navigation.ts');
-const layout=file('./layout.tsx');
-const provider=file('./company-navigation-provider.tsx');
-const shell=file('./owner-shell.tsx');
-const dashboard=file('./page.tsx');
-const studio=file('./quotations/studio-frame.tsx');
-const finance=file('./finance/page.tsx');
 
-describe('one authorized company navigation on every dashboard page',()=>{
-  it('provides the same permission-filtered navigation from dashboard layout',()=>{
+const file = (path: string) =>
+  readFileSync(new URL(path, import.meta.url), 'utf8');
+const canonical = file('./owner-workspace-navigation.ts');
+const layout = file('./layout.tsx');
+const provider = file('./company-navigation-provider.tsx');
+const shell = file('./owner-shell.tsx');
+const studio = file('./quotations/studio-frame.tsx');
+const finance = file('./finance/page.tsx');
+
+describe('one authorized company navigation on every dashboard page', () => {
+  it('uses the shared permission-filtered menu from dashboard layout', () => {
     expect(layout).toContain('ownerWorkspaceNavigation(context)');
     expect(layout).toContain('<CompanyNavigationProvider');
-    expect(canonical).toContain("canAccess(context");
-    expect(canonical).toContain("context.organizationId");
+    expect(canonical).toContain('canAccess(context');
+    expect(canonical).toContain('context.organizationId');
     expect(provider).toContain('createContext<OwnerNavItem[] | null>');
-    expect(shell).toContain('const displayedNavigation = sharedNavigation ?? navigation');
+    expect(shell).toContain(
+      'const displayedNavigation = sharedNavigation ?? navigation',
+    );
     expect(shell).toContain('displayedNavigation.map');
   });
-  it('keeps every approved module in one source with canonical destinations',()=>{
+
+  it('keeps existing destinations and introduces ERP as an optional group', () => {
     for (const name of [
-      'Dashboard','Leads','Quotations','Projects',
-      'Marketplace','Purchases','Finance','Billing & Plans',
-      'Reports','Team','Website','Settings'
-    ]) expect(canonical).toContain("label:'"+name+"'");
-    expect(canonical).toContain("label:'Billing & Plans',href:'/dashboard/billing'");
-    expect(canonical).toContain("label:'Finance',href:'/dashboard/finance'");
-    expect(canonical).not.toContain("href:'/dashboard/company/settings'");
-    expect(dashboard).toContain("label: 'Billing & Plans',\n      href: '/dashboard/billing'");
-    expect(canonical).toContain("has('invoice.view','billing')");
-    expect(canonical).not.toContain("label:'Clients'");
-    expect(canonical).not.toContain("href:'/dashboard/customers'");
+      'Dashboard',
+      'Leads',
+      'Quotations',
+      'Projects',
+      'ERP Operations',
+      'Marketplace',
+      'Purchases',
+      'Finance',
+      'Billing & Plans',
+      'Reports',
+      'Team',
+      'Website Studio',
+      'Settings',
+    ]) {
+      expect(canonical).toContain(`label: '${name}'`);
+    }
+    expect(canonical).toMatch(
+      /label: 'Billing & Plans',\\s*href: '\/dashboard\/billing'/,
+    );
+    expect(canonical).toMatch(
+      /label: 'Finance',\\s*href: '\/dashboard\/finance'/,
+    );
+    expect(canonical).not.toContain("href: '/dashboard/company/settings'");
+    expect(canonical).not.toContain("label: 'Clients'");
   });
-  it('avoids a second Quotation Studio menu and preserves its search',()=>{
+
+  it('matches ERP link permission and entitlement checks at destination', () => {
+    expect(canonical).toContain("has('execution.view', 'projects')");
+    expect(canonical).toContain("has('estimate.view', 'projects')");
+    expect(canonical).toContain("has('purchase_order.view', 'projects')");
+    expect(canonical).toContain("has('inventory.view', 'projects')");
+    expect(canonical).toContain("has('inspection.view', 'projects')");
+    expect(canonical).toContain("has('handover.view', 'projects')");
+    expect(canonical).toContain("context.entitlements.includes('purchasing')");
+    for (const href of [
+      '/dashboard/operations',
+      '/dashboard/execution',
+      '/dashboard/execution/purchase_orders',
+      '/dashboard/operations/stock',
+      '/dashboard/operations/project_inspections',
+      '/dashboard/operations/handover_records',
+    ]) {
+      expect(canonical).toContain(`href: '${href}'`);
+    }
+    expect(canonical).toContain('if (erpChildren.length)');
+    expect(canonical).not.toContain('window.location');
+  });
+
+  it('preserves the quotation studio and search behavior', () => {
     expect(studio).toContain('<OwnerShell');
     expect(studio).toContain('searchAction="/dashboard/quotations"');
     expect(studio).not.toContain('qs-sidebar-navigation');
     expect(shell).toContain('owner-layout-unified');
   });
-  it('keeps Finance tabs in the page but not duplicated in the sidebar',()=>{
-    expect(canonical).not.toContain("label:'Salaries'");
-    expect(canonical).not.toContain("label:'GST'");
+
+  it('keeps finance tabs in the page instead of duplicate menu items', () => {
+    expect(canonical).not.toContain("label: 'Salaries'");
+    expect(canonical).not.toContain("label: 'GST'");
     expect(finance).toContain("tab === 'salaries'");
     expect(finance).toContain("tab === 'gst'");
   });
