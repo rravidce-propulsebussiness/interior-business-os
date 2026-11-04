@@ -1,0 +1,52 @@
+name: ERP routing regression
+on:
+  pull_request:
+    paths:
+      - 'apps/business-app/src/app/dashboard/**'
+      - 'apps/business-app/src/erp-routing-regression.test.ts'
+      - 'apps/business-app/src/workspace-paths.ts'
+      - 'apps/business-app/src/public-website-hosts.ts'
+      - 'vitest.config.ts'
+      - '.github/workflows/erp-routing-guard.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'apps/business-app/src/app/dashboard/**'
+      - 'apps/business-app/src/erp-routing-regression.test.ts'
+      - 'apps/business-app/src/workspace-paths.ts'
+      - 'apps/business-app/src/public-website-hosts.ts'
+      - 'vitest.config.ts'
+      - '.github/workflows/erp-routing-guard.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  focused-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: ERP permission and wildcard-routing tests
+        run: >-
+          pnpm exec vitest run
+          apps/business-app/src/app/dashboard/owner-navigation.test.ts
+          apps/business-app/src/app/dashboard/owner-erp-navigation.behavior.test.ts
+          apps/business-app/src/workspace-paths.test.ts
+          apps/business-app/src/erp-routing-regression.test.ts
+      - name: Check formatting for changed integration files only
+        run: >-
+          pnpm exec prettier --check
+          apps/business-app/src/app/dashboard/owner-navigation.test.ts
+          apps/business-app/src/app/dashboard/owner-erp-navigation.behavior.test.ts
+          apps/business-app/src/erp-routing-regression.test.ts
+          apps/business-app/src/app/dashboard/owner-workspace-navigation.ts
+          vitest.config.ts
+          .github/workflows/erp-routing-guard.yml
