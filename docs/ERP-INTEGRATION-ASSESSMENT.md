@@ -271,3 +271,23 @@ The code review does not establish a universally safe ERP route set. The first i
 - A project is transferred, archived or unmapped while a conversion/export job is running; subsequent polling/download must re-check current membership, mapping and project status.
 - A file path, attachment ID, source document ID or nested child ID is guessed independently of its parent project.
 - Search, count, pagination, bulk endpoints, export bundles and error messages must not reveal the existence or counts of another organization's records.
+
+
+## ERP project lifecycle and privileged-route review (2026-11-04)
+
+A direct review of the upstream project router confirms that its project boundary is an ERP user identity, not a Business OS organization:
+
+- Project creation assigns the authenticated ERP user UUID as `owner_id`. It does not accept or persist a Business OS organization/partition.
+- The project register passes the ERP JWT role into the service; the route documentation and code allow ERP administrators to list all projects, while ordinary users are listed through the ERP user scope.
+- Project reads allow ERP owner, ERP administrator or ERP team membership. The team membership grants read access but is not a Business OS organization membership or project grant.
+- Project update, archive and related owner-only operations call an owner guard, with an ERP `role=admin` bypass. Restore also allows the ERP administrator or owner. These are useful upstream controls but cannot authorize a mapped organization boundary.
+- Project-level bulk/member, file-manager, bundle import/export, backup/restore and other lifecycle endpoints must not be treated as safe merely because they are nested below a project URL. Each operation needs the same active Business OS organization + mapping check and a current project-state check.
+- Demo-data purge/leftover cleanup routes are explicitly ERP-admin-only and destructive. They must remain entirely outside any tenant adapter, including any token that happens to carry the ERP admin role.
+
+### Consequences for the adapter
+
+The adapter must not call ERP project creation as a side effect of a browser-supplied project ID, nor infer the organization from the ERP JWT subject. A trusted provisioning operation must create or bind an ERP project only after the Business OS server has authenticated the actor, resolved the active organization from its verified membership context, and authorized the target Business OS project. The resulting mapping must be immutable with respect to organization ownership; a transfer requires an explicit audited workflow.
+
+For tenant-facing calls, the adapter should resolve the ERP project from the server-side mapping using the active organization and Business OS project, then pass the mapped ID internally. It must reject arbitrary ERP project IDs supplied by clients. The ERP admin bypass must be removed from the tenant request path or replaced with a separate, narrowly scoped service principal that cannot invoke host-wide project listing, demo cleanup, migration, converter administration or other platform controls.
+
+This additional review reinforces the current disposition: no project lifecycle, file, backup/restore or admin route is approved for proxying before explicit organization partitioning and two-organization adversarial tests are implemented.
