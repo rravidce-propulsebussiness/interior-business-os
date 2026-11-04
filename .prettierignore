@@ -8,3 +8,6 @@ coverage
 playwright-report
 test-results
 **/next-env.d.ts
+
+# Preserve upstream OpenConstructionERP formatting and license notices.
+vendor/openconstructionerp/
