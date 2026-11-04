@@ -8,6 +8,8 @@ const operation = read('../../operations/service.ts');
 describe('permission-safe project task board', () => {
   it('reuses canonical Operations task RPCs with tenant permission checks', () => {
     expect(page).toContain("operationsServices('task.view', true)");
+    expect(page).toContain("s.allowed('execution.view')");
+    expect(page).toContain('notFound()');
     expect(page).toContain(
       "s.operations.search('project_tasks', { project_id: project }, page)",
     );

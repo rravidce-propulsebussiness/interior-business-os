@@ -27,7 +27,7 @@ function company(
 describe('project management navigation and trusted portfolio boundaries', () => {
   it('opens one portfolio and canonical projects under an authorized group', () => {
     const items = ownerWorkspaceNavigation(
-      company(['project.view', 'task.view']),
+      company(['project.view', 'task.view', 'execution.view']),
     );
     expect(items.find((item) => item.label === 'Project Management')).toEqual({
       label: 'Project Management',
@@ -39,6 +39,12 @@ describe('project management navigation and trusted portfolio boundaries', () =>
         { label: 'Task Board', href: '/dashboard/project-management/tasks' },
       ],
     });
+  });
+
+  it('falls back to the existing task register without execution permission', () => {
+    const projects = ownerWorkspaceNavigation(company(['project.view', 'task.view']));
+    expect(projects.find((item) => item.label === 'Project Management')?.children)
+      .toContainEqual({ label: 'Task Register', href: '/dashboard/operations/project_tasks' });
   });
 
   it('never offers the owner portfolio to a role without project.view', () => {

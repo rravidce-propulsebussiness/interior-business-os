@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import { z } from 'zod';
 import { canAccess } from '@business-os/auth';
 import { OwnerShell } from '../../owner-shell';
@@ -32,6 +33,7 @@ export default async function ProjectTasksPage({
 }) {
   const params = await searchParams;
   const s = await operationsServices('task.view', true);
+  if (!s.allowed('execution.view')) notFound();
   const query = (params.query ?? '').trim().slice(0, 100);
   const projectPage = asPage(params.projectPage);
   const page = asPage(params.page);
