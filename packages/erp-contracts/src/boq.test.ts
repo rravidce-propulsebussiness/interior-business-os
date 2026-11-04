@@ -89,4 +89,37 @@ describe('ERP boundary contracts', () => {
       }).success,
     ).toBe(true);
   });
+
+  it('requires a complete server-resolved organization/project mapping', async () => {
+    const { erpProjectMappingSchema } = await import('./boq');
+    const mapping = {
+      organizationId: id,
+      businessProjectId: id,
+      erpProjectId: id,
+      partitionId: id,
+      status: 'active',
+      mappingVersion: 1,
+    };
+    expect(erpProjectMappingSchema.safeParse(mapping).success).toBe(true);
+    expect(
+      erpProjectMappingSchema.safeParse({
+        ...mapping,
+        partitionId: undefined,
+      }).success,
+    ).toBe(false);
+    expect(
+      erpProjectMappingSchema.safeParse({
+        ...mapping,
+        organizationId: 'not-a-uuid',
+      }).success,
+    ).toBe(false);
+    expect(
+      erpProjectMappingSchema.safeParse({
+        ...mapping,
+        status: 'active',
+        clientSupplied: true,
+      }).success,
+    ).toBe(false);
+  });
+
 });
