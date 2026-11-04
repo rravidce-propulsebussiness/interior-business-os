@@ -6,6 +6,7 @@ import {
 } from '@business-os/core/execution';
 import { executionServices } from '../service';
 import { RecordTable, titles } from '../presentation';
+import { RevisionRegister } from '../revision-register';
 import { configurationEntities, configurationPermission } from '../forms';
 export default async function ExecutionList({
   params,
@@ -41,6 +42,9 @@ export default async function ExecutionList({
     },
     page,
   );
+  if (entity === 'execution_estimate_revisions') {
+    return <RevisionRegister s={s} data={data} filter={q} />;
+  }
   const configure =
     (configurationEntities as readonly string[]).includes(entity) &&
     s.allowed(configurationPermission(entity)) &&
@@ -84,15 +88,6 @@ export default async function ExecutionList({
             href={`/dashboard/execution/${entity}/new`}
           >
             Record cost revision
-          </Link>
-        )}
-      {entity === 'execution_estimate_revisions' &&
-        s.allowed('estimate.create') && (
-          <Link
-            className="underline"
-            href={`/dashboard/execution${q.project ? `?project=${q.project}` : ''}`}
-          >
-            Create estimate from accepted contract
           </Link>
         )}
       {entity === 'materials' && (

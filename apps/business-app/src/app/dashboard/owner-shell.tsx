@@ -188,8 +188,8 @@ export function OwnerShell({
             <OwnerIcon name="dashboard" size={27} />
           </span>
           <span>
-            <strong>{companyName}</strong>
-            <small>Business OS</small>
+            <strong>ProPulse</strong>
+            <small>Business OS · {companyName}</small>
           </span>
         </a>
         <button

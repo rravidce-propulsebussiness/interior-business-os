@@ -68,6 +68,8 @@ jobs:
           apps/business-app/src/erp-routing-regression.test.ts
           apps/business-app/src/app/dashboard/project-management/portfolio.test.ts
           apps/business-app/src/app/dashboard/project-management/project-management.test.ts
+          apps/business-app/src/app/dashboard/execution/revision-cost.test.ts
+          apps/business-app/src/app/dashboard/execution/revision-ui.test.ts
       - name: Check formatting of the ERP integration
         run: >-
           pnpm exec prettier --check
@@ -81,3 +83,14 @@ jobs:
           apps/business-app/src/app/dashboard/project-management/portfolio-board.tsx
           apps/business-app/src/app/dashboard/project-management/portfolio.test.ts
           apps/business-app/src/app/dashboard/project-management/project-management.test.ts
+          apps/business-app/src/app/dashboard/execution/revision-cost.test.ts
+          apps/business-app/src/app/dashboard/execution/revision-ui.test.ts
+          apps/business-app/src/app/dashboard/execution/layout.tsx
+          apps/business-app/src/app/dashboard/execution/[entity]/page.tsx
+          apps/business-app/src/app/dashboard/execution/[entity]/[id]/page.tsx
+          apps/business-app/src/app/dashboard/execution/revision-register.tsx
+          apps/business-app/src/app/dashboard/execution/revision-workspace.tsx
+          apps/business-app/src/app/dashboard/execution/revision-cost.ts
+          apps/business-app/src/app/dashboard/execution/execution-premium.css
+          apps/business-app/src/app/dashboard/owner-shell.tsx
+          apps/business-app/src/app/dashboard/owner-shell-global.css

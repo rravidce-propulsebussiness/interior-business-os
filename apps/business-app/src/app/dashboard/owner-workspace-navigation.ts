@@ -66,6 +66,30 @@ export function ownerWorkspaceNavigation(
           : []),
       ],
     });
+  if (has('estimate.view', 'projects'))
+    items.push({
+      label: 'BOQ & Estimating',
+      href: '/dashboard/execution/execution_estimate_revisions',
+      icon: 'quotations',
+      children: [
+        {
+          label: 'Estimate Revisions',
+          href: '/dashboard/execution/execution_estimate_revisions',
+        },
+        { label: 'Execution Planner', href: '/dashboard/execution' },
+        ...(has('material.view', 'projects')
+          ? [{ label: 'Materials', href: '/dashboard/execution/materials' }]
+          : []),
+        ...(has('estimate.manage_recipes', 'projects')
+          ? [
+              {
+                label: 'Rate Recipes',
+                href: '/dashboard/execution/estimation_recipes',
+              },
+            ]
+          : []),
+      ],
+    });
   if (has('project.view', 'projects'))
     items.push({
       label: 'Project Management',

@@ -9,6 +9,7 @@ import { executionServices } from '../../service';
 import { ExecutionForm } from '../../form';
 import { configurationEntities, configurationPermission } from '../../forms';
 import { ScopeBuilder } from '../../builder';
+import { RevisionWorkspace } from '../../revision-workspace';
 import { label, records, RecordTable, text, titles } from '../../presentation';
 export default async function ExecutionDetail({
   params,
@@ -25,6 +26,11 @@ export default async function ExecutionDetail({
     row = await s.execution.detail(entity, id),
     q = await searchParams,
     page = Math.max(1, Number(q.page) || 1);
+  // Modern BOQ detail reuses exactly the same authorized revision record and
+  // existing server-side estimate actions. Other execution entities retain
+  // their established record pages and behavior.
+  if (entity === 'execution_estimate_revisions')
+    return <RevisionWorkspace s={s} row={row} />;
   const childMap: Partial<Record<ExecutionEntity, [ExecutionEntity, string]>> =
     {
       material_categories: ['materials', 'category_id'],
@@ -69,13 +75,11 @@ export default async function ExecutionDetail({
   };
   const status = text(row.status);
   const documentPermission =
-    entity === 'execution_estimate_revisions'
-      ? 'estimate.view_cost'
-      : entity === 'purchase_orders' && row.issued_at
-        ? 'purchase_order.view_cost'
-        : entity === 'goods_receipts'
-          ? 'goods_receipt.view'
-          : null;
+    entity === 'purchase_orders' && row.issued_at
+      ? 'purchase_order.view_cost'
+      : entity === 'goods_receipts'
+        ? 'goods_receipt.view'
+        : null;
   const recipients =
     entity === 'rfqs' && row.issued_at
       ? (await s.execution.search('rfq_vendors', { rfq_id: id })).rows
@@ -339,55 +343,6 @@ export default async function ExecutionDetail({
           )}
           line={row}
         />
-      )}
-      {entity === 'execution_estimate_revisions' && (
-        <section className="my-5">
-          <h2 className="text-2xl">Estimate actions</h2>
-          {status === 'draft' && (
-            <>
-              {action(
-                'Synchronize approved scope',
-                'estimate',
-                'sync',
-                'estimate.edit',
-              )}
-              {action(
-                'Submit for review',
-                'estimate',
-                'submit',
-                'estimate.edit',
-              )}
-            </>
-          )}
-          {status === 'under_review' && (
-            <>
-              {action(
-                'Approve estimate',
-                'estimate',
-                'approve',
-                'estimate.approve',
-              )}
-              {action(
-                'Return for changes',
-                'estimate',
-                'return',
-                'estimate.review',
-                true,
-              )}
-            </>
-          )}
-          {['approved', 'superseded'].includes(status) &&
-            action('Create revision', 'estimate', 'revise', 'estimate.create')}
-          {status === 'approved' &&
-            s.allowed('purchase_requisition.create') && (
-              <Link
-                className="underline"
-                href={`/dashboard/execution/purchase_requisitions/new?revision=${id}`}
-              >
-                Create requisition from requirements
-              </Link>
-            )}
-        </section>
       )}
       {entity === 'purchase_requisitions' && (
         <>
