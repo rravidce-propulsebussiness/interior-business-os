@@ -33,6 +33,7 @@ describe('ERP boundary contracts', () => {
       subjectUserId: id,
       organizationId: id,
       projectId: id,
+      partitionId: id,
       permissions: [],
       requestId: id,
       issuedAt: 200,
@@ -124,7 +125,6 @@ describe('ERP boundary contracts', () => {
     ).toBe(false);
   });
 
-
   it('rejects cross-organization, cross-project, cross-partition and inactive mappings', () => {
     const mapping = {
       organizationId: id,
@@ -172,5 +172,4 @@ describe('ERP boundary contracts', () => {
       ),
     ).toBe(false);
   });
-
 });
