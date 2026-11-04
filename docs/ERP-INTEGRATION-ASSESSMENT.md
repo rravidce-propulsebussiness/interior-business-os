@@ -232,3 +232,42 @@ A direct repository pass across BOQ, assemblies and DWG takeoff confirms that cu
 For every tenant-owned repository, make organization/partition context mandatory rather than optional. Use query predicates that include the partition key for primary-key reads, updates, deletes, counts, search and relationship traversal. Avoid APIs where `None` means unrestricted access in any tenant-facing call path. Add composite constraints so child rows cannot point across partitions. Keep platform-wide catalogues on a separate explicit read-only path with clear provenance.
 
 This review is limited to the repository files inspected and does not certify the full route/service call graph. Before implementation, trace all callers and all secondary access paths (exports, downloads, background tasks, websocket/progress endpoints, caches and bulk operations) and add two-organization negative tests.
+
+
+## Route/service and file-access review (2026-11-04)
+
+A further route/service pass confirms useful upstream project-level controls, but also identifies where the adapter must preserve and strengthen them:
+
+### BOQ routes
+- BOQ create/list and project activity/resource routes visibly call project-owner/access helpers before using project IDs. Bulk project listing filters the requested IDs through a readable-project helper.
+- This is a meaningful project-level defense, but the helpers resolve ERP user ownership/team membership and ERP administrator access. They do not validate Business OS organization membership or organization-to-project mapping.
+- BOQ routes include many secondary operations (branching, imports, resource review, change review, export/round-trip and AI-assisted operations). Each must be traced to its parent BOQ/project before exposing it. A permission dependency on its own is not enough.
+- BOQ service methods and repository access remain project-ID/BOQ-ID based; no organization partition is passed through the call chain.
+
+### Assemblies
+- Assembly routes apply permission checks and derive an owner scope for listing. The owner scope is based on the ERP caller and permits a platform-wide view for ERP administrators.
+- Several item routes load assemblies by ID and then depend on owner/project checks in route or service helpers. These are not Business OS organization grants.
+- Assembly project reassignment has a service-level check against the ERP project owner, which is useful against cross-user moves but does not prevent cross-organization moves when an ERP principal is shared.
+- Clone/import/template and component operations must preserve the same partition as the parent assembly. A child/component ID must never be accepted as a standalone authorization proof.
+
+### DWG takeoff and files
+- Drawing upload/list routes verify access to the supplied ERP project. Drawing, annotation and download helpers resolve the parent resource and call project access checks in a number of paths. This is better than an unchecked file endpoint, but it is still based on ERP project ownership/team membership.
+- Drawing conversion uses detached background tasks. A safe gateway must bind each job to organization + project + initiating actor, persist that scope, and re-authorize when polling or fetching the result. Process-local task IDs are not a durable authorization boundary.
+- The project file manager stores paths under project-specific directories such as uploads, photos, sheets and BIM. The bundle exporter selects rows and attachments by ERP project ID. Project-specific paths reduce accidental mixing but are not sufficient until project IDs are guaranteed to belong to exactly one Business OS organization and every download/export is authorized at retrieval time.
+- The file manager also aggregates takeoff and other module files. Its folder-permission filtering and all underlying collectors need to remain in the authorization path; do not proxy raw filesystem paths or let the browser supply them.
+
+### Cost matching
+- Cost-match routes verify ERP project access for run creation/listing and load run/result parents before some operations. Result/run access still resolves through ERP project IDs and user-level permissions. The gateway must validate the mapped Business OS organization/project before every read, review, validate, delete, export or result retrieval.
+- Health/diagnostic endpoints and internal processing state are not tenant-facing business features and should remain outside the adapter.
+
+### Updated route disposition
+
+The code review does not establish a universally safe ERP route set. The first integration allowlist should be deliberately narrow: read/create/update draft BOQ operations for an explicitly mapped project, after ERP-side organization partitioning and repository-level enforcement are implemented. Keep DWG conversion, CAD sessions, file manager, bundle import/export, cost-match background work, AI routes, global templates and all host-level controls disabled until their dedicated isolation tests pass.
+
+### Additional adversarial test cases
+- A valid Business OS member in organization A submits an ERP project UUID mapped to organization B, including via nested request fields and bulk arrays.
+- A user belonging to two organizations switches active organization and attempts to reuse a BOQ, assembly, component, drawing, annotation, match-run, file or job identifier from the other organization.
+- A global ERP admin token reaches every tenant-facing route; expected result is denial unless a separate, explicitly authorized platform support operation is invoked and audited.
+- A project is transferred, archived or unmapped while a conversion/export job is running; subsequent polling/download must re-check current membership, mapping and project status.
+- A file path, attachment ID, source document ID or nested child ID is guessed independently of its parent project.
+- Search, count, pagination, bulk endpoints, export bundles and error messages must not reveal the existence or counts of another organization's records.
