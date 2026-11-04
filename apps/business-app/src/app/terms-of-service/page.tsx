@@ -4,7 +4,7 @@ import { LegalPage } from '../legal-page';
 export const metadata: Metadata = {
   title: 'Terms of Service | ProPulse Business OS',
   description:
-    'Terms for using ProPulse Business OS and its business workspace features.',
+    'Terms for ProPulse Business OS workspaces and integrations.',
   robots: { index: true, follow: true },
   alternates: { canonical: 'https://sghomesinterior.in/terms-of-service' },
 };
