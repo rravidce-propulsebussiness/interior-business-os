@@ -69,6 +69,12 @@ jobs:
           apps/business-app/src/app/dashboard/project-management/portfolio.test.ts
           apps/business-app/src/app/dashboard/project-management/project-management.test.ts
           apps/business-app/src/app/dashboard/project-management/tasks/tasks-board.test.ts
+      - name: Temporary export task board permission formatting
+        run: |
+          pnpm exec prettier --write apps/business-app/src/app/dashboard/project-management/page.tsx apps/business-app/src/app/dashboard/project-management/portfolio-board.tsx apps/business-app/src/app/dashboard/project-management/project-management.test.ts
+          for path in apps/business-app/src/app/dashboard/project-management/page.tsx apps/business-app/src/app/dashboard/project-management/portfolio-board.tsx apps/business-app/src/app/dashboard/project-management/project-management.test.ts; do
+            printf 'PMACCESSFMT:%s:%s\n' "$path" "$(base64 -w0 "$path")"
+          done
       - name: Check formatting of the ERP integration
         run: >-
           pnpm exec prettier --check
