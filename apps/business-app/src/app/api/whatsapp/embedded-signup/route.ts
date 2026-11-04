@@ -19,7 +19,10 @@ function encryptToken(token: string) {
     throw new Error('TOKEN_KEY_UNAVAILABLE');
   const iv = randomBytes(12);
   const cipher = createCipheriv('aes-256-gcm', Buffer.from(keyHex, 'hex'), iv);
-  const ciphertext = Buffer.concat([cipher.update(token, 'utf8'), cipher.final()]);
+  const ciphertext = Buffer.concat([
+    cipher.update(token, 'utf8'),
+    cipher.final(),
+  ]);
   return {
     ciphertext: ciphertext.toString('base64'),
     iv: iv.toString('base64'),
@@ -109,13 +112,11 @@ export async function POST(request: Request) {
 
     const appId = process.env.META_APP_ID ?? '';
     const appSecret = process.env.META_APP_SECRET ?? '';
-    if (
-      !appId ||
-      !appSecret ||
-      !process.env.WHATSAPP_TOKEN_ENCRYPTION_KEY
-    )
+    if (!appId || !appSecret || !process.env.WHATSAPP_TOKEN_ENCRYPTION_KEY)
       return Response.json(
-        { message: 'WhatsApp connection is not fully configured on the server.' },
+        {
+          message: 'WhatsApp connection is not fully configured on the server.',
+        },
         { status: 503, headers },
       );
 
@@ -133,9 +134,9 @@ export async function POST(request: Request) {
         signal: AbortSignal.timeout(12000),
       },
     );
-    const tokenBody = (await tokenResponse.json().catch(() => null)) as
-      | { access_token?: string }
-      | null;
+    const tokenBody = (await tokenResponse.json().catch(() => null)) as {
+      access_token?: string;
+    } | null;
     if (!tokenResponse.ok || !tokenBody?.access_token)
       return Response.json(
         {
@@ -150,8 +151,7 @@ export async function POST(request: Request) {
       `${parsed.data.wabaId}?fields=id,name`,
       token,
     );
-    if (waba.id !== parsed.data.wabaId)
-      throw new Error('META_ASSET_MISMATCH');
+    if (waba.id !== parsed.data.wabaId) throw new Error('META_ASSET_MISMATCH');
 
     const numbers = await graph<{
       data?: Array<{
@@ -185,8 +185,7 @@ export async function POST(request: Request) {
       p_token_iv: encrypted.iv,
       p_token_tag: encrypted.tag,
     });
-    if (saved.error || !saved.data)
-      throw new Error('CONNECTION_SAVE_FAILED');
+    if (saved.error || !saved.data) throw new Error('CONNECTION_SAVE_FAILED');
     return Response.json({ connected: true }, { status: 200, headers });
   } catch (error) {
     if (error instanceof DomainError && error.code === 'UNAUTHENTICATED')

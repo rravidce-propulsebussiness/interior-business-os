@@ -38,16 +38,16 @@ export async function POST(request: Request) {
   if (!equalSecret(signature, expected))
     return new Response('Forbidden', { status: 403, headers });
 
-  let body: { object?: string; entry?: Array<{ id?: string; changes?: unknown[] }> };
+  let body: {
+    object?: string;
+    entry?: Array<{ id?: string; changes?: unknown[] }>;
+  };
   try {
     body = JSON.parse(raw.toString('utf8')) as typeof body;
   } catch {
     return new Response('Invalid payload', { status: 400, headers });
   }
-  if (
-    body.object !== 'whatsapp_business_account' ||
-    !Array.isArray(body.entry)
-  )
+  if (body.object !== 'whatsapp_business_account' || !Array.isArray(body.entry))
     return Response.json({ received: true }, { status: 200, headers });
 
   try {
