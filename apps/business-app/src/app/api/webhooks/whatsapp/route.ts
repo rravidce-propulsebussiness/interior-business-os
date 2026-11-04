@@ -17,7 +17,12 @@ export async function GET(request: Request) {
   const token = url.searchParams.get('hub.verify_token') ?? '';
   const challenge = url.searchParams.get('hub.challenge') ?? '';
   const expected = process.env.WHATSAPP_WEBHOOK_VERIFY_TOKEN ?? '';
-  if (mode !== 'subscribe' || !expected || !equalSecret(token, expected) || !challenge)
+  if (
+    mode !== 'subscribe' ||
+    !expected ||
+    !equalSecret(token, expected) ||
+    !challenge
+  )
     return new Response('Forbidden', { status: 403, headers });
   return new Response(challenge, { status: 200, headers });
 }
@@ -30,7 +35,8 @@ export async function POST(request: Request) {
     return new Response('Invalid payload', { status: 400, headers });
   const signature = request.headers.get('x-hub-signature-256') ?? '';
   const expected = `sha256=${createHmac('sha256', secret).update(raw).digest('hex')}`;
-  if (!equalSecret(signature, expected)) return new Response('Forbidden', { status: 403, headers });
+  if (!equalSecret(signature, expected))
+    return new Response('Forbidden', { status: 403, headers });
 
   let body: { object?: string; entry?: Array<{ id?: string; changes?: unknown[] }> };
   try {
@@ -38,14 +44,18 @@ export async function POST(request: Request) {
   } catch {
     return new Response('Invalid payload', { status: 400, headers });
   }
-  if (body.object !== 'whatsapp_business_account' || !Array.isArray(body.entry))
+  if (
+    body.object !== 'whatsapp_business_account' ||
+    !Array.isArray(body.entry)
+  )
     return Response.json({ received: true }, { status: 200, headers });
 
   try {
     const database = createOwnerProvisioningDatabase();
     for (const entry of body.entry) {
       const wabaId = entry.id ?? '';
-      if (!/^[0-9]{5,32}$/.test(wabaId) || !Array.isArray(entry.changes)) continue;
+      if (!/^[0-9]{5,32}$/.test(wabaId) || !Array.isArray(entry.changes))
+        continue;
       const { data: connection, error } = await database
         .from('whatsapp_business_connections')
         .select('organization_id')

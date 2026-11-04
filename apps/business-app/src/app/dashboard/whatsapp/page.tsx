@@ -22,7 +22,11 @@ export default async function WhatsAppPage() {
   const connections = error ? [] : (data ?? []);
 
   return (
-    <main id="main-content" tabIndex={-1} className="mx-auto max-w-6xl space-y-6 p-6">
+    <main
+      id="main-content"
+      tabIndex={-1}
+      className="mx-auto max-w-6xl space-y-6 p-6"
+    >
       <Link className="underline" href="/dashboard">
         Dashboard
       </Link>
@@ -70,7 +74,10 @@ export default async function WhatsAppPage() {
           connected. WhatsApp-specific triggers and send-message actions are
           the next integration layer.
         </p>
-        <Link className="mt-3 inline-block font-medium underline" href="/dashboard/automations">
+        <Link
+          className="mt-3 inline-block font-medium underline"
+          href="/dashboard/automations"
+        >
           Open automations
         </Link>
       </section>

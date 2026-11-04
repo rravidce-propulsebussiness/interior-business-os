@@ -7,8 +7,16 @@ type MetaLoginResponse = {
   status?: string;
 };
 type MetaSdk = {
-  init: (options: { appId: string; autoLogAppEvents: boolean; xfbml: boolean; version: string }) => void;
-  login: (callback: (response: MetaLoginResponse) => void, options: Record<string, unknown>) => void;
+  init: (options: {
+    appId: string;
+    autoLogAppEvents: boolean;
+    xfbml: boolean;
+    version: string;
+  }) => void;
+  login: (
+    callback: (response: MetaLoginResponse) => void,
+    options: Record<string, unknown>,
+  ) => void;
 };
 declare global {
   interface Window {
@@ -98,7 +106,8 @@ export function WhatsAppSetup({
         data?: { waba_id?: string; phone_number_id?: string };
       };
       try {
-        data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+        data =
+          typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
       } catch {
         return;
       }
@@ -108,12 +117,17 @@ export function WhatsAppSetup({
         setMessage('WhatsApp setup was cancelled before completion.');
         return;
       }
-      if (data.event === 'FINISH' || data.event === 'FINISH_WHATSAPP_BUSINESS_APP_ONBOARDING') {
+      if (
+        data.event === 'FINISH' ||
+        data.event === 'FINISH_WHATSAPP_BUSINESS_APP_ONBOARDING'
+      ) {
         const wabaId = data.data?.waba_id;
         const phoneNumberId = data.data?.phone_number_id;
         if (!wabaId || !phoneNumberId) {
           setBusy(false);
-          setMessage('Meta did not return a WhatsApp account and phone number. Try the connection again.');
+          setMessage(
+            'Meta did not return a WhatsApp account and phone number. Try the connection again.',
+          );
           return;
         }
         assetRef.current = { wabaId, phoneNumberId };
@@ -140,12 +154,19 @@ export function WhatsAppSetup({
         }),
       });
       const result = (await response.json()) as { message?: string };
-      if (!response.ok) throw new Error(result.message ?? 'Could not connect this WhatsApp account.');
+      if (!response.ok)
+        throw new Error(
+          result.message ?? 'Could not connect this WhatsApp account.',
+        );
       window.location.reload();
     } catch (error) {
       submittedRef.current = false;
       setBusy(false);
-      setMessage(error instanceof Error ? error.message : 'Could not connect this WhatsApp account.');
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : 'Could not connect this WhatsApp account.',
+      );
     }
   }
 
@@ -161,7 +182,11 @@ export function WhatsAppSetup({
         const code = response.authResponse?.code;
         if (!code) {
           setBusy(false);
-          setMessage(response.status === 'unknown' ? 'Meta login was cancelled.' : 'Meta did not return an authorization code. Check the app roles and permissions.');
+          setMessage(
+            response.status === 'unknown'
+              ? 'Meta login was cancelled.'
+              : 'Meta did not return an authorization code. Check the app roles and permissions.',
+          );
           return;
         }
         codeRef.current = code;
@@ -183,7 +208,8 @@ export function WhatsAppSetup({
         <div>
           <h2 className="text-xl font-semibold">WhatsApp API connection</h2>
           <p className="mt-1 text-sm text-neutral-600">
-            Each company connects its own Meta Business Portfolio and WhatsApp Business Account.
+            Each company connects its own Meta Business Portfolio and WhatsApp
+            Business Account.
           </p>
         </div>
         <button
@@ -197,19 +223,29 @@ export function WhatsAppSetup({
       </div>
 
       {!configured && (
-        <p role="status" className="rounded-lg bg-amber-50 p-3 text-sm text-amber-900">
+        <p
+          role="status"
+          className="rounded-lg bg-amber-50 p-3 text-sm text-amber-900"
+        >
           Meta app settings are not configured on the Business OS server yet.
         </p>
       )}
       {configured && !sdkReady && (
-        <p role="status" className="text-sm text-neutral-600">Loading Meta’s secure signup…</p>
+        <p role="status" className="text-sm text-neutral-600">
+          Loading Meta’s secure signup…
+        </p>
       )}
       {!canManage && (
         <p role="status" className="text-sm text-neutral-600">
-          Ask a workspace owner or administrator with automation management access to connect WhatsApp.
+          Ask a workspace owner or administrator with automation management
+          access to connect WhatsApp.
         </p>
       )}
-      {message && <p role="status" className="text-sm text-neutral-700">{message}</p>}
+      {message && (
+        <p role="status" className="text-sm text-neutral-700">
+          {message}
+        </p>
+      )}
 
       <div className="space-y-3">
         {connections.length === 0 && (
@@ -218,23 +254,36 @@ export function WhatsAppSetup({
           </p>
         )}
         {connections.map((connection) => (
-          <article key={connection.id} className="flex flex-wrap items-center justify-between gap-4 rounded-xl border p-4">
+          <article
+            key={connection.id}
+            className="flex flex-wrap items-center justify-between gap-4 rounded-xl border p-4"
+          >
             <div>
-              <h3 className="font-semibold">{connection.businessName || connection.verifiedName || 'WhatsApp Business Account'}</h3>
+              <h3 className="font-semibold">
+                {connection.businessName ||
+                  connection.verifiedName ||
+                  'WhatsApp Business Account'}
+              </h3>
               <p className="text-sm text-neutral-600">
-                {connection.displayPhoneNumber || connection.phoneNumberId} · {connection.status}
+                {connection.displayPhoneNumber || connection.phoneNumberId} ·{' '}
+                {connection.status}
               </p>
-              <p className="text-xs text-neutral-500">WABA {connection.wabaId}</p>
+              <p className="text-xs text-neutral-500">
+                WABA {connection.wabaId}
+              </p>
             </div>
             <p className="text-xs text-neutral-500">
-              Connected {new Date(connection.lastConnectedAt).toLocaleDateString()}
+              Connected{' '}
+              {new Date(connection.lastConnectedAt).toLocaleDateString()}
             </p>
           </article>
         ))}
       </div>
 
       <p className="text-xs leading-5 text-neutral-500">
-        Meta handles authentication and asset selection. Propulse never asks for a Facebook password or verification code. You can disconnect the account from Meta Business Settings.
+        Meta handles authentication and asset selection. Propulse never asks for
+        a Facebook password or verification code. You can disconnect the account
+        from Meta Business Settings.
       </p>
     </section>
   );
